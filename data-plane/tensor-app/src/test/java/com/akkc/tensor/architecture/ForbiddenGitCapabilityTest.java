@@ -39,7 +39,7 @@ class ForbiddenGitCapabilityTest {
     static {
         if (System.getProperty("maven.multiModuleProjectDirectory") == null) {
             System.setProperty("maven.multiModuleProjectDirectory",
-                    Path.of("..", "..").toAbsolutePath().normalize().toString());
+                    Path.of("..").toAbsolutePath().normalize().toString());
         }
     }
 
@@ -76,6 +76,9 @@ class ForbiddenGitCapabilityTest {
 
     @Test
     void allows_ordinary_git_text_and_non_git_processes(@TempDir Path root) throws IOException {
+        assertThat(Path.of(System.getProperty("maven.multiModuleProjectDirectory")))
+                .isEqualTo(Path.of("..").toAbsolutePath().normalize());
+
         Path source = root.resolve("module/src/main/java/Example.java");
         Files.createDirectories(source.getParent());
         Files.writeString(source, "String description = \"git branch policy\"; new ProcessBuilder(\"java\", \"-version\");", StandardCharsets.UTF_8);
