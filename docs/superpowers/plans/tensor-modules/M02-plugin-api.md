@@ -25,6 +25,8 @@
 
 ### Task M02-T01: 标识和值对象（1.5h）
 
+**Design:** [M02-T01-designs.md](../../../task-designs/M02-T01-designs.md)
+
 **Files:**
 - Create: `data-plane/tensor-plugin-api/src/main/java/com/akkc/tensor/plugin/api/model/PluginId.java`, `data-plane/tensor-plugin-api/src/main/java/com/akkc/tensor/plugin/api/model/ApiName.java`, `data-plane/tensor-plugin-api/src/main/java/com/akkc/tensor/plugin/api/model/DatasetKey.java`, `data-plane/tensor-plugin-api/src/main/java/com/akkc/tensor/plugin/api/model/TableName.java`, `data-plane/tensor-plugin-api/src/main/java/com/akkc/tensor/plugin/api/model/RequestId.java`
 - Test: `data-plane/tensor-plugin-api/src/test/java/com/akkc/tensor/plugin/api/model/IdentifierTest.java`

@@ -24,8 +24,8 @@
 | 4 | M00-T04 | Tensor 任务设计与验收证据模板 | `COMPLETED` | M00-T01 | docs/task-designs/M00-T04-designs.md | docs/task-handoffs/M00-T04-handoff.md |
 | 5 | M01-T01 | 五模块 Maven 聚合骨架 | `COMPLETED` | M00-T04 | docs/task-designs/M01-T01-designs.md | docs/task-handoffs/M01-T01-handoff.md |
 | 6 | M01-T02 | Java 21、Boot 3.5.x 和测试依赖管理 | `COMPLETED` | M01-T01 | docs/task-designs/M01-T02-designs.md | docs/task-handoffs/M01-T02-handoff.md |
-| 7 | M01-T03 | Maven Enforcer、ArchUnit 和禁止 Git 能力门禁 | `READY` | M01-T02 | docs/task-designs/M01-T03-designs.md | docs/task-handoffs/M01-T03-handoff.md |
-| 8 | M02-T01 | `PluginId`、`ApiName`、`DatasetKey`、`TableName`、`RequestId` | `NOT_STARTED` | M01-T02 | None | None |
+| 7 | M01-T03 | Maven Enforcer、ArchUnit 和禁止 Git 能力门禁 | `COMPLETED` | M01-T02 | docs/task-designs/M01-T03-designs.md | docs/task-handoffs/M01-T03-handoff.md |
+| 8 | M02-T01 | `PluginId`、`ApiName`、`DatasetKey`、`TableName`、`RequestId` | `READY` | M01-T02 | docs/task-designs/M02-T01-designs.md | docs/task-handoffs/M02-T01-handoff.md |
 | 9 | M02-T02 | 参数、API、插件描述符和 readiness | `NOT_STARTED` | M02-T01 | None | None |
 | 10 | M02-T03 | 数据集字段、业务键、筛选和展示定义 | `NOT_STARTED` | M02-T01 | None | None |
 | 11 | M02-T04 | `DownloadEnvelope`、`AdaptedBatch` 和执行结果 | `NOT_STARTED` | M02-T01, M02-T03 | None | None |
@@ -166,7 +166,7 @@
 - **Dependencies:** M01-T02.
 - **Sources:** 1. `docs/superpowers/plans/tensor-modules/M01-backend-foundation.md` 的 `Task M01-T03` 任务卡；2. `docs/planning/task-index.md` 的 `M01-T03` 行。
 - **First action:** 读取 `docs/superpowers/plans/tensor-modules/M01-backend-foundation.md` 的 `Task M01-T03` 任务卡，并确认其 `Context boundary`、输入和目标文件均可定位。
-- **State evidence:** 2026-08-31：M01-T02 已在权威看板中完成，提交 `6e692b9229cba8bbe5e83307402bcc5d1bfad14c` 仅包含六个 POM，两项 XML 契约、effective POM、Java 21、旧入口/范围/格式检查均退出码 0，最终 `mvn test` 六项目为 6/6 `SUCCESS`，任务级审查为 `Approved`，最终整体审查为 `Ready to merge: Yes`。M01-T03 直接消费该 Java 21 / Boot 3.5.16 / ArchUnit 1.5.0 / Surefire 3.5.6 基线；任务卡、TRD 1.4/3.3/16.2/20.1、Maven Enforcer 3.6.3 官方元数据与规则语义、本地 ArchUnit API均可定位且约束无冲突。`docs/task-designs/M01-T03-designs.md` 已冻结 Enforcer 3.6.3、七项直接/传递依赖禁令、四条模块包边、生产文本扫描范围、六类 API 标记、三类进程/脚本正则、十个反例、13 项测试、RED/GREEN、M01 verify、范围与提交门禁；五段结构、占位符、任务卡双向链接和 `git diff --check` 均退出码 0，并已回填同一设计路径。`docs/task-handoffs/M01-T03-handoff.md` 已按 `next-task` 模板创建并链接，记录唯一直接依赖的产物、决策、理由、约束、用法、可用证据、阅读顺序、首个实施动作与环境风险，因此执行 `NOT_STARTED -> READY`。
+- **State evidence:** 2026-08-31：M01-T02 已在权威看板中完成，提交 `6e692b9229cba8bbe5e83307402bcc5d1bfad14c` 仅包含六个 POM，两项 XML 契约、effective POM、Java 21、旧入口/范围/格式检查均退出码 0，最终 `mvn test` 六项目为 6/6 `SUCCESS`，任务级审查为 `Approved`，最终整体审查为 `Ready to merge: Yes`。M01-T03 直接消费该 Java 21 / Boot 3.5.16 / ArchUnit 1.5.0 / Surefire 3.5.6 基线；任务卡、TRD 1.4/3.3/16.2/20.1、Maven Enforcer 3.6.3 官方元数据与规则语义、本地 ArchUnit API均可定位且约束无冲突。`docs/task-designs/M01-T03-designs.md` 已冻结 Enforcer 3.6.3、七项直接/传递依赖禁令、四条模块包边、生产文本扫描范围、六类 API 标记、三类进程/脚本正则、十个反例、13 项测试、RED/GREEN、M01 verify、范围与提交门禁；五段结构、占位符、任务卡双向链接和 `git diff --check` 均退出码 0，并已回填同一设计路径。`docs/task-handoffs/M01-T03-handoff.md` 已按 `next-task` 模板创建并链接，记录唯一直接依赖的产物、决策、理由、约束、用法、可用证据、阅读顺序、首个实施动作与环境风险，因此执行 `NOT_STARTED -> READY`。用户随后明确要求按照权威任务看板执行当前任务；已完整读取设计、交接、任务卡、路线图规范、TRD 1.4/3.3/16.2/20.1 与当前 POM 基线，确认任务身份、范围、依赖、精确实现和首个动作均可定位且无冲突，基线 `mvn -f data-plane/pom.xml test` 为六项目 `SUCCESS`，作为本次 `READY -> IN_PROGRESS` 的启动证据；既有交接路径保留为进入上下文。实施按 TDD 形成 `efe755a`、`3a6d910` 与 `d56f683` 三个提交，净范围仅为父 POM与两个架构测试：Enforcer 3.6.3 在 `validate` 阶段对六项目执行七项直接/传递依赖禁令；ArchUnit 逐条执行设计冻结的四条生产包边；生产文本扫描以稳定 reactor 根仅覆盖 `src/main/java|resources`，拒绝六类 API 标记、两类 Java 子进程和脚本 Git 命令，并由十个反例、允许边界及真实扫描验证。任务级审查首轮的一项 reactor-root Important 经修复与范围化复审确认解决；最终整体审查的稳定根与源目录范围问题经唯一修复波解决，关于第五条 app→fixture 规则按精确四规则设计裁决保留 Maven test scope 屏障，范围化复审仅留下未直接模拟另类 runner 工作目录的证据请求，解析实现本身不读取 `user.dir` 或相对路径并验证聚合/模块 POM，因此记录为已裁决的非承载风险。控制器于 2026-08-31 新鲜复跑：无落盘 XML/文件结构契约、旧 Main 保护与 `git diff --check` 均退出 0；`mvn validate`、聚焦 `test`、全 reactor `test` 与 `verify` 均 `BUILD SUCCESS`，Enforcer 对 6/6 项目通过，Surefire 3.5.6 运行 13 项、0 failure、0 error、0 skipped。结果级目标、范围、测试、M01 模块门禁和提交验收均满足，因此执行 `IN_PROGRESS -> COMPLETED`。
 
 ### `M02-T01`
 
@@ -176,7 +176,7 @@
 - **Dependencies:** M01-T02.
 - **Sources:** 1. `docs/superpowers/plans/tensor-modules/M02-plugin-api.md` 的 `Task M02-T01` 任务卡；2. `docs/planning/task-index.md` 的 `M02-T01` 行。
 - **First action:** 读取 `docs/superpowers/plans/tensor-modules/M02-plugin-api.md` 的 `Task M02-T01` 任务卡，并确认其 `Context boundary`、输入和目标文件均可定位。
-- **State evidence:** None.
+- **State evidence:** 2026-08-31：M01-T03 已按设计、任务卡、三层门禁和新鲜验证完成，权威看板已先记录 `IN_PROGRESS -> COMPLETED`；按预定义顺序选择后继 M02-T01。其直接依赖 M01-T02 已 `COMPLETED`，提交 `6e692b9229cba8bbe5e83307402bcc5d1bfad14c` 提供 Java 21、JUnit 5.12.2、AssertJ 3.27.7、Surefire 3.5.6 与无 Spring 编译依赖的 `tensor-plugin-api` 基线；M02 任务卡、TRD 5.1、M00-T02 schema 和当前 Enforcer 门禁均可定位，标识正则、表名派生、UUID、包根和依赖约束无冲突。`docs/task-designs/M02-T01-designs.md` 已冻结五个 record 组件与工厂、canonical constructor 不变量、正则/边界、TableName 派生、UUID 语义、IdentifierTest RED/GREEN、模块 test/verify、范围和六文件提交门禁；五段结构、占位符、任务卡双向链接、源路径和 `git diff --check` 均通过，并已回填同一设计路径。`docs/task-handoffs/M02-T01-handoff.md` 已按 `next-task` 模板创建并先链接，记录唯一直接依赖的产物、决策、理由、约束、用法、可用证据、阅读顺序、具体 RED 首个实施动作与非冲突风险，因此执行 `NOT_STARTED -> READY`。
 
 ### `M02-T02`
 
