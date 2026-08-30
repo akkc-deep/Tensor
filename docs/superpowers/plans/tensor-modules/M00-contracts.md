@@ -152,6 +152,8 @@ Run `git add docs/contracts/openapi-v1.yaml docs/contracts/error-codes.md && git
 
 ### Task M00-T04: 建立 Tensor 任务设计与验收证据模板（1.0h）
 
+**Design:** [M00-T04-designs.md](../../../task-designs/M00-T04-designs.md)
+
 **Context boundary:** Read roadmap sections 1 and 7, approved design-spec sections 3 and 9, and `docs/task-designs/README.md`. Do not read production source code.
 
 **Files:**

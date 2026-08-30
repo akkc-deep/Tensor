@@ -6,7 +6,11 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
-        <module name="data-plane" />
+        <module name="tensor-plugin-tushare" />
+        <module name="tensor-core" />
+        <module name="tensor-plugin-api" />
+        <module name="tensor-plugin-fixture" />
+        <module name="tensor-app" />
       </profile>
     </annotationProcessing>
   </component>

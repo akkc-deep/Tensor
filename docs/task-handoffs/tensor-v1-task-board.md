@@ -21,8 +21,8 @@
 | 1 | M00-T01 | BRD→PRD→TRD 双向追踪索引 | `COMPLETED` | None | docs/task-designs/M00-T01-designs.md | docs/task-handoffs/M00-T01-handoff.md |
 | 2 | M00-T02 | 数据集元数据 JSON Schema 与示例 | `COMPLETED` | M00-T01 | docs/task-designs/M00-T02-designs.md | docs/task-handoffs/M00-T02-handoff.md |
 | 3 | M00-T03 | `/api/v1` OpenAPI 契约与错误码目录 | `COMPLETED` | M00-T01, M00-T02 | docs/task-designs/M00-T03-designs.md | docs/task-handoffs/M00-T03-handoff.md |
-| 4 | M00-T04 | Tensor 任务设计与验收证据模板 | `NOT_STARTED` | M00-T01 | None | None |
-| 5 | M01-T01 | 五模块 Maven 聚合骨架 | `NOT_STARTED` | M00-T04 | None | None |
+| 4 | M00-T04 | Tensor 任务设计与验收证据模板 | `COMPLETED` | M00-T01 | docs/task-designs/M00-T04-designs.md | docs/task-handoffs/M00-T04-handoff.md |
+| 5 | M01-T01 | 五模块 Maven 聚合骨架 | `IN_PROGRESS` | M00-T04 | docs/task-designs/M01-T01-designs.md | docs/task-handoffs/M01-T01-handoff.md |
 | 6 | M01-T02 | Java 21、Boot 3.5.x 和测试依赖管理 | `NOT_STARTED` | M01-T01 | None | None |
 | 7 | M01-T03 | Maven Enforcer、ArchUnit 和禁止 Git 能力门禁 | `NOT_STARTED` | M01-T02 | None | None |
 | 8 | M02-T01 | `PluginId`、`ApiName`、`DatasetKey`、`TableName`、`RequestId` | `NOT_STARTED` | M01-T02 | None | None |
@@ -136,7 +136,7 @@
 - **Dependencies:** M00-T01.
 - **Sources:** 1. `docs/superpowers/plans/tensor-modules/M00-contracts.md` 的 `Task M00-T04` 任务卡；2. `docs/planning/task-index.md` 的 `M00-T04` 行。
 - **First action:** 读取 `docs/superpowers/plans/tensor-modules/M00-contracts.md` 的 `Task M00-T04` 任务卡，并确认其 `Context boundary`、输入和目标文件均可定位。
-- **State evidence:** None.
+- **State evidence:** 2026-08-31：M00-T03 已按设计、任务卡、完整 GREEN 验证及两级独立审查完成。按权威看板预定义顺序选择 M00-T04；其直接依赖 M00-T01 为 `COMPLETED`，`docs/traceability/tensor-v1-requirements.md` 提供的稳定 requirement/acceptance 标识及“Evidence 仅表示计划责任”语义与 M00-T04 模板职责无冲突。`docs/task-designs/M00-T04-designs.md` 已完成、五个固定标题/占位词/反向链接门禁通过并回填同一精确路径；`docs/task-handoffs/M00-T04-handoff.md` 已按 `next-task` 模板创建，记录唯一直接依赖、读取顺序和从完整设计开始的首个实施动作。先链接交接路径，再执行 `NOT_STARTED -> READY`。随后用户澄清交接门禁必须完成下一任务的实际设计，而非仅创建结构化模板说明；复核确认原设计仍要求实施者自行组织两份目标正文。设计已在同一路径修订为两个带 `BEGIN`/`END` 标记的完整、逐字实现契约，并新增两份实现文件与嵌入正文的自动同步门禁；交接的验收条件、首个动作和风险已同步刷新。嵌入区块数量、模板标题/字段、设计五标题和占位词检查均通过，M00-T04 保持 `READY`，未记录新的状态转换。用户本轮明确同意保留现有变更并直接在当前 `main` 工作区按该设计实施 M00-T04，作为 `READY -> IN_PROGRESS` 的启动证据；既有 `next-task` 交接路径保留为进入上下文。两份目标模板已按设计冻结正文逐字创建：缺失产物 RED 门禁先因 `task-design.md` 不存在退出 1；实现后正文同步、五标题/元数据、任务卡字段、精确证据列四项正向门禁均退出 0，越权运行时职责扫描无输出并按预期退出 1。设计标题、未决词、目标目录仅含两文件、双向链接和 `git diff --check` 均退出 0；M00 需求追踪、schema/example、OpenAPI 六路径/九 schema 和模板总门禁退出 0，任务卡列出的 PRD/AC、反例、敏感词及错误码回归也均得到各自预期结果。逐条范围自审未发现 Critical、Important 或 Minor 偏离，且未修改生产代码、既有契约或需求基线；因此满足结果级验收，执行 `IN_PROGRESS -> COMPLETED`。
 
 ### `M01-T01`
 
@@ -146,7 +146,7 @@
 - **Dependencies:** M00-T04.
 - **Sources:** 1. `docs/superpowers/plans/tensor-modules/M01-backend-foundation.md` 的 `Task M01-T01` 任务卡；2. `docs/planning/task-index.md` 的 `M01-T01` 行。
 - **First action:** 读取 `docs/superpowers/plans/tensor-modules/M01-backend-foundation.md` 的 `Task M01-T01` 任务卡，并确认其 `Context boundary`、输入和目标文件均可定位。
-- **State evidence:** None.
+- **State evidence:** 2026-08-31：M00-T04 已依据冻结正文、任务级 RED/GREEN、范围/链接检查和 M00 模块总门禁完成，并在权威看板中为 `COMPLETED`；按预定义顺序选择后继 M01-T01。直接输入 `docs/superpowers/task-templates/task-design.md` 与 `docs/superpowers/task-templates/acceptance-evidence.md` 均可定位，五标题设计结构、结果证据字段及不承载运行时看板职责的约束与 M01-T01 任务卡、TRD 3.3 和现有 `data-plane/pom.xml` 无冲突。`docs/task-designs/M01-T01-designs.md` 已冻结最小六 POM 结构、父子坐标、固定模块顺序、旧入口保留、T02/T03 排除边界、确定性 RED、Maven GREEN、范围和提交门禁；五标题、占位词、双向链接、模块契约与差异检查均退出码 0，并已回填同一设计路径。`docs/task-handoffs/M01-T01-handoff.md` 已按 `next-task` 模板创建并先链接，记录唯一直接依赖、阅读顺序、首个实施动作及环境/工作区风险，因此执行 `NOT_STARTED -> READY`。用户随后明确同意直接在当前 `main` 工作区执行 M01-T01，并要求严格只修改、暂存和提交设计指定的六个 POM；已完整复核设计、交接、任务卡、TRD 3.3、路线图规范和实施前基线，任务身份、范围、输入、首个动作与固定实现均无冲突，作为本次 `READY -> IN_PROGRESS` 的启动证据；既有交接路径保留为进入上下文。
 
 ### `M01-T02`
 

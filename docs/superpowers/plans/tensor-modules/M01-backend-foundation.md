@@ -25,6 +25,8 @@
 
 ### Task M01-T01: 创建五模块聚合骨架（1.5h）
 
+**Design:** [M01-T01-designs.md](../../../task-designs/M01-T01-designs.md)
+
 **Context boundary:** Read `data-plane/pom.xml`, M00 contracts and TRD 3.3. Do not read frontend files.
 
 **Files:**
