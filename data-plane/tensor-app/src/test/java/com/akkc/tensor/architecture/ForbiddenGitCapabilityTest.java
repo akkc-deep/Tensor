@@ -7,6 +7,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -19,6 +20,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class ForbiddenGitCapabilityTest {
 
+    private static final String MAVEN_PROJECT_DIRECTORY = "maven.multiModuleProjectDirectory";
     private static final List<String> PACKAGE_MARKERS = List.of(
             "org.eclipse.jgit",
             "org.kohsuke.github",
@@ -36,17 +38,13 @@ class ForbiddenGitCapabilityTest {
             "^(?!\\s*(?:#|//|REM\\b|::))\\s*(?:exec\\s+)?git(?:\\s|$)",
             Pattern.MULTILINE | Pattern.CASE_INSENSITIVE);
 
-    static {
-        if (System.getProperty("maven.multiModuleProjectDirectory") == null) {
-            System.setProperty("maven.multiModuleProjectDirectory",
-                    Path.of("..").toAbsolutePath().normalize().toString());
-        }
-    }
-
     @Test
     void rejects_git_capabilities_in_production_sources() throws IOException {
-        Path root = Path.of(System.getProperty("maven.multiModuleProjectDirectory"));
+        Path root = scannerRoot();
 
+        assertThat(Files.readString(root.resolve("pom.xml"), StandardCharsets.UTF_8))
+                .contains("<artifactId>data-plane</artifactId>");
+        assertThat(root.resolve("tensor-app/pom.xml")).isRegularFile();
         assertThat(findViolations(root)).isEmpty();
     }
 
@@ -76,14 +74,54 @@ class ForbiddenGitCapabilityTest {
 
     @Test
     void allows_ordinary_git_text_and_non_git_processes(@TempDir Path root) throws IOException {
-        assertThat(Path.of(System.getProperty("maven.multiModuleProjectDirectory")))
-                .isEqualTo(Path.of("..").toAbsolutePath().normalize());
-
+        String projectDirectory = System.getProperty(MAVEN_PROJECT_DIRECTORY);
         Path source = root.resolve("module/src/main/java/Example.java");
         Files.createDirectories(source.getParent());
         Files.writeString(source, "String description = \"git branch policy\"; new ProcessBuilder(\"java\", \"-version\");", StandardCharsets.UTF_8);
+        Path ignoredSource = root.resolve("module/src/main/generated/Example.java");
+        Files.createDirectories(ignoredSource.getParent());
+        Files.writeString(ignoredSource, "org.eclipse.jgit", StandardCharsets.UTF_8);
 
         assertThat(findViolations(root)).isEmpty();
+        assertThat(System.getProperty(MAVEN_PROJECT_DIRECTORY)).isEqualTo(projectDirectory);
+    }
+
+    private static Path scannerRoot() {
+        String configuredRoot = System.getProperty(MAVEN_PROJECT_DIRECTORY);
+        Path root = configuredRoot == null ? dataPlaneRoot()
+                : Path.of(System.getProperty("maven.multiModuleProjectDirectory"));
+        if (!isDataPlaneRoot(root)) {
+            throw new IllegalStateException("Maven project directory is not the data-plane reactor root");
+        }
+        return root;
+    }
+
+    private static Path dataPlaneRoot() {
+        for (Path directory = classOutputDirectory(); directory != null; directory = directory.getParent()) {
+            if (isDataPlaneRoot(directory)) {
+                return directory;
+            }
+        }
+        throw new IllegalStateException("Cannot locate the data-plane reactor root");
+    }
+
+    private static Path classOutputDirectory() {
+        try {
+            return Path.of(ForbiddenGitCapabilityTest.class.getProtectionDomain().getCodeSource().getLocation().toURI());
+        } catch (URISyntaxException exception) {
+            throw new IllegalStateException("Cannot locate test classes", exception);
+        }
+    }
+
+    private static boolean isDataPlaneRoot(Path directory) {
+        try {
+            return Files.readString(directory.resolve("pom.xml"), StandardCharsets.UTF_8)
+                    .contains("<artifactId>data-plane</artifactId>")
+                    && Files.readString(directory.resolve("tensor-app/pom.xml"), StandardCharsets.UTF_8)
+                    .contains("<artifactId>tensor-app</artifactId>");
+        } catch (IOException exception) {
+            return false;
+        }
     }
 
     private static List<String> findViolations(Path root) throws IOException {
@@ -99,7 +137,7 @@ class ForbiddenGitCapabilityTest {
         String normalized = path.toString().replace('\\', '/');
         return !normalized.contains("/target/")
                 && !normalized.contains("/src/test/")
-                && normalized.contains("/src/main/")
+                && (normalized.contains("/src/main/java/") || normalized.contains("/src/main/resources/"))
                 && TEXT_SUFFIXES.stream().anyMatch(normalized::endsWith);
     }
 
