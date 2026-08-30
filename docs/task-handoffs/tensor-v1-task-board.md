@@ -20,7 +20,7 @@
 |---:|---|---|---|---|---|---|
 | 1 | M00-T01 | BRD→PRD→TRD 双向追踪索引 | `COMPLETED` | None | docs/task-designs/M00-T01-designs.md | docs/task-handoffs/M00-T01-handoff.md |
 | 2 | M00-T02 | 数据集元数据 JSON Schema 与示例 | `COMPLETED` | M00-T01 | docs/task-designs/M00-T02-designs.md | docs/task-handoffs/M00-T02-handoff.md |
-| 3 | M00-T03 | `/api/v1` OpenAPI 契约与错误码目录 | `IN_PROGRESS` | M00-T01, M00-T02 | docs/task-designs/M00-T03-designs.md | docs/task-handoffs/M00-T03-handoff.md |
+| 3 | M00-T03 | `/api/v1` OpenAPI 契约与错误码目录 | `COMPLETED` | M00-T01, M00-T02 | docs/task-designs/M00-T03-designs.md | docs/task-handoffs/M00-T03-handoff.md |
 | 4 | M00-T04 | Tensor 任务设计与验收证据模板 | `NOT_STARTED` | M00-T01 | None | None |
 | 5 | M01-T01 | 五模块 Maven 聚合骨架 | `NOT_STARTED` | M00-T04 | None | None |
 | 6 | M01-T02 | Java 21、Boot 3.5.x 和测试依赖管理 | `NOT_STARTED` | M01-T01 | None | None |
@@ -126,7 +126,7 @@
 - **Dependencies:** M00-T01, M00-T02.
 - **Sources:** 1. `docs/superpowers/plans/tensor-modules/M00-contracts.md` 的 `Task M00-T03` 任务卡；2. `docs/planning/task-index.md` 的 `M00-T03` 行。
 - **First action:** 读取 `docs/superpowers/plans/tensor-modules/M00-contracts.md` 的 `Task M00-T03` 任务卡，并确认其 `Context boundary`、输入和目标文件均可定位。
-- **State evidence:** 2026-08-30：M00-T02 已按设计和任务卡完成；准备预定义后继任务时发现 M00-T03 任务卡明确要求复用 M00-T02 标识符正则，而原看板和规划索引只列 M00-T01。项目所有者批准把 M00-T03 依赖修订为 `M00-T01, M00-T02`，权威看板详情与 `docs/planning/task-index.md` 已同步。M00-T01 的追踪索引与 M00-T02 的 schema/设计均可定位、状态为 `COMPLETED`，其决策和约束无冲突；原 `next-task` 交接在设计形成前记录了首个设计动作，并按当时流程执行 `NOT_STARTED -> READY`。此后 `docs/task-designs/M00-T03-designs.md` 已完成并回填；`docs/task-handoffs/M00-T03-handoff.md` 已按新模板刷新，记录同一设计路径、两个直接输入、读取顺序和首个实施动作。M00-T03 保持 `READY`，未记录新的状态转换。2026-08-31：用户明确要求按照权威任务看板执行当前任务；已完整读取 M00-T03 设计、既有 `next-task` 交接、任务卡及其直接依赖输入，确认任务身份、范围、输入和首个动作均可定位且无冲突，作为本次 `READY -> IN_PROGRESS` 的启动证据；既有交接路径保留为进入上下文。
+- **State evidence:** 2026-08-30：M00-T02 已按设计和任务卡完成；准备预定义后继任务时发现 M00-T03 任务卡明确要求复用 M00-T02 标识符正则，而原看板和规划索引只列 M00-T01。项目所有者批准把 M00-T03 依赖修订为 `M00-T01, M00-T02`，权威看板详情与 `docs/planning/task-index.md` 已同步。M00-T01 的追踪索引与 M00-T02 的 schema/设计均可定位、状态为 `COMPLETED`，其决策和约束无冲突；原 `next-task` 交接在设计形成前记录了首个设计动作，并按当时流程执行 `NOT_STARTED -> READY`。此后 `docs/task-designs/M00-T03-designs.md` 已完成并回填；`docs/task-handoffs/M00-T03-handoff.md` 已按新模板刷新，记录同一设计路径、两个直接输入、读取顺序和首个实施动作。M00-T03 保持 `READY`，未记录新的状态转换。2026-08-31：用户明确要求按照权威任务看板执行当前任务；已完整读取 M00-T03 设计、既有 `next-task` 交接、任务卡及其直接依赖输入，确认任务身份、范围、输入和首个动作均可定位且无冲突，作为本次 `READY -> IN_PROGRESS` 的启动证据；既有交接路径保留为进入上下文。最终 `docs/contracts/openapi-v1.yaml` 以合法无重复键的 OpenAPI 3.1 YAML 冻结六条业务路径、九个公开 schema、请求关联头、同步下载与分页/精度/固定列语义；`docs/contracts/error-codes.md` 冻结与 `ApiError.code` 完全一致的 16 项 HTTP/retryable 矩阵。实施前两项缺失产物门禁均按预期退出 1；最终设计 7 项 GREEN 门禁无失败（敏感词扫描按预期退出 1 且无输出），严格 YAML 加载、事务/筛选/列顺序语义断言和四类示例 JSON Schema 校验均退出 0。任务级审查的 3 组 Important 已在修复轮次 1 全部解决；最终整体审查的 3 项 Important 与 2 项 Minor 已在唯一修复波全部解决，范围化复审结论为全部 addressed 且无新 Critical/Important。最终验证期间 Git 状态已变为可用，`main`/`origin/main` 的 `068f001` 已跟踪两个产物且工作树干净，因此未重写既有提交。满足任务设计、任务卡、范围与审查门禁，执行 `IN_PROGRESS -> COMPLETED`。
 
 ### `M00-T04`
 
