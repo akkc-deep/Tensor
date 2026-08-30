@@ -47,6 +47,8 @@
 
 ### Task M01-T02: 锁定运行时与测试依赖（1.5h）
 
+**Design:** [M01-T02-designs.md](../../../task-designs/M01-T02-designs.md)
+
 **Context boundary:** Read only M01 POMs and TRD section 4.
 
 **Files:**
@@ -63,6 +65,8 @@
 - [ ] Commit `data-plane/**/pom.xml` with message `build: lock backend runtime and test dependencies` when Git exists.
 
 ### Task M01-T03: 建立依赖与 Git 能力门禁（2.0h）
+
+**Design:** [M01-T03-designs.md](../../../task-designs/M01-T03-designs.md)
 
 **Context boundary:** Read M01 POMs and TRD 1.4, 3.3, 16.2, 20.1. Do not read frontend.
 
