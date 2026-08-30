@@ -1,0 +1,62 @@
+{
+  "action": "init",
+  "actor": {
+    "name": "project-owner",
+    "role": "owner"
+  },
+  "after_hash": "d8f4a40fb4127cf022c309c8b26546d41c9832249bcfab62ef2079d0d578d176",
+  "after_revision": 1,
+  "after_state": {
+    "access": {
+      "forbidden_reads": [],
+      "forbidden_writes": [],
+      "reads": [],
+      "tests": [],
+      "writes": {
+        "create": [],
+        "modify": []
+      }
+    },
+    "audit": {
+      "event_id": 1,
+      "update_reason": "Initialize Tensor task handoff",
+      "updated_at": "2026-08-27T07:51:35Z",
+      "updated_by": "project-owner"
+    },
+    "authorization": {
+      "authorized": false,
+      "authorized_at": null,
+      "authorized_by": null,
+      "evidence": null
+    },
+    "blocker": null,
+    "context_amendment": null,
+    "context_budget": null,
+    "design": null,
+    "execution": null,
+    "gates": null,
+    "project": {
+      "id": "Tensor",
+      "root": "/Users/qiangzhiwei/code/github/Tensor",
+      "vcs": {
+        "base_revision": null,
+        "type": "none"
+      }
+    },
+    "revision": 1,
+    "schema_version": 1,
+    "status": "IDLE",
+    "task": null,
+    "verification": null
+  },
+  "authorization": {
+    "evidence": "The project owner requested initialization of Tensor",
+    "kind": "direct_user"
+  },
+  "before_hash": null,
+  "before_revision": null,
+  "event_id": 1,
+  "occurred_at": "2026-08-27T07:51:35Z",
+  "reason": "Initialize Tensor task handoff",
+  "schema_version": 1
+}

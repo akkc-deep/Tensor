@@ -1,0 +1,22 @@
+{
+  "api_name": "fina_audit",
+  "fetched_at": "2026-08-09T14:16:44.772355+00:00",
+  "query_mode": "ann_date",
+  "params": [
+    {
+      "ts_code": "000001.SZ",
+      "ann_date": "20260807"
+    }
+  ],
+  "fields": [
+    "ts_code",
+    "ann_date",
+    "end_date",
+    "audit_result",
+    "audit_fees",
+    "audit_agency",
+    "audit_sign"
+  ],
+  "row_count": 0,
+  "data": []
+}

@@ -1,0 +1,44 @@
+{
+  "api_name": "margin",
+  "fetched_at": "2026-08-09T14:16:47.982755+00:00",
+  "query_mode": "trade_date",
+  "params": [
+    {
+      "exchange_id": "SSE",
+      "trade_date": "20260807"
+    },
+    {
+      "exchange_id": "SZSE",
+      "trade_date": "20260807"
+    },
+    {
+      "exchange_id": "BSE",
+      "trade_date": "20260807"
+    }
+  ],
+  "fields": [
+    "trade_date",
+    "exchange_id",
+    "rzye",
+    "rzmre",
+    "rzche",
+    "rqye",
+    "rqmcl",
+    "rzrqye",
+    "rqyl"
+  ],
+  "row_count": 1,
+  "data": [
+    {
+      "trade_date": "20260807",
+      "exchange_id": "SSE",
+      "rzye": 1344617540893.0,
+      "rzmre": 127114792988.0,
+      "rzche": 122717405626.0,
+      "rqye": 16089911314.0,
+      "rqmcl": 97765164.0,
+      "rzrqye": 1360707452207.0,
+      "rqyl": 2816275273.0
+    }
+  ]
+}

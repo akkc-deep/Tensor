@@ -1,0 +1,43 @@
+{
+  "api_name": "forecast",
+  "fetched_at": "2026-08-09T14:17:00.461613+00:00",
+  "query_mode": "ann_date",
+  "params": [
+    {
+      "ann_date": "20260807"
+    }
+  ],
+  "fields": [
+    "ts_code",
+    "ann_date",
+    "end_date",
+    "type",
+    "p_change_min",
+    "p_change_max",
+    "net_profit_min",
+    "net_profit_max",
+    "last_parent_net",
+    "first_ann_date",
+    "summary",
+    "change_reason",
+    "update_flag"
+  ],
+  "row_count": 1,
+  "data": [
+    {
+      "ts_code": "688796.SH",
+      "ann_date": "20260807",
+      "end_date": "20260630",
+      "type": "预增",
+      "p_change_min": 391.87,
+      "p_change_max": 412.71,
+      "net_profit_min": 23609.44,
+      "net_profit_max": 24609.44,
+      "last_parent_net": 4799.91,
+      "first_ann_date": "20260807",
+      "summary": "预计2026年1-6月归属于上市公司股东的净利润盈利:23,609.44万元至24,609.44万元,同比上年增长:391.87%至412.71%,同比上年增长18,809.53万元至19,809.53万元。",
+      "change_reason": "(一)随着生物医药行业迈入创新引领产业发展的新阶段,公司依托前瞻性的研发布局、领先的产品及高质量的服务,以及覆盖全球顶级药企与头部生物科技公司的优质客户网络,充分释放竞争优势,深度承接行业景气度提升带来的业务发展机遇。报告期内,公司两大业务线实现双轮驱动与跨越式协同,推动营业收入持续保持高速增长。(二)依托公司收入规模以及行业地位的显著提升,公司产能与运营的规模效应加速显现。在此基础上,叠加精益化管理的持续深化,公司有效实现降本增效,带动整体毛利率进一步提升,期间费用率有效降低,公司盈利能力显著增强,规模化利润加速释放。",
+      "update_flag": "0"
+    }
+  ]
+}

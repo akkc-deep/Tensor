@@ -1,0 +1,875 @@
+# Tensor v1 Project Task Board
+
+## Project
+
+- **Project ID:** `tensor-v1`.
+- **Goal:** 按契约优先的模块化单体路线图交付 Tensor v1：完成 49 个 Tushare Pro 数据集的下载、适配、单事务 Upsert、只读查询、Vue 控制面、单 JAR 打包及发布验证。
+- **Scope:** 包含 M00–M14 的 77 个预定义任务；排除路线图明确范围外的热加载、外部插件 JAR、任务队列、登录权限、导出、插件市场，以及后续发现后另行规划的缺陷修复任务。
+- **Completion condition:** 77 个预定义任务全部为 `COMPLETED`，其任务验收和模块门禁全部通过，并满足路线图中 49/49 数据集契约、AC-001～018、性能、安全、单 JAR 和全新环境页面闭环条件。
+
+## Workflow
+
+- **Execution:** Serial execution is owned by the user; the board does not enforce cross-task exclusion.
+- **Next-task selection:** Choose the non-completed task with the smallest greater `Order` after the current task completes.
+- **Successor preparation:** Complete and link the selected successor's design document before writing its `next-task` handoff or making it `READY`; a successor-design failure never changes the completed predecessor.
+- **Allowed transitions:** `NOT_STARTED -> READY`, `READY -> IN_PROGRESS`, `IN_PROGRESS -> PAUSED`, `PAUSED -> IN_PROGRESS`, `READY -> BLOCKED`, `IN_PROGRESS -> BLOCKED`, `BLOCKED -> READY`, `IN_PROGRESS -> COMPLETED`.
+
+## Tasks
+
+| Order | Task ID | Title | Status | Dependencies | Design document | Handoff |
+|---:|---|---|---|---|---|---|
+| 1 | M00-T01 | BRD→PRD→TRD 双向追踪索引 | `COMPLETED` | None | docs/task-designs/M00-T01-designs.md | docs/task-handoffs/M00-T01-handoff.md |
+| 2 | M00-T02 | 数据集元数据 JSON Schema 与示例 | `COMPLETED` | M00-T01 | docs/task-designs/M00-T02-designs.md | docs/task-handoffs/M00-T02-handoff.md |
+| 3 | M00-T03 | `/api/v1` OpenAPI 契约与错误码目录 | `IN_PROGRESS` | M00-T01, M00-T02 | docs/task-designs/M00-T03-designs.md | docs/task-handoffs/M00-T03-handoff.md |
+| 4 | M00-T04 | Tensor 任务设计与验收证据模板 | `NOT_STARTED` | M00-T01 | None | None |
+| 5 | M01-T01 | 五模块 Maven 聚合骨架 | `NOT_STARTED` | M00-T04 | None | None |
+| 6 | M01-T02 | Java 21、Boot 3.5.x 和测试依赖管理 | `NOT_STARTED` | M01-T01 | None | None |
+| 7 | M01-T03 | Maven Enforcer、ArchUnit 和禁止 Git 能力门禁 | `NOT_STARTED` | M01-T02 | None | None |
+| 8 | M02-T01 | `PluginId`、`ApiName`、`DatasetKey`、`TableName`、`RequestId` | `NOT_STARTED` | M01-T02 | None | None |
+| 9 | M02-T02 | 参数、API、插件描述符和 readiness | `NOT_STARTED` | M02-T01 | None | None |
+| 10 | M02-T03 | 数据集字段、业务键、筛选和展示定义 | `NOT_STARTED` | M02-T01 | None | None |
+| 11 | M02-T04 | `DownloadEnvelope`、`AdaptedBatch` 和执行结果 | `NOT_STARTED` | M02-T01, M02-T03 | None | None |
+| 12 | M02-T05 | `DataSourcePlugin`、`DatasetAdapter` 和领域错误 | `NOT_STARTED` | M02-T02, M02-T03, M02-T04 | None | None |
+| 13 | M03-T01 | YAML 加载、schema 校验和模板对照测试框架 | `NOT_STARTED` | M00-T02, M02-T03 | None | None |
+| 14 | M03-T02 | 基础与组织 11 数据集 YAML | `NOT_STARTED` | M03-T01 | None | None |
+| 15 | M03-T03 | 行情与估值 7 数据集 YAML | `NOT_STARTED` | M03-T01 | None | None |
+| 16 | M03-T04 | 交易与资金 6 数据集 YAML | `NOT_STARTED` | M03-T01 | None | None |
+| 17 | M03-T05 | 互联互通与转融通 6 数据集 YAML | `NOT_STARTED` | M03-T01 | None | None |
+| 18 | M03-T06 | 财务与披露 9 数据集 YAML | `NOT_STARTED` | M03-T01 | None | None |
+| 19 | M03-T07 | 公司行动 3 数据集 YAML | `NOT_STARTED` | M03-T01 | None | None |
+| 20 | M03-T08 | 股东与治理 7 数据集 YAML | `NOT_STARTED` | M03-T01 | None | None |
+| 21 | M03-T09 | 49/49 名称、字段、参数、键和筛选总契约 | `NOT_STARTED` | M03-T02, M03-T03, M03-T04, M03-T05, M03-T06, M03-T07, M03-T08 | None | None |
+| 22 | M04-T01 | V1 基础与组织表 | `NOT_STARTED` | M03-T02 | None | None |
+| 23 | M04-T02 | V2 行情、交易与资金表 | `NOT_STARTED` | M03-T03, M03-T04 | None | None |
+| 24 | M04-T03 | V3 互联互通与转融通表 | `NOT_STARTED` | M03-T05 | None | None |
+| 25 | M04-T04 | V4 财务与披露宽表 | `NOT_STARTED` | M03-T06 | None | None |
+| 26 | M04-T05 | V5 公司行动、股东与治理表 | `NOT_STARTED` | M03-T07, M03-T08 | None | None |
+| 27 | M04-T06 | V6 fixture 表与 49 表结构总校验 | `NOT_STARTED` | M04-T01, M04-T02, M04-T03, M04-T04, M04-T05 | None | None |
+| 28 | M05-T01 | `PluginRegistry` 与 `AdapterRegistry` | `NOT_STARTED` | M02-T05 | None | None |
+| 29 | M05-T02 | `DatasetCatalog` 和启动元数据/表结构校验 | `NOT_STARTED` | M03-T09, M04-T06 | None | None |
+| 30 | M05-T03 | 元数据驱动参数校验 | `NOT_STARTED` | M02-T02, M03-T09 | None | None |
+| 31 | M05-T04 | 严格日期、文本、整数和精确数值转换 | `NOT_STARTED` | M02-T03 | None | None |
+| 32 | M05-T05 | `GenericDatasetAdapter`、重复键和指纹键 | `NOT_STARTED` | M05-T02, M05-T03, M05-T04 | None | None |
+| 33 | M06-T01 | 白名单 SQL 标识符和 Upsert 模板 | `NOT_STARTED` | M02-T03, M04-T06 | None | None |
+| 34 | M06-T02 | 复合键与指纹键编码/绑定 | `NOT_STARTED` | M05-T05 | None | None |
+| 35 | M06-T03 | 已有键预查、数据集锁和插入/更新计数 | `NOT_STARTED` | M06-T01, M06-T02 | None | None |
+| 36 | M06-T04 | 单事务批量 Upsert 与回滚 | `NOT_STARTED` | M06-T03 | None | None |
+| 37 | M06-T05 | 查询条件白名单和 COUNT/分页 SQL | `NOT_STARTED` | M02-T03, M04-T06 | None | None |
+| 38 | M06-T06 | `DatasetQueryService`、页码归一化和精度序列化 | `NOT_STARTED` | M06-T05 | None | None |
+| 39 | M07-T01 | 配置属性和同步 `RestClient` | `NOT_STARTED` | M02-T05 | None | None |
+| 40 | M07-T02 | Tushare 请求、响应 DTO 和严格返回校验 | `NOT_STARTED` | M03-T09, M07-T01 | None | None |
+| 41 | M07-T03 | 鉴权、权限、限流、网络、超时和格式错误分类 | `NOT_STARTED` | M07-T02 | None | None |
+| 42 | M07-T04 | `TushareProPlugin` 描述符、readiness 和 49 接口下载 | `NOT_STARTED` | M07-T02, M07-T03 | None | None |
+| 43 | M08-T01 | fixture 元数据、插件和适配器 | `NOT_STARTED` | M02-T05, M04-T06 | None | None |
+| 44 | M08-T02 | 成功、空、上游失败、适配失败和写入失败模式 | `NOT_STARTED` | M08-T01 | None | None |
+| 45 | M08-T03 | fixture 注册→适配→入库→查询集成测试 | `NOT_STARTED` | M05-T05, M06-T06, M08-T02 | None | None |
+| 46 | M09-T01 | Boot 入口、请求标识和通用 API DTO | `NOT_STARTED` | M01-T03, M02-T05 | None | None |
+| 47 | M09-T02 | 数据源、接口和数据集元数据 API | `NOT_STARTED` | M05-T02, M09-T01 | None | None |
+| 48 | M09-T03 | 同步下载 API 与事务提交后结果 | `NOT_STARTED` | M05-T03, M05-T05, M06-T04, M07-T04, M09-T01 | None | None |
+| 49 | M09-T04 | 数据集定义与只读分页查询 API | `NOT_STARTED` | M06-T06, M09-T01 | None | None |
+| 50 | M09-T05 | 全局异常和 HTTP 状态映射 | `NOT_STARTED` | M09-T02, M09-T03, M09-T04 | None | None |
+| 51 | M09-T06 | 配置、脱敏、指标、健康和静态资源安全 | `NOT_STARTED` | M09-T01, M09-T02, M09-T03, M09-T04, M09-T05 | None | None |
+| 52 | M10-T01 | Vue 依赖、Vitest、VTU 和 Playwright 配置 | `NOT_STARTED` | M00-T03 | None | None |
+| 53 | M10-T02 | `/downloads`、`/datasets` 路由和桌面布局 | `NOT_STARTED` | M10-T01 | None | None |
+| 54 | M10-T03 | Axios 客户端、DTO 和错误拦截 | `NOT_STARTED` | M00-T03, M10-T01 | None | None |
+| 55 | M10-T04 | 日期、空值、精度格式化和无障碍状态组件 | `NOT_STARTED` | M10-T01 | None | None |
+| 56 | M11-T01 | 数据源与接口分组搜索选择组件 | `NOT_STARTED` | M10-T03 | None | None |
+| 57 | M11-T02 | 元数据驱动动态参数表单 | `NOT_STARTED` | M10-T03, M10-T04 | None | None |
+| 58 | M11-T03 | 下载 composable、控件锁定和请求世代 | `NOT_STARTED` | M10-T03 | None | None |
+| 59 | M11-T04 | 成功、空和失败结果组件 | `NOT_STARTED` | M10-T04, M11-T03 | None | None |
+| 60 | M11-T05 | `DownloadView` 页面集成和组件回归 | `NOT_STARTED` | M11-T01, M11-T02, M11-T03, M11-T04 | None | None |
+| 61 | M12-T01 | 数据集选择与动态筛选表单 | `NOT_STARTED` | M10-T03, M10-T04 | None | None |
+| 62 | M12-T02 | 全字段、固定列和横向滚动表格 | `NOT_STARTED` | M10-T04 | None | None |
+| 63 | M12-T03 | 20/50/100 分页组件 | `NOT_STARTED` | M10-T04 | None | None |
+| 64 | M12-T04 | 查询 composable、竞态和超界页处理 | `NOT_STARTED` | M10-T03 | None | None |
+| 65 | M12-T05 | `DatasetView` 页面集成和组件回归 | `NOT_STARTED` | M12-T01, M12-T02, M12-T03, M12-T04 | None | None |
+| 66 | M13-T01 | 前端确定性构建及静态资源复制 | `NOT_STARTED` | M10-T02, M11-T05, M12-T05 | None | None |
+| 67 | M13-T02 | 单个可执行 JAR 打包和内容检查 | `NOT_STARTED` | M09-T06, M13-T01 | None | None |
+| 68 | M13-T03 | 生产配置、CORS、SPA fallback 和优雅停机 | `NOT_STARTED` | M09-T06, M13-T02 | None | None |
+| 69 | M13-T04 | 全新环境运行说明和启动 smoke test | `NOT_STARTED` | M13-T03 | None | None |
+| 70 | M14-T01 | fixture 页面端到端主闭环 | `NOT_STARTED` | M13-T04 | None | None |
+| 71 | M14-T02 | 下载失败、空结果、幂等和回滚矩阵 | `NOT_STARTED` | M14-T01 | None | None |
+| 72 | M14-T03 | 查询、分页、宽表、竞态和无障碍 E2E | `NOT_STARTED` | M14-T01 | None | None |
+| 73 | M14-T04 | 49 数据集自动契约与页面回归驱动 | `NOT_STARTED` | M03-T09, M04-T06, M14-T01 | None | None |
+| 74 | M14-T05 | 真实 Tushare 49 接口受控页面验收 | `NOT_STARTED` | M14-T04 | None | None |
+| 75 | M14-T06 | `daily` 与 `balancesheet` 性能验证 | `NOT_STARTED` | M14-T03, M14-T05 | None | None |
+| 76 | M14-T07 | Token、SQL、依赖、网络和运行安全验证 | `NOT_STARTED` | M14-T02, M14-T03, M14-T04, M14-T05 | None | None |
+| 77 | M14-T08 | 全新环境 AC-001～018 与发布证据包 | `NOT_STARTED` | M14-T01, M14-T02, M14-T03, M14-T04, M14-T05, M14-T06, M14-T07 | None | None |
+
+## Task Details
+
+### `M00-T01`
+
+- **Goal:** 交付“BRD→PRD→TRD 双向追踪索引”。
+- **Scope:** 包含该交付物及其直接测试与验证；不包含其他预定义任务的交付物，也不扩展 `docs/superpowers/plans/tensor-modules/M00-contracts.md` 中该任务卡明确的文件、主要语言、接口和排除边界。
+- **Acceptance:** “BRD→PRD→TRD 双向追踪索引”已按该任务卡指定的位置和行为形成；任务卡列出的全部测试、验证命令和检查得到其注明的预期结果；没有混入排除范围。
+- **Dependencies:** None.
+- **Sources:** 1. `docs/superpowers/plans/tensor-modules/M00-contracts.md` 的 `Task M00-T01` 任务卡；2. `docs/planning/task-index.md` 的 `M00-T01` 行。
+- **First action:** 读取 `docs/superpowers/plans/tensor-modules/M00-contracts.md` 的 `Task M00-T01` 任务卡，并确认其 `Context boundary`、输入和目标文件均可定位。
+- **State evidence:** 2026-08-30：用户明确要求按照权威任务看板执行当前任务，作为首次 `READY -> IN_PROGRESS` 的启动证据。实施与独立审查确认：授权源未定义五类非功能需求的 BRD 值，也未提供逐项 PRD/NFR→AC 交叉表；设计要求七列非空、缺少映射时停止且当前任务禁止修改设计，因此按 `docs/task-handoffs/M00-T01-handoff.md` 执行 `IN_PROGRESS -> BLOCKED`。解阻条件是项目所有者批准的设计或授权矩阵明确给出这些映射/表示规则。随后用户回复“同意”，批准以 `N/A（BRD 未定义）` 表示无 BRD 映射的 NFR，并区分直接 AC、部分覆盖 AC 与 PRD 内联验收；`docs/task-designs/M00-T01-designs.md` 已记录 6 项 NFR→BRD 裁决和 37 项 Acceptance 交叉表，满足交接中的解阻条件，因此执行 `BLOCKED -> READY`。用户再次回复“同意”，明确授权按修订后的设计继续执行 M00-T01，作为本次 `READY -> IN_PROGRESS` 的启动证据。`docs/traceability/tensor-v1-requirements.md` 最终包含按序排列的 31 项功能需求和 6 项非功能要求、固定七列、完整 FR/AC 覆盖，并与设计中的 6 项 NFR→BRD 裁决及 37 项 Acceptance 交叉表逐项一致；结构契约、映射裁决、标识完整性、空值/占位符、受保护输入哈希和相对链接六项最终验证均退出码 0，独立审查结论为 `Ready to merge: Yes` 且无 Critical/Important 实施问题，因此执行 `IN_PROGRESS -> COMPLETED`。
+
+### `M00-T02`
+
+- **Goal:** 交付“数据集元数据 JSON Schema 与示例”。
+- **Scope:** 包含该交付物及其直接测试与验证；不包含其他预定义任务的交付物，也不扩展 `docs/superpowers/plans/tensor-modules/M00-contracts.md` 中该任务卡明确的文件、主要语言、接口和排除边界。
+- **Acceptance:** “数据集元数据 JSON Schema 与示例”已按该任务卡指定的位置和行为形成；任务卡列出的全部测试、验证命令和检查得到其注明的预期结果；没有混入排除范围。
+- **Dependencies:** M00-T01.
+- **Sources:** 1. `docs/superpowers/plans/tensor-modules/M00-contracts.md` 的 `Task M00-T02` 任务卡；2. `docs/planning/task-index.md` 的 `M00-T02` 行。
+- **First action:** 读取 `docs/superpowers/plans/tensor-modules/M00-contracts.md` 的 `Task M00-T02` 任务卡，并确认其 `Context boundary`、输入和目标文件均可定位。
+- **State evidence:** 2026-08-30：M00-T01 已在权威看板中完成；M00-T02 直接消费其产物 `docs/traceability/tensor-v1-requirements.md` 中 `PRD-F-002`、`PRD-F-004`、`PRD-F-007`、`PRD-F-008`、`PRD-F-015`、`PRD-F-016`、`PRD-F-019`、`PRD-F-020`、`PRD-F-024`、`PRD-F-025`、`PRD-F-027` 和 `PRD 10.4` 共 12 行，任务卡、TRD 5.3/8.1 与 `docs/data-template/manifest.json` 均可定位且约束无冲突；`docs/task-handoffs/M00-T02-handoff.md` 已按 `next-task` 模板创建并记录这些直接输入，因此执行 `NOT_STARTED -> READY`。随后用户明确要求按权威任务看板执行当前任务；完整读取既有交接并核对任务卡、TRD 5.3/8.1/8.2 与 `daily` 字段基线后，确认授权输入没有唯一规定 `businessKey` 如何同时表达字段列表和 `COMPOSITE|FINGERPRINT` 模式，也没有规定固定列的表示位置，且看板尚无 M00-T02 设计文档；这些选择会改变后续模块消费的公开契约，不能由实施者猜测。`docs/task-handoffs/M00-T02-handoff.md` 已改写为 `pause` 交接，解阻条件是项目所有者批准可写入任务设计的精确 schema 字段结构，因此执行 `READY -> BLOCKED`。用户回复“同意”，批准 `businessKey: {mode, fields}`、`filters: string[]`、根级可选 `fixedColumn`、TRD 5.3 参数字段及列展示元数据结构；`docs/task-designs/M00-T02-designs.md` 已固化该裁决和精确测试/验收命令，任务卡与看板均已回填同一设计路径，设计五标题、链接和占位符门禁通过，满足暂停交接的解阻条件，因此执行 `BLOCKED -> READY`。用户再次回复“同意”，明确授权按 `docs/task-designs/M00-T02-designs.md` 继续实施 M00-T02，作为本次 `READY -> IN_PROGRESS` 的启动证据；现有 `pause` 交接路径保留为历史与恢复上下文。最终 `docs/contracts/dataset-definition.schema.json` 为合法 JSON Schema 2020-12，恰含十个必填根字段、可选 `fixedColumn`、批准的正则/枚举/条件字段及封闭对象；`docs/contracts/dataset-definition.example.yaml` 通过该 schema，包含与模板同序的 11 个 `daily` 字段、连续展示顺序及批准的业务键/筛选/固定列。修复后 schema/example 正向校验、任务卡 `jq` 门禁、7/7 结构反例、`daily` 顺序/引用、精确契约/链接/状态/条件守卫及缺失判别字段诊断七项最终验证均退出码 0；任务级审查为规范符合且质量 `Approved`，最终整体审查为 `Ready to merge: Yes`，唯一修复波的两项 Minor 均经范围化复审确认已解决且无新 Critical/Important 问题。范围检查确认 `docs/contracts/` 仅有两个目标产物；项目无 Git 元数据且未初始化。因此满足任务设计和任务卡验收，执行 `IN_PROGRESS -> COMPLETED`。
+
+### `M00-T03`
+
+- **Goal:** 交付“`/api/v1` OpenAPI 契约与错误码目录”。
+- **Scope:** 包含该交付物及其直接测试与验证；不包含其他预定义任务的交付物，也不扩展 `docs/superpowers/plans/tensor-modules/M00-contracts.md` 中该任务卡明确的文件、主要语言、接口和排除边界。
+- **Acceptance:** “`/api/v1` OpenAPI 契约与错误码目录”已按该任务卡指定的位置和行为形成；任务卡列出的全部测试、验证命令和检查得到其注明的预期结果；没有混入排除范围。
+- **Dependencies:** M00-T01, M00-T02.
+- **Sources:** 1. `docs/superpowers/plans/tensor-modules/M00-contracts.md` 的 `Task M00-T03` 任务卡；2. `docs/planning/task-index.md` 的 `M00-T03` 行。
+- **First action:** 读取 `docs/superpowers/plans/tensor-modules/M00-contracts.md` 的 `Task M00-T03` 任务卡，并确认其 `Context boundary`、输入和目标文件均可定位。
+- **State evidence:** 2026-08-30：M00-T02 已按设计和任务卡完成；准备预定义后继任务时发现 M00-T03 任务卡明确要求复用 M00-T02 标识符正则，而原看板和规划索引只列 M00-T01。项目所有者批准把 M00-T03 依赖修订为 `M00-T01, M00-T02`，权威看板详情与 `docs/planning/task-index.md` 已同步。M00-T01 的追踪索引与 M00-T02 的 schema/设计均可定位、状态为 `COMPLETED`，其决策和约束无冲突；原 `next-task` 交接在设计形成前记录了首个设计动作，并按当时流程执行 `NOT_STARTED -> READY`。此后 `docs/task-designs/M00-T03-designs.md` 已完成并回填；`docs/task-handoffs/M00-T03-handoff.md` 已按新模板刷新，记录同一设计路径、两个直接输入、读取顺序和首个实施动作。M00-T03 保持 `READY`，未记录新的状态转换。2026-08-31：用户明确要求按照权威任务看板执行当前任务；已完整读取 M00-T03 设计、既有 `next-task` 交接、任务卡及其直接依赖输入，确认任务身份、范围、输入和首个动作均可定位且无冲突，作为本次 `READY -> IN_PROGRESS` 的启动证据；既有交接路径保留为进入上下文。
+
+### `M00-T04`
+
+- **Goal:** 交付“Tensor 任务设计与验收证据模板”。
+- **Scope:** 包含该交付物及其直接测试与验证；不包含其他预定义任务的交付物，也不扩展 `docs/superpowers/plans/tensor-modules/M00-contracts.md` 中该任务卡明确的文件、主要语言、接口和排除边界。
+- **Acceptance:** “Tensor 任务设计与验收证据模板”已按该任务卡指定的位置和行为形成；任务卡列出的全部测试、验证命令和检查得到其注明的预期结果；没有混入排除范围。
+- **Dependencies:** M00-T01.
+- **Sources:** 1. `docs/superpowers/plans/tensor-modules/M00-contracts.md` 的 `Task M00-T04` 任务卡；2. `docs/planning/task-index.md` 的 `M00-T04` 行。
+- **First action:** 读取 `docs/superpowers/plans/tensor-modules/M00-contracts.md` 的 `Task M00-T04` 任务卡，并确认其 `Context boundary`、输入和目标文件均可定位。
+- **State evidence:** None.
+
+### `M01-T01`
+
+- **Goal:** 交付“五模块 Maven 聚合骨架”。
+- **Scope:** 包含该交付物及其直接测试与验证；不包含其他预定义任务的交付物，也不扩展 `docs/superpowers/plans/tensor-modules/M01-backend-foundation.md` 中该任务卡明确的文件、主要语言、接口和排除边界。
+- **Acceptance:** “五模块 Maven 聚合骨架”已按该任务卡指定的位置和行为形成；任务卡列出的全部测试、验证命令和检查得到其注明的预期结果；没有混入排除范围。
+- **Dependencies:** M00-T04.
+- **Sources:** 1. `docs/superpowers/plans/tensor-modules/M01-backend-foundation.md` 的 `Task M01-T01` 任务卡；2. `docs/planning/task-index.md` 的 `M01-T01` 行。
+- **First action:** 读取 `docs/superpowers/plans/tensor-modules/M01-backend-foundation.md` 的 `Task M01-T01` 任务卡，并确认其 `Context boundary`、输入和目标文件均可定位。
+- **State evidence:** None.
+
+### `M01-T02`
+
+- **Goal:** 交付“Java 21、Boot 3.5.x 和测试依赖管理”。
+- **Scope:** 包含该交付物及其直接测试与验证；不包含其他预定义任务的交付物，也不扩展 `docs/superpowers/plans/tensor-modules/M01-backend-foundation.md` 中该任务卡明确的文件、主要语言、接口和排除边界。
+- **Acceptance:** “Java 21、Boot 3.5.x 和测试依赖管理”已按该任务卡指定的位置和行为形成；任务卡列出的全部测试、验证命令和检查得到其注明的预期结果；没有混入排除范围。
+- **Dependencies:** M01-T01.
+- **Sources:** 1. `docs/superpowers/plans/tensor-modules/M01-backend-foundation.md` 的 `Task M01-T02` 任务卡；2. `docs/planning/task-index.md` 的 `M01-T02` 行。
+- **First action:** 读取 `docs/superpowers/plans/tensor-modules/M01-backend-foundation.md` 的 `Task M01-T02` 任务卡，并确认其 `Context boundary`、输入和目标文件均可定位。
+- **State evidence:** None.
+
+### `M01-T03`
+
+- **Goal:** 交付“Maven Enforcer、ArchUnit 和禁止 Git 能力门禁”。
+- **Scope:** 包含该交付物及其直接测试与验证；不包含其他预定义任务的交付物，也不扩展 `docs/superpowers/plans/tensor-modules/M01-backend-foundation.md` 中该任务卡明确的文件、主要语言、接口和排除边界。
+- **Acceptance:** “Maven Enforcer、ArchUnit 和禁止 Git 能力门禁”已按该任务卡指定的位置和行为形成；任务卡列出的全部测试、验证命令和检查得到其注明的预期结果；没有混入排除范围。
+- **Dependencies:** M01-T02.
+- **Sources:** 1. `docs/superpowers/plans/tensor-modules/M01-backend-foundation.md` 的 `Task M01-T03` 任务卡；2. `docs/planning/task-index.md` 的 `M01-T03` 行。
+- **First action:** 读取 `docs/superpowers/plans/tensor-modules/M01-backend-foundation.md` 的 `Task M01-T03` 任务卡，并确认其 `Context boundary`、输入和目标文件均可定位。
+- **State evidence:** None.
+
+### `M02-T01`
+
+- **Goal:** 交付“`PluginId`、`ApiName`、`DatasetKey`、`TableName`、`RequestId`”。
+- **Scope:** 包含该交付物及其直接测试与验证；不包含其他预定义任务的交付物，也不扩展 `docs/superpowers/plans/tensor-modules/M02-plugin-api.md` 中该任务卡明确的文件、主要语言、接口和排除边界。
+- **Acceptance:** “`PluginId`、`ApiName`、`DatasetKey`、`TableName`、`RequestId`”已按该任务卡指定的位置和行为形成；任务卡列出的全部测试、验证命令和检查得到其注明的预期结果；没有混入排除范围。
+- **Dependencies:** M01-T02.
+- **Sources:** 1. `docs/superpowers/plans/tensor-modules/M02-plugin-api.md` 的 `Task M02-T01` 任务卡；2. `docs/planning/task-index.md` 的 `M02-T01` 行。
+- **First action:** 读取 `docs/superpowers/plans/tensor-modules/M02-plugin-api.md` 的 `Task M02-T01` 任务卡，并确认其 `Context boundary`、输入和目标文件均可定位。
+- **State evidence:** None.
+
+### `M02-T02`
+
+- **Goal:** 交付“参数、API、插件描述符和 readiness”。
+- **Scope:** 包含该交付物及其直接测试与验证；不包含其他预定义任务的交付物，也不扩展 `docs/superpowers/plans/tensor-modules/M02-plugin-api.md` 中该任务卡明确的文件、主要语言、接口和排除边界。
+- **Acceptance:** “参数、API、插件描述符和 readiness”已按该任务卡指定的位置和行为形成；任务卡列出的全部测试、验证命令和检查得到其注明的预期结果；没有混入排除范围。
+- **Dependencies:** M02-T01.
+- **Sources:** 1. `docs/superpowers/plans/tensor-modules/M02-plugin-api.md` 的 `Task M02-T02` 任务卡；2. `docs/planning/task-index.md` 的 `M02-T02` 行。
+- **First action:** 读取 `docs/superpowers/plans/tensor-modules/M02-plugin-api.md` 的 `Task M02-T02` 任务卡，并确认其 `Context boundary`、输入和目标文件均可定位。
+- **State evidence:** None.
+
+### `M02-T03`
+
+- **Goal:** 交付“数据集字段、业务键、筛选和展示定义”。
+- **Scope:** 包含该交付物及其直接测试与验证；不包含其他预定义任务的交付物，也不扩展 `docs/superpowers/plans/tensor-modules/M02-plugin-api.md` 中该任务卡明确的文件、主要语言、接口和排除边界。
+- **Acceptance:** “数据集字段、业务键、筛选和展示定义”已按该任务卡指定的位置和行为形成；任务卡列出的全部测试、验证命令和检查得到其注明的预期结果；没有混入排除范围。
+- **Dependencies:** M02-T01.
+- **Sources:** 1. `docs/superpowers/plans/tensor-modules/M02-plugin-api.md` 的 `Task M02-T03` 任务卡；2. `docs/planning/task-index.md` 的 `M02-T03` 行。
+- **First action:** 读取 `docs/superpowers/plans/tensor-modules/M02-plugin-api.md` 的 `Task M02-T03` 任务卡，并确认其 `Context boundary`、输入和目标文件均可定位。
+- **State evidence:** None.
+
+### `M02-T04`
+
+- **Goal:** 交付“`DownloadEnvelope`、`AdaptedBatch` 和执行结果”。
+- **Scope:** 包含该交付物及其直接测试与验证；不包含其他预定义任务的交付物，也不扩展 `docs/superpowers/plans/tensor-modules/M02-plugin-api.md` 中该任务卡明确的文件、主要语言、接口和排除边界。
+- **Acceptance:** “`DownloadEnvelope`、`AdaptedBatch` 和执行结果”已按该任务卡指定的位置和行为形成；任务卡列出的全部测试、验证命令和检查得到其注明的预期结果；没有混入排除范围。
+- **Dependencies:** M02-T01, M02-T03.
+- **Sources:** 1. `docs/superpowers/plans/tensor-modules/M02-plugin-api.md` 的 `Task M02-T04` 任务卡；2. `docs/planning/task-index.md` 的 `M02-T04` 行。
+- **First action:** 读取 `docs/superpowers/plans/tensor-modules/M02-plugin-api.md` 的 `Task M02-T04` 任务卡，并确认其 `Context boundary`、输入和目标文件均可定位。
+- **State evidence:** None.
+
+### `M02-T05`
+
+- **Goal:** 交付“`DataSourcePlugin`、`DatasetAdapter` 和领域错误”。
+- **Scope:** 包含该交付物及其直接测试与验证；不包含其他预定义任务的交付物，也不扩展 `docs/superpowers/plans/tensor-modules/M02-plugin-api.md` 中该任务卡明确的文件、主要语言、接口和排除边界。
+- **Acceptance:** “`DataSourcePlugin`、`DatasetAdapter` 和领域错误”已按该任务卡指定的位置和行为形成；任务卡列出的全部测试、验证命令和检查得到其注明的预期结果；没有混入排除范围。
+- **Dependencies:** M02-T02, M02-T03, M02-T04.
+- **Sources:** 1. `docs/superpowers/plans/tensor-modules/M02-plugin-api.md` 的 `Task M02-T05` 任务卡；2. `docs/planning/task-index.md` 的 `M02-T05` 行。
+- **First action:** 读取 `docs/superpowers/plans/tensor-modules/M02-plugin-api.md` 的 `Task M02-T05` 任务卡，并确认其 `Context boundary`、输入和目标文件均可定位。
+- **State evidence:** None.
+
+### `M03-T01`
+
+- **Goal:** 交付“YAML 加载、schema 校验和模板对照测试框架”。
+- **Scope:** 包含该交付物及其直接测试与验证；不包含其他预定义任务的交付物，也不扩展 `docs/superpowers/plans/tensor-modules/M03-tushare-metadata.md` 中该任务卡明确的文件、主要语言、接口和排除边界。
+- **Acceptance:** “YAML 加载、schema 校验和模板对照测试框架”已按该任务卡指定的位置和行为形成；任务卡列出的全部测试、验证命令和检查得到其注明的预期结果；没有混入排除范围。
+- **Dependencies:** M00-T02, M02-T03.
+- **Sources:** 1. `docs/superpowers/plans/tensor-modules/M03-tushare-metadata.md` 的 `Task M03-T01` 任务卡；2. `docs/planning/task-index.md` 的 `M03-T01` 行。
+- **First action:** 读取 `docs/superpowers/plans/tensor-modules/M03-tushare-metadata.md` 的 `Task M03-T01` 任务卡，并确认其 `Context boundary`、输入和目标文件均可定位。
+- **State evidence:** None.
+
+### `M03-T02`
+
+- **Goal:** 交付“基础与组织 11 数据集 YAML”。
+- **Scope:** 包含该交付物及其直接测试与验证；不包含其他预定义任务的交付物，也不扩展 `docs/superpowers/plans/tensor-modules/M03-tushare-metadata.md` 中该任务卡明确的文件、主要语言、接口和排除边界。
+- **Acceptance:** “基础与组织 11 数据集 YAML”已按该任务卡指定的位置和行为形成；任务卡列出的全部测试、验证命令和检查得到其注明的预期结果；没有混入排除范围。
+- **Dependencies:** M03-T01.
+- **Sources:** 1. `docs/superpowers/plans/tensor-modules/M03-tushare-metadata.md` 的 `Task M03-T02` 任务卡；2. `docs/planning/task-index.md` 的 `M03-T02` 行。
+- **First action:** 读取 `docs/superpowers/plans/tensor-modules/M03-tushare-metadata.md` 的 `Task M03-T02` 任务卡，并确认其 `Context boundary`、输入和目标文件均可定位。
+- **State evidence:** None.
+
+### `M03-T03`
+
+- **Goal:** 交付“行情与估值 7 数据集 YAML”。
+- **Scope:** 包含该交付物及其直接测试与验证；不包含其他预定义任务的交付物，也不扩展 `docs/superpowers/plans/tensor-modules/M03-tushare-metadata.md` 中该任务卡明确的文件、主要语言、接口和排除边界。
+- **Acceptance:** “行情与估值 7 数据集 YAML”已按该任务卡指定的位置和行为形成；任务卡列出的全部测试、验证命令和检查得到其注明的预期结果；没有混入排除范围。
+- **Dependencies:** M03-T01.
+- **Sources:** 1. `docs/superpowers/plans/tensor-modules/M03-tushare-metadata.md` 的 `Task M03-T03` 任务卡；2. `docs/planning/task-index.md` 的 `M03-T03` 行。
+- **First action:** 读取 `docs/superpowers/plans/tensor-modules/M03-tushare-metadata.md` 的 `Task M03-T03` 任务卡，并确认其 `Context boundary`、输入和目标文件均可定位。
+- **State evidence:** None.
+
+### `M03-T04`
+
+- **Goal:** 交付“交易与资金 6 数据集 YAML”。
+- **Scope:** 包含该交付物及其直接测试与验证；不包含其他预定义任务的交付物，也不扩展 `docs/superpowers/plans/tensor-modules/M03-tushare-metadata.md` 中该任务卡明确的文件、主要语言、接口和排除边界。
+- **Acceptance:** “交易与资金 6 数据集 YAML”已按该任务卡指定的位置和行为形成；任务卡列出的全部测试、验证命令和检查得到其注明的预期结果；没有混入排除范围。
+- **Dependencies:** M03-T01.
+- **Sources:** 1. `docs/superpowers/plans/tensor-modules/M03-tushare-metadata.md` 的 `Task M03-T04` 任务卡；2. `docs/planning/task-index.md` 的 `M03-T04` 行。
+- **First action:** 读取 `docs/superpowers/plans/tensor-modules/M03-tushare-metadata.md` 的 `Task M03-T04` 任务卡，并确认其 `Context boundary`、输入和目标文件均可定位。
+- **State evidence:** None.
+
+### `M03-T05`
+
+- **Goal:** 交付“互联互通与转融通 6 数据集 YAML”。
+- **Scope:** 包含该交付物及其直接测试与验证；不包含其他预定义任务的交付物，也不扩展 `docs/superpowers/plans/tensor-modules/M03-tushare-metadata.md` 中该任务卡明确的文件、主要语言、接口和排除边界。
+- **Acceptance:** “互联互通与转融通 6 数据集 YAML”已按该任务卡指定的位置和行为形成；任务卡列出的全部测试、验证命令和检查得到其注明的预期结果；没有混入排除范围。
+- **Dependencies:** M03-T01.
+- **Sources:** 1. `docs/superpowers/plans/tensor-modules/M03-tushare-metadata.md` 的 `Task M03-T05` 任务卡；2. `docs/planning/task-index.md` 的 `M03-T05` 行。
+- **First action:** 读取 `docs/superpowers/plans/tensor-modules/M03-tushare-metadata.md` 的 `Task M03-T05` 任务卡，并确认其 `Context boundary`、输入和目标文件均可定位。
+- **State evidence:** None.
+
+### `M03-T06`
+
+- **Goal:** 交付“财务与披露 9 数据集 YAML”。
+- **Scope:** 包含该交付物及其直接测试与验证；不包含其他预定义任务的交付物，也不扩展 `docs/superpowers/plans/tensor-modules/M03-tushare-metadata.md` 中该任务卡明确的文件、主要语言、接口和排除边界。
+- **Acceptance:** “财务与披露 9 数据集 YAML”已按该任务卡指定的位置和行为形成；任务卡列出的全部测试、验证命令和检查得到其注明的预期结果；没有混入排除范围。
+- **Dependencies:** M03-T01.
+- **Sources:** 1. `docs/superpowers/plans/tensor-modules/M03-tushare-metadata.md` 的 `Task M03-T06` 任务卡；2. `docs/planning/task-index.md` 的 `M03-T06` 行。
+- **First action:** 读取 `docs/superpowers/plans/tensor-modules/M03-tushare-metadata.md` 的 `Task M03-T06` 任务卡，并确认其 `Context boundary`、输入和目标文件均可定位。
+- **State evidence:** None.
+
+### `M03-T07`
+
+- **Goal:** 交付“公司行动 3 数据集 YAML”。
+- **Scope:** 包含该交付物及其直接测试与验证；不包含其他预定义任务的交付物，也不扩展 `docs/superpowers/plans/tensor-modules/M03-tushare-metadata.md` 中该任务卡明确的文件、主要语言、接口和排除边界。
+- **Acceptance:** “公司行动 3 数据集 YAML”已按该任务卡指定的位置和行为形成；任务卡列出的全部测试、验证命令和检查得到其注明的预期结果；没有混入排除范围。
+- **Dependencies:** M03-T01.
+- **Sources:** 1. `docs/superpowers/plans/tensor-modules/M03-tushare-metadata.md` 的 `Task M03-T07` 任务卡；2. `docs/planning/task-index.md` 的 `M03-T07` 行。
+- **First action:** 读取 `docs/superpowers/plans/tensor-modules/M03-tushare-metadata.md` 的 `Task M03-T07` 任务卡，并确认其 `Context boundary`、输入和目标文件均可定位。
+- **State evidence:** None.
+
+### `M03-T08`
+
+- **Goal:** 交付“股东与治理 7 数据集 YAML”。
+- **Scope:** 包含该交付物及其直接测试与验证；不包含其他预定义任务的交付物，也不扩展 `docs/superpowers/plans/tensor-modules/M03-tushare-metadata.md` 中该任务卡明确的文件、主要语言、接口和排除边界。
+- **Acceptance:** “股东与治理 7 数据集 YAML”已按该任务卡指定的位置和行为形成；任务卡列出的全部测试、验证命令和检查得到其注明的预期结果；没有混入排除范围。
+- **Dependencies:** M03-T01.
+- **Sources:** 1. `docs/superpowers/plans/tensor-modules/M03-tushare-metadata.md` 的 `Task M03-T08` 任务卡；2. `docs/planning/task-index.md` 的 `M03-T08` 行。
+- **First action:** 读取 `docs/superpowers/plans/tensor-modules/M03-tushare-metadata.md` 的 `Task M03-T08` 任务卡，并确认其 `Context boundary`、输入和目标文件均可定位。
+- **State evidence:** None.
+
+### `M03-T09`
+
+- **Goal:** 交付“49/49 名称、字段、参数、键和筛选总契约”。
+- **Scope:** 包含该交付物及其直接测试与验证；不包含其他预定义任务的交付物，也不扩展 `docs/superpowers/plans/tensor-modules/M03-tushare-metadata.md` 中该任务卡明确的文件、主要语言、接口和排除边界。
+- **Acceptance:** “49/49 名称、字段、参数、键和筛选总契约”已按该任务卡指定的位置和行为形成；任务卡列出的全部测试、验证命令和检查得到其注明的预期结果；没有混入排除范围。
+- **Dependencies:** M03-T02, M03-T03, M03-T04, M03-T05, M03-T06, M03-T07, M03-T08.
+- **Sources:** 1. `docs/superpowers/plans/tensor-modules/M03-tushare-metadata.md` 的 `Task M03-T09` 任务卡；2. `docs/planning/task-index.md` 的 `M03-T09` 行。
+- **First action:** 读取 `docs/superpowers/plans/tensor-modules/M03-tushare-metadata.md` 的 `Task M03-T09` 任务卡，并确认其 `Context boundary`、输入和目标文件均可定位。
+- **State evidence:** None.
+
+### `M04-T01`
+
+- **Goal:** 交付“V1 基础与组织表”。
+- **Scope:** 包含该交付物及其直接测试与验证；不包含其他预定义任务的交付物，也不扩展 `docs/superpowers/plans/tensor-modules/M04-flyway-schema.md` 中该任务卡明确的文件、主要语言、接口和排除边界。
+- **Acceptance:** “V1 基础与组织表”已按该任务卡指定的位置和行为形成；任务卡列出的全部测试、验证命令和检查得到其注明的预期结果；没有混入排除范围。
+- **Dependencies:** M03-T02.
+- **Sources:** 1. `docs/superpowers/plans/tensor-modules/M04-flyway-schema.md` 的 `Task M04-T01` 任务卡；2. `docs/planning/task-index.md` 的 `M04-T01` 行。
+- **First action:** 读取 `docs/superpowers/plans/tensor-modules/M04-flyway-schema.md` 的 `Task M04-T01` 任务卡，并确认其 `Context boundary`、输入和目标文件均可定位。
+- **State evidence:** None.
+
+### `M04-T02`
+
+- **Goal:** 交付“V2 行情、交易与资金表”。
+- **Scope:** 包含该交付物及其直接测试与验证；不包含其他预定义任务的交付物，也不扩展 `docs/superpowers/plans/tensor-modules/M04-flyway-schema.md` 中该任务卡明确的文件、主要语言、接口和排除边界。
+- **Acceptance:** “V2 行情、交易与资金表”已按该任务卡指定的位置和行为形成；任务卡列出的全部测试、验证命令和检查得到其注明的预期结果；没有混入排除范围。
+- **Dependencies:** M03-T03, M03-T04.
+- **Sources:** 1. `docs/superpowers/plans/tensor-modules/M04-flyway-schema.md` 的 `Task M04-T02` 任务卡；2. `docs/planning/task-index.md` 的 `M04-T02` 行。
+- **First action:** 读取 `docs/superpowers/plans/tensor-modules/M04-flyway-schema.md` 的 `Task M04-T02` 任务卡，并确认其 `Context boundary`、输入和目标文件均可定位。
+- **State evidence:** None.
+
+### `M04-T03`
+
+- **Goal:** 交付“V3 互联互通与转融通表”。
+- **Scope:** 包含该交付物及其直接测试与验证；不包含其他预定义任务的交付物，也不扩展 `docs/superpowers/plans/tensor-modules/M04-flyway-schema.md` 中该任务卡明确的文件、主要语言、接口和排除边界。
+- **Acceptance:** “V3 互联互通与转融通表”已按该任务卡指定的位置和行为形成；任务卡列出的全部测试、验证命令和检查得到其注明的预期结果；没有混入排除范围。
+- **Dependencies:** M03-T05.
+- **Sources:** 1. `docs/superpowers/plans/tensor-modules/M04-flyway-schema.md` 的 `Task M04-T03` 任务卡；2. `docs/planning/task-index.md` 的 `M04-T03` 行。
+- **First action:** 读取 `docs/superpowers/plans/tensor-modules/M04-flyway-schema.md` 的 `Task M04-T03` 任务卡，并确认其 `Context boundary`、输入和目标文件均可定位。
+- **State evidence:** None.
+
+### `M04-T04`
+
+- **Goal:** 交付“V4 财务与披露宽表”。
+- **Scope:** 包含该交付物及其直接测试与验证；不包含其他预定义任务的交付物，也不扩展 `docs/superpowers/plans/tensor-modules/M04-flyway-schema.md` 中该任务卡明确的文件、主要语言、接口和排除边界。
+- **Acceptance:** “V4 财务与披露宽表”已按该任务卡指定的位置和行为形成；任务卡列出的全部测试、验证命令和检查得到其注明的预期结果；没有混入排除范围。
+- **Dependencies:** M03-T06.
+- **Sources:** 1. `docs/superpowers/plans/tensor-modules/M04-flyway-schema.md` 的 `Task M04-T04` 任务卡；2. `docs/planning/task-index.md` 的 `M04-T04` 行。
+- **First action:** 读取 `docs/superpowers/plans/tensor-modules/M04-flyway-schema.md` 的 `Task M04-T04` 任务卡，并确认其 `Context boundary`、输入和目标文件均可定位。
+- **State evidence:** None.
+
+### `M04-T05`
+
+- **Goal:** 交付“V5 公司行动、股东与治理表”。
+- **Scope:** 包含该交付物及其直接测试与验证；不包含其他预定义任务的交付物，也不扩展 `docs/superpowers/plans/tensor-modules/M04-flyway-schema.md` 中该任务卡明确的文件、主要语言、接口和排除边界。
+- **Acceptance:** “V5 公司行动、股东与治理表”已按该任务卡指定的位置和行为形成；任务卡列出的全部测试、验证命令和检查得到其注明的预期结果；没有混入排除范围。
+- **Dependencies:** M03-T07, M03-T08.
+- **Sources:** 1. `docs/superpowers/plans/tensor-modules/M04-flyway-schema.md` 的 `Task M04-T05` 任务卡；2. `docs/planning/task-index.md` 的 `M04-T05` 行。
+- **First action:** 读取 `docs/superpowers/plans/tensor-modules/M04-flyway-schema.md` 的 `Task M04-T05` 任务卡，并确认其 `Context boundary`、输入和目标文件均可定位。
+- **State evidence:** None.
+
+### `M04-T06`
+
+- **Goal:** 交付“V6 fixture 表与 49 表结构总校验”。
+- **Scope:** 包含该交付物及其直接测试与验证；不包含其他预定义任务的交付物，也不扩展 `docs/superpowers/plans/tensor-modules/M04-flyway-schema.md` 中该任务卡明确的文件、主要语言、接口和排除边界。
+- **Acceptance:** “V6 fixture 表与 49 表结构总校验”已按该任务卡指定的位置和行为形成；任务卡列出的全部测试、验证命令和检查得到其注明的预期结果；没有混入排除范围。
+- **Dependencies:** M04-T01, M04-T02, M04-T03, M04-T04, M04-T05.
+- **Sources:** 1. `docs/superpowers/plans/tensor-modules/M04-flyway-schema.md` 的 `Task M04-T06` 任务卡；2. `docs/planning/task-index.md` 的 `M04-T06` 行。
+- **First action:** 读取 `docs/superpowers/plans/tensor-modules/M04-flyway-schema.md` 的 `Task M04-T06` 任务卡，并确认其 `Context boundary`、输入和目标文件均可定位。
+- **State evidence:** None.
+
+### `M05-T01`
+
+- **Goal:** 交付“`PluginRegistry` 与 `AdapterRegistry`”。
+- **Scope:** 包含该交付物及其直接测试与验证；不包含其他预定义任务的交付物，也不扩展 `docs/superpowers/plans/tensor-modules/M05-core-registry-adapter.md` 中该任务卡明确的文件、主要语言、接口和排除边界。
+- **Acceptance:** “`PluginRegistry` 与 `AdapterRegistry`”已按该任务卡指定的位置和行为形成；任务卡列出的全部测试、验证命令和检查得到其注明的预期结果；没有混入排除范围。
+- **Dependencies:** M02-T05.
+- **Sources:** 1. `docs/superpowers/plans/tensor-modules/M05-core-registry-adapter.md` 的 `Task M05-T01` 任务卡；2. `docs/planning/task-index.md` 的 `M05-T01` 行。
+- **First action:** 读取 `docs/superpowers/plans/tensor-modules/M05-core-registry-adapter.md` 的 `Task M05-T01` 任务卡，并确认其 `Context boundary`、输入和目标文件均可定位。
+- **State evidence:** None.
+
+### `M05-T02`
+
+- **Goal:** 交付“`DatasetCatalog` 和启动元数据/表结构校验”。
+- **Scope:** 包含该交付物及其直接测试与验证；不包含其他预定义任务的交付物，也不扩展 `docs/superpowers/plans/tensor-modules/M05-core-registry-adapter.md` 中该任务卡明确的文件、主要语言、接口和排除边界。
+- **Acceptance:** “`DatasetCatalog` 和启动元数据/表结构校验”已按该任务卡指定的位置和行为形成；任务卡列出的全部测试、验证命令和检查得到其注明的预期结果；没有混入排除范围。
+- **Dependencies:** M03-T09, M04-T06.
+- **Sources:** 1. `docs/superpowers/plans/tensor-modules/M05-core-registry-adapter.md` 的 `Task M05-T02` 任务卡；2. `docs/planning/task-index.md` 的 `M05-T02` 行。
+- **First action:** 读取 `docs/superpowers/plans/tensor-modules/M05-core-registry-adapter.md` 的 `Task M05-T02` 任务卡，并确认其 `Context boundary`、输入和目标文件均可定位。
+- **State evidence:** None.
+
+### `M05-T03`
+
+- **Goal:** 交付“元数据驱动参数校验”。
+- **Scope:** 包含该交付物及其直接测试与验证；不包含其他预定义任务的交付物，也不扩展 `docs/superpowers/plans/tensor-modules/M05-core-registry-adapter.md` 中该任务卡明确的文件、主要语言、接口和排除边界。
+- **Acceptance:** “元数据驱动参数校验”已按该任务卡指定的位置和行为形成；任务卡列出的全部测试、验证命令和检查得到其注明的预期结果；没有混入排除范围。
+- **Dependencies:** M02-T02, M03-T09.
+- **Sources:** 1. `docs/superpowers/plans/tensor-modules/M05-core-registry-adapter.md` 的 `Task M05-T03` 任务卡；2. `docs/planning/task-index.md` 的 `M05-T03` 行。
+- **First action:** 读取 `docs/superpowers/plans/tensor-modules/M05-core-registry-adapter.md` 的 `Task M05-T03` 任务卡，并确认其 `Context boundary`、输入和目标文件均可定位。
+- **State evidence:** None.
+
+### `M05-T04`
+
+- **Goal:** 交付“严格日期、文本、整数和精确数值转换”。
+- **Scope:** 包含该交付物及其直接测试与验证；不包含其他预定义任务的交付物，也不扩展 `docs/superpowers/plans/tensor-modules/M05-core-registry-adapter.md` 中该任务卡明确的文件、主要语言、接口和排除边界。
+- **Acceptance:** “严格日期、文本、整数和精确数值转换”已按该任务卡指定的位置和行为形成；任务卡列出的全部测试、验证命令和检查得到其注明的预期结果；没有混入排除范围。
+- **Dependencies:** M02-T03.
+- **Sources:** 1. `docs/superpowers/plans/tensor-modules/M05-core-registry-adapter.md` 的 `Task M05-T04` 任务卡；2. `docs/planning/task-index.md` 的 `M05-T04` 行。
+- **First action:** 读取 `docs/superpowers/plans/tensor-modules/M05-core-registry-adapter.md` 的 `Task M05-T04` 任务卡，并确认其 `Context boundary`、输入和目标文件均可定位。
+- **State evidence:** None.
+
+### `M05-T05`
+
+- **Goal:** 交付“`GenericDatasetAdapter`、重复键和指纹键”。
+- **Scope:** 包含该交付物及其直接测试与验证；不包含其他预定义任务的交付物，也不扩展 `docs/superpowers/plans/tensor-modules/M05-core-registry-adapter.md` 中该任务卡明确的文件、主要语言、接口和排除边界。
+- **Acceptance:** “`GenericDatasetAdapter`、重复键和指纹键”已按该任务卡指定的位置和行为形成；任务卡列出的全部测试、验证命令和检查得到其注明的预期结果；没有混入排除范围。
+- **Dependencies:** M05-T02, M05-T03, M05-T04.
+- **Sources:** 1. `docs/superpowers/plans/tensor-modules/M05-core-registry-adapter.md` 的 `Task M05-T05` 任务卡；2. `docs/planning/task-index.md` 的 `M05-T05` 行。
+- **First action:** 读取 `docs/superpowers/plans/tensor-modules/M05-core-registry-adapter.md` 的 `Task M05-T05` 任务卡，并确认其 `Context boundary`、输入和目标文件均可定位。
+- **State evidence:** None.
+
+### `M06-T01`
+
+- **Goal:** 交付“白名单 SQL 标识符和 Upsert 模板”。
+- **Scope:** 包含该交付物及其直接测试与验证；不包含其他预定义任务的交付物，也不扩展 `docs/superpowers/plans/tensor-modules/M06-core-persistence-query.md` 中该任务卡明确的文件、主要语言、接口和排除边界。
+- **Acceptance:** “白名单 SQL 标识符和 Upsert 模板”已按该任务卡指定的位置和行为形成；任务卡列出的全部测试、验证命令和检查得到其注明的预期结果；没有混入排除范围。
+- **Dependencies:** M02-T03, M04-T06.
+- **Sources:** 1. `docs/superpowers/plans/tensor-modules/M06-core-persistence-query.md` 的 `Task M06-T01` 任务卡；2. `docs/planning/task-index.md` 的 `M06-T01` 行。
+- **First action:** 读取 `docs/superpowers/plans/tensor-modules/M06-core-persistence-query.md` 的 `Task M06-T01` 任务卡，并确认其 `Context boundary`、输入和目标文件均可定位。
+- **State evidence:** None.
+
+### `M06-T02`
+
+- **Goal:** 交付“复合键与指纹键编码/绑定”。
+- **Scope:** 包含该交付物及其直接测试与验证；不包含其他预定义任务的交付物，也不扩展 `docs/superpowers/plans/tensor-modules/M06-core-persistence-query.md` 中该任务卡明确的文件、主要语言、接口和排除边界。
+- **Acceptance:** “复合键与指纹键编码/绑定”已按该任务卡指定的位置和行为形成；任务卡列出的全部测试、验证命令和检查得到其注明的预期结果；没有混入排除范围。
+- **Dependencies:** M05-T05.
+- **Sources:** 1. `docs/superpowers/plans/tensor-modules/M06-core-persistence-query.md` 的 `Task M06-T02` 任务卡；2. `docs/planning/task-index.md` 的 `M06-T02` 行。
+- **First action:** 读取 `docs/superpowers/plans/tensor-modules/M06-core-persistence-query.md` 的 `Task M06-T02` 任务卡，并确认其 `Context boundary`、输入和目标文件均可定位。
+- **State evidence:** None.
+
+### `M06-T03`
+
+- **Goal:** 交付“已有键预查、数据集锁和插入/更新计数”。
+- **Scope:** 包含该交付物及其直接测试与验证；不包含其他预定义任务的交付物，也不扩展 `docs/superpowers/plans/tensor-modules/M06-core-persistence-query.md` 中该任务卡明确的文件、主要语言、接口和排除边界。
+- **Acceptance:** “已有键预查、数据集锁和插入/更新计数”已按该任务卡指定的位置和行为形成；任务卡列出的全部测试、验证命令和检查得到其注明的预期结果；没有混入排除范围。
+- **Dependencies:** M06-T01, M06-T02.
+- **Sources:** 1. `docs/superpowers/plans/tensor-modules/M06-core-persistence-query.md` 的 `Task M06-T03` 任务卡；2. `docs/planning/task-index.md` 的 `M06-T03` 行。
+- **First action:** 读取 `docs/superpowers/plans/tensor-modules/M06-core-persistence-query.md` 的 `Task M06-T03` 任务卡，并确认其 `Context boundary`、输入和目标文件均可定位。
+- **State evidence:** None.
+
+### `M06-T04`
+
+- **Goal:** 交付“单事务批量 Upsert 与回滚”。
+- **Scope:** 包含该交付物及其直接测试与验证；不包含其他预定义任务的交付物，也不扩展 `docs/superpowers/plans/tensor-modules/M06-core-persistence-query.md` 中该任务卡明确的文件、主要语言、接口和排除边界。
+- **Acceptance:** “单事务批量 Upsert 与回滚”已按该任务卡指定的位置和行为形成；任务卡列出的全部测试、验证命令和检查得到其注明的预期结果；没有混入排除范围。
+- **Dependencies:** M06-T03.
+- **Sources:** 1. `docs/superpowers/plans/tensor-modules/M06-core-persistence-query.md` 的 `Task M06-T04` 任务卡；2. `docs/planning/task-index.md` 的 `M06-T04` 行。
+- **First action:** 读取 `docs/superpowers/plans/tensor-modules/M06-core-persistence-query.md` 的 `Task M06-T04` 任务卡，并确认其 `Context boundary`、输入和目标文件均可定位。
+- **State evidence:** None.
+
+### `M06-T05`
+
+- **Goal:** 交付“查询条件白名单和 COUNT/分页 SQL”。
+- **Scope:** 包含该交付物及其直接测试与验证；不包含其他预定义任务的交付物，也不扩展 `docs/superpowers/plans/tensor-modules/M06-core-persistence-query.md` 中该任务卡明确的文件、主要语言、接口和排除边界。
+- **Acceptance:** “查询条件白名单和 COUNT/分页 SQL”已按该任务卡指定的位置和行为形成；任务卡列出的全部测试、验证命令和检查得到其注明的预期结果；没有混入排除范围。
+- **Dependencies:** M02-T03, M04-T06.
+- **Sources:** 1. `docs/superpowers/plans/tensor-modules/M06-core-persistence-query.md` 的 `Task M06-T05` 任务卡；2. `docs/planning/task-index.md` 的 `M06-T05` 行。
+- **First action:** 读取 `docs/superpowers/plans/tensor-modules/M06-core-persistence-query.md` 的 `Task M06-T05` 任务卡，并确认其 `Context boundary`、输入和目标文件均可定位。
+- **State evidence:** None.
+
+### `M06-T06`
+
+- **Goal:** 交付“`DatasetQueryService`、页码归一化和精度序列化”。
+- **Scope:** 包含该交付物及其直接测试与验证；不包含其他预定义任务的交付物，也不扩展 `docs/superpowers/plans/tensor-modules/M06-core-persistence-query.md` 中该任务卡明确的文件、主要语言、接口和排除边界。
+- **Acceptance:** “`DatasetQueryService`、页码归一化和精度序列化”已按该任务卡指定的位置和行为形成；任务卡列出的全部测试、验证命令和检查得到其注明的预期结果；没有混入排除范围。
+- **Dependencies:** M06-T05.
+- **Sources:** 1. `docs/superpowers/plans/tensor-modules/M06-core-persistence-query.md` 的 `Task M06-T06` 任务卡；2. `docs/planning/task-index.md` 的 `M06-T06` 行。
+- **First action:** 读取 `docs/superpowers/plans/tensor-modules/M06-core-persistence-query.md` 的 `Task M06-T06` 任务卡，并确认其 `Context boundary`、输入和目标文件均可定位。
+- **State evidence:** None.
+
+### `M07-T01`
+
+- **Goal:** 交付“配置属性和同步 `RestClient`”。
+- **Scope:** 包含该交付物及其直接测试与验证；不包含其他预定义任务的交付物，也不扩展 `docs/superpowers/plans/tensor-modules/M07-tushare-plugin.md` 中该任务卡明确的文件、主要语言、接口和排除边界。
+- **Acceptance:** “配置属性和同步 `RestClient`”已按该任务卡指定的位置和行为形成；任务卡列出的全部测试、验证命令和检查得到其注明的预期结果；没有混入排除范围。
+- **Dependencies:** M02-T05.
+- **Sources:** 1. `docs/superpowers/plans/tensor-modules/M07-tushare-plugin.md` 的 `Task M07-T01` 任务卡；2. `docs/planning/task-index.md` 的 `M07-T01` 行。
+- **First action:** 读取 `docs/superpowers/plans/tensor-modules/M07-tushare-plugin.md` 的 `Task M07-T01` 任务卡，并确认其 `Context boundary`、输入和目标文件均可定位。
+- **State evidence:** None.
+
+### `M07-T02`
+
+- **Goal:** 交付“Tushare 请求、响应 DTO 和严格返回校验”。
+- **Scope:** 包含该交付物及其直接测试与验证；不包含其他预定义任务的交付物，也不扩展 `docs/superpowers/plans/tensor-modules/M07-tushare-plugin.md` 中该任务卡明确的文件、主要语言、接口和排除边界。
+- **Acceptance:** “Tushare 请求、响应 DTO 和严格返回校验”已按该任务卡指定的位置和行为形成；任务卡列出的全部测试、验证命令和检查得到其注明的预期结果；没有混入排除范围。
+- **Dependencies:** M03-T09, M07-T01.
+- **Sources:** 1. `docs/superpowers/plans/tensor-modules/M07-tushare-plugin.md` 的 `Task M07-T02` 任务卡；2. `docs/planning/task-index.md` 的 `M07-T02` 行。
+- **First action:** 读取 `docs/superpowers/plans/tensor-modules/M07-tushare-plugin.md` 的 `Task M07-T02` 任务卡，并确认其 `Context boundary`、输入和目标文件均可定位。
+- **State evidence:** None.
+
+### `M07-T03`
+
+- **Goal:** 交付“鉴权、权限、限流、网络、超时和格式错误分类”。
+- **Scope:** 包含该交付物及其直接测试与验证；不包含其他预定义任务的交付物，也不扩展 `docs/superpowers/plans/tensor-modules/M07-tushare-plugin.md` 中该任务卡明确的文件、主要语言、接口和排除边界。
+- **Acceptance:** “鉴权、权限、限流、网络、超时和格式错误分类”已按该任务卡指定的位置和行为形成；任务卡列出的全部测试、验证命令和检查得到其注明的预期结果；没有混入排除范围。
+- **Dependencies:** M07-T02.
+- **Sources:** 1. `docs/superpowers/plans/tensor-modules/M07-tushare-plugin.md` 的 `Task M07-T03` 任务卡；2. `docs/planning/task-index.md` 的 `M07-T03` 行。
+- **First action:** 读取 `docs/superpowers/plans/tensor-modules/M07-tushare-plugin.md` 的 `Task M07-T03` 任务卡，并确认其 `Context boundary`、输入和目标文件均可定位。
+- **State evidence:** None.
+
+### `M07-T04`
+
+- **Goal:** 交付“`TushareProPlugin` 描述符、readiness 和 49 接口下载”。
+- **Scope:** 包含该交付物及其直接测试与验证；不包含其他预定义任务的交付物，也不扩展 `docs/superpowers/plans/tensor-modules/M07-tushare-plugin.md` 中该任务卡明确的文件、主要语言、接口和排除边界。
+- **Acceptance:** “`TushareProPlugin` 描述符、readiness 和 49 接口下载”已按该任务卡指定的位置和行为形成；任务卡列出的全部测试、验证命令和检查得到其注明的预期结果；没有混入排除范围。
+- **Dependencies:** M07-T02, M07-T03.
+- **Sources:** 1. `docs/superpowers/plans/tensor-modules/M07-tushare-plugin.md` 的 `Task M07-T04` 任务卡；2. `docs/planning/task-index.md` 的 `M07-T04` 行。
+- **First action:** 读取 `docs/superpowers/plans/tensor-modules/M07-tushare-plugin.md` 的 `Task M07-T04` 任务卡，并确认其 `Context boundary`、输入和目标文件均可定位。
+- **State evidence:** None.
+
+### `M08-T01`
+
+- **Goal:** 交付“fixture 元数据、插件和适配器”。
+- **Scope:** 包含该交付物及其直接测试与验证；不包含其他预定义任务的交付物，也不扩展 `docs/superpowers/plans/tensor-modules/M08-fixture-plugin.md` 中该任务卡明确的文件、主要语言、接口和排除边界。
+- **Acceptance:** “fixture 元数据、插件和适配器”已按该任务卡指定的位置和行为形成；任务卡列出的全部测试、验证命令和检查得到其注明的预期结果；没有混入排除范围。
+- **Dependencies:** M02-T05, M04-T06.
+- **Sources:** 1. `docs/superpowers/plans/tensor-modules/M08-fixture-plugin.md` 的 `Task M08-T01` 任务卡；2. `docs/planning/task-index.md` 的 `M08-T01` 行。
+- **First action:** 读取 `docs/superpowers/plans/tensor-modules/M08-fixture-plugin.md` 的 `Task M08-T01` 任务卡，并确认其 `Context boundary`、输入和目标文件均可定位。
+- **State evidence:** None.
+
+### `M08-T02`
+
+- **Goal:** 交付“成功、空、上游失败、适配失败和写入失败模式”。
+- **Scope:** 包含该交付物及其直接测试与验证；不包含其他预定义任务的交付物，也不扩展 `docs/superpowers/plans/tensor-modules/M08-fixture-plugin.md` 中该任务卡明确的文件、主要语言、接口和排除边界。
+- **Acceptance:** “成功、空、上游失败、适配失败和写入失败模式”已按该任务卡指定的位置和行为形成；任务卡列出的全部测试、验证命令和检查得到其注明的预期结果；没有混入排除范围。
+- **Dependencies:** M08-T01.
+- **Sources:** 1. `docs/superpowers/plans/tensor-modules/M08-fixture-plugin.md` 的 `Task M08-T02` 任务卡；2. `docs/planning/task-index.md` 的 `M08-T02` 行。
+- **First action:** 读取 `docs/superpowers/plans/tensor-modules/M08-fixture-plugin.md` 的 `Task M08-T02` 任务卡，并确认其 `Context boundary`、输入和目标文件均可定位。
+- **State evidence:** None.
+
+### `M08-T03`
+
+- **Goal:** 交付“fixture 注册→适配→入库→查询集成测试”。
+- **Scope:** 包含该交付物及其直接测试与验证；不包含其他预定义任务的交付物，也不扩展 `docs/superpowers/plans/tensor-modules/M08-fixture-plugin.md` 中该任务卡明确的文件、主要语言、接口和排除边界。
+- **Acceptance:** “fixture 注册→适配→入库→查询集成测试”已按该任务卡指定的位置和行为形成；任务卡列出的全部测试、验证命令和检查得到其注明的预期结果；没有混入排除范围。
+- **Dependencies:** M05-T05, M06-T06, M08-T02.
+- **Sources:** 1. `docs/superpowers/plans/tensor-modules/M08-fixture-plugin.md` 的 `Task M08-T03` 任务卡；2. `docs/planning/task-index.md` 的 `M08-T03` 行。
+- **First action:** 读取 `docs/superpowers/plans/tensor-modules/M08-fixture-plugin.md` 的 `Task M08-T03` 任务卡，并确认其 `Context boundary`、输入和目标文件均可定位。
+- **State evidence:** None.
+
+### `M09-T01`
+
+- **Goal:** 交付“Boot 入口、请求标识和通用 API DTO”。
+- **Scope:** 包含该交付物及其直接测试与验证；不包含其他预定义任务的交付物，也不扩展 `docs/superpowers/plans/tensor-modules/M09-app-api.md` 中该任务卡明确的文件、主要语言、接口和排除边界。
+- **Acceptance:** “Boot 入口、请求标识和通用 API DTO”已按该任务卡指定的位置和行为形成；任务卡列出的全部测试、验证命令和检查得到其注明的预期结果；没有混入排除范围。
+- **Dependencies:** M01-T03, M02-T05.
+- **Sources:** 1. `docs/superpowers/plans/tensor-modules/M09-app-api.md` 的 `Task M09-T01` 任务卡；2. `docs/planning/task-index.md` 的 `M09-T01` 行。
+- **First action:** 读取 `docs/superpowers/plans/tensor-modules/M09-app-api.md` 的 `Task M09-T01` 任务卡，并确认其 `Context boundary`、输入和目标文件均可定位。
+- **State evidence:** None.
+
+### `M09-T02`
+
+- **Goal:** 交付“数据源、接口和数据集元数据 API”。
+- **Scope:** 包含该交付物及其直接测试与验证；不包含其他预定义任务的交付物，也不扩展 `docs/superpowers/plans/tensor-modules/M09-app-api.md` 中该任务卡明确的文件、主要语言、接口和排除边界。
+- **Acceptance:** “数据源、接口和数据集元数据 API”已按该任务卡指定的位置和行为形成；任务卡列出的全部测试、验证命令和检查得到其注明的预期结果；没有混入排除范围。
+- **Dependencies:** M05-T02, M09-T01.
+- **Sources:** 1. `docs/superpowers/plans/tensor-modules/M09-app-api.md` 的 `Task M09-T02` 任务卡；2. `docs/planning/task-index.md` 的 `M09-T02` 行。
+- **First action:** 读取 `docs/superpowers/plans/tensor-modules/M09-app-api.md` 的 `Task M09-T02` 任务卡，并确认其 `Context boundary`、输入和目标文件均可定位。
+- **State evidence:** None.
+
+### `M09-T03`
+
+- **Goal:** 交付“同步下载 API 与事务提交后结果”。
+- **Scope:** 包含该交付物及其直接测试与验证；不包含其他预定义任务的交付物，也不扩展 `docs/superpowers/plans/tensor-modules/M09-app-api.md` 中该任务卡明确的文件、主要语言、接口和排除边界。
+- **Acceptance:** “同步下载 API 与事务提交后结果”已按该任务卡指定的位置和行为形成；任务卡列出的全部测试、验证命令和检查得到其注明的预期结果；没有混入排除范围。
+- **Dependencies:** M05-T03, M05-T05, M06-T04, M07-T04, M09-T01.
+- **Sources:** 1. `docs/superpowers/plans/tensor-modules/M09-app-api.md` 的 `Task M09-T03` 任务卡；2. `docs/planning/task-index.md` 的 `M09-T03` 行。
+- **First action:** 读取 `docs/superpowers/plans/tensor-modules/M09-app-api.md` 的 `Task M09-T03` 任务卡，并确认其 `Context boundary`、输入和目标文件均可定位。
+- **State evidence:** None.
+
+### `M09-T04`
+
+- **Goal:** 交付“数据集定义与只读分页查询 API”。
+- **Scope:** 包含该交付物及其直接测试与验证；不包含其他预定义任务的交付物，也不扩展 `docs/superpowers/plans/tensor-modules/M09-app-api.md` 中该任务卡明确的文件、主要语言、接口和排除边界。
+- **Acceptance:** “数据集定义与只读分页查询 API”已按该任务卡指定的位置和行为形成；任务卡列出的全部测试、验证命令和检查得到其注明的预期结果；没有混入排除范围。
+- **Dependencies:** M06-T06, M09-T01.
+- **Sources:** 1. `docs/superpowers/plans/tensor-modules/M09-app-api.md` 的 `Task M09-T04` 任务卡；2. `docs/planning/task-index.md` 的 `M09-T04` 行。
+- **First action:** 读取 `docs/superpowers/plans/tensor-modules/M09-app-api.md` 的 `Task M09-T04` 任务卡，并确认其 `Context boundary`、输入和目标文件均可定位。
+- **State evidence:** None.
+
+### `M09-T05`
+
+- **Goal:** 交付“全局异常和 HTTP 状态映射”。
+- **Scope:** 包含该交付物及其直接测试与验证；不包含其他预定义任务的交付物，也不扩展 `docs/superpowers/plans/tensor-modules/M09-app-api.md` 中该任务卡明确的文件、主要语言、接口和排除边界。
+- **Acceptance:** “全局异常和 HTTP 状态映射”已按该任务卡指定的位置和行为形成；任务卡列出的全部测试、验证命令和检查得到其注明的预期结果；没有混入排除范围。
+- **Dependencies:** M09-T02, M09-T03, M09-T04.
+- **Sources:** 1. `docs/superpowers/plans/tensor-modules/M09-app-api.md` 的 `Task M09-T05` 任务卡；2. `docs/planning/task-index.md` 的 `M09-T05` 行。
+- **First action:** 读取 `docs/superpowers/plans/tensor-modules/M09-app-api.md` 的 `Task M09-T05` 任务卡，并确认其 `Context boundary`、输入和目标文件均可定位。
+- **State evidence:** None.
+
+### `M09-T06`
+
+- **Goal:** 交付“配置、脱敏、指标、健康和静态资源安全”。
+- **Scope:** 包含该交付物及其直接测试与验证；不包含其他预定义任务的交付物，也不扩展 `docs/superpowers/plans/tensor-modules/M09-app-api.md` 中该任务卡明确的文件、主要语言、接口和排除边界。
+- **Acceptance:** “配置、脱敏、指标、健康和静态资源安全”已按该任务卡指定的位置和行为形成；任务卡列出的全部测试、验证命令和检查得到其注明的预期结果；没有混入排除范围。
+- **Dependencies:** M09-T01, M09-T02, M09-T03, M09-T04, M09-T05.
+- **Sources:** 1. `docs/superpowers/plans/tensor-modules/M09-app-api.md` 的 `Task M09-T06` 任务卡；2. `docs/planning/task-index.md` 的 `M09-T06` 行。
+- **First action:** 读取 `docs/superpowers/plans/tensor-modules/M09-app-api.md` 的 `Task M09-T06` 任务卡，并确认其 `Context boundary`、输入和目标文件均可定位。
+- **State evidence:** None.
+
+### `M10-T01`
+
+- **Goal:** 交付“Vue 依赖、Vitest、VTU 和 Playwright 配置”。
+- **Scope:** 包含该交付物及其直接测试与验证；不包含其他预定义任务的交付物，也不扩展 `docs/superpowers/plans/tensor-modules/M10-frontend-foundation.md` 中该任务卡明确的文件、主要语言、接口和排除边界。
+- **Acceptance:** “Vue 依赖、Vitest、VTU 和 Playwright 配置”已按该任务卡指定的位置和行为形成；任务卡列出的全部测试、验证命令和检查得到其注明的预期结果；没有混入排除范围。
+- **Dependencies:** M00-T03.
+- **Sources:** 1. `docs/superpowers/plans/tensor-modules/M10-frontend-foundation.md` 的 `Task M10-T01` 任务卡；2. `docs/planning/task-index.md` 的 `M10-T01` 行。
+- **First action:** 读取 `docs/superpowers/plans/tensor-modules/M10-frontend-foundation.md` 的 `Task M10-T01` 任务卡，并确认其 `Context boundary`、输入和目标文件均可定位。
+- **State evidence:** None.
+
+### `M10-T02`
+
+- **Goal:** 交付“`/downloads`、`/datasets` 路由和桌面布局”。
+- **Scope:** 包含该交付物及其直接测试与验证；不包含其他预定义任务的交付物，也不扩展 `docs/superpowers/plans/tensor-modules/M10-frontend-foundation.md` 中该任务卡明确的文件、主要语言、接口和排除边界。
+- **Acceptance:** “`/downloads`、`/datasets` 路由和桌面布局”已按该任务卡指定的位置和行为形成；任务卡列出的全部测试、验证命令和检查得到其注明的预期结果；没有混入排除范围。
+- **Dependencies:** M10-T01.
+- **Sources:** 1. `docs/superpowers/plans/tensor-modules/M10-frontend-foundation.md` 的 `Task M10-T02` 任务卡；2. `docs/planning/task-index.md` 的 `M10-T02` 行。
+- **First action:** 读取 `docs/superpowers/plans/tensor-modules/M10-frontend-foundation.md` 的 `Task M10-T02` 任务卡，并确认其 `Context boundary`、输入和目标文件均可定位。
+- **State evidence:** None.
+
+### `M10-T03`
+
+- **Goal:** 交付“Axios 客户端、DTO 和错误拦截”。
+- **Scope:** 包含该交付物及其直接测试与验证；不包含其他预定义任务的交付物，也不扩展 `docs/superpowers/plans/tensor-modules/M10-frontend-foundation.md` 中该任务卡明确的文件、主要语言、接口和排除边界。
+- **Acceptance:** “Axios 客户端、DTO 和错误拦截”已按该任务卡指定的位置和行为形成；任务卡列出的全部测试、验证命令和检查得到其注明的预期结果；没有混入排除范围。
+- **Dependencies:** M00-T03, M10-T01.
+- **Sources:** 1. `docs/superpowers/plans/tensor-modules/M10-frontend-foundation.md` 的 `Task M10-T03` 任务卡；2. `docs/planning/task-index.md` 的 `M10-T03` 行。
+- **First action:** 读取 `docs/superpowers/plans/tensor-modules/M10-frontend-foundation.md` 的 `Task M10-T03` 任务卡，并确认其 `Context boundary`、输入和目标文件均可定位。
+- **State evidence:** None.
+
+### `M10-T04`
+
+- **Goal:** 交付“日期、空值、精度格式化和无障碍状态组件”。
+- **Scope:** 包含该交付物及其直接测试与验证；不包含其他预定义任务的交付物，也不扩展 `docs/superpowers/plans/tensor-modules/M10-frontend-foundation.md` 中该任务卡明确的文件、主要语言、接口和排除边界。
+- **Acceptance:** “日期、空值、精度格式化和无障碍状态组件”已按该任务卡指定的位置和行为形成；任务卡列出的全部测试、验证命令和检查得到其注明的预期结果；没有混入排除范围。
+- **Dependencies:** M10-T01.
+- **Sources:** 1. `docs/superpowers/plans/tensor-modules/M10-frontend-foundation.md` 的 `Task M10-T04` 任务卡；2. `docs/planning/task-index.md` 的 `M10-T04` 行。
+- **First action:** 读取 `docs/superpowers/plans/tensor-modules/M10-frontend-foundation.md` 的 `Task M10-T04` 任务卡，并确认其 `Context boundary`、输入和目标文件均可定位。
+- **State evidence:** None.
+
+### `M11-T01`
+
+- **Goal:** 交付“数据源与接口分组搜索选择组件”。
+- **Scope:** 包含该交付物及其直接测试与验证；不包含其他预定义任务的交付物，也不扩展 `docs/superpowers/plans/tensor-modules/M11-download-ui.md` 中该任务卡明确的文件、主要语言、接口和排除边界。
+- **Acceptance:** “数据源与接口分组搜索选择组件”已按该任务卡指定的位置和行为形成；任务卡列出的全部测试、验证命令和检查得到其注明的预期结果；没有混入排除范围。
+- **Dependencies:** M10-T03.
+- **Sources:** 1. `docs/superpowers/plans/tensor-modules/M11-download-ui.md` 的 `Task M11-T01` 任务卡；2. `docs/planning/task-index.md` 的 `M11-T01` 行。
+- **First action:** 读取 `docs/superpowers/plans/tensor-modules/M11-download-ui.md` 的 `Task M11-T01` 任务卡，并确认其 `Context boundary`、输入和目标文件均可定位。
+- **State evidence:** None.
+
+### `M11-T02`
+
+- **Goal:** 交付“元数据驱动动态参数表单”。
+- **Scope:** 包含该交付物及其直接测试与验证；不包含其他预定义任务的交付物，也不扩展 `docs/superpowers/plans/tensor-modules/M11-download-ui.md` 中该任务卡明确的文件、主要语言、接口和排除边界。
+- **Acceptance:** “元数据驱动动态参数表单”已按该任务卡指定的位置和行为形成；任务卡列出的全部测试、验证命令和检查得到其注明的预期结果；没有混入排除范围。
+- **Dependencies:** M10-T03, M10-T04.
+- **Sources:** 1. `docs/superpowers/plans/tensor-modules/M11-download-ui.md` 的 `Task M11-T02` 任务卡；2. `docs/planning/task-index.md` 的 `M11-T02` 行。
+- **First action:** 读取 `docs/superpowers/plans/tensor-modules/M11-download-ui.md` 的 `Task M11-T02` 任务卡，并确认其 `Context boundary`、输入和目标文件均可定位。
+- **State evidence:** None.
+
+### `M11-T03`
+
+- **Goal:** 交付“下载 composable、控件锁定和请求世代”。
+- **Scope:** 包含该交付物及其直接测试与验证；不包含其他预定义任务的交付物，也不扩展 `docs/superpowers/plans/tensor-modules/M11-download-ui.md` 中该任务卡明确的文件、主要语言、接口和排除边界。
+- **Acceptance:** “下载 composable、控件锁定和请求世代”已按该任务卡指定的位置和行为形成；任务卡列出的全部测试、验证命令和检查得到其注明的预期结果；没有混入排除范围。
+- **Dependencies:** M10-T03.
+- **Sources:** 1. `docs/superpowers/plans/tensor-modules/M11-download-ui.md` 的 `Task M11-T03` 任务卡；2. `docs/planning/task-index.md` 的 `M11-T03` 行。
+- **First action:** 读取 `docs/superpowers/plans/tensor-modules/M11-download-ui.md` 的 `Task M11-T03` 任务卡，并确认其 `Context boundary`、输入和目标文件均可定位。
+- **State evidence:** None.
+
+### `M11-T04`
+
+- **Goal:** 交付“成功、空和失败结果组件”。
+- **Scope:** 包含该交付物及其直接测试与验证；不包含其他预定义任务的交付物，也不扩展 `docs/superpowers/plans/tensor-modules/M11-download-ui.md` 中该任务卡明确的文件、主要语言、接口和排除边界。
+- **Acceptance:** “成功、空和失败结果组件”已按该任务卡指定的位置和行为形成；任务卡列出的全部测试、验证命令和检查得到其注明的预期结果；没有混入排除范围。
+- **Dependencies:** M10-T04, M11-T03.
+- **Sources:** 1. `docs/superpowers/plans/tensor-modules/M11-download-ui.md` 的 `Task M11-T04` 任务卡；2. `docs/planning/task-index.md` 的 `M11-T04` 行。
+- **First action:** 读取 `docs/superpowers/plans/tensor-modules/M11-download-ui.md` 的 `Task M11-T04` 任务卡，并确认其 `Context boundary`、输入和目标文件均可定位。
+- **State evidence:** None.
+
+### `M11-T05`
+
+- **Goal:** 交付“`DownloadView` 页面集成和组件回归”。
+- **Scope:** 包含该交付物及其直接测试与验证；不包含其他预定义任务的交付物，也不扩展 `docs/superpowers/plans/tensor-modules/M11-download-ui.md` 中该任务卡明确的文件、主要语言、接口和排除边界。
+- **Acceptance:** “`DownloadView` 页面集成和组件回归”已按该任务卡指定的位置和行为形成；任务卡列出的全部测试、验证命令和检查得到其注明的预期结果；没有混入排除范围。
+- **Dependencies:** M11-T01, M11-T02, M11-T03, M11-T04.
+- **Sources:** 1. `docs/superpowers/plans/tensor-modules/M11-download-ui.md` 的 `Task M11-T05` 任务卡；2. `docs/planning/task-index.md` 的 `M11-T05` 行。
+- **First action:** 读取 `docs/superpowers/plans/tensor-modules/M11-download-ui.md` 的 `Task M11-T05` 任务卡，并确认其 `Context boundary`、输入和目标文件均可定位。
+- **State evidence:** None.
+
+### `M12-T01`
+
+- **Goal:** 交付“数据集选择与动态筛选表单”。
+- **Scope:** 包含该交付物及其直接测试与验证；不包含其他预定义任务的交付物，也不扩展 `docs/superpowers/plans/tensor-modules/M12-dataset-ui.md` 中该任务卡明确的文件、主要语言、接口和排除边界。
+- **Acceptance:** “数据集选择与动态筛选表单”已按该任务卡指定的位置和行为形成；任务卡列出的全部测试、验证命令和检查得到其注明的预期结果；没有混入排除范围。
+- **Dependencies:** M10-T03, M10-T04.
+- **Sources:** 1. `docs/superpowers/plans/tensor-modules/M12-dataset-ui.md` 的 `Task M12-T01` 任务卡；2. `docs/planning/task-index.md` 的 `M12-T01` 行。
+- **First action:** 读取 `docs/superpowers/plans/tensor-modules/M12-dataset-ui.md` 的 `Task M12-T01` 任务卡，并确认其 `Context boundary`、输入和目标文件均可定位。
+- **State evidence:** None.
+
+### `M12-T02`
+
+- **Goal:** 交付“全字段、固定列和横向滚动表格”。
+- **Scope:** 包含该交付物及其直接测试与验证；不包含其他预定义任务的交付物，也不扩展 `docs/superpowers/plans/tensor-modules/M12-dataset-ui.md` 中该任务卡明确的文件、主要语言、接口和排除边界。
+- **Acceptance:** “全字段、固定列和横向滚动表格”已按该任务卡指定的位置和行为形成；任务卡列出的全部测试、验证命令和检查得到其注明的预期结果；没有混入排除范围。
+- **Dependencies:** M10-T04.
+- **Sources:** 1. `docs/superpowers/plans/tensor-modules/M12-dataset-ui.md` 的 `Task M12-T02` 任务卡；2. `docs/planning/task-index.md` 的 `M12-T02` 行。
+- **First action:** 读取 `docs/superpowers/plans/tensor-modules/M12-dataset-ui.md` 的 `Task M12-T02` 任务卡，并确认其 `Context boundary`、输入和目标文件均可定位。
+- **State evidence:** None.
+
+### `M12-T03`
+
+- **Goal:** 交付“20/50/100 分页组件”。
+- **Scope:** 包含该交付物及其直接测试与验证；不包含其他预定义任务的交付物，也不扩展 `docs/superpowers/plans/tensor-modules/M12-dataset-ui.md` 中该任务卡明确的文件、主要语言、接口和排除边界。
+- **Acceptance:** “20/50/100 分页组件”已按该任务卡指定的位置和行为形成；任务卡列出的全部测试、验证命令和检查得到其注明的预期结果；没有混入排除范围。
+- **Dependencies:** M10-T04.
+- **Sources:** 1. `docs/superpowers/plans/tensor-modules/M12-dataset-ui.md` 的 `Task M12-T03` 任务卡；2. `docs/planning/task-index.md` 的 `M12-T03` 行。
+- **First action:** 读取 `docs/superpowers/plans/tensor-modules/M12-dataset-ui.md` 的 `Task M12-T03` 任务卡，并确认其 `Context boundary`、输入和目标文件均可定位。
+- **State evidence:** None.
+
+### `M12-T04`
+
+- **Goal:** 交付“查询 composable、竞态和超界页处理”。
+- **Scope:** 包含该交付物及其直接测试与验证；不包含其他预定义任务的交付物，也不扩展 `docs/superpowers/plans/tensor-modules/M12-dataset-ui.md` 中该任务卡明确的文件、主要语言、接口和排除边界。
+- **Acceptance:** “查询 composable、竞态和超界页处理”已按该任务卡指定的位置和行为形成；任务卡列出的全部测试、验证命令和检查得到其注明的预期结果；没有混入排除范围。
+- **Dependencies:** M10-T03.
+- **Sources:** 1. `docs/superpowers/plans/tensor-modules/M12-dataset-ui.md` 的 `Task M12-T04` 任务卡；2. `docs/planning/task-index.md` 的 `M12-T04` 行。
+- **First action:** 读取 `docs/superpowers/plans/tensor-modules/M12-dataset-ui.md` 的 `Task M12-T04` 任务卡，并确认其 `Context boundary`、输入和目标文件均可定位。
+- **State evidence:** None.
+
+### `M12-T05`
+
+- **Goal:** 交付“`DatasetView` 页面集成和组件回归”。
+- **Scope:** 包含该交付物及其直接测试与验证；不包含其他预定义任务的交付物，也不扩展 `docs/superpowers/plans/tensor-modules/M12-dataset-ui.md` 中该任务卡明确的文件、主要语言、接口和排除边界。
+- **Acceptance:** “`DatasetView` 页面集成和组件回归”已按该任务卡指定的位置和行为形成；任务卡列出的全部测试、验证命令和检查得到其注明的预期结果；没有混入排除范围。
+- **Dependencies:** M12-T01, M12-T02, M12-T03, M12-T04.
+- **Sources:** 1. `docs/superpowers/plans/tensor-modules/M12-dataset-ui.md` 的 `Task M12-T05` 任务卡；2. `docs/planning/task-index.md` 的 `M12-T05` 行。
+- **First action:** 读取 `docs/superpowers/plans/tensor-modules/M12-dataset-ui.md` 的 `Task M12-T05` 任务卡，并确认其 `Context boundary`、输入和目标文件均可定位。
+- **State evidence:** None.
+
+### `M13-T01`
+
+- **Goal:** 交付“前端确定性构建及静态资源复制”。
+- **Scope:** 包含该交付物及其直接测试与验证；不包含其他预定义任务的交付物，也不扩展 `docs/superpowers/plans/tensor-modules/M13-packaging-runbook.md` 中该任务卡明确的文件、主要语言、接口和排除边界。
+- **Acceptance:** “前端确定性构建及静态资源复制”已按该任务卡指定的位置和行为形成；任务卡列出的全部测试、验证命令和检查得到其注明的预期结果；没有混入排除范围。
+- **Dependencies:** M10-T02, M11-T05, M12-T05.
+- **Sources:** 1. `docs/superpowers/plans/tensor-modules/M13-packaging-runbook.md` 的 `Task M13-T01` 任务卡；2. `docs/planning/task-index.md` 的 `M13-T01` 行。
+- **First action:** 读取 `docs/superpowers/plans/tensor-modules/M13-packaging-runbook.md` 的 `Task M13-T01` 任务卡，并确认其 `Context boundary`、输入和目标文件均可定位。
+- **State evidence:** None.
+
+### `M13-T02`
+
+- **Goal:** 交付“单个可执行 JAR 打包和内容检查”。
+- **Scope:** 包含该交付物及其直接测试与验证；不包含其他预定义任务的交付物，也不扩展 `docs/superpowers/plans/tensor-modules/M13-packaging-runbook.md` 中该任务卡明确的文件、主要语言、接口和排除边界。
+- **Acceptance:** “单个可执行 JAR 打包和内容检查”已按该任务卡指定的位置和行为形成；任务卡列出的全部测试、验证命令和检查得到其注明的预期结果；没有混入排除范围。
+- **Dependencies:** M09-T06, M13-T01.
+- **Sources:** 1. `docs/superpowers/plans/tensor-modules/M13-packaging-runbook.md` 的 `Task M13-T02` 任务卡；2. `docs/planning/task-index.md` 的 `M13-T02` 行。
+- **First action:** 读取 `docs/superpowers/plans/tensor-modules/M13-packaging-runbook.md` 的 `Task M13-T02` 任务卡，并确认其 `Context boundary`、输入和目标文件均可定位。
+- **State evidence:** None.
+
+### `M13-T03`
+
+- **Goal:** 交付“生产配置、CORS、SPA fallback 和优雅停机”。
+- **Scope:** 包含该交付物及其直接测试与验证；不包含其他预定义任务的交付物，也不扩展 `docs/superpowers/plans/tensor-modules/M13-packaging-runbook.md` 中该任务卡明确的文件、主要语言、接口和排除边界。
+- **Acceptance:** “生产配置、CORS、SPA fallback 和优雅停机”已按该任务卡指定的位置和行为形成；任务卡列出的全部测试、验证命令和检查得到其注明的预期结果；没有混入排除范围。
+- **Dependencies:** M09-T06, M13-T02.
+- **Sources:** 1. `docs/superpowers/plans/tensor-modules/M13-packaging-runbook.md` 的 `Task M13-T03` 任务卡；2. `docs/planning/task-index.md` 的 `M13-T03` 行。
+- **First action:** 读取 `docs/superpowers/plans/tensor-modules/M13-packaging-runbook.md` 的 `Task M13-T03` 任务卡，并确认其 `Context boundary`、输入和目标文件均可定位。
+- **State evidence:** None.
+
+### `M13-T04`
+
+- **Goal:** 交付“全新环境运行说明和启动 smoke test”。
+- **Scope:** 包含该交付物及其直接测试与验证；不包含其他预定义任务的交付物，也不扩展 `docs/superpowers/plans/tensor-modules/M13-packaging-runbook.md` 中该任务卡明确的文件、主要语言、接口和排除边界。
+- **Acceptance:** “全新环境运行说明和启动 smoke test”已按该任务卡指定的位置和行为形成；任务卡列出的全部测试、验证命令和检查得到其注明的预期结果；没有混入排除范围。
+- **Dependencies:** M13-T03.
+- **Sources:** 1. `docs/superpowers/plans/tensor-modules/M13-packaging-runbook.md` 的 `Task M13-T04` 任务卡；2. `docs/planning/task-index.md` 的 `M13-T04` 行。
+- **First action:** 读取 `docs/superpowers/plans/tensor-modules/M13-packaging-runbook.md` 的 `Task M13-T04` 任务卡，并确认其 `Context boundary`、输入和目标文件均可定位。
+- **State evidence:** None.
+
+### `M14-T01`
+
+- **Goal:** 交付“fixture 页面端到端主闭环”。
+- **Scope:** 包含该交付物及其直接测试与验证；不包含其他预定义任务的交付物，也不扩展 `docs/superpowers/plans/tensor-modules/M14-integration-release.md` 中该任务卡明确的文件、主要语言、接口和排除边界。
+- **Acceptance:** “fixture 页面端到端主闭环”已按该任务卡指定的位置和行为形成；任务卡列出的全部测试、验证命令和检查得到其注明的预期结果；没有混入排除范围。
+- **Dependencies:** M13-T04.
+- **Sources:** 1. `docs/superpowers/plans/tensor-modules/M14-integration-release.md` 的 `Task M14-T01` 任务卡；2. `docs/planning/task-index.md` 的 `M14-T01` 行。
+- **First action:** 读取 `docs/superpowers/plans/tensor-modules/M14-integration-release.md` 的 `Task M14-T01` 任务卡，并确认其 `Context boundary`、输入和目标文件均可定位。
+- **State evidence:** None.
+
+### `M14-T02`
+
+- **Goal:** 交付“下载失败、空结果、幂等和回滚矩阵”。
+- **Scope:** 包含该交付物及其直接测试与验证；不包含其他预定义任务的交付物，也不扩展 `docs/superpowers/plans/tensor-modules/M14-integration-release.md` 中该任务卡明确的文件、主要语言、接口和排除边界。
+- **Acceptance:** “下载失败、空结果、幂等和回滚矩阵”已按该任务卡指定的位置和行为形成；任务卡列出的全部测试、验证命令和检查得到其注明的预期结果；没有混入排除范围。
+- **Dependencies:** M14-T01.
+- **Sources:** 1. `docs/superpowers/plans/tensor-modules/M14-integration-release.md` 的 `Task M14-T02` 任务卡；2. `docs/planning/task-index.md` 的 `M14-T02` 行。
+- **First action:** 读取 `docs/superpowers/plans/tensor-modules/M14-integration-release.md` 的 `Task M14-T02` 任务卡，并确认其 `Context boundary`、输入和目标文件均可定位。
+- **State evidence:** None.
+
+### `M14-T03`
+
+- **Goal:** 交付“查询、分页、宽表、竞态和无障碍 E2E”。
+- **Scope:** 包含该交付物及其直接测试与验证；不包含其他预定义任务的交付物，也不扩展 `docs/superpowers/plans/tensor-modules/M14-integration-release.md` 中该任务卡明确的文件、主要语言、接口和排除边界。
+- **Acceptance:** “查询、分页、宽表、竞态和无障碍 E2E”已按该任务卡指定的位置和行为形成；任务卡列出的全部测试、验证命令和检查得到其注明的预期结果；没有混入排除范围。
+- **Dependencies:** M14-T01.
+- **Sources:** 1. `docs/superpowers/plans/tensor-modules/M14-integration-release.md` 的 `Task M14-T03` 任务卡；2. `docs/planning/task-index.md` 的 `M14-T03` 行。
+- **First action:** 读取 `docs/superpowers/plans/tensor-modules/M14-integration-release.md` 的 `Task M14-T03` 任务卡，并确认其 `Context boundary`、输入和目标文件均可定位。
+- **State evidence:** None.
+
+### `M14-T04`
+
+- **Goal:** 交付“49 数据集自动契约与页面回归驱动”。
+- **Scope:** 包含该交付物及其直接测试与验证；不包含其他预定义任务的交付物，也不扩展 `docs/superpowers/plans/tensor-modules/M14-integration-release.md` 中该任务卡明确的文件、主要语言、接口和排除边界。
+- **Acceptance:** “49 数据集自动契约与页面回归驱动”已按该任务卡指定的位置和行为形成；任务卡列出的全部测试、验证命令和检查得到其注明的预期结果；没有混入排除范围。
+- **Dependencies:** M03-T09, M04-T06, M14-T01.
+- **Sources:** 1. `docs/superpowers/plans/tensor-modules/M14-integration-release.md` 的 `Task M14-T04` 任务卡；2. `docs/planning/task-index.md` 的 `M14-T04` 行。
+- **First action:** 读取 `docs/superpowers/plans/tensor-modules/M14-integration-release.md` 的 `Task M14-T04` 任务卡，并确认其 `Context boundary`、输入和目标文件均可定位。
+- **State evidence:** None.
+
+### `M14-T05`
+
+- **Goal:** 交付“真实 Tushare 49 接口受控页面验收”。
+- **Scope:** 包含该交付物及其直接测试与验证；不包含其他预定义任务的交付物，也不扩展 `docs/superpowers/plans/tensor-modules/M14-integration-release.md` 中该任务卡明确的文件、主要语言、接口和排除边界。
+- **Acceptance:** “真实 Tushare 49 接口受控页面验收”已按该任务卡指定的位置和行为形成；任务卡列出的全部测试、验证命令和检查得到其注明的预期结果；没有混入排除范围。
+- **Dependencies:** M14-T04.
+- **Sources:** 1. `docs/superpowers/plans/tensor-modules/M14-integration-release.md` 的 `Task M14-T05` 任务卡；2. `docs/planning/task-index.md` 的 `M14-T05` 行。
+- **First action:** 读取 `docs/superpowers/plans/tensor-modules/M14-integration-release.md` 的 `Task M14-T05` 任务卡，并确认其 `Context boundary`、输入和目标文件均可定位。
+- **State evidence:** None.
+
+### `M14-T06`
+
+- **Goal:** 交付“`daily` 与 `balancesheet` 性能验证”。
+- **Scope:** 包含该交付物及其直接测试与验证；不包含其他预定义任务的交付物，也不扩展 `docs/superpowers/plans/tensor-modules/M14-integration-release.md` 中该任务卡明确的文件、主要语言、接口和排除边界。
+- **Acceptance:** “`daily` 与 `balancesheet` 性能验证”已按该任务卡指定的位置和行为形成；任务卡列出的全部测试、验证命令和检查得到其注明的预期结果；没有混入排除范围。
+- **Dependencies:** M14-T03, M14-T05.
+- **Sources:** 1. `docs/superpowers/plans/tensor-modules/M14-integration-release.md` 的 `Task M14-T06` 任务卡；2. `docs/planning/task-index.md` 的 `M14-T06` 行。
+- **First action:** 读取 `docs/superpowers/plans/tensor-modules/M14-integration-release.md` 的 `Task M14-T06` 任务卡，并确认其 `Context boundary`、输入和目标文件均可定位。
+- **State evidence:** None.
+
+### `M14-T07`
+
+- **Goal:** 交付“Token、SQL、依赖、网络和运行安全验证”。
+- **Scope:** 包含该交付物及其直接测试与验证；不包含其他预定义任务的交付物，也不扩展 `docs/superpowers/plans/tensor-modules/M14-integration-release.md` 中该任务卡明确的文件、主要语言、接口和排除边界。
+- **Acceptance:** “Token、SQL、依赖、网络和运行安全验证”已按该任务卡指定的位置和行为形成；任务卡列出的全部测试、验证命令和检查得到其注明的预期结果；没有混入排除范围。
+- **Dependencies:** M14-T02, M14-T03, M14-T04, M14-T05.
+- **Sources:** 1. `docs/superpowers/plans/tensor-modules/M14-integration-release.md` 的 `Task M14-T07` 任务卡；2. `docs/planning/task-index.md` 的 `M14-T07` 行。
+- **First action:** 读取 `docs/superpowers/plans/tensor-modules/M14-integration-release.md` 的 `Task M14-T07` 任务卡，并确认其 `Context boundary`、输入和目标文件均可定位。
+- **State evidence:** None.
+
+### `M14-T08`
+
+- **Goal:** 交付“全新环境 AC-001～018 与发布证据包”。
+- **Scope:** 包含该交付物及其直接测试与验证；不包含其他预定义任务的交付物，也不扩展 `docs/superpowers/plans/tensor-modules/M14-integration-release.md` 中该任务卡明确的文件、主要语言、接口和排除边界。
+- **Acceptance:** “全新环境 AC-001～018 与发布证据包”已按该任务卡指定的位置和行为形成；任务卡列出的全部测试、验证命令和检查得到其注明的预期结果；没有混入排除范围。
+- **Dependencies:** M14-T01, M14-T02, M14-T03, M14-T04, M14-T05, M14-T06, M14-T07.
+- **Sources:** 1. `docs/superpowers/plans/tensor-modules/M14-integration-release.md` 的 `Task M14-T08` 任务卡；2. `docs/planning/task-index.md` 的 `M14-T08` 行。
+- **First action:** 读取 `docs/superpowers/plans/tensor-modules/M14-integration-release.md` 的 `Task M14-T08` 任务卡，并确认其 `Context boundary`、输入和目标文件均可定位。
+- **State evidence:** None.
+
+## Risks
+
+- 用户回复、权限审批、网络故障、真实 Tushare 服务不可用和 CI 排队可能形成外部等待；这些等待不计入任务 AI 工时，并应单独记录为进度风险。
+- 真实 Tushare 验收依赖可用 Token 和上游服务；Token 不得进入前端、业务 API、数据库、普通日志、异常正文或诊断端点。
+- Git 不可用时不得初始化新仓库；各任务改为在验收证据中记录修改文件和校验输出。

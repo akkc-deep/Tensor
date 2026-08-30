@@ -1,0 +1,422 @@
+openapi: 3.1.0
+info:
+  title: Tensor v1 REST API
+  version: v1
+  description: Shared REST contract for Tensor v1 metadata, downloads, and read-only dataset queries.
+paths:
+  /api/v1/data-sources:
+    get:
+      operationId: listDataSources
+      responses:
+        '200':
+          description: Registered data sources.
+          headers:
+            X-Request-Id: {required: true, schema: {type: string, minLength: 1}}
+          content:
+            application/json:
+              schema: {type: array, items: {$ref: '#/components/schemas/DataSourceSummary'}}
+        '500': &internalError
+          description: Internal processing failure.
+          headers:
+            X-Request-Id: {required: true, schema: {type: string, minLength: 1}}
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/ApiError'}
+  /api/v1/data-sources/{pluginId}/apis:
+    parameters:
+      - {name: pluginId, in: path, required: true, schema: {type: string, pattern: '^[a-z][a-z0-9_]{1,63}$'}}
+    get:
+      operationId: listPluginApis
+      responses:
+        '200':
+          description: API descriptors for the data source.
+          headers:
+            X-Request-Id: {required: true, schema: {type: string, minLength: 1}}
+          content:
+            application/json:
+              schema: {type: array, items: {$ref: '#/components/schemas/ApiDescriptor'}}
+        '409': &pluginDisabled
+          description: A registered plugin is disabled.
+          headers:
+            X-Request-Id: {required: true, schema: {type: string, minLength: 1}}
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/ApiError'}
+        '500': *internalError
+  /api/v1/downloads:
+    post:
+      operationId: downloadDataset
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/DownloadRequest'}
+            examples:
+              dailyDownload:
+                value: {pluginId: tushare_pro, apiName: daily, params: {trade_date: '20260807'}}
+      responses:
+        '200':
+          description: A committed successful or valid empty download.
+          headers:
+            X-Request-Id:
+              required: true
+              description: Matches the requestId in this response body.
+              schema: {type: string, minLength: 1}
+              example: c52bce3d-5aa5-4c8e-ae64-e73cb76d8f33
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/DownloadResponse'}
+              examples:
+                success:
+                  value: {requestId: c52bce3d-5aa5-4c8e-ae64-e73cb76d8f33, outcome: SUCCESS, pluginId: tushare_pro, apiName: daily, sourceRowCount: 5535, insertedRows: 5535, updatedRows: 0, message: 下载成功}
+                empty:
+                  value: {requestId: c52bce3d-5aa5-4c8e-ae64-e73cb76d8f33, outcome: EMPTY, pluginId: tushare_pro, apiName: monthly, sourceRowCount: 0, insertedRows: 0, updatedRows: 0, message: 下载成功，0 条数据}
+        '400': &parameterInvalid
+          description: Input validation failure.
+          headers:
+            X-Request-Id:
+              required: true
+              description: Matches the requestId in this error body.
+              schema: {type: string, minLength: 1}
+              example: c52bce3d-5aa5-4c8e-ae64-e73cb76d8f33
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/ApiError'}
+              examples:
+                invalidDateRange:
+                  value: {requestId: c52bce3d-5aa5-4c8e-ae64-e73cb76d8f33, code: PARAM_INVALID, message: 开始日期不能晚于结束日期, retryable: false, fieldErrors: [{field: start_date, message: 必须早于或等于结束日期}]}
+        '409': *pluginDisabled
+        '422': &adapterFieldMissing
+          description: Adapted data has a required source field missing or violates a declared type constraint.
+          headers:
+            X-Request-Id: {required: true, schema: {type: string, minLength: 1}}
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/ApiError'}
+        '500': &persistenceFailed
+          description: The persistence transaction failed and was rolled back; no committed download was formed.
+          headers:
+            X-Request-Id: {required: true, schema: {type: string, minLength: 1}}
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/ApiError'}
+        '502': &sourceUnavailable
+          description: Source processing failure.
+          headers:
+            X-Request-Id: {required: true, schema: {type: string, minLength: 1}}
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/ApiError'}
+        '504': &sourceTimeout
+          description: The source did not respond in time.
+          headers:
+            X-Request-Id: {required: true, schema: {type: string, minLength: 1}}
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/ApiError'}
+  /api/v1/data-sources/{pluginId}/datasets:
+    parameters:
+      - {name: pluginId, in: path, required: true, schema: {type: string, pattern: '^[a-z][a-z0-9_]{1,63}$'}}
+    get:
+      operationId: listPluginDatasets
+      responses:
+        '200':
+          description: Dataset summaries.
+          headers:
+            X-Request-Id: {required: true, schema: {type: string, minLength: 1}}
+          content:
+            application/json:
+              schema: {type: array, items: {$ref: '#/components/schemas/DatasetSummary'}}
+        '409': &datasetMisconfigured
+          description: Dataset metadata is incomplete or inconsistent.
+          headers:
+            X-Request-Id: {required: true, schema: {type: string, minLength: 1}}
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/ApiError'}
+        '500': *internalError
+  /api/v1/data-sources/{pluginId}/datasets/{apiName}:
+    parameters:
+      - {name: pluginId, in: path, required: true, schema: {type: string, pattern: '^[a-z][a-z0-9_]{1,63}$'}}
+      - {name: apiName, in: path, required: true, schema: {type: string, pattern: '^[a-z][a-z0-9_]{1,63}$'}}
+    get:
+      operationId: getDatasetDefinition
+      responses:
+        '200':
+          description: Full dataset display metadata.
+          headers:
+            X-Request-Id: {required: true, schema: {type: string, minLength: 1}}
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/DatasetDefinitionResponse'}
+        '409': *datasetMisconfigured
+        '500': *internalError
+  /api/v1/data-sources/{pluginId}/datasets/{apiName}/records:
+    parameters:
+      - {name: pluginId, in: path, required: true, schema: {type: string, pattern: '^[a-z][a-z0-9_]{1,63}$'}}
+      - {name: apiName, in: path, required: true, schema: {type: string, pattern: '^[a-z][a-z0-9_]{1,63}$'}}
+    get:
+      operationId: listDatasetRecords
+      description: Each optional filter is accepted only when the selected dataset metadata declares the corresponding filter; an undeclared filter is rejected as PARAM_INVALID. A requested page beyond the valid range after data changes is normalized to the new last page.
+      parameters:
+        - {name: tsCode, in: query, required: false, description: Accepted only when dataset metadata declares the ts_code filter., schema: {type: string}}
+        - {name: tradeDateFrom, in: query, required: false, description: Accepted only when dataset metadata declares the trade_date filter., schema: {type: string, format: date}}
+        - {name: tradeDateTo, in: query, required: false, description: Accepted only when dataset metadata declares the trade_date filter., schema: {type: string, format: date}}
+        - {name: annDateFrom, in: query, required: false, description: Accepted only when dataset metadata declares the ann_date filter., schema: {type: string, format: date}}
+        - {name: annDateTo, in: query, required: false, description: Accepted only when dataset metadata declares the ann_date filter., schema: {type: string, format: date}}
+        - {name: page, in: query, required: false, description: One-based requested page; an out-of-range page is normalized to the new last page., schema: {type: integer, minimum: 1, default: 1}}
+        - {name: pageSize, in: query, required: false, schema: {type: integer, enum: [20, 50, 100], default: 50}}
+      responses:
+        '200':
+          description: A normalized page; an empty result has zero totals and an empty items array. An out-of-range request is returned as the new last page.
+          headers:
+            X-Request-Id: {required: true, schema: {type: string, minLength: 1}}
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/PageResponse'}
+              examples:
+                records:
+                  value:
+                    requestId: c52bce3d-5aa5-4c8e-ae64-e73cb76d8f33
+                    pluginId: tushare_pro
+                    apiName: daily
+                    page: 1
+                    pageSize: 50
+                    totalElements: 1
+                    totalPages: 1
+                    columns: [ts_code, trade_date, open, volume, source_plugin, source_api, ingested_at]
+                    items:
+                      - {ts_code: 000001.SZ, trade_date: '2026-08-07', open: '11.230000000000000000', volume: '9223372036854775807', source_plugin: tushare_pro, source_api: daily, ingested_at: '2026-08-25T10:30:15.123+08:00'}
+        '400':
+          description: Query parameter validation failure.
+          headers:
+            X-Request-Id:
+              required: true
+              description: Matches the requestId in this error body.
+              schema: {type: string, minLength: 1}
+              example: c52bce3d-5aa5-4c8e-ae64-e73cb76d8f33
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/ApiError'}
+              examples:
+                invalidDateRange:
+                  value: {requestId: c52bce3d-5aa5-4c8e-ae64-e73cb76d8f33, code: PARAM_INVALID, message: tradeDateFrom 不能晚于 tradeDateTo, retryable: false, fieldErrors: [{field: tradeDateFrom, message: 必须早于或等于 tradeDateTo}]}
+        '409': *datasetMisconfigured
+        '500': &queryFailed
+          description: The read query could not be completed.
+          headers:
+            X-Request-Id: {required: true, schema: {type: string, minLength: 1}}
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/ApiError'}
+components:
+  schemas:
+    DataSourceSummary:
+      type: object
+      additionalProperties: false
+      required: [pluginId, displayName, description, enabled, credentialConfigured, downloadAvailable, unavailableReason]
+      properties:
+        pluginId: {type: string, pattern: '^[a-z][a-z0-9_]{1,63}$'}
+        displayName: {type: string, minLength: 1}
+        description: {type: string, minLength: 1}
+        enabled: {type: boolean}
+        credentialConfigured: {type: boolean}
+        downloadAvailable: {type: boolean}
+        unavailableReason: {type: [string, 'null']}
+      allOf:
+        - if: {properties: {downloadAvailable: {const: true}}, required: [downloadAvailable]}
+          then: {properties: {unavailableReason: {type: 'null'}}}
+        - if: {properties: {downloadAvailable: {const: false}}, required: [downloadAvailable]}
+          then: {properties: {unavailableReason: {type: string, minLength: 1}}}
+    ApiDescriptor:
+      type: object
+      additionalProperties: false
+      required: [apiName, displayName, category, queryMode, parameters]
+      properties:
+        apiName: {type: string, pattern: '^[a-z][a-z0-9_]{1,63}$'}
+        displayName: {type: string, minLength: 1}
+        category: {type: string, minLength: 1, maxLength: 64}
+        queryMode: {enum: [trade_date, ann_date, snapshot, date_range]}
+        parameters:
+          type: array
+          items:
+            type: object
+            additionalProperties: false
+            required: [name, label, type, required]
+            properties:
+              name: {type: string, pattern: '^[a-z][a-z0-9_]{1,63}$'}
+              label: {type: string, minLength: 1}
+              type: {enum: [DATE, DATE_RANGE_MEMBER, MONTH, TS_CODE, ENUM, TEXT]}
+              required: {type: boolean}
+              description: {type: string, minLength: 1}
+              defaultValue: {type: string}
+              allowedValues: {type: array, minItems: 1, uniqueItems: true, items: {type: string}}
+              pattern: {type: string}
+              relatedParameter: {type: string, pattern: '^[a-z][a-z0-9_]{1,63}$'}
+            allOf:
+              - if: {properties: {type: {const: ENUM}}, required: [type]}
+                then: {required: [allowedValues]}
+              - if: {properties: {type: {const: DATE_RANGE_MEMBER}}, required: [type]}
+                then: {required: [relatedParameter]}
+    DatasetSummary:
+      type: object
+      additionalProperties: false
+      required: [pluginId, apiName, displayName, category, queryMode, filters, fixedColumn]
+      properties:
+        pluginId: {type: string, pattern: '^[a-z][a-z0-9_]{1,63}$'}
+        apiName: {type: string, pattern: '^[a-z][a-z0-9_]{1,63}$'}
+        displayName: {type: string, minLength: 1}
+        category: {type: string, minLength: 1, maxLength: 64}
+        queryMode: {enum: [trade_date, ann_date, snapshot, date_range]}
+        filters:
+          type: array
+          description: Ordered exactly as the M00-T02 metadata filters array; duplicate filter objects are not allowed.
+          uniqueItems: true
+          items:
+            type: object
+            additionalProperties: false
+            required: [field, operator, controlType]
+            properties:
+              field: {enum: [ts_code, trade_date, ann_date]}
+              operator: {enum: [EQ, BETWEEN]}
+              controlType: {enum: [TEXT, DATE_RANGE]}
+            allOf:
+              - if: {properties: {field: {const: ts_code}}, required: [field]}
+                then: {properties: {operator: {const: EQ}, controlType: {const: TEXT}}}
+              - if: {properties: {field: {enum: [trade_date, ann_date]}}, required: [field]}
+                then: {properties: {operator: {const: BETWEEN}, controlType: {const: DATE_RANGE}}}
+        fixedColumn:
+          type: string
+          pattern: '^[a-z][a-z0-9_]{1,63}$'
+          description: Uses the metadata fixedColumn when configured; otherwise uses the first business field in metadata displayOrder.
+    DatasetDefinitionResponse:
+      type: object
+      additionalProperties: false
+      required: [pluginId, apiName, displayName, category, queryMode, filters, fixedColumn, columns]
+      properties:
+        pluginId: {type: string, pattern: '^[a-z][a-z0-9_]{1,63}$'}
+        apiName: {type: string, pattern: '^[a-z][a-z0-9_]{1,63}$'}
+        displayName: {type: string, minLength: 1}
+        category: {type: string, minLength: 1, maxLength: 64}
+        queryMode: {enum: [trade_date, ann_date, snapshot, date_range]}
+        filters:
+          type: array
+          description: Ordered exactly as the M00-T02 metadata filters array; duplicate filter objects are not allowed.
+          uniqueItems: true
+          items:
+            type: object
+            additionalProperties: false
+            required: [field, operator, controlType]
+            properties:
+              field: {enum: [ts_code, trade_date, ann_date]}
+              operator: {enum: [EQ, BETWEEN]}
+              controlType: {enum: [TEXT, DATE_RANGE]}
+            allOf:
+              - if: {properties: {field: {const: ts_code}}, required: [field]}
+                then: {properties: {operator: {const: EQ}, controlType: {const: TEXT}}}
+              - if: {properties: {field: {enum: [trade_date, ann_date]}}, required: [field]}
+                then: {properties: {operator: {const: BETWEEN}, controlType: {const: DATE_RANGE}}}
+        fixedColumn:
+          type: string
+          pattern: '^[a-z][a-z0-9_]{1,63}$'
+          description: Uses the metadata fixedColumn when configured; otherwise uses the first business field in metadata displayOrder.
+        columns:
+          type: array
+          minItems: 1
+          description: All business columns, ordered by ascending displayOrder.
+          items:
+            type: object
+            additionalProperties: false
+            required: [name, label, logicalType, nullable, displayOrder]
+            properties:
+              name: {type: string, pattern: '^[a-z][a-z0-9_]{1,63}$'}
+              label: {type: string, minLength: 1}
+              logicalType: {enum: [STRING, TEXT, DATE, MONTH, LONG, DECIMAL, ENUM]}
+              nullable: {type: boolean}
+              displayOrder: {type: integer, minimum: 0}
+              length: {type: integer, minimum: 1}
+              precision: {type: integer, minimum: 1, maximum: 65}
+              scale: {type: integer, minimum: 0, maximum: 30}
+              allowedValues: {type: array, minItems: 1, uniqueItems: true, items: {type: string}}
+              longText: {type: boolean}
+            allOf:
+              - if: {properties: {logicalType: {enum: [STRING, ENUM]}}, required: [logicalType]}
+                then: {required: [length]}
+              - if: {properties: {logicalType: {const: DECIMAL}}, required: [logicalType]}
+                then: {required: [precision, scale]}
+    DownloadRequest:
+      type: object
+      additionalProperties: false
+      required: [pluginId, apiName, params]
+      properties:
+        pluginId: {type: string, pattern: '^[a-z][a-z0-9_]{1,63}$'}
+        apiName: {type: string, pattern: '^[a-z][a-z0-9_]{1,63}$'}
+        params:
+          type: object
+          propertyNames: {pattern: '^[a-z][a-z0-9_]{1,63}$'}
+          additionalProperties: {type: string}
+    DownloadResponse:
+      type: object
+      additionalProperties: false
+      required: [requestId, outcome, pluginId, apiName, sourceRowCount, insertedRows, updatedRows, message]
+      properties:
+        requestId: {type: string, minLength: 1}
+        outcome: {enum: [SUCCESS, EMPTY]}
+        pluginId: {type: string, pattern: '^[a-z][a-z0-9_]{1,63}$'}
+        apiName: {type: string, pattern: '^[a-z][a-z0-9_]{1,63}$'}
+        sourceRowCount: {type: integer, format: int64, minimum: 0}
+        insertedRows: {type: integer, format: int64, minimum: 0}
+        updatedRows: {type: integer, format: int64, minimum: 0}
+        message: {type: string, minLength: 1}
+      allOf:
+        - if: {properties: {outcome: {const: EMPTY}}, required: [outcome]}
+          then:
+            properties:
+              sourceRowCount: {maximum: 0}
+              insertedRows: {maximum: 0}
+              updatedRows: {maximum: 0}
+        - if: {properties: {outcome: {const: SUCCESS}}, required: [outcome]}
+          then: {properties: {sourceRowCount: {minimum: 1}}}
+    PageResponse:
+      type: object
+      additionalProperties: false
+      required: [requestId, pluginId, apiName, page, pageSize, totalElements, totalPages, columns, items]
+      properties:
+        requestId: {type: string, minLength: 1}
+        pluginId: {type: string, pattern: '^[a-z][a-z0-9_]{1,63}$'}
+        apiName: {type: string, pattern: '^[a-z][a-z0-9_]{1,63}$'}
+        page: {type: integer, minimum: 1}
+        pageSize: {type: integer, enum: [20, 50, 100], default: 50}
+        totalElements: {type: integer, format: int64, minimum: 0}
+        totalPages: {type: integer, format: int64, minimum: 0}
+        columns:
+          type: array
+          description: Business field names in metadata displayOrder, followed by source_plugin, source_api, and ingested_at.
+          uniqueItems: true
+          items: {type: string, pattern: '^[a-z][a-z0-9_]{1,63}$'}
+        items:
+          type: array
+          items:
+            type: object
+            propertyNames: {pattern: '^[a-z][a-z0-9_]{1,63}$'}
+            additionalProperties: {type: [string, 'null']}
+    ApiError:
+      type: object
+      additionalProperties: false
+      required: [requestId, code, message, retryable, fieldErrors]
+      properties:
+        requestId: {type: string, minLength: 1, description: Must equal the X-Request-Id response header.}
+        code:
+          enum: [PARAM_REQUIRED, PARAM_INVALID, PLUGIN_DISABLED, DATASET_MISCONFIGURED, SOURCE_AUTH_FAILED, SOURCE_PERMISSION_DENIED, SOURCE_RATE_LIMITED, SOURCE_UNAVAILABLE, SOURCE_NETWORK_ERROR, SOURCE_TIMEOUT, SOURCE_PAYLOAD_INVALID, ADAPTER_FIELD_MISSING, ADAPTER_TYPE_INVALID, PERSISTENCE_FAILED, QUERY_FAILED, INTERNAL_ERROR]
+        message: {type: string, minLength: 1}
+        retryable: {type: boolean}
+        fieldErrors:
+          type: array
+          items: {$ref: '#/components/schemas/FieldError'}
+    FieldError:
+      type: object
+      additionalProperties: false
+      required: [field, message]
+      properties:
+        field: {type: string, minLength: 1}
+        message: {type: string, minLength: 1}

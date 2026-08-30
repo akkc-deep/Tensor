@@ -1,0 +1,31 @@
+{
+  "api_name": "moneyflow_hsgt",
+  "fetched_at": "2026-08-09T14:16:55.041867+00:00",
+  "query_mode": "trade_date",
+  "params": [
+    {
+      "trade_date": "20260807"
+    }
+  ],
+  "fields": [
+    "trade_date",
+    "ggt_ss",
+    "ggt_sz",
+    "hgt",
+    "sgt",
+    "north_money",
+    "south_money"
+  ],
+  "row_count": 1,
+  "data": [
+    {
+      "trade_date": "20260807",
+      "ggt_ss": "31734.2",
+      "ggt_sz": "23030.9",
+      "hgt": "157452.06",
+      "sgt": "187698.04",
+      "north_money": "345150.1",
+      "south_money": "54765.11"
+    }
+  ]
+}

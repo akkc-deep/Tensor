@@ -1,0 +1,30 @@
+{
+  "api_name": "namechange",
+  "fetched_at": "2026-08-09T14:17:03.651559+00:00",
+  "query_mode": "range",
+  "params": [
+    {
+      "start_date": "20260807",
+      "end_date": "20260807"
+    }
+  ],
+  "fields": [
+    "ts_code",
+    "name",
+    "start_date",
+    "end_date",
+    "ann_date",
+    "change_reason"
+  ],
+  "row_count": 1,
+  "data": [
+    {
+      "ts_code": "301707.SZ",
+      "name": "展芯股份",
+      "start_date": "20260807",
+      "end_date": null,
+      "ann_date": "20260807",
+      "change_reason": "其他"
+    }
+  ]
+}

@@ -1,0 +1,122 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://tensor.local/contracts/dataset-definition.schema.json",
+  "title": "Tensor Dataset Definition",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "pluginId",
+    "apiName",
+    "tableName",
+    "category",
+    "displayName",
+    "queryMode",
+    "parameters",
+    "columns",
+    "businessKey",
+    "filters"
+  ],
+  "properties": {
+    "pluginId": { "type": "string", "pattern": "^[a-z][a-z0-9_]{1,63}$" },
+    "apiName": { "type": "string", "pattern": "^[a-z][a-z0-9_]{1,63}$" },
+    "tableName": { "type": "string", "pattern": "^tushare_pro__[a-z][a-z0-9_]{1,63}$" },
+    "category": { "type": "string", "minLength": 1, "maxLength": 64 },
+    "displayName": { "type": "string", "minLength": 1, "maxLength": 128 },
+    "queryMode": { "enum": ["trade_date", "ann_date", "snapshot", "date_range"] },
+    "parameters": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/parameter" }
+    },
+    "columns": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/column" }
+    },
+    "businessKey": { "$ref": "#/$defs/businessKey" },
+    "filters": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": { "type": "string", "pattern": "^[a-z][a-z0-9_]{1,63}$" }
+    },
+    "fixedColumn": { "type": "string", "pattern": "^[a-z][a-z0-9_]{1,63}$" }
+  },
+  "$defs": {
+    "parameter": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "label", "type", "required"],
+      "properties": {
+        "name": { "type": "string", "pattern": "^[a-z][a-z0-9_]{1,63}$" },
+        "label": { "type": "string", "minLength": 1 },
+        "type": { "enum": ["DATE", "DATE_RANGE_MEMBER", "MONTH", "TS_CODE", "ENUM", "TEXT"] },
+        "required": { "type": "boolean" },
+        "description": { "type": "string", "minLength": 1 },
+        "defaultValue": { "type": "string" },
+        "allowedValues": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "type": "string" }
+        },
+        "pattern": { "type": "string" },
+        "relatedParameter": { "type": "string", "pattern": "^[a-z][a-z0-9_]{1,63}$" }
+      },
+      "allOf": [
+        {
+          "if": { "required": ["type"], "properties": { "type": { "const": "ENUM" } } },
+          "then": { "required": ["allowedValues"] }
+        },
+        {
+          "if": { "required": ["type"], "properties": { "type": { "const": "DATE_RANGE_MEMBER" } } },
+          "then": { "required": ["relatedParameter"] }
+        }
+      ]
+    },
+    "column": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "label", "logicalType", "nullable", "displayOrder"],
+      "properties": {
+        "name": { "type": "string", "pattern": "^[a-z][a-z0-9_]{1,63}$" },
+        "label": { "type": "string", "minLength": 1 },
+        "logicalType": { "enum": ["STRING", "TEXT", "DATE", "MONTH", "LONG", "DECIMAL", "ENUM"] },
+        "nullable": { "type": "boolean" },
+        "displayOrder": { "type": "integer", "minimum": 0 },
+        "length": { "type": "integer", "minimum": 1 },
+        "precision": { "type": "integer", "minimum": 1, "maximum": 65 },
+        "scale": { "type": "integer", "minimum": 0, "maximum": 30 },
+        "allowedValues": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "type": "string" }
+        },
+        "longText": { "type": "boolean" }
+      },
+      "allOf": [
+        {
+          "if": { "required": ["logicalType"], "properties": { "logicalType": { "enum": ["STRING", "ENUM"] } } },
+          "then": { "required": ["length"] }
+        },
+        {
+          "if": { "required": ["logicalType"], "properties": { "logicalType": { "const": "DECIMAL" } } },
+          "then": { "required": ["precision", "scale"] }
+        }
+      ]
+    },
+    "businessKey": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["mode", "fields"],
+      "properties": {
+        "mode": { "enum": ["COMPOSITE", "FINGERPRINT"] },
+        "fields": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": { "type": "string", "pattern": "^[a-z][a-z0-9_]{1,63}$" }
+        }
+      }
+    }
+  }
+}

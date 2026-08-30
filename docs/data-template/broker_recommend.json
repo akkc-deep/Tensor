@@ -1,0 +1,1435 @@
+{
+  "api_name": "broker_recommend",
+  "fetched_at": "2026-08-09T14:16:46.068098+00:00",
+  "query_mode": "snapshot",
+  "params": [
+    {
+      "month": "202608"
+    }
+  ],
+  "fields": [
+    "month",
+    "broker",
+    "ts_code",
+    "name"
+  ],
+  "row_count": 236,
+  "data": [
+    {
+      "month": "202608",
+      "broker": "东兴证券",
+      "ts_code": "300627.SZ",
+      "name": "华测导航"
+    },
+    {
+      "month": "202608",
+      "broker": "东兴证券",
+      "ts_code": "600519.SH",
+      "name": "贵州茅台"
+    },
+    {
+      "month": "202608",
+      "broker": "东兴证券",
+      "ts_code": "601665.SH",
+      "name": "齐鲁银行"
+    },
+    {
+      "month": "202608",
+      "broker": "东兴证券",
+      "ts_code": "603345.SH",
+      "name": "安井食品"
+    },
+    {
+      "month": "202608",
+      "broker": "东兴证券",
+      "ts_code": "688103.SH",
+      "name": "国力电子"
+    },
+    {
+      "month": "202608",
+      "broker": "东海证券",
+      "ts_code": "002142.SZ",
+      "name": "宁波银行"
+    },
+    {
+      "month": "202608",
+      "broker": "东海证券",
+      "ts_code": "002353.SZ",
+      "name": "杰瑞股份"
+    },
+    {
+      "month": "202608",
+      "broker": "东海证券",
+      "ts_code": "002371.SZ",
+      "name": "北方华创"
+    },
+    {
+      "month": "202608",
+      "broker": "东海证券",
+      "ts_code": "300558.SZ",
+      "name": "贝达药业"
+    },
+    {
+      "month": "202608",
+      "broker": "东海证券",
+      "ts_code": "600160.SH",
+      "name": "巨化股份"
+    },
+    {
+      "month": "202608",
+      "broker": "东海证券",
+      "ts_code": "601233.SH",
+      "name": "桐昆股份"
+    },
+    {
+      "month": "202608",
+      "broker": "东海证券",
+      "ts_code": "603345.SH",
+      "name": "安井食品"
+    },
+    {
+      "month": "202608",
+      "broker": "东海证券",
+      "ts_code": "603893.SH",
+      "name": "瑞芯微"
+    },
+    {
+      "month": "202608",
+      "broker": "东海证券",
+      "ts_code": "688220.SH",
+      "name": "翱捷科技"
+    },
+    {
+      "month": "202608",
+      "broker": "中原证券",
+      "ts_code": "002371.SZ",
+      "name": "北方华创"
+    },
+    {
+      "month": "202608",
+      "broker": "中原证券",
+      "ts_code": "002594.SZ",
+      "name": "比亚迪"
+    },
+    {
+      "month": "202608",
+      "broker": "中原证券",
+      "ts_code": "002648.SZ",
+      "name": "卫星化学"
+    },
+    {
+      "month": "202608",
+      "broker": "中原证券",
+      "ts_code": "300750.SZ",
+      "name": "宁德时代"
+    },
+    {
+      "month": "202608",
+      "broker": "中原证券",
+      "ts_code": "600285.SH",
+      "name": "羚锐制药"
+    },
+    {
+      "month": "202608",
+      "broker": "中原证券",
+      "ts_code": "600312.SH",
+      "name": "平高电气"
+    },
+    {
+      "month": "202608",
+      "broker": "中原证券",
+      "ts_code": "601728.SH",
+      "name": "中国电信"
+    },
+    {
+      "month": "202608",
+      "broker": "中原证券",
+      "ts_code": "603444.SH",
+      "name": "吉比特"
+    },
+    {
+      "month": "202608",
+      "broker": "中原证券",
+      "ts_code": "688256.SH",
+      "name": "寒武纪"
+    },
+    {
+      "month": "202608",
+      "broker": "中国银河",
+      "ts_code": "000425.SZ",
+      "name": "徐工机械"
+    },
+    {
+      "month": "202608",
+      "broker": "中国银河",
+      "ts_code": "002886.SZ",
+      "name": "沃特股份"
+    },
+    {
+      "month": "202608",
+      "broker": "中国银河",
+      "ts_code": "300750.SZ",
+      "name": "宁德时代"
+    },
+    {
+      "month": "202608",
+      "broker": "中国银河",
+      "ts_code": "600030.SH",
+      "name": "中信证券"
+    },
+    {
+      "month": "202608",
+      "broker": "中国银河",
+      "ts_code": "600795.SH",
+      "name": "国电电力"
+    },
+    {
+      "month": "202608",
+      "broker": "中国银河",
+      "ts_code": "600926.SH",
+      "name": "杭州银行"
+    },
+    {
+      "month": "202608",
+      "broker": "中国银河",
+      "ts_code": "600941.SH",
+      "name": "中国移动"
+    },
+    {
+      "month": "202608",
+      "broker": "中国银河",
+      "ts_code": "601899.SH",
+      "name": "紫金矿业"
+    },
+    {
+      "month": "202608",
+      "broker": "中国银河",
+      "ts_code": "603259.SH",
+      "name": "药明康德"
+    },
+    {
+      "month": "202608",
+      "broker": "中国银河",
+      "ts_code": "688981.SH",
+      "name": "中芯国际"
+    },
+    {
+      "month": "202608",
+      "broker": "中泰证券",
+      "ts_code": "000333.SZ",
+      "name": "美的集团"
+    },
+    {
+      "month": "202608",
+      "broker": "中泰证券",
+      "ts_code": "000893.SZ",
+      "name": "亚钾国际"
+    },
+    {
+      "month": "202608",
+      "broker": "中泰证券",
+      "ts_code": "000951.SZ",
+      "name": "中国重汽"
+    },
+    {
+      "month": "202608",
+      "broker": "中泰证券",
+      "ts_code": "002541.SZ",
+      "name": "鸿路钢构"
+    },
+    {
+      "month": "202608",
+      "broker": "中泰证券",
+      "ts_code": "300217.SZ",
+      "name": "东方电热"
+    },
+    {
+      "month": "202608",
+      "broker": "中泰证券",
+      "ts_code": "300662.SZ",
+      "name": "科锐国际"
+    },
+    {
+      "month": "202608",
+      "broker": "中泰证券",
+      "ts_code": "600166.SH",
+      "name": "福田汽车"
+    },
+    {
+      "month": "202608",
+      "broker": "中泰证券",
+      "ts_code": "600801.SH",
+      "name": "华新建材"
+    },
+    {
+      "month": "202608",
+      "broker": "中泰证券",
+      "ts_code": "603259.SH",
+      "name": "药明康德"
+    },
+    {
+      "month": "202608",
+      "broker": "中泰证券",
+      "ts_code": "605499.SH",
+      "name": "东鹏饮料"
+    },
+    {
+      "month": "202608",
+      "broker": "中泰证券",
+      "ts_code": "688059.SH",
+      "name": "华锐精密"
+    },
+    {
+      "month": "202608",
+      "broker": "交银国际",
+      "ts_code": "000333.SZ",
+      "name": "美的集团"
+    },
+    {
+      "month": "202608",
+      "broker": "光大证券",
+      "ts_code": "000651.SZ",
+      "name": "格力电器"
+    },
+    {
+      "month": "202608",
+      "broker": "光大证券",
+      "ts_code": "000729.SZ",
+      "name": "燕京啤酒"
+    },
+    {
+      "month": "202608",
+      "broker": "光大证券",
+      "ts_code": "002353.SZ",
+      "name": "杰瑞股份"
+    },
+    {
+      "month": "202608",
+      "broker": "光大证券",
+      "ts_code": "002371.SZ",
+      "name": "北方华创"
+    },
+    {
+      "month": "202608",
+      "broker": "光大证券",
+      "ts_code": "002895.SZ",
+      "name": "川恒股份"
+    },
+    {
+      "month": "202608",
+      "broker": "光大证券",
+      "ts_code": "300593.SZ",
+      "name": "新雷能"
+    },
+    {
+      "month": "202608",
+      "broker": "光大证券",
+      "ts_code": "300750.SZ",
+      "name": "宁德时代"
+    },
+    {
+      "month": "202608",
+      "broker": "光大证券",
+      "ts_code": "301413.SZ",
+      "name": "安培龙"
+    },
+    {
+      "month": "202608",
+      "broker": "光大证券",
+      "ts_code": "601899.SH",
+      "name": "紫金矿业"
+    },
+    {
+      "month": "202608",
+      "broker": "光大证券",
+      "ts_code": "688981.SH",
+      "name": "中芯国际"
+    },
+    {
+      "month": "202608",
+      "broker": "兴业证券",
+      "ts_code": "001979.SZ",
+      "name": "招商蛇口"
+    },
+    {
+      "month": "202608",
+      "broker": "兴业证券",
+      "ts_code": "002517.SZ",
+      "name": "恺英网络"
+    },
+    {
+      "month": "202608",
+      "broker": "兴业证券",
+      "ts_code": "002532.SZ",
+      "name": "天山铝业"
+    },
+    {
+      "month": "202608",
+      "broker": "兴业证券",
+      "ts_code": "300408.SZ",
+      "name": "三环集团"
+    },
+    {
+      "month": "202608",
+      "broker": "兴业证券",
+      "ts_code": "600060.SH",
+      "name": "海信视像"
+    },
+    {
+      "month": "202608",
+      "broker": "兴业证券",
+      "ts_code": "600562.SH",
+      "name": "国睿科技"
+    },
+    {
+      "month": "202608",
+      "broker": "兴业证券",
+      "ts_code": "600660.SH",
+      "name": "福耀玻璃"
+    },
+    {
+      "month": "202608",
+      "broker": "兴业证券",
+      "ts_code": "603288.SH",
+      "name": "海天味业"
+    },
+    {
+      "month": "202608",
+      "broker": "兴业证券",
+      "ts_code": "603298.SH",
+      "name": "杭叉集团"
+    },
+    {
+      "month": "202608",
+      "broker": "兴业证券",
+      "ts_code": "603568.SH",
+      "name": "伟明环保"
+    },
+    {
+      "month": "202608",
+      "broker": "兴业证券",
+      "ts_code": "688111.SH",
+      "name": "金山办公"
+    },
+    {
+      "month": "202608",
+      "broker": "华泰证券",
+      "ts_code": "002714.SZ",
+      "name": "牧原股份"
+    },
+    {
+      "month": "202608",
+      "broker": "华泰证券",
+      "ts_code": "002832.SZ",
+      "name": "比音勒芬"
+    },
+    {
+      "month": "202608",
+      "broker": "华泰证券",
+      "ts_code": "300750.SZ",
+      "name": "宁德时代"
+    },
+    {
+      "month": "202608",
+      "broker": "华泰证券",
+      "ts_code": "300866.SZ",
+      "name": "安克创新"
+    },
+    {
+      "month": "202608",
+      "broker": "华泰证券",
+      "ts_code": "600388.SH",
+      "name": "龙净环保"
+    },
+    {
+      "month": "202608",
+      "broker": "华泰证券",
+      "ts_code": "600487.SH",
+      "name": "亨通光电"
+    },
+    {
+      "month": "202608",
+      "broker": "华泰证券",
+      "ts_code": "601166.SH",
+      "name": "兴业银行"
+    },
+    {
+      "month": "202608",
+      "broker": "华泰证券",
+      "ts_code": "688361.SH",
+      "name": "中科飞测"
+    },
+    {
+      "month": "202608",
+      "broker": "华源证券",
+      "ts_code": "000400.SZ",
+      "name": "许继电气"
+    },
+    {
+      "month": "202608",
+      "broker": "华源证券",
+      "ts_code": "300049.SZ",
+      "name": "福瑞医科"
+    },
+    {
+      "month": "202608",
+      "broker": "华源证券",
+      "ts_code": "300408.SZ",
+      "name": "三环集团"
+    },
+    {
+      "month": "202608",
+      "broker": "华源证券",
+      "ts_code": "600919.SH",
+      "name": "江苏银行"
+    },
+    {
+      "month": "202608",
+      "broker": "华源证券",
+      "ts_code": "601619.SH",
+      "name": "嘉泽新能"
+    },
+    {
+      "month": "202608",
+      "broker": "华源证券",
+      "ts_code": "601872.SH",
+      "name": "招商轮船"
+    },
+    {
+      "month": "202608",
+      "broker": "华源证券",
+      "ts_code": "603269.SH",
+      "name": "海鸥股份"
+    },
+    {
+      "month": "202608",
+      "broker": "华源证券",
+      "ts_code": "689009.SH",
+      "name": "九号公司"
+    },
+    {
+      "month": "202608",
+      "broker": "华源证券",
+      "ts_code": "920476.BJ",
+      "name": "海能技术"
+    },
+    {
+      "month": "202608",
+      "broker": "华盘证券",
+      "ts_code": "600331.SH",
+      "name": "宏达股份"
+    },
+    {
+      "month": "202608",
+      "broker": "华鑫证券",
+      "ts_code": "000700.SZ",
+      "name": "模塑科技"
+    },
+    {
+      "month": "202608",
+      "broker": "华鑫证券",
+      "ts_code": "002025.SZ",
+      "name": "航天电器"
+    },
+    {
+      "month": "202608",
+      "broker": "华鑫证券",
+      "ts_code": "002624.SZ",
+      "name": "完美世界"
+    },
+    {
+      "month": "202608",
+      "broker": "华鑫证券",
+      "ts_code": "002891.SZ",
+      "name": "中宠股份"
+    },
+    {
+      "month": "202608",
+      "broker": "华鑫证券",
+      "ts_code": "300285.SZ",
+      "name": "国瓷材料"
+    },
+    {
+      "month": "202608",
+      "broker": "华鑫证券",
+      "ts_code": "300308.SZ",
+      "name": "中际旭创"
+    },
+    {
+      "month": "202608",
+      "broker": "华鑫证券",
+      "ts_code": "300432.SZ",
+      "name": "富临精工"
+    },
+    {
+      "month": "202608",
+      "broker": "华鑫证券",
+      "ts_code": "600426.SH",
+      "name": "华鲁恒升"
+    },
+    {
+      "month": "202608",
+      "broker": "华鑫证券",
+      "ts_code": "688825.SH",
+      "name": "长鑫科技"
+    },
+    {
+      "month": "202608",
+      "broker": "华龙证券",
+      "ts_code": "000977.SZ",
+      "name": "浪潮信息"
+    },
+    {
+      "month": "202608",
+      "broker": "华龙证券",
+      "ts_code": "002126.SZ",
+      "name": "银轮股份"
+    },
+    {
+      "month": "202608",
+      "broker": "华龙证券",
+      "ts_code": "002254.SZ",
+      "name": "泰和新材"
+    },
+    {
+      "month": "202608",
+      "broker": "华龙证券",
+      "ts_code": "300308.SZ",
+      "name": "中际旭创"
+    },
+    {
+      "month": "202608",
+      "broker": "华龙证券",
+      "ts_code": "600176.SH",
+      "name": "中国巨石"
+    },
+    {
+      "month": "202608",
+      "broker": "华龙证券",
+      "ts_code": "600882.SH",
+      "name": "妙可蓝多"
+    },
+    {
+      "month": "202608",
+      "broker": "华龙证券",
+      "ts_code": "601899.SH",
+      "name": "紫金矿业"
+    },
+    {
+      "month": "202608",
+      "broker": "华龙证券",
+      "ts_code": "688110.SH",
+      "name": "东芯股份"
+    },
+    {
+      "month": "202608",
+      "broker": "国信证券",
+      "ts_code": "000333.SZ",
+      "name": "美的集团"
+    },
+    {
+      "month": "202608",
+      "broker": "国信证券",
+      "ts_code": "002352.SZ",
+      "name": "顺丰控股"
+    },
+    {
+      "month": "202608",
+      "broker": "国信证券",
+      "ts_code": "002415.SZ",
+      "name": "海康威视"
+    },
+    {
+      "month": "202608",
+      "broker": "国信证券",
+      "ts_code": "002532.SZ",
+      "name": "天山铝业"
+    },
+    {
+      "month": "202608",
+      "broker": "国信证券",
+      "ts_code": "600900.SH",
+      "name": "长江电力"
+    },
+    {
+      "month": "202608",
+      "broker": "国信证券",
+      "ts_code": "600926.SH",
+      "name": "杭州银行"
+    },
+    {
+      "month": "202608",
+      "broker": "国信证券",
+      "ts_code": "603259.SH",
+      "name": "药明康德"
+    },
+    {
+      "month": "202608",
+      "broker": "国信证券",
+      "ts_code": "688188.SH",
+      "name": "柏楚电子"
+    },
+    {
+      "month": "202608",
+      "broker": "国泰海通",
+      "ts_code": "000977.SZ",
+      "name": "浪潮信息"
+    },
+    {
+      "month": "202608",
+      "broker": "国泰海通",
+      "ts_code": "002142.SZ",
+      "name": "宁波银行"
+    },
+    {
+      "month": "202608",
+      "broker": "国泰海通",
+      "ts_code": "002281.SZ",
+      "name": "光迅科技"
+    },
+    {
+      "month": "202608",
+      "broker": "国泰海通",
+      "ts_code": "002517.SZ",
+      "name": "恺英网络"
+    },
+    {
+      "month": "202608",
+      "broker": "国泰海通",
+      "ts_code": "300115.SZ",
+      "name": "长盈精密"
+    },
+    {
+      "month": "202608",
+      "broker": "国泰海通",
+      "ts_code": "300750.SZ",
+      "name": "宁德时代"
+    },
+    {
+      "month": "202608",
+      "broker": "国泰海通",
+      "ts_code": "300866.SZ",
+      "name": "安克创新"
+    },
+    {
+      "month": "202608",
+      "broker": "国泰海通",
+      "ts_code": "301275.SZ",
+      "name": "汉朔科技"
+    },
+    {
+      "month": "202608",
+      "broker": "国泰海通",
+      "ts_code": "600026.SH",
+      "name": "中远海能"
+    },
+    {
+      "month": "202608",
+      "broker": "国泰海通",
+      "ts_code": "600030.SH",
+      "name": "中信证券"
+    },
+    {
+      "month": "202608",
+      "broker": "国泰海通",
+      "ts_code": "600276.SH",
+      "name": "恒瑞医药"
+    },
+    {
+      "month": "202608",
+      "broker": "国泰海通",
+      "ts_code": "601225.SH",
+      "name": "陕西煤业"
+    },
+    {
+      "month": "202608",
+      "broker": "国泰海通",
+      "ts_code": "601899.SH",
+      "name": "紫金矿业"
+    },
+    {
+      "month": "202608",
+      "broker": "国泰海通",
+      "ts_code": "603288.SH",
+      "name": "海天味业"
+    },
+    {
+      "month": "202608",
+      "broker": "国泰海通",
+      "ts_code": "603605.SH",
+      "name": "珀莱雅"
+    },
+    {
+      "month": "202608",
+      "broker": "国泰海通",
+      "ts_code": "688012.SH",
+      "name": "中微公司"
+    },
+    {
+      "month": "202608",
+      "broker": "国泰海通",
+      "ts_code": "688231.SH",
+      "name": "隆达股份"
+    },
+    {
+      "month": "202608",
+      "broker": "国泰海通",
+      "ts_code": "688630.SH",
+      "name": "芯碁微装"
+    },
+    {
+      "month": "202608",
+      "broker": "国联民生",
+      "ts_code": "002594.SZ",
+      "name": "比亚迪"
+    },
+    {
+      "month": "202608",
+      "broker": "国联民生",
+      "ts_code": "300308.SZ",
+      "name": "中际旭创"
+    },
+    {
+      "month": "202608",
+      "broker": "国联民生",
+      "ts_code": "300750.SZ",
+      "name": "宁德时代"
+    },
+    {
+      "month": "202608",
+      "broker": "国联民生",
+      "ts_code": "601101.SH",
+      "name": "昊华能源"
+    },
+    {
+      "month": "202608",
+      "broker": "国联民生",
+      "ts_code": "601211.SH",
+      "name": "国泰海通"
+    },
+    {
+      "month": "202608",
+      "broker": "国联民生",
+      "ts_code": "601233.SH",
+      "name": "桐昆股份"
+    },
+    {
+      "month": "202608",
+      "broker": "国联民生",
+      "ts_code": "688981.SH",
+      "name": "中芯国际"
+    },
+    {
+      "month": "202608",
+      "broker": "国金证券",
+      "ts_code": "000776.SZ",
+      "name": "广发证券"
+    },
+    {
+      "month": "202608",
+      "broker": "国金证券",
+      "ts_code": "300866.SZ",
+      "name": "安克创新"
+    },
+    {
+      "month": "202608",
+      "broker": "国金证券",
+      "ts_code": "600795.SH",
+      "name": "国电电力"
+    },
+    {
+      "month": "202608",
+      "broker": "国金证券",
+      "ts_code": "601138.SH",
+      "name": "工业富联"
+    },
+    {
+      "month": "202608",
+      "broker": "国金证券",
+      "ts_code": "601958.SH",
+      "name": "金钼股份"
+    },
+    {
+      "month": "202608",
+      "broker": "国金证券",
+      "ts_code": "603308.SH",
+      "name": "应流股份"
+    },
+    {
+      "month": "202608",
+      "broker": "国金证券",
+      "ts_code": "688127.SH",
+      "name": "蓝特光学"
+    },
+    {
+      "month": "202608",
+      "broker": "山西证券",
+      "ts_code": "300308.SZ",
+      "name": "中际旭创"
+    },
+    {
+      "month": "202608",
+      "broker": "山西证券",
+      "ts_code": "300418.SZ",
+      "name": "昆仑万维"
+    },
+    {
+      "month": "202608",
+      "broker": "山西证券",
+      "ts_code": "300761.SZ",
+      "name": "立华股份"
+    },
+    {
+      "month": "202608",
+      "broker": "山西证券",
+      "ts_code": "300857.SZ",
+      "name": "协创数据"
+    },
+    {
+      "month": "202608",
+      "broker": "山西证券",
+      "ts_code": "300972.SZ",
+      "name": "万辰集团"
+    },
+    {
+      "month": "202608",
+      "broker": "山西证券",
+      "ts_code": "601898.SH",
+      "name": "中煤能源"
+    },
+    {
+      "month": "202608",
+      "broker": "山西证券",
+      "ts_code": "688506.SH",
+      "name": "百利天恒"
+    },
+    {
+      "month": "202608",
+      "broker": "山西证券",
+      "ts_code": "688629.SH",
+      "name": "华丰科技"
+    },
+    {
+      "month": "202608",
+      "broker": "山西证券",
+      "ts_code": "688702.SH",
+      "name": "盛科通信"
+    },
+    {
+      "month": "202608",
+      "broker": "平安证券",
+      "ts_code": "002812.SZ",
+      "name": "恩捷股份"
+    },
+    {
+      "month": "202608",
+      "broker": "平安证券",
+      "ts_code": "300260.SZ",
+      "name": "新莱应材"
+    },
+    {
+      "month": "202608",
+      "broker": "平安证券",
+      "ts_code": "600176.SH",
+      "name": "中国巨石"
+    },
+    {
+      "month": "202608",
+      "broker": "平安证券",
+      "ts_code": "600276.SH",
+      "name": "恒瑞医药"
+    },
+    {
+      "month": "202608",
+      "broker": "平安证券",
+      "ts_code": "600938.SH",
+      "name": "中国海油"
+    },
+    {
+      "month": "202608",
+      "broker": "平安证券",
+      "ts_code": "603259.SH",
+      "name": "药明康德"
+    },
+    {
+      "month": "202608",
+      "broker": "平安证券",
+      "ts_code": "603766.SH",
+      "name": "隆鑫通用"
+    },
+    {
+      "month": "202608",
+      "broker": "平安证券",
+      "ts_code": "688041.SH",
+      "name": "海光信息"
+    },
+    {
+      "month": "202608",
+      "broker": "平安证券",
+      "ts_code": "688103.SH",
+      "name": "国力电子"
+    },
+    {
+      "month": "202608",
+      "broker": "开源证券",
+      "ts_code": "002602.SZ",
+      "name": "世纪华通"
+    },
+    {
+      "month": "202608",
+      "broker": "开源证券",
+      "ts_code": "300596.SZ",
+      "name": "利安隆"
+    },
+    {
+      "month": "202608",
+      "broker": "开源证券",
+      "ts_code": "301321.SZ",
+      "name": "翰博高新"
+    },
+    {
+      "month": "202608",
+      "broker": "开源证券",
+      "ts_code": "600985.SH",
+      "name": "淮北矿业"
+    },
+    {
+      "month": "202608",
+      "broker": "开源证券",
+      "ts_code": "601168.SH",
+      "name": "西部矿业"
+    },
+    {
+      "month": "202608",
+      "broker": "开源证券",
+      "ts_code": "601688.SH",
+      "name": "华泰证券"
+    },
+    {
+      "month": "202608",
+      "broker": "开源证券",
+      "ts_code": "603259.SH",
+      "name": "药明康德"
+    },
+    {
+      "month": "202608",
+      "broker": "开源证券",
+      "ts_code": "605117.SH",
+      "name": "德业股份"
+    },
+    {
+      "month": "202608",
+      "broker": "开源证券",
+      "ts_code": "688025.SH",
+      "name": "杰普特"
+    },
+    {
+      "month": "202608",
+      "broker": "浙商证券",
+      "ts_code": "000977.SZ",
+      "name": "浪潮信息"
+    },
+    {
+      "month": "202608",
+      "broker": "浙商证券",
+      "ts_code": "002078.SZ",
+      "name": "太阳纸业"
+    },
+    {
+      "month": "202608",
+      "broker": "浙商证券",
+      "ts_code": "002371.SZ",
+      "name": "北方华创"
+    },
+    {
+      "month": "202608",
+      "broker": "浙商证券",
+      "ts_code": "002488.SZ",
+      "name": "金固股份"
+    },
+    {
+      "month": "202608",
+      "broker": "浙商证券",
+      "ts_code": "300418.SZ",
+      "name": "昆仑万维"
+    },
+    {
+      "month": "202608",
+      "broker": "浙商证券",
+      "ts_code": "300750.SZ",
+      "name": "宁德时代"
+    },
+    {
+      "month": "202608",
+      "broker": "浙商证券",
+      "ts_code": "601601.SH",
+      "name": "中国太保"
+    },
+    {
+      "month": "202608",
+      "broker": "浙商证券",
+      "ts_code": "603259.SH",
+      "name": "药明康德"
+    },
+    {
+      "month": "202608",
+      "broker": "浙商证券",
+      "ts_code": "605376.SH",
+      "name": "博迁新材"
+    },
+    {
+      "month": "202608",
+      "broker": "爱建证券",
+      "ts_code": "001287.SZ",
+      "name": "中电港"
+    },
+    {
+      "month": "202608",
+      "broker": "爱建证券",
+      "ts_code": "002245.SZ",
+      "name": "蔚蓝锂芯"
+    },
+    {
+      "month": "202608",
+      "broker": "爱建证券",
+      "ts_code": "002371.SZ",
+      "name": "北方华创"
+    },
+    {
+      "month": "202608",
+      "broker": "爱建证券",
+      "ts_code": "300870.SZ",
+      "name": "欧陆通"
+    },
+    {
+      "month": "202608",
+      "broker": "爱建证券",
+      "ts_code": "601965.SH",
+      "name": "中国汽研"
+    },
+    {
+      "month": "202608",
+      "broker": "爱建证券",
+      "ts_code": "688630.SH",
+      "name": "芯碁微装"
+    },
+    {
+      "month": "202608",
+      "broker": "爱建证券",
+      "ts_code": "688981.SH",
+      "name": "中芯国际"
+    },
+    {
+      "month": "202608",
+      "broker": "申万宏源",
+      "ts_code": "000333.SZ",
+      "name": "美的集团"
+    },
+    {
+      "month": "202608",
+      "broker": "申万宏源",
+      "ts_code": "002832.SZ",
+      "name": "比音勒芬"
+    },
+    {
+      "month": "202608",
+      "broker": "申万宏源",
+      "ts_code": "300628.SZ",
+      "name": "亿联网络"
+    },
+    {
+      "month": "202608",
+      "broker": "申万宏源",
+      "ts_code": "600760.SH",
+      "name": "中航沈飞"
+    },
+    {
+      "month": "202608",
+      "broker": "申万宏源",
+      "ts_code": "601872.SH",
+      "name": "招商轮船"
+    },
+    {
+      "month": "202608",
+      "broker": "申万宏源",
+      "ts_code": "603259.SH",
+      "name": "药明康德"
+    },
+    {
+      "month": "202608",
+      "broker": "申万宏源",
+      "ts_code": "603806.SH",
+      "name": "福斯特"
+    },
+    {
+      "month": "202608",
+      "broker": "西部证券",
+      "ts_code": "001233.SZ",
+      "name": "海安集团"
+    },
+    {
+      "month": "202608",
+      "broker": "西部证券",
+      "ts_code": "002353.SZ",
+      "name": "杰瑞股份"
+    },
+    {
+      "month": "202608",
+      "broker": "西部证券",
+      "ts_code": "300308.SZ",
+      "name": "中际旭创"
+    },
+    {
+      "month": "202608",
+      "broker": "西部证券",
+      "ts_code": "300750.SZ",
+      "name": "宁德时代"
+    },
+    {
+      "month": "202608",
+      "broker": "西部证券",
+      "ts_code": "600309.SH",
+      "name": "万华化学"
+    },
+    {
+      "month": "202608",
+      "broker": "西部证券",
+      "ts_code": "601899.SH",
+      "name": "紫金矿业"
+    },
+    {
+      "month": "202608",
+      "broker": "西部证券",
+      "ts_code": "603014.SH",
+      "name": "威高血净"
+    },
+    {
+      "month": "202608",
+      "broker": "西部证券",
+      "ts_code": "603259.SH",
+      "name": "药明康德"
+    },
+    {
+      "month": "202608",
+      "broker": "西部证券",
+      "ts_code": "603993.SH",
+      "name": "洛阳钼业"
+    },
+    {
+      "month": "202608",
+      "broker": "西部证券",
+      "ts_code": "688702.SH",
+      "name": "盛科通信"
+    },
+    {
+      "month": "202608",
+      "broker": "西部证券",
+      "ts_code": "920015.BJ",
+      "name": "锦华新材"
+    },
+    {
+      "month": "202608",
+      "broker": "财信证券",
+      "ts_code": "000333.SZ",
+      "name": "美的集团"
+    },
+    {
+      "month": "202608",
+      "broker": "财信证券",
+      "ts_code": "002847.SZ",
+      "name": "盐津铺子"
+    },
+    {
+      "month": "202608",
+      "broker": "财信证券",
+      "ts_code": "300285.SZ",
+      "name": "国瓷材料"
+    },
+    {
+      "month": "202608",
+      "broker": "财信证券",
+      "ts_code": "301033.SZ",
+      "name": "迈普医学"
+    },
+    {
+      "month": "202608",
+      "broker": "财信证券",
+      "ts_code": "600312.SH",
+      "name": "平高电气"
+    },
+    {
+      "month": "202608",
+      "broker": "财信证券",
+      "ts_code": "600563.SH",
+      "name": "法拉电子"
+    },
+    {
+      "month": "202608",
+      "broker": "财信证券",
+      "ts_code": "600988.SH",
+      "name": "赤峰黄金"
+    },
+    {
+      "month": "202608",
+      "broker": "财信证券",
+      "ts_code": "688012.SH",
+      "name": "中微公司"
+    },
+    {
+      "month": "202608",
+      "broker": "财信证券",
+      "ts_code": "688111.SH",
+      "name": "金山办公"
+    },
+    {
+      "month": "202608",
+      "broker": "财信证券",
+      "ts_code": "688192.SH",
+      "name": "迪哲医药"
+    },
+    {
+      "month": "202608",
+      "broker": "财通证券",
+      "ts_code": "000338.SZ",
+      "name": "潍柴动力"
+    },
+    {
+      "month": "202608",
+      "broker": "财通证券",
+      "ts_code": "002541.SZ",
+      "name": "鸿路钢构"
+    },
+    {
+      "month": "202608",
+      "broker": "财通证券",
+      "ts_code": "600031.SH",
+      "name": "三一重工"
+    },
+    {
+      "month": "202608",
+      "broker": "财通证券",
+      "ts_code": "603317.SH",
+      "name": "天味食品"
+    },
+    {
+      "month": "202608",
+      "broker": "财通证券",
+      "ts_code": "605098.SH",
+      "name": "行动教育"
+    },
+    {
+      "month": "202608",
+      "broker": "财通证券",
+      "ts_code": "688041.SH",
+      "name": "海光信息"
+    },
+    {
+      "month": "202608",
+      "broker": "财通证券",
+      "ts_code": "688102.SH",
+      "name": "斯瑞新材"
+    },
+    {
+      "month": "202608",
+      "broker": "长江证券",
+      "ts_code": "000975.SZ",
+      "name": "山金国际"
+    },
+    {
+      "month": "202608",
+      "broker": "长江证券",
+      "ts_code": "002384.SZ",
+      "name": "东山精密"
+    },
+    {
+      "month": "202608",
+      "broker": "长江证券",
+      "ts_code": "002463.SZ",
+      "name": "沪电股份"
+    },
+    {
+      "month": "202608",
+      "broker": "长江证券",
+      "ts_code": "300308.SZ",
+      "name": "中际旭创"
+    },
+    {
+      "month": "202608",
+      "broker": "长江证券",
+      "ts_code": "300418.SZ",
+      "name": "昆仑万维"
+    },
+    {
+      "month": "202608",
+      "broker": "长江证券",
+      "ts_code": "300483.SZ",
+      "name": "首华燃气"
+    },
+    {
+      "month": "202608",
+      "broker": "长江证券",
+      "ts_code": "300502.SZ",
+      "name": "新易盛"
+    },
+    {
+      "month": "202608",
+      "broker": "长江证券",
+      "ts_code": "301526.SZ",
+      "name": "国际复材"
+    },
+    {
+      "month": "202608",
+      "broker": "长江证券",
+      "ts_code": "600256.SH",
+      "name": "广汇能源"
+    },
+    {
+      "month": "202608",
+      "broker": "长江证券",
+      "ts_code": "600309.SH",
+      "name": "万华化学"
+    },
+    {
+      "month": "202608",
+      "broker": "长江证券",
+      "ts_code": "600483.SH",
+      "name": "福能股份"
+    },
+    {
+      "month": "202608",
+      "broker": "长江证券",
+      "ts_code": "600499.SH",
+      "name": "科达制造"
+    },
+    {
+      "month": "202608",
+      "broker": "长江证券",
+      "ts_code": "601101.SH",
+      "name": "昊华能源"
+    },
+    {
+      "month": "202608",
+      "broker": "长江证券",
+      "ts_code": "601872.SH",
+      "name": "招商轮船"
+    },
+    {
+      "month": "202608",
+      "broker": "长江证券",
+      "ts_code": "601918.SH",
+      "name": "新集能源"
+    },
+    {
+      "month": "202608",
+      "broker": "长江证券",
+      "ts_code": "688041.SH",
+      "name": "海光信息"
+    },
+    {
+      "month": "202608",
+      "broker": "长江证券",
+      "ts_code": "688256.SH",
+      "name": "寒武纪"
+    }
+  ]
+}

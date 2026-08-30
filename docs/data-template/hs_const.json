@@ -1,0 +1,5784 @@
+{
+  "api_name": "hs_const",
+  "fetched_at": "2026-08-09T14:16:43.215217+00:00",
+  "query_mode": "snapshot",
+  "params": [
+    {
+      "hs_type": "SH"
+    },
+    {
+      "hs_type": "SZ"
+    }
+  ],
+  "fields": [
+    "ts_code",
+    "hs_type",
+    "in_date",
+    "out_date",
+    "is_new"
+  ],
+  "row_count": 823,
+  "data": [
+    {
+      "ts_code": "601628.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "601099.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "601808.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "601107.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "601880.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600348.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600557.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600426.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600487.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600446.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600039.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600511.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600565.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600547.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600004.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600597.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600559.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600026.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600587.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600340.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600507.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600438.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600516.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600521.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600031.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600030.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600990.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600352.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600459.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600050.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600012.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600460.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600406.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600439.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600993.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600563.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600549.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600020.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600967.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600015.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600570.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600271.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600577.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600572.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600489.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600502.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600491.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600522.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600900.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600029.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600436.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600409.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "601958.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "601038.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600387.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "601866.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600284.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600535.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600499.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600580.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "601238.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "601919.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "601001.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "601333.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "601158.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "601666.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "601006.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600970.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600973.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600987.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "601699.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "601588.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600000.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600007.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600009.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600010.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600011.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600016.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600019.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600028.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600036.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600038.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600056.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600062.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600066.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600068.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600073.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600085.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600089.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600104.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600109.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600111.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600115.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600118.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600125.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600138.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600141.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600153.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600161.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600162.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600398.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600422.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600486.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600498.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600500.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600519.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600528.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600536.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600548.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600566.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600567.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600582.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600583.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600585.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600596.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600600.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600611.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600612.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600623.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600626.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600635.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600637.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600641.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600642.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600643.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600648.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600655.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600657.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600660.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600663.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600664.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600667.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600668.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600673.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600674.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600682.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600685.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600688.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600690.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600694.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600703.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600705.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600708.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600711.SH",
+      "hs_type": "SH",
+      "in_date": "20141215",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600720.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600729.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600739.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600741.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600742.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600748.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600750.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600754.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600755.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600756.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600765.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600775.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600787.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600795.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600808.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600811.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600816.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600820.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600823.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600826.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600828.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600835.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600837.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600846.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "601607.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600850.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600859.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600863.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600867.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600872.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600874.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600875.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600876.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600886.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600887.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600893.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600171.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600176.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600180.SH",
+      "hs_type": "SH",
+      "in_date": "20141215",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600183.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600185.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600188.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600196.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600197.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600201.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600208.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600210.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600216.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600236.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600239.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600261.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600276.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600277.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600285.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600298.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600305.SH",
+      "hs_type": "SH",
+      "in_date": "20141215",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600309.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600312.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600323.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600329.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600332.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600335.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600350.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600362.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600363.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600366.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600372.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600377.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600380.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600383.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600388.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600395.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "601021.SH",
+      "hs_type": "SH",
+      "in_date": "20150615",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "603600.SH",
+      "hs_type": "SH",
+      "in_date": "20150615",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600958.SH",
+      "hs_type": "SH",
+      "in_date": "20150615",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600273.SH",
+      "hs_type": "SH",
+      "in_date": "20150615",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "603609.SH",
+      "hs_type": "SH",
+      "in_date": "20150615",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600661.SH",
+      "hs_type": "SH",
+      "in_date": "20150615",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "603019.SH",
+      "hs_type": "SH",
+      "in_date": "20150615",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "601788.SH",
+      "hs_type": "SH",
+      "in_date": "20150615",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600917.SH",
+      "hs_type": "SH",
+      "in_date": "20150615",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "603686.SH",
+      "hs_type": "SH",
+      "in_date": "20150615",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600123.SH",
+      "hs_type": "SH",
+      "in_date": "20150615",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "603899.SH",
+      "hs_type": "SH",
+      "in_date": "20150615",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600206.SH",
+      "hs_type": "SH",
+      "in_date": "20150615",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "601016.SH",
+      "hs_type": "SH",
+      "in_date": "20150615",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "603368.SH",
+      "hs_type": "SH",
+      "in_date": "20150615",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600897.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "601992.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "601800.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "601000.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600018.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600295.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600027.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600420.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "601727.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "601991.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "601688.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "601328.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "601939.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "601398.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "601288.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "601988.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "601901.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "601390.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "601318.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "601166.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "601857.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "601336.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "601377.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "601818.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600999.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "601555.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600048.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "601002.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "601098.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "601877.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "601717.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "601233.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "601012.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "603077.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "601567.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "601789.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "601222.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "603993.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "601799.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "601933.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "601311.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "601668.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "601139.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "601898.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "601088.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "601231.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "601633.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "601766.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "601216.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "601618.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "601989.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "601111.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "601600.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "601998.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "601009.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "601169.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "601186.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "601058.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "603288.SH",
+      "hs_type": "SH",
+      "in_date": "20141215",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "601899.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "601678.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "603369.SH",
+      "hs_type": "SH",
+      "in_date": "20141215",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "601601.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "603328.SH",
+      "hs_type": "SH",
+      "in_date": "20141215",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "603128.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "601636.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "601669.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "603766.SH",
+      "hs_type": "SH",
+      "in_date": "20141117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600483.SH",
+      "hs_type": "SH",
+      "in_date": "20151214",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "601888.SH",
+      "hs_type": "SH",
+      "in_date": "20151214",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "603025.SH",
+      "hs_type": "SH",
+      "in_date": "20151214",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "603885.SH",
+      "hs_type": "SH",
+      "in_date": "20151214",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "603669.SH",
+      "hs_type": "SH",
+      "in_date": "20151214",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "603338.SH",
+      "hs_type": "SH",
+      "in_date": "20151214",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600326.SH",
+      "hs_type": "SH",
+      "in_date": "20151214",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "601689.SH",
+      "hs_type": "SH",
+      "in_date": "20151214",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600337.SH",
+      "hs_type": "SH",
+      "in_date": "20151214",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600885.SH",
+      "hs_type": "SH",
+      "in_date": "20151214",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "603599.SH",
+      "hs_type": "SH",
+      "in_date": "20151214",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "603568.SH",
+      "hs_type": "SH",
+      "in_date": "20151214",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "601198.SH",
+      "hs_type": "SH",
+      "in_date": "20151214",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "601985.SH",
+      "hs_type": "SH",
+      "in_date": "20151214",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "603355.SH",
+      "hs_type": "SH",
+      "in_date": "20151214",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "603883.SH",
+      "hs_type": "SH",
+      "in_date": "20151214",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "601211.SH",
+      "hs_type": "SH",
+      "in_date": "20151214",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "603589.SH",
+      "hs_type": "SH",
+      "in_date": "20151214",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600699.SH",
+      "hs_type": "SH",
+      "in_date": "20151214",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "603898.SH",
+      "hs_type": "SH",
+      "in_date": "20151214",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "603118.SH",
+      "hs_type": "SH",
+      "in_date": "20151214",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600167.SH",
+      "hs_type": "SH",
+      "in_date": "20170612",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600233.SH",
+      "hs_type": "SH",
+      "in_date": "20170612",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600909.SH",
+      "hs_type": "SH",
+      "in_date": "20170612",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600919.SH",
+      "hs_type": "SH",
+      "in_date": "20170612",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600926.SH",
+      "hs_type": "SH",
+      "in_date": "20170612",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600977.SH",
+      "hs_type": "SH",
+      "in_date": "20170612",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600996.SH",
+      "hs_type": "SH",
+      "in_date": "20170612",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600998.SH",
+      "hs_type": "SH",
+      "in_date": "20170612",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "601229.SH",
+      "hs_type": "SH",
+      "in_date": "20170612",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "601997.SH",
+      "hs_type": "SH",
+      "in_date": "20170612",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "603060.SH",
+      "hs_type": "SH",
+      "in_date": "20170612",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "603098.SH",
+      "hs_type": "SH",
+      "in_date": "20170612",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "603160.SH",
+      "hs_type": "SH",
+      "in_date": "20170612",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "603165.SH",
+      "hs_type": "SH",
+      "in_date": "20170612",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "603228.SH",
+      "hs_type": "SH",
+      "in_date": "20170612",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "603298.SH",
+      "hs_type": "SH",
+      "in_date": "20170612",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "603444.SH",
+      "hs_type": "SH",
+      "in_date": "20170612",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "603515.SH",
+      "hs_type": "SH",
+      "in_date": "20170612",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "603556.SH",
+      "hs_type": "SH",
+      "in_date": "20170612",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "603569.SH",
+      "hs_type": "SH",
+      "in_date": "20170612",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "603585.SH",
+      "hs_type": "SH",
+      "in_date": "20170612",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "603639.SH",
+      "hs_type": "SH",
+      "in_date": "20170612",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "603658.SH",
+      "hs_type": "SH",
+      "in_date": "20170612",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "603816.SH",
+      "hs_type": "SH",
+      "in_date": "20170612",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "603858.SH",
+      "hs_type": "SH",
+      "in_date": "20170612",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "603877.SH",
+      "hs_type": "SH",
+      "in_date": "20170612",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "603888.SH",
+      "hs_type": "SH",
+      "in_date": "20170612",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "603929.SH",
+      "hs_type": "SH",
+      "in_date": "20170612",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "603959.SH",
+      "hs_type": "SH",
+      "in_date": "20170612",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600136.SH",
+      "hs_type": "SH",
+      "in_date": "20181217",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600160.SH",
+      "hs_type": "SH",
+      "in_date": "20181217",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600256.SH",
+      "hs_type": "SH",
+      "in_date": "20181217",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600282.SH",
+      "hs_type": "SH",
+      "in_date": "20181217",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600376.SH",
+      "hs_type": "SH",
+      "in_date": "20181217",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600622.SH",
+      "hs_type": "SH",
+      "in_date": "20181217",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600681.SH",
+      "hs_type": "SH",
+      "in_date": "20181217",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600702.SH",
+      "hs_type": "SH",
+      "in_date": "20181217",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600728.SH",
+      "hs_type": "SH",
+      "in_date": "20181217",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600777.SH",
+      "hs_type": "SH",
+      "in_date": "20181217",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "601138.SH",
+      "hs_type": "SH",
+      "in_date": "20181217",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "601619.SH",
+      "hs_type": "SH",
+      "in_date": "20181217",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "601801.SH",
+      "hs_type": "SH",
+      "in_date": "20181217",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600072.SH",
+      "hs_type": "SH",
+      "in_date": "20171211",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600230.SH",
+      "hs_type": "SH",
+      "in_date": "20171211",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600258.SH",
+      "hs_type": "SH",
+      "in_date": "20171211",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600325.SH",
+      "hs_type": "SH",
+      "in_date": "20171211",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600338.SH",
+      "hs_type": "SH",
+      "in_date": "20171211",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600346.SH",
+      "hs_type": "SH",
+      "in_date": "20171211",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600598.SH",
+      "hs_type": "SH",
+      "in_date": "20171211",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600693.SH",
+      "hs_type": "SH",
+      "in_date": "20171211",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600779.SH",
+      "hs_type": "SH",
+      "in_date": "20171211",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600971.SH",
+      "hs_type": "SH",
+      "in_date": "20171211",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "601117.SH",
+      "hs_type": "SH",
+      "in_date": "20171211",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "601128.SH",
+      "hs_type": "SH",
+      "in_date": "20171211",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "601200.SH",
+      "hs_type": "SH",
+      "in_date": "20171211",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "601225.SH",
+      "hs_type": "SH",
+      "in_date": "20171211",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "601858.SH",
+      "hs_type": "SH",
+      "in_date": "20171211",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "601878.SH",
+      "hs_type": "SH",
+      "in_date": "20171211",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "603113.SH",
+      "hs_type": "SH",
+      "in_date": "20171211",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "603225.SH",
+      "hs_type": "SH",
+      "in_date": "20171211",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "603233.SH",
+      "hs_type": "SH",
+      "in_date": "20171211",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "603305.SH",
+      "hs_type": "SH",
+      "in_date": "20171211",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "603387.SH",
+      "hs_type": "SH",
+      "in_date": "20171211",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "603421.SH",
+      "hs_type": "SH",
+      "in_date": "20171211",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "603517.SH",
+      "hs_type": "SH",
+      "in_date": "20171211",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "603579.SH",
+      "hs_type": "SH",
+      "in_date": "20171211",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "603603.SH",
+      "hs_type": "SH",
+      "in_date": "20171211",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "603626.SH",
+      "hs_type": "SH",
+      "in_date": "20171211",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "603728.SH",
+      "hs_type": "SH",
+      "in_date": "20171211",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "603730.SH",
+      "hs_type": "SH",
+      "in_date": "20171211",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "603799.SH",
+      "hs_type": "SH",
+      "in_date": "20171211",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "603803.SH",
+      "hs_type": "SH",
+      "in_date": "20171211",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "603833.SH",
+      "hs_type": "SH",
+      "in_date": "20171211",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "603881.SH",
+      "hs_type": "SH",
+      "in_date": "20171211",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "601330.SH",
+      "hs_type": "SH",
+      "in_date": "20180626",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "601068.SH",
+      "hs_type": "SH",
+      "in_date": "20180914",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "601990.SH",
+      "hs_type": "SH",
+      "in_date": "20181217",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "603039.SH",
+      "hs_type": "SH",
+      "in_date": "20181217",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "603043.SH",
+      "hs_type": "SH",
+      "in_date": "20181217",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "603259.SH",
+      "hs_type": "SH",
+      "in_date": "20181217",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "603283.SH",
+      "hs_type": "SH",
+      "in_date": "20181217",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "603367.SH",
+      "hs_type": "SH",
+      "in_date": "20181217",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "603466.SH",
+      "hs_type": "SH",
+      "in_date": "20181217",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "603486.SH",
+      "hs_type": "SH",
+      "in_date": "20181217",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "603587.SH",
+      "hs_type": "SH",
+      "in_date": "20181217",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "603596.SH",
+      "hs_type": "SH",
+      "in_date": "20181217",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "603650.SH",
+      "hs_type": "SH",
+      "in_date": "20181217",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "603666.SH",
+      "hs_type": "SH",
+      "in_date": "20181217",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "603680.SH",
+      "hs_type": "SH",
+      "in_date": "20181217",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "603713.SH",
+      "hs_type": "SH",
+      "in_date": "20181217",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "603733.SH",
+      "hs_type": "SH",
+      "in_date": "20181217",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "603773.SH",
+      "hs_type": "SH",
+      "in_date": "20181217",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "603801.SH",
+      "hs_type": "SH",
+      "in_date": "20181217",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "603871.SH",
+      "hs_type": "SH",
+      "in_date": "20181217",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "603882.SH",
+      "hs_type": "SH",
+      "in_date": "20181217",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "603897.SH",
+      "hs_type": "SH",
+      "in_date": "20181217",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "603986.SH",
+      "hs_type": "SH",
+      "in_date": "20181217",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "601916.SH",
+      "hs_type": "SH",
+      "in_date": "20191210",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "603806.SH",
+      "hs_type": "SH",
+      "in_date": "20160613",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "601069.SH",
+      "hs_type": "SH",
+      "in_date": "20160613",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600310.SH",
+      "hs_type": "SH",
+      "in_date": "20160613",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600260.SH",
+      "hs_type": "SH",
+      "in_date": "20160613",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "603997.SH",
+      "hs_type": "SH",
+      "in_date": "20160613",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "603939.SH",
+      "hs_type": "SH",
+      "in_date": "20160613",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600763.SH",
+      "hs_type": "SH",
+      "in_date": "20160613",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600879.SH",
+      "hs_type": "SH",
+      "in_date": "20160613",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600606.SH",
+      "hs_type": "SH",
+      "in_date": "20160613",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600418.SH",
+      "hs_type": "SH",
+      "in_date": "20160613",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600297.SH",
+      "hs_type": "SH",
+      "in_date": "20160613",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600466.SH",
+      "hs_type": "SH",
+      "in_date": "20160613",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600373.SH",
+      "hs_type": "SH",
+      "in_date": "20160613",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "603866.SH",
+      "hs_type": "SH",
+      "in_date": "20160613",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600061.SH",
+      "hs_type": "SH",
+      "in_date": "20160613",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "601155.SH",
+      "hs_type": "SH",
+      "in_date": "20160613",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "603008.SH",
+      "hs_type": "SH",
+      "in_date": "20160613",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600803.SH",
+      "hs_type": "SH",
+      "in_date": "20160613",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600053.SH",
+      "hs_type": "SH",
+      "in_date": "20160613",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "603108.SH",
+      "hs_type": "SH",
+      "in_date": "20161212",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "603737.SH",
+      "hs_type": "SH",
+      "in_date": "20161212",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "603339.SH",
+      "hs_type": "SH",
+      "in_date": "20161212",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "603588.SH",
+      "hs_type": "SH",
+      "in_date": "20161212",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600105.SH",
+      "hs_type": "SH",
+      "in_date": "20161212",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600531.SH",
+      "hs_type": "SH",
+      "in_date": "20161212",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "603868.SH",
+      "hs_type": "SH",
+      "in_date": "20161212",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "603198.SH",
+      "hs_type": "SH",
+      "in_date": "20161212",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600093.SH",
+      "hs_type": "SH",
+      "in_date": "20161212",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600975.SH",
+      "hs_type": "SH",
+      "in_date": "20161212",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600809.SH",
+      "hs_type": "SH",
+      "in_date": "20161212",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "603989.SH",
+      "hs_type": "SH",
+      "in_date": "20161212",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600477.SH",
+      "hs_type": "SH",
+      "in_date": "20161212",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600299.SH",
+      "hs_type": "SH",
+      "in_date": "20161212",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600986.SH",
+      "hs_type": "SH",
+      "in_date": "20161212",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "601828.SH",
+      "hs_type": "SH",
+      "in_date": "20180131",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "601005.SH",
+      "hs_type": "SH",
+      "in_date": "20180309",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "601298.SH",
+      "hs_type": "SH",
+      "in_date": "20190211",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "601865.SH",
+      "hs_type": "SH",
+      "in_date": "20190301",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600871.SH",
+      "hs_type": "SH",
+      "in_date": "20190402",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600008.SH",
+      "hs_type": "SH",
+      "in_date": "20191216",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600057.SH",
+      "hs_type": "SH",
+      "in_date": "20191216",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600150.SH",
+      "hs_type": "SH",
+      "in_date": "20191216",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600155.SH",
+      "hs_type": "SH",
+      "in_date": "20191216",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600177.SH",
+      "hs_type": "SH",
+      "in_date": "20191216",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600221.SH",
+      "hs_type": "SH",
+      "in_date": "20191216",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600368.SH",
+      "hs_type": "SH",
+      "in_date": "20191216",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600378.SH",
+      "hs_type": "SH",
+      "in_date": "20191216",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600604.SH",
+      "hs_type": "SH",
+      "in_date": "20191216",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600736.SH",
+      "hs_type": "SH",
+      "in_date": "20191216",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600740.SH",
+      "hs_type": "SH",
+      "in_date": "20191216",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600745.SH",
+      "hs_type": "SH",
+      "in_date": "20191216",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600771.SH",
+      "hs_type": "SH",
+      "in_date": "20191216",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600928.SH",
+      "hs_type": "SH",
+      "in_date": "20191216",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600968.SH",
+      "hs_type": "SH",
+      "in_date": "20191216",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600989.SH",
+      "hs_type": "SH",
+      "in_date": "20191216",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "601236.SH",
+      "hs_type": "SH",
+      "in_date": "20191216",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "601066.SH",
+      "hs_type": "SH",
+      "in_date": "20180704",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600860.SH",
+      "hs_type": "SH",
+      "in_date": "20180404",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "601869.SH",
+      "hs_type": "SH",
+      "in_date": "20180803",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "601698.SH",
+      "hs_type": "SH",
+      "in_date": "20191216",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "601949.SH",
+      "hs_type": "SH",
+      "in_date": "20191216",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "601952.SH",
+      "hs_type": "SH",
+      "in_date": "20191216",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "603236.SH",
+      "hs_type": "SH",
+      "in_date": "20191216",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "603267.SH",
+      "hs_type": "SH",
+      "in_date": "20191216",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "603279.SH",
+      "hs_type": "SH",
+      "in_date": "20191216",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "603317.SH",
+      "hs_type": "SH",
+      "in_date": "20191216",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "603327.SH",
+      "hs_type": "SH",
+      "in_date": "20191216",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "603360.SH",
+      "hs_type": "SH",
+      "in_date": "20191216",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "603379.SH",
+      "hs_type": "SH",
+      "in_date": "20191216",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "603429.SH",
+      "hs_type": "SH",
+      "in_date": "20191216",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "603508.SH",
+      "hs_type": "SH",
+      "in_date": "20191216",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "603605.SH",
+      "hs_type": "SH",
+      "in_date": "20191216",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "603606.SH",
+      "hs_type": "SH",
+      "in_date": "20191216",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "603613.SH",
+      "hs_type": "SH",
+      "in_date": "20191216",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "603681.SH",
+      "hs_type": "SH",
+      "in_date": "20191216",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "603687.SH",
+      "hs_type": "SH",
+      "in_date": "20191216",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "603915.SH",
+      "hs_type": "SH",
+      "in_date": "20191216",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "603956.SH",
+      "hs_type": "SH",
+      "in_date": "20191216",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "603982.SH",
+      "hs_type": "SH",
+      "in_date": "20191216",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "603983.SH",
+      "hs_type": "SH",
+      "in_date": "20191216",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "601811.SH",
+      "hs_type": "SH",
+      "in_date": "20160822",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "601881.SH",
+      "hs_type": "SH",
+      "in_date": "20170213",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "603157.SH",
+      "hs_type": "SH",
+      "in_date": "20171016",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600025.SH",
+      "hs_type": "SH",
+      "in_date": "20180611",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600094.SH",
+      "hs_type": "SH",
+      "in_date": "20180611",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600231.SH",
+      "hs_type": "SH",
+      "in_date": "20180611",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600252.SH",
+      "hs_type": "SH",
+      "in_date": "20180611",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600315.SH",
+      "hs_type": "SH",
+      "in_date": "20180611",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600392.SH",
+      "hs_type": "SH",
+      "in_date": "20180611",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600452.SH",
+      "hs_type": "SH",
+      "in_date": "20180611",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600545.SH",
+      "hs_type": "SH",
+      "in_date": "20180611",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600588.SH",
+      "hs_type": "SH",
+      "in_date": "20180611",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600760.SH",
+      "hs_type": "SH",
+      "in_date": "20180611",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600782.SH",
+      "hs_type": "SH",
+      "in_date": "20180611",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600801.SH",
+      "hs_type": "SH",
+      "in_date": "20180611",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600933.SH",
+      "hs_type": "SH",
+      "in_date": "20180611",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "601003.SH",
+      "hs_type": "SH",
+      "in_date": "20180611",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "601019.SH",
+      "hs_type": "SH",
+      "in_date": "20180611",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "601100.SH",
+      "hs_type": "SH",
+      "in_date": "20180611",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "601108.SH",
+      "hs_type": "SH",
+      "in_date": "20180611",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "601360.SH",
+      "hs_type": "SH",
+      "in_date": "20180611",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "601838.SH",
+      "hs_type": "SH",
+      "in_date": "20180611",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "601966.SH",
+      "hs_type": "SH",
+      "in_date": "20180611",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "603007.SH",
+      "hs_type": "SH",
+      "in_date": "20180611",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "603056.SH",
+      "hs_type": "SH",
+      "in_date": "20180611",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "603080.SH",
+      "hs_type": "SH",
+      "in_date": "20180611",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "603103.SH",
+      "hs_type": "SH",
+      "in_date": "20180611",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "603180.SH",
+      "hs_type": "SH",
+      "in_date": "20180611",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "603260.SH",
+      "hs_type": "SH",
+      "in_date": "20180611",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "603337.SH",
+      "hs_type": "SH",
+      "in_date": "20180611",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "603357.SH",
+      "hs_type": "SH",
+      "in_date": "20180611",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "603363.SH",
+      "hs_type": "SH",
+      "in_date": "20180611",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "603533.SH",
+      "hs_type": "SH",
+      "in_date": "20180611",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "603659.SH",
+      "hs_type": "SH",
+      "in_date": "20180611",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "603660.SH",
+      "hs_type": "SH",
+      "in_date": "20180611",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "603707.SH",
+      "hs_type": "SH",
+      "in_date": "20180611",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "603711.SH",
+      "hs_type": "SH",
+      "in_date": "20180611",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "603848.SH",
+      "hs_type": "SH",
+      "in_date": "20180611",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "601077.SH",
+      "hs_type": "SH",
+      "in_date": "20191112",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "601658.SH",
+      "hs_type": "SH",
+      "in_date": "20191227",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "601375.SH",
+      "hs_type": "SH",
+      "in_date": "20170117",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "601326.SH",
+      "hs_type": "SH",
+      "in_date": "20170830",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "601319.SH",
+      "hs_type": "SH",
+      "in_date": "20181130",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600021.SH",
+      "hs_type": "SH",
+      "in_date": "20190617",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "601598.SH",
+      "hs_type": "SH",
+      "in_date": "20190118",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600120.SH",
+      "hs_type": "SH",
+      "in_date": "20190617",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600132.SH",
+      "hs_type": "SH",
+      "in_date": "20190617",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600170.SH",
+      "hs_type": "SH",
+      "in_date": "20190617",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600219.SH",
+      "hs_type": "SH",
+      "in_date": "20190617",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600369.SH",
+      "hs_type": "SH",
+      "in_date": "20190617",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600639.SH",
+      "hs_type": "SH",
+      "in_date": "20190617",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600675.SH",
+      "hs_type": "SH",
+      "in_date": "20190617",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600704.SH",
+      "hs_type": "SH",
+      "in_date": "20190617",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600733.SH",
+      "hs_type": "SH",
+      "in_date": "20190617",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600738.SH",
+      "hs_type": "SH",
+      "in_date": "20190617",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600845.SH",
+      "hs_type": "SH",
+      "in_date": "20190617",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600848.SH",
+      "hs_type": "SH",
+      "in_date": "20190617",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600895.SH",
+      "hs_type": "SH",
+      "in_date": "20190617",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600903.SH",
+      "hs_type": "SH",
+      "in_date": "20190617",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "600985.SH",
+      "hs_type": "SH",
+      "in_date": "20190617",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "601018.SH",
+      "hs_type": "SH",
+      "in_date": "20190617",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "601162.SH",
+      "hs_type": "SH",
+      "in_date": "20190617",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "601577.SH",
+      "hs_type": "SH",
+      "in_date": "20190617",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "601615.SH",
+      "hs_type": "SH",
+      "in_date": "20190617",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "601860.SH",
+      "hs_type": "SH",
+      "in_date": "20190617",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "601872.SH",
+      "hs_type": "SH",
+      "in_date": "20190617",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "603027.SH",
+      "hs_type": "SH",
+      "in_date": "20190617",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "603121.SH",
+      "hs_type": "SH",
+      "in_date": "20190617",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "603127.SH",
+      "hs_type": "SH",
+      "in_date": "20190617",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "603185.SH",
+      "hs_type": "SH",
+      "in_date": "20190617",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "603220.SH",
+      "hs_type": "SH",
+      "in_date": "20190617",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "603332.SH",
+      "hs_type": "SH",
+      "in_date": "20190617",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "603351.SH",
+      "hs_type": "SH",
+      "in_date": "20190617",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "603393.SH",
+      "hs_type": "SH",
+      "in_date": "20190617",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "603501.SH",
+      "hs_type": "SH",
+      "in_date": "20190617",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "603505.SH",
+      "hs_type": "SH",
+      "in_date": "20190617",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "603583.SH",
+      "hs_type": "SH",
+      "in_date": "20190617",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "603590.SH",
+      "hs_type": "SH",
+      "in_date": "20190617",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "603638.SH",
+      "hs_type": "SH",
+      "in_date": "20190617",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "603708.SH",
+      "hs_type": "SH",
+      "in_date": "20190617",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "603712.SH",
+      "hs_type": "SH",
+      "in_date": "20190617",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "603808.SH",
+      "hs_type": "SH",
+      "in_date": "20190617",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "603876.SH",
+      "hs_type": "SH",
+      "in_date": "20190617",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "002910.SZ",
+      "hs_type": "SZ",
+      "in_date": "20171114",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "000016.SZ",
+      "hs_type": "SZ",
+      "in_date": "20180102",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "001872.SZ",
+      "hs_type": "SZ",
+      "in_date": "20180102",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "000040.SZ",
+      "hs_type": "SZ",
+      "in_date": "20180102",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "000401.SZ",
+      "hs_type": "SZ",
+      "in_date": "20180102",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "000429.SZ",
+      "hs_type": "SZ",
+      "in_date": "20180102",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "000553.SZ",
+      "hs_type": "SZ",
+      "in_date": "20180102",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "000560.SZ",
+      "hs_type": "SZ",
+      "in_date": "20180102",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "000710.SZ",
+      "hs_type": "SZ",
+      "in_date": "20180102",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "000723.SZ",
+      "hs_type": "SZ",
+      "in_date": "20180102",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "000951.SZ",
+      "hs_type": "SZ",
+      "in_date": "20180102",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "000968.SZ",
+      "hs_type": "SZ",
+      "in_date": "20180102",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "002061.SZ",
+      "hs_type": "SZ",
+      "in_date": "20180102",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "002507.SZ",
+      "hs_type": "SZ",
+      "in_date": "20180102",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "002530.SZ",
+      "hs_type": "SZ",
+      "in_date": "20180102",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "002537.SZ",
+      "hs_type": "SZ",
+      "in_date": "20180102",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "002545.SZ",
+      "hs_type": "SZ",
+      "in_date": "20180102",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "002611.SZ",
+      "hs_type": "SZ",
+      "in_date": "20180102",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "002648.SZ",
+      "hs_type": "SZ",
+      "in_date": "20180102",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "002747.SZ",
+      "hs_type": "SZ",
+      "in_date": "20180102",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "002812.SZ",
+      "hs_type": "SZ",
+      "in_date": "20180102",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "002839.SZ",
+      "hs_type": "SZ",
+      "in_date": "20180102",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "002841.SZ",
+      "hs_type": "SZ",
+      "in_date": "20180102",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "002859.SZ",
+      "hs_type": "SZ",
+      "in_date": "20180102",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "002867.SZ",
+      "hs_type": "SZ",
+      "in_date": "20180102",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "300308.SZ",
+      "hs_type": "SZ",
+      "in_date": "20180102",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "300457.SZ",
+      "hs_type": "SZ",
+      "in_date": "20180102",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "300616.SZ",
+      "hs_type": "SZ",
+      "in_date": "20180102",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "300618.SZ",
+      "hs_type": "SZ",
+      "in_date": "20180102",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "300628.SZ",
+      "hs_type": "SZ",
+      "in_date": "20180102",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "300666.SZ",
+      "hs_type": "SZ",
+      "in_date": "20180102",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "002936.SZ",
+      "hs_type": "SZ",
+      "in_date": "20181011",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "000301.SZ",
+      "hs_type": "SZ",
+      "in_date": "20180703",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "000537.SZ",
+      "hs_type": "SZ",
+      "in_date": "20180703",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "000546.SZ",
+      "hs_type": "SZ",
+      "in_date": "20180703",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "000789.SZ",
+      "hs_type": "SZ",
+      "in_date": "20180703",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "000831.SZ",
+      "hs_type": "SZ",
+      "in_date": "20180703",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "000932.SZ",
+      "hs_type": "SZ",
+      "in_date": "20180703",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "000935.SZ",
+      "hs_type": "SZ",
+      "in_date": "20180703",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "001965.SZ",
+      "hs_type": "SZ",
+      "in_date": "20180703",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "002258.SZ",
+      "hs_type": "SZ",
+      "in_date": "20180703",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "002382.SZ",
+      "hs_type": "SZ",
+      "in_date": "20180703",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "002409.SZ",
+      "hs_type": "SZ",
+      "in_date": "20180703",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "002430.SZ",
+      "hs_type": "SZ",
+      "in_date": "20180703",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "002511.SZ",
+      "hs_type": "SZ",
+      "in_date": "20180703",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "002677.SZ",
+      "hs_type": "SZ",
+      "in_date": "20180703",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "002807.SZ",
+      "hs_type": "SZ",
+      "in_date": "20180703",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "002901.SZ",
+      "hs_type": "SZ",
+      "in_date": "20180703",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "002907.SZ",
+      "hs_type": "SZ",
+      "in_date": "20180703",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "002911.SZ",
+      "hs_type": "SZ",
+      "in_date": "20180703",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "002912.SZ",
+      "hs_type": "SZ",
+      "in_date": "20180703",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "002913.SZ",
+      "hs_type": "SZ",
+      "in_date": "20180703",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "002916.SZ",
+      "hs_type": "SZ",
+      "in_date": "20180703",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "002920.SZ",
+      "hs_type": "SZ",
+      "in_date": "20180703",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "300232.SZ",
+      "hs_type": "SZ",
+      "in_date": "20180703",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "300298.SZ",
+      "hs_type": "SZ",
+      "in_date": "20180703",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "300349.SZ",
+      "hs_type": "SZ",
+      "in_date": "20180703",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "300357.SZ",
+      "hs_type": "SZ",
+      "in_date": "20180703",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "300482.SZ",
+      "hs_type": "SZ",
+      "in_date": "20180703",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "300529.SZ",
+      "hs_type": "SZ",
+      "in_date": "20180703",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "300567.SZ",
+      "hs_type": "SZ",
+      "in_date": "20180703",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "300601.SZ",
+      "hs_type": "SZ",
+      "in_date": "20180703",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "300676.SZ",
+      "hs_type": "SZ",
+      "in_date": "20180703",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "300679.SZ",
+      "hs_type": "SZ",
+      "in_date": "20180703",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "300685.SZ",
+      "hs_type": "SZ",
+      "in_date": "20180703",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "300699.SZ",
+      "hs_type": "SZ",
+      "in_date": "20180703",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "300725.SZ",
+      "hs_type": "SZ",
+      "in_date": "20180703",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "300726.SZ",
+      "hs_type": "SZ",
+      "in_date": "20180703",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "300735.SZ",
+      "hs_type": "SZ",
+      "in_date": "20180703",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "000025.SZ",
+      "hs_type": "SZ",
+      "in_date": "20170703",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "000617.SZ",
+      "hs_type": "SZ",
+      "in_date": "20170703",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "000717.SZ",
+      "hs_type": "SZ",
+      "in_date": "20170703",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "000818.SZ",
+      "hs_type": "SZ",
+      "in_date": "20170703",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "000877.SZ",
+      "hs_type": "SZ",
+      "in_date": "20170703",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "000933.SZ",
+      "hs_type": "SZ",
+      "in_date": "20170703",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "000976.SZ",
+      "hs_type": "SZ",
+      "in_date": "20170703",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "000980.SZ",
+      "hs_type": "SZ",
+      "in_date": "20170703",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "002110.SZ",
+      "hs_type": "SZ",
+      "in_date": "20170703",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "002506.SZ",
+      "hs_type": "SZ",
+      "in_date": "20170703",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "002558.SZ",
+      "hs_type": "SZ",
+      "in_date": "20170703",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "002597.SZ",
+      "hs_type": "SZ",
+      "in_date": "20170703",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "002815.SZ",
+      "hs_type": "SZ",
+      "in_date": "20170703",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "002818.SZ",
+      "hs_type": "SZ",
+      "in_date": "20170703",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "002821.SZ",
+      "hs_type": "SZ",
+      "in_date": "20170703",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "002831.SZ",
+      "hs_type": "SZ",
+      "in_date": "20170703",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "002120.SZ",
+      "hs_type": "SZ",
+      "in_date": "20170703",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "002608.SZ",
+      "hs_type": "SZ",
+      "in_date": "20170703",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "002490.SZ",
+      "hs_type": "SZ",
+      "in_date": "20180416",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "300398.SZ",
+      "hs_type": "SZ",
+      "in_date": "20170703",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "300180.SZ",
+      "hs_type": "SZ",
+      "in_date": "20170703",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "300038.SZ",
+      "hs_type": "SZ",
+      "in_date": "20170703",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "300450.SZ",
+      "hs_type": "SZ",
+      "in_date": "20170703",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "300527.SZ",
+      "hs_type": "SZ",
+      "in_date": "20170703",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "300558.SZ",
+      "hs_type": "SZ",
+      "in_date": "20170703",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "300762.SZ",
+      "hs_type": "SZ",
+      "in_date": "20191216",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "300765.SZ",
+      "hs_type": "SZ",
+      "in_date": "20191216",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "300766.SZ",
+      "hs_type": "SZ",
+      "in_date": "20191216",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "300768.SZ",
+      "hs_type": "SZ",
+      "in_date": "20191216",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "300770.SZ",
+      "hs_type": "SZ",
+      "in_date": "20191216",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "300773.SZ",
+      "hs_type": "SZ",
+      "in_date": "20191216",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "002948.SZ",
+      "hs_type": "SZ",
+      "in_date": "20190130",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "000019.SZ",
+      "hs_type": "SZ",
+      "in_date": "20190617",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "000049.SZ",
+      "hs_type": "SZ",
+      "in_date": "20190617",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "000070.SZ",
+      "hs_type": "SZ",
+      "in_date": "20190617",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "000629.SZ",
+      "hs_type": "SZ",
+      "in_date": "20190617",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "000667.SZ",
+      "hs_type": "SZ",
+      "in_date": "20190617",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "000861.SZ",
+      "hs_type": "SZ",
+      "in_date": "20190617",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "000936.SZ",
+      "hs_type": "SZ",
+      "in_date": "20190617",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "000950.SZ",
+      "hs_type": "SZ",
+      "in_date": "20190617",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "001696.SZ",
+      "hs_type": "SZ",
+      "in_date": "20190617",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "002063.SZ",
+      "hs_type": "SZ",
+      "in_date": "20190617",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "002100.SZ",
+      "hs_type": "SZ",
+      "in_date": "20190617",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "002115.SZ",
+      "hs_type": "SZ",
+      "in_date": "20190617",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "002124.SZ",
+      "hs_type": "SZ",
+      "in_date": "20190617",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "002318.SZ",
+      "hs_type": "SZ",
+      "in_date": "20190617",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "002364.SZ",
+      "hs_type": "SZ",
+      "in_date": "20190617",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "002446.SZ",
+      "hs_type": "SZ",
+      "in_date": "20190617",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "002567.SZ",
+      "hs_type": "SZ",
+      "in_date": "20190617",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "002621.SZ",
+      "hs_type": "SZ",
+      "in_date": "20190617",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "002726.SZ",
+      "hs_type": "SZ",
+      "in_date": "20190617",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "002755.SZ",
+      "hs_type": "SZ",
+      "in_date": "20190617",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "002792.SZ",
+      "hs_type": "SZ",
+      "in_date": "20190617",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "002938.SZ",
+      "hs_type": "SZ",
+      "in_date": "20190617",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "002939.SZ",
+      "hs_type": "SZ",
+      "in_date": "20190617",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "300079.SZ",
+      "hs_type": "SZ",
+      "in_date": "20190617",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "300130.SZ",
+      "hs_type": "SZ",
+      "in_date": "20190617",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "300252.SZ",
+      "hs_type": "SZ",
+      "in_date": "20190617",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "300352.SZ",
+      "hs_type": "SZ",
+      "in_date": "20190617",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "300401.SZ",
+      "hs_type": "SZ",
+      "in_date": "20190617",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "300423.SZ",
+      "hs_type": "SZ",
+      "in_date": "20190617",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "300572.SZ",
+      "hs_type": "SZ",
+      "in_date": "20190617",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "300682.SZ",
+      "hs_type": "SZ",
+      "in_date": "20190617",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "300724.SZ",
+      "hs_type": "SZ",
+      "in_date": "20190617",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "300748.SZ",
+      "hs_type": "SZ",
+      "in_date": "20190617",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "002034.SZ",
+      "hs_type": "SZ",
+      "in_date": "20190311",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "002705.SZ",
+      "hs_type": "SZ",
+      "in_date": "20190311",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "000597.SZ",
+      "hs_type": "SZ",
+      "in_date": "20190102",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "002370.SZ",
+      "hs_type": "SZ",
+      "in_date": "20190102",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "002607.SZ",
+      "hs_type": "SZ",
+      "in_date": "20190102",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "002683.SZ",
+      "hs_type": "SZ",
+      "in_date": "20190102",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "002768.SZ",
+      "hs_type": "SZ",
+      "in_date": "20190102",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "002832.SZ",
+      "hs_type": "SZ",
+      "in_date": "20190102",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "002851.SZ",
+      "hs_type": "SZ",
+      "in_date": "20190102",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "002925.SZ",
+      "hs_type": "SZ",
+      "in_date": "20190102",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "002926.SZ",
+      "hs_type": "SZ",
+      "in_date": "20190102",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "002928.SZ",
+      "hs_type": "SZ",
+      "in_date": "20190102",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "002929.SZ",
+      "hs_type": "SZ",
+      "in_date": "20190102",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "300149.SZ",
+      "hs_type": "SZ",
+      "in_date": "20190102",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "300184.SZ",
+      "hs_type": "SZ",
+      "in_date": "20190102",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "300276.SZ",
+      "hs_type": "SZ",
+      "in_date": "20190102",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "300326.SZ",
+      "hs_type": "SZ",
+      "in_date": "20190102",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "300348.SZ",
+      "hs_type": "SZ",
+      "in_date": "20190102",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "300365.SZ",
+      "hs_type": "SZ",
+      "in_date": "20190102",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "300429.SZ",
+      "hs_type": "SZ",
+      "in_date": "20190102",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "300454.SZ",
+      "hs_type": "SZ",
+      "in_date": "20190102",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "300456.SZ",
+      "hs_type": "SZ",
+      "in_date": "20190102",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "300487.SZ",
+      "hs_type": "SZ",
+      "in_date": "20190102",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "300504.SZ",
+      "hs_type": "SZ",
+      "in_date": "20190102",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "300523.SZ",
+      "hs_type": "SZ",
+      "in_date": "20190102",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "300595.SZ",
+      "hs_type": "SZ",
+      "in_date": "20190102",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "300602.SZ",
+      "hs_type": "SZ",
+      "in_date": "20190102",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "300630.SZ",
+      "hs_type": "SZ",
+      "in_date": "20190102",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "300633.SZ",
+      "hs_type": "SZ",
+      "in_date": "20190102",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "300634.SZ",
+      "hs_type": "SZ",
+      "in_date": "20190102",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "300661.SZ",
+      "hs_type": "SZ",
+      "in_date": "20190102",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "300741.SZ",
+      "hs_type": "SZ",
+      "in_date": "20190102",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "300747.SZ",
+      "hs_type": "SZ",
+      "in_date": "20190102",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "300750.SZ",
+      "hs_type": "SZ",
+      "in_date": "20190102",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "300760.SZ",
+      "hs_type": "SZ",
+      "in_date": "20190102",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "002798.SZ",
+      "hs_type": "SZ",
+      "in_date": "20190514",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "300233.SZ",
+      "hs_type": "SZ",
+      "in_date": "20190514",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "003816.SZ",
+      "hs_type": "SZ",
+      "in_date": "20190909",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "001914.SZ",
+      "hs_type": "SZ",
+      "in_date": "20191216",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "000544.SZ",
+      "hs_type": "SZ",
+      "in_date": "20191216",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "000592.SZ",
+      "hs_type": "SZ",
+      "in_date": "20191216",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "000657.SZ",
+      "hs_type": "SZ",
+      "in_date": "20191216",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "000672.SZ",
+      "hs_type": "SZ",
+      "in_date": "20191216",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "000682.SZ",
+      "hs_type": "SZ",
+      "in_date": "20191216",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "000708.SZ",
+      "hs_type": "SZ",
+      "in_date": "20191216",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "000720.SZ",
+      "hs_type": "SZ",
+      "in_date": "20191216",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "000795.SZ",
+      "hs_type": "SZ",
+      "in_date": "20191216",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "000815.SZ",
+      "hs_type": "SZ",
+      "in_date": "20191216",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "000863.SZ",
+      "hs_type": "SZ",
+      "in_date": "20191216",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "000923.SZ",
+      "hs_type": "SZ",
+      "in_date": "20191216",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "000931.SZ",
+      "hs_type": "SZ",
+      "in_date": "20191216",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "000958.SZ",
+      "hs_type": "SZ",
+      "in_date": "20191216",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "000967.SZ",
+      "hs_type": "SZ",
+      "in_date": "20191216",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "002036.SZ",
+      "hs_type": "SZ",
+      "in_date": "20191216",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "002041.SZ",
+      "hs_type": "SZ",
+      "in_date": "20191216",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "002057.SZ",
+      "hs_type": "SZ",
+      "in_date": "20191216",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "002130.SZ",
+      "hs_type": "SZ",
+      "in_date": "20191216",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "002194.SZ",
+      "hs_type": "SZ",
+      "in_date": "20191216",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "002216.SZ",
+      "hs_type": "SZ",
+      "in_date": "20191216",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "002234.SZ",
+      "hs_type": "SZ",
+      "in_date": "20191216",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "002274.SZ",
+      "hs_type": "SZ",
+      "in_date": "20191216",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "002301.SZ",
+      "hs_type": "SZ",
+      "in_date": "20191216",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "002367.SZ",
+      "hs_type": "SZ",
+      "in_date": "20191216",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "002378.SZ",
+      "hs_type": "SZ",
+      "in_date": "20191216",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "002423.SZ",
+      "hs_type": "SZ",
+      "in_date": "20191216",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "002467.SZ",
+      "hs_type": "SZ",
+      "in_date": "20191216",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "002481.SZ",
+      "hs_type": "SZ",
+      "in_date": "20191216",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "002550.SZ",
+      "hs_type": "SZ",
+      "in_date": "20191216",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "002617.SZ",
+      "hs_type": "SZ",
+      "in_date": "20191216",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "002639.SZ",
+      "hs_type": "SZ",
+      "in_date": "20191216",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "002695.SZ",
+      "hs_type": "SZ",
+      "in_date": "20191216",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "002733.SZ",
+      "hs_type": "SZ",
+      "in_date": "20191216",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "002746.SZ",
+      "hs_type": "SZ",
+      "in_date": "20191216",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "002777.SZ",
+      "hs_type": "SZ",
+      "in_date": "20191216",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "002796.SZ",
+      "hs_type": "SZ",
+      "in_date": "20191216",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "002941.SZ",
+      "hs_type": "SZ",
+      "in_date": "20191216",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "002946.SZ",
+      "hs_type": "SZ",
+      "in_date": "20191216",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "002950.SZ",
+      "hs_type": "SZ",
+      "in_date": "20191216",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "002951.SZ",
+      "hs_type": "SZ",
+      "in_date": "20191216",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "002958.SZ",
+      "hs_type": "SZ",
+      "in_date": "20191216",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "300034.SZ",
+      "hs_type": "SZ",
+      "in_date": "20191216",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "300043.SZ",
+      "hs_type": "SZ",
+      "in_date": "20191216",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "300123.SZ",
+      "hs_type": "SZ",
+      "in_date": "20191216",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "300131.SZ",
+      "hs_type": "SZ",
+      "in_date": "20191216",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "300191.SZ",
+      "hs_type": "SZ",
+      "in_date": "20191216",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "300194.SZ",
+      "hs_type": "SZ",
+      "in_date": "20191216",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "300223.SZ",
+      "hs_type": "SZ",
+      "in_date": "20191216",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "300224.SZ",
+      "hs_type": "SZ",
+      "in_date": "20191216",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "300236.SZ",
+      "hs_type": "SZ",
+      "in_date": "20191216",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "300292.SZ",
+      "hs_type": "SZ",
+      "in_date": "20191216",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "300322.SZ",
+      "hs_type": "SZ",
+      "in_date": "20191216",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "300327.SZ",
+      "hs_type": "SZ",
+      "in_date": "20191216",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "300379.SZ",
+      "hs_type": "SZ",
+      "in_date": "20191216",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "300394.SZ",
+      "hs_type": "SZ",
+      "in_date": "20191216",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "300428.SZ",
+      "hs_type": "SZ",
+      "in_date": "20191216",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "300502.SZ",
+      "hs_type": "SZ",
+      "in_date": "20191216",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "300559.SZ",
+      "hs_type": "SZ",
+      "in_date": "20191216",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "300570.SZ",
+      "hs_type": "SZ",
+      "in_date": "20191216",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "300577.SZ",
+      "hs_type": "SZ",
+      "in_date": "20191216",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "300596.SZ",
+      "hs_type": "SZ",
+      "in_date": "20191216",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "300638.SZ",
+      "hs_type": "SZ",
+      "in_date": "20191216",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "300674.SZ",
+      "hs_type": "SZ",
+      "in_date": "20191216",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "300702.SZ",
+      "hs_type": "SZ",
+      "in_date": "20191216",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "300723.SZ",
+      "hs_type": "SZ",
+      "in_date": "20191216",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "300751.SZ",
+      "hs_type": "SZ",
+      "in_date": "20191216",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "300755.SZ",
+      "hs_type": "SZ",
+      "in_date": "20191216",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "300759.SZ",
+      "hs_type": "SZ",
+      "in_date": "20191223",
+      "out_date": null,
+      "is_new": "1"
+    },
+    {
+      "ts_code": "300761.SZ",
+      "hs_type": "SZ",
+      "in_date": "20191216",
+      "out_date": null,
+      "is_new": "1"
+    }
+  ]
+}

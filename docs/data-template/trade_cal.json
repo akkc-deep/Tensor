@@ -1,0 +1,43 @@
+{
+  "api_name": "trade_cal",
+  "fetched_at": "2026-08-09T14:16:47.034659+00:00",
+  "query_mode": "range",
+  "params": [
+    {
+      "exchange": "SSE",
+      "start_date": "20260807",
+      "end_date": "20260807"
+    },
+    {
+      "exchange": "SZSE",
+      "start_date": "20260807",
+      "end_date": "20260807"
+    },
+    {
+      "exchange": "BSE",
+      "start_date": "20260807",
+      "end_date": "20260807"
+    }
+  ],
+  "fields": [
+    "exchange",
+    "cal_date",
+    "is_open",
+    "pretrade_date"
+  ],
+  "row_count": 2,
+  "data": [
+    {
+      "exchange": "SSE",
+      "cal_date": "20260807",
+      "is_open": 1,
+      "pretrade_date": "20260806"
+    },
+    {
+      "exchange": "SZSE",
+      "cal_date": "20260807",
+      "is_open": 1,
+      "pretrade_date": "20260806"
+    }
+  ]
+}

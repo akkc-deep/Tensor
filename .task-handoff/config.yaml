@@ -1,0 +1,9 @@
+{
+  "budget": {
+    "reassess_fixed_input_fraction": 0.4,
+    "warn_fixed_input_fraction": 0.3
+  },
+  "display_timezone": "Asia/Shanghai",
+  "schema_version": 1,
+  "vcs": "auto"
+}

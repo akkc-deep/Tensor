@@ -1,0 +1,90 @@
+{
+  "api_name": "disclosure_date",
+  "fetched_at": "2026-08-09T14:17:01.527024+00:00",
+  "query_mode": "ann_date",
+  "params": [
+    {
+      "ann_date": "20260807"
+    }
+  ],
+  "fields": [
+    "ts_code",
+    "ann_date",
+    "end_date",
+    "pre_date",
+    "actual_date"
+  ],
+  "row_count": 10,
+  "data": [
+    {
+      "ts_code": "600168.SH",
+      "ann_date": "20260807",
+      "end_date": "20260630",
+      "pre_date": "20260814",
+      "actual_date": null
+    },
+    {
+      "ts_code": "301584.SZ",
+      "ann_date": "20260807",
+      "end_date": "20260630",
+      "pre_date": "20260817",
+      "actual_date": null
+    },
+    {
+      "ts_code": "600133.SH",
+      "ann_date": "20260807",
+      "end_date": "20260630",
+      "pre_date": "20260819",
+      "actual_date": null
+    },
+    {
+      "ts_code": "600176.SH",
+      "ann_date": "20260807",
+      "end_date": "20260630",
+      "pre_date": "20260821",
+      "actual_date": null
+    },
+    {
+      "ts_code": "002116.SZ",
+      "ann_date": "20260807",
+      "end_date": "20260630",
+      "pre_date": "20260822",
+      "actual_date": null
+    },
+    {
+      "ts_code": "301707.SZ",
+      "ann_date": "20260807",
+      "end_date": "20260630",
+      "pre_date": "20260825",
+      "actual_date": null
+    },
+    {
+      "ts_code": "000795.SZ",
+      "ann_date": "20260807",
+      "end_date": "20260630",
+      "pre_date": "20260826",
+      "actual_date": null
+    },
+    {
+      "ts_code": "605117.SH",
+      "ann_date": "20260807",
+      "end_date": "20260630",
+      "pre_date": "20260827",
+      "actual_date": null
+    },
+    {
+      "ts_code": "301459.SZ",
+      "ann_date": "20260807",
+      "end_date": "20260630",
+      "pre_date": "20260829",
+      "actual_date": null
+    },
+    {
+      "ts_code": "688825.SH",
+      "ann_date": "20260807",
+      "end_date": "20260630",
+      "pre_date": "20260829",
+      "actual_date": null
+    }
+  ]
+}

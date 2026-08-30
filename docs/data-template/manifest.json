@@ -1,0 +1,626 @@
+{
+  "trade_date": "20260807",
+  "generated_at": "2026-08-09T14:17:07.171618+00:00",
+  "interfaces": [
+    {
+      "api_name": "stock_basic",
+      "filename": "stock_basic.json",
+      "query_mode": "snapshot",
+      "params": [
+        {
+          "list_status": "L"
+        },
+        {
+          "list_status": "P"
+        },
+        {
+          "list_status": "D"
+        }
+      ],
+      "row_count": 5878,
+      "status": "ok"
+    },
+    {
+      "api_name": "stock_company",
+      "filename": "stock_company.json",
+      "query_mode": "snapshot",
+      "params": [
+        {
+          "exchange": "SSE"
+        },
+        {
+          "exchange": "SZSE"
+        },
+        {
+          "exchange": "BSE"
+        }
+      ],
+      "row_count": 6294,
+      "status": "ok"
+    },
+    {
+      "api_name": "hs_const",
+      "filename": "hs_const.json",
+      "query_mode": "snapshot",
+      "params": [
+        {
+          "hs_type": "SH"
+        },
+        {
+          "hs_type": "SZ"
+        }
+      ],
+      "row_count": 823,
+      "status": "ok"
+    },
+    {
+      "api_name": "income",
+      "filename": "income.json",
+      "query_mode": "ann_date",
+      "params": [
+        {
+          "ts_code": "000001.SZ",
+          "ann_date": "20260807"
+        }
+      ],
+      "row_count": 0,
+      "status": "empty"
+    },
+    {
+      "api_name": "balancesheet",
+      "filename": "balancesheet.json",
+      "query_mode": "ann_date",
+      "params": [
+        {
+          "ts_code": "000001.SZ",
+          "ann_date": "20260807"
+        }
+      ],
+      "row_count": 0,
+      "status": "empty"
+    },
+    {
+      "api_name": "cashflow",
+      "filename": "cashflow.json",
+      "query_mode": "ann_date",
+      "params": [
+        {
+          "ts_code": "000001.SZ",
+          "ann_date": "20260807"
+        }
+      ],
+      "row_count": 0,
+      "status": "empty"
+    },
+    {
+      "api_name": "fina_indicator",
+      "filename": "fina_indicator.json",
+      "query_mode": "ann_date",
+      "params": [
+        {
+          "ts_code": "000001.SZ",
+          "ann_date": "20260807"
+        }
+      ],
+      "row_count": 0,
+      "status": "empty"
+    },
+    {
+      "api_name": "fina_audit",
+      "filename": "fina_audit.json",
+      "query_mode": "ann_date",
+      "params": [
+        {
+          "ts_code": "000001.SZ",
+          "ann_date": "20260807"
+        }
+      ],
+      "row_count": 0,
+      "status": "empty"
+    },
+    {
+      "api_name": "fina_mainbz",
+      "filename": "fina_mainbz.json",
+      "query_mode": "ann_date",
+      "params": [
+        {
+          "ts_code": "000001.SZ",
+          "ann_date": "20260807"
+        }
+      ],
+      "row_count": 150,
+      "status": "ok"
+    },
+    {
+      "api_name": "stk_rewards",
+      "filename": "stk_rewards.json",
+      "query_mode": "snapshot",
+      "params": [
+        {
+          "ts_code": "000001.SZ"
+        }
+      ],
+      "row_count": 1428,
+      "status": "ok"
+    },
+    {
+      "api_name": "stk_holdernumber",
+      "filename": "stk_holdernumber.json",
+      "query_mode": "snapshot",
+      "params": [
+        {
+          "ts_code": "000001.SZ"
+        }
+      ],
+      "row_count": 149,
+      "status": "ok"
+    },
+    {
+      "api_name": "broker_recommend",
+      "filename": "broker_recommend.json",
+      "query_mode": "snapshot",
+      "params": [
+        {
+          "month": "202608"
+        }
+      ],
+      "row_count": 236,
+      "status": "ok"
+    },
+    {
+      "api_name": "trade_cal",
+      "filename": "trade_cal.json",
+      "query_mode": "range",
+      "params": [
+        {
+          "exchange": "SSE",
+          "start_date": "20260807",
+          "end_date": "20260807"
+        },
+        {
+          "exchange": "SZSE",
+          "start_date": "20260807",
+          "end_date": "20260807"
+        },
+        {
+          "exchange": "BSE",
+          "start_date": "20260807",
+          "end_date": "20260807"
+        }
+      ],
+      "row_count": 2,
+      "status": "ok"
+    },
+    {
+      "api_name": "margin",
+      "filename": "margin.json",
+      "query_mode": "trade_date",
+      "params": [
+        {
+          "exchange_id": "SSE",
+          "trade_date": "20260807"
+        },
+        {
+          "exchange_id": "SZSE",
+          "trade_date": "20260807"
+        },
+        {
+          "exchange_id": "BSE",
+          "trade_date": "20260807"
+        }
+      ],
+      "row_count": 1,
+      "status": "ok"
+    },
+    {
+      "api_name": "daily",
+      "filename": "daily.json",
+      "query_mode": "trade_date",
+      "params": [
+        {
+          "trade_date": "20260807"
+        }
+      ],
+      "row_count": 5535,
+      "status": "ok"
+    },
+    {
+      "api_name": "weekly",
+      "filename": "weekly.json",
+      "query_mode": "trade_date",
+      "params": [
+        {
+          "trade_date": "20260807"
+        }
+      ],
+      "row_count": 5613,
+      "status": "ok"
+    },
+    {
+      "api_name": "monthly",
+      "filename": "monthly.json",
+      "query_mode": "trade_date",
+      "params": [
+        {
+          "trade_date": "20260807"
+        }
+      ],
+      "row_count": 0,
+      "status": "empty"
+    },
+    {
+      "api_name": "adj_factor",
+      "filename": "adj_factor.json",
+      "query_mode": "trade_date",
+      "params": [
+        {
+          "trade_date": "20260807"
+        }
+      ],
+      "row_count": 5553,
+      "status": "ok"
+    },
+    {
+      "api_name": "suspend_d",
+      "filename": "suspend_d.json",
+      "query_mode": "trade_date",
+      "params": [
+        {
+          "trade_date": "20260807"
+        }
+      ],
+      "row_count": 5,
+      "status": "ok"
+    },
+    {
+      "api_name": "daily_basic",
+      "filename": "daily_basic.json",
+      "query_mode": "trade_date",
+      "params": [
+        {
+          "trade_date": "20260807"
+        }
+      ],
+      "row_count": 5535,
+      "status": "ok"
+    },
+    {
+      "api_name": "moneyflow",
+      "filename": "moneyflow.json",
+      "query_mode": "trade_date",
+      "params": [
+        {
+          "trade_date": "20260807"
+        }
+      ],
+      "row_count": 5535,
+      "status": "ok"
+    },
+    {
+      "api_name": "stk_limit",
+      "filename": "stk_limit.json",
+      "query_mode": "trade_date",
+      "params": [
+        {
+          "trade_date": "20260807"
+        }
+      ],
+      "row_count": 7733,
+      "status": "ok"
+    },
+    {
+      "api_name": "moneyflow_hsgt",
+      "filename": "moneyflow_hsgt.json",
+      "query_mode": "trade_date",
+      "params": [
+        {
+          "trade_date": "20260807"
+        }
+      ],
+      "row_count": 1,
+      "status": "ok"
+    },
+    {
+      "api_name": "hsgt_top10",
+      "filename": "hsgt_top10.json",
+      "query_mode": "trade_date",
+      "params": [
+        {
+          "trade_date": "20260807"
+        }
+      ],
+      "row_count": 20,
+      "status": "ok"
+    },
+    {
+      "api_name": "hk_hold",
+      "filename": "hk_hold.json",
+      "query_mode": "trade_date",
+      "params": [
+        {
+          "trade_date": "20260807"
+        }
+      ],
+      "row_count": 955,
+      "status": "ok"
+    },
+    {
+      "api_name": "top_list",
+      "filename": "top_list.json",
+      "query_mode": "trade_date",
+      "params": [
+        {
+          "trade_date": "20260807"
+        }
+      ],
+      "row_count": 67,
+      "status": "ok"
+    },
+    {
+      "api_name": "top_inst",
+      "filename": "top_inst.json",
+      "query_mode": "trade_date",
+      "params": [
+        {
+          "trade_date": "20260807"
+        }
+      ],
+      "row_count": 680,
+      "status": "ok"
+    },
+    {
+      "api_name": "margin_detail",
+      "filename": "margin_detail.json",
+      "query_mode": "trade_date",
+      "params": [
+        {
+          "trade_date": "20260807"
+        }
+      ],
+      "row_count": 1994,
+      "status": "ok"
+    },
+    {
+      "api_name": "block_trade",
+      "filename": "block_trade.json",
+      "query_mode": "trade_date",
+      "params": [
+        {
+          "trade_date": "20260807"
+        }
+      ],
+      "row_count": 139,
+      "status": "ok"
+    },
+    {
+      "api_name": "slb_len",
+      "filename": "slb_len.json",
+      "query_mode": "trade_date",
+      "params": [
+        {
+          "trade_date": "20260807"
+        }
+      ],
+      "row_count": 0,
+      "status": "empty"
+    },
+    {
+      "api_name": "slb_sec",
+      "filename": "slb_sec.json",
+      "query_mode": "trade_date",
+      "params": [
+        {
+          "trade_date": "20260807"
+        }
+      ],
+      "row_count": 0,
+      "status": "empty"
+    },
+    {
+      "api_name": "slb_sec_detail",
+      "filename": "slb_sec_detail.json",
+      "query_mode": "trade_date",
+      "params": [
+        {
+          "trade_date": "20260807"
+        }
+      ],
+      "row_count": 0,
+      "status": "empty"
+    },
+    {
+      "api_name": "forecast",
+      "filename": "forecast.json",
+      "query_mode": "ann_date",
+      "params": [
+        {
+          "ann_date": "20260807"
+        }
+      ],
+      "row_count": 1,
+      "status": "ok"
+    },
+    {
+      "api_name": "express",
+      "filename": "express.json",
+      "query_mode": "ann_date",
+      "params": [
+        {
+          "ann_date": "20260807"
+        }
+      ],
+      "row_count": 1,
+      "status": "ok"
+    },
+    {
+      "api_name": "dividend",
+      "filename": "dividend.json",
+      "query_mode": "ann_date",
+      "params": [
+        {
+          "ann_date": "20260807"
+        }
+      ],
+      "row_count": 0,
+      "status": "empty"
+    },
+    {
+      "api_name": "disclosure_date",
+      "filename": "disclosure_date.json",
+      "query_mode": "ann_date",
+      "params": [
+        {
+          "ann_date": "20260807"
+        }
+      ],
+      "row_count": 10,
+      "status": "ok"
+    },
+    {
+      "api_name": "repurchase",
+      "filename": "repurchase.json",
+      "query_mode": "ann_date",
+      "params": [
+        {
+          "ann_date": "20260807"
+        }
+      ],
+      "row_count": 27,
+      "status": "ok"
+    },
+    {
+      "api_name": "share_float",
+      "filename": "share_float.json",
+      "query_mode": "ann_date",
+      "params": [
+        {
+          "ann_date": "20260807"
+        }
+      ],
+      "row_count": 115,
+      "status": "ok"
+    },
+    {
+      "api_name": "stk_holdertrade",
+      "filename": "stk_holdertrade.json",
+      "query_mode": "ann_date",
+      "params": [
+        {
+          "ann_date": "20260807"
+        }
+      ],
+      "row_count": 44,
+      "status": "ok"
+    },
+    {
+      "api_name": "top10_holders",
+      "filename": "top10_holders.json",
+      "query_mode": "ann_date",
+      "params": [
+        {
+          "ann_date": "20260807"
+        }
+      ],
+      "row_count": 0,
+      "status": "empty"
+    },
+    {
+      "api_name": "top10_floatholders",
+      "filename": "top10_floatholders.json",
+      "query_mode": "ann_date",
+      "params": [
+        {
+          "ann_date": "20260807"
+        }
+      ],
+      "row_count": 0,
+      "status": "empty"
+    },
+    {
+      "api_name": "new_share",
+      "filename": "new_share.json",
+      "query_mode": "range",
+      "params": [
+        {
+          "start_date": "20260807",
+          "end_date": "20260807"
+        }
+      ],
+      "row_count": 1,
+      "status": "ok"
+    },
+    {
+      "api_name": "namechange",
+      "filename": "namechange.json",
+      "query_mode": "range",
+      "params": [
+        {
+          "start_date": "20260807",
+          "end_date": "20260807"
+        }
+      ],
+      "row_count": 1,
+      "status": "ok"
+    },
+    {
+      "api_name": "stk_managers",
+      "filename": "stk_managers.json",
+      "query_mode": "snapshot",
+      "params": [
+        {}
+      ],
+      "row_count": 3999,
+      "status": "ok"
+    },
+    {
+      "api_name": "pledge_stat",
+      "filename": "pledge_stat.json",
+      "query_mode": "snapshot",
+      "params": [
+        {}
+      ],
+      "row_count": 3000,
+      "status": "ok"
+    },
+    {
+      "api_name": "pledge_detail",
+      "filename": "pledge_detail.json",
+      "query_mode": "snapshot",
+      "params": [
+        {}
+      ],
+      "row_count": 1438,
+      "status": "ok"
+    },
+    {
+      "api_name": "index_classify",
+      "filename": "index_classify.json",
+      "query_mode": "snapshot",
+      "params": [
+        {}
+      ],
+      "row_count": 359,
+      "status": "ok"
+    },
+    {
+      "api_name": "index_member",
+      "filename": "index_member.json",
+      "query_mode": "snapshot",
+      "params": [
+        {}
+      ],
+      "row_count": 3000,
+      "status": "ok"
+    },
+    {
+      "api_name": "index_member_all",
+      "filename": "index_member_all.json",
+      "query_mode": "snapshot",
+      "params": [
+        {}
+      ],
+      "row_count": 3000,
+      "status": "ok"
+    }
+  ]
+}

@@ -1,0 +1,42 @@
+{
+  "api_name": "new_share",
+  "fetched_at": "2026-08-09T14:17:03.341741+00:00",
+  "query_mode": "range",
+  "params": [
+    {
+      "start_date": "20260807",
+      "end_date": "20260807"
+    }
+  ],
+  "fields": [
+    "ts_code",
+    "sub_code",
+    "name",
+    "ipo_date",
+    "issue_date",
+    "amount",
+    "market_amount",
+    "price",
+    "pe",
+    "limit_amount",
+    "funds",
+    "ballot"
+  ],
+  "row_count": 1,
+  "data": [
+    {
+      "ts_code": "688826.SH",
+      "sub_code": "787826",
+      "name": "频准激光",
+      "ipo_date": "20260807",
+      "issue_date": null,
+      "amount": 1000.0,
+      "market_amount": 240.0,
+      "price": 186.88,
+      "pe": 49.42,
+      "limit_amount": 0.2,
+      "funds": 18.688,
+      "ballot": 0.0
+    }
+  ]
+}

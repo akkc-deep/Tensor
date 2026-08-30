@@ -1,0 +1,321 @@
+{
+  "api_name": "repurchase",
+  "fetched_at": "2026-08-09T14:17:01.733347+00:00",
+  "query_mode": "ann_date",
+  "params": [
+    {
+      "ann_date": "20260807"
+    }
+  ],
+  "fields": [
+    "ts_code",
+    "ann_date",
+    "end_date",
+    "proc",
+    "exp_date",
+    "vol",
+    "amount",
+    "high_limit",
+    "low_limit"
+  ],
+  "row_count": 27,
+  "data": [
+    {
+      "ts_code": "603939.SH",
+      "ann_date": "20260807",
+      "end_date": "20260806",
+      "proc": "实施",
+      "exp_date": null,
+      "vol": 1775600.0,
+      "amount": 39619500.0,
+      "high_limit": 22.62,
+      "low_limit": 22.01
+    },
+    {
+      "ts_code": "002264.SZ",
+      "ann_date": "20260807",
+      "end_date": "20260805",
+      "proc": "完成",
+      "exp_date": null,
+      "vol": 2400000.0,
+      "amount": 14551500.0,
+      "high_limit": 6.69,
+      "low_limit": 5.9
+    },
+    {
+      "ts_code": "603288.SH",
+      "ann_date": "20260807",
+      "end_date": "20260806",
+      "proc": "实施",
+      "exp_date": null,
+      "vol": 2590407.0,
+      "amount": 94554409.36,
+      "high_limit": 36.87,
+      "low_limit": 36.87
+    },
+    {
+      "ts_code": "603341.SH",
+      "ann_date": "20260807",
+      "end_date": "20260806",
+      "proc": "实施",
+      "exp_date": null,
+      "vol": 3453123.0,
+      "amount": 129223080.94,
+      "high_limit": 37.14,
+      "low_limit": 36.22
+    },
+    {
+      "ts_code": "688755.SH",
+      "ann_date": "20260807",
+      "end_date": "20260806",
+      "proc": "实施",
+      "exp_date": null,
+      "vol": 29663.0,
+      "amount": 740221.88,
+      "high_limit": 24.99,
+      "low_limit": 24.78
+    },
+    {
+      "ts_code": "002980.SZ",
+      "ann_date": "20260807",
+      "end_date": "20260807",
+      "proc": "完成",
+      "exp_date": null,
+      "vol": 935560.0,
+      "amount": null,
+      "high_limit": null,
+      "low_limit": 7.21
+    },
+    {
+      "ts_code": "601137.SH",
+      "ann_date": "20260807",
+      "end_date": "20260811",
+      "proc": "完成",
+      "exp_date": null,
+      "vol": 680000.0,
+      "amount": 7621460.4,
+      "high_limit": 11.208,
+      "low_limit": 11.208
+    },
+    {
+      "ts_code": "605020.SH",
+      "ann_date": "20260807",
+      "end_date": "20260806",
+      "proc": "实施",
+      "exp_date": null,
+      "vol": 1180000.0,
+      "amount": 39207900.0,
+      "high_limit": 35.23,
+      "low_limit": 31.29
+    },
+    {
+      "ts_code": "605389.SH",
+      "ann_date": "20260807",
+      "end_date": "20260807",
+      "proc": "完成",
+      "exp_date": null,
+      "vol": 315981.0,
+      "amount": 1.0,
+      "high_limit": null,
+      "low_limit": null
+    },
+    {
+      "ts_code": "600585.SH",
+      "ann_date": "20260807",
+      "end_date": "20260806",
+      "proc": "实施",
+      "exp_date": null,
+      "vol": 25349800.0,
+      "amount": 468378251.01,
+      "high_limit": 17.8,
+      "low_limit": 17.58
+    },
+    {
+      "ts_code": "603596.SH",
+      "ann_date": "20260807",
+      "end_date": "20260806",
+      "proc": "实施",
+      "exp_date": null,
+      "vol": 296100.0,
+      "amount": 7952300.0,
+      "high_limit": 27.35,
+      "low_limit": 26.62
+    },
+    {
+      "ts_code": "600028.SH",
+      "ann_date": "20260807",
+      "end_date": "20260806",
+      "proc": "实施",
+      "exp_date": null,
+      "vol": 93650050.0,
+      "amount": 437966387.9,
+      "high_limit": 5.08,
+      "low_limit": 4.99
+    },
+    {
+      "ts_code": "601919.SH",
+      "ann_date": "20260807",
+      "end_date": "20260806",
+      "proc": "实施",
+      "exp_date": null,
+      "vol": 33211924.0,
+      "amount": 485020138.76,
+      "high_limit": 15.4,
+      "low_limit": 15.27
+    },
+    {
+      "ts_code": "000650.SZ",
+      "ann_date": "20260807",
+      "end_date": "20260805",
+      "proc": "完成",
+      "exp_date": null,
+      "vol": 17700050.0,
+      "amount": 99999600.1,
+      "high_limit": 5.73,
+      "low_limit": 4.86
+    },
+    {
+      "ts_code": "600276.SH",
+      "ann_date": "20260807",
+      "end_date": "20260806",
+      "proc": "实施",
+      "exp_date": null,
+      "vol": 15373040.0,
+      "amount": 938679989.09,
+      "high_limit": 52.91,
+      "low_limit": 52.01
+    },
+    {
+      "ts_code": "002249.SZ",
+      "ann_date": "20260807",
+      "end_date": "20260806",
+      "proc": "实施",
+      "exp_date": null,
+      "vol": 1330000.0,
+      "amount": 9926647.0,
+      "high_limit": 7.49,
+      "low_limit": 7.44
+    },
+    {
+      "ts_code": "000525.SZ",
+      "ann_date": "20260807",
+      "end_date": "20260807",
+      "proc": "完成",
+      "exp_date": null,
+      "vol": 169900.0,
+      "amount": 730570.0,
+      "high_limit": 4.3,
+      "low_limit": 4.3
+    },
+    {
+      "ts_code": "001207.SZ",
+      "ann_date": "20260807",
+      "end_date": "20260806",
+      "proc": "实施",
+      "exp_date": null,
+      "vol": 21300.0,
+      "amount": 329144.4,
+      "high_limit": 15.63,
+      "low_limit": 15.4
+    },
+    {
+      "ts_code": "603590.SH",
+      "ann_date": "20260807",
+      "end_date": null,
+      "proc": "股东大会通过",
+      "exp_date": null,
+      "vol": null,
+      "amount": 132552.0,
+      "high_limit": 15.78,
+      "low_limit": 15.78
+    },
+    {
+      "ts_code": "300157.SZ",
+      "ann_date": "20260807",
+      "end_date": null,
+      "proc": "预案",
+      "exp_date": null,
+      "vol": null,
+      "amount": null,
+      "high_limit": null,
+      "low_limit": 1.61
+    },
+    {
+      "ts_code": "920768.BJ",
+      "ann_date": "20260807",
+      "end_date": "20260806",
+      "proc": "实施",
+      "exp_date": null,
+      "vol": 492760.0,
+      "amount": 3439864.01,
+      "high_limit": 7.04,
+      "low_limit": 6.94
+    },
+    {
+      "ts_code": "300631.SZ",
+      "ann_date": "20260807",
+      "end_date": "20260807",
+      "proc": "实施",
+      "exp_date": null,
+      "vol": 191300.0,
+      "amount": 4175089.2,
+      "high_limit": 22.0,
+      "low_limit": 21.5
+    },
+    {
+      "ts_code": "920717.BJ",
+      "ann_date": "20260807",
+      "end_date": "20260806",
+      "proc": "实施",
+      "exp_date": null,
+      "vol": 1978500.0,
+      "amount": 16080540.75,
+      "high_limit": 8.4,
+      "low_limit": 7.79
+    },
+    {
+      "ts_code": "300906.SZ",
+      "ann_date": "20260807",
+      "end_date": "20260805",
+      "proc": "实施",
+      "exp_date": null,
+      "vol": 992400.0,
+      "amount": 25534098.31,
+      "high_limit": 26.5,
+      "low_limit": 24.55
+    },
+    {
+      "ts_code": "920807.BJ",
+      "ann_date": "20260807",
+      "end_date": null,
+      "proc": "预案",
+      "exp_date": null,
+      "vol": null,
+      "amount": 20000080.0,
+      "high_limit": 17.8,
+      "low_limit": null
+    },
+    {
+      "ts_code": "300274.SZ",
+      "ann_date": "20260807",
+      "end_date": "20260806",
+      "proc": "实施",
+      "exp_date": null,
+      "vol": 471800.0,
+      "amount": 49993778.0,
+      "high_limit": 106.64,
+      "low_limit": 105.26
+    },
+    {
+      "ts_code": "300408.SZ",
+      "ann_date": "20260807",
+      "end_date": "20260807",
+      "proc": "实施",
+      "exp_date": null,
+      "vol": 3619461.0,
+      "amount": 432795560.98,
+      "high_limit": 124.61,
+      "low_limit": 120.76
+    }
+  ]
+}

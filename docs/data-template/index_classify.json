@@ -1,0 +1,3251 @@
+{
+  "api_name": "index_classify",
+  "fetched_at": "2026-08-09T14:17:05.313114+00:00",
+  "query_mode": "snapshot",
+  "params": [
+    {}
+  ],
+  "fields": [
+    "index_code",
+    "industry_name",
+    "level",
+    "industry_code",
+    "is_pub",
+    "parent_code",
+    "src"
+  ],
+  "row_count": 359,
+  "data": [
+    {
+      "index_code": "801020.SI",
+      "industry_name": "采掘",
+      "level": "L1",
+      "industry_code": "210000",
+      "is_pub": null,
+      "parent_code": "0",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "801030.SI",
+      "industry_name": "化工",
+      "level": "L1",
+      "industry_code": "220000",
+      "is_pub": null,
+      "parent_code": "0",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "801040.SI",
+      "industry_name": "钢铁",
+      "level": "L1",
+      "industry_code": "230000",
+      "is_pub": null,
+      "parent_code": "0",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "801050.SI",
+      "industry_name": "有色金属",
+      "level": "L1",
+      "industry_code": "240000",
+      "is_pub": null,
+      "parent_code": "0",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "801710.SI",
+      "industry_name": "建筑材料",
+      "level": "L1",
+      "industry_code": "610000",
+      "is_pub": null,
+      "parent_code": "0",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "801720.SI",
+      "industry_name": "建筑装饰",
+      "level": "L1",
+      "industry_code": "620000",
+      "is_pub": null,
+      "parent_code": "0",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "801730.SI",
+      "industry_name": "电气设备",
+      "level": "L1",
+      "industry_code": "630000",
+      "is_pub": null,
+      "parent_code": "0",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "801890.SI",
+      "industry_name": "机械设备",
+      "level": "L1",
+      "industry_code": "640000",
+      "is_pub": null,
+      "parent_code": "0",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "801740.SI",
+      "industry_name": "国防军工",
+      "level": "L1",
+      "industry_code": "650000",
+      "is_pub": null,
+      "parent_code": "0",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "801880.SI",
+      "industry_name": "汽车",
+      "level": "L1",
+      "industry_code": "280000",
+      "is_pub": null,
+      "parent_code": "0",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "801110.SI",
+      "industry_name": "家用电器",
+      "level": "L1",
+      "industry_code": "330000",
+      "is_pub": null,
+      "parent_code": "0",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "801130.SI",
+      "industry_name": "纺织服装",
+      "level": "L1",
+      "industry_code": "350000",
+      "is_pub": null,
+      "parent_code": "0",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "801140.SI",
+      "industry_name": "轻工制造",
+      "level": "L1",
+      "industry_code": "360000",
+      "is_pub": null,
+      "parent_code": "0",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "801200.SI",
+      "industry_name": "商业贸易",
+      "level": "L1",
+      "industry_code": "450000",
+      "is_pub": null,
+      "parent_code": "0",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "801010.SI",
+      "industry_name": "农林牧渔",
+      "level": "L1",
+      "industry_code": "110000",
+      "is_pub": null,
+      "parent_code": "0",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "801120.SI",
+      "industry_name": "食品饮料",
+      "level": "L1",
+      "industry_code": "340000",
+      "is_pub": null,
+      "parent_code": "0",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "801210.SI",
+      "industry_name": "休闲服务",
+      "level": "L1",
+      "industry_code": "460000",
+      "is_pub": null,
+      "parent_code": "0",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "801150.SI",
+      "industry_name": "医药生物",
+      "level": "L1",
+      "industry_code": "370000",
+      "is_pub": null,
+      "parent_code": "0",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "801160.SI",
+      "industry_name": "公用事业",
+      "level": "L1",
+      "industry_code": "410000",
+      "is_pub": null,
+      "parent_code": "0",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "801170.SI",
+      "industry_name": "交通运输",
+      "level": "L1",
+      "industry_code": "420000",
+      "is_pub": null,
+      "parent_code": "0",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "801180.SI",
+      "industry_name": "房地产",
+      "level": "L1",
+      "industry_code": "430000",
+      "is_pub": null,
+      "parent_code": "0",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "801080.SI",
+      "industry_name": "电子",
+      "level": "L1",
+      "industry_code": "270000",
+      "is_pub": null,
+      "parent_code": "0",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "801750.SI",
+      "industry_name": "计算机",
+      "level": "L1",
+      "industry_code": "710000",
+      "is_pub": null,
+      "parent_code": "0",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "801760.SI",
+      "industry_name": "传媒",
+      "level": "L1",
+      "industry_code": "720000",
+      "is_pub": null,
+      "parent_code": "0",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "801770.SI",
+      "industry_name": "通信",
+      "level": "L1",
+      "industry_code": "730000",
+      "is_pub": null,
+      "parent_code": "0",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "801780.SI",
+      "industry_name": "银行",
+      "level": "L1",
+      "industry_code": "480000",
+      "is_pub": null,
+      "parent_code": "0",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "801790.SI",
+      "industry_name": "非银金融",
+      "level": "L1",
+      "industry_code": "490000",
+      "is_pub": null,
+      "parent_code": "0",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "801230.SI",
+      "industry_name": "综合",
+      "level": "L1",
+      "industry_code": "510000",
+      "is_pub": null,
+      "parent_code": "0",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "801023.SI",
+      "industry_name": "石油开采",
+      "level": "L2",
+      "industry_code": "210100",
+      "is_pub": null,
+      "parent_code": "210000",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "801021.SI",
+      "industry_name": "煤炭开采",
+      "level": "L2",
+      "industry_code": "210200",
+      "is_pub": null,
+      "parent_code": "210000",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "801022.SI",
+      "industry_name": "其他采掘",
+      "level": "L2",
+      "industry_code": "210300",
+      "is_pub": null,
+      "parent_code": "210000",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "801024.SI",
+      "industry_name": "采掘服务",
+      "level": "L2",
+      "industry_code": "210400",
+      "is_pub": null,
+      "parent_code": "210000",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "801035.SI",
+      "industry_name": "石油化工",
+      "level": "L2",
+      "industry_code": "220100",
+      "is_pub": null,
+      "parent_code": "220000",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "801033.SI",
+      "industry_name": "化学原料",
+      "level": "L2",
+      "industry_code": "220200",
+      "is_pub": null,
+      "parent_code": "220000",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "801034.SI",
+      "industry_name": "化学制品",
+      "level": "L2",
+      "industry_code": "220300",
+      "is_pub": null,
+      "parent_code": "220000",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "801032.SI",
+      "industry_name": "化学纤维",
+      "level": "L2",
+      "industry_code": "220400",
+      "is_pub": null,
+      "parent_code": "220000",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "801036.SI",
+      "industry_name": "塑料",
+      "level": "L2",
+      "industry_code": "220500",
+      "is_pub": null,
+      "parent_code": "220000",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "801037.SI",
+      "industry_name": "橡胶",
+      "level": "L2",
+      "industry_code": "220600",
+      "is_pub": null,
+      "parent_code": "220000",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "801041.SI",
+      "industry_name": "钢铁",
+      "level": "L2",
+      "industry_code": "230100",
+      "is_pub": null,
+      "parent_code": "230000",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "801055.SI",
+      "industry_name": "工业金属",
+      "level": "L2",
+      "industry_code": "240300",
+      "is_pub": null,
+      "parent_code": "240000",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "801053.SI",
+      "industry_name": "黄金",
+      "level": "L2",
+      "industry_code": "240400",
+      "is_pub": null,
+      "parent_code": "240000",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "801054.SI",
+      "industry_name": "稀有金属",
+      "level": "L2",
+      "industry_code": "240500",
+      "is_pub": null,
+      "parent_code": "240000",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "801051.SI",
+      "industry_name": "金属非金属新材料",
+      "level": "L2",
+      "industry_code": "240200",
+      "is_pub": null,
+      "parent_code": "240000",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "801711.SI",
+      "industry_name": "水泥制造",
+      "level": "L2",
+      "industry_code": "610100",
+      "is_pub": null,
+      "parent_code": "610000",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "801712.SI",
+      "industry_name": "玻璃制造",
+      "level": "L2",
+      "industry_code": "610200",
+      "is_pub": null,
+      "parent_code": "610000",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "801713.SI",
+      "industry_name": "其他建材",
+      "level": "L2",
+      "industry_code": "610300",
+      "is_pub": null,
+      "parent_code": "610000",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "801721.SI",
+      "industry_name": "房屋建设",
+      "level": "L2",
+      "industry_code": "620100",
+      "is_pub": null,
+      "parent_code": "620000",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "801722.SI",
+      "industry_name": "装修装饰",
+      "level": "L2",
+      "industry_code": "620200",
+      "is_pub": null,
+      "parent_code": "620000",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "801725.SI",
+      "industry_name": "园林工程",
+      "level": "L2",
+      "industry_code": "620500",
+      "is_pub": null,
+      "parent_code": "620000",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "801723.SI",
+      "industry_name": "基础建设",
+      "level": "L2",
+      "industry_code": "620300",
+      "is_pub": null,
+      "parent_code": "620000",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "801724.SI",
+      "industry_name": "专业工程",
+      "level": "L2",
+      "industry_code": "620400",
+      "is_pub": null,
+      "parent_code": "620000",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "801731.SI",
+      "industry_name": "电机",
+      "level": "L2",
+      "industry_code": "630100",
+      "is_pub": null,
+      "parent_code": "630000",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "801732.SI",
+      "industry_name": "电气自动化设备",
+      "level": "L2",
+      "industry_code": "630200",
+      "is_pub": null,
+      "parent_code": "630000",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "801733.SI",
+      "industry_name": "电源设备",
+      "level": "L2",
+      "industry_code": "630300",
+      "is_pub": null,
+      "parent_code": "630000",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "801734.SI",
+      "industry_name": "高低压设备",
+      "level": "L2",
+      "industry_code": "630400",
+      "is_pub": null,
+      "parent_code": "630000",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "801072.SI",
+      "industry_name": "通用机械",
+      "level": "L2",
+      "industry_code": "640100",
+      "is_pub": null,
+      "parent_code": "640000",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "801074.SI",
+      "industry_name": "专用设备",
+      "level": "L2",
+      "industry_code": "640200",
+      "is_pub": null,
+      "parent_code": "640000",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "801073.SI",
+      "industry_name": "仪器仪表",
+      "level": "L2",
+      "industry_code": "640300",
+      "is_pub": null,
+      "parent_code": "640000",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "801075.SI",
+      "industry_name": "金属制品",
+      "level": "L2",
+      "industry_code": "640400",
+      "is_pub": null,
+      "parent_code": "640000",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "801076.SI",
+      "industry_name": "运输设备",
+      "level": "L2",
+      "industry_code": "640500",
+      "is_pub": null,
+      "parent_code": "640000",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "801741.SI",
+      "industry_name": "航天装备",
+      "level": "L2",
+      "industry_code": "650100",
+      "is_pub": null,
+      "parent_code": "650000",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "801742.SI",
+      "industry_name": "航空装备",
+      "level": "L2",
+      "industry_code": "650200",
+      "is_pub": null,
+      "parent_code": "650000",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "801743.SI",
+      "industry_name": "地面兵装",
+      "level": "L2",
+      "industry_code": "650300",
+      "is_pub": null,
+      "parent_code": "650000",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "801744.SI",
+      "industry_name": "船舶制造",
+      "level": "L2",
+      "industry_code": "650400",
+      "is_pub": null,
+      "parent_code": "650000",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "801094.SI",
+      "industry_name": "汽车整车",
+      "level": "L2",
+      "industry_code": "280100",
+      "is_pub": null,
+      "parent_code": "280000",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "801093.SI",
+      "industry_name": "汽车零部件",
+      "level": "L2",
+      "industry_code": "280200",
+      "is_pub": null,
+      "parent_code": "280000",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "801092.SI",
+      "industry_name": "汽车服务",
+      "level": "L2",
+      "industry_code": "280300",
+      "is_pub": null,
+      "parent_code": "280000",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "801881.SI",
+      "industry_name": "其他交运设备",
+      "level": "L2",
+      "industry_code": "280400",
+      "is_pub": null,
+      "parent_code": "280000",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "801111.SI",
+      "industry_name": "白色家电",
+      "level": "L2",
+      "industry_code": "330100",
+      "is_pub": null,
+      "parent_code": "330000",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "801112.SI",
+      "industry_name": "视听器材",
+      "level": "L2",
+      "industry_code": "330200",
+      "is_pub": null,
+      "parent_code": "330000",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "801131.SI",
+      "industry_name": "纺织制造",
+      "level": "L2",
+      "industry_code": "350100",
+      "is_pub": null,
+      "parent_code": "350000",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "801132.SI",
+      "industry_name": "服装家纺",
+      "level": "L2",
+      "industry_code": "350200",
+      "is_pub": null,
+      "parent_code": "350000",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "801143.SI",
+      "industry_name": "造纸",
+      "level": "L2",
+      "industry_code": "360100",
+      "is_pub": null,
+      "parent_code": "360000",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "801141.SI",
+      "industry_name": "包装印刷",
+      "level": "L2",
+      "industry_code": "360200",
+      "is_pub": null,
+      "parent_code": "360000",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "801142.SI",
+      "industry_name": "家用轻工",
+      "level": "L2",
+      "industry_code": "360300",
+      "is_pub": null,
+      "parent_code": "360000",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "801144.SI",
+      "industry_name": "其他轻工制造",
+      "level": "L2",
+      "industry_code": "360400",
+      "is_pub": null,
+      "parent_code": "360000",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "801203.SI",
+      "industry_name": "一般零售",
+      "level": "L2",
+      "industry_code": "450300",
+      "is_pub": null,
+      "parent_code": "450000",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "801204.SI",
+      "industry_name": "专业零售",
+      "level": "L2",
+      "industry_code": "450400",
+      "is_pub": null,
+      "parent_code": "450000",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "801205.SI",
+      "industry_name": "商业物业经营",
+      "level": "L2",
+      "industry_code": "450500",
+      "is_pub": null,
+      "parent_code": "450000",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "801202.SI",
+      "industry_name": "贸易",
+      "level": "L2",
+      "industry_code": "450200",
+      "is_pub": null,
+      "parent_code": "450000",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "801016.SI",
+      "industry_name": "种植业",
+      "level": "L2",
+      "industry_code": "110100",
+      "is_pub": null,
+      "parent_code": "110000",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "801015.SI",
+      "industry_name": "渔业",
+      "level": "L2",
+      "industry_code": "110200",
+      "is_pub": null,
+      "parent_code": "110000",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "801011.SI",
+      "industry_name": "林业",
+      "level": "L2",
+      "industry_code": "110300",
+      "is_pub": null,
+      "parent_code": "110000",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "801014.SI",
+      "industry_name": "饲料",
+      "level": "L2",
+      "industry_code": "110400",
+      "is_pub": null,
+      "parent_code": "110000",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "801012.SI",
+      "industry_name": "农产品加工",
+      "level": "L2",
+      "industry_code": "110500",
+      "is_pub": null,
+      "parent_code": "110000",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "801013.SI",
+      "industry_name": "农业综合",
+      "level": "L2",
+      "industry_code": "110600",
+      "is_pub": null,
+      "parent_code": "110000",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "801017.SI",
+      "industry_name": "畜禽养殖",
+      "level": "L2",
+      "industry_code": "110700",
+      "is_pub": null,
+      "parent_code": "110000",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "801018.SI",
+      "industry_name": "动物保健",
+      "level": "L2",
+      "industry_code": "110800",
+      "is_pub": null,
+      "parent_code": "110000",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "801123.SI",
+      "industry_name": "饮料制造",
+      "level": "L2",
+      "industry_code": "340300",
+      "is_pub": null,
+      "parent_code": "340000",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "801124.SI",
+      "industry_name": "食品加工",
+      "level": "L2",
+      "industry_code": "340400",
+      "is_pub": null,
+      "parent_code": "340000",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "801212.SI",
+      "industry_name": "景点",
+      "level": "L2",
+      "industry_code": "460100",
+      "is_pub": null,
+      "parent_code": "460000",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "801213.SI",
+      "industry_name": "酒店",
+      "level": "L2",
+      "industry_code": "460200",
+      "is_pub": null,
+      "parent_code": "460000",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "801214.SI",
+      "industry_name": "旅游综合",
+      "level": "L2",
+      "industry_code": "460300",
+      "is_pub": null,
+      "parent_code": "460000",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "801211.SI",
+      "industry_name": "餐饮",
+      "level": "L2",
+      "industry_code": "460400",
+      "is_pub": null,
+      "parent_code": "460000",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "801215.SI",
+      "industry_name": "其他休闲服务",
+      "level": "L2",
+      "industry_code": "460500",
+      "is_pub": null,
+      "parent_code": "460000",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "801151.SI",
+      "industry_name": "化学制药",
+      "level": "L2",
+      "industry_code": "370100",
+      "is_pub": null,
+      "parent_code": "370000",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "801155.SI",
+      "industry_name": "中药",
+      "level": "L2",
+      "industry_code": "370200",
+      "is_pub": null,
+      "parent_code": "370000",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "801152.SI",
+      "industry_name": "生物制品",
+      "level": "L2",
+      "industry_code": "370300",
+      "is_pub": null,
+      "parent_code": "370000",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "801154.SI",
+      "industry_name": "医药商业",
+      "level": "L2",
+      "industry_code": "370400",
+      "is_pub": null,
+      "parent_code": "370000",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "801153.SI",
+      "industry_name": "医疗器械",
+      "level": "L2",
+      "industry_code": "370500",
+      "is_pub": null,
+      "parent_code": "370000",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "801156.SI",
+      "industry_name": "医疗服务",
+      "level": "L2",
+      "industry_code": "370600",
+      "is_pub": null,
+      "parent_code": "370000",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "801161.SI",
+      "industry_name": "电力",
+      "level": "L2",
+      "industry_code": "410100",
+      "is_pub": null,
+      "parent_code": "410000",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "801164.SI",
+      "industry_name": "水务",
+      "level": "L2",
+      "industry_code": "410200",
+      "is_pub": null,
+      "parent_code": "410000",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "801163.SI",
+      "industry_name": "燃气",
+      "level": "L2",
+      "industry_code": "410300",
+      "is_pub": null,
+      "parent_code": "410000",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "801162.SI",
+      "industry_name": "环保工程及服务",
+      "level": "L2",
+      "industry_code": "410400",
+      "is_pub": null,
+      "parent_code": "410000",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "801171.SI",
+      "industry_name": "港口",
+      "level": "L2",
+      "industry_code": "420100",
+      "is_pub": null,
+      "parent_code": "420000",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "801175.SI",
+      "industry_name": "高速公路",
+      "level": "L2",
+      "industry_code": "420200",
+      "is_pub": null,
+      "parent_code": "420000",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "801172.SI",
+      "industry_name": "公交",
+      "level": "L2",
+      "industry_code": "420300",
+      "is_pub": null,
+      "parent_code": "420000",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "801173.SI",
+      "industry_name": "航空运输",
+      "level": "L2",
+      "industry_code": "420400",
+      "is_pub": null,
+      "parent_code": "420000",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "801174.SI",
+      "industry_name": "机场",
+      "level": "L2",
+      "industry_code": "420500",
+      "is_pub": null,
+      "parent_code": "420000",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "801176.SI",
+      "industry_name": "航运",
+      "level": "L2",
+      "industry_code": "420600",
+      "is_pub": null,
+      "parent_code": "420000",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "801177.SI",
+      "industry_name": "铁路运输",
+      "level": "L2",
+      "industry_code": "420700",
+      "is_pub": null,
+      "parent_code": "420000",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "801178.SI",
+      "industry_name": "物流",
+      "level": "L2",
+      "industry_code": "420800",
+      "is_pub": null,
+      "parent_code": "420000",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "801181.SI",
+      "industry_name": "房地产开发",
+      "level": "L2",
+      "industry_code": "430100",
+      "is_pub": null,
+      "parent_code": "430000",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "801182.SI",
+      "industry_name": "园区开发",
+      "level": "L2",
+      "industry_code": "430200",
+      "is_pub": null,
+      "parent_code": "430000",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "801081.SI",
+      "industry_name": "半导体",
+      "level": "L2",
+      "industry_code": "270100",
+      "is_pub": null,
+      "parent_code": "270000",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "801083.SI",
+      "industry_name": "元件",
+      "level": "L2",
+      "industry_code": "270200",
+      "is_pub": null,
+      "parent_code": "270000",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "801084.SI",
+      "industry_name": "光学光电子",
+      "level": "L2",
+      "industry_code": "270300",
+      "is_pub": null,
+      "parent_code": "270000",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "801082.SI",
+      "industry_name": "其他电子",
+      "level": "L2",
+      "industry_code": "270400",
+      "is_pub": null,
+      "parent_code": "270000",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "801085.SI",
+      "industry_name": "电子制造",
+      "level": "L2",
+      "industry_code": "270500",
+      "is_pub": null,
+      "parent_code": "270000",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "801101.SI",
+      "industry_name": "计算机设备",
+      "level": "L2",
+      "industry_code": "710100",
+      "is_pub": null,
+      "parent_code": "710000",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "801222.SI",
+      "industry_name": "计算机应用",
+      "level": "L2",
+      "industry_code": "710200",
+      "is_pub": null,
+      "parent_code": "710000",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "801761.SI",
+      "industry_name": "文化传媒",
+      "level": "L2",
+      "industry_code": "720100",
+      "is_pub": null,
+      "parent_code": "720000",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "801751.SI",
+      "industry_name": "营销传播",
+      "level": "L2",
+      "industry_code": "720200",
+      "is_pub": null,
+      "parent_code": "720000",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "801752.SI",
+      "industry_name": "互联网传媒",
+      "level": "L2",
+      "industry_code": "720300",
+      "is_pub": null,
+      "parent_code": "720000",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "801223.SI",
+      "industry_name": "通信运营",
+      "level": "L2",
+      "industry_code": "730100",
+      "is_pub": null,
+      "parent_code": "730000",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "801102.SI",
+      "industry_name": "通信设备",
+      "level": "L2",
+      "industry_code": "730200",
+      "is_pub": null,
+      "parent_code": "730000",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "801192.SI",
+      "industry_name": "银行",
+      "level": "L2",
+      "industry_code": "480100",
+      "is_pub": null,
+      "parent_code": "480000",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "801193.SI",
+      "industry_name": "证券",
+      "level": "L2",
+      "industry_code": "490100",
+      "is_pub": null,
+      "parent_code": "490000",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "801194.SI",
+      "industry_name": "保险",
+      "level": "L2",
+      "industry_code": "490200",
+      "is_pub": null,
+      "parent_code": "490000",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "801191.SI",
+      "industry_name": "多元金融",
+      "level": "L2",
+      "industry_code": "490300",
+      "is_pub": null,
+      "parent_code": "490000",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "801231.SI",
+      "industry_name": "综合",
+      "level": "L2",
+      "industry_code": "510100",
+      "is_pub": null,
+      "parent_code": "510000",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "850211.SI",
+      "industry_name": "石油开采",
+      "level": "L3",
+      "industry_code": "210101",
+      "is_pub": null,
+      "parent_code": "210100",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "850221.SI",
+      "industry_name": "煤炭开采",
+      "level": "L3",
+      "industry_code": "210201",
+      "is_pub": null,
+      "parent_code": "210200",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "850222.SI",
+      "industry_name": "焦炭加工",
+      "level": "L3",
+      "industry_code": "210202",
+      "is_pub": null,
+      "parent_code": "210200",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "850231.SI",
+      "industry_name": "其他采掘",
+      "level": "L3",
+      "industry_code": "210301",
+      "is_pub": null,
+      "parent_code": "210300",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "850241.SI",
+      "industry_name": "油气钻采服务",
+      "level": "L3",
+      "industry_code": "210401",
+      "is_pub": null,
+      "parent_code": "210400",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "850242.SI",
+      "industry_name": "其他采掘服务",
+      "level": "L3",
+      "industry_code": "210402",
+      "is_pub": null,
+      "parent_code": "210400",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "850311.SI",
+      "industry_name": "石油加工",
+      "level": "L3",
+      "industry_code": "220101",
+      "is_pub": null,
+      "parent_code": "220100",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "850313.SI",
+      "industry_name": "石油贸易",
+      "level": "L3",
+      "industry_code": "220103",
+      "is_pub": null,
+      "parent_code": "220100",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "850321.SI",
+      "industry_name": "纯碱",
+      "level": "L3",
+      "industry_code": "220201",
+      "is_pub": null,
+      "parent_code": "220200",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "850322.SI",
+      "industry_name": "氯碱",
+      "level": "L3",
+      "industry_code": "220202",
+      "is_pub": null,
+      "parent_code": "220200",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "850323.SI",
+      "industry_name": "无机盐",
+      "level": "L3",
+      "industry_code": "220203",
+      "is_pub": null,
+      "parent_code": "220200",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "850324.SI",
+      "industry_name": "其他化学原料",
+      "level": "L3",
+      "industry_code": "220204",
+      "is_pub": null,
+      "parent_code": "220200",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "850331.SI",
+      "industry_name": "氮肥",
+      "level": "L3",
+      "industry_code": "220301",
+      "is_pub": null,
+      "parent_code": "220300",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "850332.SI",
+      "industry_name": "磷肥",
+      "level": "L3",
+      "industry_code": "220302",
+      "is_pub": null,
+      "parent_code": "220300",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "850336.SI",
+      "industry_name": "钾肥",
+      "level": "L3",
+      "industry_code": "220306",
+      "is_pub": null,
+      "parent_code": "220300",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "850381.SI",
+      "industry_name": "复合肥",
+      "level": "L3",
+      "industry_code": "220310",
+      "is_pub": null,
+      "parent_code": "220300",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "850333.SI",
+      "industry_name": "农药",
+      "level": "L3",
+      "industry_code": "220303",
+      "is_pub": null,
+      "parent_code": "220300",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "850334.SI",
+      "industry_name": "日用化学产品",
+      "level": "L3",
+      "industry_code": "220304",
+      "is_pub": null,
+      "parent_code": "220300",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "850335.SI",
+      "industry_name": "涂料油漆油墨制造",
+      "level": "L3",
+      "industry_code": "220305",
+      "is_pub": null,
+      "parent_code": "220300",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "850337.SI",
+      "industry_name": "民爆用品",
+      "level": "L3",
+      "industry_code": "220307",
+      "is_pub": null,
+      "parent_code": "220300",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "850338.SI",
+      "industry_name": "纺织化学用品",
+      "level": "L3",
+      "industry_code": "220308",
+      "is_pub": null,
+      "parent_code": "220300",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "850382.SI",
+      "industry_name": "氟化工及制冷剂",
+      "level": "L3",
+      "industry_code": "220311",
+      "is_pub": null,
+      "parent_code": "220300",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "850383.SI",
+      "industry_name": "磷化工及磷酸盐",
+      "level": "L3",
+      "industry_code": "220312",
+      "is_pub": null,
+      "parent_code": "220300",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "850339.SI",
+      "industry_name": "其他化学制品",
+      "level": "L3",
+      "industry_code": "220309",
+      "is_pub": null,
+      "parent_code": "220300",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "850372.SI",
+      "industry_name": "聚氨酯",
+      "level": "L3",
+      "industry_code": "220313",
+      "is_pub": null,
+      "parent_code": "220300",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "850373.SI",
+      "industry_name": "玻纤",
+      "level": "L3",
+      "industry_code": "220314",
+      "is_pub": null,
+      "parent_code": "220300",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "850341.SI",
+      "industry_name": "涤纶",
+      "level": "L3",
+      "industry_code": "220401",
+      "is_pub": null,
+      "parent_code": "220400",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "850342.SI",
+      "industry_name": "维纶",
+      "level": "L3",
+      "industry_code": "220402",
+      "is_pub": null,
+      "parent_code": "220400",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "850343.SI",
+      "industry_name": "粘胶",
+      "level": "L3",
+      "industry_code": "220403",
+      "is_pub": null,
+      "parent_code": "220400",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "850345.SI",
+      "industry_name": "氨纶",
+      "level": "L3",
+      "industry_code": "220405",
+      "is_pub": null,
+      "parent_code": "220400",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "850344.SI",
+      "industry_name": "其他纤维",
+      "level": "L3",
+      "industry_code": "220404",
+      "is_pub": null,
+      "parent_code": "220400",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "850352.SI",
+      "industry_name": "合成革",
+      "level": "L3",
+      "industry_code": "220502",
+      "is_pub": null,
+      "parent_code": "220500",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "850353.SI",
+      "industry_name": "改性塑料",
+      "level": "L3",
+      "industry_code": "220503",
+      "is_pub": null,
+      "parent_code": "220500",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "850351.SI",
+      "industry_name": "其他塑料制品",
+      "level": "L3",
+      "industry_code": "220501",
+      "is_pub": null,
+      "parent_code": "220500",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "850361.SI",
+      "industry_name": "轮胎",
+      "level": "L3",
+      "industry_code": "220601",
+      "is_pub": null,
+      "parent_code": "220600",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "850362.SI",
+      "industry_name": "其他橡胶制品",
+      "level": "L3",
+      "industry_code": "220602",
+      "is_pub": null,
+      "parent_code": "220600",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "850363.SI",
+      "industry_name": "炭黑",
+      "level": "L3",
+      "industry_code": "220603",
+      "is_pub": null,
+      "parent_code": "220600",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "850411.SI",
+      "industry_name": "普钢",
+      "level": "L3",
+      "industry_code": "230101",
+      "is_pub": null,
+      "parent_code": "230100",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "850412.SI",
+      "industry_name": "特钢",
+      "level": "L3",
+      "industry_code": "230102",
+      "is_pub": null,
+      "parent_code": "230100",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "850551.SI",
+      "industry_name": "铝",
+      "level": "L3",
+      "industry_code": "240301",
+      "is_pub": null,
+      "parent_code": "240300",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "850552.SI",
+      "industry_name": "铜",
+      "level": "L3",
+      "industry_code": "240302",
+      "is_pub": null,
+      "parent_code": "240300",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "850553.SI",
+      "industry_name": "铅锌",
+      "level": "L3",
+      "industry_code": "240303",
+      "is_pub": null,
+      "parent_code": "240300",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "850531.SI",
+      "industry_name": "黄金",
+      "level": "L3",
+      "industry_code": "240401",
+      "is_pub": null,
+      "parent_code": "240400",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "850541.SI",
+      "industry_name": "稀土",
+      "level": "L3",
+      "industry_code": "240501",
+      "is_pub": null,
+      "parent_code": "240500",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "850542.SI",
+      "industry_name": "钨",
+      "level": "L3",
+      "industry_code": "240502",
+      "is_pub": null,
+      "parent_code": "240500",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "850543.SI",
+      "industry_name": "锂",
+      "level": "L3",
+      "industry_code": "240503",
+      "is_pub": null,
+      "parent_code": "240500",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "850544.SI",
+      "industry_name": "其他稀有小金属",
+      "level": "L3",
+      "industry_code": "240504",
+      "is_pub": null,
+      "parent_code": "240500",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "850521.SI",
+      "industry_name": "金属新材料",
+      "level": "L3",
+      "industry_code": "240201",
+      "is_pub": null,
+      "parent_code": "240200",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "850522.SI",
+      "industry_name": "磁性材料",
+      "level": "L3",
+      "industry_code": "240202",
+      "is_pub": null,
+      "parent_code": "240200",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "850523.SI",
+      "industry_name": "非金属新材料",
+      "level": "L3",
+      "industry_code": "240203",
+      "is_pub": null,
+      "parent_code": "240200",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "850612.SI",
+      "industry_name": "水泥制造",
+      "level": "L3",
+      "industry_code": "610101",
+      "is_pub": null,
+      "parent_code": "610100",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "850611.SI",
+      "industry_name": "玻璃制造",
+      "level": "L3",
+      "industry_code": "610201",
+      "is_pub": null,
+      "parent_code": "610200",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "850615.SI",
+      "industry_name": "耐火材料",
+      "level": "L3",
+      "industry_code": "610301",
+      "is_pub": null,
+      "parent_code": "610300",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "850616.SI",
+      "industry_name": "管材",
+      "level": "L3",
+      "industry_code": "610302",
+      "is_pub": null,
+      "parent_code": "610300",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "850614.SI",
+      "industry_name": "其他建材",
+      "level": "L3",
+      "industry_code": "610303",
+      "is_pub": null,
+      "parent_code": "610300",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "850623.SI",
+      "industry_name": "房屋建设",
+      "level": "L3",
+      "industry_code": "620101",
+      "is_pub": null,
+      "parent_code": "620100",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "857221.SI",
+      "industry_name": "装修装饰",
+      "level": "L3",
+      "industry_code": "620201",
+      "is_pub": null,
+      "parent_code": "620200",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "857251.SI",
+      "industry_name": "园林工程",
+      "level": "L3",
+      "industry_code": "620501",
+      "is_pub": null,
+      "parent_code": "620500",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "857231.SI",
+      "industry_name": "城轨建设",
+      "level": "L3",
+      "industry_code": "620301",
+      "is_pub": null,
+      "parent_code": "620300",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "857232.SI",
+      "industry_name": "路桥施工",
+      "level": "L3",
+      "industry_code": "620302",
+      "is_pub": null,
+      "parent_code": "620300",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "857233.SI",
+      "industry_name": "水利工程",
+      "level": "L3",
+      "industry_code": "620303",
+      "is_pub": null,
+      "parent_code": "620300",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "857234.SI",
+      "industry_name": "铁路建设",
+      "level": "L3",
+      "industry_code": "620304",
+      "is_pub": null,
+      "parent_code": "620300",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "857235.SI",
+      "industry_name": "其他基础建设",
+      "level": "L3",
+      "industry_code": "620305",
+      "is_pub": null,
+      "parent_code": "620300",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "857241.SI",
+      "industry_name": "钢结构",
+      "level": "L3",
+      "industry_code": "620401",
+      "is_pub": null,
+      "parent_code": "620400",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "857242.SI",
+      "industry_name": "化学工程",
+      "level": "L3",
+      "industry_code": "620402",
+      "is_pub": null,
+      "parent_code": "620400",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "857243.SI",
+      "industry_name": "国际工程承包",
+      "level": "L3",
+      "industry_code": "620403",
+      "is_pub": null,
+      "parent_code": "620400",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "857244.SI",
+      "industry_name": "其他专业工程",
+      "level": "L3",
+      "industry_code": "620404",
+      "is_pub": null,
+      "parent_code": "620400",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "850741.SI",
+      "industry_name": "电机",
+      "level": "L3",
+      "industry_code": "630101",
+      "is_pub": null,
+      "parent_code": "630100",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "857321.SI",
+      "industry_name": "电网自动化",
+      "level": "L3",
+      "industry_code": "630201",
+      "is_pub": null,
+      "parent_code": "630200",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "857322.SI",
+      "industry_name": "工控自动化",
+      "level": "L3",
+      "industry_code": "630202",
+      "is_pub": null,
+      "parent_code": "630200",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "857323.SI",
+      "industry_name": "计量仪表",
+      "level": "L3",
+      "industry_code": "630203",
+      "is_pub": null,
+      "parent_code": "630200",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "857331.SI",
+      "industry_name": "综合电力设备商",
+      "level": "L3",
+      "industry_code": "630301",
+      "is_pub": null,
+      "parent_code": "630300",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "857332.SI",
+      "industry_name": "风电设备",
+      "level": "L3",
+      "industry_code": "630302",
+      "is_pub": null,
+      "parent_code": "630300",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "857333.SI",
+      "industry_name": "光伏设备",
+      "level": "L3",
+      "industry_code": "630303",
+      "is_pub": null,
+      "parent_code": "630300",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "857334.SI",
+      "industry_name": "火电设备",
+      "level": "L3",
+      "industry_code": "630304",
+      "is_pub": null,
+      "parent_code": "630300",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "857335.SI",
+      "industry_name": "储能设备",
+      "level": "L3",
+      "industry_code": "630305",
+      "is_pub": null,
+      "parent_code": "630300",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "857336.SI",
+      "industry_name": "其它电源设备",
+      "level": "L3",
+      "industry_code": "630306",
+      "is_pub": null,
+      "parent_code": "630300",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "857341.SI",
+      "industry_name": "高压设备",
+      "level": "L3",
+      "industry_code": "630401",
+      "is_pub": null,
+      "parent_code": "630400",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "857342.SI",
+      "industry_name": "中压设备",
+      "level": "L3",
+      "industry_code": "630402",
+      "is_pub": null,
+      "parent_code": "630400",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "857343.SI",
+      "industry_name": "低压设备",
+      "level": "L3",
+      "industry_code": "630403",
+      "is_pub": null,
+      "parent_code": "630400",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "857344.SI",
+      "industry_name": "线缆部件及其他",
+      "level": "L3",
+      "industry_code": "630404",
+      "is_pub": null,
+      "parent_code": "630400",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "850711.SI",
+      "industry_name": "机床工具",
+      "level": "L3",
+      "industry_code": "640101",
+      "is_pub": null,
+      "parent_code": "640100",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "850712.SI",
+      "industry_name": "机械基础件",
+      "level": "L3",
+      "industry_code": "640102",
+      "is_pub": null,
+      "parent_code": "640100",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "850713.SI",
+      "industry_name": "磨具磨料",
+      "level": "L3",
+      "industry_code": "640103",
+      "is_pub": null,
+      "parent_code": "640100",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "850714.SI",
+      "industry_name": "内燃机",
+      "level": "L3",
+      "industry_code": "640104",
+      "is_pub": null,
+      "parent_code": "640100",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "850715.SI",
+      "industry_name": "制冷空调设备",
+      "level": "L3",
+      "industry_code": "640105",
+      "is_pub": null,
+      "parent_code": "640100",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "850716.SI",
+      "industry_name": "其它通用机械",
+      "level": "L3",
+      "industry_code": "640106",
+      "is_pub": null,
+      "parent_code": "640100",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "850722.SI",
+      "industry_name": "工程机械",
+      "level": "L3",
+      "industry_code": "640201",
+      "is_pub": null,
+      "parent_code": "640200",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "850724.SI",
+      "industry_name": "重型机械",
+      "level": "L3",
+      "industry_code": "640202",
+      "is_pub": null,
+      "parent_code": "640200",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "850725.SI",
+      "industry_name": "冶金矿采化工设备",
+      "level": "L3",
+      "industry_code": "640203",
+      "is_pub": null,
+      "parent_code": "640200",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "850728.SI",
+      "industry_name": "楼宇设备",
+      "level": "L3",
+      "industry_code": "640204",
+      "is_pub": null,
+      "parent_code": "640200",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "850729.SI",
+      "industry_name": "环保设备",
+      "level": "L3",
+      "industry_code": "640205",
+      "is_pub": null,
+      "parent_code": "640200",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "850721.SI",
+      "industry_name": "纺织服装设备",
+      "level": "L3",
+      "industry_code": "640206",
+      "is_pub": null,
+      "parent_code": "640200",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "850723.SI",
+      "industry_name": "农用机械",
+      "level": "L3",
+      "industry_code": "640207",
+      "is_pub": null,
+      "parent_code": "640200",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "850726.SI",
+      "industry_name": "印刷包装机械",
+      "level": "L3",
+      "industry_code": "640208",
+      "is_pub": null,
+      "parent_code": "640200",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "850727.SI",
+      "industry_name": "其它专用机械",
+      "level": "L3",
+      "industry_code": "640209",
+      "is_pub": null,
+      "parent_code": "640200",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "850731.SI",
+      "industry_name": "仪器仪表",
+      "level": "L3",
+      "industry_code": "640301",
+      "is_pub": null,
+      "parent_code": "640300",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "850751.SI",
+      "industry_name": "金属制品",
+      "level": "L3",
+      "industry_code": "640401",
+      "is_pub": null,
+      "parent_code": "640400",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "850936.SI",
+      "industry_name": "铁路设备",
+      "level": "L3",
+      "industry_code": "640501",
+      "is_pub": null,
+      "parent_code": "640500",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "857411.SI",
+      "industry_name": "航天装备",
+      "level": "L3",
+      "industry_code": "650101",
+      "is_pub": null,
+      "parent_code": "650100",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "857421.SI",
+      "industry_name": "航空装备",
+      "level": "L3",
+      "industry_code": "650201",
+      "is_pub": null,
+      "parent_code": "650200",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "857431.SI",
+      "industry_name": "地面兵装",
+      "level": "L3",
+      "industry_code": "650301",
+      "is_pub": null,
+      "parent_code": "650300",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "850935.SI",
+      "industry_name": "船舶制造",
+      "level": "L3",
+      "industry_code": "650401",
+      "is_pub": null,
+      "parent_code": "650400",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "850911.SI",
+      "industry_name": "乘用车",
+      "level": "L3",
+      "industry_code": "280101",
+      "is_pub": null,
+      "parent_code": "280100",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "850912.SI",
+      "industry_name": "商用载货车",
+      "level": "L3",
+      "industry_code": "280102",
+      "is_pub": null,
+      "parent_code": "280100",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "850913.SI",
+      "industry_name": "商用载客车",
+      "level": "L3",
+      "industry_code": "280103",
+      "is_pub": null,
+      "parent_code": "280100",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "850921.SI",
+      "industry_name": "汽车零部件",
+      "level": "L3",
+      "industry_code": "280201",
+      "is_pub": null,
+      "parent_code": "280200",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "850941.SI",
+      "industry_name": "汽车服务",
+      "level": "L3",
+      "industry_code": "280301",
+      "is_pub": null,
+      "parent_code": "280300",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "858811.SI",
+      "industry_name": "其他交运设备",
+      "level": "L3",
+      "industry_code": "280401",
+      "is_pub": null,
+      "parent_code": "280400",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "851111.SI",
+      "industry_name": "冰箱",
+      "level": "L3",
+      "industry_code": "330101",
+      "is_pub": null,
+      "parent_code": "330100",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "851112.SI",
+      "industry_name": "空调",
+      "level": "L3",
+      "industry_code": "330102",
+      "is_pub": null,
+      "parent_code": "330100",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "851113.SI",
+      "industry_name": "洗衣机",
+      "level": "L3",
+      "industry_code": "330103",
+      "is_pub": null,
+      "parent_code": "330100",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "851114.SI",
+      "industry_name": "小家电",
+      "level": "L3",
+      "industry_code": "330104",
+      "is_pub": null,
+      "parent_code": "330100",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "851115.SI",
+      "industry_name": "家电零部件",
+      "level": "L3",
+      "industry_code": "330105",
+      "is_pub": null,
+      "parent_code": "330100",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "851121.SI",
+      "industry_name": "彩电",
+      "level": "L3",
+      "industry_code": "330201",
+      "is_pub": null,
+      "parent_code": "330200",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "851122.SI",
+      "industry_name": "其它视听器材",
+      "level": "L3",
+      "industry_code": "330202",
+      "is_pub": null,
+      "parent_code": "330200",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "851311.SI",
+      "industry_name": "毛纺",
+      "level": "L3",
+      "industry_code": "350101",
+      "is_pub": null,
+      "parent_code": "350100",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "851312.SI",
+      "industry_name": "棉纺",
+      "level": "L3",
+      "industry_code": "350102",
+      "is_pub": null,
+      "parent_code": "350100",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "851313.SI",
+      "industry_name": "丝绸",
+      "level": "L3",
+      "industry_code": "350103",
+      "is_pub": null,
+      "parent_code": "350100",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "851314.SI",
+      "industry_name": "印染",
+      "level": "L3",
+      "industry_code": "350104",
+      "is_pub": null,
+      "parent_code": "350100",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "851315.SI",
+      "industry_name": "辅料",
+      "level": "L3",
+      "industry_code": "350105",
+      "is_pub": null,
+      "parent_code": "350100",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "851316.SI",
+      "industry_name": "其他纺织",
+      "level": "L3",
+      "industry_code": "350106",
+      "is_pub": null,
+      "parent_code": "350100",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "851322.SI",
+      "industry_name": "男装",
+      "level": "L3",
+      "industry_code": "350202",
+      "is_pub": null,
+      "parent_code": "350200",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "851323.SI",
+      "industry_name": "女装",
+      "level": "L3",
+      "industry_code": "350203",
+      "is_pub": null,
+      "parent_code": "350200",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "851324.SI",
+      "industry_name": "休闲服装",
+      "level": "L3",
+      "industry_code": "350204",
+      "is_pub": null,
+      "parent_code": "350200",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "851325.SI",
+      "industry_name": "鞋帽",
+      "level": "L3",
+      "industry_code": "350205",
+      "is_pub": null,
+      "parent_code": "350200",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "851326.SI",
+      "industry_name": "家纺",
+      "level": "L3",
+      "industry_code": "350206",
+      "is_pub": null,
+      "parent_code": "350200",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "851327.SI",
+      "industry_name": "其他服装",
+      "level": "L3",
+      "industry_code": "350207",
+      "is_pub": null,
+      "parent_code": "350200",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "851411.SI",
+      "industry_name": "造纸",
+      "level": "L3",
+      "industry_code": "360101",
+      "is_pub": null,
+      "parent_code": "360100",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "851421.SI",
+      "industry_name": "包装印刷",
+      "level": "L3",
+      "industry_code": "360201",
+      "is_pub": null,
+      "parent_code": "360200",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "851432.SI",
+      "industry_name": "家具",
+      "level": "L3",
+      "industry_code": "360302",
+      "is_pub": null,
+      "parent_code": "360300",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "851433.SI",
+      "industry_name": "其他家用轻工",
+      "level": "L3",
+      "industry_code": "360303",
+      "is_pub": null,
+      "parent_code": "360300",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "851434.SI",
+      "industry_name": "珠宝首饰",
+      "level": "L3",
+      "industry_code": "360304",
+      "is_pub": null,
+      "parent_code": "360300",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "851435.SI",
+      "industry_name": "文娱用品",
+      "level": "L3",
+      "industry_code": "360305",
+      "is_pub": null,
+      "parent_code": "360300",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "851441.SI",
+      "industry_name": "其他轻工制造",
+      "level": "L3",
+      "industry_code": "360401",
+      "is_pub": null,
+      "parent_code": "360400",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "852031.SI",
+      "industry_name": "百货",
+      "level": "L3",
+      "industry_code": "450301",
+      "is_pub": null,
+      "parent_code": "450300",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "852032.SI",
+      "industry_name": "超市",
+      "level": "L3",
+      "industry_code": "450302",
+      "is_pub": null,
+      "parent_code": "450300",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "852033.SI",
+      "industry_name": "多业态零售",
+      "level": "L3",
+      "industry_code": "450303",
+      "is_pub": null,
+      "parent_code": "450300",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "852041.SI",
+      "industry_name": "专业连锁",
+      "level": "L3",
+      "industry_code": "450401",
+      "is_pub": null,
+      "parent_code": "450400",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "852051.SI",
+      "industry_name": "一般物业经营",
+      "level": "L3",
+      "industry_code": "450501",
+      "is_pub": null,
+      "parent_code": "450500",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "852052.SI",
+      "industry_name": "专业市场",
+      "level": "L3",
+      "industry_code": "450502",
+      "is_pub": null,
+      "parent_code": "450500",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "852021.SI",
+      "industry_name": "贸易",
+      "level": "L3",
+      "industry_code": "450201",
+      "is_pub": null,
+      "parent_code": "450200",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "850111.SI",
+      "industry_name": "种子生产",
+      "level": "L3",
+      "industry_code": "110101",
+      "is_pub": null,
+      "parent_code": "110100",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "850112.SI",
+      "industry_name": "粮食种植",
+      "level": "L3",
+      "industry_code": "110102",
+      "is_pub": null,
+      "parent_code": "110100",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "850113.SI",
+      "industry_name": "其他种植业",
+      "level": "L3",
+      "industry_code": "110103",
+      "is_pub": null,
+      "parent_code": "110100",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "850121.SI",
+      "industry_name": "海洋捕捞",
+      "level": "L3",
+      "industry_code": "110201",
+      "is_pub": null,
+      "parent_code": "110200",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "850122.SI",
+      "industry_name": "水产养殖",
+      "level": "L3",
+      "industry_code": "110202",
+      "is_pub": null,
+      "parent_code": "110200",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "850131.SI",
+      "industry_name": "林业",
+      "level": "L3",
+      "industry_code": "110301",
+      "is_pub": null,
+      "parent_code": "110300",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "850141.SI",
+      "industry_name": "饲料",
+      "level": "L3",
+      "industry_code": "110401",
+      "is_pub": null,
+      "parent_code": "110400",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "850151.SI",
+      "industry_name": "果蔬加工",
+      "level": "L3",
+      "industry_code": "110501",
+      "is_pub": null,
+      "parent_code": "110500",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "850152.SI",
+      "industry_name": "粮油加工",
+      "level": "L3",
+      "industry_code": "110502",
+      "is_pub": null,
+      "parent_code": "110500",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "850154.SI",
+      "industry_name": "其他农产品加工",
+      "level": "L3",
+      "industry_code": "110504",
+      "is_pub": null,
+      "parent_code": "110500",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "850161.SI",
+      "industry_name": "农业综合",
+      "level": "L3",
+      "industry_code": "110601",
+      "is_pub": null,
+      "parent_code": "110600",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "850171.SI",
+      "industry_name": "畜禽养殖",
+      "level": "L3",
+      "industry_code": "110701",
+      "is_pub": null,
+      "parent_code": "110700",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "850181.SI",
+      "industry_name": "动物保健",
+      "level": "L3",
+      "industry_code": "110801",
+      "is_pub": null,
+      "parent_code": "110800",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "851231.SI",
+      "industry_name": "白酒",
+      "level": "L3",
+      "industry_code": "340301",
+      "is_pub": null,
+      "parent_code": "340300",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "851232.SI",
+      "industry_name": "啤酒",
+      "level": "L3",
+      "industry_code": "340302",
+      "is_pub": null,
+      "parent_code": "340300",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "851233.SI",
+      "industry_name": "其他酒类",
+      "level": "L3",
+      "industry_code": "340303",
+      "is_pub": null,
+      "parent_code": "340300",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "851234.SI",
+      "industry_name": "软饮料",
+      "level": "L3",
+      "industry_code": "340304",
+      "is_pub": null,
+      "parent_code": "340300",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "851235.SI",
+      "industry_name": "葡萄酒",
+      "level": "L3",
+      "industry_code": "340305",
+      "is_pub": null,
+      "parent_code": "340300",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "851236.SI",
+      "industry_name": "黄酒",
+      "level": "L3",
+      "industry_code": "340306",
+      "is_pub": null,
+      "parent_code": "340300",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "851241.SI",
+      "industry_name": "肉制品",
+      "level": "L3",
+      "industry_code": "340401",
+      "is_pub": null,
+      "parent_code": "340400",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "851242.SI",
+      "industry_name": "调味发酵品",
+      "level": "L3",
+      "industry_code": "340402",
+      "is_pub": null,
+      "parent_code": "340400",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "851243.SI",
+      "industry_name": "乳品",
+      "level": "L3",
+      "industry_code": "340403",
+      "is_pub": null,
+      "parent_code": "340400",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "851244.SI",
+      "industry_name": "食品综合",
+      "level": "L3",
+      "industry_code": "340404",
+      "is_pub": null,
+      "parent_code": "340400",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "852111.SI",
+      "industry_name": "人工景点",
+      "level": "L3",
+      "industry_code": "460101",
+      "is_pub": null,
+      "parent_code": "460100",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "852112.SI",
+      "industry_name": "自然景点",
+      "level": "L3",
+      "industry_code": "460102",
+      "is_pub": null,
+      "parent_code": "460100",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "852121.SI",
+      "industry_name": "酒店",
+      "level": "L3",
+      "industry_code": "460201",
+      "is_pub": null,
+      "parent_code": "460200",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "852131.SI",
+      "industry_name": "旅游综合",
+      "level": "L3",
+      "industry_code": "460301",
+      "is_pub": null,
+      "parent_code": "460300",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "852141.SI",
+      "industry_name": "餐饮",
+      "level": "L3",
+      "industry_code": "460401",
+      "is_pub": null,
+      "parent_code": "460400",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "852151.SI",
+      "industry_name": "其他休闲服务",
+      "level": "L3",
+      "industry_code": "460501",
+      "is_pub": null,
+      "parent_code": "460500",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "851511.SI",
+      "industry_name": "化学原料药",
+      "level": "L3",
+      "industry_code": "370101",
+      "is_pub": null,
+      "parent_code": "370100",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "851512.SI",
+      "industry_name": "化学制剂",
+      "level": "L3",
+      "industry_code": "370102",
+      "is_pub": null,
+      "parent_code": "370100",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "851521.SI",
+      "industry_name": "中药",
+      "level": "L3",
+      "industry_code": "370201",
+      "is_pub": null,
+      "parent_code": "370200",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "851531.SI",
+      "industry_name": "生物制品",
+      "level": "L3",
+      "industry_code": "370301",
+      "is_pub": null,
+      "parent_code": "370300",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "851541.SI",
+      "industry_name": "医药商业",
+      "level": "L3",
+      "industry_code": "370401",
+      "is_pub": null,
+      "parent_code": "370400",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "851551.SI",
+      "industry_name": "医疗器械",
+      "level": "L3",
+      "industry_code": "370501",
+      "is_pub": null,
+      "parent_code": "370500",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "851561.SI",
+      "industry_name": "医疗服务",
+      "level": "L3",
+      "industry_code": "370601",
+      "is_pub": null,
+      "parent_code": "370600",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "851611.SI",
+      "industry_name": "火电",
+      "level": "L3",
+      "industry_code": "410101",
+      "is_pub": null,
+      "parent_code": "410100",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "851612.SI",
+      "industry_name": "水电",
+      "level": "L3",
+      "industry_code": "410102",
+      "is_pub": null,
+      "parent_code": "410100",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "851613.SI",
+      "industry_name": "燃机发电",
+      "level": "L3",
+      "industry_code": "410103",
+      "is_pub": null,
+      "parent_code": "410100",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "851614.SI",
+      "industry_name": "热电",
+      "level": "L3",
+      "industry_code": "410104",
+      "is_pub": null,
+      "parent_code": "410100",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "851615.SI",
+      "industry_name": "新能源发电",
+      "level": "L3",
+      "industry_code": "410105",
+      "is_pub": null,
+      "parent_code": "410100",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "851621.SI",
+      "industry_name": "水务",
+      "level": "L3",
+      "industry_code": "410201",
+      "is_pub": null,
+      "parent_code": "410200",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "851631.SI",
+      "industry_name": "燃气",
+      "level": "L3",
+      "industry_code": "410301",
+      "is_pub": null,
+      "parent_code": "410300",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "851641.SI",
+      "industry_name": "环保工程及服务",
+      "level": "L3",
+      "industry_code": "410401",
+      "is_pub": null,
+      "parent_code": "410400",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "851711.SI",
+      "industry_name": "港口",
+      "level": "L3",
+      "industry_code": "420101",
+      "is_pub": null,
+      "parent_code": "420100",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "851731.SI",
+      "industry_name": "高速公路",
+      "level": "L3",
+      "industry_code": "420201",
+      "is_pub": null,
+      "parent_code": "420200",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "851721.SI",
+      "industry_name": "公交",
+      "level": "L3",
+      "industry_code": "420301",
+      "is_pub": null,
+      "parent_code": "420300",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "851741.SI",
+      "industry_name": "航空运输",
+      "level": "L3",
+      "industry_code": "420401",
+      "is_pub": null,
+      "parent_code": "420400",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "851751.SI",
+      "industry_name": "机场",
+      "level": "L3",
+      "industry_code": "420501",
+      "is_pub": null,
+      "parent_code": "420500",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "851761.SI",
+      "industry_name": "航运",
+      "level": "L3",
+      "industry_code": "420601",
+      "is_pub": null,
+      "parent_code": "420600",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "851771.SI",
+      "industry_name": "铁路运输",
+      "level": "L3",
+      "industry_code": "420701",
+      "is_pub": null,
+      "parent_code": "420700",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "851781.SI",
+      "industry_name": "物流",
+      "level": "L3",
+      "industry_code": "420801",
+      "is_pub": null,
+      "parent_code": "420800",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "851811.SI",
+      "industry_name": "房地产开发",
+      "level": "L3",
+      "industry_code": "430101",
+      "is_pub": null,
+      "parent_code": "430100",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "851821.SI",
+      "industry_name": "园区开发",
+      "level": "L3",
+      "industry_code": "430201",
+      "is_pub": null,
+      "parent_code": "430200",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "850811.SI",
+      "industry_name": "集成电路",
+      "level": "L3",
+      "industry_code": "270101",
+      "is_pub": null,
+      "parent_code": "270100",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "850812.SI",
+      "industry_name": "分立器件",
+      "level": "L3",
+      "industry_code": "270102",
+      "is_pub": null,
+      "parent_code": "270100",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "850813.SI",
+      "industry_name": "半导体材料",
+      "level": "L3",
+      "industry_code": "270103",
+      "is_pub": null,
+      "parent_code": "270100",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "850822.SI",
+      "industry_name": "印制电路板",
+      "level": "L3",
+      "industry_code": "270202",
+      "is_pub": null,
+      "parent_code": "270200",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "850823.SI",
+      "industry_name": "被动元件",
+      "level": "L3",
+      "industry_code": "270203",
+      "is_pub": null,
+      "parent_code": "270200",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "850831.SI",
+      "industry_name": "显示器件",
+      "level": "L3",
+      "industry_code": "270301",
+      "is_pub": null,
+      "parent_code": "270300",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "850832.SI",
+      "industry_name": "LED",
+      "level": "L3",
+      "industry_code": "270302",
+      "is_pub": null,
+      "parent_code": "270300",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "850833.SI",
+      "industry_name": "光学元件",
+      "level": "L3",
+      "industry_code": "270303",
+      "is_pub": null,
+      "parent_code": "270300",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "850841.SI",
+      "industry_name": "其他电子",
+      "level": "L3",
+      "industry_code": "270401",
+      "is_pub": null,
+      "parent_code": "270400",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "850851.SI",
+      "industry_name": "电子系统组装",
+      "level": "L3",
+      "industry_code": "270501",
+      "is_pub": null,
+      "parent_code": "270500",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "850852.SI",
+      "industry_name": "电子零部件制造",
+      "level": "L3",
+      "industry_code": "270502",
+      "is_pub": null,
+      "parent_code": "270500",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "851021.SI",
+      "industry_name": "计算机设备",
+      "level": "L3",
+      "industry_code": "710101",
+      "is_pub": null,
+      "parent_code": "710100",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "852225.SI",
+      "industry_name": "软件开发",
+      "level": "L3",
+      "industry_code": "710201",
+      "is_pub": null,
+      "parent_code": "710200",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "852226.SI",
+      "industry_name": "IT服务",
+      "level": "L3",
+      "industry_code": "710202",
+      "is_pub": null,
+      "parent_code": "710200",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "852241.SI",
+      "industry_name": "平面媒体",
+      "level": "L3",
+      "industry_code": "720101",
+      "is_pub": null,
+      "parent_code": "720100",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "852242.SI",
+      "industry_name": "影视动漫",
+      "level": "L3",
+      "industry_code": "720102",
+      "is_pub": null,
+      "parent_code": "720100",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "852224.SI",
+      "industry_name": "有线电视网络",
+      "level": "L3",
+      "industry_code": "720103",
+      "is_pub": null,
+      "parent_code": "720100",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "852244.SI",
+      "industry_name": "其他文化传媒",
+      "level": "L3",
+      "industry_code": "720104",
+      "is_pub": null,
+      "parent_code": "720100",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "852243.SI",
+      "industry_name": "营销服务",
+      "level": "L3",
+      "industry_code": "720201",
+      "is_pub": null,
+      "parent_code": "720200",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "852221.SI",
+      "industry_name": "互联网信息服务",
+      "level": "L3",
+      "industry_code": "720301",
+      "is_pub": null,
+      "parent_code": "720300",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "852222.SI",
+      "industry_name": "移动互联网服务",
+      "level": "L3",
+      "industry_code": "720302",
+      "is_pub": null,
+      "parent_code": "720300",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "852223.SI",
+      "industry_name": "其他互联网服务",
+      "level": "L3",
+      "industry_code": "720303",
+      "is_pub": null,
+      "parent_code": "720300",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "852211.SI",
+      "industry_name": "通信运营",
+      "level": "L3",
+      "industry_code": "730101",
+      "is_pub": null,
+      "parent_code": "730100",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "851012.SI",
+      "industry_name": "终端设备",
+      "level": "L3",
+      "industry_code": "730201",
+      "is_pub": null,
+      "parent_code": "730200",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "851013.SI",
+      "industry_name": "通信传输设备",
+      "level": "L3",
+      "industry_code": "730202",
+      "is_pub": null,
+      "parent_code": "730200",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "851014.SI",
+      "industry_name": "通信配套服务",
+      "level": "L3",
+      "industry_code": "730203",
+      "is_pub": null,
+      "parent_code": "730200",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "851911.SI",
+      "industry_name": "银行",
+      "level": "L3",
+      "industry_code": "480101",
+      "is_pub": null,
+      "parent_code": "480100",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "851931.SI",
+      "industry_name": "证券",
+      "level": "L3",
+      "industry_code": "490101",
+      "is_pub": null,
+      "parent_code": "490100",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "851941.SI",
+      "industry_name": "保险",
+      "level": "L3",
+      "industry_code": "490201",
+      "is_pub": null,
+      "parent_code": "490200",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "851921.SI",
+      "industry_name": "多元金融",
+      "level": "L3",
+      "industry_code": "490301",
+      "is_pub": null,
+      "parent_code": "490300",
+      "src": "SW2014"
+    },
+    {
+      "index_code": "852311.SI",
+      "industry_name": "综合",
+      "level": "L3",
+      "industry_code": "510101",
+      "is_pub": null,
+      "parent_code": "510100",
+      "src": "SW2014"
+    }
+  ]
+}

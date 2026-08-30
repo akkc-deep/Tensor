@@ -1,0 +1,1057 @@
+{
+  "api_name": "share_float",
+  "fetched_at": "2026-08-09T14:17:02.073716+00:00",
+  "query_mode": "ann_date",
+  "params": [
+    {
+      "ann_date": "20260807"
+    }
+  ],
+  "fields": [
+    "ts_code",
+    "ann_date",
+    "float_date",
+    "float_share",
+    "float_ratio",
+    "holder_name",
+    "share_type"
+  ],
+  "row_count": 115,
+  "data": [
+    {
+      "ts_code": "603324.SH",
+      "ann_date": "20260807",
+      "float_date": "20290806",
+      "float_share": 200000.0,
+      "float_ratio": 0.1319,
+      "holder_name": "许云",
+      "share_type": "股权激励限售流通"
+    },
+    {
+      "ts_code": "603324.SH",
+      "ann_date": "20260807",
+      "float_date": "20290806",
+      "float_share": 80000.0,
+      "float_ratio": 0.0528,
+      "holder_name": "章学春",
+      "share_type": "股权激励限售流通"
+    },
+    {
+      "ts_code": "603324.SH",
+      "ann_date": "20260807",
+      "float_date": "20290806",
+      "float_share": 30000.0,
+      "float_ratio": 0.0198,
+      "holder_name": "聂磊",
+      "share_type": "股权激励限售流通"
+    },
+    {
+      "ts_code": "603324.SH",
+      "ann_date": "20260807",
+      "float_date": "20290806",
+      "float_share": 1400000.0,
+      "float_ratio": 0.9236,
+      "holder_name": "常程",
+      "share_type": "股权激励限售流通"
+    },
+    {
+      "ts_code": "603324.SH",
+      "ann_date": "20260807",
+      "float_date": "20290806",
+      "float_share": 250000.0,
+      "float_ratio": 0.1649,
+      "holder_name": "张鹏",
+      "share_type": "股权激励限售流通"
+    },
+    {
+      "ts_code": "603324.SH",
+      "ann_date": "20260807",
+      "float_date": "20290806",
+      "float_share": 80000.0,
+      "float_ratio": 0.0528,
+      "holder_name": "郁洪伟",
+      "share_type": "股权激励限售流通"
+    },
+    {
+      "ts_code": "603324.SH",
+      "ann_date": "20260807",
+      "float_date": "20290806",
+      "float_share": 3064900.0,
+      "float_ratio": 2.022,
+      "holder_name": "核心及骨干人员、董事会认为需要激励的其他人员(共149人)",
+      "share_type": "股权激励限售流通"
+    },
+    {
+      "ts_code": "874687",
+      "ann_date": "20260807",
+      "float_date": "20280811",
+      "float_share": 10571560.0,
+      "float_ratio": 21.8989,
+      "holder_name": "嘉兴珈上投资合伙企业(有限合伙)",
+      "share_type": "首发原始股"
+    },
+    {
+      "ts_code": "874687",
+      "ann_date": "20260807",
+      "float_date": "20280811",
+      "float_share": 3063920.0,
+      "float_ratio": 6.3469,
+      "holder_name": "嘉兴珈北投资合伙企业(有限合伙)",
+      "share_type": "首发原始股"
+    },
+    {
+      "ts_code": "874687",
+      "ann_date": "20260807",
+      "float_date": "20280811",
+      "float_share": 2566480.0,
+      "float_ratio": 5.3164,
+      "holder_name": "嘉兴珈广投资合伙企业(有限合伙)",
+      "share_type": "首发原始股"
+    },
+    {
+      "ts_code": "874687",
+      "ann_date": "20260807",
+      "float_date": "20280811",
+      "float_share": 10571560.0,
+      "float_ratio": 21.8989,
+      "holder_name": "嘉兴珈上投资合伙企业（有限合伙）",
+      "share_type": "首发原始股"
+    },
+    {
+      "ts_code": "874687",
+      "ann_date": "20260807",
+      "float_date": "20280811",
+      "float_share": 6603320.0,
+      "float_ratio": 13.6787,
+      "holder_name": "田军",
+      "share_type": "首发原始股"
+    },
+    {
+      "ts_code": "874687",
+      "ann_date": "20260807",
+      "float_date": "20280811",
+      "float_share": 3814360.0,
+      "float_ratio": 7.9014,
+      "holder_name": "苏文才",
+      "share_type": "首发原始股"
+    },
+    {
+      "ts_code": "874687",
+      "ann_date": "20260807",
+      "float_date": "20280811",
+      "float_share": 3802160.0,
+      "float_ratio": 7.8761,
+      "holder_name": "王吉超",
+      "share_type": "首发原始股"
+    },
+    {
+      "ts_code": "874687",
+      "ann_date": "20260807",
+      "float_date": "20280811",
+      "float_share": 3063920.0,
+      "float_ratio": 6.3469,
+      "holder_name": "嘉兴珈北投资合伙企业（有限合伙）",
+      "share_type": "首发原始股"
+    },
+    {
+      "ts_code": "874687",
+      "ann_date": "20260807",
+      "float_date": "20280811",
+      "float_share": 2566480.0,
+      "float_ratio": 5.3164,
+      "holder_name": "嘉兴珈广投资合伙企业（有限合伙）",
+      "share_type": "首发原始股"
+    },
+    {
+      "ts_code": "874687",
+      "ann_date": "20260807",
+      "float_date": "20280811",
+      "float_share": 414433.0,
+      "float_ratio": 0.8585,
+      "holder_name": "嘉兴盛央股权投资有限公司",
+      "share_type": "首发原始股"
+    },
+    {
+      "ts_code": "002524.SZ",
+      "ann_date": "20260807",
+      "float_date": "20280807",
+      "float_share": 30000.0,
+      "float_ratio": 0.0058,
+      "holder_name": "陈少伟",
+      "share_type": "股权激励限售流通"
+    },
+    {
+      "ts_code": "002524.SZ",
+      "ann_date": "20260807",
+      "float_date": "20280807",
+      "float_share": 30000.0,
+      "float_ratio": 0.0058,
+      "holder_name": "张勇辉",
+      "share_type": "股权激励限售流通"
+    },
+    {
+      "ts_code": "002524.SZ",
+      "ann_date": "20260807",
+      "float_date": "20280807",
+      "float_share": 30000.0,
+      "float_ratio": 0.0058,
+      "holder_name": "李俊英",
+      "share_type": "股权激励限售流通"
+    },
+    {
+      "ts_code": "002524.SZ",
+      "ann_date": "20260807",
+      "float_date": "20280807",
+      "float_share": 30000.0,
+      "float_ratio": 0.0058,
+      "holder_name": "周荷莲",
+      "share_type": "股权激励限售流通"
+    },
+    {
+      "ts_code": "002524.SZ",
+      "ann_date": "20260807",
+      "float_date": "20280807",
+      "float_share": 40000.0,
+      "float_ratio": 0.0078,
+      "holder_name": "荣翱",
+      "share_type": "股权激励限售流通"
+    },
+    {
+      "ts_code": "002524.SZ",
+      "ann_date": "20260807",
+      "float_date": "20280807",
+      "float_share": 30000.0,
+      "float_ratio": 0.0058,
+      "holder_name": "陈智芳",
+      "share_type": "股权激励限售流通"
+    },
+    {
+      "ts_code": "002524.SZ",
+      "ann_date": "20260807",
+      "float_date": "20280807",
+      "float_share": 1280000.0,
+      "float_ratio": 0.2484,
+      "holder_name": "中层管理人员及核心骨干员工(96人)",
+      "share_type": "股权激励限售流通"
+    },
+    {
+      "ts_code": "002524.SZ",
+      "ann_date": "20260807",
+      "float_date": "20280807",
+      "float_share": 30000.0,
+      "float_ratio": 0.0058,
+      "holder_name": "王琦",
+      "share_type": "股权激励限售流通"
+    },
+    {
+      "ts_code": "603324.SH",
+      "ann_date": "20260807",
+      "float_date": "20280807",
+      "float_share": 200000.0,
+      "float_ratio": 0.1319,
+      "holder_name": "许云",
+      "share_type": "股权激励限售流通"
+    },
+    {
+      "ts_code": "603324.SH",
+      "ann_date": "20260807",
+      "float_date": "20280807",
+      "float_share": 80000.0,
+      "float_ratio": 0.0528,
+      "holder_name": "章学春",
+      "share_type": "股权激励限售流通"
+    },
+    {
+      "ts_code": "603324.SH",
+      "ann_date": "20260807",
+      "float_date": "20280807",
+      "float_share": 30000.0,
+      "float_ratio": 0.0198,
+      "holder_name": "聂磊",
+      "share_type": "股权激励限售流通"
+    },
+    {
+      "ts_code": "603324.SH",
+      "ann_date": "20260807",
+      "float_date": "20280807",
+      "float_share": 1400000.0,
+      "float_ratio": 0.9236,
+      "holder_name": "常程",
+      "share_type": "股权激励限售流通"
+    },
+    {
+      "ts_code": "603324.SH",
+      "ann_date": "20260807",
+      "float_date": "20280807",
+      "float_share": 250000.0,
+      "float_ratio": 0.1649,
+      "holder_name": "张鹏",
+      "share_type": "股权激励限售流通"
+    },
+    {
+      "ts_code": "603324.SH",
+      "ann_date": "20260807",
+      "float_date": "20280807",
+      "float_share": 80000.0,
+      "float_ratio": 0.0528,
+      "holder_name": "郁洪伟",
+      "share_type": "股权激励限售流通"
+    },
+    {
+      "ts_code": "603324.SH",
+      "ann_date": "20260807",
+      "float_date": "20280807",
+      "float_share": 3064900.0,
+      "float_ratio": 2.022,
+      "holder_name": "核心及骨干人员、董事会认为需要激励的其他人员(共149人)",
+      "share_type": "股权激励限售流通"
+    },
+    {
+      "ts_code": "874687",
+      "ann_date": "20260807",
+      "float_date": "20270811",
+      "float_share": 506881.0,
+      "float_ratio": 1.05,
+      "holder_name": "东吴证券珈凯生物员工参与北交所战略配售集合资产管理计划",
+      "share_type": "首发战略配售股份"
+    },
+    {
+      "ts_code": "874687",
+      "ann_date": "20260807",
+      "float_date": "20270811",
+      "float_share": 217234.0,
+      "float_ratio": 0.45,
+      "holder_name": "东吴创新资本管理有限责任公司",
+      "share_type": "首发战略配售股份"
+    },
+    {
+      "ts_code": "002524.SZ",
+      "ann_date": "20260807",
+      "float_date": "20270806",
+      "float_share": 30000.0,
+      "float_ratio": 0.0058,
+      "holder_name": "陈少伟",
+      "share_type": "股权激励限售流通"
+    },
+    {
+      "ts_code": "002524.SZ",
+      "ann_date": "20260807",
+      "float_date": "20270806",
+      "float_share": 30000.0,
+      "float_ratio": 0.0058,
+      "holder_name": "张勇辉",
+      "share_type": "股权激励限售流通"
+    },
+    {
+      "ts_code": "002524.SZ",
+      "ann_date": "20260807",
+      "float_date": "20270806",
+      "float_share": 30000.0,
+      "float_ratio": 0.0058,
+      "holder_name": "李俊英",
+      "share_type": "股权激励限售流通"
+    },
+    {
+      "ts_code": "002524.SZ",
+      "ann_date": "20260807",
+      "float_date": "20270806",
+      "float_share": 30000.0,
+      "float_ratio": 0.0058,
+      "holder_name": "周荷莲",
+      "share_type": "股权激励限售流通"
+    },
+    {
+      "ts_code": "002524.SZ",
+      "ann_date": "20260807",
+      "float_date": "20270806",
+      "float_share": 40000.0,
+      "float_ratio": 0.0078,
+      "holder_name": "荣翱",
+      "share_type": "股权激励限售流通"
+    },
+    {
+      "ts_code": "002524.SZ",
+      "ann_date": "20260807",
+      "float_date": "20270806",
+      "float_share": 30000.0,
+      "float_ratio": 0.0058,
+      "holder_name": "陈智芳",
+      "share_type": "股权激励限售流通"
+    },
+    {
+      "ts_code": "002524.SZ",
+      "ann_date": "20260807",
+      "float_date": "20270806",
+      "float_share": 1280000.0,
+      "float_ratio": 0.2484,
+      "holder_name": "中层管理人员及核心骨干员工(96人)",
+      "share_type": "股权激励限售流通"
+    },
+    {
+      "ts_code": "002524.SZ",
+      "ann_date": "20260807",
+      "float_date": "20270806",
+      "float_share": 30000.0,
+      "float_ratio": 0.0058,
+      "holder_name": "王琦",
+      "share_type": "股权激励限售流通"
+    },
+    {
+      "ts_code": "603324.SH",
+      "ann_date": "20260807",
+      "float_date": "20270805",
+      "float_share": 200000.0,
+      "float_ratio": 0.1319,
+      "holder_name": "许云",
+      "share_type": "股权激励限售流通"
+    },
+    {
+      "ts_code": "603324.SH",
+      "ann_date": "20260807",
+      "float_date": "20270805",
+      "float_share": 80000.0,
+      "float_ratio": 0.0528,
+      "holder_name": "章学春",
+      "share_type": "股权激励限售流通"
+    },
+    {
+      "ts_code": "603324.SH",
+      "ann_date": "20260807",
+      "float_date": "20270805",
+      "float_share": 30000.0,
+      "float_ratio": 0.0198,
+      "holder_name": "聂磊",
+      "share_type": "股权激励限售流通"
+    },
+    {
+      "ts_code": "603324.SH",
+      "ann_date": "20260807",
+      "float_date": "20270805",
+      "float_share": 1400000.0,
+      "float_ratio": 0.9236,
+      "holder_name": "常程",
+      "share_type": "股权激励限售流通"
+    },
+    {
+      "ts_code": "603324.SH",
+      "ann_date": "20260807",
+      "float_date": "20270805",
+      "float_share": 250000.0,
+      "float_ratio": 0.1649,
+      "holder_name": "张鹏",
+      "share_type": "股权激励限售流通"
+    },
+    {
+      "ts_code": "603324.SH",
+      "ann_date": "20260807",
+      "float_date": "20270805",
+      "float_share": 80000.0,
+      "float_ratio": 0.0528,
+      "holder_name": "郁洪伟",
+      "share_type": "股权激励限售流通"
+    },
+    {
+      "ts_code": "603324.SH",
+      "ann_date": "20260807",
+      "float_date": "20270805",
+      "float_share": 3064900.0,
+      "float_ratio": 2.022,
+      "holder_name": "核心及骨干人员、董事会认为需要激励的其他人员(共149人)",
+      "share_type": "股权激励限售流通"
+    },
+    {
+      "ts_code": "002213.SZ",
+      "ann_date": "20260807",
+      "float_date": "20270212",
+      "float_share": 1328708.0,
+      "float_ratio": 0.5527,
+      "holder_name": "汇添富基金管理股份有限公司",
+      "share_type": "定增股份"
+    },
+    {
+      "ts_code": "002213.SZ",
+      "ann_date": "20260807",
+      "float_date": "20270212",
+      "float_share": 576923.0,
+      "float_ratio": 0.24,
+      "holder_name": "杨宗麟",
+      "share_type": "定增股份"
+    },
+    {
+      "ts_code": "002213.SZ",
+      "ann_date": "20260807",
+      "float_date": "20270212",
+      "float_share": 89000.0,
+      "float_ratio": 0.037,
+      "holder_name": "吴敌",
+      "share_type": "定增股份"
+    },
+    {
+      "ts_code": "002213.SZ",
+      "ann_date": "20260807",
+      "float_date": "20270212",
+      "float_share": 387273.0,
+      "float_ratio": 0.1611,
+      "holder_name": "诺德基金管理有限公司",
+      "share_type": "定增股份"
+    },
+    {
+      "ts_code": "002213.SZ",
+      "ann_date": "20260807",
+      "float_date": "20270212",
+      "float_share": 295857.0,
+      "float_ratio": 0.1231,
+      "holder_name": "吴丽贤",
+      "share_type": "定增股份"
+    },
+    {
+      "ts_code": "002213.SZ",
+      "ann_date": "20260807",
+      "float_date": "20270212",
+      "float_share": 88757.0,
+      "float_ratio": 0.0369,
+      "holder_name": "深圳纽富斯投资管理有限公司-纽富斯雪宝21号私募证券投资基金",
+      "share_type": "定增股份"
+    },
+    {
+      "ts_code": "002213.SZ",
+      "ann_date": "20260807",
+      "float_date": "20270212",
+      "float_share": 88755.0,
+      "float_ratio": 0.0369,
+      "holder_name": "财通基金管理有限公司",
+      "share_type": "定增股份"
+    },
+    {
+      "ts_code": "874687",
+      "ann_date": "20260807",
+      "float_date": "20260911",
+      "float_share": 2161960.0,
+      "float_ratio": 4.4785,
+      "holder_name": "平阳致宸青云创业投资合伙企业(有限合伙)",
+      "share_type": "首发原始股"
+    },
+    {
+      "ts_code": "874687",
+      "ann_date": "20260807",
+      "float_date": "20260911",
+      "float_share": 1503040.0,
+      "float_ratio": 3.1135,
+      "holder_name": "芜湖华熙朗亚健康产业投资合伙企业(有限合伙)",
+      "share_type": "首发原始股"
+    },
+    {
+      "ts_code": "874687",
+      "ann_date": "20260807",
+      "float_date": "20260911",
+      "float_share": 1173280.0,
+      "float_ratio": 2.4304,
+      "holder_name": "温润佳品壹号(珠海)股权投资基金合伙企业(有限合伙)",
+      "share_type": "首发原始股"
+    },
+    {
+      "ts_code": "874687",
+      "ann_date": "20260807",
+      "float_date": "20260911",
+      "float_share": 1056160.0,
+      "float_ratio": 2.1878,
+      "holder_name": "苏州苏盈金穗创业投资中心(有限合伙)",
+      "share_type": "首发原始股"
+    },
+    {
+      "ts_code": "874687",
+      "ann_date": "20260807",
+      "float_date": "20260911",
+      "float_share": 610440.0,
+      "float_ratio": 1.2645,
+      "holder_name": "温润佳品贰号(珠海)股权投资基金合伙企业(有限合伙)",
+      "share_type": "首发原始股"
+    },
+    {
+      "ts_code": "874687",
+      "ann_date": "20260807",
+      "float_date": "20260911",
+      "float_share": 604080.0,
+      "float_ratio": 1.2513,
+      "holder_name": "湖州致宸天珈创业投资合伙企业(有限合伙)",
+      "share_type": "首发原始股"
+    },
+    {
+      "ts_code": "874687",
+      "ann_date": "20260807",
+      "float_date": "20260911",
+      "float_share": 2161960.0,
+      "float_ratio": 4.4785,
+      "holder_name": "平阳致宸青云创业投资合伙企业（有限合伙）",
+      "share_type": "首发原始股"
+    },
+    {
+      "ts_code": "874687",
+      "ann_date": "20260807",
+      "float_date": "20260911",
+      "float_share": 1503040.0,
+      "float_ratio": 3.1135,
+      "holder_name": "芜湖华熙朗亚健康产业投资合伙企业（有限合伙）",
+      "share_type": "首发原始股"
+    },
+    {
+      "ts_code": "874687",
+      "ann_date": "20260807",
+      "float_date": "20260911",
+      "float_share": 1173280.0,
+      "float_ratio": 2.4304,
+      "holder_name": "温润佳品壹号（珠海）股权投资基金合伙企业（有限合伙）",
+      "share_type": "首发原始股"
+    },
+    {
+      "ts_code": "874687",
+      "ann_date": "20260807",
+      "float_date": "20260911",
+      "float_share": 1056160.0,
+      "float_ratio": 2.1878,
+      "holder_name": "苏州苏盈金穗创业投资中心（有限合伙）",
+      "share_type": "首发原始股"
+    },
+    {
+      "ts_code": "874687",
+      "ann_date": "20260807",
+      "float_date": "20260911",
+      "float_share": 610440.0,
+      "float_ratio": 1.2645,
+      "holder_name": "温润佳品贰号（珠海）股权投资基金合伙企业（有限合伙）",
+      "share_type": "首发原始股"
+    },
+    {
+      "ts_code": "874687",
+      "ann_date": "20260807",
+      "float_date": "20260911",
+      "float_share": 604080.0,
+      "float_ratio": 1.2513,
+      "holder_name": "湖州致宸天珈创业投资合伙企业（有限合伙）",
+      "share_type": "首发原始股"
+    },
+    {
+      "ts_code": "603529.SH",
+      "ann_date": "20260807",
+      "float_date": "20260813",
+      "float_share": 43000.0,
+      "float_ratio": 0.005,
+      "holder_name": "彭伟",
+      "share_type": "股权激励限售流通"
+    },
+    {
+      "ts_code": "603529.SH",
+      "ann_date": "20260807",
+      "float_date": "20260813",
+      "float_share": 223000.0,
+      "float_ratio": 0.0258,
+      "holder_name": "郑慧",
+      "share_type": "股权激励限售流通"
+    },
+    {
+      "ts_code": "603529.SH",
+      "ann_date": "20260807",
+      "float_date": "20260813",
+      "float_share": 300000.0,
+      "float_ratio": 0.0347,
+      "holder_name": "高辉",
+      "share_type": "股权激励限售流通"
+    },
+    {
+      "ts_code": "603529.SH",
+      "ann_date": "20260807",
+      "float_date": "20260813",
+      "float_share": 26000.0,
+      "float_ratio": 0.003,
+      "holder_name": "李新",
+      "share_type": "股权激励限售流通"
+    },
+    {
+      "ts_code": "603529.SH",
+      "ann_date": "20260807",
+      "float_date": "20260813",
+      "float_share": 10092524.0,
+      "float_ratio": 1.1678,
+      "holder_name": "中高层管理人员、核心技术(业务)人员(332人)",
+      "share_type": "股权激励限售流通"
+    },
+    {
+      "ts_code": "605099.SH",
+      "ann_date": "20260807",
+      "float_date": "20260813",
+      "float_share": 466000.0,
+      "float_ratio": 0.1157,
+      "holder_name": "高级管理人员(3人)",
+      "share_type": "股权激励限售流通"
+    },
+    {
+      "ts_code": "605099.SH",
+      "ann_date": "20260807",
+      "float_date": "20260813",
+      "float_share": 875000.0,
+      "float_ratio": 0.2173,
+      "holder_name": "总监级管理人员(9人)",
+      "share_type": "股权激励限售流通"
+    },
+    {
+      "ts_code": "600418.SH",
+      "ann_date": "20260807",
+      "float_date": "20260812",
+      "float_share": 4811550.0,
+      "float_ratio": 0.2135,
+      "holder_name": "财通基金管理有限公司",
+      "share_type": "公开增发一般股份"
+    },
+    {
+      "ts_code": "600418.SH",
+      "ann_date": "20260807",
+      "float_date": "20260812",
+      "float_share": 2004811.0,
+      "float_ratio": 0.0889,
+      "holder_name": "姚志超",
+      "share_type": "定增股份"
+    },
+    {
+      "ts_code": "600418.SH",
+      "ann_date": "20260807",
+      "float_date": "20260812",
+      "float_share": 4009623.0,
+      "float_ratio": 0.1779,
+      "holder_name": "深圳市新思哲投资管理有限公司-新思哲多策略母基金私募证券投资基金",
+      "share_type": "定增股份"
+    },
+    {
+      "ts_code": "600418.SH",
+      "ann_date": "20260807",
+      "float_date": "20260812",
+      "float_share": 2004811.0,
+      "float_ratio": 0.0889,
+      "holder_name": "中阅资本管理股份公司-中阅知行2号私募证券投资基金",
+      "share_type": "定增股份"
+    },
+    {
+      "ts_code": "600418.SH",
+      "ann_date": "20260807",
+      "float_date": "20260812",
+      "float_share": 5212510.0,
+      "float_ratio": 0.2312,
+      "holder_name": "广发证券股份有限公司",
+      "share_type": "定增股份"
+    },
+    {
+      "ts_code": "600418.SH",
+      "ann_date": "20260807",
+      "float_date": "20260812",
+      "float_share": 20048115.0,
+      "float_ratio": 0.8894,
+      "holder_name": "葛卫东",
+      "share_type": "定增股份"
+    },
+    {
+      "ts_code": "600418.SH",
+      "ann_date": "20260807",
+      "float_date": "20260812",
+      "float_share": 20048115.0,
+      "float_ratio": 0.8894,
+      "holder_name": "方文艳",
+      "share_type": "公开增发一般股份"
+    },
+    {
+      "ts_code": "600418.SH",
+      "ann_date": "20260807",
+      "float_date": "20260812",
+      "float_share": 12028869.0,
+      "float_ratio": 0.5336,
+      "holder_name": "杭州知春投资管理有限公司-知春精选一期私募证券投资基金",
+      "share_type": "定增股份"
+    },
+    {
+      "ts_code": "600469.SH",
+      "ann_date": "20260807",
+      "float_date": "20260812",
+      "float_share": 5839416.0,
+      "float_ratio": 0.6561,
+      "holder_name": "苏州高新私募基金管理有限公司-苏州苏新绿碳产业投资合伙企业(有限合伙)",
+      "share_type": "定增股份"
+    },
+    {
+      "ts_code": "600469.SH",
+      "ann_date": "20260807",
+      "float_date": "20260812",
+      "float_share": 4379562.0,
+      "float_ratio": 0.4921,
+      "holder_name": "张家港金创优选股权投资合伙企业(有限合伙)",
+      "share_type": "定增股份"
+    },
+    {
+      "ts_code": "600469.SH",
+      "ann_date": "20260807",
+      "float_date": "20260812",
+      "float_share": 12554744.0,
+      "float_ratio": 1.4106,
+      "holder_name": "诺德基金管理有限公司",
+      "share_type": "定增股份"
+    },
+    {
+      "ts_code": "600469.SH",
+      "ann_date": "20260807",
+      "float_date": "20260812",
+      "float_share": 8029197.0,
+      "float_ratio": 0.9021,
+      "holder_name": "西安博成基金管理有限公司-博成理解同鑫私募证券投资基金",
+      "share_type": "定增股份"
+    },
+    {
+      "ts_code": "600469.SH",
+      "ann_date": "20260807",
+      "float_date": "20260812",
+      "float_share": 3649635.0,
+      "float_ratio": 0.4101,
+      "holder_name": "中国黄金集团资产管理有限公司",
+      "share_type": "定增股份"
+    },
+    {
+      "ts_code": "600469.SH",
+      "ann_date": "20260807",
+      "float_date": "20260812",
+      "float_share": 17518248.0,
+      "float_ratio": 1.9683,
+      "holder_name": "易方达基金管理有限公司",
+      "share_type": "定增股份"
+    },
+    {
+      "ts_code": "600469.SH",
+      "ann_date": "20260807",
+      "float_date": "20260812",
+      "float_share": 4233576.0,
+      "float_ratio": 0.4757,
+      "holder_name": "中信证券资产管理有限公司",
+      "share_type": "定增股份"
+    },
+    {
+      "ts_code": "600469.SH",
+      "ann_date": "20260807",
+      "float_date": "20260812",
+      "float_share": 3649635.0,
+      "float_ratio": 0.4101,
+      "holder_name": "河北国控资本管理有限公司",
+      "share_type": "定增股份"
+    },
+    {
+      "ts_code": "600469.SH",
+      "ann_date": "20260807",
+      "float_date": "20260812",
+      "float_share": 3649635.0,
+      "float_ratio": 0.4101,
+      "holder_name": "济南瀚祥投资管理合伙企业(有限合伙)",
+      "share_type": "定增股份"
+    },
+    {
+      "ts_code": "600469.SH",
+      "ann_date": "20260807",
+      "float_date": "20260812",
+      "float_share": 11678832.0,
+      "float_ratio": 1.3122,
+      "holder_name": "王梓旭",
+      "share_type": "定增股份"
+    },
+    {
+      "ts_code": "600469.SH",
+      "ann_date": "20260807",
+      "float_date": "20260812",
+      "float_share": 25109489.0,
+      "float_ratio": 2.8212,
+      "holder_name": "华泰资产管理有限公司",
+      "share_type": "定增股份"
+    },
+    {
+      "ts_code": "600469.SH",
+      "ann_date": "20260807",
+      "float_date": "20260812",
+      "float_share": 11970802.0,
+      "float_ratio": 1.345,
+      "holder_name": "财通基金管理有限公司",
+      "share_type": "定增股份"
+    },
+    {
+      "ts_code": "600469.SH",
+      "ann_date": "20260807",
+      "float_date": "20260812",
+      "float_share": 3649635.0,
+      "float_ratio": 0.4101,
+      "holder_name": "大成基金管理有限公司",
+      "share_type": "定增股份"
+    },
+    {
+      "ts_code": "600469.SH",
+      "ann_date": "20260807",
+      "float_date": "20260812",
+      "float_share": 875915.0,
+      "float_ratio": 0.0984,
+      "holder_name": "泉州市国有资产投资经营有限责任公司",
+      "share_type": "定增股份"
+    },
+    {
+      "ts_code": "002967.SZ",
+      "ann_date": "20260807",
+      "float_date": "20260812",
+      "float_share": 4164931.0,
+      "float_ratio": 0.6512,
+      "holder_name": "广州国资产业发展并购基金合伙企业(有限合伙)",
+      "share_type": "公开增发一般股份"
+    },
+    {
+      "ts_code": "002967.SZ",
+      "ann_date": "20260807",
+      "float_date": "20260812",
+      "float_share": 7496876.0,
+      "float_ratio": 1.1721,
+      "holder_name": "中国国有企业结构调整基金二期股份有限公司",
+      "share_type": "定增股份"
+    },
+    {
+      "ts_code": "002967.SZ",
+      "ann_date": "20260807",
+      "float_date": "20260812",
+      "float_share": 1665972.0,
+      "float_ratio": 0.2605,
+      "holder_name": "李怡名",
+      "share_type": "定增股份"
+    },
+    {
+      "ts_code": "002967.SZ",
+      "ann_date": "20260807",
+      "float_date": "20260812",
+      "float_share": 3498542.0,
+      "float_ratio": 0.547,
+      "holder_name": "西安博成基金管理有限公司-博成定增1号私募证券投资基金",
+      "share_type": "定增股份"
+    },
+    {
+      "ts_code": "002967.SZ",
+      "ann_date": "20260807",
+      "float_date": "20260812",
+      "float_share": 12494793.0,
+      "float_ratio": 1.9535,
+      "holder_name": "国家军民融合产业投资基金二期有限责任公司",
+      "share_type": "定增股份"
+    },
+    {
+      "ts_code": "002967.SZ",
+      "ann_date": "20260807",
+      "float_date": "20260812",
+      "float_share": 2832153.0,
+      "float_ratio": 0.4428,
+      "holder_name": "财通基金管理有限公司",
+      "share_type": "定增股份"
+    },
+    {
+      "ts_code": "002967.SZ",
+      "ann_date": "20260807",
+      "float_date": "20260812",
+      "float_share": 1665972.0,
+      "float_ratio": 0.2605,
+      "holder_name": "黑龙江辰能资本投资运营有限公司",
+      "share_type": "定增股份"
+    },
+    {
+      "ts_code": "002967.SZ",
+      "ann_date": "20260807",
+      "float_date": "20260812",
+      "float_share": 1665972.0,
+      "float_ratio": 0.2605,
+      "holder_name": "无锡金筹投资管理有限公司-金筹研究精选一期私募证券投资基金",
+      "share_type": "定增股份"
+    },
+    {
+      "ts_code": "002967.SZ",
+      "ann_date": "20260807",
+      "float_date": "20260812",
+      "float_share": 1665972.0,
+      "float_ratio": 0.2605,
+      "holder_name": "福建银丰创业投资有限责任公司",
+      "share_type": "定增股份"
+    },
+    {
+      "ts_code": "002967.SZ",
+      "ann_date": "20260807",
+      "float_date": "20260812",
+      "float_share": 1665972.0,
+      "float_ratio": 0.2605,
+      "holder_name": "济南瀚祥投资管理合伙企业(有限合伙)",
+      "share_type": "定增股份"
+    },
+    {
+      "ts_code": "002967.SZ",
+      "ann_date": "20260807",
+      "float_date": "20260812",
+      "float_share": 2082465.0,
+      "float_ratio": 0.3256,
+      "holder_name": "中国北方工业有限公司",
+      "share_type": "定增股份"
+    },
+    {
+      "ts_code": "002967.SZ",
+      "ann_date": "20260807",
+      "float_date": "20260812",
+      "float_share": 2082465.0,
+      "float_ratio": 0.3256,
+      "holder_name": "广州产投私募证券投资基金管理有限公司-产投证投价值1号私募证券投资基金",
+      "share_type": "公开增发一般股份"
+    },
+    {
+      "ts_code": "002967.SZ",
+      "ann_date": "20260807",
+      "float_date": "20260812",
+      "float_share": 1665972.0,
+      "float_ratio": 0.2605,
+      "holder_name": "广州产业投资控股集团有限公司",
+      "share_type": "定增股份"
+    },
+    {
+      "ts_code": "002967.SZ",
+      "ann_date": "20260807",
+      "float_date": "20260812",
+      "float_share": 2707205.0,
+      "float_ratio": 0.4233,
+      "holder_name": "广州粤凯新能产业股权投资合伙企业(有限合伙)",
+      "share_type": "定增股份"
+    },
+    {
+      "ts_code": "002967.SZ",
+      "ann_date": "20260807",
+      "float_date": "20260812",
+      "float_share": 1665972.0,
+      "float_ratio": 0.2605,
+      "holder_name": "广东省粤科母基金投资管理有限公司-粤科国惠产投定臻(广东)股权投资合伙企业(有限合伙)",
+      "share_type": "定增股份"
+    },
+    {
+      "ts_code": "002967.SZ",
+      "ann_date": "20260807",
+      "float_date": "20260812",
+      "float_share": 5122872.0,
+      "float_ratio": 0.8009,
+      "holder_name": "湖北省铁路发展基金有限责任公司",
+      "share_type": "定增股份"
+    },
+    {
+      "ts_code": "920961.BJ",
+      "ann_date": "20260807",
+      "float_date": "20260812",
+      "float_share": 1513803.0,
+      "float_ratio": 1.0598,
+      "holder_name": "创远信科(上海)技术股份有限公司-2025年员工持股计划",
+      "share_type": "其他类型"
+    },
+    {
+      "ts_code": "920092.BJ",
+      "ann_date": "20260807",
+      "float_date": "20260812",
+      "float_share": 13092.0,
+      "float_ratio": 0.0211,
+      "holder_name": "柳鹏",
+      "share_type": "其他类型"
+    }
+  ]
+}

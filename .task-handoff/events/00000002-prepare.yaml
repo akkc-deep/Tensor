@@ -1,0 +1,329 @@
+{
+  "action": "prepare",
+  "actor": {
+    "name": "project-owner",
+    "role": "owner"
+  },
+  "after_hash": "c06a5914fe2b520224c975fd2aeaaaadb9c9b2eb9532f091946673ff504d1cfb",
+  "after_revision": 2,
+  "after_state": {
+    "access": {
+      "baseline_reads": [
+        {
+          "declared_by": "docs/task-designs/M00-T01-designs.md",
+          "declaring_design_sha256": "dd34786f762091dfd9b5c0770f0f7d4f07411fd4496f491d4b21d7ed51d075b8",
+          "id": "brd-requirements",
+          "path": "docs/design/Tensor_多源证券数据平台_BRD_v1.0.md",
+          "purpose": "读取 BRD 功能、页面、存储与验收范围",
+          "selection_sha256": "8c8901be44fc298641be2494f01a558e737ebb6127a04dc738b407f1699e56e8",
+          "selector": {
+            "heading_paths": [
+              [
+                "Tensor 多数据源证券数据下载与查看 BRD",
+                "4. 功能需求"
+              ],
+              [
+                "Tensor 多数据源证券数据下载与查看 BRD",
+                "5. 页面范围"
+              ],
+              [
+                "Tensor 多数据源证券数据下载与查看 BRD",
+                "6. 数据存储要求"
+              ],
+              [
+                "Tensor 多数据源证券数据下载与查看 BRD",
+                "7. 验收标准"
+              ]
+            ],
+            "type": "markdown-headings"
+          },
+          "source_sha256": "03c03571d7610b014c4789295351635c6036bcd51f7d015e36fe6c8730cfbba1"
+        },
+        {
+          "declared_by": "docs/task-designs/M00-T01-designs.md",
+          "declaring_design_sha256": "dd34786f762091dfd9b5c0770f0f7d4f07411fd4496f491d4b21d7ed51d075b8",
+          "id": "prd-requirements",
+          "path": "docs/design/Tensor_多源证券数据平台_PRD_v1.0.md",
+          "purpose": "读取功能需求、非功能要求、验收场景与 BRD 映射",
+          "selection_sha256": "22af5b845c9f7f8c3af7248427eab504aa622ebe3e28e0c692e959be404c0aad",
+          "selector": {
+            "heading_paths": [
+              [
+                "Tensor 多源证券数据平台 PRD",
+                "7. 详细功能需求"
+              ],
+              [
+                "Tensor 多源证券数据平台 PRD",
+                "10. 非功能需求"
+              ],
+              [
+                "Tensor 多源证券数据平台 PRD",
+                "12. 验收方案与发布准入",
+                "12.1 核心验收场景"
+              ],
+              [
+                "Tensor 多源证券数据平台 PRD",
+                "13. BRD 追踪矩阵"
+              ]
+            ],
+            "type": "markdown-headings"
+          },
+          "source_sha256": "2597510a0ac815d487e0645fbf6519851021a77803c36d51f321a17b76416a2e"
+        },
+        {
+          "declared_by": "docs/task-designs/M00-T01-designs.md",
+          "declaring_design_sha256": "dd34786f762091dfd9b5c0770f0f7d4f07411fd4496f491d4b21d7ed51d075b8",
+          "id": "trd-traceability",
+          "path": "docs/design/Tensor_多源证券数据平台_TRD_v1.0.md",
+          "purpose": "读取技术追踪矩阵、风险约束与完成条件",
+          "selection_sha256": "2ec1a1f25fe40bf9b4ea3b6ca2e93662ab26ffc2e7d2e88ca45bbbd26ae48b98",
+          "selector": {
+            "heading_paths": [
+              [
+                "Tensor 多源证券数据平台 TRD",
+                "21. 需求追踪矩阵"
+              ],
+              [
+                "Tensor 多源证券数据平台 TRD",
+                "22. 风险与约束"
+              ],
+              [
+                "Tensor 多源证券数据平台 TRD",
+                "23. 实现与评审完成条件"
+              ]
+            ],
+            "type": "markdown-headings"
+          },
+          "source_sha256": "d9582b51677305bc1cb922ec76c5561229820dbeddc4f251d456eaecbd8baf43"
+        },
+        {
+          "declared_by": "docs/task-designs/M00-T01-designs.md",
+          "declaring_design_sha256": "dd34786f762091dfd9b5c0770f0f7d4f07411fd4496f491d4b21d7ed51d075b8",
+          "id": "implementation-roadmap",
+          "path": "docs/superpowers/plans/2026-08-25-tensor-implementation-roadmap.md",
+          "purpose": "读取实施模块与发布证据责任矩阵",
+          "selection_sha256": "11c8aae87316114991c499a1741a337e9bab5bb47840fb9ce3956ad3e237ed31",
+          "selector": {
+            "heading_paths": [
+              [
+                "Tensor Module Roadmap Implementation Plan",
+                "6. 需求追踪总矩阵"
+              ]
+            ],
+            "type": "markdown-headings"
+          },
+          "source_sha256": "6f6c17d102f3e22f827afe820bcd997f6a1f703b7a66c3c5f660cb7fdc8a4177"
+        },
+        {
+          "declared_by": "docs/task-designs/M00-T01-designs.md",
+          "declaring_design_sha256": "dd34786f762091dfd9b5c0770f0f7d4f07411fd4496f491d4b21d7ed51d075b8",
+          "id": "m00-t01-task-card",
+          "path": "docs/superpowers/plans/tensor-modules/M00-contracts.md",
+          "purpose": "读取 M00-T01 任务卡、步骤与验收要求",
+          "selection_sha256": "1562b1908dae744467d1e8bbc1068292cc1c1e9e5d0368e2047805c74a9a5415",
+          "selector": {
+            "heading_paths": [
+              [
+                "M00 Requirements and Shared Contracts Implementation Plan",
+                "Project Planning Inputs",
+                "Task M00-T01: 建立需求追踪索引（1.0h）"
+              ]
+            ],
+            "type": "markdown-headings"
+          },
+          "source_sha256": "53c775bef4cc6ece46f702a8322758c0074a63addf37d78b7b2407ae693b9fc6"
+        }
+      ],
+      "forbidden_reads": [
+        ".env"
+      ],
+      "forbidden_writes": [
+        "docs/design/Tensor_多源证券数据平台_BRD_v1.0.md",
+        "docs/design/Tensor_多源证券数据平台_PRD_v1.0.md",
+        "docs/design/Tensor_多源证券数据平台_TRD_v1.0.md",
+        "docs/superpowers/plans/2026-08-25-tensor-implementation-roadmap.md",
+        "docs/superpowers/plans/tensor-modules/M00-contracts.md",
+        "docs/task-designs/M00-T01-designs.md"
+      ],
+      "read_contract_version": 3,
+      "reads": [
+        {
+          "id": "task-design",
+          "manifest_entries": [],
+          "path": "docs/task-designs/M00-T01-designs.md",
+          "purpose": "读取 M00-T01 的完整任务设计与验收边界",
+          "selection_sha256": "dd34786f762091dfd9b5c0770f0f7d4f07411fd4496f491d4b21d7ed51d075b8",
+          "selector": {
+            "type": "design-whole-file"
+          },
+          "source_deliverable": "docs/task-designs/M00-T01-designs.md",
+          "source_records": [],
+          "source_sha256": "dd34786f762091dfd9b5c0770f0f7d4f07411fd4496f491d4b21d7ed51d075b8",
+          "source_tasks": [
+            "M00-T01"
+          ]
+        }
+      ],
+      "tests": [
+        {
+          "argv": [
+            "python3",
+            "-c",
+            "from pathlib import Path; import re; text=Path('docs/traceability/tensor-v1-requirements.md').read_text(encoding='utf-8'); lines=text.splitlines(); header='| BRD | PRD | Priority | TRD | Acceptance | Module | Evidence |'; i=lines.index(header); assert re.fullmatch(r'\\|(?:\\s*:?-+:?\\s*\\|){7}', lines[i+1]); body=[]; j=i+2; exec(\"while j < len(lines) and lines[j].startswith('|'):\\n body.append([cell.strip() for cell in lines[j].strip().strip('|').split('|')]); j += 1\"); assert len(body)==37; assert all(len(row)==7 and all(row) for row in body); assert all(sum(token in row[1] for row in body)==1 for token in [f'PRD-F-{n:03d}' for n in range(1,32)]); assert all(sum(token in row[1] for row in body)==1 for token in [f'10.{n}' for n in range(1,7)]); joined='\\n'.join(' | '.join(row) for row in body); assert all(token in joined for token in [f'FR-{n:02d}' for n in range(1,10)] + [f'AC-{n:03d}' for n in range(1,19)]); assert not re.search(r'(?i)\\b(?:TODO|TBD)\\b|待定|未决', joined); function_rows=[row for row in body if re.search(r'PRD-F-\\d{3}', row[1])]; assert all(('P1' in row[2]) == ('PRD-F-014' in row[1]) for row in function_rows); assert all(('P0' in row[2]) for row in function_rows if 'PRD-F-014' not in row[1]); assert all('发布门禁' in row[2] for row in body if re.search(r'10\\.[1-6]', row[1]))"
+          ],
+          "cwd": ".",
+          "environment": [],
+          "id": "traceability-contract"
+        }
+      ],
+      "writes": {
+        "create": [
+          "docs/traceability/tensor-v1-requirements.md"
+        ],
+        "modify": []
+      }
+    },
+    "audit": {
+      "event_id": 2,
+      "update_reason": "Prepare the first Tensor task handoff from the owner-authorized project plan",
+      "updated_at": "2026-08-27T07:52:10Z",
+      "updated_by": "project-owner"
+    },
+    "authorization": {
+      "authorized": false,
+      "authorized_at": null,
+      "authorized_by": null,
+      "evidence": null
+    },
+    "blocker": null,
+    "context_amendment": null,
+    "context_budget": {
+      "assessment": "ESTIMATED",
+      "authorized_input_estimate": 31735,
+      "confidence": "HIGH",
+      "context_window_tokens": null,
+      "estimate_source": "Exact UTF-8 byte lengths of the authorized v3 design and baseline selections; executor context window is unknown",
+      "execution_reserve": 60000,
+      "tool_output_reserve": 20000
+    },
+    "design": {
+      "approved_at": "2026-08-27T07:50:22Z",
+      "approved_by": "project-owner",
+      "path": "docs/task-designs/M00-T01-designs.md",
+      "readable_sections": [
+        "做什么",
+        "怎么做",
+        "如何测试",
+        "如何验证",
+        "依赖什么信息"
+      ],
+      "version": 1
+    },
+    "execution": null,
+    "gates": {
+      "conditional": {
+        "security": {
+          "applicable": false,
+          "evidence": "The task creates documentation only and does not access credentials or runtime configuration",
+          "result": "PASS"
+        }
+      },
+      "core": {
+        "acceptance_defined": {
+          "evidence": "The design defines the 37-row schema, uniqueness, coverage and no-placeholder acceptance checks",
+          "result": "PASS"
+        },
+        "access_sufficient": {
+          "evidence": "The design and all five baseline semantic reads declared by the task design are bound by v3 digests",
+          "result": "PASS"
+        },
+        "context_feasible": {
+          "evidence": "Authorized selections total 31,735 UTF-8 bytes and the implementation unit is bounded to one Markdown deliverable",
+          "result": "PASS"
+        },
+        "dependencies_ready": {
+          "evidence": "M00-T01 is the first task and declares no predecessors",
+          "result": "PASS"
+        },
+        "design_confirmed": {
+          "evidence": "The project owner requested the first-task handoff and the complete M00-T01 design version 1 was reviewed",
+          "result": "PASS"
+        },
+        "scope_defined": {
+          "evidence": "Scope is confined to creating docs/traceability/tensor-v1-requirements.md",
+          "result": "PASS"
+        }
+      }
+    },
+    "plan": {
+      "authorization_evidence": "The owner requested generation of the first Tensor task handoff",
+      "authorized_at": "2026-08-27T07:50:22Z",
+      "authorized_by": "project-owner",
+      "revision": 1,
+      "tasks": [
+        {
+          "deliverables": [
+            "docs/traceability/tensor-v1-requirements.md"
+          ],
+          "dependencies": [],
+          "design": {
+            "path": "docs/task-designs/M00-T01-designs.md",
+            "sha256": "dd34786f762091dfd9b5c0770f0f7d4f07411fd4496f491d4b21d7ed51d075b8",
+            "version": 1
+          },
+          "id": "M00-T01",
+          "objective": "建立 Tensor v1 的 BRD、PRD、TRD、验收用例、实施模块和计划证据双向追踪索引",
+          "order": 1,
+          "out_of_scope": [
+            "修改 BRD、PRD 或 TRD",
+            "设计接口、数据库表或生产代码",
+            "执行或宣称发布验收已通过"
+          ],
+          "risk_level": "low",
+          "title": "建立需求追踪索引"
+        }
+      ]
+    },
+    "project": {
+      "id": "Tensor",
+      "root": "/Users/qiangzhiwei/code/github/Tensor",
+      "vcs": {
+        "base_revision": null,
+        "type": "none"
+      }
+    },
+    "revision": 2,
+    "schema_version": 1,
+    "status": "DESIGN_REVIEW",
+    "task": {
+      "deliverables": [
+        "docs/traceability/tensor-v1-requirements.md"
+      ],
+      "dependencies": [],
+      "id": "M00-T01",
+      "objective": "建立 Tensor v1 的 BRD、PRD、TRD、验收用例、实施模块和计划证据双向追踪索引",
+      "out_of_scope": [
+        "修改 BRD、PRD 或 TRD",
+        "设计接口、数据库表或生产代码",
+        "执行或宣称发布验收已通过"
+      ],
+      "risk_level": "low",
+      "title": "建立需求追踪索引"
+    },
+    "verification": {
+      "required_commands": [
+        "traceability-contract"
+      ],
+      "results": [],
+      "started_at": null,
+      "status": "PENDING"
+    }
+  },
+  "authorization": null,
+  "before_hash": "d8f4a40fb4127cf022c309c8b26546d41c9832249bcfab62ef2079d0d578d176",
+  "before_revision": 1,
+  "event_id": 2,
+  "occurred_at": "2026-08-27T07:52:10Z",
+  "reason": "Prepare the first Tensor task handoff from the owner-authorized project plan",
+  "schema_version": 1
+}

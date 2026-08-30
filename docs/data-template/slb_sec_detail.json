@@ -1,0 +1,20 @@
+{
+  "api_name": "slb_sec_detail",
+  "fetched_at": "2026-08-09T14:16:57.891809+00:00",
+  "query_mode": "trade_date",
+  "params": [
+    {
+      "trade_date": "20260807"
+    }
+  ],
+  "fields": [
+    "trade_date",
+    "ts_code",
+    "name",
+    "tenor",
+    "fee_rate",
+    "lent_qnt"
+  ],
+  "row_count": 0,
+  "data": []
+}

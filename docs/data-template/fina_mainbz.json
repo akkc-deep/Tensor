@@ -1,0 +1,1524 @@
+{
+  "api_name": "fina_mainbz",
+  "fetched_at": "2026-08-09T14:16:45.127359+00:00",
+  "query_mode": "ann_date",
+  "params": [
+    {
+      "ts_code": "000001.SZ",
+      "ann_date": "20260807"
+    }
+  ],
+  "fields": [
+    "ts_code",
+    "end_date",
+    "bz_item",
+    "bz_code",
+    "bz_sales",
+    "bz_profit",
+    "bz_cost",
+    "curr_type"
+  ],
+  "row_count": 150,
+  "data": [
+    {
+      "ts_code": "000001.SZ",
+      "end_date": "20251231",
+      "bz_item": "资产处置损益",
+      "bz_code": "P",
+      "bz_sales": 252000000.0,
+      "bz_profit": null,
+      "bz_cost": null,
+      "curr_type": "CNY"
+    },
+    {
+      "ts_code": "000001.SZ",
+      "end_date": "20251231",
+      "bz_item": "汇兑损益",
+      "bz_code": "P",
+      "bz_sales": 960000000.0,
+      "bz_profit": null,
+      "bz_cost": null,
+      "curr_type": "CNY"
+    },
+    {
+      "ts_code": "000001.SZ",
+      "end_date": "20251231",
+      "bz_item": "投资收益",
+      "bz_code": "P",
+      "bz_sales": 20474000000.0,
+      "bz_profit": null,
+      "bz_cost": null,
+      "curr_type": "CNY"
+    },
+    {
+      "ts_code": "000001.SZ",
+      "end_date": "20251231",
+      "bz_item": "手续费及佣金净收入：手续费及佣金收入：银行卡手续费收入",
+      "bz_code": "P",
+      "bz_sales": 12393000000.0,
+      "bz_profit": null,
+      "bz_cost": null,
+      "curr_type": "CNY"
+    },
+    {
+      "ts_code": "000001.SZ",
+      "end_date": "20251231",
+      "bz_item": "手续费及佣金净收入：手续费及佣金收入：资产托管手续费收入",
+      "bz_code": "P",
+      "bz_sales": 1510000000.0,
+      "bz_profit": null,
+      "bz_cost": null,
+      "curr_type": "CNY"
+    },
+    {
+      "ts_code": "000001.SZ",
+      "end_date": "20251231",
+      "bz_item": "手续费及佣金净收入：手续费及佣金收入：结算手续费收入",
+      "bz_code": "P",
+      "bz_sales": 3161000000.0,
+      "bz_profit": null,
+      "bz_cost": null,
+      "curr_type": "CNY"
+    },
+    {
+      "ts_code": "000001.SZ",
+      "end_date": "20251231",
+      "bz_item": "手续费及佣金净收入：手续费及佣金收入：其他",
+      "bz_code": "P",
+      "bz_sales": 4050000000.0,
+      "bz_profit": null,
+      "bz_cost": null,
+      "curr_type": "CNY"
+    },
+    {
+      "ts_code": "000001.SZ",
+      "end_date": "20251231",
+      "bz_item": "手续费及佣金净收入：手续费及佣金收入：代理及委托手续费收入",
+      "bz_code": "P",
+      "bz_sales": 6126000000.0,
+      "bz_profit": null,
+      "bz_cost": null,
+      "curr_type": "CNY"
+    },
+    {
+      "ts_code": "000001.SZ",
+      "end_date": "20251231",
+      "bz_item": "手续费及佣金净收入：手续费及佣金收入",
+      "bz_code": "P",
+      "bz_sales": 27240000000.0,
+      "bz_profit": null,
+      "bz_cost": null,
+      "curr_type": "CNY"
+    },
+    {
+      "ts_code": "000001.SZ",
+      "end_date": "20251231",
+      "bz_item": "手续费及佣金净收入：手续费及佣金支出",
+      "bz_code": "P",
+      "bz_sales": -3346000000.0,
+      "bz_profit": null,
+      "bz_cost": null,
+      "curr_type": "CNY"
+    },
+    {
+      "ts_code": "000001.SZ",
+      "end_date": "20251231",
+      "bz_item": "手续费及佣金净收入",
+      "bz_code": "P",
+      "bz_sales": 23894000000.0,
+      "bz_profit": null,
+      "bz_cost": null,
+      "curr_type": "CNY"
+    },
+    {
+      "ts_code": "000001.SZ",
+      "end_date": "20251231",
+      "bz_item": "利息净收入：利息收入：金融投资",
+      "bz_code": "P",
+      "bz_sales": 27327000000.0,
+      "bz_profit": null,
+      "bz_cost": null,
+      "curr_type": "CNY"
+    },
+    {
+      "ts_code": "000001.SZ",
+      "end_date": "20251231",
+      "bz_item": "利息净收入：利息收入：存放同业、拆放同业及买入返售金融资产",
+      "bz_code": "P",
+      "bz_sales": 8915000000.0,
+      "bz_profit": null,
+      "bz_cost": null,
+      "curr_type": "CNY"
+    },
+    {
+      "ts_code": "000001.SZ",
+      "end_date": "20251231",
+      "bz_item": "利息净收入：利息收入：存放中央银行款项",
+      "bz_code": "P",
+      "bz_sales": 3120000000.0,
+      "bz_profit": null,
+      "bz_cost": null,
+      "curr_type": "CNY"
+    },
+    {
+      "ts_code": "000001.SZ",
+      "end_date": "20251231",
+      "bz_item": "利息净收入：利息收入：发放贷款和垫款",
+      "bz_code": "P",
+      "bz_sales": 130501000000.0,
+      "bz_profit": null,
+      "bz_cost": null,
+      "curr_type": "CNY"
+    },
+    {
+      "ts_code": "000001.SZ",
+      "end_date": "20251231",
+      "bz_item": "利息净收入：利息收入",
+      "bz_code": "P",
+      "bz_sales": 169863000000.0,
+      "bz_profit": null,
+      "bz_cost": null,
+      "curr_type": "CNY"
+    },
+    {
+      "ts_code": "000001.SZ",
+      "end_date": "20251231",
+      "bz_item": "利息净收入：利息支出：已发行债务证券",
+      "bz_code": "P",
+      "bz_sales": -12125000000.0,
+      "bz_profit": null,
+      "bz_cost": null,
+      "curr_type": "CNY"
+    },
+    {
+      "ts_code": "000001.SZ",
+      "end_date": "20251231",
+      "bz_item": "利息净收入：利息支出：吸收存款",
+      "bz_code": "P",
+      "bz_sales": -59409000000.0,
+      "bz_profit": null,
+      "bz_cost": null,
+      "curr_type": "CNY"
+    },
+    {
+      "ts_code": "000001.SZ",
+      "end_date": "20251231",
+      "bz_item": "利息净收入：利息支出：向中央银行借款",
+      "bz_code": "P",
+      "bz_sales": -1941000000.0,
+      "bz_profit": null,
+      "bz_cost": null,
+      "curr_type": "CNY"
+    },
+    {
+      "ts_code": "000001.SZ",
+      "end_date": "20251231",
+      "bz_item": "利息净收入：利息支出：同业存放、同业拆入及卖出回购金融资产",
+      "bz_code": "P",
+      "bz_sales": -8367000000.0,
+      "bz_profit": null,
+      "bz_cost": null,
+      "curr_type": "CNY"
+    },
+    {
+      "ts_code": "000001.SZ",
+      "end_date": "20251231",
+      "bz_item": "利息净收入：利息支出",
+      "bz_code": "P",
+      "bz_sales": -81842000000.0,
+      "bz_profit": null,
+      "bz_cost": null,
+      "curr_type": "CNY"
+    },
+    {
+      "ts_code": "000001.SZ",
+      "end_date": "20251231",
+      "bz_item": "利息净收入",
+      "bz_code": "P",
+      "bz_sales": 88021000000.0,
+      "bz_profit": null,
+      "bz_cost": null,
+      "curr_type": "CNY"
+    },
+    {
+      "ts_code": "000001.SZ",
+      "end_date": "20251231",
+      "bz_item": "其他收益",
+      "bz_code": "P",
+      "bz_sales": 65000000.0,
+      "bz_profit": null,
+      "bz_cost": null,
+      "curr_type": "CNY"
+    },
+    {
+      "ts_code": "000001.SZ",
+      "end_date": "20251231",
+      "bz_item": "其他业务收入",
+      "bz_code": "P",
+      "bz_sales": 294000000.0,
+      "bz_profit": null,
+      "bz_cost": null,
+      "curr_type": "CNY"
+    },
+    {
+      "ts_code": "000001.SZ",
+      "end_date": "20251231",
+      "bz_item": "公允价值变动损益",
+      "bz_code": "P",
+      "bz_sales": -2518000000.0,
+      "bz_profit": null,
+      "bz_cost": null,
+      "curr_type": "CNY"
+    },
+    {
+      "ts_code": "000001.SZ",
+      "end_date": "20251231",
+      "bz_item": "产品",
+      "bz_code": "P",
+      "bz_sales": 131442000000.0,
+      "bz_profit": null,
+      "bz_cost": null,
+      "curr_type": "CNY"
+    },
+    {
+      "ts_code": "000001.SZ",
+      "end_date": "20251231",
+      "bz_item": "零售金融业务",
+      "bz_code": "I",
+      "bz_sales": 61626000000.0,
+      "bz_profit": 40834000000.0,
+      "bz_cost": 20792000000.0,
+      "curr_type": "CNY"
+    },
+    {
+      "ts_code": "000001.SZ",
+      "end_date": "20251231",
+      "bz_item": "行业",
+      "bz_code": "I",
+      "bz_sales": 131442000000.0,
+      "bz_profit": 91975000000.0,
+      "bz_cost": 39467000000.0,
+      "curr_type": "CNY"
+    },
+    {
+      "ts_code": "000001.SZ",
+      "end_date": "20251231",
+      "bz_item": "批发金融业务",
+      "bz_code": "I",
+      "bz_sales": 57959000000.0,
+      "bz_profit": 40214000000.0,
+      "bz_cost": 17745000000.0,
+      "curr_type": "CNY"
+    },
+    {
+      "ts_code": "000001.SZ",
+      "end_date": "20251231",
+      "bz_item": "其他业务",
+      "bz_code": "I",
+      "bz_sales": 11857000000.0,
+      "bz_profit": 10927000000.0,
+      "bz_cost": 930000000.0,
+      "curr_type": "CNY"
+    },
+    {
+      "ts_code": "000001.SZ",
+      "end_date": "20251231",
+      "bz_item": "西区",
+      "bz_code": "D",
+      "bz_sales": 5474000000.0,
+      "bz_profit": 3026000000.0,
+      "bz_cost": 2448000000.0,
+      "curr_type": "CNY"
+    },
+    {
+      "ts_code": "000001.SZ",
+      "end_date": "20251231",
+      "bz_item": "总部",
+      "bz_code": "D",
+      "bz_sales": 71518000000.0,
+      "bz_profit": 53778000000.0,
+      "bz_cost": 17740000000.0,
+      "curr_type": "CNY"
+    },
+    {
+      "ts_code": "000001.SZ",
+      "end_date": "20251231",
+      "bz_item": "境外",
+      "bz_code": "D",
+      "bz_sales": 1058000000.0,
+      "bz_profit": 795000000.0,
+      "bz_cost": 263000000.0,
+      "curr_type": "CNY"
+    },
+    {
+      "ts_code": "000001.SZ",
+      "end_date": "20251231",
+      "bz_item": "地区",
+      "bz_code": "D",
+      "bz_sales": 131442000000.0,
+      "bz_profit": 91975000000.0,
+      "bz_cost": 39467000000.0,
+      "curr_type": "CNY"
+    },
+    {
+      "ts_code": "000001.SZ",
+      "end_date": "20251231",
+      "bz_item": "南区",
+      "bz_code": "D",
+      "bz_sales": 20116000000.0,
+      "bz_profit": 13439000000.0,
+      "bz_cost": 6677000000.0,
+      "curr_type": "CNY"
+    },
+    {
+      "ts_code": "000001.SZ",
+      "end_date": "20251231",
+      "bz_item": "北区",
+      "bz_code": "D",
+      "bz_sales": 13258000000.0,
+      "bz_profit": 7822000000.0,
+      "bz_cost": 5436000000.0,
+      "curr_type": "CNY"
+    },
+    {
+      "ts_code": "000001.SZ",
+      "end_date": "20251231",
+      "bz_item": "东区",
+      "bz_code": "D",
+      "bz_sales": 20018000000.0,
+      "bz_profit": 13115000000.0,
+      "bz_cost": 6903000000.0,
+      "curr_type": "CNY"
+    },
+    {
+      "ts_code": "000001.SZ",
+      "end_date": "20250630",
+      "bz_item": "资产处置损益",
+      "bz_code": "P",
+      "bz_sales": 83000000.0,
+      "bz_profit": null,
+      "bz_cost": null,
+      "curr_type": "CNY"
+    },
+    {
+      "ts_code": "000001.SZ",
+      "end_date": "20250630",
+      "bz_item": "汇兑损益",
+      "bz_code": "P",
+      "bz_sales": 767000000.0,
+      "bz_profit": null,
+      "bz_cost": null,
+      "curr_type": "CNY"
+    },
+    {
+      "ts_code": "000001.SZ",
+      "end_date": "20250630",
+      "bz_item": "投资收益",
+      "bz_code": "P",
+      "bz_sales": 12730000000.0,
+      "bz_profit": null,
+      "bz_cost": null,
+      "curr_type": "CNY"
+    },
+    {
+      "ts_code": "000001.SZ",
+      "end_date": "20250630",
+      "bz_item": "手续费及佣金净收入：手续费及佣金收入：银行卡手续费收入",
+      "bz_code": "P",
+      "bz_sales": 6408000000.0,
+      "bz_profit": null,
+      "bz_cost": null,
+      "curr_type": "CNY"
+    },
+    {
+      "ts_code": "000001.SZ",
+      "end_date": "20250630",
+      "bz_item": "手续费及佣金净收入：手续费及佣金收入：资产托管手续费收入",
+      "bz_code": "P",
+      "bz_sales": 798000000.0,
+      "bz_profit": null,
+      "bz_cost": null,
+      "curr_type": "CNY"
+    },
+    {
+      "ts_code": "000001.SZ",
+      "end_date": "20250630",
+      "bz_item": "手续费及佣金净收入：手续费及佣金收入：结算手续费收入",
+      "bz_code": "P",
+      "bz_sales": 1907000000.0,
+      "bz_profit": null,
+      "bz_cost": null,
+      "curr_type": "CNY"
+    },
+    {
+      "ts_code": "000001.SZ",
+      "end_date": "20250630",
+      "bz_item": "手续费及佣金净收入：手续费及佣金收入：其他",
+      "bz_code": "P",
+      "bz_sales": 2122000000.0,
+      "bz_profit": null,
+      "bz_cost": null,
+      "curr_type": "CNY"
+    },
+    {
+      "ts_code": "000001.SZ",
+      "end_date": "20250630",
+      "bz_item": "手续费及佣金净收入：手续费及佣金收入：代理及委托手续费收入",
+      "bz_code": "P",
+      "bz_sales": 3124000000.0,
+      "bz_profit": null,
+      "bz_cost": null,
+      "curr_type": "CNY"
+    },
+    {
+      "ts_code": "000001.SZ",
+      "end_date": "20250630",
+      "bz_item": "手续费及佣金净收入：手续费及佣金收入",
+      "bz_code": "P",
+      "bz_sales": 14359000000.0,
+      "bz_profit": null,
+      "bz_cost": null,
+      "curr_type": "CNY"
+    },
+    {
+      "ts_code": "000001.SZ",
+      "end_date": "20250630",
+      "bz_item": "手续费及佣金净收入：手续费及佣金支出",
+      "bz_code": "P",
+      "bz_sales": -1620000000.0,
+      "bz_profit": null,
+      "bz_cost": null,
+      "curr_type": "CNY"
+    },
+    {
+      "ts_code": "000001.SZ",
+      "end_date": "20250630",
+      "bz_item": "手续费及佣金净收入",
+      "bz_code": "P",
+      "bz_sales": 12739000000.0,
+      "bz_profit": null,
+      "bz_cost": null,
+      "curr_type": "CNY"
+    },
+    {
+      "ts_code": "000001.SZ",
+      "end_date": "20250630",
+      "bz_item": "利息净收入：利息收入：金融投资",
+      "bz_code": "P",
+      "bz_sales": 13982000000.0,
+      "bz_profit": null,
+      "bz_cost": null,
+      "curr_type": "CNY"
+    },
+    {
+      "ts_code": "000001.SZ",
+      "end_date": "20250630",
+      "bz_item": "利息净收入：利息收入：存放同业、拆放同业及买入返售金融资产",
+      "bz_code": "P",
+      "bz_sales": 4884000000.0,
+      "bz_profit": null,
+      "bz_cost": null,
+      "curr_type": "CNY"
+    },
+    {
+      "ts_code": "000001.SZ",
+      "end_date": "20250630",
+      "bz_item": "利息净收入：利息收入：存放中央银行款项",
+      "bz_code": "P",
+      "bz_sales": 1608000000.0,
+      "bz_profit": null,
+      "bz_cost": null,
+      "curr_type": "CNY"
+    },
+    {
+      "ts_code": "000001.SZ",
+      "end_date": "20250630",
+      "bz_item": "利息净收入：利息收入：发放贷款和垫款",
+      "bz_code": "P",
+      "bz_sales": 67457000000.0,
+      "bz_profit": null,
+      "bz_cost": null,
+      "curr_type": "CNY"
+    },
+    {
+      "ts_code": "000001.SZ",
+      "end_date": "20250630",
+      "bz_item": "利息净收入：利息收入",
+      "bz_code": "P",
+      "bz_sales": 87931000000.0,
+      "bz_profit": null,
+      "bz_cost": null,
+      "curr_type": "CNY"
+    },
+    {
+      "ts_code": "000001.SZ",
+      "end_date": "20250630",
+      "bz_item": "利息净收入：利息支出：已发行债务证券",
+      "bz_code": "P",
+      "bz_sales": -6309000000.0,
+      "bz_profit": null,
+      "bz_cost": null,
+      "curr_type": "CNY"
+    },
+    {
+      "ts_code": "000001.SZ",
+      "end_date": "20250630",
+      "bz_item": "利息净收入：利息支出：吸收存款",
+      "bz_code": "P",
+      "bz_sales": -31626000000.0,
+      "bz_profit": null,
+      "bz_cost": null,
+      "curr_type": "CNY"
+    },
+    {
+      "ts_code": "000001.SZ",
+      "end_date": "20250630",
+      "bz_item": "利息净收入：利息支出：向中央银行借款",
+      "bz_code": "P",
+      "bz_sales": -1029000000.0,
+      "bz_profit": null,
+      "bz_cost": null,
+      "curr_type": "CNY"
+    },
+    {
+      "ts_code": "000001.SZ",
+      "end_date": "20250630",
+      "bz_item": "利息净收入：利息支出：同业存放、同业拆入及卖出回购金融资产",
+      "bz_code": "P",
+      "bz_sales": -4460000000.0,
+      "bz_profit": null,
+      "bz_cost": null,
+      "curr_type": "CNY"
+    },
+    {
+      "ts_code": "000001.SZ",
+      "end_date": "20250630",
+      "bz_item": "利息净收入：利息支出",
+      "bz_code": "P",
+      "bz_sales": -43424000000.0,
+      "bz_profit": null,
+      "bz_cost": null,
+      "curr_type": "CNY"
+    },
+    {
+      "ts_code": "000001.SZ",
+      "end_date": "20250630",
+      "bz_item": "利息净收入",
+      "bz_code": "P",
+      "bz_sales": 44507000000.0,
+      "bz_profit": null,
+      "bz_cost": null,
+      "curr_type": "CNY"
+    },
+    {
+      "ts_code": "000001.SZ",
+      "end_date": "20250630",
+      "bz_item": "其他收益",
+      "bz_code": "P",
+      "bz_sales": 50000000.0,
+      "bz_profit": null,
+      "bz_cost": null,
+      "curr_type": "CNY"
+    },
+    {
+      "ts_code": "000001.SZ",
+      "end_date": "20250630",
+      "bz_item": "其他业务收入",
+      "bz_code": "P",
+      "bz_sales": 174000000.0,
+      "bz_profit": null,
+      "bz_cost": null,
+      "curr_type": "CNY"
+    },
+    {
+      "ts_code": "000001.SZ",
+      "end_date": "20250630",
+      "bz_item": "公允价值变动损益",
+      "bz_code": "P",
+      "bz_sales": -1665000000.0,
+      "bz_profit": null,
+      "bz_cost": null,
+      "curr_type": "CNY"
+    },
+    {
+      "ts_code": "000001.SZ",
+      "end_date": "20250630",
+      "bz_item": "产品",
+      "bz_code": "P",
+      "bz_sales": 69385000000.0,
+      "bz_profit": null,
+      "bz_cost": null,
+      "curr_type": "CNY"
+    },
+    {
+      "ts_code": "000001.SZ",
+      "end_date": "20250630",
+      "bz_item": "零售金融业务",
+      "bz_code": "I",
+      "bz_sales": 31081000000.0,
+      "bz_profit": 20057000000.0,
+      "bz_cost": 11024000000.0,
+      "curr_type": "CNY"
+    },
+    {
+      "ts_code": "000001.SZ",
+      "end_date": "20250630",
+      "bz_item": "行业",
+      "bz_code": "I",
+      "bz_sales": 69385000000.0,
+      "bz_profit": 49552000000.0,
+      "bz_cost": 19833000000.0,
+      "curr_type": "CNY"
+    },
+    {
+      "ts_code": "000001.SZ",
+      "end_date": "20250630",
+      "bz_item": "批发金融业务",
+      "bz_code": "I",
+      "bz_sales": 30425000000.0,
+      "bz_profit": 22386000000.0,
+      "bz_cost": 8039000000.0,
+      "curr_type": "CNY"
+    },
+    {
+      "ts_code": "000001.SZ",
+      "end_date": "20250630",
+      "bz_item": "其他业务",
+      "bz_code": "I",
+      "bz_sales": 7879000000.0,
+      "bz_profit": 7109000000.0,
+      "bz_cost": 770000000.0,
+      "curr_type": "CNY"
+    },
+    {
+      "ts_code": "000001.SZ",
+      "end_date": "20250630",
+      "bz_item": "西区",
+      "bz_code": "D",
+      "bz_sales": 2643000000.0,
+      "bz_profit": 1627000000.0,
+      "bz_cost": 1016000000.0,
+      "curr_type": "CNY"
+    },
+    {
+      "ts_code": "000001.SZ",
+      "end_date": "20250630",
+      "bz_item": "总部",
+      "bz_code": "D",
+      "bz_sales": 40152000000.0,
+      "bz_profit": 29537000000.0,
+      "bz_cost": 10615000000.0,
+      "curr_type": "CNY"
+    },
+    {
+      "ts_code": "000001.SZ",
+      "end_date": "20250630",
+      "bz_item": "境外",
+      "bz_code": "D",
+      "bz_sales": 555000000.0,
+      "bz_profit": 423000000.0,
+      "bz_cost": 132000000.0,
+      "curr_type": "CNY"
+    },
+    {
+      "ts_code": "000001.SZ",
+      "end_date": "20250630",
+      "bz_item": "地区",
+      "bz_code": "D",
+      "bz_sales": 69385000000.0,
+      "bz_profit": 49552000000.0,
+      "bz_cost": 19833000000.0,
+      "curr_type": "CNY"
+    },
+    {
+      "ts_code": "000001.SZ",
+      "end_date": "20250630",
+      "bz_item": "南区",
+      "bz_code": "D",
+      "bz_sales": 10043000000.0,
+      "bz_profit": 7209000000.0,
+      "bz_cost": 2834000000.0,
+      "curr_type": "CNY"
+    },
+    {
+      "ts_code": "000001.SZ",
+      "end_date": "20250630",
+      "bz_item": "北区",
+      "bz_code": "D",
+      "bz_sales": 6404000000.0,
+      "bz_profit": 4015000000.0,
+      "bz_cost": 2389000000.0,
+      "curr_type": "CNY"
+    },
+    {
+      "ts_code": "000001.SZ",
+      "end_date": "20250630",
+      "bz_item": "东区",
+      "bz_code": "D",
+      "bz_sales": 9588000000.0,
+      "bz_profit": 6741000000.0,
+      "bz_cost": 2847000000.0,
+      "curr_type": "CNY"
+    },
+    {
+      "ts_code": "000001.SZ",
+      "end_date": "20241231",
+      "bz_item": "资产处置损益",
+      "bz_code": "P",
+      "bz_sales": 8000000.0,
+      "bz_profit": null,
+      "bz_cost": null,
+      "curr_type": "CNY"
+    },
+    {
+      "ts_code": "000001.SZ",
+      "end_date": "20241231",
+      "bz_item": "汇兑损益",
+      "bz_code": "P",
+      "bz_sales": 880000000.0,
+      "bz_profit": null,
+      "bz_cost": null,
+      "curr_type": "CNY"
+    },
+    {
+      "ts_code": "000001.SZ",
+      "end_date": "20241231",
+      "bz_item": "投资收益",
+      "bz_code": "P",
+      "bz_sales": 24604000000.0,
+      "bz_profit": null,
+      "bz_cost": null,
+      "curr_type": "CNY"
+    },
+    {
+      "ts_code": "000001.SZ",
+      "end_date": "20241231",
+      "bz_item": "手续费及佣金净收入：手续费及佣金收入：银行卡手续费收入",
+      "bz_code": "P",
+      "bz_sales": 13174000000.0,
+      "bz_profit": null,
+      "bz_cost": null,
+      "curr_type": "CNY"
+    },
+    {
+      "ts_code": "000001.SZ",
+      "end_date": "20241231",
+      "bz_item": "手续费及佣金净收入：手续费及佣金收入：资产托管手续费收入",
+      "bz_code": "P",
+      "bz_sales": 1456000000.0,
+      "bz_profit": null,
+      "bz_cost": null,
+      "curr_type": "CNY"
+    },
+    {
+      "ts_code": "000001.SZ",
+      "end_date": "20241231",
+      "bz_item": "手续费及佣金净收入：手续费及佣金收入：结算手续费收入",
+      "bz_code": "P",
+      "bz_sales": 3022000000.0,
+      "bz_profit": null,
+      "bz_cost": null,
+      "curr_type": "CNY"
+    },
+    {
+      "ts_code": "000001.SZ",
+      "end_date": "20241231",
+      "bz_item": "手续费及佣金净收入：手续费及佣金收入：其他",
+      "bz_code": "P",
+      "bz_sales": 4758000000.0,
+      "bz_profit": null,
+      "bz_cost": null,
+      "curr_type": "CNY"
+    },
+    {
+      "ts_code": "000001.SZ",
+      "end_date": "20241231",
+      "bz_item": "手续费及佣金净收入：手续费及佣金收入：代理及委托手续费收入",
+      "bz_code": "P",
+      "bz_sales": 5434000000.0,
+      "bz_profit": null,
+      "bz_cost": null,
+      "curr_type": "CNY"
+    },
+    {
+      "ts_code": "000001.SZ",
+      "end_date": "20241231",
+      "bz_item": "手续费及佣金净收入：手续费及佣金收入",
+      "bz_code": "P",
+      "bz_sales": 27844000000.0,
+      "bz_profit": null,
+      "bz_cost": null,
+      "curr_type": "CNY"
+    },
+    {
+      "ts_code": "000001.SZ",
+      "end_date": "20241231",
+      "bz_item": "手续费及佣金净收入：手续费及佣金支出",
+      "bz_code": "P",
+      "bz_sales": -3732000000.0,
+      "bz_profit": null,
+      "bz_cost": null,
+      "curr_type": "CNY"
+    },
+    {
+      "ts_code": "000001.SZ",
+      "end_date": "20241231",
+      "bz_item": "手续费及佣金净收入",
+      "bz_code": "P",
+      "bz_sales": 24112000000.0,
+      "bz_profit": null,
+      "bz_cost": null,
+      "curr_type": "CNY"
+    },
+    {
+      "ts_code": "000001.SZ",
+      "end_date": "20241231",
+      "bz_item": "利息净收入：利息收入：金融投资",
+      "bz_code": "P",
+      "bz_sales": 30538000000.0,
+      "bz_profit": null,
+      "bz_cost": null,
+      "curr_type": "CNY"
+    },
+    {
+      "ts_code": "000001.SZ",
+      "end_date": "20241231",
+      "bz_item": "利息净收入：利息收入：存放同业、拆放同业及买入返售金融资产",
+      "bz_code": "P",
+      "bz_sales": 10206000000.0,
+      "bz_profit": null,
+      "bz_cost": null,
+      "curr_type": "CNY"
+    },
+    {
+      "ts_code": "000001.SZ",
+      "end_date": "20241231",
+      "bz_item": "利息净收入：利息收入：存放中央银行款项",
+      "bz_code": "P",
+      "bz_sales": 3438000000.0,
+      "bz_profit": null,
+      "bz_cost": null,
+      "curr_type": "CNY"
+    },
+    {
+      "ts_code": "000001.SZ",
+      "end_date": "20241231",
+      "bz_item": "利息净收入：利息收入：发放贷款和垫款",
+      "bz_code": "P",
+      "bz_sales": 154199000000.0,
+      "bz_profit": null,
+      "bz_cost": null,
+      "curr_type": "CNY"
+    },
+    {
+      "ts_code": "000001.SZ",
+      "end_date": "20241231",
+      "bz_item": "利息净收入：利息收入",
+      "bz_code": "P",
+      "bz_sales": 198381000000.0,
+      "bz_profit": null,
+      "bz_cost": null,
+      "curr_type": "CNY"
+    },
+    {
+      "ts_code": "000001.SZ",
+      "end_date": "20241231",
+      "bz_item": "利息净收入：利息支出：已发行债务证券",
+      "bz_code": "P",
+      "bz_sales": -16568000000.0,
+      "bz_profit": null,
+      "bz_cost": null,
+      "curr_type": "CNY"
+    },
+    {
+      "ts_code": "000001.SZ",
+      "end_date": "20241231",
+      "bz_item": "利息净收入：利息支出：吸收存款",
+      "bz_code": "P",
+      "bz_sales": -72321000000.0,
+      "bz_profit": null,
+      "bz_cost": null,
+      "curr_type": "CNY"
+    },
+    {
+      "ts_code": "000001.SZ",
+      "end_date": "20241231",
+      "bz_item": "利息净收入：利息支出：向中央银行借款",
+      "bz_code": "P",
+      "bz_sales": -2778000000.0,
+      "bz_profit": null,
+      "bz_cost": null,
+      "curr_type": "CNY"
+    },
+    {
+      "ts_code": "000001.SZ",
+      "end_date": "20241231",
+      "bz_item": "利息净收入：利息支出：同业存放、同业拆入及卖出回购金融资产",
+      "bz_code": "P",
+      "bz_sales": -13287000000.0,
+      "bz_profit": null,
+      "bz_cost": null,
+      "curr_type": "CNY"
+    },
+    {
+      "ts_code": "000001.SZ",
+      "end_date": "20241231",
+      "bz_item": "利息净收入：利息支出",
+      "bz_code": "P",
+      "bz_sales": -104954000000.0,
+      "bz_profit": null,
+      "bz_cost": null,
+      "curr_type": "CNY"
+    },
+    {
+      "ts_code": "000001.SZ",
+      "end_date": "20241231",
+      "bz_item": "利息净收入",
+      "bz_code": "P",
+      "bz_sales": 93427000000.0,
+      "bz_profit": null,
+      "bz_cost": null,
+      "curr_type": "CNY"
+    },
+    {
+      "ts_code": "000001.SZ",
+      "end_date": "20241231",
+      "bz_item": "其他收益",
+      "bz_code": "P",
+      "bz_sales": 178000000.0,
+      "bz_profit": null,
+      "bz_cost": null,
+      "curr_type": "CNY"
+    },
+    {
+      "ts_code": "000001.SZ",
+      "end_date": "20241231",
+      "bz_item": "其他业务收入",
+      "bz_code": "P",
+      "bz_sales": 382000000.0,
+      "bz_profit": null,
+      "bz_cost": null,
+      "curr_type": "CNY"
+    },
+    {
+      "ts_code": "000001.SZ",
+      "end_date": "20241231",
+      "bz_item": "公允价值变动损益",
+      "bz_code": "P",
+      "bz_sales": 3104000000.0,
+      "bz_profit": null,
+      "bz_cost": null,
+      "curr_type": "CNY"
+    },
+    {
+      "ts_code": "000001.SZ",
+      "end_date": "20241231",
+      "bz_item": "产品",
+      "bz_code": "P",
+      "bz_sales": 146695000000.0,
+      "bz_profit": null,
+      "bz_cost": null,
+      "curr_type": "CNY"
+    },
+    {
+      "ts_code": "000001.SZ",
+      "end_date": "20241231",
+      "bz_item": "零售金融业务",
+      "bz_code": "I",
+      "bz_sales": 71255000000.0,
+      "bz_profit": 49219000000.0,
+      "bz_cost": 22036000000.0,
+      "curr_type": "CNY"
+    },
+    {
+      "ts_code": "000001.SZ",
+      "end_date": "20241231",
+      "bz_item": "行业",
+      "bz_code": "I",
+      "bz_sales": 146695000000.0,
+      "bz_profit": 104634000000.0,
+      "bz_cost": 42061000000.0,
+      "curr_type": "CNY"
+    },
+    {
+      "ts_code": "000001.SZ",
+      "end_date": "20241231",
+      "bz_item": "批发金融业务",
+      "bz_code": "I",
+      "bz_sales": 63841000000.0,
+      "bz_profit": 44801000000.0,
+      "bz_cost": 19040000000.0,
+      "curr_type": "CNY"
+    },
+    {
+      "ts_code": "000001.SZ",
+      "end_date": "20241231",
+      "bz_item": "其他业务",
+      "bz_code": "I",
+      "bz_sales": 11599000000.0,
+      "bz_profit": 10614000000.0,
+      "bz_cost": 985000000.0,
+      "curr_type": "CNY"
+    },
+    {
+      "ts_code": "000001.SZ",
+      "end_date": "20241231",
+      "bz_item": "西区",
+      "bz_code": "D",
+      "bz_sales": 6742000000.0,
+      "bz_profit": 4091000000.0,
+      "bz_cost": 2651000000.0,
+      "curr_type": "CNY"
+    },
+    {
+      "ts_code": "000001.SZ",
+      "end_date": "20241231",
+      "bz_item": "总部",
+      "bz_code": "D",
+      "bz_sales": 81018000000.0,
+      "bz_profit": 62158000000.0,
+      "bz_cost": 18860000000.0,
+      "curr_type": "CNY"
+    },
+    {
+      "ts_code": "000001.SZ",
+      "end_date": "20241231",
+      "bz_item": "境外",
+      "bz_code": "D",
+      "bz_sales": 862000000.0,
+      "bz_profit": 528000000.0,
+      "bz_cost": 334000000.0,
+      "curr_type": "CNY"
+    },
+    {
+      "ts_code": "000001.SZ",
+      "end_date": "20241231",
+      "bz_item": "地区",
+      "bz_code": "D",
+      "bz_sales": 146695000000.0,
+      "bz_profit": 104634000000.0,
+      "bz_cost": 42061000000.0,
+      "curr_type": "CNY"
+    },
+    {
+      "ts_code": "000001.SZ",
+      "end_date": "20241231",
+      "bz_item": "南区",
+      "bz_code": "D",
+      "bz_sales": 22555000000.0,
+      "bz_profit": 15690000000.0,
+      "bz_cost": 6865000000.0,
+      "curr_type": "CNY"
+    },
+    {
+      "ts_code": "000001.SZ",
+      "end_date": "20241231",
+      "bz_item": "北区",
+      "bz_code": "D",
+      "bz_sales": 14664000000.0,
+      "bz_profit": 8834000000.0,
+      "bz_cost": 5830000000.0,
+      "curr_type": "CNY"
+    },
+    {
+      "ts_code": "000001.SZ",
+      "end_date": "20241231",
+      "bz_item": "东区",
+      "bz_code": "D",
+      "bz_sales": 20854000000.0,
+      "bz_profit": 13333000000.0,
+      "bz_cost": 7521000000.0,
+      "curr_type": "CNY"
+    },
+    {
+      "ts_code": "000001.SZ",
+      "end_date": "20240630",
+      "bz_item": "资产处置损益",
+      "bz_code": "P",
+      "bz_sales": 23000000.0,
+      "bz_profit": null,
+      "bz_cost": null,
+      "curr_type": "CNY"
+    },
+    {
+      "ts_code": "000001.SZ",
+      "end_date": "20240630",
+      "bz_item": "汇兑损益",
+      "bz_code": "P",
+      "bz_sales": 56000000.0,
+      "bz_profit": null,
+      "bz_cost": null,
+      "curr_type": "CNY"
+    },
+    {
+      "ts_code": "000001.SZ",
+      "end_date": "20240630",
+      "bz_item": "投资收益",
+      "bz_code": "P",
+      "bz_sales": 12239000000.0,
+      "bz_profit": null,
+      "bz_cost": null,
+      "curr_type": "CNY"
+    },
+    {
+      "ts_code": "000001.SZ",
+      "end_date": "20240630",
+      "bz_item": "手续费及佣金净收入：手续费及佣金收入：银行卡手续费收入",
+      "bz_code": "P",
+      "bz_sales": 6412000000.0,
+      "bz_profit": null,
+      "bz_cost": null,
+      "curr_type": "CNY"
+    },
+    {
+      "ts_code": "000001.SZ",
+      "end_date": "20240630",
+      "bz_item": "手续费及佣金净收入：手续费及佣金收入：资产托管手续费收入",
+      "bz_code": "P",
+      "bz_sales": 807000000.0,
+      "bz_profit": null,
+      "bz_cost": null,
+      "curr_type": "CNY"
+    },
+    {
+      "ts_code": "000001.SZ",
+      "end_date": "20240630",
+      "bz_item": "手续费及佣金净收入：手续费及佣金收入：结算手续费收入",
+      "bz_code": "P",
+      "bz_sales": 1836000000.0,
+      "bz_profit": null,
+      "bz_cost": null,
+      "curr_type": "CNY"
+    },
+    {
+      "ts_code": "000001.SZ",
+      "end_date": "20240630",
+      "bz_item": "手续费及佣金净收入：手续费及佣金收入：其他",
+      "bz_code": "P",
+      "bz_sales": 2975000000.0,
+      "bz_profit": null,
+      "bz_cost": null,
+      "curr_type": "CNY"
+    },
+    {
+      "ts_code": "000001.SZ",
+      "end_date": "20240630",
+      "bz_item": "手续费及佣金净收入：手续费及佣金收入：代理及委托手续费收入",
+      "bz_code": "P",
+      "bz_sales": 2902000000.0,
+      "bz_profit": null,
+      "bz_cost": null,
+      "curr_type": "CNY"
+    },
+    {
+      "ts_code": "000001.SZ",
+      "end_date": "20240630",
+      "bz_item": "手续费及佣金净收入：手续费及佣金收入",
+      "bz_code": "P",
+      "bz_sales": 14932000000.0,
+      "bz_profit": null,
+      "bz_cost": null,
+      "curr_type": "CNY"
+    },
+    {
+      "ts_code": "000001.SZ",
+      "end_date": "20240630",
+      "bz_item": "手续费及佣金净收入：手续费及佣金支出",
+      "bz_code": "P",
+      "bz_sales": -1935000000.0,
+      "bz_profit": null,
+      "bz_cost": null,
+      "curr_type": "CNY"
+    },
+    {
+      "ts_code": "000001.SZ",
+      "end_date": "20240630",
+      "bz_item": "手续费及佣金净收入",
+      "bz_code": "P",
+      "bz_sales": 12997000000.0,
+      "bz_profit": null,
+      "bz_cost": null,
+      "curr_type": "CNY"
+    },
+    {
+      "ts_code": "000001.SZ",
+      "end_date": "20240630",
+      "bz_item": "利息净收入：利息收入：金融投资",
+      "bz_code": "P",
+      "bz_sales": 15597000000.0,
+      "bz_profit": null,
+      "bz_cost": null,
+      "curr_type": "CNY"
+    },
+    {
+      "ts_code": "000001.SZ",
+      "end_date": "20240630",
+      "bz_item": "利息净收入：利息收入：存放同业、拆放同业及买入返售金融资产",
+      "bz_code": "P",
+      "bz_sales": 5284000000.0,
+      "bz_profit": null,
+      "bz_cost": null,
+      "curr_type": "CNY"
+    },
+    {
+      "ts_code": "000001.SZ",
+      "end_date": "20240630",
+      "bz_item": "利息净收入：利息收入：存放中央银行款项",
+      "bz_code": "P",
+      "bz_sales": 1722000000.0,
+      "bz_profit": null,
+      "bz_cost": null,
+      "curr_type": "CNY"
+    },
+    {
+      "ts_code": "000001.SZ",
+      "end_date": "20240630",
+      "bz_item": "利息净收入：利息收入：发放贷款和垫款",
+      "bz_code": "P",
+      "bz_sales": 81526000000.0,
+      "bz_profit": null,
+      "bz_cost": null,
+      "curr_type": "CNY"
+    },
+    {
+      "ts_code": "000001.SZ",
+      "end_date": "20240630",
+      "bz_item": "利息净收入：利息收入",
+      "bz_code": "P",
+      "bz_sales": 104129000000.0,
+      "bz_profit": null,
+      "bz_cost": null,
+      "curr_type": "CNY"
+    },
+    {
+      "ts_code": "000001.SZ",
+      "end_date": "20240630",
+      "bz_item": "利息净收入：利息支出：已发行债务证券",
+      "bz_code": "P",
+      "bz_sales": -9222000000.0,
+      "bz_profit": null,
+      "bz_cost": null,
+      "curr_type": "CNY"
+    },
+    {
+      "ts_code": "000001.SZ",
+      "end_date": "20240630",
+      "bz_item": "利息净收入：利息支出：吸收存款",
+      "bz_code": "P",
+      "bz_sales": -37017000000.0,
+      "bz_profit": null,
+      "bz_cost": null,
+      "curr_type": "CNY"
+    },
+    {
+      "ts_code": "000001.SZ",
+      "end_date": "20240630",
+      "bz_item": "利息净收入：利息支出：向中央银行借款",
+      "bz_code": "P",
+      "bz_sales": -1615000000.0,
+      "bz_profit": null,
+      "bz_cost": null,
+      "curr_type": "CNY"
+    },
+    {
+      "ts_code": "000001.SZ",
+      "end_date": "20240630",
+      "bz_item": "利息净收入：利息支出：同业存放、同业拆入及卖出回购金融资产",
+      "bz_code": "P",
+      "bz_sales": -7189000000.0,
+      "bz_profit": null,
+      "bz_cost": null,
+      "curr_type": "CNY"
+    },
+    {
+      "ts_code": "000001.SZ",
+      "end_date": "20240630",
+      "bz_item": "利息净收入：利息支出",
+      "bz_code": "P",
+      "bz_sales": -55043000000.0,
+      "bz_profit": null,
+      "bz_cost": null,
+      "curr_type": "CNY"
+    },
+    {
+      "ts_code": "000001.SZ",
+      "end_date": "20240630",
+      "bz_item": "利息净收入",
+      "bz_code": "P",
+      "bz_sales": 49086000000.0,
+      "bz_profit": null,
+      "bz_cost": null,
+      "curr_type": "CNY"
+    },
+    {
+      "ts_code": "000001.SZ",
+      "end_date": "20240630",
+      "bz_item": "其他收益",
+      "bz_code": "P",
+      "bz_sales": 115000000.0,
+      "bz_profit": null,
+      "bz_cost": null,
+      "curr_type": "CNY"
+    },
+    {
+      "ts_code": "000001.SZ",
+      "end_date": "20240630",
+      "bz_item": "其他业务收入",
+      "bz_code": "P",
+      "bz_sales": 192000000.0,
+      "bz_profit": null,
+      "bz_cost": null,
+      "curr_type": "CNY"
+    },
+    {
+      "ts_code": "000001.SZ",
+      "end_date": "20240630",
+      "bz_item": "公允价值变动损益",
+      "bz_code": "P",
+      "bz_sales": 2424000000.0,
+      "bz_profit": null,
+      "bz_cost": null,
+      "curr_type": "CNY"
+    },
+    {
+      "ts_code": "000001.SZ",
+      "end_date": "20240630",
+      "bz_item": "产品",
+      "bz_code": "P",
+      "bz_sales": 77132000000.0,
+      "bz_profit": null,
+      "bz_cost": null,
+      "curr_type": "CNY"
+    },
+    {
+      "ts_code": "000001.SZ",
+      "end_date": "20240630",
+      "bz_item": "零售金融业务",
+      "bz_code": "I",
+      "bz_sales": 39091000000.0,
+      "bz_profit": 26644000000.0,
+      "bz_cost": 12447000000.0,
+      "curr_type": "CNY"
+    },
+    {
+      "ts_code": "000001.SZ",
+      "end_date": "20240630",
+      "bz_item": "行业",
+      "bz_code": "I",
+      "bz_sales": 77132000000.0,
+      "bz_profit": 55240000000.0,
+      "bz_cost": 21892000000.0,
+      "curr_type": "CNY"
+    },
+    {
+      "ts_code": "000001.SZ",
+      "end_date": "20240630",
+      "bz_item": "批发金融业务",
+      "bz_code": "I",
+      "bz_sales": 33096000000.0,
+      "bz_profit": 24330000000.0,
+      "bz_cost": 8766000000.0,
+      "curr_type": "CNY"
+    },
+    {
+      "ts_code": "000001.SZ",
+      "end_date": "20240630",
+      "bz_item": "其他业务",
+      "bz_code": "I",
+      "bz_sales": 4945000000.0,
+      "bz_profit": 4266000000.0,
+      "bz_cost": 679000000.0,
+      "curr_type": "CNY"
+    },
+    {
+      "ts_code": "000001.SZ",
+      "end_date": "20240630",
+      "bz_item": "西区",
+      "bz_code": "D",
+      "bz_sales": 3792000000.0,
+      "bz_profit": 2719000000.0,
+      "bz_cost": 1073000000.0,
+      "curr_type": "CNY"
+    },
+    {
+      "ts_code": "000001.SZ",
+      "end_date": "20240630",
+      "bz_item": "总部",
+      "bz_code": "D",
+      "bz_sales": 41994000000.0,
+      "bz_profit": 29783000000.0,
+      "bz_cost": 12211000000.0,
+      "curr_type": "CNY"
+    },
+    {
+      "ts_code": "000001.SZ",
+      "end_date": "20240630",
+      "bz_item": "境外",
+      "bz_code": "D",
+      "bz_sales": 428000000.0,
+      "bz_profit": 268000000.0,
+      "bz_cost": 160000000.0,
+      "curr_type": "CNY"
+    },
+    {
+      "ts_code": "000001.SZ",
+      "end_date": "20240630",
+      "bz_item": "地区",
+      "bz_code": "D",
+      "bz_sales": 77132000000.0,
+      "bz_profit": 55240000000.0,
+      "bz_cost": 21892000000.0,
+      "curr_type": "CNY"
+    },
+    {
+      "ts_code": "000001.SZ",
+      "end_date": "20240630",
+      "bz_item": "南区",
+      "bz_code": "D",
+      "bz_sales": 12403000000.0,
+      "bz_profit": 9553000000.0,
+      "bz_cost": 2850000000.0,
+      "curr_type": "CNY"
+    },
+    {
+      "ts_code": "000001.SZ",
+      "end_date": "20240630",
+      "bz_item": "北区",
+      "bz_code": "D",
+      "bz_sales": 7868000000.0,
+      "bz_profit": 5416000000.0,
+      "bz_cost": 2452000000.0,
+      "curr_type": "CNY"
+    },
+    {
+      "ts_code": "000001.SZ",
+      "end_date": "20240630",
+      "bz_item": "东区",
+      "bz_code": "D",
+      "bz_sales": 10647000000.0,
+      "bz_profit": 7501000000.0,
+      "bz_cost": 3146000000.0,
+      "curr_type": "CNY"
+    },
+    {
+      "ts_code": "000001.SZ",
+      "end_date": "20231231",
+      "bz_item": "资产处置损益",
+      "bz_code": "P",
+      "bz_sales": 144000000.0,
+      "bz_profit": null,
+      "bz_cost": null,
+      "curr_type": "CNY"
+    },
+    {
+      "ts_code": "000001.SZ",
+      "end_date": "20231231",
+      "bz_item": "汇兑损益",
+      "bz_code": "P",
+      "bz_sales": 662000000.0,
+      "bz_profit": null,
+      "bz_cost": null,
+      "curr_type": "CNY"
+    }
+  ]
+}

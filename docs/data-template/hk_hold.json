@@ -1,0 +1,8617 @@
+{
+  "api_name": "hk_hold",
+  "fetched_at": "2026-08-09T14:16:55.712653+00:00",
+  "query_mode": "trade_date",
+  "params": [
+    {
+      "trade_date": "20260807"
+    }
+  ],
+  "fields": [
+    "code",
+    "trade_date",
+    "ts_code",
+    "name",
+    "vol",
+    "ratio",
+    "exchange"
+  ],
+  "row_count": 955,
+  "data": [
+    {
+      "code": "1",
+      "trade_date": "20260807",
+      "ts_code": "00001.HK",
+      "name": "長和",
+      "vol": 73639371,
+      "ratio": 1.91,
+      "exchange": "HK"
+    },
+    {
+      "code": "2",
+      "trade_date": "20260807",
+      "ts_code": "00002.HK",
+      "name": "中電控股",
+      "vol": 50339678,
+      "ratio": 1.98,
+      "exchange": "HK"
+    },
+    {
+      "code": "3",
+      "trade_date": "20260807",
+      "ts_code": "00003.HK",
+      "name": "香港中華煤氣",
+      "vol": 448671593,
+      "ratio": 2.4,
+      "exchange": "HK"
+    },
+    {
+      "code": "4",
+      "trade_date": "20260807",
+      "ts_code": "00004.HK",
+      "name": "九龍倉集團",
+      "vol": 4696950,
+      "ratio": 0.14,
+      "exchange": "HK"
+    },
+    {
+      "code": "5",
+      "trade_date": "20260807",
+      "ts_code": "00005.HK",
+      "name": "匯豐控股",
+      "vol": 1534161675,
+      "ratio": 8.92,
+      "exchange": "HK"
+    },
+    {
+      "code": "6",
+      "trade_date": "20260807",
+      "ts_code": "00006.HK",
+      "name": "電能實業",
+      "vol": 178323419,
+      "ratio": 8.36,
+      "exchange": "HK"
+    },
+    {
+      "code": "8",
+      "trade_date": "20260807",
+      "ts_code": "00008.HK",
+      "name": "電訊盈科",
+      "vol": 229183096,
+      "ratio": 2.95,
+      "exchange": "HK"
+    },
+    {
+      "code": "10",
+      "trade_date": "20260807",
+      "ts_code": "00010.HK",
+      "name": "恆隆集團",
+      "vol": 21904000,
+      "ratio": 1.6,
+      "exchange": "HK"
+    },
+    {
+      "code": "12",
+      "trade_date": "20260807",
+      "ts_code": "00012.HK",
+      "name": "恆基地產",
+      "vol": 66037615,
+      "ratio": 1.35,
+      "exchange": "HK"
+    },
+    {
+      "code": "13",
+      "trade_date": "20260807",
+      "ts_code": "00013.HK",
+      "name": "和黃醫藥",
+      "vol": 233526255,
+      "ratio": 26.76,
+      "exchange": "HK"
+    },
+    {
+      "code": "14",
+      "trade_date": "20260807",
+      "ts_code": "00014.HK",
+      "name": "希慎興業",
+      "vol": 26258325,
+      "ratio": 2.54,
+      "exchange": "HK"
+    },
+    {
+      "code": "16",
+      "trade_date": "20260807",
+      "ts_code": "00016.HK",
+      "name": "新鴻基地產",
+      "vol": 65115732,
+      "ratio": 2.24,
+      "exchange": "HK"
+    },
+    {
+      "code": "17",
+      "trade_date": "20260807",
+      "ts_code": "00017.HK",
+      "name": "新世界發展",
+      "vol": 113770519,
+      "ratio": 4.51,
+      "exchange": "HK"
+    },
+    {
+      "code": "19",
+      "trade_date": "20260807",
+      "ts_code": "00019.HK",
+      "name": "太古股份公司Ａ",
+      "vol": 8915500,
+      "ratio": 1.13,
+      "exchange": "HK"
+    },
+    {
+      "code": "20",
+      "trade_date": "20260807",
+      "ts_code": "00020.HK",
+      "name": "商湯-W",
+      "vol": 9915465266,
+      "ratio": 23.47,
+      "exchange": "HK"
+    },
+    {
+      "code": "23",
+      "trade_date": "20260807",
+      "ts_code": "00023.HK",
+      "name": "東亞銀行",
+      "vol": 2391830,
+      "ratio": 0.08,
+      "exchange": "HK"
+    },
+    {
+      "code": "27",
+      "trade_date": "20260807",
+      "ts_code": "00027.HK",
+      "name": "銀河娛樂",
+      "vol": 41333848,
+      "ratio": 0.94,
+      "exchange": "HK"
+    },
+    {
+      "code": "35",
+      "trade_date": "20260807",
+      "ts_code": "00035.HK",
+      "name": "遠東發展",
+      "vol": 426843,
+      "ratio": 0.01,
+      "exchange": "HK"
+    },
+    {
+      "code": "38",
+      "trade_date": "20260807",
+      "ts_code": "00038.HK",
+      "name": "第一拖拉機股份",
+      "vol": 204614643,
+      "ratio": 52.19,
+      "exchange": "HK"
+    },
+    {
+      "code": "41",
+      "trade_date": "20260807",
+      "ts_code": "00041.HK",
+      "name": "鷹君",
+      "vol": 17510162,
+      "ratio": 2.33,
+      "exchange": "HK"
+    },
+    {
+      "code": "42",
+      "trade_date": "20260807",
+      "ts_code": "00042.HK",
+      "name": "東北電氣",
+      "vol": 6052000,
+      "ratio": 2.34,
+      "exchange": "HK"
+    },
+    {
+      "code": "45",
+      "trade_date": "20260807",
+      "ts_code": "00045.HK",
+      "name": "大酒店",
+      "vol": 17520,
+      "ratio": 0.0,
+      "exchange": "HK"
+    },
+    {
+      "code": "59",
+      "trade_date": "20260807",
+      "ts_code": "00059.HK",
+      "name": "天譽置業",
+      "vol": 1823710000,
+      "ratio": 21.59,
+      "exchange": "HK"
+    },
+    {
+      "code": "66",
+      "trade_date": "20260807",
+      "ts_code": "00066.HK",
+      "name": "港鐵公司",
+      "vol": 126811046,
+      "ratio": 2.03,
+      "exchange": "HK"
+    },
+    {
+      "code": "69",
+      "trade_date": "20260807",
+      "ts_code": "00069.HK",
+      "name": "香格里拉(亞洲)",
+      "vol": 10712000,
+      "ratio": 0.29,
+      "exchange": "HK"
+    },
+    {
+      "code": "81",
+      "trade_date": "20260807",
+      "ts_code": "00081.HK",
+      "name": "中國海外宏洋集團",
+      "vol": 658931126,
+      "ratio": 18.51,
+      "exchange": "HK"
+    },
+    {
+      "code": "83",
+      "trade_date": "20260807",
+      "ts_code": "00083.HK",
+      "name": "信和置業",
+      "vol": 109757964,
+      "ratio": 1.14,
+      "exchange": "HK"
+    },
+    {
+      "code": "86",
+      "trade_date": "20260807",
+      "ts_code": "00086.HK",
+      "name": "新鴻基公司",
+      "vol": 22676000,
+      "ratio": 1.15,
+      "exchange": "HK"
+    },
+    {
+      "code": "87",
+      "trade_date": "20260807",
+      "ts_code": "00087.HK",
+      "name": "太古股份公司Ｂ",
+      "vol": 50806276,
+      "ratio": 1.78,
+      "exchange": "HK"
+    },
+    {
+      "code": "95",
+      "trade_date": "20260807",
+      "ts_code": "00095.HK",
+      "name": "綠景中國地產",
+      "vol": 539134000,
+      "ratio": 8.46,
+      "exchange": "HK"
+    },
+    {
+      "code": "101",
+      "trade_date": "20260807",
+      "ts_code": "00101.HK",
+      "name": "恆隆地產",
+      "vol": 304244665,
+      "ratio": 5.84,
+      "exchange": "HK"
+    },
+    {
+      "code": "107",
+      "trade_date": "20260807",
+      "ts_code": "00107.HK",
+      "name": "四川成渝高速公路",
+      "vol": 446065807,
+      "ratio": 49.81,
+      "exchange": "HK"
+    },
+    {
+      "code": "116",
+      "trade_date": "20260807",
+      "ts_code": "00116.HK",
+      "name": "周生生",
+      "vol": 7146000,
+      "ratio": 1.06,
+      "exchange": "HK"
+    },
+    {
+      "code": "119",
+      "trade_date": "20260807",
+      "ts_code": "00119.HK",
+      "name": "保利置業集團",
+      "vol": 856245052,
+      "ratio": 22.4,
+      "exchange": "HK"
+    },
+    {
+      "code": "120",
+      "trade_date": "20260807",
+      "ts_code": "00120.HK",
+      "name": "COSMOPOL INT\\'L",
+      "vol": 53424600,
+      "ratio": 3.25,
+      "exchange": "HK"
+    },
+    {
+      "code": "123",
+      "trade_date": "20260807",
+      "ts_code": "00123.HK",
+      "name": "越秀地產",
+      "vol": 564620457,
+      "ratio": 14.02,
+      "exchange": "HK"
+    },
+    {
+      "code": "124",
+      "trade_date": "20260807",
+      "ts_code": "00124.HK",
+      "name": "粵海置地",
+      "vol": 12211100,
+      "ratio": 0.71,
+      "exchange": "HK"
+    },
+    {
+      "code": "127",
+      "trade_date": "20260807",
+      "ts_code": "00127.HK",
+      "name": "華人置業",
+      "vol": 891500,
+      "ratio": 0.03,
+      "exchange": "HK"
+    },
+    {
+      "code": "135",
+      "trade_date": "20260807",
+      "ts_code": "00135.HK",
+      "name": "昆侖能源",
+      "vol": 1294922228,
+      "ratio": 14.98,
+      "exchange": "HK"
+    },
+    {
+      "code": "136",
+      "trade_date": "20260807",
+      "ts_code": "00136.HK",
+      "name": "中國儒意",
+      "vol": 4203747825,
+      "ratio": 25.01,
+      "exchange": "HK"
+    },
+    {
+      "code": "142",
+      "trade_date": "20260807",
+      "ts_code": "00142.HK",
+      "name": "第一太平",
+      "vol": 102915000,
+      "ratio": 2.41,
+      "exchange": "HK"
+    },
+    {
+      "code": "144",
+      "trade_date": "20260807",
+      "ts_code": "00144.HK",
+      "name": "招商局港口",
+      "vol": 320421872,
+      "ratio": 7.62,
+      "exchange": "HK"
+    },
+    {
+      "code": "148",
+      "trade_date": "20260807",
+      "ts_code": "00148.HK",
+      "name": "建滔集團",
+      "vol": 270712852,
+      "ratio": 24.13,
+      "exchange": "HK"
+    },
+    {
+      "code": "151",
+      "trade_date": "20260807",
+      "ts_code": "00151.HK",
+      "name": "中國旺旺",
+      "vol": 177132201,
+      "ratio": 1.49,
+      "exchange": "HK"
+    },
+    {
+      "code": "152",
+      "trade_date": "20260807",
+      "ts_code": "00152.HK",
+      "name": "深圳國際",
+      "vol": 505827302,
+      "ratio": 20.63,
+      "exchange": "HK"
+    },
+    {
+      "code": "163",
+      "trade_date": "20260807",
+      "ts_code": "00163.HK",
+      "name": "英皇國際",
+      "vol": 5178000,
+      "ratio": 0.09,
+      "exchange": "HK"
+    },
+    {
+      "code": "165",
+      "trade_date": "20260807",
+      "ts_code": "00165.HK",
+      "name": "中國光大控股",
+      "vol": 477932403,
+      "ratio": 28.35,
+      "exchange": "HK"
+    },
+    {
+      "code": "168",
+      "trade_date": "20260807",
+      "ts_code": "00168.HK",
+      "name": "青島啤酒股份",
+      "vol": 321065007,
+      "ratio": 49.0,
+      "exchange": "HK"
+    },
+    {
+      "code": "173",
+      "trade_date": "20260807",
+      "ts_code": "00173.HK",
+      "name": "嘉華國際",
+      "vol": 158876055,
+      "ratio": 5.02,
+      "exchange": "HK"
+    },
+    {
+      "code": "175",
+      "trade_date": "20260807",
+      "ts_code": "00175.HK",
+      "name": "吉利汽車",
+      "vol": 1184050375,
+      "ratio": 10.91,
+      "exchange": "HK"
+    },
+    {
+      "code": "177",
+      "trade_date": "20260807",
+      "ts_code": "00177.HK",
+      "name": "江蘇寧滬高速公路",
+      "vol": 743997576,
+      "ratio": 60.88,
+      "exchange": "HK"
+    },
+    {
+      "code": "178",
+      "trade_date": "20260807",
+      "ts_code": "00178.HK",
+      "name": "莎莎國際",
+      "vol": 1777183,
+      "ratio": 0.05,
+      "exchange": "HK"
+    },
+    {
+      "code": "179",
+      "trade_date": "20260807",
+      "ts_code": "00179.HK",
+      "name": "德昌電機控股",
+      "vol": 95268456,
+      "ratio": 10.18,
+      "exchange": "HK"
+    },
+    {
+      "code": "185",
+      "trade_date": "20260807",
+      "ts_code": "00185.HK",
+      "name": "正商實業",
+      "vol": 18813000,
+      "ratio": 0.97,
+      "exchange": "HK"
+    },
+    {
+      "code": "187",
+      "trade_date": "20260807",
+      "ts_code": "00187.HK",
+      "name": "京城機電股份",
+      "vol": 54194000,
+      "ratio": 54.19,
+      "exchange": "HK"
+    },
+    {
+      "code": "189",
+      "trade_date": "20260807",
+      "ts_code": "00189.HK",
+      "name": "東岳集團",
+      "vol": 593867050,
+      "ratio": 34.26,
+      "exchange": "HK"
+    },
+    {
+      "code": "200",
+      "trade_date": "20260807",
+      "ts_code": "00200.HK",
+      "name": "新濠國際發展",
+      "vol": 161143300,
+      "ratio": 7.08,
+      "exchange": "HK"
+    },
+    {
+      "code": "215",
+      "trade_date": "20260807",
+      "ts_code": "00215.HK",
+      "name": "和記電訊香港",
+      "vol": 3006000,
+      "ratio": 0.06,
+      "exchange": "HK"
+    },
+    {
+      "code": "220",
+      "trade_date": "20260807",
+      "ts_code": "00220.HK",
+      "name": "統一企業中國",
+      "vol": 542220402,
+      "ratio": 12.54,
+      "exchange": "HK"
+    },
+    {
+      "code": "241",
+      "trade_date": "20260807",
+      "ts_code": "00241.HK",
+      "name": "阿里健康",
+      "vol": 1962281242,
+      "ratio": 12.13,
+      "exchange": "HK"
+    },
+    {
+      "code": "242",
+      "trade_date": "20260807",
+      "ts_code": "00242.HK",
+      "name": "信德集團",
+      "vol": 101452000,
+      "ratio": 3.35,
+      "exchange": "HK"
+    },
+    {
+      "code": "245",
+      "trade_date": "20260807",
+      "ts_code": "00245.HK",
+      "name": "中薇金融",
+      "vol": 1054000,
+      "ratio": 0.04,
+      "exchange": "HK"
+    },
+    {
+      "code": "256",
+      "trade_date": "20260807",
+      "ts_code": "00256.HK",
+      "name": "冠城鐘錶珠寶",
+      "vol": 873257364,
+      "ratio": 16.81,
+      "exchange": "HK"
+    },
+    {
+      "code": "257",
+      "trade_date": "20260807",
+      "ts_code": "00257.HK",
+      "name": "光大環境",
+      "vol": 1870999654,
+      "ratio": 30.45,
+      "exchange": "HK"
+    },
+    {
+      "code": "267",
+      "trade_date": "20260807",
+      "ts_code": "00267.HK",
+      "name": "中信股份",
+      "vol": 2078983005,
+      "ratio": 7.14,
+      "exchange": "HK"
+    },
+    {
+      "code": "268",
+      "trade_date": "20260807",
+      "ts_code": "00268.HK",
+      "name": "金蝶國際",
+      "vol": 791728309,
+      "ratio": 22.52,
+      "exchange": "HK"
+    },
+    {
+      "code": "270",
+      "trade_date": "20260807",
+      "ts_code": "00270.HK",
+      "name": "粵海投資",
+      "vol": 623111155,
+      "ratio": 9.52,
+      "exchange": "HK"
+    },
+    {
+      "code": "272",
+      "trade_date": "20260807",
+      "ts_code": "00272.HK",
+      "name": "瑞安房地產",
+      "vol": 857831000,
+      "ratio": 10.68,
+      "exchange": "HK"
+    },
+    {
+      "code": "279",
+      "trade_date": "20260807",
+      "ts_code": "00279.HK",
+      "name": "裕承科金",
+      "vol": 13413450,
+      "ratio": 0.96,
+      "exchange": "HK"
+    },
+    {
+      "code": "285",
+      "trade_date": "20260807",
+      "ts_code": "00285.HK",
+      "name": "比亞迪電子",
+      "vol": 242080610,
+      "ratio": 10.73,
+      "exchange": "HK"
+    },
+    {
+      "code": "288",
+      "trade_date": "20260807",
+      "ts_code": "00288.HK",
+      "name": "萬洲國際",
+      "vol": 748949288,
+      "ratio": 5.83,
+      "exchange": "HK"
+    },
+    {
+      "code": "290",
+      "trade_date": "20260807",
+      "ts_code": "00290.HK",
+      "name": "國富量子",
+      "vol": 207948000,
+      "ratio": 2.01,
+      "exchange": "HK"
+    },
+    {
+      "code": "291",
+      "trade_date": "20260807",
+      "ts_code": "00291.HK",
+      "name": "華潤啤酒",
+      "vol": 216184672,
+      "ratio": 6.65,
+      "exchange": "HK"
+    },
+    {
+      "code": "293",
+      "trade_date": "20260807",
+      "ts_code": "00293.HK",
+      "name": "國泰航空",
+      "vol": 117783333,
+      "ratio": 1.93,
+      "exchange": "HK"
+    },
+    {
+      "code": "295",
+      "trade_date": "20260807",
+      "ts_code": "00295.HK",
+      "name": "江山控股",
+      "vol": 30475000,
+      "ratio": 0.2,
+      "exchange": "HK"
+    },
+    {
+      "code": "296",
+      "trade_date": "20260807",
+      "ts_code": "00296.HK",
+      "name": "英皇娛樂酒店",
+      "vol": 500695,
+      "ratio": 0.04,
+      "exchange": "HK"
+    },
+    {
+      "code": "297",
+      "trade_date": "20260807",
+      "ts_code": "00297.HK",
+      "name": "中化化肥",
+      "vol": 1892678200,
+      "ratio": 26.93,
+      "exchange": "HK"
+    },
+    {
+      "code": "299",
+      "trade_date": "20260807",
+      "ts_code": "00299.HK",
+      "name": "寶新置地",
+      "vol": 5112513,
+      "ratio": 4.67,
+      "exchange": "HK"
+    },
+    {
+      "code": "300",
+      "trade_date": "20260807",
+      "ts_code": "00300.HK",
+      "name": "美的集團",
+      "vol": 164139752,
+      "ratio": 25.21,
+      "exchange": "HK"
+    },
+    {
+      "code": "302",
+      "trade_date": "20260807",
+      "ts_code": "00302.HK",
+      "name": "中手游",
+      "vol": 180872200,
+      "ratio": 5.79,
+      "exchange": "HK"
+    },
+    {
+      "code": "303",
+      "trade_date": "20260807",
+      "ts_code": "00303.HK",
+      "name": "VTECH HOLDINGS",
+      "vol": 20904074,
+      "ratio": 8.23,
+      "exchange": "HK"
+    },
+    {
+      "code": "308",
+      "trade_date": "20260807",
+      "ts_code": "00308.HK",
+      "name": "香港中旅",
+      "vol": 304907829,
+      "ratio": 5.5,
+      "exchange": "HK"
+    },
+    {
+      "code": "314",
+      "trade_date": "20260807",
+      "ts_code": "00314.HK",
+      "name": "思派健康",
+      "vol": 105981800,
+      "ratio": 13.83,
+      "exchange": "HK"
+    },
+    {
+      "code": "315",
+      "trade_date": "20260807",
+      "ts_code": "00315.HK",
+      "name": "數碼通電訊",
+      "vol": 676534,
+      "ratio": 0.06,
+      "exchange": "HK"
+    },
+    {
+      "code": "316",
+      "trade_date": "20260807",
+      "ts_code": "00316.HK",
+      "name": "東方海外國際",
+      "vol": 29276200,
+      "ratio": 4.42,
+      "exchange": "HK"
+    },
+    {
+      "code": "317",
+      "trade_date": "20260807",
+      "ts_code": "00317.HK",
+      "name": "中船防務",
+      "vol": 130931200,
+      "ratio": 22.11,
+      "exchange": "HK"
+    },
+    {
+      "code": "321",
+      "trade_date": "20260807",
+      "ts_code": "00321.HK",
+      "name": "德永佳集團",
+      "vol": 646000,
+      "ratio": 0.04,
+      "exchange": "HK"
+    },
+    {
+      "code": "322",
+      "trade_date": "20260807",
+      "ts_code": "00322.HK",
+      "name": "康師傅控股",
+      "vol": 408915758,
+      "ratio": 7.24,
+      "exchange": "HK"
+    },
+    {
+      "code": "323",
+      "trade_date": "20260807",
+      "ts_code": "00323.HK",
+      "name": "馬鞍山鋼鐵股份",
+      "vol": 337252000,
+      "ratio": 19.45,
+      "exchange": "HK"
+    },
+    {
+      "code": "325",
+      "trade_date": "20260807",
+      "ts_code": "00325.HK",
+      "name": "布魯可",
+      "vol": 18061983,
+      "ratio": 7.24,
+      "exchange": "HK"
+    },
+    {
+      "code": "327",
+      "trade_date": "20260807",
+      "ts_code": "00327.HK",
+      "name": "百富環球",
+      "vol": 43061000,
+      "ratio": 4.05,
+      "exchange": "HK"
+    },
+    {
+      "code": "330",
+      "trade_date": "20260807",
+      "ts_code": "00330.HK",
+      "name": "思捷環球",
+      "vol": 532130,
+      "ratio": 0.18,
+      "exchange": "HK"
+    },
+    {
+      "code": "336",
+      "trade_date": "20260807",
+      "ts_code": "00336.HK",
+      "name": "華寶國際",
+      "vol": 643382100,
+      "ratio": 19.92,
+      "exchange": "HK"
+    },
+    {
+      "code": "337",
+      "trade_date": "20260807",
+      "ts_code": "00337.HK",
+      "name": "綠地香港",
+      "vol": 56928000,
+      "ratio": 2.03,
+      "exchange": "HK"
+    },
+    {
+      "code": "338",
+      "trade_date": "20260807",
+      "ts_code": "00338.HK",
+      "name": "上海石油化工股份",
+      "vol": 1036284000,
+      "ratio": 32.23,
+      "exchange": "HK"
+    },
+    {
+      "code": "341",
+      "trade_date": "20260807",
+      "ts_code": "00341.HK",
+      "name": "大家樂集團",
+      "vol": 20586000,
+      "ratio": 3.54,
+      "exchange": "HK"
+    },
+    {
+      "code": "345",
+      "trade_date": "20260807",
+      "ts_code": "00345.HK",
+      "name": "VITASOY INT\\'L",
+      "vol": 31682000,
+      "ratio": 3.1,
+      "exchange": "HK"
+    },
+    {
+      "code": "347",
+      "trade_date": "20260807",
+      "ts_code": "00347.HK",
+      "name": "鞍鋼股份",
+      "vol": 177388400,
+      "ratio": 12.56,
+      "exchange": "HK"
+    },
+    {
+      "code": "354",
+      "trade_date": "20260807",
+      "ts_code": "00354.HK",
+      "name": "中國軟件國際",
+      "vol": 1009097921,
+      "ratio": 36.93,
+      "exchange": "HK"
+    },
+    {
+      "code": "358",
+      "trade_date": "20260807",
+      "ts_code": "00358.HK",
+      "name": "江西銅業股份",
+      "vol": 251472811,
+      "ratio": 18.11,
+      "exchange": "HK"
+    },
+    {
+      "code": "363",
+      "trade_date": "20260807",
+      "ts_code": "00363.HK",
+      "name": "上海實業控股",
+      "vol": 84047701,
+      "ratio": 7.72,
+      "exchange": "HK"
+    },
+    {
+      "code": "371",
+      "trade_date": "20260807",
+      "ts_code": "00371.HK",
+      "name": "北控水務集團",
+      "vol": 2028101437,
+      "ratio": 20.17,
+      "exchange": "HK"
+    },
+    {
+      "code": "384",
+      "trade_date": "20260807",
+      "ts_code": "00384.HK",
+      "name": "中國燃氣",
+      "vol": 1067356025,
+      "ratio": 19.58,
+      "exchange": "HK"
+    },
+    {
+      "code": "386",
+      "trade_date": "20260807",
+      "ts_code": "00386.HK",
+      "name": "中國石油化工股份",
+      "vol": 6717618194,
+      "ratio": 28.23,
+      "exchange": "HK"
+    },
+    {
+      "code": "388",
+      "trade_date": "20260807",
+      "ts_code": "00388.HK",
+      "name": "香港交易所",
+      "vol": 46230316,
+      "ratio": 3.64,
+      "exchange": "HK"
+    },
+    {
+      "code": "390",
+      "trade_date": "20260807",
+      "ts_code": "00390.HK",
+      "name": "中國中鐵",
+      "vol": 1473333439,
+      "ratio": 35.0,
+      "exchange": "HK"
+    },
+    {
+      "code": "392",
+      "trade_date": "20260807",
+      "ts_code": "00392.HK",
+      "name": "北京控股",
+      "vol": 289632510,
+      "ratio": 23.01,
+      "exchange": "HK"
+    },
+    {
+      "code": "400",
+      "trade_date": "20260807",
+      "ts_code": "00400.HK",
+      "name": "硬蛋創新",
+      "vol": 13329000,
+      "ratio": 0.8,
+      "exchange": "HK"
+    },
+    {
+      "code": "405",
+      "trade_date": "20260807",
+      "ts_code": "00405.HK",
+      "name": "越秀房產信託基金",
+      "vol": 151979,
+      "ratio": 0.0,
+      "exchange": "HK"
+    },
+    {
+      "code": "410",
+      "trade_date": "20260807",
+      "ts_code": "00410.HK",
+      "name": "SOHO中國",
+      "vol": 697948510,
+      "ratio": 13.41,
+      "exchange": "HK"
+    },
+    {
+      "code": "412",
+      "trade_date": "20260807",
+      "ts_code": "00412.HK",
+      "name": "山高控股",
+      "vol": 739044500,
+      "ratio": 12.27,
+      "exchange": "HK"
+    },
+    {
+      "code": "419",
+      "trade_date": "20260807",
+      "ts_code": "00419.HK",
+      "name": "弘毅文化集團",
+      "vol": 9610000,
+      "ratio": 0.54,
+      "exchange": "HK"
+    },
+    {
+      "code": "425",
+      "trade_date": "20260807",
+      "ts_code": "00425.HK",
+      "name": "敏實集團",
+      "vol": 197796485,
+      "ratio": 16.7,
+      "exchange": "HK"
+    },
+    {
+      "code": "432",
+      "trade_date": "20260807",
+      "ts_code": "00432.HK",
+      "name": "盈大地產",
+      "vol": 42738,
+      "ratio": 0.0,
+      "exchange": "HK"
+    },
+    {
+      "code": "439",
+      "trade_date": "20260807",
+      "ts_code": "00439.HK",
+      "name": "瀚源控股",
+      "vol": 16202200,
+      "ratio": 2.63,
+      "exchange": "HK"
+    },
+    {
+      "code": "440",
+      "trade_date": "20260807",
+      "ts_code": "00440.HK",
+      "name": "大新金融",
+      "vol": 3484800,
+      "ratio": 1.08,
+      "exchange": "HK"
+    },
+    {
+      "code": "451",
+      "trade_date": "20260807",
+      "ts_code": "00451.HK",
+      "name": "時代數字",
+      "vol": 16598585,
+      "ratio": 0.93,
+      "exchange": "HK"
+    },
+    {
+      "code": "460",
+      "trade_date": "20260807",
+      "ts_code": "00460.HK",
+      "name": "四環醫藥",
+      "vol": 1307032107,
+      "ratio": 14.0,
+      "exchange": "HK"
+    },
+    {
+      "code": "467",
+      "trade_date": "20260807",
+      "ts_code": "00467.HK",
+      "name": "聯合能源集團",
+      "vol": 1270620000,
+      "ratio": 4.87,
+      "exchange": "HK"
+    },
+    {
+      "code": "468",
+      "trade_date": "20260807",
+      "ts_code": "00468.HK",
+      "name": "紛美包裝",
+      "vol": 88000,
+      "ratio": 0.0,
+      "exchange": "HK"
+    },
+    {
+      "code": "470",
+      "trade_date": "20260807",
+      "ts_code": "00470.HK",
+      "name": "先導智能",
+      "vol": 10704300,
+      "ratio": 9.9,
+      "exchange": "HK"
+    },
+    {
+      "code": "480",
+      "trade_date": "20260807",
+      "ts_code": "00480.HK",
+      "name": "香港興業國際",
+      "vol": 28800,
+      "ratio": 0.0,
+      "exchange": "HK"
+    },
+    {
+      "code": "488",
+      "trade_date": "20260807",
+      "ts_code": "00488.HK",
+      "name": "麗新發展",
+      "vol": 450,
+      "ratio": 0.0,
+      "exchange": "HK"
+    },
+    {
+      "code": "493",
+      "trade_date": "20260807",
+      "ts_code": "00493.HK",
+      "name": "國美零售",
+      "vol": 21020890000,
+      "ratio": 27.5,
+      "exchange": "HK"
+    },
+    {
+      "code": "496",
+      "trade_date": "20260807",
+      "ts_code": "00496.HK",
+      "name": "卡森國際",
+      "vol": 40753000,
+      "ratio": 2.21,
+      "exchange": "HK"
+    },
+    {
+      "code": "501",
+      "trade_date": "20260807",
+      "ts_code": "00501.HK",
+      "name": "豪威集團",
+      "vol": 4798100,
+      "ratio": 9.44,
+      "exchange": "HK"
+    },
+    {
+      "code": "506",
+      "trade_date": "20260807",
+      "ts_code": "00506.HK",
+      "name": "中國食品",
+      "vol": 145984168,
+      "ratio": 5.21,
+      "exchange": "HK"
+    },
+    {
+      "code": "508",
+      "trade_date": "20260807",
+      "ts_code": "00508.HK",
+      "name": "鼎億集團投資",
+      "vol": 32134000,
+      "ratio": 3.71,
+      "exchange": "HK"
+    },
+    {
+      "code": "511",
+      "trade_date": "20260807",
+      "ts_code": "00511.HK",
+      "name": "無綫集團",
+      "vol": 128500,
+      "ratio": 0.02,
+      "exchange": "HK"
+    },
+    {
+      "code": "512",
+      "trade_date": "20260807",
+      "ts_code": "00512.HK",
+      "name": "遠大醫藥",
+      "vol": 691687642,
+      "ratio": 19.47,
+      "exchange": "HK"
+    },
+    {
+      "code": "517",
+      "trade_date": "20260807",
+      "ts_code": "00517.HK",
+      "name": "中遠海運國際",
+      "vol": 38000,
+      "ratio": 0.0,
+      "exchange": "HK"
+    },
+    {
+      "code": "520",
+      "trade_date": "20260807",
+      "ts_code": "00520.HK",
+      "name": "呷哺呷哺",
+      "vol": 112571500,
+      "ratio": 10.35,
+      "exchange": "HK"
+    },
+    {
+      "code": "522",
+      "trade_date": "20260807",
+      "ts_code": "00522.HK",
+      "name": "ASM PACIFIC",
+      "vol": 56998920,
+      "ratio": 13.58,
+      "exchange": "HK"
+    },
+    {
+      "code": "525",
+      "trade_date": "20260807",
+      "ts_code": "00525.HK",
+      "name": "廣深鐵路股份",
+      "vol": 506834720,
+      "ratio": 35.4,
+      "exchange": "HK"
+    },
+    {
+      "code": "535",
+      "trade_date": "20260807",
+      "ts_code": "00535.HK",
+      "name": "金地商置",
+      "vol": 2109610000,
+      "ratio": 12.69,
+      "exchange": "HK"
+    },
+    {
+      "code": "537",
+      "trade_date": "20260807",
+      "ts_code": "00537.HK",
+      "name": "普源精電",
+      "vol": 4571800,
+      "ratio": 18.42,
+      "exchange": "HK"
+    },
+    {
+      "code": "546",
+      "trade_date": "20260807",
+      "ts_code": "00546.HK",
+      "name": "阜豐集團",
+      "vol": 269729284,
+      "ratio": 10.75,
+      "exchange": "HK"
+    },
+    {
+      "code": "547",
+      "trade_date": "20260807",
+      "ts_code": "00547.HK",
+      "name": "數字王國",
+      "vol": 62149000,
+      "ratio": 0.77,
+      "exchange": "HK"
+    },
+    {
+      "code": "548",
+      "trade_date": "20260807",
+      "ts_code": "00548.HK",
+      "name": "深圳高速公路股份",
+      "vol": 382979588,
+      "ratio": 51.22,
+      "exchange": "HK"
+    },
+    {
+      "code": "551",
+      "trade_date": "20260807",
+      "ts_code": "00551.HK",
+      "name": "裕元集團",
+      "vol": 110392740,
+      "ratio": 6.87,
+      "exchange": "HK"
+    },
+    {
+      "code": "552",
+      "trade_date": "20260807",
+      "ts_code": "00552.HK",
+      "name": "中國通信服務",
+      "vol": 784984870,
+      "ratio": 32.82,
+      "exchange": "HK"
+    },
+    {
+      "code": "553",
+      "trade_date": "20260807",
+      "ts_code": "00553.HK",
+      "name": "南京熊貓電子股份",
+      "vol": 97374000,
+      "ratio": 40.23,
+      "exchange": "HK"
+    },
+    {
+      "code": "558",
+      "trade_date": "20260807",
+      "ts_code": "00558.HK",
+      "name": "力勁科技",
+      "vol": 119070000,
+      "ratio": 8.72,
+      "exchange": "HK"
+    },
+    {
+      "code": "563",
+      "trade_date": "20260807",
+      "ts_code": "00563.HK",
+      "name": "上實城市開發",
+      "vol": 56701010,
+      "ratio": 1.18,
+      "exchange": "HK"
+    },
+    {
+      "code": "564",
+      "trade_date": "20260807",
+      "ts_code": "00564.HK",
+      "name": "中創智領",
+      "vol": 121494758,
+      "ratio": 49.94,
+      "exchange": "HK"
+    },
+    {
+      "code": "568",
+      "trade_date": "20260807",
+      "ts_code": "00568.HK",
+      "name": "山東墨龍",
+      "vol": 167166800,
+      "ratio": 59.31,
+      "exchange": "HK"
+    },
+    {
+      "code": "570",
+      "trade_date": "20260807",
+      "ts_code": "00570.HK",
+      "name": "中國中藥",
+      "vol": 1559928270,
+      "ratio": 30.96,
+      "exchange": "HK"
+    },
+    {
+      "code": "576",
+      "trade_date": "20260807",
+      "ts_code": "00576.HK",
+      "name": "浙江滬杭甬",
+      "vol": 1121402401,
+      "ratio": 55.41,
+      "exchange": "HK"
+    },
+    {
+      "code": "579",
+      "trade_date": "20260807",
+      "ts_code": "00579.HK",
+      "name": "京能清潔能源",
+      "vol": 132566000,
+      "ratio": 4.68,
+      "exchange": "HK"
+    },
+    {
+      "code": "581",
+      "trade_date": "20260807",
+      "ts_code": "00581.HK",
+      "name": "中國東方集團",
+      "vol": 365440000,
+      "ratio": 9.81,
+      "exchange": "HK"
+    },
+    {
+      "code": "582",
+      "trade_date": "20260807",
+      "ts_code": "00582.HK",
+      "name": "神話世界",
+      "vol": 10860120,
+      "ratio": 0.28,
+      "exchange": "HK"
+    },
+    {
+      "code": "586",
+      "trade_date": "20260807",
+      "ts_code": "00586.HK",
+      "name": "海螺創業",
+      "vol": 886098511,
+      "ratio": 49.44,
+      "exchange": "HK"
+    },
+    {
+      "code": "587",
+      "trade_date": "20260807",
+      "ts_code": "00587.HK",
+      "name": "海螺環保",
+      "vol": 306561500,
+      "ratio": 16.77,
+      "exchange": "HK"
+    },
+    {
+      "code": "588",
+      "trade_date": "20260807",
+      "ts_code": "00588.HK",
+      "name": "北京北辰實業股份",
+      "vol": 306180000,
+      "ratio": 43.3,
+      "exchange": "HK"
+    },
+    {
+      "code": "590",
+      "trade_date": "20260807",
+      "ts_code": "00590.HK",
+      "name": "六福集團",
+      "vol": 40279832,
+      "ratio": 6.85,
+      "exchange": "HK"
+    },
+    {
+      "code": "598",
+      "trade_date": "20260807",
+      "ts_code": "00598.HK",
+      "name": "中國外運",
+      "vol": 977877789,
+      "ratio": 48.49,
+      "exchange": "HK"
+    },
+    {
+      "code": "604",
+      "trade_date": "20260807",
+      "ts_code": "00604.HK",
+      "name": "深圳控股",
+      "vol": 326283843,
+      "ratio": 3.66,
+      "exchange": "HK"
+    },
+    {
+      "code": "607",
+      "trade_date": "20260807",
+      "ts_code": "00607.HK",
+      "name": "豐盛控股",
+      "vol": 33643500,
+      "ratio": 4.74,
+      "exchange": "HK"
+    },
+    {
+      "code": "612",
+      "trade_date": "20260807",
+      "ts_code": "00612.HK",
+      "name": "嘉文世紀投資公司",
+      "vol": 888000,
+      "ratio": 0.05,
+      "exchange": "HK"
+    },
+    {
+      "code": "631",
+      "trade_date": "20260807",
+      "ts_code": "00631.HK",
+      "name": "三一國際",
+      "vol": 135951475,
+      "ratio": 4.12,
+      "exchange": "HK"
+    },
+    {
+      "code": "636",
+      "trade_date": "20260807",
+      "ts_code": "00636.HK",
+      "name": "KLN",
+      "vol": 41207002,
+      "ratio": 2.27,
+      "exchange": "HK"
+    },
+    {
+      "code": "638",
+      "trade_date": "20260807",
+      "ts_code": "00638.HK",
+      "name": "廣和通",
+      "vol": 42056000,
+      "ratio": 31.12,
+      "exchange": "HK"
+    },
+    {
+      "code": "639",
+      "trade_date": "20260807",
+      "ts_code": "00639.HK",
+      "name": "首鋼資源",
+      "vol": 670210948,
+      "ratio": 13.16,
+      "exchange": "HK"
+    },
+    {
+      "code": "650",
+      "trade_date": "20260807",
+      "ts_code": "00650.HK",
+      "name": "普達特科技",
+      "vol": 197272000,
+      "ratio": 2.65,
+      "exchange": "HK"
+    },
+    {
+      "code": "656",
+      "trade_date": "20260807",
+      "ts_code": "00656.HK",
+      "name": "復星國際",
+      "vol": 1210066718,
+      "ratio": 14.88,
+      "exchange": "HK"
+    },
+    {
+      "code": "658",
+      "trade_date": "20260807",
+      "ts_code": "00658.HK",
+      "name": "中國高速傳動",
+      "vol": 91897000,
+      "ratio": 5.61,
+      "exchange": "HK"
+    },
+    {
+      "code": "659",
+      "trade_date": "20260807",
+      "ts_code": "00659.HK",
+      "name": "周大福創建",
+      "vol": 14281147,
+      "ratio": 0.31,
+      "exchange": "HK"
+    },
+    {
+      "code": "666",
+      "trade_date": "20260807",
+      "ts_code": "00666.HK",
+      "name": "瑞浦蘭鈞",
+      "vol": 105227625,
+      "ratio": 11.25,
+      "exchange": "HK"
+    },
+    {
+      "code": "667",
+      "trade_date": "20260807",
+      "ts_code": "00667.HK",
+      "name": "中國東方教育",
+      "vol": 251148439,
+      "ratio": 11.32,
+      "exchange": "HK"
+    },
+    {
+      "code": "668",
+      "trade_date": "20260807",
+      "ts_code": "00668.HK",
+      "name": "安克創新",
+      "vol": 1228400,
+      "ratio": 2.45,
+      "exchange": "HK"
+    },
+    {
+      "code": "669",
+      "trade_date": "20260807",
+      "ts_code": "00669.HK",
+      "name": "創科實業",
+      "vol": 12257107,
+      "ratio": 0.66,
+      "exchange": "HK"
+    },
+    {
+      "code": "670",
+      "trade_date": "20260807",
+      "ts_code": "00670.HK",
+      "name": "中國東方航空股份",
+      "vol": 480441891,
+      "ratio": 9.48,
+      "exchange": "HK"
+    },
+    {
+      "code": "683",
+      "trade_date": "20260807",
+      "ts_code": "00683.HK",
+      "name": "嘉里建設",
+      "vol": 57318333,
+      "ratio": 3.94,
+      "exchange": "HK"
+    },
+    {
+      "code": "686",
+      "trade_date": "20260807",
+      "ts_code": "00686.HK",
+      "name": "北京能源國際",
+      "vol": 14021800,
+      "ratio": 0.62,
+      "exchange": "HK"
+    },
+    {
+      "code": "687",
+      "trade_date": "20260807",
+      "ts_code": "00687.HK",
+      "name": "泰昇集團",
+      "vol": 4058000,
+      "ratio": 0.12,
+      "exchange": "HK"
+    },
+    {
+      "code": "688",
+      "trade_date": "20260807",
+      "ts_code": "00688.HK",
+      "name": "中國海外發展",
+      "vol": 943389046,
+      "ratio": 8.61,
+      "exchange": "HK"
+    },
+    {
+      "code": "691",
+      "trade_date": "20260807",
+      "ts_code": "00691.HK",
+      "name": "山水水泥",
+      "vol": 2924000,
+      "ratio": 0.06,
+      "exchange": "HK"
+    },
+    {
+      "code": "694",
+      "trade_date": "20260807",
+      "ts_code": "00694.HK",
+      "name": "北京首都機場股份",
+      "vol": 347820000,
+      "ratio": 18.5,
+      "exchange": "HK"
+    },
+    {
+      "code": "696",
+      "trade_date": "20260807",
+      "ts_code": "00696.HK",
+      "name": "中國民航信息網絡",
+      "vol": 267670825,
+      "ratio": 28.69,
+      "exchange": "HK"
+    },
+    {
+      "code": "697",
+      "trade_date": "20260807",
+      "ts_code": "00697.HK",
+      "name": "首程控股",
+      "vol": 1668107892,
+      "ratio": 19.85,
+      "exchange": "HK"
+    },
+    {
+      "code": "698",
+      "trade_date": "20260807",
+      "ts_code": "00698.HK",
+      "name": "通達集團",
+      "vol": 980900,
+      "ratio": 0.5,
+      "exchange": "HK"
+    },
+    {
+      "code": "699",
+      "trade_date": "20260807",
+      "ts_code": "00699.HK",
+      "name": "均勝電子",
+      "vol": 40175660,
+      "ratio": 25.9,
+      "exchange": "HK"
+    },
+    {
+      "code": "700",
+      "trade_date": "20260807",
+      "ts_code": "00700.HK",
+      "name": "騰訊控股",
+      "vol": 1064194152,
+      "ratio": 11.71,
+      "exchange": "HK"
+    },
+    {
+      "code": "709",
+      "trade_date": "20260807",
+      "ts_code": "00709.HK",
+      "name": "佐丹奴國際",
+      "vol": 90000,
+      "ratio": 0.0,
+      "exchange": "HK"
+    },
+    {
+      "code": "710",
+      "trade_date": "20260807",
+      "ts_code": "00710.HK",
+      "name": "京東方精電",
+      "vol": 48646000,
+      "ratio": 6.13,
+      "exchange": "HK"
+    },
+    {
+      "code": "718",
+      "trade_date": "20260807",
+      "ts_code": "00718.HK",
+      "name": "太和控股",
+      "vol": 17640000,
+      "ratio": 0.33,
+      "exchange": "HK"
+    },
+    {
+      "code": "719",
+      "trade_date": "20260807",
+      "ts_code": "00719.HK",
+      "name": "山東新華製藥股份",
+      "vol": 74594100,
+      "ratio": 38.24,
+      "exchange": "HK"
+    },
+    {
+      "code": "721",
+      "trade_date": "20260807",
+      "ts_code": "00721.HK",
+      "name": "中國金融國際",
+      "vol": 12036000,
+      "ratio": 0.54,
+      "exchange": "HK"
+    },
+    {
+      "code": "728",
+      "trade_date": "20260807",
+      "ts_code": "00728.HK",
+      "name": "中國電信",
+      "vol": 9739902376,
+      "ratio": 70.18,
+      "exchange": "HK"
+    },
+    {
+      "code": "732",
+      "trade_date": "20260807",
+      "ts_code": "00732.HK",
+      "name": "信利國際",
+      "vol": 128186000,
+      "ratio": 4.35,
+      "exchange": "HK"
+    },
+    {
+      "code": "737",
+      "trade_date": "20260807",
+      "ts_code": "00737.HK",
+      "name": "灣區發展",
+      "vol": 560000,
+      "ratio": 0.01,
+      "exchange": "HK"
+    },
+    {
+      "code": "743",
+      "trade_date": "20260807",
+      "ts_code": "00743.HK",
+      "name": "亞洲水泥(中國)",
+      "vol": 55306000,
+      "ratio": 3.52,
+      "exchange": "HK"
+    },
+    {
+      "code": "751",
+      "trade_date": "20260807",
+      "ts_code": "00751.HK",
+      "name": "創維集團",
+      "vol": 57361324,
+      "ratio": 3.02,
+      "exchange": "HK"
+    },
+    {
+      "code": "753",
+      "trade_date": "20260807",
+      "ts_code": "00753.HK",
+      "name": "中國國航",
+      "vol": 703308625,
+      "ratio": 14.18,
+      "exchange": "HK"
+    },
+    {
+      "code": "754",
+      "trade_date": "20260807",
+      "ts_code": "00754.HK",
+      "name": "合生創展集團",
+      "vol": 235182588,
+      "ratio": 6.19,
+      "exchange": "HK"
+    },
+    {
+      "code": "762",
+      "trade_date": "20260807",
+      "ts_code": "00762.HK",
+      "name": "中國聯通",
+      "vol": 3802330834,
+      "ratio": 12.41,
+      "exchange": "HK"
+    },
+    {
+      "code": "763",
+      "trade_date": "20260807",
+      "ts_code": "00763.HK",
+      "name": "中興通訊",
+      "vol": 388351402,
+      "ratio": 51.39,
+      "exchange": "HK"
+    },
+    {
+      "code": "772",
+      "trade_date": "20260807",
+      "ts_code": "00772.HK",
+      "name": "閱文集團",
+      "vol": 192679235,
+      "ratio": 19.05,
+      "exchange": "HK"
+    },
+    {
+      "code": "775",
+      "trade_date": "20260807",
+      "ts_code": "00775.HK",
+      "name": "長江生命科技",
+      "vol": 54830200,
+      "ratio": 0.56,
+      "exchange": "HK"
+    },
+    {
+      "code": "777",
+      "trade_date": "20260807",
+      "ts_code": "00777.HK",
+      "name": "網龍",
+      "vol": 31598500,
+      "ratio": 5.94,
+      "exchange": "HK"
+    },
+    {
+      "code": "780",
+      "trade_date": "20260807",
+      "ts_code": "00780.HK",
+      "name": "同程旅行",
+      "vol": 223346536,
+      "ratio": 9.48,
+      "exchange": "HK"
+    },
+    {
+      "code": "788",
+      "trade_date": "20260807",
+      "ts_code": "00788.HK",
+      "name": "中國鐵塔",
+      "vol": 1003414814,
+      "ratio": 21.49,
+      "exchange": "HK"
+    },
+    {
+      "code": "799",
+      "trade_date": "20260807",
+      "ts_code": "00799.HK",
+      "name": "IGG INC",
+      "vol": 47673100,
+      "ratio": 4.05,
+      "exchange": "HK"
+    },
+    {
+      "code": "800",
+      "trade_date": "20260807",
+      "ts_code": "00800.HK",
+      "name": "文遠知行-W",
+      "vol": 4165300,
+      "ratio": 0.39,
+      "exchange": "HK"
+    },
+    {
+      "code": "806",
+      "trade_date": "20260807",
+      "ts_code": "00806.HK",
+      "name": "惠理集團",
+      "vol": 81463000,
+      "ratio": 4.45,
+      "exchange": "HK"
+    },
+    {
+      "code": "811",
+      "trade_date": "20260807",
+      "ts_code": "00811.HK",
+      "name": "新華文軒",
+      "vol": 253842014,
+      "ratio": 57.43,
+      "exchange": "HK"
+    },
+    {
+      "code": "813",
+      "trade_date": "20260807",
+      "ts_code": "00813.HK",
+      "name": "世茂集團",
+      "vol": 72465704,
+      "ratio": 0.68,
+      "exchange": "HK"
+    },
+    {
+      "code": "816",
+      "trade_date": "20260807",
+      "ts_code": "00816.HK",
+      "name": "金茂服務",
+      "vol": 3646784,
+      "ratio": 0.39,
+      "exchange": "HK"
+    },
+    {
+      "code": "817",
+      "trade_date": "20260807",
+      "ts_code": "00817.HK",
+      "name": "中國金茂",
+      "vol": 2663672395,
+      "ratio": 19.7,
+      "exchange": "HK"
+    },
+    {
+      "code": "819",
+      "trade_date": "20260807",
+      "ts_code": "00819.HK",
+      "name": "天能動力",
+      "vol": 256314272,
+      "ratio": 22.75,
+      "exchange": "HK"
+    },
+    {
+      "code": "826",
+      "trade_date": "20260807",
+      "ts_code": "00826.HK",
+      "name": "天工國際",
+      "vol": 567254174,
+      "ratio": 20.81,
+      "exchange": "HK"
+    },
+    {
+      "code": "829",
+      "trade_date": "20260807",
+      "ts_code": "00829.HK",
+      "name": "神冠控股",
+      "vol": 91264000,
+      "ratio": 2.82,
+      "exchange": "HK"
+    },
+    {
+      "code": "832",
+      "trade_date": "20260807",
+      "ts_code": "00832.HK",
+      "name": "建業地產",
+      "vol": 117020004,
+      "ratio": 3.85,
+      "exchange": "HK"
+    },
+    {
+      "code": "836",
+      "trade_date": "20260807",
+      "ts_code": "00836.HK",
+      "name": "華潤電力",
+      "vol": 1162319167,
+      "ratio": 22.44,
+      "exchange": "HK"
+    },
+    {
+      "code": "839",
+      "trade_date": "20260807",
+      "ts_code": "00839.HK",
+      "name": "中教控股",
+      "vol": 442964834,
+      "ratio": 15.8,
+      "exchange": "HK"
+    },
+    {
+      "code": "845",
+      "trade_date": "20260807",
+      "ts_code": "00845.HK",
+      "name": "恆盛地產",
+      "vol": 14332000,
+      "ratio": 0.18,
+      "exchange": "HK"
+    },
+    {
+      "code": "846",
+      "trade_date": "20260807",
+      "ts_code": "00846.HK",
+      "name": "明發集團",
+      "vol": 3355000,
+      "ratio": 0.05,
+      "exchange": "HK"
+    },
+    {
+      "code": "853",
+      "trade_date": "20260807",
+      "ts_code": "00853.HK",
+      "name": "微創醫療",
+      "vol": 924958153,
+      "ratio": 48.23,
+      "exchange": "HK"
+    },
+    {
+      "code": "855",
+      "trade_date": "20260807",
+      "ts_code": "00855.HK",
+      "name": "中國水務",
+      "vol": 365284100,
+      "ratio": 22.37,
+      "exchange": "HK"
+    },
+    {
+      "code": "856",
+      "trade_date": "20260807",
+      "ts_code": "00856.HK",
+      "name": "偉仕佳杰",
+      "vol": 68002000,
+      "ratio": 4.72,
+      "exchange": "HK"
+    },
+    {
+      "code": "857",
+      "trade_date": "20260807",
+      "ts_code": "00857.HK",
+      "name": "中國石油股份",
+      "vol": 8425646495,
+      "ratio": 39.92,
+      "exchange": "HK"
+    },
+    {
+      "code": "860",
+      "trade_date": "20260807",
+      "ts_code": "00860.HK",
+      "name": "APOLLO出行",
+      "vol": 703800,
+      "ratio": 0.06,
+      "exchange": "HK"
+    },
+    {
+      "code": "861",
+      "trade_date": "20260807",
+      "ts_code": "00861.HK",
+      "name": "神州控股",
+      "vol": 697409400,
+      "ratio": 41.67,
+      "exchange": "HK"
+    },
+    {
+      "code": "867",
+      "trade_date": "20260807",
+      "ts_code": "00867.HK",
+      "name": "康哲藥業",
+      "vol": 455125738,
+      "ratio": 18.64,
+      "exchange": "HK"
+    },
+    {
+      "code": "868",
+      "trade_date": "20260807",
+      "ts_code": "00868.HK",
+      "name": "信義玻璃",
+      "vol": 579476723,
+      "ratio": 13.08,
+      "exchange": "HK"
+    },
+    {
+      "code": "873",
+      "trade_date": "20260807",
+      "ts_code": "00873.HK",
+      "name": "世茂服務",
+      "vol": 312551000,
+      "ratio": 12.65,
+      "exchange": "HK"
+    },
+    {
+      "code": "874",
+      "trade_date": "20260807",
+      "ts_code": "00874.HK",
+      "name": "白雲山",
+      "vol": 125154211,
+      "ratio": 56.91,
+      "exchange": "HK"
+    },
+    {
+      "code": "880",
+      "trade_date": "20260807",
+      "ts_code": "00880.HK",
+      "name": "澳博控股",
+      "vol": 553024960,
+      "ratio": 7.78,
+      "exchange": "HK"
+    },
+    {
+      "code": "881",
+      "trade_date": "20260807",
+      "ts_code": "00881.HK",
+      "name": "中升控股",
+      "vol": 237631438,
+      "ratio": 9.95,
+      "exchange": "HK"
+    },
+    {
+      "code": "883",
+      "trade_date": "20260807",
+      "ts_code": "00883.HK",
+      "name": "中國海洋石油",
+      "vol": 10597865898,
+      "ratio": 22.29,
+      "exchange": "HK"
+    },
+    {
+      "code": "884",
+      "trade_date": "20260807",
+      "ts_code": "00884.HK",
+      "name": "旭輝控股集團",
+      "vol": 1464318416,
+      "ratio": 7.91,
+      "exchange": "HK"
+    },
+    {
+      "code": "895",
+      "trade_date": "20260807",
+      "ts_code": "00895.HK",
+      "name": "東江環保",
+      "vol": 93049000,
+      "ratio": 46.48,
+      "exchange": "HK"
+    },
+    {
+      "code": "902",
+      "trade_date": "20260807",
+      "ts_code": "00902.HK",
+      "name": "華能國際電力股份",
+      "vol": 2633593898,
+      "ratio": 56.02,
+      "exchange": "HK"
+    },
+    {
+      "code": "909",
+      "trade_date": "20260807",
+      "ts_code": "00909.HK",
+      "name": "明源雲",
+      "vol": 137306000,
+      "ratio": 7.17,
+      "exchange": "HK"
+    },
+    {
+      "code": "911",
+      "trade_date": "20260807",
+      "ts_code": "00911.HK",
+      "name": "前海健康",
+      "vol": 6944025,
+      "ratio": 4.08,
+      "exchange": "HK"
+    },
+    {
+      "code": "914",
+      "trade_date": "20260807",
+      "ts_code": "00914.HK",
+      "name": "海螺水泥",
+      "vol": 267199872,
+      "ratio": 20.55,
+      "exchange": "HK"
+    },
+    {
+      "code": "916",
+      "trade_date": "20260807",
+      "ts_code": "00916.HK",
+      "name": "龍源電力",
+      "vol": 1877740083,
+      "ratio": 56.58,
+      "exchange": "HK"
+    },
+    {
+      "code": "917",
+      "trade_date": "20260807",
+      "ts_code": "00917.HK",
+      "name": "趣致集團",
+      "vol": 44085933,
+      "ratio": 16.63,
+      "exchange": "HK"
+    },
+    {
+      "code": "921",
+      "trade_date": "20260807",
+      "ts_code": "00921.HK",
+      "name": "海信家電",
+      "vol": 59111115,
+      "ratio": 12.85,
+      "exchange": "HK"
+    },
+    {
+      "code": "931",
+      "trade_date": "20260807",
+      "ts_code": "00931.HK",
+      "name": "中國港能",
+      "vol": 73611000,
+      "ratio": 0.89,
+      "exchange": "HK"
+    },
+    {
+      "code": "933",
+      "trade_date": "20260807",
+      "ts_code": "00933.HK",
+      "name": "非凡領越",
+      "vol": 19768000,
+      "ratio": 0.19,
+      "exchange": "HK"
+    },
+    {
+      "code": "934",
+      "trade_date": "20260807",
+      "ts_code": "00934.HK",
+      "name": "中石化冠德",
+      "vol": 298823231,
+      "ratio": 12.01,
+      "exchange": "HK"
+    },
+    {
+      "code": "939",
+      "trade_date": "20260807",
+      "ts_code": "00939.HK",
+      "name": "建設銀行",
+      "vol": 36422679071,
+      "ratio": 15.14,
+      "exchange": "HK"
+    },
+    {
+      "code": "941",
+      "trade_date": "20260807",
+      "ts_code": "00941.HK",
+      "name": "中國移動",
+      "vol": 2902545958,
+      "ratio": 13.38,
+      "exchange": "HK"
+    },
+    {
+      "code": "950",
+      "trade_date": "20260807",
+      "ts_code": "00950.HK",
+      "name": "李氏大藥廠",
+      "vol": 244000,
+      "ratio": 0.04,
+      "exchange": "HK"
+    },
+    {
+      "code": "951",
+      "trade_date": "20260807",
+      "ts_code": "00951.HK",
+      "name": "超威動力",
+      "vol": 90747000,
+      "ratio": 8.21,
+      "exchange": "HK"
+    },
+    {
+      "code": "956",
+      "trade_date": "20260807",
+      "ts_code": "00956.HK",
+      "name": "新天綠色能源",
+      "vol": 1282550639,
+      "ratio": 59.76,
+      "exchange": "HK"
+    },
+    {
+      "code": "960",
+      "trade_date": "20260807",
+      "ts_code": "00960.HK",
+      "name": "龍湖集團",
+      "vol": 850771336,
+      "ratio": 11.98,
+      "exchange": "HK"
+    },
+    {
+      "code": "966",
+      "trade_date": "20260807",
+      "ts_code": "00966.HK",
+      "name": "中國太平",
+      "vol": 519476733,
+      "ratio": 14.44,
+      "exchange": "HK"
+    },
+    {
+      "code": "968",
+      "trade_date": "20260807",
+      "ts_code": "00968.HK",
+      "name": "信義光能",
+      "vol": 1391072714,
+      "ratio": 15.2,
+      "exchange": "HK"
+    },
+    {
+      "code": "975",
+      "trade_date": "20260807",
+      "ts_code": "00975.HK",
+      "name": "MONGOLIAN MINING CORPORATION",
+      "vol": 104756839,
+      "ratio": 10.12,
+      "exchange": "HK"
+    },
+    {
+      "code": "976",
+      "trade_date": "20260807",
+      "ts_code": "00976.HK",
+      "name": "齊合環保",
+      "vol": 43872000,
+      "ratio": 2.73,
+      "exchange": "HK"
+    },
+    {
+      "code": "978",
+      "trade_date": "20260807",
+      "ts_code": "00978.HK",
+      "name": "招商局置地",
+      "vol": 117756000,
+      "ratio": 2.4,
+      "exchange": "HK"
+    },
+    {
+      "code": "981",
+      "trade_date": "20260807",
+      "ts_code": "00981.HK",
+      "name": "中芯國際",
+      "vol": 2504132410,
+      "ratio": 29.24,
+      "exchange": "HK"
+    },
+    {
+      "code": "989",
+      "trade_date": "20260807",
+      "ts_code": "00989.HK",
+      "name": "中國長白山國際",
+      "vol": 3217750,
+      "ratio": 0.89,
+      "exchange": "HK"
+    },
+    {
+      "code": "990",
+      "trade_date": "20260807",
+      "ts_code": "00990.HK",
+      "name": "至源控股",
+      "vol": 1750340000,
+      "ratio": 11.81,
+      "exchange": "HK"
+    },
+    {
+      "code": "991",
+      "trade_date": "20260807",
+      "ts_code": "00991.HK",
+      "name": "大唐發電",
+      "vol": 984837273,
+      "ratio": 16.11,
+      "exchange": "HK"
+    },
+    {
+      "code": "992",
+      "trade_date": "20260807",
+      "ts_code": "00992.HK",
+      "name": "聯想集團",
+      "vol": 1003643778,
+      "ratio": 8.08,
+      "exchange": "HK"
+    },
+    {
+      "code": "995",
+      "trade_date": "20260807",
+      "ts_code": "00995.HK",
+      "name": "安徽皖通高速公路",
+      "vol": 252214307,
+      "ratio": 46.44,
+      "exchange": "HK"
+    },
+    {
+      "code": "998",
+      "trade_date": "20260807",
+      "ts_code": "00998.HK",
+      "name": "中信銀行",
+      "vol": 4361509011,
+      "ratio": 29.3,
+      "exchange": "HK"
+    },
+    {
+      "code": "999",
+      "trade_date": "20260807",
+      "ts_code": "00999.HK",
+      "name": "小菜園",
+      "vol": 41418869,
+      "ratio": 3.51,
+      "exchange": "HK"
+    },
+    {
+      "code": "1024",
+      "trade_date": "20260807",
+      "ts_code": "01024.HK",
+      "name": "快手-W",
+      "vol": 842894799,
+      "ratio": 19.47,
+      "exchange": "HK"
+    },
+    {
+      "code": "1028",
+      "trade_date": "20260807",
+      "ts_code": "01028.HK",
+      "name": "千百度",
+      "vol": 342000,
+      "ratio": 0.01,
+      "exchange": "HK"
+    },
+    {
+      "code": "1030",
+      "trade_date": "20260807",
+      "ts_code": "01030.HK",
+      "name": "新城發展",
+      "vol": 1660995200,
+      "ratio": 22.86,
+      "exchange": "HK"
+    },
+    {
+      "code": "1033",
+      "trade_date": "20260807",
+      "ts_code": "01033.HK",
+      "name": "中石化油服",
+      "vol": 1192686000,
+      "ratio": 22.03,
+      "exchange": "HK"
+    },
+    {
+      "code": "1038",
+      "trade_date": "20260807",
+      "ts_code": "01038.HK",
+      "name": "長江基建集團",
+      "vol": 146513473,
+      "ratio": 5.8,
+      "exchange": "HK"
+    },
+    {
+      "code": "1044",
+      "trade_date": "20260807",
+      "ts_code": "01044.HK",
+      "name": "恆安國際",
+      "vol": 86770000,
+      "ratio": 7.46,
+      "exchange": "HK"
+    },
+    {
+      "code": "1052",
+      "trade_date": "20260807",
+      "ts_code": "01052.HK",
+      "name": "越秀交通基建",
+      "vol": 380996000,
+      "ratio": 22.76,
+      "exchange": "HK"
+    },
+    {
+      "code": "1053",
+      "trade_date": "20260807",
+      "ts_code": "01053.HK",
+      "name": "重慶鋼鐵股份",
+      "vol": 143428000,
+      "ratio": 26.64,
+      "exchange": "HK"
+    },
+    {
+      "code": "1055",
+      "trade_date": "20260807",
+      "ts_code": "01055.HK",
+      "name": "中國南方航空股份",
+      "vol": 727347437,
+      "ratio": 15.65,
+      "exchange": "HK"
+    },
+    {
+      "code": "1057",
+      "trade_date": "20260807",
+      "ts_code": "01057.HK",
+      "name": "浙江世寶",
+      "vol": 118778760,
+      "ratio": 54.78,
+      "exchange": "HK"
+    },
+    {
+      "code": "1060",
+      "trade_date": "20260807",
+      "ts_code": "01060.HK",
+      "name": "大麥娛樂",
+      "vol": 7647427258,
+      "ratio": 25.51,
+      "exchange": "HK"
+    },
+    {
+      "code": "1065",
+      "trade_date": "20260807",
+      "ts_code": "01065.HK",
+      "name": "天津創業環保股份",
+      "vol": 232254100,
+      "ratio": 68.3,
+      "exchange": "HK"
+    },
+    {
+      "code": "1066",
+      "trade_date": "20260807",
+      "ts_code": "01066.HK",
+      "name": "威高股份",
+      "vol": 591977041,
+      "ratio": 13.08,
+      "exchange": "HK"
+    },
+    {
+      "code": "1068",
+      "trade_date": "20260807",
+      "ts_code": "01068.HK",
+      "name": "雨潤食品",
+      "vol": 13672000,
+      "ratio": 0.75,
+      "exchange": "HK"
+    },
+    {
+      "code": "1070",
+      "trade_date": "20260807",
+      "ts_code": "01070.HK",
+      "name": "TCL電子",
+      "vol": 298454605,
+      "ratio": 11.83,
+      "exchange": "HK"
+    },
+    {
+      "code": "1071",
+      "trade_date": "20260807",
+      "ts_code": "01071.HK",
+      "name": "華電國際電力股份",
+      "vol": 1043035036,
+      "ratio": 60.73,
+      "exchange": "HK"
+    },
+    {
+      "code": "1072",
+      "trade_date": "20260807",
+      "ts_code": "01072.HK",
+      "name": "東方電氣",
+      "vol": 66895910,
+      "ratio": 16.39,
+      "exchange": "HK"
+    },
+    {
+      "code": "1081",
+      "trade_date": "20260807",
+      "ts_code": "01081.HK",
+      "name": "大金重工",
+      "vol": 2737700,
+      "ratio": 2.66,
+      "exchange": "HK"
+    },
+    {
+      "code": "1083",
+      "trade_date": "20260807",
+      "ts_code": "01083.HK",
+      "name": "港華智慧能源",
+      "vol": 535166180,
+      "ratio": 14.14,
+      "exchange": "HK"
+    },
+    {
+      "code": "1086",
+      "trade_date": "20260807",
+      "ts_code": "01086.HK",
+      "name": "好孩子國際",
+      "vol": 12297000,
+      "ratio": 0.73,
+      "exchange": "HK"
+    },
+    {
+      "code": "1088",
+      "trade_date": "20260807",
+      "ts_code": "01088.HK",
+      "name": "中國神華",
+      "vol": 2355015373,
+      "ratio": 69.72,
+      "exchange": "HK"
+    },
+    {
+      "code": "1093",
+      "trade_date": "20260807",
+      "ts_code": "01093.HK",
+      "name": "石藥集團",
+      "vol": 3274945125,
+      "ratio": 28.41,
+      "exchange": "HK"
+    },
+    {
+      "code": "1097",
+      "trade_date": "20260807",
+      "ts_code": "01097.HK",
+      "name": "有線寬頻",
+      "vol": 58730,
+      "ratio": 0.0,
+      "exchange": "HK"
+    },
+    {
+      "code": "1098",
+      "trade_date": "20260807",
+      "ts_code": "01098.HK",
+      "name": "路勁",
+      "vol": 3267000,
+      "ratio": 0.43,
+      "exchange": "HK"
+    },
+    {
+      "code": "1099",
+      "trade_date": "20260807",
+      "ts_code": "01099.HK",
+      "name": "國藥控股",
+      "vol": 351515237,
+      "ratio": 26.19,
+      "exchange": "HK"
+    },
+    {
+      "code": "1108",
+      "trade_date": "20260807",
+      "ts_code": "01108.HK",
+      "name": "凱盛新能",
+      "vol": 171184000,
+      "ratio": 68.47,
+      "exchange": "HK"
+    },
+    {
+      "code": "1109",
+      "trade_date": "20260807",
+      "ts_code": "01109.HK",
+      "name": "華潤置地",
+      "vol": 1001392556,
+      "ratio": 14.03,
+      "exchange": "HK"
+    },
+    {
+      "code": "1112",
+      "trade_date": "20260807",
+      "ts_code": "01112.HK",
+      "name": "H&H國際控股",
+      "vol": 76585099,
+      "ratio": 11.85,
+      "exchange": "HK"
+    },
+    {
+      "code": "1113",
+      "trade_date": "20260807",
+      "ts_code": "01113.HK",
+      "name": "長實集團",
+      "vol": 43912579,
+      "ratio": 1.24,
+      "exchange": "HK"
+    },
+    {
+      "code": "1114",
+      "trade_date": "20260807",
+      "ts_code": "01114.HK",
+      "name": "BRILLIANCE CHI",
+      "vol": 1087082000,
+      "ratio": 21.54,
+      "exchange": "HK"
+    },
+    {
+      "code": "1115",
+      "trade_date": "20260807",
+      "ts_code": "01115.HK",
+      "name": "5100藏冰川",
+      "vol": 65411665,
+      "ratio": 1.16,
+      "exchange": "HK"
+    },
+    {
+      "code": "1117",
+      "trade_date": "20260807",
+      "ts_code": "01117.HK",
+      "name": "現代牧業",
+      "vol": 1357785072,
+      "ratio": 17.14,
+      "exchange": "HK"
+    },
+    {
+      "code": "1119",
+      "trade_date": "20260807",
+      "ts_code": "01119.HK",
+      "name": "創夢天地",
+      "vol": 225779700,
+      "ratio": 10.93,
+      "exchange": "HK"
+    },
+    {
+      "code": "1121",
+      "trade_date": "20260807",
+      "ts_code": "01121.HK",
+      "name": "金陽新能源",
+      "vol": 29298000,
+      "ratio": 1.52,
+      "exchange": "HK"
+    },
+    {
+      "code": "1128",
+      "trade_date": "20260807",
+      "ts_code": "01128.HK",
+      "name": "永利澳門",
+      "vol": 115094000,
+      "ratio": 2.18,
+      "exchange": "HK"
+    },
+    {
+      "code": "1137",
+      "trade_date": "20260807",
+      "ts_code": "01137.HK",
+      "name": "香港科技探索",
+      "vol": 2376234,
+      "ratio": 0.29,
+      "exchange": "HK"
+    },
+    {
+      "code": "1138",
+      "trade_date": "20260807",
+      "ts_code": "01138.HK",
+      "name": "中遠海能",
+      "vol": 584970152,
+      "ratio": 45.12,
+      "exchange": "HK"
+    },
+    {
+      "code": "1140",
+      "trade_date": "20260807",
+      "ts_code": "01140.HK",
+      "name": "華科智能投資",
+      "vol": 61964000,
+      "ratio": 0.53,
+      "exchange": "HK"
+    },
+    {
+      "code": "1141",
+      "trade_date": "20260807",
+      "ts_code": "01141.HK",
+      "name": "民銀資本",
+      "vol": 27467400,
+      "ratio": 2.5,
+      "exchange": "HK"
+    },
+    {
+      "code": "1157",
+      "trade_date": "20260807",
+      "ts_code": "01157.HK",
+      "name": "中聯重科",
+      "vol": 513725774,
+      "ratio": 33.08,
+      "exchange": "HK"
+    },
+    {
+      "code": "1164",
+      "trade_date": "20260807",
+      "ts_code": "01164.HK",
+      "name": "中廣核礦業",
+      "vol": 1172699286,
+      "ratio": 15.41,
+      "exchange": "HK"
+    },
+    {
+      "code": "1165",
+      "trade_date": "20260807",
+      "ts_code": "01165.HK",
+      "name": "順風清潔能源",
+      "vol": 275810000,
+      "ratio": 5.42,
+      "exchange": "HK"
+    },
+    {
+      "code": "1167",
+      "trade_date": "20260807",
+      "ts_code": "01167.HK",
+      "name": "加科思-B",
+      "vol": 33420300,
+      "ratio": 4.21,
+      "exchange": "HK"
+    },
+    {
+      "code": "1171",
+      "trade_date": "20260807",
+      "ts_code": "01171.HK",
+      "name": "兗礦能源",
+      "vol": 1872847831,
+      "ratio": 45.94,
+      "exchange": "HK"
+    },
+    {
+      "code": "1176",
+      "trade_date": "20260807",
+      "ts_code": "01176.HK",
+      "name": "珠光控股",
+      "vol": 1050882000,
+      "ratio": 11.86,
+      "exchange": "HK"
+    },
+    {
+      "code": "1177",
+      "trade_date": "20260807",
+      "ts_code": "01177.HK",
+      "name": "中國生物製藥",
+      "vol": 3152960153,
+      "ratio": 16.87,
+      "exchange": "HK"
+    },
+    {
+      "code": "1186",
+      "trade_date": "20260807",
+      "ts_code": "01186.HK",
+      "name": "中國鐵建",
+      "vol": 1081194767,
+      "ratio": 52.06,
+      "exchange": "HK"
+    },
+    {
+      "code": "1187",
+      "trade_date": "20260807",
+      "ts_code": "01187.HK",
+      "name": "可孚醫療",
+      "vol": 5257300,
+      "ratio": 19.46,
+      "exchange": "HK"
+    },
+    {
+      "code": "1188",
+      "trade_date": "20260807",
+      "ts_code": "01188.HK",
+      "name": "正道集團",
+      "vol": 92582000,
+      "ratio": 0.45,
+      "exchange": "HK"
+    },
+    {
+      "code": "1193",
+      "trade_date": "20260807",
+      "ts_code": "01193.HK",
+      "name": "華潤燃氣",
+      "vol": 448056395,
+      "ratio": 19.35,
+      "exchange": "HK"
+    },
+    {
+      "code": "1196",
+      "trade_date": "20260807",
+      "ts_code": "01196.HK",
+      "name": "偉祿科技股份",
+      "vol": 172348000,
+      "ratio": 11.94,
+      "exchange": "HK"
+    },
+    {
+      "code": "1199",
+      "trade_date": "20260807",
+      "ts_code": "01199.HK",
+      "name": "中遠海運港口",
+      "vol": 354145840,
+      "ratio": 8.81,
+      "exchange": "HK"
+    },
+    {
+      "code": "1205",
+      "trade_date": "20260807",
+      "ts_code": "01205.HK",
+      "name": "中信資源",
+      "vol": 64462100,
+      "ratio": 0.81,
+      "exchange": "HK"
+    },
+    {
+      "code": "1208",
+      "trade_date": "20260807",
+      "ts_code": "01208.HK",
+      "name": "五礦資源",
+      "vol": 1217990031,
+      "ratio": 9.47,
+      "exchange": "HK"
+    },
+    {
+      "code": "1209",
+      "trade_date": "20260807",
+      "ts_code": "01209.HK",
+      "name": "華潤萬象生活",
+      "vol": 229317936,
+      "ratio": 10.03,
+      "exchange": "HK"
+    },
+    {
+      "code": "1211",
+      "trade_date": "20260807",
+      "ts_code": "01211.HK",
+      "name": "比亞迪股份",
+      "vol": 357524664,
+      "ratio": 9.7,
+      "exchange": "HK"
+    },
+    {
+      "code": "1233",
+      "trade_date": "20260807",
+      "ts_code": "01233.HK",
+      "name": "時代中國控股",
+      "vol": 112629791,
+      "ratio": 3.75,
+      "exchange": "HK"
+    },
+    {
+      "code": "1234",
+      "trade_date": "20260807",
+      "ts_code": "01234.HK",
+      "name": "中國利郎",
+      "vol": 104447000,
+      "ratio": 8.71,
+      "exchange": "HK"
+    },
+    {
+      "code": "1238",
+      "trade_date": "20260807",
+      "ts_code": "01238.HK",
+      "name": "寶龍地產",
+      "vol": 396828000,
+      "ratio": 9.57,
+      "exchange": "HK"
+    },
+    {
+      "code": "1244",
+      "trade_date": "20260807",
+      "ts_code": "01244.HK",
+      "name": "思路迪醫藥股份",
+      "vol": 17076000,
+      "ratio": 6.61,
+      "exchange": "HK"
+    },
+    {
+      "code": "1250",
+      "trade_date": "20260807",
+      "ts_code": "01250.HK",
+      "name": "山高新能源",
+      "vol": 12940800,
+      "ratio": 0.56,
+      "exchange": "HK"
+    },
+    {
+      "code": "1253",
+      "trade_date": "20260807",
+      "ts_code": "01253.HK",
+      "name": "綠博生態",
+      "vol": 368400,
+      "ratio": 0.06,
+      "exchange": "HK"
+    },
+    {
+      "code": "1257",
+      "trade_date": "20260807",
+      "ts_code": "01257.HK",
+      "name": "中國光大綠色環保",
+      "vol": 233262100,
+      "ratio": 11.29,
+      "exchange": "HK"
+    },
+    {
+      "code": "1258",
+      "trade_date": "20260807",
+      "ts_code": "01258.HK",
+      "name": "中國有色礦業",
+      "vol": 528270584,
+      "ratio": 13.53,
+      "exchange": "HK"
+    },
+    {
+      "code": "1268",
+      "trade_date": "20260807",
+      "ts_code": "01268.HK",
+      "name": "美東汽車",
+      "vol": 32700000,
+      "ratio": 2.42,
+      "exchange": "HK"
+    },
+    {
+      "code": "1269",
+      "trade_date": "20260807",
+      "ts_code": "01269.HK",
+      "name": "首控集團",
+      "vol": 228255400,
+      "ratio": 12.34,
+      "exchange": "HK"
+    },
+    {
+      "code": "1270",
+      "trade_date": "20260807",
+      "ts_code": "01270.HK",
+      "name": "朗廷-SS",
+      "vol": 563348,
+      "ratio": 0.01,
+      "exchange": "HK"
+    },
+    {
+      "code": "1274",
+      "trade_date": "20260807",
+      "ts_code": "01274.HK",
+      "name": "知行科技",
+      "vol": 40207700,
+      "ratio": 15.61,
+      "exchange": "HK"
+    },
+    {
+      "code": "1276",
+      "trade_date": "20260807",
+      "ts_code": "01276.HK",
+      "name": "恆瑞醫藥",
+      "vol": 63073578,
+      "ratio": 24.42,
+      "exchange": "HK"
+    },
+    {
+      "code": "1277",
+      "trade_date": "20260807",
+      "ts_code": "01277.HK",
+      "name": "力量發展",
+      "vol": 474016515,
+      "ratio": 5.5,
+      "exchange": "HK"
+    },
+    {
+      "code": "1282",
+      "trade_date": "20260807",
+      "ts_code": "01282.HK",
+      "name": "中澤豐",
+      "vol": 386671400,
+      "ratio": 7.73,
+      "exchange": "HK"
+    },
+    {
+      "code": "1288",
+      "trade_date": "20260807",
+      "ts_code": "01288.HK",
+      "name": "農業銀行",
+      "vol": 15620182016,
+      "ratio": 50.81,
+      "exchange": "HK"
+    },
+    {
+      "code": "1293",
+      "trade_date": "20260807",
+      "ts_code": "01293.HK",
+      "name": "廣匯寶信",
+      "vol": 14748508,
+      "ratio": 0.51,
+      "exchange": "HK"
+    },
+    {
+      "code": "1299",
+      "trade_date": "20260807",
+      "ts_code": "01299.HK",
+      "name": "友邦保險",
+      "vol": 287713787,
+      "ratio": 2.78,
+      "exchange": "HK"
+    },
+    {
+      "code": "1302",
+      "trade_date": "20260807",
+      "ts_code": "01302.HK",
+      "name": "先健科技",
+      "vol": 1804182200,
+      "ratio": 38.94,
+      "exchange": "HK"
+    },
+    {
+      "code": "1304",
+      "trade_date": "20260807",
+      "ts_code": "01304.HK",
+      "name": "FORTIOR TECHNOLOGY (SHENZHEN) CO., LTD.",
+      "vol": 9124190,
+      "ratio": 42.32,
+      "exchange": "HK"
+    },
+    {
+      "code": "1308",
+      "trade_date": "20260807",
+      "ts_code": "01308.HK",
+      "name": "海豐國際",
+      "vol": 151390538,
+      "ratio": 5.58,
+      "exchange": "HK"
+    },
+    {
+      "code": "1310",
+      "trade_date": "20260807",
+      "ts_code": "01310.HK",
+      "name": "香港寬頻",
+      "vol": 26457000,
+      "ratio": 1.78,
+      "exchange": "HK"
+    },
+    {
+      "code": "1313",
+      "trade_date": "20260807",
+      "ts_code": "01313.HK",
+      "name": "華潤建材科技",
+      "vol": 441602000,
+      "ratio": 6.31,
+      "exchange": "HK"
+    },
+    {
+      "code": "1315",
+      "trade_date": "20260807",
+      "ts_code": "01315.HK",
+      "name": "綠色經濟",
+      "vol": 17512620,
+      "ratio": 2.8,
+      "exchange": "HK"
+    },
+    {
+      "code": "1316",
+      "trade_date": "20260807",
+      "ts_code": "01316.HK",
+      "name": "耐世特",
+      "vol": 281547551,
+      "ratio": 11.21,
+      "exchange": "HK"
+    },
+    {
+      "code": "1317",
+      "trade_date": "20260807",
+      "ts_code": "01317.HK",
+      "name": "楓葉教育",
+      "vol": 595454200,
+      "ratio": 20.93,
+      "exchange": "HK"
+    },
+    {
+      "code": "1318",
+      "trade_date": "20260807",
+      "ts_code": "01318.HK",
+      "name": "毛戈平",
+      "vol": 87124092,
+      "ratio": 17.76,
+      "exchange": "HK"
+    },
+    {
+      "code": "1330",
+      "trade_date": "20260807",
+      "ts_code": "01330.HK",
+      "name": "綠色動力環保",
+      "vol": 295065020,
+      "ratio": 72.96,
+      "exchange": "HK"
+    },
+    {
+      "code": "1333",
+      "trade_date": "20260807",
+      "ts_code": "01333.HK",
+      "name": "博雷頓",
+      "vol": 31184400,
+      "ratio": 8.64,
+      "exchange": "HK"
+    },
+    {
+      "code": "1336",
+      "trade_date": "20260807",
+      "ts_code": "01336.HK",
+      "name": "新華保險",
+      "vol": 487940092,
+      "ratio": 47.18,
+      "exchange": "HK"
+    },
+    {
+      "code": "1339",
+      "trade_date": "20260807",
+      "ts_code": "01339.HK",
+      "name": "中國人民保險集團",
+      "vol": 2434621531,
+      "ratio": 27.89,
+      "exchange": "HK"
+    },
+    {
+      "code": "1341",
+      "trade_date": "20260807",
+      "ts_code": "01341.HK",
+      "name": "昊天國際建投",
+      "vol": 6514280000,
+      "ratio": 58.7,
+      "exchange": "HK"
+    },
+    {
+      "code": "1347",
+      "trade_date": "20260807",
+      "ts_code": "01347.HK",
+      "name": "華虹宏力",
+      "vol": 387948429,
+      "ratio": 22.31,
+      "exchange": "HK"
+    },
+    {
+      "code": "1349",
+      "trade_date": "20260807",
+      "ts_code": "01349.HK",
+      "name": "復旦張江",
+      "vol": 137785100,
+      "ratio": 42.26,
+      "exchange": "HK"
+    },
+    {
+      "code": "1357",
+      "trade_date": "20260807",
+      "ts_code": "01357.HK",
+      "name": "美圖公司",
+      "vol": 1418211917,
+      "ratio": 30.92,
+      "exchange": "HK"
+    },
+    {
+      "code": "1359",
+      "trade_date": "20260807",
+      "ts_code": "01359.HK",
+      "name": "中國信達",
+      "vol": 5736264500,
+      "ratio": 42.27,
+      "exchange": "HK"
+    },
+    {
+      "code": "1361",
+      "trade_date": "20260807",
+      "ts_code": "01361.HK",
+      "name": "361度",
+      "vol": 388359000,
+      "ratio": 17.9,
+      "exchange": "HK"
+    },
+    {
+      "code": "1364",
+      "trade_date": "20260807",
+      "ts_code": "01364.HK",
+      "name": "古茗",
+      "vol": 137655579,
+      "ratio": 5.78,
+      "exchange": "HK"
+    },
+    {
+      "code": "1368",
+      "trade_date": "20260807",
+      "ts_code": "01368.HK",
+      "name": "特步國際",
+      "vol": 481501481,
+      "ratio": 17.09,
+      "exchange": "HK"
+    },
+    {
+      "code": "1375",
+      "trade_date": "20260807",
+      "ts_code": "01375.HK",
+      "name": "中州證券",
+      "vol": 698224000,
+      "ratio": 58.41,
+      "exchange": "HK"
+    },
+    {
+      "code": "1377",
+      "trade_date": "20260807",
+      "ts_code": "01377.HK",
+      "name": "鼎泰高科",
+      "vol": 1392700,
+      "ratio": 11.02,
+      "exchange": "HK"
+    },
+    {
+      "code": "1378",
+      "trade_date": "20260807",
+      "ts_code": "01378.HK",
+      "name": "中國宏橋",
+      "vol": 1065465071,
+      "ratio": 10.84,
+      "exchange": "HK"
+    },
+    {
+      "code": "1382",
+      "trade_date": "20260807",
+      "ts_code": "01382.HK",
+      "name": "互太紡織",
+      "vol": 21229000,
+      "ratio": 1.52,
+      "exchange": "HK"
+    },
+    {
+      "code": "1384",
+      "trade_date": "20260807",
+      "ts_code": "01384.HK",
+      "name": "滴普科技",
+      "vol": 19531800,
+      "ratio": 5.83,
+      "exchange": "HK"
+    },
+    {
+      "code": "1385",
+      "trade_date": "20260807",
+      "ts_code": "01385.HK",
+      "name": "上海復旦",
+      "vol": 77417267,
+      "ratio": 27.22,
+      "exchange": "HK"
+    },
+    {
+      "code": "1398",
+      "trade_date": "20260807",
+      "ts_code": "01398.HK",
+      "name": "工商銀行",
+      "vol": 36074835470,
+      "ratio": 41.56,
+      "exchange": "HK"
+    },
+    {
+      "code": "1405",
+      "trade_date": "20260807",
+      "ts_code": "01405.HK",
+      "name": "達勢股份",
+      "vol": 13808224,
+      "ratio": 10.48,
+      "exchange": "HK"
+    },
+    {
+      "code": "1415",
+      "trade_date": "20260807",
+      "ts_code": "01415.HK",
+      "name": "高偉電子",
+      "vol": 112458255,
+      "ratio": 12.92,
+      "exchange": "HK"
+    },
+    {
+      "code": "1428",
+      "trade_date": "20260807",
+      "ts_code": "01428.HK",
+      "name": "耀才證券金融",
+      "vol": 189656000,
+      "ratio": 11.16,
+      "exchange": "HK"
+    },
+    {
+      "code": "1432",
+      "trade_date": "20260807",
+      "ts_code": "01432.HK",
+      "name": "中國聖牧-PF",
+      "vol": 49086000,
+      "ratio": 0.57,
+      "exchange": "HK"
+    },
+    {
+      "code": "1448",
+      "trade_date": "20260807",
+      "ts_code": "01448.HK",
+      "name": "福壽園",
+      "vol": 597208000,
+      "ratio": 25.73,
+      "exchange": "HK"
+    },
+    {
+      "code": "1456",
+      "trade_date": "20260807",
+      "ts_code": "01456.HK",
+      "name": "國聯民生",
+      "vol": 249167500,
+      "ratio": 56.28,
+      "exchange": "HK"
+    },
+    {
+      "code": "1458",
+      "trade_date": "20260807",
+      "ts_code": "01458.HK",
+      "name": "周黑鴨",
+      "vol": 157989000,
+      "ratio": 7.59,
+      "exchange": "HK"
+    },
+    {
+      "code": "1468",
+      "trade_date": "20260807",
+      "ts_code": "01468.HK",
+      "name": "嘉高達資本",
+      "vol": 169669972,
+      "ratio": 40.7,
+      "exchange": "HK"
+    },
+    {
+      "code": "1475",
+      "trade_date": "20260807",
+      "ts_code": "01475.HK",
+      "name": "日清食品",
+      "vol": 191100,
+      "ratio": 0.01,
+      "exchange": "HK"
+    },
+    {
+      "code": "1477",
+      "trade_date": "20260807",
+      "ts_code": "01477.HK",
+      "name": "歐康維視生物-B",
+      "vol": 56694500,
+      "ratio": 6.77,
+      "exchange": "HK"
+    },
+    {
+      "code": "1478",
+      "trade_date": "20260807",
+      "ts_code": "01478.HK",
+      "name": "丘鈦科技",
+      "vol": 75952000,
+      "ratio": 6.34,
+      "exchange": "HK"
+    },
+    {
+      "code": "1508",
+      "trade_date": "20260807",
+      "ts_code": "01508.HK",
+      "name": "中國再保險",
+      "vol": 528172000,
+      "ratio": 7.9,
+      "exchange": "HK"
+    },
+    {
+      "code": "1513",
+      "trade_date": "20260807",
+      "ts_code": "01513.HK",
+      "name": "麗珠醫藥",
+      "vol": 73607532,
+      "ratio": 24.54,
+      "exchange": "HK"
+    },
+    {
+      "code": "1515",
+      "trade_date": "20260807",
+      "ts_code": "01515.HK",
+      "name": "華潤醫療",
+      "vol": 304954100,
+      "ratio": 23.51,
+      "exchange": "HK"
+    },
+    {
+      "code": "1516",
+      "trade_date": "20260807",
+      "ts_code": "01516.HK",
+      "name": "融創服務",
+      "vol": 663157522,
+      "ratio": 21.89,
+      "exchange": "HK"
+    },
+    {
+      "code": "1519",
+      "trade_date": "20260807",
+      "ts_code": "01519.HK",
+      "name": "極兔速遞-W",
+      "vol": 992327131,
+      "ratio": 10.15,
+      "exchange": "HK"
+    },
+    {
+      "code": "1521",
+      "trade_date": "20260807",
+      "ts_code": "01521.HK",
+      "name": "方達控股",
+      "vol": 387322000,
+      "ratio": 18.95,
+      "exchange": "HK"
+    },
+    {
+      "code": "1528",
+      "trade_date": "20260807",
+      "ts_code": "01528.HK",
+      "name": "紅星美凱龍",
+      "vol": 408666090,
+      "ratio": 55.12,
+      "exchange": "HK"
+    },
+    {
+      "code": "1530",
+      "trade_date": "20260807",
+      "ts_code": "01530.HK",
+      "name": "三生製藥",
+      "vol": 1045195348,
+      "ratio": 41.16,
+      "exchange": "HK"
+    },
+    {
+      "code": "1541",
+      "trade_date": "20260807",
+      "ts_code": "01541.HK",
+      "name": "宜明昂科-B",
+      "vol": 25439400,
+      "ratio": 6.04,
+      "exchange": "HK"
+    },
+    {
+      "code": "1548",
+      "trade_date": "20260807",
+      "ts_code": "01548.HK",
+      "name": "金斯瑞生物科技",
+      "vol": 538835724,
+      "ratio": 24.61,
+      "exchange": "HK"
+    },
+    {
+      "code": "1551",
+      "trade_date": "20260807",
+      "ts_code": "01551.HK",
+      "name": "廣州農商銀行",
+      "vol": 2414000,
+      "ratio": 0.09,
+      "exchange": "HK"
+    },
+    {
+      "code": "1563",
+      "trade_date": "20260807",
+      "ts_code": "01563.HK",
+      "name": "友聯國際教育租賃",
+      "vol": 269691000,
+      "ratio": 15.94,
+      "exchange": "HK"
+    },
+    {
+      "code": "1569",
+      "trade_date": "20260807",
+      "ts_code": "01569.HK",
+      "name": "民生教育",
+      "vol": 60300000,
+      "ratio": 1.42,
+      "exchange": "HK"
+    },
+    {
+      "code": "1578",
+      "trade_date": "20260807",
+      "ts_code": "01578.HK",
+      "name": "天津銀行",
+      "vol": 28500,
+      "ratio": 0.0,
+      "exchange": "HK"
+    },
+    {
+      "code": "1579",
+      "trade_date": "20260807",
+      "ts_code": "01579.HK",
+      "name": "頤海國際",
+      "vol": 186930333,
+      "ratio": 18.02,
+      "exchange": "HK"
+    },
+    {
+      "code": "1583",
+      "trade_date": "20260807",
+      "ts_code": "01583.HK",
+      "name": "親親食品",
+      "vol": 6800,
+      "ratio": 0.0,
+      "exchange": "HK"
+    },
+    {
+      "code": "1585",
+      "trade_date": "20260807",
+      "ts_code": "01585.HK",
+      "name": "雅迪控股",
+      "vol": 192389556,
+      "ratio": 6.18,
+      "exchange": "HK"
+    },
+    {
+      "code": "1600",
+      "trade_date": "20260807",
+      "ts_code": "01600.HK",
+      "name": "天倫燃氣",
+      "vol": 4644500,
+      "ratio": 0.46,
+      "exchange": "HK"
+    },
+    {
+      "code": "1606",
+      "trade_date": "20260807",
+      "ts_code": "01606.HK",
+      "name": "國銀金租",
+      "vol": 40000,
+      "ratio": 0.0,
+      "exchange": "HK"
+    },
+    {
+      "code": "1608",
+      "trade_date": "20260807",
+      "ts_code": "01608.HK",
+      "name": "偉能集團",
+      "vol": 8977676,
+      "ratio": 0.13,
+      "exchange": "HK"
+    },
+    {
+      "code": "1610",
+      "trade_date": "20260807",
+      "ts_code": "01610.HK",
+      "name": "中糧家佳康",
+      "vol": 1757864994,
+      "ratio": 38.35,
+      "exchange": "HK"
+    },
+    {
+      "code": "1618",
+      "trade_date": "20260807",
+      "ts_code": "01618.HK",
+      "name": "中國中冶",
+      "vol": 1001950000,
+      "ratio": 35.28,
+      "exchange": "HK"
+    },
+    {
+      "code": "1622",
+      "trade_date": "20260807",
+      "ts_code": "01622.HK",
+      "name": "力高集團",
+      "vol": 197818000,
+      "ratio": 5.56,
+      "exchange": "HK"
+    },
+    {
+      "code": "1628",
+      "trade_date": "20260807",
+      "ts_code": "01628.HK",
+      "name": "禹洲集團",
+      "vol": 26729181,
+      "ratio": 1.78,
+      "exchange": "HK"
+    },
+    {
+      "code": "1635",
+      "trade_date": "20260807",
+      "ts_code": "01635.HK",
+      "name": "大眾公用",
+      "vol": 378410000,
+      "ratio": 70.9,
+      "exchange": "HK"
+    },
+    {
+      "code": "1636",
+      "trade_date": "20260807",
+      "ts_code": "01636.HK",
+      "name": "中國金屬利用",
+      "vol": 3400800,
+      "ratio": 0.75,
+      "exchange": "HK"
+    },
+    {
+      "code": "1638",
+      "trade_date": "20260807",
+      "ts_code": "01638.HK",
+      "name": "佳兆業集團",
+      "vol": 841247843,
+      "ratio": 7.35,
+      "exchange": "HK"
+    },
+    {
+      "code": "1658",
+      "trade_date": "20260807",
+      "ts_code": "01658.HK",
+      "name": "郵儲銀行",
+      "vol": 6015925926,
+      "ratio": 30.29,
+      "exchange": "HK"
+    },
+    {
+      "code": "1661",
+      "trade_date": "20260807",
+      "ts_code": "01661.HK",
+      "name": "中國前沿科技集團",
+      "vol": 161100,
+      "ratio": 0.08,
+      "exchange": "HK"
+    },
+    {
+      "code": "1666",
+      "trade_date": "20260807",
+      "ts_code": "01666.HK",
+      "name": "同仁堂科技",
+      "vol": 47271000,
+      "ratio": 7.51,
+      "exchange": "HK"
+    },
+    {
+      "code": "1668",
+      "trade_date": "20260807",
+      "ts_code": "01668.HK",
+      "name": "華南城",
+      "vol": 1218345544,
+      "ratio": 10.64,
+      "exchange": "HK"
+    },
+    {
+      "code": "1675",
+      "trade_date": "20260807",
+      "ts_code": "01675.HK",
+      "name": "亞信科技",
+      "vol": 97680400,
+      "ratio": 10.39,
+      "exchange": "HK"
+    },
+    {
+      "code": "1680",
+      "trade_date": "20260807",
+      "ts_code": "01680.HK",
+      "name": "澳門勵駿",
+      "vol": 4440350,
+      "ratio": 0.47,
+      "exchange": "HK"
+    },
+    {
+      "code": "1681",
+      "trade_date": "20260807",
+      "ts_code": "01681.HK",
+      "name": "康臣葯業",
+      "vol": 40510000,
+      "ratio": 4.8,
+      "exchange": "HK"
+    },
+    {
+      "code": "1685",
+      "trade_date": "20260807",
+      "ts_code": "01685.HK",
+      "name": "博耳電力",
+      "vol": 661000,
+      "ratio": 0.08,
+      "exchange": "HK"
+    },
+    {
+      "code": "1686",
+      "trade_date": "20260807",
+      "ts_code": "01686.HK",
+      "name": "新意網集團",
+      "vol": 64607000,
+      "ratio": 2.73,
+      "exchange": "HK"
+    },
+    {
+      "code": "1688",
+      "trade_date": "20260807",
+      "ts_code": "01688.HK",
+      "name": "領益智造",
+      "vol": 132003960,
+      "ratio": 16.25,
+      "exchange": "HK"
+    },
+    {
+      "code": "1691",
+      "trade_date": "20260807",
+      "ts_code": "01691.HK",
+      "name": "JS環球生活",
+      "vol": 167052500,
+      "ratio": 4.8,
+      "exchange": "HK"
+    },
+    {
+      "code": "1709",
+      "trade_date": "20260807",
+      "ts_code": "01709.HK",
+      "name": "德林控股",
+      "vol": 492453100,
+      "ratio": 24.09,
+      "exchange": "HK"
+    },
+    {
+      "code": "1717",
+      "trade_date": "20260807",
+      "ts_code": "01717.HK",
+      "name": "澳優",
+      "vol": 10848000,
+      "ratio": 0.6,
+      "exchange": "HK"
+    },
+    {
+      "code": "1725",
+      "trade_date": "20260807",
+      "ts_code": "01725.HK",
+      "name": "中國技術集團",
+      "vol": 49051800,
+      "ratio": 5.98,
+      "exchange": "HK"
+    },
+    {
+      "code": "1728",
+      "trade_date": "20260807",
+      "ts_code": "01728.HK",
+      "name": "正通汽車",
+      "vol": 93466800,
+      "ratio": 0.92,
+      "exchange": "HK"
+    },
+    {
+      "code": "1729",
+      "trade_date": "20260807",
+      "ts_code": "01729.HK",
+      "name": "匯聚科技",
+      "vol": 277498369,
+      "ratio": 12.42,
+      "exchange": "HK"
+    },
+    {
+      "code": "1735",
+      "trade_date": "20260807",
+      "ts_code": "01735.HK",
+      "name": "中環新能源",
+      "vol": 185147401,
+      "ratio": 4.37,
+      "exchange": "HK"
+    },
+    {
+      "code": "1755",
+      "trade_date": "20260807",
+      "ts_code": "01755.HK",
+      "name": "新城悅服務",
+      "vol": 52595000,
+      "ratio": 6.03,
+      "exchange": "HK"
+    },
+    {
+      "code": "1765",
+      "trade_date": "20260807",
+      "ts_code": "01765.HK",
+      "name": "希教國際控股",
+      "vol": 2365797836,
+      "ratio": 27.27,
+      "exchange": "HK"
+    },
+    {
+      "code": "1766",
+      "trade_date": "20260807",
+      "ts_code": "01766.HK",
+      "name": "中國中車",
+      "vol": 1890390949,
+      "ratio": 43.24,
+      "exchange": "HK"
+    },
+    {
+      "code": "1768",
+      "trade_date": "20260807",
+      "ts_code": "01768.HK",
+      "name": "鳴鳴很忙",
+      "vol": 2995413,
+      "ratio": 1.37,
+      "exchange": "HK"
+    },
+    {
+      "code": "1769",
+      "trade_date": "20260807",
+      "ts_code": "01769.HK",
+      "name": "思考樂教育",
+      "vol": 6823000,
+      "ratio": 1.01,
+      "exchange": "HK"
+    },
+    {
+      "code": "1772",
+      "trade_date": "20260807",
+      "ts_code": "01772.HK",
+      "name": "贛鋒鋰業",
+      "vol": 129683251,
+      "ratio": 26.84,
+      "exchange": "HK"
+    },
+    {
+      "code": "1773",
+      "trade_date": "20260807",
+      "ts_code": "01773.HK",
+      "name": "天立國際控股",
+      "vol": 396994215,
+      "ratio": 18.93,
+      "exchange": "HK"
+    },
+    {
+      "code": "1776",
+      "trade_date": "20260807",
+      "ts_code": "01776.HK",
+      "name": "廣發証券",
+      "vol": 1051504996,
+      "ratio": 54.73,
+      "exchange": "HK"
+    },
+    {
+      "code": "1777",
+      "trade_date": "20260807",
+      "ts_code": "01777.HK",
+      "name": "花樣年控股",
+      "vol": 170007000,
+      "ratio": 0.93,
+      "exchange": "HK"
+    },
+    {
+      "code": "1778",
+      "trade_date": "20260807",
+      "ts_code": "01778.HK",
+      "name": "彩生活",
+      "vol": 45125117,
+      "ratio": 2.42,
+      "exchange": "HK"
+    },
+    {
+      "code": "1783",
+      "trade_date": "20260807",
+      "ts_code": "01783.HK",
+      "name": "晉景新能",
+      "vol": 103401000,
+      "ratio": 3.57,
+      "exchange": "HK"
+    },
+    {
+      "code": "1787",
+      "trade_date": "20260807",
+      "ts_code": "01787.HK",
+      "name": "山東黃金",
+      "vol": 512381011,
+      "ratio": 51.46,
+      "exchange": "HK"
+    },
+    {
+      "code": "1788",
+      "trade_date": "20260807",
+      "ts_code": "01788.HK",
+      "name": "國泰君安國際",
+      "vol": 1579660110,
+      "ratio": 16.57,
+      "exchange": "HK"
+    },
+    {
+      "code": "1789",
+      "trade_date": "20260807",
+      "ts_code": "01789.HK",
+      "name": "愛康醫療",
+      "vol": 235917768,
+      "ratio": 20.95,
+      "exchange": "HK"
+    },
+    {
+      "code": "1797",
+      "trade_date": "20260807",
+      "ts_code": "01797.HK",
+      "name": "東方甄選",
+      "vol": 293953605,
+      "ratio": 27.9,
+      "exchange": "HK"
+    },
+    {
+      "code": "1798",
+      "trade_date": "20260807",
+      "ts_code": "01798.HK",
+      "name": "大唐新能源",
+      "vol": 1102210200,
+      "ratio": 44.06,
+      "exchange": "HK"
+    },
+    {
+      "code": "1799",
+      "trade_date": "20260807",
+      "ts_code": "01799.HK",
+      "name": "新特能源",
+      "vol": 139162400,
+      "ratio": 36.98,
+      "exchange": "HK"
+    },
+    {
+      "code": "1800",
+      "trade_date": "20260807",
+      "ts_code": "01800.HK",
+      "name": "中國交通建設",
+      "vol": 2033951402,
+      "ratio": 46.02,
+      "exchange": "HK"
+    },
+    {
+      "code": "1801",
+      "trade_date": "20260807",
+      "ts_code": "01801.HK",
+      "name": "信達生物",
+      "vol": 489860943,
+      "ratio": 28.08,
+      "exchange": "HK"
+    },
+    {
+      "code": "1810",
+      "trade_date": "20260807",
+      "ts_code": "01810.HK",
+      "name": "小米集團－Ｗ",
+      "vol": 4999404213,
+      "ratio": 19.33,
+      "exchange": "HK"
+    },
+    {
+      "code": "1811",
+      "trade_date": "20260807",
+      "ts_code": "01811.HK",
+      "name": "中廣核新能源",
+      "vol": 724498532,
+      "ratio": 16.87,
+      "exchange": "HK"
+    },
+    {
+      "code": "1812",
+      "trade_date": "20260807",
+      "ts_code": "01812.HK",
+      "name": "晨鳴紙業",
+      "vol": 194753200,
+      "ratio": 36.85,
+      "exchange": "HK"
+    },
+    {
+      "code": "1813",
+      "trade_date": "20260807",
+      "ts_code": "01813.HK",
+      "name": "合景泰富集團",
+      "vol": 220785271,
+      "ratio": 6.45,
+      "exchange": "HK"
+    },
+    {
+      "code": "1816",
+      "trade_date": "20260807",
+      "ts_code": "01816.HK",
+      "name": "中廣核電力",
+      "vol": 5693680292,
+      "ratio": 50.99,
+      "exchange": "HK"
+    },
+    {
+      "code": "1817",
+      "trade_date": "20260807",
+      "ts_code": "01817.HK",
+      "name": "慕尚集團控股",
+      "vol": 616000,
+      "ratio": 0.06,
+      "exchange": "HK"
+    },
+    {
+      "code": "1818",
+      "trade_date": "20260807",
+      "ts_code": "01818.HK",
+      "name": "招金礦業",
+      "vol": 839260789,
+      "ratio": 29.11,
+      "exchange": "HK"
+    },
+    {
+      "code": "1828",
+      "trade_date": "20260807",
+      "ts_code": "01828.HK",
+      "name": "富衛集團",
+      "vol": 1655400,
+      "ratio": 0.11,
+      "exchange": "HK"
+    },
+    {
+      "code": "1833",
+      "trade_date": "20260807",
+      "ts_code": "01833.HK",
+      "name": "平安好醫生",
+      "vol": 442284462,
+      "ratio": 20.45,
+      "exchange": "HK"
+    },
+    {
+      "code": "1836",
+      "trade_date": "20260807",
+      "ts_code": "01836.HK",
+      "name": "九興控股",
+      "vol": 43336822,
+      "ratio": 5.12,
+      "exchange": "HK"
+    },
+    {
+      "code": "1848",
+      "trade_date": "20260807",
+      "ts_code": "01848.HK",
+      "name": "中國飛機租賃",
+      "vol": 3129223,
+      "ratio": 0.41,
+      "exchange": "HK"
+    },
+    {
+      "code": "1855",
+      "trade_date": "20260807",
+      "ts_code": "01855.HK",
+      "name": "中慶股份",
+      "vol": 86774000,
+      "ratio": 10.51,
+      "exchange": "HK"
+    },
+    {
+      "code": "1858",
+      "trade_date": "20260807",
+      "ts_code": "01858.HK",
+      "name": "春立醫療",
+      "vol": 45084718,
+      "ratio": 47.38,
+      "exchange": "HK"
+    },
+    {
+      "code": "1860",
+      "trade_date": "20260807",
+      "ts_code": "01860.HK",
+      "name": "匯量科技",
+      "vol": 448725519,
+      "ratio": 26.23,
+      "exchange": "HK"
+    },
+    {
+      "code": "1873",
+      "trade_date": "20260807",
+      "ts_code": "01873.HK",
+      "name": "維亞生物",
+      "vol": 175783500,
+      "ratio": 8.38,
+      "exchange": "HK"
+    },
+    {
+      "code": "1876",
+      "trade_date": "20260807",
+      "ts_code": "01876.HK",
+      "name": "百威亞太",
+      "vol": 189665396,
+      "ratio": 1.42,
+      "exchange": "HK"
+    },
+    {
+      "code": "1877",
+      "trade_date": "20260807",
+      "ts_code": "01877.HK",
+      "name": "君實生物",
+      "vol": 153684822,
+      "ratio": 59.04,
+      "exchange": "HK"
+    },
+    {
+      "code": "1880",
+      "trade_date": "20260807",
+      "ts_code": "01880.HK",
+      "name": "中國中免",
+      "vol": 42971400,
+      "ratio": 34.28,
+      "exchange": "HK"
+    },
+    {
+      "code": "1882",
+      "trade_date": "20260807",
+      "ts_code": "01882.HK",
+      "name": "海天國際",
+      "vol": 102962800,
+      "ratio": 6.44,
+      "exchange": "HK"
+    },
+    {
+      "code": "1883",
+      "trade_date": "20260807",
+      "ts_code": "01883.HK",
+      "name": "中信國際電訊",
+      "vol": 186616000,
+      "ratio": 5.03,
+      "exchange": "HK"
+    },
+    {
+      "code": "1888",
+      "trade_date": "20260807",
+      "ts_code": "01888.HK",
+      "name": "建滔積層板",
+      "vol": 409362405,
+      "ratio": 12.98,
+      "exchange": "HK"
+    },
+    {
+      "code": "1890",
+      "trade_date": "20260807",
+      "ts_code": "01890.HK",
+      "name": "中國科培",
+      "vol": 92488200,
+      "ratio": 4.58,
+      "exchange": "HK"
+    },
+    {
+      "code": "1896",
+      "trade_date": "20260807",
+      "ts_code": "01896.HK",
+      "name": "貓眼娛樂",
+      "vol": 236980574,
+      "ratio": 20.38,
+      "exchange": "HK"
+    },
+    {
+      "code": "1898",
+      "trade_date": "20260807",
+      "ts_code": "01898.HK",
+      "name": "中煤能源",
+      "vol": 1649792109,
+      "ratio": 40.17,
+      "exchange": "HK"
+    },
+    {
+      "code": "1905",
+      "trade_date": "20260807",
+      "ts_code": "01905.HK",
+      "name": "海通恆信",
+      "vol": 148000,
+      "ratio": 0.0,
+      "exchange": "HK"
+    },
+    {
+      "code": "1907",
+      "trade_date": "20260807",
+      "ts_code": "01907.HK",
+      "name": "中國旭陽集團",
+      "vol": 370624572,
+      "ratio": 8.31,
+      "exchange": "HK"
+    },
+    {
+      "code": "1908",
+      "trade_date": "20260807",
+      "ts_code": "01908.HK",
+      "name": "建發國際集團",
+      "vol": 388846229,
+      "ratio": 16.78,
+      "exchange": "HK"
+    },
+    {
+      "code": "1909",
+      "trade_date": "20260807",
+      "ts_code": "01909.HK",
+      "name": "火岩控股",
+      "vol": 3894605,
+      "ratio": 1.6,
+      "exchange": "HK"
+    },
+    {
+      "code": "1910",
+      "trade_date": "20260807",
+      "ts_code": "01910.HK",
+      "name": "新秀麗",
+      "vol": 28959300,
+      "ratio": 1.96,
+      "exchange": "HK"
+    },
+    {
+      "code": "1911",
+      "trade_date": "20260807",
+      "ts_code": "01911.HK",
+      "name": "華興資本控股",
+      "vol": 28373100,
+      "ratio": 4.94,
+      "exchange": "HK"
+    },
+    {
+      "code": "1916",
+      "trade_date": "20260807",
+      "ts_code": "01916.HK",
+      "name": "江西銀行",
+      "vol": 10562500,
+      "ratio": 0.78,
+      "exchange": "HK"
+    },
+    {
+      "code": "1918",
+      "trade_date": "20260807",
+      "ts_code": "01918.HK",
+      "name": "融創中國",
+      "vol": 6170786003,
+      "ratio": 30.9,
+      "exchange": "HK"
+    },
+    {
+      "code": "1919",
+      "trade_date": "20260807",
+      "ts_code": "01919.HK",
+      "name": "中遠海控",
+      "vol": 798817736,
+      "ratio": 29.44,
+      "exchange": "HK"
+    },
+    {
+      "code": "1921",
+      "trade_date": "20260807",
+      "ts_code": "01921.HK",
+      "name": "達力普控股",
+      "vol": 38274000,
+      "ratio": 2.41,
+      "exchange": "HK"
+    },
+    {
+      "code": "1928",
+      "trade_date": "20260807",
+      "ts_code": "01928.HK",
+      "name": "金沙中國有限公司",
+      "vol": 115704743,
+      "ratio": 1.42,
+      "exchange": "HK"
+    },
+    {
+      "code": "1929",
+      "trade_date": "20260807",
+      "ts_code": "01929.HK",
+      "name": "周大福",
+      "vol": 95321934,
+      "ratio": 0.96,
+      "exchange": "HK"
+    },
+    {
+      "code": "1942",
+      "trade_date": "20260807",
+      "ts_code": "01942.HK",
+      "name": "馬可數字科技",
+      "vol": 472208000,
+      "ratio": 34.4,
+      "exchange": "HK"
+    },
+    {
+      "code": "1951",
+      "trade_date": "20260807",
+      "ts_code": "01951.HK",
+      "name": "錦欣生殖",
+      "vol": 1295435669,
+      "ratio": 47.88,
+      "exchange": "HK"
+    },
+    {
+      "code": "1952",
+      "trade_date": "20260807",
+      "ts_code": "01952.HK",
+      "name": "雲頂新耀",
+      "vol": 196378409,
+      "ratio": 55.49,
+      "exchange": "HK"
+    },
+    {
+      "code": "1958",
+      "trade_date": "20260807",
+      "ts_code": "01958.HK",
+      "name": "北京汽車",
+      "vol": 649101000,
+      "ratio": 25.74,
+      "exchange": "HK"
+    },
+    {
+      "code": "1963",
+      "trade_date": "20260807",
+      "ts_code": "01963.HK",
+      "name": "重慶銀行",
+      "vol": 133914512,
+      "ratio": 8.47,
+      "exchange": "HK"
+    },
+    {
+      "code": "1966",
+      "trade_date": "20260807",
+      "ts_code": "01966.HK",
+      "name": "中駿集團控股",
+      "vol": 241261979,
+      "ratio": 5.7,
+      "exchange": "HK"
+    },
+    {
+      "code": "1969",
+      "trade_date": "20260807",
+      "ts_code": "01969.HK",
+      "name": "中國春來",
+      "vol": 33693000,
+      "ratio": 2.79,
+      "exchange": "HK"
+    },
+    {
+      "code": "1970",
+      "trade_date": "20260807",
+      "ts_code": "01970.HK",
+      "name": "IMAX CHINA HOLDING, INC.",
+      "vol": 634900,
+      "ratio": 0.18,
+      "exchange": "HK"
+    },
+    {
+      "code": "1972",
+      "trade_date": "20260807",
+      "ts_code": "01972.HK",
+      "name": "太古地產",
+      "vol": 119216767,
+      "ratio": 2.06,
+      "exchange": "HK"
+    },
+    {
+      "code": "1980",
+      "trade_date": "20260807",
+      "ts_code": "01980.HK",
+      "name": "天鴿互動",
+      "vol": 12961000,
+      "ratio": 1.16,
+      "exchange": "HK"
+    },
+    {
+      "code": "1981",
+      "trade_date": "20260807",
+      "ts_code": "01981.HK",
+      "name": "華夏控股",
+      "vol": 8182100,
+      "ratio": 0.49,
+      "exchange": "HK"
+    },
+    {
+      "code": "1988",
+      "trade_date": "20260807",
+      "ts_code": "01988.HK",
+      "name": "民生銀行",
+      "vol": 2393192627,
+      "ratio": 28.75,
+      "exchange": "HK"
+    },
+    {
+      "code": "1989",
+      "trade_date": "20260807",
+      "ts_code": "01989.HK",
+      "name": "廣合科技",
+      "vol": 11076769,
+      "ratio": 24.07,
+      "exchange": "HK"
+    },
+    {
+      "code": "1995",
+      "trade_date": "20260807",
+      "ts_code": "01995.HK",
+      "name": "永升服務",
+      "vol": 70080000,
+      "ratio": 4.06,
+      "exchange": "HK"
+    },
+    {
+      "code": "1996",
+      "trade_date": "20260807",
+      "ts_code": "01996.HK",
+      "name": "弘陽地產",
+      "vol": 222331000,
+      "ratio": 6.65,
+      "exchange": "HK"
+    },
+    {
+      "code": "1997",
+      "trade_date": "20260807",
+      "ts_code": "01997.HK",
+      "name": "九龍倉置業",
+      "vol": 28433146,
+      "ratio": 0.93,
+      "exchange": "HK"
+    },
+    {
+      "code": "1999",
+      "trade_date": "20260807",
+      "ts_code": "01999.HK",
+      "name": "敏華控股",
+      "vol": 540777141,
+      "ratio": 14.06,
+      "exchange": "HK"
+    },
+    {
+      "code": "2001",
+      "trade_date": "20260807",
+      "ts_code": "02001.HK",
+      "name": "新高教集團",
+      "vol": 76674824,
+      "ratio": 3.88,
+      "exchange": "HK"
+    },
+    {
+      "code": "2003",
+      "trade_date": "20260807",
+      "ts_code": "02003.HK",
+      "name": "維信金科",
+      "vol": 4600,
+      "ratio": 0.0,
+      "exchange": "HK"
+    },
+    {
+      "code": "2005",
+      "trade_date": "20260807",
+      "ts_code": "02005.HK",
+      "name": "石四藥集團",
+      "vol": 554750000,
+      "ratio": 18.78,
+      "exchange": "HK"
+    },
+    {
+      "code": "2007",
+      "trade_date": "20260807",
+      "ts_code": "02007.HK",
+      "name": "碧桂園",
+      "vol": 9614330942,
+      "ratio": 20.66,
+      "exchange": "HK"
+    },
+    {
+      "code": "2008",
+      "trade_date": "20260807",
+      "ts_code": "02008.HK",
+      "name": "鳳凰衛視",
+      "vol": 10869700,
+      "ratio": 2.17,
+      "exchange": "HK"
+    },
+    {
+      "code": "2009",
+      "trade_date": "20260807",
+      "ts_code": "02009.HK",
+      "name": "金隅集團",
+      "vol": 940506000,
+      "ratio": 40.2,
+      "exchange": "HK"
+    },
+    {
+      "code": "2013",
+      "trade_date": "20260807",
+      "ts_code": "02013.HK",
+      "name": "微盟集團",
+      "vol": 1020759000,
+      "ratio": 24.69,
+      "exchange": "HK"
+    },
+    {
+      "code": "2015",
+      "trade_date": "20260807",
+      "ts_code": "02015.HK",
+      "name": "理想汽車-W",
+      "vol": 487907777,
+      "ratio": 22.54,
+      "exchange": "HK"
+    },
+    {
+      "code": "2016",
+      "trade_date": "20260807",
+      "ts_code": "02016.HK",
+      "name": "浙商銀行",
+      "vol": 1833863228,
+      "ratio": 30.97,
+      "exchange": "HK"
+    },
+    {
+      "code": "2018",
+      "trade_date": "20260807",
+      "ts_code": "02018.HK",
+      "name": "瑞聲科技",
+      "vol": 86422243,
+      "ratio": 7.2,
+      "exchange": "HK"
+    },
+    {
+      "code": "2020",
+      "trade_date": "20260807",
+      "ts_code": "02020.HK",
+      "name": "安踏體育",
+      "vol": 200642838,
+      "ratio": 7.17,
+      "exchange": "HK"
+    },
+    {
+      "code": "2026",
+      "trade_date": "20260807",
+      "ts_code": "02026.HK",
+      "name": "小馬智行-W",
+      "vol": 6888000,
+      "ratio": 1.57,
+      "exchange": "HK"
+    },
+    {
+      "code": "2038",
+      "trade_date": "20260807",
+      "ts_code": "02038.HK",
+      "name": "富智康集團",
+      "vol": 72313787,
+      "ratio": 9.17,
+      "exchange": "HK"
+    },
+    {
+      "code": "2039",
+      "trade_date": "20260807",
+      "ts_code": "02039.HK",
+      "name": "中集集團",
+      "vol": 432337216,
+      "ratio": 13.98,
+      "exchange": "HK"
+    },
+    {
+      "code": "2048",
+      "trade_date": "20260807",
+      "ts_code": "02048.HK",
+      "name": "易居企業控股",
+      "vol": 196358100,
+      "ratio": 11.22,
+      "exchange": "HK"
+    },
+    {
+      "code": "2050",
+      "trade_date": "20260807",
+      "ts_code": "02050.HK",
+      "name": "三花智控",
+      "vol": 155264275,
+      "ratio": 32.57,
+      "exchange": "HK"
+    },
+    {
+      "code": "2051",
+      "trade_date": "20260807",
+      "ts_code": "02051.HK",
+      "name": "VALA",
+      "vol": 10524000,
+      "ratio": 0.64,
+      "exchange": "HK"
+    },
+    {
+      "code": "2057",
+      "trade_date": "20260807",
+      "ts_code": "02057.HK",
+      "name": "中通快遞-Ｗ",
+      "vol": 73763603,
+      "ratio": 9.65,
+      "exchange": "HK"
+    },
+    {
+      "code": "2068",
+      "trade_date": "20260807",
+      "ts_code": "02068.HK",
+      "name": "中鋁國際",
+      "vol": 77350000,
+      "ratio": 19.36,
+      "exchange": "HK"
+    },
+    {
+      "code": "2096",
+      "trade_date": "20260807",
+      "ts_code": "02096.HK",
+      "name": "先聲藥業",
+      "vol": 340268794,
+      "ratio": 13.24,
+      "exchange": "HK"
+    },
+    {
+      "code": "2097",
+      "trade_date": "20260807",
+      "ts_code": "02097.HK",
+      "name": "蜜雪集團",
+      "vol": 11075456,
+      "ratio": 7.33,
+      "exchange": "HK"
+    },
+    {
+      "code": "2098",
+      "trade_date": "20260807",
+      "ts_code": "02098.HK",
+      "name": "卓爾智聯",
+      "vol": 12270000,
+      "ratio": 0.09,
+      "exchange": "HK"
+    },
+    {
+      "code": "2099",
+      "trade_date": "20260807",
+      "ts_code": "02099.HK",
+      "name": "中國黃金國際",
+      "vol": 91103338,
+      "ratio": 22.97,
+      "exchange": "HK"
+    },
+    {
+      "code": "2105",
+      "trade_date": "20260807",
+      "ts_code": "02105.HK",
+      "name": "來凱醫藥-B",
+      "vol": 28089051,
+      "ratio": 6.24,
+      "exchange": "HK"
+    },
+    {
+      "code": "2111",
+      "trade_date": "20260807",
+      "ts_code": "02111.HK",
+      "name": "超盈國際控股",
+      "vol": 468000,
+      "ratio": 0.04,
+      "exchange": "HK"
+    },
+    {
+      "code": "2121",
+      "trade_date": "20260807",
+      "ts_code": "02121.HK",
+      "name": "創新奇智",
+      "vol": 61584800,
+      "ratio": 10.92,
+      "exchange": "HK"
+    },
+    {
+      "code": "2126",
+      "trade_date": "20260807",
+      "ts_code": "02126.HK",
+      "name": "藥明巨諾-B",
+      "vol": 34661000,
+      "ratio": 8.31,
+      "exchange": "HK"
+    },
+    {
+      "code": "2128",
+      "trade_date": "20260807",
+      "ts_code": "02128.HK",
+      "name": "中國聯塑",
+      "vol": 214858161,
+      "ratio": 6.91,
+      "exchange": "HK"
+    },
+    {
+      "code": "2136",
+      "trade_date": "20260807",
+      "ts_code": "02136.HK",
+      "name": "利福中國",
+      "vol": 10000,
+      "ratio": 0.0,
+      "exchange": "HK"
+    },
+    {
+      "code": "2137",
+      "trade_date": "20260807",
+      "ts_code": "02137.HK",
+      "name": "騰盛博藥-B",
+      "vol": 140371000,
+      "ratio": 19.09,
+      "exchange": "HK"
+    },
+    {
+      "code": "2138",
+      "trade_date": "20260807",
+      "ts_code": "02138.HK",
+      "name": "醫思健康",
+      "vol": 17729000,
+      "ratio": 1.49,
+      "exchange": "HK"
+    },
+    {
+      "code": "2142",
+      "trade_date": "20260807",
+      "ts_code": "02142.HK",
+      "name": "和鉑醫藥-B",
+      "vol": 19942000,
+      "ratio": 2.21,
+      "exchange": "HK"
+    },
+    {
+      "code": "2145",
+      "trade_date": "20260807",
+      "ts_code": "02145.HK",
+      "name": "上美股份",
+      "vol": 34378155,
+      "ratio": 16.64,
+      "exchange": "HK"
+    },
+    {
+      "code": "2150",
+      "trade_date": "20260807",
+      "ts_code": "02150.HK",
+      "name": "奈雪的茶",
+      "vol": 133243500,
+      "ratio": 7.79,
+      "exchange": "HK"
+    },
+    {
+      "code": "2155",
+      "trade_date": "20260807",
+      "ts_code": "02155.HK",
+      "name": "森松國際",
+      "vol": 267876151,
+      "ratio": 21.06,
+      "exchange": "HK"
+    },
+    {
+      "code": "2156",
+      "trade_date": "20260807",
+      "ts_code": "02156.HK",
+      "name": "建發物業",
+      "vol": 2844986,
+      "ratio": 0.2,
+      "exchange": "HK"
+    },
+    {
+      "code": "2157",
+      "trade_date": "20260807",
+      "ts_code": "02157.HK",
+      "name": "樂普生物",
+      "vol": 574369401,
+      "ratio": 31.82,
+      "exchange": "HK"
+    },
+    {
+      "code": "2158",
+      "trade_date": "20260807",
+      "ts_code": "02158.HK",
+      "name": "醫渡科技",
+      "vol": 239352348,
+      "ratio": 22.3,
+      "exchange": "HK"
+    },
+    {
+      "code": "2160",
+      "trade_date": "20260807",
+      "ts_code": "02160.HK",
+      "name": "微創心通-B",
+      "vol": 19890600,
+      "ratio": 1.55,
+      "exchange": "HK"
+    },
+    {
+      "code": "2162",
+      "trade_date": "20260807",
+      "ts_code": "02162.HK",
+      "name": "康諾亞-B",
+      "vol": 127547004,
+      "ratio": 42.68,
+      "exchange": "HK"
+    },
+    {
+      "code": "2169",
+      "trade_date": "20260807",
+      "ts_code": "02169.HK",
+      "name": "滄港鐵路",
+      "vol": 1606562000,
+      "ratio": 40.16,
+      "exchange": "HK"
+    },
+    {
+      "code": "2171",
+      "trade_date": "20260807",
+      "ts_code": "02171.HK",
+      "name": "科濟藥業-B",
+      "vol": 202121000,
+      "ratio": 34.0,
+      "exchange": "HK"
+    },
+    {
+      "code": "2172",
+      "trade_date": "20260807",
+      "ts_code": "02172.HK",
+      "name": "微創腦科學",
+      "vol": 81210684,
+      "ratio": 13.87,
+      "exchange": "HK"
+    },
+    {
+      "code": "2186",
+      "trade_date": "20260807",
+      "ts_code": "02186.HK",
+      "name": "綠葉製藥",
+      "vol": 1612484136,
+      "ratio": 40.36,
+      "exchange": "HK"
+    },
+    {
+      "code": "2192",
+      "trade_date": "20260807",
+      "ts_code": "02192.HK",
+      "name": "醫脈通",
+      "vol": 61881481,
+      "ratio": 8.35,
+      "exchange": "HK"
+    },
+    {
+      "code": "2196",
+      "trade_date": "20260807",
+      "ts_code": "02196.HK",
+      "name": "復星醫藥",
+      "vol": 330875464,
+      "ratio": 59.94,
+      "exchange": "HK"
+    },
+    {
+      "code": "2197",
+      "trade_date": "20260807",
+      "ts_code": "02197.HK",
+      "name": "三葉草生物-B",
+      "vol": 78235000,
+      "ratio": 6.02,
+      "exchange": "HK"
+    },
+    {
+      "code": "2199",
+      "trade_date": "20260807",
+      "ts_code": "02199.HK",
+      "name": "維珍妮",
+      "vol": 1024000,
+      "ratio": 0.08,
+      "exchange": "HK"
+    },
+    {
+      "code": "2202",
+      "trade_date": "20260807",
+      "ts_code": "02202.HK",
+      "name": "萬科企業",
+      "vol": 1339411134,
+      "ratio": 60.7,
+      "exchange": "HK"
+    },
+    {
+      "code": "2208",
+      "trade_date": "20260807",
+      "ts_code": "02208.HK",
+      "name": "金風科技",
+      "vol": 243049793,
+      "ratio": 31.41,
+      "exchange": "HK"
+    },
+    {
+      "code": "2218",
+      "trade_date": "20260807",
+      "ts_code": "02218.HK",
+      "name": "安德利果汁",
+      "vol": 9015520,
+      "ratio": 14.16,
+      "exchange": "HK"
+    },
+    {
+      "code": "2228",
+      "trade_date": "20260807",
+      "ts_code": "02228.HK",
+      "name": "晶泰控股",
+      "vol": 1999159591,
+      "ratio": 46.44,
+      "exchange": "HK"
+    },
+    {
+      "code": "2232",
+      "trade_date": "20260807",
+      "ts_code": "02232.HK",
+      "name": "晶苑國際",
+      "vol": 154791636,
+      "ratio": 5.42,
+      "exchange": "HK"
+    },
+    {
+      "code": "2233",
+      "trade_date": "20260807",
+      "ts_code": "02233.HK",
+      "name": "西部水泥",
+      "vol": 2121944000,
+      "ratio": 38.83,
+      "exchange": "HK"
+    },
+    {
+      "code": "2238",
+      "trade_date": "20260807",
+      "ts_code": "02238.HK",
+      "name": "廣汽集團",
+      "vol": 1793217345,
+      "ratio": 63.73,
+      "exchange": "HK"
+    },
+    {
+      "code": "2246",
+      "trade_date": "20260807",
+      "ts_code": "02246.HK",
+      "name": "快狗打車",
+      "vol": 768320,
+      "ratio": 1.16,
+      "exchange": "HK"
+    },
+    {
+      "code": "2252",
+      "trade_date": "20260807",
+      "ts_code": "02252.HK",
+      "name": "微創機器人-B",
+      "vol": 103025120,
+      "ratio": 9.98,
+      "exchange": "HK"
+    },
+    {
+      "code": "2255",
+      "trade_date": "20260807",
+      "ts_code": "02255.HK",
+      "name": "海昌海洋公園",
+      "vol": 1703107000,
+      "ratio": 12.88,
+      "exchange": "HK"
+    },
+    {
+      "code": "2257",
+      "trade_date": "20260807",
+      "ts_code": "02257.HK",
+      "name": "聖諾醫藥-B",
+      "vol": 2881300,
+      "ratio": 2.62,
+      "exchange": "HK"
+    },
+    {
+      "code": "2259",
+      "trade_date": "20260807",
+      "ts_code": "02259.HK",
+      "name": "紫金黃金國際",
+      "vol": 108923660,
+      "ratio": 4.06,
+      "exchange": "HK"
+    },
+    {
+      "code": "2268",
+      "trade_date": "20260807",
+      "ts_code": "02268.HK",
+      "name": "藥明合聯",
+      "vol": 164664634,
+      "ratio": 12.99,
+      "exchange": "HK"
+    },
+    {
+      "code": "2269",
+      "trade_date": "20260807",
+      "ts_code": "02269.HK",
+      "name": "藥明生物",
+      "vol": 996374451,
+      "ratio": 24.02,
+      "exchange": "HK"
+    },
+    {
+      "code": "2273",
+      "trade_date": "20260807",
+      "ts_code": "02273.HK",
+      "name": "固生堂",
+      "vol": 80511910,
+      "ratio": 34.34,
+      "exchange": "HK"
+    },
+    {
+      "code": "2276",
+      "trade_date": "20260807",
+      "ts_code": "02276.HK",
+      "name": "康耐特光學",
+      "vol": 40121721,
+      "ratio": 8.05,
+      "exchange": "HK"
+    },
+    {
+      "code": "2279",
+      "trade_date": "20260807",
+      "ts_code": "02279.HK",
+      "name": "雍禾醫療",
+      "vol": 13995000,
+      "ratio": 2.65,
+      "exchange": "HK"
+    },
+    {
+      "code": "2280",
+      "trade_date": "20260807",
+      "ts_code": "02280.HK",
+      "name": "慧聰集團",
+      "vol": 61085000,
+      "ratio": 4.66,
+      "exchange": "HK"
+    },
+    {
+      "code": "2282",
+      "trade_date": "20260807",
+      "ts_code": "02282.HK",
+      "name": "美高梅中國",
+      "vol": 50803087,
+      "ratio": 1.33,
+      "exchange": "HK"
+    },
+    {
+      "code": "2285",
+      "trade_date": "20260807",
+      "ts_code": "02285.HK",
+      "name": "泉峰控股",
+      "vol": 47685788,
+      "ratio": 9.35,
+      "exchange": "HK"
+    },
+    {
+      "code": "2291",
+      "trade_date": "20260807",
+      "ts_code": "02291.HK",
+      "name": "心泰醫療",
+      "vol": 11194820,
+      "ratio": 3.22,
+      "exchange": "HK"
+    },
+    {
+      "code": "2298",
+      "trade_date": "20260807",
+      "ts_code": "02298.HK",
+      "name": "都市麗人",
+      "vol": 3623000,
+      "ratio": 0.15,
+      "exchange": "HK"
+    },
+    {
+      "code": "2313",
+      "trade_date": "20260807",
+      "ts_code": "02313.HK",
+      "name": "申洲國際",
+      "vol": 120482264,
+      "ratio": 8.01,
+      "exchange": "HK"
+    },
+    {
+      "code": "2314",
+      "trade_date": "20260807",
+      "ts_code": "02314.HK",
+      "name": "理文造紙",
+      "vol": 179968239,
+      "ratio": 4.18,
+      "exchange": "HK"
+    },
+    {
+      "code": "2315",
+      "trade_date": "20260807",
+      "ts_code": "02315.HK",
+      "name": "百奧賽圖-B",
+      "vol": 44079523,
+      "ratio": 39.78,
+      "exchange": "HK"
+    },
+    {
+      "code": "2318",
+      "trade_date": "20260807",
+      "ts_code": "02318.HK",
+      "name": "中國平安",
+      "vol": 953132581,
+      "ratio": 12.78,
+      "exchange": "HK"
+    },
+    {
+      "code": "2319",
+      "trade_date": "20260807",
+      "ts_code": "02319.HK",
+      "name": "蒙牛乳業",
+      "vol": 484962191,
+      "ratio": 12.52,
+      "exchange": "HK"
+    },
+    {
+      "code": "2326",
+      "trade_date": "20260807",
+      "ts_code": "02326.HK",
+      "name": "新源萬恆控股",
+      "vol": 53210000,
+      "ratio": 0.24,
+      "exchange": "HK"
+    },
+    {
+      "code": "2328",
+      "trade_date": "20260807",
+      "ts_code": "02328.HK",
+      "name": "中國財險",
+      "vol": 2101890924,
+      "ratio": 30.45,
+      "exchange": "HK"
+    },
+    {
+      "code": "2329",
+      "trade_date": "20260807",
+      "ts_code": "02329.HK",
+      "name": "國瑞健康",
+      "vol": 132117000,
+      "ratio": 2.97,
+      "exchange": "HK"
+    },
+    {
+      "code": "2331",
+      "trade_date": "20260807",
+      "ts_code": "02331.HK",
+      "name": "李寧",
+      "vol": 373477902,
+      "ratio": 14.44,
+      "exchange": "HK"
+    },
+    {
+      "code": "2333",
+      "trade_date": "20260807",
+      "ts_code": "02333.HK",
+      "name": "長城汽車",
+      "vol": 803533296,
+      "ratio": 34.64,
+      "exchange": "HK"
+    },
+    {
+      "code": "2338",
+      "trade_date": "20260807",
+      "ts_code": "02338.HK",
+      "name": "濰柴動力",
+      "vol": 193243431,
+      "ratio": 9.93,
+      "exchange": "HK"
+    },
+    {
+      "code": "2342",
+      "trade_date": "20260807",
+      "ts_code": "02342.HK",
+      "name": "京信通信",
+      "vol": 1722000,
+      "ratio": 0.05,
+      "exchange": "HK"
+    },
+    {
+      "code": "2343",
+      "trade_date": "20260807",
+      "ts_code": "02343.HK",
+      "name": "太平洋航運",
+      "vol": 503338626,
+      "ratio": 9.75,
+      "exchange": "HK"
+    },
+    {
+      "code": "2356",
+      "trade_date": "20260807",
+      "ts_code": "02356.HK",
+      "name": "大新銀行集團",
+      "vol": 4735200,
+      "ratio": 0.33,
+      "exchange": "HK"
+    },
+    {
+      "code": "2357",
+      "trade_date": "20260807",
+      "ts_code": "02357.HK",
+      "name": "中航科工",
+      "vol": 1251265636,
+      "ratio": 20.13,
+      "exchange": "HK"
+    },
+    {
+      "code": "2359",
+      "trade_date": "20260807",
+      "ts_code": "02359.HK",
+      "name": "藥明康德",
+      "vol": 63037987,
+      "ratio": 12.34,
+      "exchange": "HK"
+    },
+    {
+      "code": "2362",
+      "trade_date": "20260807",
+      "ts_code": "02362.HK",
+      "name": "金川國際",
+      "vol": 1472206000,
+      "ratio": 11.2,
+      "exchange": "HK"
+    },
+    {
+      "code": "2363",
+      "trade_date": "20260807",
+      "ts_code": "02363.HK",
+      "name": "通達宏泰",
+      "vol": 32925,
+      "ratio": 0.01,
+      "exchange": "HK"
+    },
+    {
+      "code": "2367",
+      "trade_date": "20260807",
+      "ts_code": "02367.HK",
+      "name": "巨子生物",
+      "vol": 232717545,
+      "ratio": 21.91,
+      "exchange": "HK"
+    },
+    {
+      "code": "2369",
+      "trade_date": "20260807",
+      "ts_code": "02369.HK",
+      "name": "酷派集團",
+      "vol": 460450,
+      "ratio": 0.13,
+      "exchange": "HK"
+    },
+    {
+      "code": "2378",
+      "trade_date": "20260807",
+      "ts_code": "02378.HK",
+      "name": "保誠",
+      "vol": 3461409,
+      "ratio": 0.13,
+      "exchange": "HK"
+    },
+    {
+      "code": "2380",
+      "trade_date": "20260807",
+      "ts_code": "02380.HK",
+      "name": "中國電力",
+      "vol": 2849396669,
+      "ratio": 23.03,
+      "exchange": "HK"
+    },
+    {
+      "code": "2382",
+      "trade_date": "20260807",
+      "ts_code": "02382.HK",
+      "name": "舜宇光學科技",
+      "vol": 148284971,
+      "ratio": 13.54,
+      "exchange": "HK"
+    },
+    {
+      "code": "2386",
+      "trade_date": "20260807",
+      "ts_code": "02386.HK",
+      "name": "中石化煉化工程",
+      "vol": 429908837,
+      "ratio": 26.09,
+      "exchange": "HK"
+    },
+    {
+      "code": "2388",
+      "trade_date": "20260807",
+      "ts_code": "02388.HK",
+      "name": "中銀香港",
+      "vol": 425955810,
+      "ratio": 4.02,
+      "exchange": "HK"
+    },
+    {
+      "code": "2400",
+      "trade_date": "20260807",
+      "ts_code": "02400.HK",
+      "name": "心動公司",
+      "vol": 132408130,
+      "ratio": 27.05,
+      "exchange": "HK"
+    },
+    {
+      "code": "2402",
+      "trade_date": "20260807",
+      "ts_code": "02402.HK",
+      "name": "億華通",
+      "vol": 12275866,
+      "ratio": 27.42,
+      "exchange": "HK"
+    },
+    {
+      "code": "2407",
+      "trade_date": "20260807",
+      "ts_code": "02407.HK",
+      "name": "高視醫療",
+      "vol": 5214900,
+      "ratio": 3.52,
+      "exchange": "HK"
+    },
+    {
+      "code": "2410",
+      "trade_date": "20260807",
+      "ts_code": "02410.HK",
+      "name": "同源康醫藥-B",
+      "vol": 130909500,
+      "ratio": 34.43,
+      "exchange": "HK"
+    },
+    {
+      "code": "2411",
+      "trade_date": "20260807",
+      "ts_code": "02411.HK",
+      "name": "百果園集團",
+      "vol": 110938500,
+      "ratio": 5.54,
+      "exchange": "HK"
+    },
+    {
+      "code": "2415",
+      "trade_date": "20260807",
+      "ts_code": "02415.HK",
+      "name": "梅斯健康",
+      "vol": 5521000,
+      "ratio": 0.9,
+      "exchange": "HK"
+    },
+    {
+      "code": "2416",
+      "trade_date": "20260807",
+      "ts_code": "02416.HK",
+      "name": "易點雲",
+      "vol": 15773000,
+      "ratio": 2.91,
+      "exchange": "HK"
+    },
+    {
+      "code": "2419",
+      "trade_date": "20260807",
+      "ts_code": "02419.HK",
+      "name": "德康農牧",
+      "vol": 47932186,
+      "ratio": 30.41,
+      "exchange": "HK"
+    },
+    {
+      "code": "2423",
+      "trade_date": "20260807",
+      "ts_code": "02423.HK",
+      "name": "貝殼-W",
+      "vol": 421338058,
+      "ratio": 12.15,
+      "exchange": "HK"
+    },
+    {
+      "code": "2429",
+      "trade_date": "20260807",
+      "ts_code": "02429.HK",
+      "name": "友寶在線",
+      "vol": 154536500,
+      "ratio": 16.32,
+      "exchange": "HK"
+    },
+    {
+      "code": "2431",
+      "trade_date": "20260807",
+      "ts_code": "02431.HK",
+      "name": "佑駕創新",
+      "vol": 72881600,
+      "ratio": 20.59,
+      "exchange": "HK"
+    },
+    {
+      "code": "2432",
+      "trade_date": "20260807",
+      "ts_code": "02432.HK",
+      "name": "越疆",
+      "vol": 56674800,
+      "ratio": 14.38,
+      "exchange": "HK"
+    },
+    {
+      "code": "2443",
+      "trade_date": "20260807",
+      "ts_code": "02443.HK",
+      "name": "汽車街",
+      "vol": 104884600,
+      "ratio": 12.58,
+      "exchange": "HK"
+    },
+    {
+      "code": "2453",
+      "trade_date": "20260807",
+      "ts_code": "02453.HK",
+      "name": "美中嘉和",
+      "vol": 76654400,
+      "ratio": 24.41,
+      "exchange": "HK"
+    },
+    {
+      "code": "2460",
+      "trade_date": "20260807",
+      "ts_code": "02460.HK",
+      "name": "華潤飲料",
+      "vol": 154217600,
+      "ratio": 6.42,
+      "exchange": "HK"
+    },
+    {
+      "code": "2465",
+      "trade_date": "20260807",
+      "ts_code": "02465.HK",
+      "name": "龍蟠科技",
+      "vol": 90176970,
+      "ratio": 66.79,
+      "exchange": "HK"
+    },
+    {
+      "code": "2469",
+      "trade_date": "20260807",
+      "ts_code": "02469.HK",
+      "name": "粉筆",
+      "vol": 402772000,
+      "ratio": 17.96,
+      "exchange": "HK"
+    },
+    {
+      "code": "2473",
+      "trade_date": "20260807",
+      "ts_code": "02473.HK",
+      "name": "喜相逢集團",
+      "vol": 1045747500,
+      "ratio": 56.33,
+      "exchange": "HK"
+    },
+    {
+      "code": "2476",
+      "trade_date": "20260807",
+      "ts_code": "02476.HK",
+      "name": "勝宏科技",
+      "vol": 25206063,
+      "ratio": 22.85,
+      "exchange": "HK"
+    },
+    {
+      "code": "2477",
+      "trade_date": "20260807",
+      "ts_code": "02477.HK",
+      "name": "經緯天地",
+      "vol": 2525017600,
+      "ratio": 52.63,
+      "exchange": "HK"
+    },
+    {
+      "code": "2487",
+      "trade_date": "20260807",
+      "ts_code": "02487.HK",
+      "name": "科笛-Ｂ",
+      "vol": 6385600,
+      "ratio": 1.7,
+      "exchange": "HK"
+    },
+    {
+      "code": "2493",
+      "trade_date": "20260807",
+      "ts_code": "02493.HK",
+      "name": "邁威生物-B",
+      "vol": 9641200,
+      "ratio": 20.45,
+      "exchange": "HK"
+    },
+    {
+      "code": "2498",
+      "trade_date": "20260807",
+      "ts_code": "02498.HK",
+      "name": "速騰聚創",
+      "vol": 185459001,
+      "ratio": 38.27,
+      "exchange": "HK"
+    },
+    {
+      "code": "2500",
+      "trade_date": "20260807",
+      "ts_code": "02500.HK",
+      "name": "啟明醫療-B",
+      "vol": 47801100,
+      "ratio": 10.83,
+      "exchange": "HK"
+    },
+    {
+      "code": "2506",
+      "trade_date": "20260807",
+      "ts_code": "02506.HK",
+      "name": "訊飛醫療科技",
+      "vol": 5102550,
+      "ratio": 6.59,
+      "exchange": "HK"
+    },
+    {
+      "code": "2507",
+      "trade_date": "20260807",
+      "ts_code": "02507.HK",
+      "name": "西銳",
+      "vol": 44884328,
+      "ratio": 12.25,
+      "exchange": "HK"
+    },
+    {
+      "code": "2510",
+      "trade_date": "20260807",
+      "ts_code": "02510.HK",
+      "name": "德翔海運",
+      "vol": 58947101,
+      "ratio": 3.53,
+      "exchange": "HK"
+    },
+    {
+      "code": "2511",
+      "trade_date": "20260807",
+      "ts_code": "02511.HK",
+      "name": "君聖泰醫藥-B",
+      "vol": 9511000,
+      "ratio": 1.41,
+      "exchange": "HK"
+    },
+    {
+      "code": "2513",
+      "trade_date": "20260807",
+      "ts_code": "02513.HK",
+      "name": "智譜",
+      "vol": 25825230,
+      "ratio": 10.7,
+      "exchange": "HK"
+    },
+    {
+      "code": "2517",
+      "trade_date": "20260807",
+      "ts_code": "02517.HK",
+      "name": "鍋圈",
+      "vol": 284091923,
+      "ratio": 10.34,
+      "exchange": "HK"
+    },
+    {
+      "code": "2522",
+      "trade_date": "20260807",
+      "ts_code": "02522.HK",
+      "name": "一脈陽光",
+      "vol": 106094500,
+      "ratio": 36.06,
+      "exchange": "HK"
+    },
+    {
+      "code": "2525",
+      "trade_date": "20260807",
+      "ts_code": "02525.HK",
+      "name": "禾賽-Ｗ(新)",
+      "vol": 67938700,
+      "ratio": 5.4,
+      "exchange": "HK"
+    },
+    {
+      "code": "2533",
+      "trade_date": "20260807",
+      "ts_code": "02533.HK",
+      "name": "黑芝麻智能",
+      "vol": 215536081,
+      "ratio": 30.08,
+      "exchange": "HK"
+    },
+    {
+      "code": "2550",
+      "trade_date": "20260807",
+      "ts_code": "02550.HK",
+      "name": "宜搜科技",
+      "vol": 91953000,
+      "ratio": 20.33,
+      "exchange": "HK"
+    },
+    {
+      "code": "2555",
+      "trade_date": "20260807",
+      "ts_code": "02555.HK",
+      "name": "茶百道",
+      "vol": 56914600,
+      "ratio": 3.85,
+      "exchange": "HK"
+    },
+    {
+      "code": "2556",
+      "trade_date": "20260807",
+      "ts_code": "02556.HK",
+      "name": "邁富時",
+      "vol": 62180000,
+      "ratio": 23.14,
+      "exchange": "HK"
+    },
+    {
+      "code": "2562",
+      "trade_date": "20260807",
+      "ts_code": "02562.HK",
+      "name": "獅騰控股",
+      "vol": 187939000,
+      "ratio": 40.26,
+      "exchange": "HK"
+    },
+    {
+      "code": "2565",
+      "trade_date": "20260807",
+      "ts_code": "02565.HK",
+      "name": "派格生物醫藥－Ｂ",
+      "vol": 36415500,
+      "ratio": 9.43,
+      "exchange": "HK"
+    },
+    {
+      "code": "2570",
+      "trade_date": "20260807",
+      "ts_code": "02570.HK",
+      "name": "重塑能源",
+      "vol": 11515080,
+      "ratio": 12.95,
+      "exchange": "HK"
+    },
+    {
+      "code": "2575",
+      "trade_date": "20260807",
+      "ts_code": "02575.HK",
+      "name": "軒竹生物-B",
+      "vol": 13546500,
+      "ratio": 2.61,
+      "exchange": "HK"
+    },
+    {
+      "code": "2577",
+      "trade_date": "20260807",
+      "ts_code": "02577.HK",
+      "name": "英諾賽科",
+      "vol": 112013391,
+      "ratio": 12.44,
+      "exchange": "HK"
+    },
+    {
+      "code": "2579",
+      "trade_date": "20260807",
+      "ts_code": "02579.HK",
+      "name": "中偉新材",
+      "vol": 27762400,
+      "ratio": 26.63,
+      "exchange": "HK"
+    },
+    {
+      "code": "2580",
+      "trade_date": "20260807",
+      "ts_code": "02580.HK",
+      "name": "奧克斯電氣",
+      "vol": 115096512,
+      "ratio": 7.24,
+      "exchange": "HK"
+    },
+    {
+      "code": "2582",
+      "trade_date": "20260807",
+      "ts_code": "02582.HK",
+      "name": "國富氫能",
+      "vol": 29654200,
+      "ratio": 24.73,
+      "exchange": "HK"
+    },
+    {
+      "code": "2583",
+      "trade_date": "20260807",
+      "ts_code": "02583.HK",
+      "name": "西普尼",
+      "vol": 1424800,
+      "ratio": 2.42,
+      "exchange": "HK"
+    },
+    {
+      "code": "2586",
+      "trade_date": "20260807",
+      "ts_code": "02586.HK",
+      "name": "多點數智",
+      "vol": 60881600,
+      "ratio": 6.48,
+      "exchange": "HK"
+    },
+    {
+      "code": "2587",
+      "trade_date": "20260807",
+      "ts_code": "02587.HK",
+      "name": "健康之路",
+      "vol": 207540500,
+      "ratio": 23.64,
+      "exchange": "HK"
+    },
+    {
+      "code": "2588",
+      "trade_date": "20260807",
+      "ts_code": "02588.HK",
+      "name": "中銀航空租賃",
+      "vol": 35341636,
+      "ratio": 5.08,
+      "exchange": "HK"
+    },
+    {
+      "code": "2589",
+      "trade_date": "20260807",
+      "ts_code": "02589.HK",
+      "name": "滬上阿姨",
+      "vol": 2430090,
+      "ratio": 2.55,
+      "exchange": "HK"
+    },
+    {
+      "code": "2590",
+      "trade_date": "20260807",
+      "ts_code": "02590.HK",
+      "name": "極智嘉-W",
+      "vol": 71247400,
+      "ratio": 6.95,
+      "exchange": "HK"
+    },
+    {
+      "code": "2591",
+      "trade_date": "20260807",
+      "ts_code": "02591.HK",
+      "name": "銀諾醫藥-B",
+      "vol": 12388400,
+      "ratio": 2.94,
+      "exchange": "HK"
+    },
+    {
+      "code": "2595",
+      "trade_date": "20260807",
+      "ts_code": "02595.HK",
+      "name": "勁方醫藥-B",
+      "vol": 43919540,
+      "ratio": 12.48,
+      "exchange": "HK"
+    },
+    {
+      "code": "2600",
+      "trade_date": "20260807",
+      "ts_code": "02600.HK",
+      "name": "中國鋁業",
+      "vol": 773725515,
+      "ratio": 19.61,
+      "exchange": "HK"
+    },
+    {
+      "code": "2601",
+      "trade_date": "20260807",
+      "ts_code": "02601.HK",
+      "name": "中國太保",
+      "vol": 1114675871,
+      "ratio": 40.15,
+      "exchange": "HK"
+    },
+    {
+      "code": "2602",
+      "trade_date": "20260807",
+      "ts_code": "02602.HK",
+      "name": "萬物雲",
+      "vol": 121156430,
+      "ratio": 10.36,
+      "exchange": "HK"
+    },
+    {
+      "code": "2603",
+      "trade_date": "20260807",
+      "ts_code": "02603.HK",
+      "name": "吉宏股份",
+      "vol": 44682500,
+      "ratio": 57.8,
+      "exchange": "HK"
+    },
+    {
+      "code": "2607",
+      "trade_date": "20260807",
+      "ts_code": "02607.HK",
+      "name": "上海醫藥",
+      "vol": 252406010,
+      "ratio": 27.46,
+      "exchange": "HK"
+    },
+    {
+      "code": "2609",
+      "trade_date": "20260807",
+      "ts_code": "02609.HK",
+      "name": "佰澤醫療",
+      "vol": 107448000,
+      "ratio": 8.14,
+      "exchange": "HK"
+    },
+    {
+      "code": "2610",
+      "trade_date": "20260807",
+      "ts_code": "02610.HK",
+      "name": "南山鋁業國際",
+      "vol": 21156318,
+      "ratio": 3.4,
+      "exchange": "HK"
+    },
+    {
+      "code": "2611",
+      "trade_date": "20260807",
+      "ts_code": "02611.HK",
+      "name": "國泰海通",
+      "vol": 1406031761,
+      "ratio": 40.09,
+      "exchange": "HK"
+    },
+    {
+      "code": "2616",
+      "trade_date": "20260807",
+      "ts_code": "02616.HK",
+      "name": "基石藥業-B",
+      "vol": 81343000,
+      "ratio": 5.09,
+      "exchange": "HK"
+    },
+    {
+      "code": "2617",
+      "trade_date": "20260807",
+      "ts_code": "02617.HK",
+      "name": "藥捷安康-B",
+      "vol": 49269784,
+      "ratio": 15.75,
+      "exchange": "HK"
+    },
+    {
+      "code": "2618",
+      "trade_date": "20260807",
+      "ts_code": "02618.HK",
+      "name": "京東物流",
+      "vol": 213437646,
+      "ratio": 3.21,
+      "exchange": "HK"
+    },
+    {
+      "code": "2627",
+      "trade_date": "20260807",
+      "ts_code": "02627.HK",
+      "name": "中慧生物-B",
+      "vol": 1438800,
+      "ratio": 0.48,
+      "exchange": "HK"
+    },
+    {
+      "code": "2628",
+      "trade_date": "20260807",
+      "ts_code": "02628.HK",
+      "name": "中國人壽",
+      "vol": 2139414562,
+      "ratio": 28.74,
+      "exchange": "HK"
+    },
+    {
+      "code": "2629",
+      "trade_date": "20260807",
+      "ts_code": "02629.HK",
+      "name": "MIRXES HOLDING COMPANY LIMITED",
+      "vol": 52168700,
+      "ratio": 17.49,
+      "exchange": "HK"
+    },
+    {
+      "code": "2631",
+      "trade_date": "20260807",
+      "ts_code": "02631.HK",
+      "name": "天岳先進",
+      "vol": 31830000,
+      "ratio": 57.96,
+      "exchange": "HK"
+    },
+    {
+      "code": "2635",
+      "trade_date": "20260807",
+      "ts_code": "02635.HK",
+      "name": "諾比侃",
+      "vol": 27452000,
+      "ratio": 9.01,
+      "exchange": "HK"
+    },
+    {
+      "code": "2637",
+      "trade_date": "20260807",
+      "ts_code": "02637.HK",
+      "name": "海西新藥",
+      "vol": 5582106,
+      "ratio": 7.09,
+      "exchange": "HK"
+    },
+    {
+      "code": "2643",
+      "trade_date": "20260807",
+      "ts_code": "02643.HK",
+      "name": "曹操出行",
+      "vol": 50848079,
+      "ratio": 8.66,
+      "exchange": "HK"
+    },
+    {
+      "code": "2648",
+      "trade_date": "20260807",
+      "ts_code": "02648.HK",
+      "name": "安井食品",
+      "vol": 18260362,
+      "ratio": 45.65,
+      "exchange": "HK"
+    },
+    {
+      "code": "2650",
+      "trade_date": "20260807",
+      "ts_code": "02650.HK",
+      "name": "摯達科技",
+      "vol": 16113750,
+      "ratio": 5.06,
+      "exchange": "HK"
+    },
+    {
+      "code": "2652",
+      "trade_date": "20260807",
+      "ts_code": "02652.HK",
+      "name": "長風藥業",
+      "vol": 11936200,
+      "ratio": null,
+      "exchange": "HK"
+    },
+    {
+      "code": "2655",
+      "trade_date": "20260807",
+      "ts_code": "02655.HK",
+      "name": "果下科技",
+      "vol": 21103800,
+      "ratio": 5.34,
+      "exchange": "HK"
+    },
+    {
+      "code": "2656",
+      "trade_date": "20260807",
+      "ts_code": "02656.HK",
+      "name": "健康160",
+      "vol": 18589750,
+      "ratio": 5.35,
+      "exchange": "HK"
+    },
+    {
+      "code": "2659",
+      "trade_date": "20260807",
+      "ts_code": "02659.HK",
+      "name": "寶濟藥業-B",
+      "vol": 17508900,
+      "ratio": 11.34,
+      "exchange": "HK"
+    },
+    {
+      "code": "2661",
+      "trade_date": "20260807",
+      "ts_code": "02661.HK",
+      "name": "輕鬆健康",
+      "vol": 30773800,
+      "ratio": 14.35,
+      "exchange": "HK"
+    },
+    {
+      "code": "2665",
+      "trade_date": "20260807",
+      "ts_code": "02665.HK",
+      "name": "圖達通",
+      "vol": 64983500,
+      "ratio": 4.94,
+      "exchange": "HK"
+    },
+    {
+      "code": "2666",
+      "trade_date": "20260807",
+      "ts_code": "02666.HK",
+      "name": "環球醫療",
+      "vol": 511480500,
+      "ratio": 25.39,
+      "exchange": "HK"
+    },
+    {
+      "code": "2669",
+      "trade_date": "20260807",
+      "ts_code": "02669.HK",
+      "name": "中海物業",
+      "vol": 733427166,
+      "ratio": 22.32,
+      "exchange": "HK"
+    },
+    {
+      "code": "2675",
+      "trade_date": "20260807",
+      "ts_code": "02675.HK",
+      "name": "精鋒醫療-B",
+      "vol": 4320100,
+      "ratio": 1.31,
+      "exchange": "HK"
+    },
+    {
+      "code": "2676",
+      "trade_date": "20260807",
+      "ts_code": "02676.HK",
+      "name": "納芯微",
+      "vol": 7131495,
+      "ratio": 35.48,
+      "exchange": "HK"
+    },
+    {
+      "code": "2678",
+      "trade_date": "20260807",
+      "ts_code": "02678.HK",
+      "name": "天虹國際集團",
+      "vol": 21542000,
+      "ratio": 2.34,
+      "exchange": "HK"
+    },
+    {
+      "code": "2685",
+      "trade_date": "20260807",
+      "ts_code": "02685.HK",
+      "name": "量化派",
+      "vol": 77493500,
+      "ratio": 14.9,
+      "exchange": "HK"
+    },
+    {
+      "code": "2687",
+      "trade_date": "20260807",
+      "ts_code": "02687.HK",
+      "name": "卓越睿新",
+      "vol": 37000,
+      "ratio": 0.05,
+      "exchange": "HK"
+    },
+    {
+      "code": "2688",
+      "trade_date": "20260807",
+      "ts_code": "02688.HK",
+      "name": "新奧能源",
+      "vol": 138469799,
+      "ratio": 12.22,
+      "exchange": "HK"
+    },
+    {
+      "code": "2689",
+      "trade_date": "20260807",
+      "ts_code": "02689.HK",
+      "name": "玖龍紙業",
+      "vol": 591765550,
+      "ratio": 12.6,
+      "exchange": "HK"
+    },
+    {
+      "code": "2691",
+      "trade_date": "20260807",
+      "ts_code": "02691.HK",
+      "name": "南華期貨股份",
+      "vol": 35268500,
+      "ratio": 32.75,
+      "exchange": "HK"
+    },
+    {
+      "code": "2692",
+      "trade_date": "20260807",
+      "ts_code": "02692.HK",
+      "name": "兆威機電",
+      "vol": 5265200,
+      "ratio": 19.67,
+      "exchange": "HK"
+    },
+    {
+      "code": "2698",
+      "trade_date": "20260807",
+      "ts_code": "02698.HK",
+      "name": "樂舒適",
+      "vol": 41161312,
+      "ratio": 6.62,
+      "exchange": "HK"
+    },
+    {
+      "code": "2701",
+      "trade_date": "20260807",
+      "ts_code": "02701.HK",
+      "name": "國民技術",
+      "vol": 43052400,
+      "ratio": 45.3,
+      "exchange": "HK"
+    },
+    {
+      "code": "2706",
+      "trade_date": "20260807",
+      "ts_code": "02706.HK",
+      "name": "海致科技集團",
+      "vol": 7182015,
+      "ratio": 1.79,
+      "exchange": "HK"
+    },
+    {
+      "code": "2714",
+      "trade_date": "20260807",
+      "ts_code": "02714.HK",
+      "name": "牧原股份",
+      "vol": 46638700,
+      "ratio": 15.02,
+      "exchange": "HK"
+    },
+    {
+      "code": "2715",
+      "trade_date": "20260807",
+      "ts_code": "02715.HK",
+      "name": "埃斯頓",
+      "vol": 40325200,
+      "ratio": 41.65,
+      "exchange": "HK"
+    },
+    {
+      "code": "2718",
+      "trade_date": "20260807",
+      "ts_code": "02718.HK",
+      "name": "明略科技-W",
+      "vol": 6978720,
+      "ratio": 4.56,
+      "exchange": "HK"
+    },
+    {
+      "code": "2727",
+      "trade_date": "20260807",
+      "ts_code": "02727.HK",
+      "name": "上海電氣",
+      "vol": 1230749000,
+      "ratio": 42.07,
+      "exchange": "HK"
+    },
+    {
+      "code": "2768",
+      "trade_date": "20260807",
+      "ts_code": "02768.HK",
+      "name": "國恩科技",
+      "vol": 10541602,
+      "ratio": 23.73,
+      "exchange": "HK"
+    },
+    {
+      "code": "2772",
+      "trade_date": "20260807",
+      "ts_code": "02772.HK",
+      "name": "中梁控股",
+      "vol": 108475500,
+      "ratio": 2.42,
+      "exchange": "HK"
+    },
+    {
+      "code": "2777",
+      "trade_date": "20260807",
+      "ts_code": "02777.HK",
+      "name": "富力地產",
+      "vol": 303768000,
+      "ratio": 8.08,
+      "exchange": "HK"
+    },
+    {
+      "code": "2788",
+      "trade_date": "20260807",
+      "ts_code": "02788.HK",
+      "name": "創新實業",
+      "vol": 113797585,
+      "ratio": 5.47,
+      "exchange": "HK"
+    },
+    {
+      "code": "2798",
+      "trade_date": "20260807",
+      "ts_code": "02798.HK",
+      "name": "久泰邦達能源",
+      "vol": 188830000,
+      "ratio": 11.8,
+      "exchange": "HK"
+    },
+    {
+      "code": "2799",
+      "trade_date": "20260807",
+      "ts_code": "02799.HK",
+      "name": "中信金融資產",
+      "vol": 5128854000,
+      "ratio": 14.49,
+      "exchange": "HK"
+    },
+    {
+      "code": "2800",
+      "trade_date": "20260807",
+      "ts_code": "02800.HK",
+      "name": "盈富基金",
+      "vol": 117546690,
+      "ratio": 2.21,
+      "exchange": "HK"
+    },
+    {
+      "code": "2801",
+      "trade_date": "20260807",
+      "ts_code": "02801.HK",
+      "name": "安碩中國",
+      "vol": 262600,
+      "ratio": 0.04,
+      "exchange": "HK"
+    },
+    {
+      "code": "2825",
+      "trade_date": "20260807",
+      "ts_code": "02825.HK",
+      "name": "標智香港100",
+      "vol": 400,
+      "ratio": 0.0,
+      "exchange": "HK"
+    },
+    {
+      "code": "2828",
+      "trade_date": "20260807",
+      "ts_code": "02828.HK",
+      "name": "恆生中國企業",
+      "vol": 3461100,
+      "ratio": 1.22,
+      "exchange": "HK"
+    },
+    {
+      "code": "2837",
+      "trade_date": "20260807",
+      "ts_code": "02837.HK",
+      "name": "GX恆生科技",
+      "vol": 49913800,
+      "ratio": 13.98,
+      "exchange": "HK"
+    },
+    {
+      "code": "2858",
+      "trade_date": "20260807",
+      "ts_code": "02858.HK",
+      "name": "易鑫集團",
+      "vol": 888180500,
+      "ratio": 13.04,
+      "exchange": "HK"
+    },
+    {
+      "code": "2865",
+      "trade_date": "20260807",
+      "ts_code": "02865.HK",
+      "name": "鈞達股份",
+      "vol": 48714414,
+      "ratio": 59.31,
+      "exchange": "HK"
+    },
+    {
+      "code": "2866",
+      "trade_date": "20260807",
+      "ts_code": "02866.HK",
+      "name": "中遠海發",
+      "vol": 968930000,
+      "ratio": 28.3,
+      "exchange": "HK"
+    },
+    {
+      "code": "2869",
+      "trade_date": "20260807",
+      "ts_code": "02869.HK",
+      "name": "綠城服務",
+      "vol": 415765357,
+      "ratio": null,
+      "exchange": "HK"
+    },
+    {
+      "code": "2877",
+      "trade_date": "20260807",
+      "ts_code": "02877.HK",
+      "name": "神威藥業",
+      "vol": 60344565,
+      "ratio": 7.28,
+      "exchange": "HK"
+    },
+    {
+      "code": "2880",
+      "trade_date": "20260807",
+      "ts_code": "02880.HK",
+      "name": "遼港股份",
+      "vol": 968440088,
+      "ratio": 18.76,
+      "exchange": "HK"
+    },
+    {
+      "code": "2882",
+      "trade_date": "20260807",
+      "ts_code": "02882.HK",
+      "name": "金至尊集團",
+      "vol": 30219,
+      "ratio": 0.0,
+      "exchange": "HK"
+    },
+    {
+      "code": "2883",
+      "trade_date": "20260807",
+      "ts_code": "02883.HK",
+      "name": "中海油田服務",
+      "vol": 496577323,
+      "ratio": 27.4,
+      "exchange": "HK"
+    },
+    {
+      "code": "2888",
+      "trade_date": "20260807",
+      "ts_code": "02888.HK",
+      "name": "渣打集團",
+      "vol": 36275244,
+      "ratio": 1.65,
+      "exchange": "HK"
+    },
+    {
+      "code": "2889",
+      "trade_date": "20260807",
+      "ts_code": "02889.HK",
+      "name": "博泰車聯",
+      "vol": 6639740,
+      "ratio": 8.01,
+      "exchange": "HK"
+    },
+    {
+      "code": "2899",
+      "trade_date": "20260807",
+      "ts_code": "02899.HK",
+      "name": "紫金礦業",
+      "vol": 1339692965,
+      "ratio": 22.36,
+      "exchange": "HK"
+    },
+    {
+      "code": "2983",
+      "trade_date": "20260807",
+      "ts_code": "02983.HK",
+      "name": "禾賽-W(舊)",
+      "vol": 434240,
+      "ratio": 0.03,
+      "exchange": "HK"
+    },
+    {
+      "code": "3032",
+      "trade_date": "20260807",
+      "ts_code": "03032.HK",
+      "name": "恆生科技ETF",
+      "vol": 204496400,
+      "ratio": 15.48,
+      "exchange": "HK"
+    },
+    {
+      "code": "3033",
+      "trade_date": "20260807",
+      "ts_code": "03033.HK",
+      "name": "南方恆生科技",
+      "vol": 8303313800,
+      "ratio": 58.1,
+      "exchange": "HK"
+    },
+    {
+      "code": "3037",
+      "trade_date": "20260807",
+      "ts_code": "03037.HK",
+      "name": "南方恆指ETF",
+      "vol": 133200,
+      "ratio": 0.51,
+      "exchange": "HK"
+    },
+    {
+      "code": "3039",
+      "trade_date": "20260807",
+      "ts_code": "03039.HK",
+      "name": "易方達恆指ESG",
+      "vol": 75600,
+      "ratio": 0.03,
+      "exchange": "HK"
+    },
+    {
+      "code": "3040",
+      "trade_date": "20260807",
+      "ts_code": "03040.HK",
+      "name": "GX中國",
+      "vol": 200,
+      "ratio": 0.0,
+      "exchange": "HK"
+    },
+    {
+      "code": "3067",
+      "trade_date": "20260807",
+      "ts_code": "03067.HK",
+      "name": "安碩恆生科技",
+      "vol": 9286700,
+      "ratio": 0.65,
+      "exchange": "HK"
+    },
+    {
+      "code": "3069",
+      "trade_date": "20260807",
+      "ts_code": "03069.HK",
+      "name": "華夏恆生生科",
+      "vol": 13806600,
+      "ratio": 8.09,
+      "exchange": "HK"
+    },
+    {
+      "code": "3070",
+      "trade_date": "20260807",
+      "ts_code": "03070.HK",
+      "name": "平安香港高息",
+      "vol": 2826700,
+      "ratio": 9.37,
+      "exchange": "HK"
+    },
+    {
+      "code": "3088",
+      "trade_date": "20260807",
+      "ts_code": "03088.HK",
+      "name": "華夏恆生科技",
+      "vol": 35712000,
+      "ratio": 12.71,
+      "exchange": "HK"
+    },
+    {
+      "code": "3110",
+      "trade_date": "20260807",
+      "ts_code": "03110.HK",
+      "name": "GX恆生股息",
+      "vol": 2876900,
+      "ratio": 1.55,
+      "exchange": "HK"
+    },
+    {
+      "code": "3115",
+      "trade_date": "20260807",
+      "ts_code": "03115.HK",
+      "name": "安碩恆生指數",
+      "vol": 54300,
+      "ratio": 0.19,
+      "exchange": "HK"
+    },
+    {
+      "code": "3167",
+      "trade_date": "20260807",
+      "ts_code": "03167.HK",
+      "name": "工銀南方中國",
+      "vol": 1100,
+      "ratio": 0.01,
+      "exchange": "HK"
+    },
+    {
+      "code": "3174",
+      "trade_date": "20260807",
+      "ts_code": "03174.HK",
+      "name": "南方恆生生科",
+      "vol": 1030700,
+      "ratio": 0.39,
+      "exchange": "HK"
+    },
+    {
+      "code": "3200",
+      "trade_date": "20260807",
+      "ts_code": "03200.HK",
+      "name": "大族數控",
+      "vol": 15751535,
+      "ratio": 27.14,
+      "exchange": "HK"
+    },
+    {
+      "code": "3268",
+      "trade_date": "20260807",
+      "ts_code": "03268.HK",
+      "name": "美格智能",
+      "vol": 11085700,
+      "ratio": 27.53,
+      "exchange": "HK"
+    },
+    {
+      "code": "3288",
+      "trade_date": "20260807",
+      "ts_code": "03288.HK",
+      "name": "海天味業",
+      "vol": 70633500,
+      "ratio": 24.24,
+      "exchange": "HK"
+    },
+    {
+      "code": "3296",
+      "trade_date": "20260807",
+      "ts_code": "03296.HK",
+      "name": "華勤技術",
+      "vol": 11141240,
+      "ratio": 11.81,
+      "exchange": "HK"
+    },
+    {
+      "code": "3301",
+      "trade_date": "20260807",
+      "ts_code": "03301.HK",
+      "name": "融信中國",
+      "vol": 108753000,
+      "ratio": 6.45,
+      "exchange": "HK"
+    },
+    {
+      "code": "3306",
+      "trade_date": "20260807",
+      "ts_code": "03306.HK",
+      "name": "江南布衣",
+      "vol": 54929203,
+      "ratio": 10.29,
+      "exchange": "HK"
+    },
+    {
+      "code": "3309",
+      "trade_date": "20260807",
+      "ts_code": "03309.HK",
+      "name": "希瑪醫療",
+      "vol": 65733000,
+      "ratio": 5.33,
+      "exchange": "HK"
+    },
+    {
+      "code": "3311",
+      "trade_date": "20260807",
+      "ts_code": "03311.HK",
+      "name": "中國建築國際",
+      "vol": 668787425,
+      "ratio": 12.66,
+      "exchange": "HK"
+    },
+    {
+      "code": "3317",
+      "trade_date": "20260807",
+      "ts_code": "03317.HK",
+      "name": "迅策",
+      "vol": 10713900,
+      "ratio": 3.89,
+      "exchange": "HK"
+    },
+    {
+      "code": "3319",
+      "trade_date": "20260807",
+      "ts_code": "03319.HK",
+      "name": "雅生活服務",
+      "vol": 306944250,
+      "ratio": 21.6,
+      "exchange": "HK"
+    },
+    {
+      "code": "3320",
+      "trade_date": "20260807",
+      "ts_code": "03320.HK",
+      "name": "華潤醫藥",
+      "vol": 433253619,
+      "ratio": 6.89,
+      "exchange": "HK"
+    },
+    {
+      "code": "3323",
+      "trade_date": "20260807",
+      "ts_code": "03323.HK",
+      "name": "中國建材",
+      "vol": 1157882559,
+      "ratio": 31.15,
+      "exchange": "HK"
+    },
+    {
+      "code": "3328",
+      "trade_date": "20260807",
+      "ts_code": "03328.HK",
+      "name": "交通銀行",
+      "vol": 2835678446,
+      "ratio": 8.09,
+      "exchange": "HK"
+    },
+    {
+      "code": "3329",
+      "trade_date": "20260807",
+      "ts_code": "03329.HK",
+      "name": "交銀國際",
+      "vol": 1801000,
+      "ratio": 0.06,
+      "exchange": "HK"
+    },
+    {
+      "code": "3330",
+      "trade_date": "20260807",
+      "ts_code": "03330.HK",
+      "name": "靈寶黃金",
+      "vol": 419674019,
+      "ratio": 35.03,
+      "exchange": "HK"
+    },
+    {
+      "code": "3339",
+      "trade_date": "20260807",
+      "ts_code": "03339.HK",
+      "name": "中國龍工",
+      "vol": 288778362,
+      "ratio": 6.74,
+      "exchange": "HK"
+    },
+    {
+      "code": "3347",
+      "trade_date": "20260807",
+      "ts_code": "03347.HK",
+      "name": "泰格醫藥",
+      "vol": 51105609,
+      "ratio": 41.5,
+      "exchange": "HK"
+    },
+    {
+      "code": "3360",
+      "trade_date": "20260807",
+      "ts_code": "03360.HK",
+      "name": "遠東宏信",
+      "vol": 717799892,
+      "ratio": 14.89,
+      "exchange": "HK"
+    },
+    {
+      "code": "3368",
+      "trade_date": "20260807",
+      "ts_code": "03368.HK",
+      "name": "百盛集團",
+      "vol": 5197500,
+      "ratio": 0.19,
+      "exchange": "HK"
+    },
+    {
+      "code": "3369",
+      "trade_date": "20260807",
+      "ts_code": "03369.HK",
+      "name": "秦港股份",
+      "vol": 374751500,
+      "ratio": 45.15,
+      "exchange": "HK"
+    },
+    {
+      "code": "3377",
+      "trade_date": "20260807",
+      "ts_code": "03377.HK",
+      "name": "遠洋集團",
+      "vol": 670316100,
+      "ratio": 5.29,
+      "exchange": "HK"
+    },
+    {
+      "code": "3380",
+      "trade_date": "20260807",
+      "ts_code": "03380.HK",
+      "name": "龍光集團",
+      "vol": 508385000,
+      "ratio": 8.93,
+      "exchange": "HK"
+    },
+    {
+      "code": "3382",
+      "trade_date": "20260807",
+      "ts_code": "03382.HK",
+      "name": "天津港發展",
+      "vol": 84142000,
+      "ratio": 1.36,
+      "exchange": "HK"
+    },
+    {
+      "code": "3383",
+      "trade_date": "20260807",
+      "ts_code": "03383.HK",
+      "name": "雅居樂集團",
+      "vol": 336194000,
+      "ratio": 6.65,
+      "exchange": "HK"
+    },
+    {
+      "code": "3389",
+      "trade_date": "20260807",
+      "ts_code": "03389.HK",
+      "name": "亨得利",
+      "vol": 44000,
+      "ratio": 0.0,
+      "exchange": "HK"
+    },
+    {
+      "code": "3393",
+      "trade_date": "20260807",
+      "ts_code": "03393.HK",
+      "name": "威勝控股",
+      "vol": 41656837,
+      "ratio": 3.98,
+      "exchange": "HK"
+    },
+    {
+      "code": "3396",
+      "trade_date": "20260807",
+      "ts_code": "03396.HK",
+      "name": "聯想控股",
+      "vol": 168474100,
+      "ratio": 13.24,
+      "exchange": "HK"
+    },
+    {
+      "code": "3403",
+      "trade_date": "20260807",
+      "ts_code": "03403.HK",
+      "name": "華夏恆ESG",
+      "vol": 1700,
+      "ratio": 0.0,
+      "exchange": "HK"
+    },
+    {
+      "code": "3406",
+      "trade_date": "20260807",
+      "ts_code": "03406.HK",
+      "name": "平安科技精選",
+      "vol": 346950,
+      "ratio": 0.92,
+      "exchange": "HK"
+    },
+    {
+      "code": "3423",
+      "trade_date": "20260807",
+      "ts_code": "03423.HK",
+      "name": "招商恆生科技",
+      "vol": 1959040,
+      "ratio": 3.52,
+      "exchange": "HK"
+    },
+    {
+      "code": "3431",
+      "trade_date": "20260807",
+      "ts_code": "03431.HK",
+      "name": "南方港韓科技",
+      "vol": 69258000,
+      "ratio": 48.25,
+      "exchange": "HK"
+    },
+    {
+      "code": "3432",
+      "trade_date": "20260807",
+      "ts_code": "03432.HK",
+      "name": "南方港股通",
+      "vol": 2580,
+      "ratio": 0.0,
+      "exchange": "HK"
+    },
+    {
+      "code": "3437",
+      "trade_date": "20260807",
+      "ts_code": "03437.HK",
+      "name": "博時央企紅利",
+      "vol": 451000,
+      "ratio": 0.48,
+      "exchange": "HK"
+    },
+    {
+      "code": "3441",
+      "trade_date": "20260807",
+      "ts_code": "03441.HK",
+      "name": "南方東西精選",
+      "vol": 45342900,
+      "ratio": 34.87,
+      "exchange": "HK"
+    },
+    {
+      "code": "3442",
+      "trade_date": "20260807",
+      "ts_code": "03442.HK",
+      "name": "南方港美科技",
+      "vol": 38467700,
+      "ratio": 44.2,
+      "exchange": "HK"
+    },
+    {
+      "code": "3443",
+      "trade_date": "20260807",
+      "ts_code": "03443.HK",
+      "name": "南方香港股票",
+      "vol": 3100,
+      "ratio": 0.0,
+      "exchange": "HK"
+    },
+    {
+      "code": "3469",
+      "trade_date": "20260807",
+      "ts_code": "03469.HK",
+      "name": "南方港股通紅利",
+      "vol": 67000,
+      "ratio": 0.06,
+      "exchange": "HK"
+    },
+    {
+      "code": "3477",
+      "trade_date": "20260807",
+      "ts_code": "03477.HK",
+      "name": "平安東西精選",
+      "vol": 159800,
+      "ratio": 0.43,
+      "exchange": "HK"
+    },
+    {
+      "code": "3483",
+      "trade_date": "20260807",
+      "ts_code": "03483.HK",
+      "name": "易方達高股息",
+      "vol": 20752000,
+      "ratio": 58.78,
+      "exchange": "HK"
+    },
+    {
+      "code": "3489",
+      "trade_date": "20260807",
+      "ts_code": "03489.HK",
+      "name": "易方達AI",
+      "vol": 27335600,
+      "ratio": 59.81,
+      "exchange": "HK"
+    },
+    {
+      "code": "3606",
+      "trade_date": "20260807",
+      "ts_code": "03606.HK",
+      "name": "福耀玻璃",
+      "vol": 88297015,
+      "ratio": 14.54,
+      "exchange": "HK"
+    },
+    {
+      "code": "3613",
+      "trade_date": "20260807",
+      "ts_code": "03613.HK",
+      "name": "同仁堂國藥",
+      "vol": 160372100,
+      "ratio": 19.15,
+      "exchange": "HK"
+    },
+    {
+      "code": "3618",
+      "trade_date": "20260807",
+      "ts_code": "03618.HK",
+      "name": "重慶農村商業銀行",
+      "vol": 960846306,
+      "ratio": 38.22,
+      "exchange": "HK"
+    },
+    {
+      "code": "3633",
+      "trade_date": "20260807",
+      "ts_code": "03633.HK",
+      "name": "中裕能源",
+      "vol": 110618000,
+      "ratio": 4.02,
+      "exchange": "HK"
+    },
+    {
+      "code": "3650",
+      "trade_date": "20260807",
+      "ts_code": "03650.HK",
+      "name": "KEEP INC.",
+      "vol": 15795400,
+      "ratio": 3.09,
+      "exchange": "HK"
+    },
+    {
+      "code": "3661",
+      "trade_date": "20260807",
+      "ts_code": "03661.HK",
+      "name": "聖邦股份",
+      "vol": 2007700,
+      "ratio": 3.23,
+      "exchange": "HK"
+    },
+    {
+      "code": "3668",
+      "trade_date": "20260807",
+      "ts_code": "03668.HK",
+      "name": "兗煤澳大利亞",
+      "vol": 61599082,
+      "ratio": 4.66,
+      "exchange": "HK"
+    },
+    {
+      "code": "3669",
+      "trade_date": "20260807",
+      "ts_code": "03669.HK",
+      "name": "永達汽車",
+      "vol": 107953500,
+      "ratio": 5.66,
+      "exchange": "HK"
+    },
+    {
+      "code": "3677",
+      "trade_date": "20260807",
+      "ts_code": "03677.HK",
+      "name": "正力新能",
+      "vol": 94760400,
+      "ratio": 6.37,
+      "exchange": "HK"
+    },
+    {
+      "code": "3678",
+      "trade_date": "20260807",
+      "ts_code": "03678.HK",
+      "name": "弘業期貨",
+      "vol": 158415000,
+      "ratio": 63.43,
+      "exchange": "HK"
+    },
+    {
+      "code": "3690",
+      "trade_date": "20260807",
+      "ts_code": "03690.HK",
+      "name": "美團-W",
+      "vol": 1205347816,
+      "ratio": 19.5,
+      "exchange": "HK"
+    },
+    {
+      "code": "3692",
+      "trade_date": "20260807",
+      "ts_code": "03692.HK",
+      "name": "翰森製藥",
+      "vol": 322639815,
+      "ratio": 5.31,
+      "exchange": "HK"
+    },
+    {
+      "code": "3696",
+      "trade_date": "20260807",
+      "ts_code": "03696.HK",
+      "name": "英矽智能",
+      "vol": 131591708,
+      "ratio": 22.58,
+      "exchange": "HK"
+    },
+    {
+      "code": "3698",
+      "trade_date": "20260807",
+      "ts_code": "03698.HK",
+      "name": "徽商銀行",
+      "vol": 288051900,
+      "ratio": 8.27,
+      "exchange": "HK"
+    },
+    {
+      "code": "3709",
+      "trade_date": "20260807",
+      "ts_code": "03709.HK",
+      "name": "贏家時尚",
+      "vol": 22213000,
+      "ratio": 3.13,
+      "exchange": "HK"
+    },
+    {
+      "code": "3738",
+      "trade_date": "20260807",
+      "ts_code": "03738.HK",
+      "name": "阜博集團",
+      "vol": 1143700209,
+      "ratio": 44.07,
+      "exchange": "HK"
+    },
+    {
+      "code": "3750",
+      "trade_date": "20260807",
+      "ts_code": "03750.HK",
+      "name": "寧德時代",
+      "vol": 6392516,
+      "ratio": 2.91,
+      "exchange": "HK"
+    },
+    {
+      "code": "3759",
+      "trade_date": "20260807",
+      "ts_code": "03759.HK",
+      "name": "康龍化成",
+      "vol": 119767316,
+      "ratio": 33.26,
+      "exchange": "HK"
+    },
+    {
+      "code": "3788",
+      "trade_date": "20260807",
+      "ts_code": "03788.HK",
+      "name": "罕王黃金",
+      "vol": 332000,
+      "ratio": 0.01,
+      "exchange": "HK"
+    },
+    {
+      "code": "3800",
+      "trade_date": "20260807",
+      "ts_code": "03800.HK",
+      "name": "協鑫科技",
+      "vol": 10462127354,
+      "ratio": 31.49,
+      "exchange": "HK"
+    },
+    {
+      "code": "3808",
+      "trade_date": "20260807",
+      "ts_code": "03808.HK",
+      "name": "中國重汽",
+      "vol": 250585329,
+      "ratio": 9.07,
+      "exchange": "HK"
+    },
+    {
+      "code": "3813",
+      "trade_date": "20260807",
+      "ts_code": "03813.HK",
+      "name": "寶勝國際",
+      "vol": 13806000,
+      "ratio": 0.25,
+      "exchange": "HK"
+    },
+    {
+      "code": "3818",
+      "trade_date": "20260807",
+      "ts_code": "03818.HK",
+      "name": "中國動向",
+      "vol": 208007000,
+      "ratio": 3.52,
+      "exchange": "HK"
+    },
+    {
+      "code": "3836",
+      "trade_date": "20260807",
+      "ts_code": "03836.HK",
+      "name": "和諧汽車",
+      "vol": 125569500,
+      "ratio": 8.24,
+      "exchange": "HK"
+    },
+    {
+      "code": "3858",
+      "trade_date": "20260807",
+      "ts_code": "03858.HK",
+      "name": "佳鑫國際資源",
+      "vol": 38342463,
+      "ratio": 8.4,
+      "exchange": "HK"
+    },
+    {
+      "code": "3866",
+      "trade_date": "20260807",
+      "ts_code": "03866.HK",
+      "name": "青島銀行",
+      "vol": 498724686,
+      "ratio": 21.75,
+      "exchange": "HK"
+    },
+    {
+      "code": "3868",
+      "trade_date": "20260807",
+      "ts_code": "03868.HK",
+      "name": "信義能源",
+      "vol": 1026014068,
+      "ratio": 12.03,
+      "exchange": "HK"
+    },
+    {
+      "code": "3877",
+      "trade_date": "20260807",
+      "ts_code": "03877.HK",
+      "name": "中國船舶租賃",
+      "vol": 1280006130,
+      "ratio": 20.62,
+      "exchange": "HK"
+    },
+    {
+      "code": "3881",
+      "trade_date": "20260807",
+      "ts_code": "03881.HK",
+      "name": "希迪智駕",
+      "vol": 11382400,
+      "ratio": 2.67,
+      "exchange": "HK"
+    },
+    {
+      "code": "3883",
+      "trade_date": "20260807",
+      "ts_code": "03883.HK",
+      "name": "中國奧園",
+      "vol": 158896000,
+      "ratio": 3.37,
+      "exchange": "HK"
+    },
+    {
+      "code": "3886",
+      "trade_date": "20260807",
+      "ts_code": "03886.HK",
+      "name": "康健國際醫療",
+      "vol": 26886000,
+      "ratio": 0.39,
+      "exchange": "HK"
+    },
+    {
+      "code": "3888",
+      "trade_date": "20260807",
+      "ts_code": "03888.HK",
+      "name": "金山軟件",
+      "vol": 248074239,
+      "ratio": 18.04,
+      "exchange": "HK"
+    },
+    {
+      "code": "3896",
+      "trade_date": "20260807",
+      "ts_code": "03896.HK",
+      "name": "金山雲",
+      "vol": 1283909477,
+      "ratio": 28.32,
+      "exchange": "HK"
+    },
+    {
+      "code": "3898",
+      "trade_date": "20260807",
+      "ts_code": "03898.HK",
+      "name": "時代電氣",
+      "vol": 94609468,
+      "ratio": 20.48,
+      "exchange": "HK"
+    },
+    {
+      "code": "3899",
+      "trade_date": "20260807",
+      "ts_code": "03899.HK",
+      "name": "中集安瑞科",
+      "vol": 229086585,
+      "ratio": 10.82,
+      "exchange": "HK"
+    },
+    {
+      "code": "3900",
+      "trade_date": "20260807",
+      "ts_code": "03900.HK",
+      "name": "綠城中國",
+      "vol": 761737514,
+      "ratio": 29.99,
+      "exchange": "HK"
+    },
+    {
+      "code": "3908",
+      "trade_date": "20260807",
+      "ts_code": "03908.HK",
+      "name": "中金公司",
+      "vol": 462530865,
+      "ratio": 24.29,
+      "exchange": "HK"
+    },
+    {
+      "code": "3913",
+      "trade_date": "20260807",
+      "ts_code": "03913.HK",
+      "name": "合景悠活",
+      "vol": 109438040,
+      "ratio": 5.39,
+      "exchange": "HK"
+    },
+    {
+      "code": "3918",
+      "trade_date": "20260807",
+      "ts_code": "03918.HK",
+      "name": "金界控股",
+      "vol": 180300247,
+      "ratio": 4.06,
+      "exchange": "HK"
+    },
+    {
+      "code": "3931",
+      "trade_date": "20260807",
+      "ts_code": "03931.HK",
+      "name": "中創新航",
+      "vol": 112141400,
+      "ratio": 14.72,
+      "exchange": "HK"
+    },
+    {
+      "code": "3933",
+      "trade_date": "20260807",
+      "ts_code": "03933.HK",
+      "name": "聯邦制藥",
+      "vol": 602365471,
+      "ratio": 30.57,
+      "exchange": "HK"
+    },
+    {
+      "code": "3939",
+      "trade_date": "20260807",
+      "ts_code": "03939.HK",
+      "name": "萬國黃金集團",
+      "vol": 661591333,
+      "ratio": 14.95,
+      "exchange": "HK"
+    },
+    {
+      "code": "3958",
+      "trade_date": "20260807",
+      "ts_code": "03958.HK",
+      "name": "東方證券",
+      "vol": 624498629,
+      "ratio": 60.79,
+      "exchange": "HK"
+    },
+    {
+      "code": "3968",
+      "trade_date": "20260807",
+      "ts_code": "03968.HK",
+      "name": "招商銀行",
+      "vol": 1457166590,
+      "ratio": 31.73,
+      "exchange": "HK"
+    },
+    {
+      "code": "3969",
+      "trade_date": "20260807",
+      "ts_code": "03969.HK",
+      "name": "中國通號",
+      "vol": 1047733000,
+      "ratio": 53.21,
+      "exchange": "HK"
+    },
+    {
+      "code": "3986",
+      "trade_date": "20260807",
+      "ts_code": "03986.HK",
+      "name": "兆易創新",
+      "vol": 16242800,
+      "ratio": 48.84,
+      "exchange": "HK"
+    },
+    {
+      "code": "3988",
+      "trade_date": "20260807",
+      "ts_code": "03988.HK",
+      "name": "中國銀行",
+      "vol": 29419145939,
+      "ratio": 35.17,
+      "exchange": "HK"
+    },
+    {
+      "code": "3990",
+      "trade_date": "20260807",
+      "ts_code": "03990.HK",
+      "name": "美的置業",
+      "vol": 106332820,
+      "ratio": 7.39,
+      "exchange": "HK"
+    },
+    {
+      "code": "3993",
+      "trade_date": "20260807",
+      "ts_code": "03993.HK",
+      "name": "洛陽鉬業",
+      "vol": 852845768,
+      "ratio": 21.67,
+      "exchange": "HK"
+    },
+    {
+      "code": "3996",
+      "trade_date": "20260807",
+      "ts_code": "03996.HK",
+      "name": "中國能源建設",
+      "vol": 2530438880,
+      "ratio": 27.31,
+      "exchange": "HK"
+    },
+    {
+      "code": "3998",
+      "trade_date": "20260807",
+      "ts_code": "03998.HK",
+      "name": "波司登",
+      "vol": 1079374706,
+      "ratio": 9.21,
+      "exchange": "HK"
+    },
+    {
+      "code": "6030",
+      "trade_date": "20260807",
+      "ts_code": "06030.HK",
+      "name": "中信証券",
+      "vol": 888283669,
+      "ratio": 25.93,
+      "exchange": "HK"
+    },
+    {
+      "code": "6031",
+      "trade_date": "20260807",
+      "ts_code": "06031.HK",
+      "name": "三一重工",
+      "vol": 52646221,
+      "ratio": 7.3,
+      "exchange": "HK"
+    },
+    {
+      "code": "6049",
+      "trade_date": "20260807",
+      "ts_code": "06049.HK",
+      "name": "保利物業",
+      "vol": 66320260,
+      "ratio": 19.1,
+      "exchange": "HK"
+    },
+    {
+      "code": "6055",
+      "trade_date": "20260807",
+      "ts_code": "06055.HK",
+      "name": "中煙香港",
+      "vol": 105673542,
+      "ratio": 15.27,
+      "exchange": "HK"
+    },
+    {
+      "code": "6060",
+      "trade_date": "20260807",
+      "ts_code": "06060.HK",
+      "name": "眾安在線",
+      "vol": 357963508,
+      "ratio": 21.89,
+      "exchange": "HK"
+    },
+    {
+      "code": "6066",
+      "trade_date": "20260807",
+      "ts_code": "06066.HK",
+      "name": "中信建投証券",
+      "vol": 522873055,
+      "ratio": 41.46,
+      "exchange": "HK"
+    },
+    {
+      "code": "6067",
+      "trade_date": "20260807",
+      "ts_code": "06067.HK",
+      "name": "星源材質",
+      "vol": 32606500,
+      "ratio": 21.79,
+      "exchange": "HK"
+    },
+    {
+      "code": "6068",
+      "trade_date": "20260807",
+      "ts_code": "06068.HK",
+      "name": "光正教育",
+      "vol": 81224000,
+      "ratio": 3.72,
+      "exchange": "HK"
+    },
+    {
+      "code": "6069",
+      "trade_date": "20260807",
+      "ts_code": "06069.HK",
+      "name": "盛業",
+      "vol": 136526663,
+      "ratio": 12.8,
+      "exchange": "HK"
+    },
+    {
+      "code": "6078",
+      "trade_date": "20260807",
+      "ts_code": "06078.HK",
+      "name": "海吉亞醫療",
+      "vol": 168240270,
+      "ratio": 27.19,
+      "exchange": "HK"
+    },
+    {
+      "code": "6082",
+      "trade_date": "20260807",
+      "ts_code": "06082.HK",
+      "name": "壁仞科技",
+      "vol": 129930800,
+      "ratio": 9.59,
+      "exchange": "HK"
+    },
+    {
+      "code": "6086",
+      "trade_date": "20260807",
+      "ts_code": "06086.HK",
+      "name": "方舟健客",
+      "vol": 60504000,
+      "ratio": 4.36,
+      "exchange": "HK"
+    },
+    {
+      "code": "6088",
+      "trade_date": "20260807",
+      "ts_code": "06088.HK",
+      "name": "FIT HON TENG LIMITED",
+      "vol": 404475361,
+      "ratio": 5.53,
+      "exchange": "HK"
+    },
+    {
+      "code": "6090",
+      "trade_date": "20260807",
+      "ts_code": "06090.HK",
+      "name": "不同集團",
+      "vol": 16423600,
+      "ratio": 18.09,
+      "exchange": "HK"
+    },
+    {
+      "code": "6098",
+      "trade_date": "20260807",
+      "ts_code": "06098.HK",
+      "name": "碧桂園服務",
+      "vol": 871956527,
+      "ratio": 26.75,
+      "exchange": "HK"
+    },
+    {
+      "code": "6099",
+      "trade_date": "20260807",
+      "ts_code": "06099.HK",
+      "name": "招商證券",
+      "vol": 291777860,
+      "ratio": 22.89,
+      "exchange": "HK"
+    },
+    {
+      "code": "6100",
+      "trade_date": "20260807",
+      "ts_code": "06100.HK",
+      "name": "同道獵聘",
+      "vol": 10787000,
+      "ratio": 2.09,
+      "exchange": "HK"
+    },
+    {
+      "code": "6110",
+      "trade_date": "20260807",
+      "ts_code": "06110.HK",
+      "name": "滔搏",
+      "vol": 388509668,
+      "ratio": 6.25,
+      "exchange": "HK"
+    },
+    {
+      "code": "6127",
+      "trade_date": "20260807",
+      "ts_code": "06127.HK",
+      "name": "昭衍新藥",
+      "vol": 70650014,
+      "ratio": 59.37,
+      "exchange": "HK"
+    },
+    {
+      "code": "6158",
+      "trade_date": "20260807",
+      "ts_code": "06158.HK",
+      "name": "正榮地產",
+      "vol": 631335000,
+      "ratio": 14.45,
+      "exchange": "HK"
+    },
+    {
+      "code": "6160",
+      "trade_date": "20260807",
+      "ts_code": "06160.HK",
+      "name": "百濟神州",
+      "vol": 118229397,
+      "ratio": 7.66,
+      "exchange": "HK"
+    },
+    {
+      "code": "6166",
+      "trade_date": "20260807",
+      "ts_code": "06166.HK",
+      "name": "劍橋科技",
+      "vol": 49083750,
+      "ratio": 52.96,
+      "exchange": "HK"
+    },
+    {
+      "code": "6168",
+      "trade_date": "20260807",
+      "ts_code": "06168.HK",
+      "name": "周六福",
+      "vol": 12908100,
+      "ratio": 4.71,
+      "exchange": "HK"
+    },
+    {
+      "code": "6169",
+      "trade_date": "20260807",
+      "ts_code": "06169.HK",
+      "name": "宇華教育",
+      "vol": 423352300,
+      "ratio": 9.82,
+      "exchange": "HK"
+    },
+    {
+      "code": "6178",
+      "trade_date": "20260807",
+      "ts_code": "06178.HK",
+      "name": "光大證券",
+      "vol": 178598000,
+      "ratio": 25.36,
+      "exchange": "HK"
+    },
+    {
+      "code": "6181",
+      "trade_date": "20260807",
+      "ts_code": "06181.HK",
+      "name": "老鋪黃金",
+      "vol": 17972660,
+      "ratio": 12.51,
+      "exchange": "HK"
+    },
+    {
+      "code": "6185",
+      "trade_date": "20260807",
+      "ts_code": "06185.HK",
+      "name": "康希諾生物",
+      "vol": 50396900,
+      "ratio": 37.97,
+      "exchange": "HK"
+    },
+    {
+      "code": "6186",
+      "trade_date": "20260807",
+      "ts_code": "06186.HK",
+      "name": "中國飛鶴",
+      "vol": 1360694145,
+      "ratio": 15.0,
+      "exchange": "HK"
+    },
+    {
+      "code": "6196",
+      "trade_date": "20260807",
+      "ts_code": "06196.HK",
+      "name": "鄭州銀行",
+      "vol": 1131706322,
+      "ratio": 56.0,
+      "exchange": "HK"
+    },
+    {
+      "code": "6198",
+      "trade_date": "20260807",
+      "ts_code": "06198.HK",
+      "name": "青島港",
+      "vol": 421594813,
+      "ratio": 38.35,
+      "exchange": "HK"
+    },
+    {
+      "code": "6600",
+      "trade_date": "20260807",
+      "ts_code": "06600.HK",
+      "name": "臥安機器人",
+      "vol": 4112800,
+      "ratio": 1.82,
+      "exchange": "HK"
+    },
+    {
+      "code": "6601",
+      "trade_date": "20260807",
+      "ts_code": "06601.HK",
+      "name": "朝雲集團",
+      "vol": 40114500,
+      "ratio": 3.0,
+      "exchange": "HK"
+    },
+    {
+      "code": "6603",
+      "trade_date": "20260807",
+      "ts_code": "06603.HK",
+      "name": "IFBH LIMITED",
+      "vol": 27666000,
+      "ratio": 10.36,
+      "exchange": "HK"
+    },
+    {
+      "code": "6610",
+      "trade_date": "20260807",
+      "ts_code": "06610.HK",
+      "name": "飛天雲動",
+      "vol": 12001850,
+      "ratio": 9.22,
+      "exchange": "HK"
+    },
+    {
+      "code": "6613",
+      "trade_date": "20260807",
+      "ts_code": "06613.HK",
+      "name": "藍思科技",
+      "vol": 114445141,
+      "ratio": 37.93,
+      "exchange": "HK"
+    },
+    {
+      "code": "6616",
+      "trade_date": "20260807",
+      "ts_code": "06616.HK",
+      "name": "環球新材國際",
+      "vol": 437030000,
+      "ratio": 35.0,
+      "exchange": "HK"
+    },
+    {
+      "code": "6618",
+      "trade_date": "20260807",
+      "ts_code": "06618.HK",
+      "name": "京東健康",
+      "vol": 214064407,
+      "ratio": 6.7,
+      "exchange": "HK"
+    },
+    {
+      "code": "6639",
+      "trade_date": "20260807",
+      "ts_code": "06639.HK",
+      "name": "瑞爾集團",
+      "vol": 46289500,
+      "ratio": 8.2,
+      "exchange": "HK"
+    },
+    {
+      "code": "6651",
+      "trade_date": "20260807",
+      "ts_code": "06651.HK",
+      "name": "五一視界",
+      "vol": 21529800,
+      "ratio": 5.37,
+      "exchange": "HK"
+    },
+    {
+      "code": "6655",
+      "trade_date": "20260807",
+      "ts_code": "06655.HK",
+      "name": "華新建材",
+      "vol": 143616594,
+      "ratio": 19.54,
+      "exchange": "HK"
+    },
+    {
+      "code": "6660",
+      "trade_date": "20260807",
+      "ts_code": "06660.HK",
+      "name": "艾美疫苗",
+      "vol": 43020400,
+      "ratio": 8.46,
+      "exchange": "HK"
+    },
+    {
+      "code": "6666",
+      "trade_date": "20260807",
+      "ts_code": "06666.HK",
+      "name": "恆大物業",
+      "vol": 1855394500,
+      "ratio": 17.15,
+      "exchange": "HK"
+    },
+    {
+      "code": "6680",
+      "trade_date": "20260807",
+      "ts_code": "06680.HK",
+      "name": "金力永磁",
+      "vol": 50147292,
+      "ratio": 20.55,
+      "exchange": "HK"
+    },
+    {
+      "code": "6681",
+      "trade_date": "20260807",
+      "ts_code": "06681.HK",
+      "name": "腦動極光-B",
+      "vol": 239657000,
+      "ratio": 17.63,
+      "exchange": "HK"
+    },
+    {
+      "code": "6682",
+      "trade_date": "20260807",
+      "ts_code": "06682.HK",
+      "name": "範式智能",
+      "vol": 190217100,
+      "ratio": 52.92,
+      "exchange": "HK"
+    },
+    {
+      "code": "6683",
+      "trade_date": "20260807",
+      "ts_code": "06683.HK",
+      "name": "巨星傳奇",
+      "vol": 181509500,
+      "ratio": 18.93,
+      "exchange": "HK"
+    },
+    {
+      "code": "6687",
+      "trade_date": "20260807",
+      "ts_code": "06687.HK",
+      "name": "聚水潭",
+      "vol": 24860900,
+      "ratio": 5.69,
+      "exchange": "HK"
+    },
+    {
+      "code": "6690",
+      "trade_date": "20260807",
+      "ts_code": "06690.HK",
+      "name": "海爾智家",
+      "vol": 607302826,
+      "ratio": 21.27,
+      "exchange": "HK"
+    },
+    {
+      "code": "6693",
+      "trade_date": "20260807",
+      "ts_code": "06693.HK",
+      "name": "赤峰黃金",
+      "vol": 90712806,
+      "ratio": 38.34,
+      "exchange": "HK"
+    },
+    {
+      "code": "6698",
+      "trade_date": "20260807",
+      "ts_code": "06698.HK",
+      "name": "星空華文",
+      "vol": 31241500,
+      "ratio": 7.83,
+      "exchange": "HK"
+    },
+    {
+      "code": "6699",
+      "trade_date": "20260807",
+      "ts_code": "06699.HK",
+      "name": "時代天使",
+      "vol": 22876687,
+      "ratio": 13.32,
+      "exchange": "HK"
+    },
+    {
+      "code": "6745",
+      "trade_date": "20260807",
+      "ts_code": "06745.HK",
+      "name": "濱化股份",
+      "vol": 75761000,
+      "ratio": 21.5,
+      "exchange": "HK"
+    },
+    {
+      "code": "6806",
+      "trade_date": "20260807",
+      "ts_code": "06806.HK",
+      "name": "申萬宏源",
+      "vol": 923647200,
+      "ratio": 36.88,
+      "exchange": "HK"
+    },
+    {
+      "code": "6808",
+      "trade_date": "20260807",
+      "ts_code": "06808.HK",
+      "name": "高鑫零售",
+      "vol": 230252500,
+      "ratio": 2.4,
+      "exchange": "HK"
+    },
+    {
+      "code": "6809",
+      "trade_date": "20260807",
+      "ts_code": "06809.HK",
+      "name": "瀾起科技",
+      "vol": 18933100,
+      "ratio": 24.98,
+      "exchange": "HK"
+    },
+    {
+      "code": "6818",
+      "trade_date": "20260807",
+      "ts_code": "06818.HK",
+      "name": "中國光大銀行",
+      "vol": 2268748981,
+      "ratio": 17.89,
+      "exchange": "HK"
+    },
+    {
+      "code": "6821",
+      "trade_date": "20260807",
+      "ts_code": "06821.HK",
+      "name": "凱萊英",
+      "vol": 11738788,
+      "ratio": 42.16,
+      "exchange": "HK"
+    },
+    {
+      "code": "6826",
+      "trade_date": "20260807",
+      "ts_code": "06826.HK",
+      "name": "昊海生物科技",
+      "vol": 14728028,
+      "ratio": 42.34,
+      "exchange": "HK"
+    },
+    {
+      "code": "6828",
+      "trade_date": "20260807",
+      "ts_code": "06828.HK",
+      "name": "北京燃氣藍天",
+      "vol": 180032000,
+      "ratio": 0.79,
+      "exchange": "HK"
+    },
+    {
+      "code": "6855",
+      "trade_date": "20260807",
+      "ts_code": "06855.HK",
+      "name": "亞盛醫藥",
+      "vol": 188844087,
+      "ratio": 50.54,
+      "exchange": "HK"
+    },
+    {
+      "code": "6862",
+      "trade_date": "20260807",
+      "ts_code": "06862.HK",
+      "name": "海底撈",
+      "vol": 460486206,
+      "ratio": 8.26,
+      "exchange": "HK"
+    },
+    {
+      "code": "6865",
+      "trade_date": "20260807",
+      "ts_code": "06865.HK",
+      "name": "福萊特玻璃",
+      "vol": 181796786,
+      "ratio": 41.15,
+      "exchange": "HK"
+    },
+    {
+      "code": "6869",
+      "trade_date": "20260807",
+      "ts_code": "06869.HK",
+      "name": "長飛光纖光纜",
+      "vol": 178527704,
+      "ratio": 42.34,
+      "exchange": "HK"
+    },
+    {
+      "code": "6878",
+      "trade_date": "20260807",
+      "ts_code": "06878.HK",
+      "name": "鼎豐集團汽車",
+      "vol": 448032500,
+      "ratio": 47.68,
+      "exchange": "HK"
+    },
+    {
+      "code": "6881",
+      "trade_date": "20260807",
+      "ts_code": "06881.HK",
+      "name": "中國銀河",
+      "vol": 1705943230,
+      "ratio": 46.21,
+      "exchange": "HK"
+    },
+    {
+      "code": "6886",
+      "trade_date": "20260807",
+      "ts_code": "06886.HK",
+      "name": "HUATAI SECURITIES CO., LTD.",
+      "vol": 980150415,
+      "ratio": 57.01,
+      "exchange": "HK"
+    },
+    {
+      "code": "6887",
+      "trade_date": "20260807",
+      "ts_code": "06887.HK",
+      "name": "東陽光藥",
+      "vol": 39150965,
+      "ratio": 12.18,
+      "exchange": "HK"
+    },
+    {
+      "code": "6929",
+      "trade_date": "20260807",
+      "ts_code": "06929.HK",
+      "name": "業聚醫療",
+      "vol": 1665500,
+      "ratio": 0.19,
+      "exchange": "HK"
+    },
+    {
+      "code": "6936",
+      "trade_date": "20260807",
+      "ts_code": "06936.HK",
+      "name": "順豐控股",
+      "vol": 83777462,
+      "ratio": 17.97,
+      "exchange": "HK"
+    },
+    {
+      "code": "6955",
+      "trade_date": "20260807",
+      "ts_code": "06955.HK",
+      "name": "博安生物",
+      "vol": 150079600,
+      "ratio": 24.1,
+      "exchange": "HK"
+    },
+    {
+      "code": "6963",
+      "trade_date": "20260807",
+      "ts_code": "06963.HK",
+      "name": "陽光保險",
+      "vol": 1009123421,
+      "ratio": 29.0,
+      "exchange": "HK"
+    },
+    {
+      "code": "6968",
+      "trade_date": "20260807",
+      "ts_code": "06968.HK",
+      "name": "港龍中國地產",
+      "vol": 265135000,
+      "ratio": 16.33,
+      "exchange": "HK"
+    },
+    {
+      "code": "6969",
+      "trade_date": "20260807",
+      "ts_code": "06969.HK",
+      "name": "思摩爾國際",
+      "vol": 619135299,
+      "ratio": 9.98,
+      "exchange": "HK"
+    },
+    {
+      "code": "6978",
+      "trade_date": "20260807",
+      "ts_code": "06978.HK",
+      "name": "永泰生物-B",
+      "vol": 14278600,
+      "ratio": 2.31,
+      "exchange": "HK"
+    },
+    {
+      "code": "6979",
+      "trade_date": "20260807",
+      "ts_code": "06979.HK",
+      "name": "珍酒李渡",
+      "vol": 294678433,
+      "ratio": 8.68,
+      "exchange": "HK"
+    },
+    {
+      "code": "6988",
+      "trade_date": "20260807",
+      "ts_code": "06988.HK",
+      "name": "樂享集團",
+      "vol": 408192200,
+      "ratio": 17.2,
+      "exchange": "HK"
+    },
+    {
+      "code": "6989",
+      "trade_date": "20260807",
+      "ts_code": "06989.HK",
+      "name": "卓越商企服務",
+      "vol": 20746000,
+      "ratio": 1.69,
+      "exchange": "HK"
+    },
+    {
+      "code": "6990",
+      "trade_date": "20260807",
+      "ts_code": "06990.HK",
+      "name": "科倫博泰生物",
+      "vol": 45281488,
+      "ratio": 25.6,
+      "exchange": "HK"
+    },
+    {
+      "code": "6993",
+      "trade_date": "20260807",
+      "ts_code": "06993.HK",
+      "name": "藍月亮集團",
+      "vol": 26656500,
+      "ratio": 0.44,
+      "exchange": "HK"
+    },
+    {
+      "code": "6996",
+      "trade_date": "20260807",
+      "ts_code": "06996.HK",
+      "name": "德琪醫藥-B",
+      "vol": 9409500,
+      "ratio": 1.38,
+      "exchange": "HK"
+    },
+    {
+      "code": "6998",
+      "trade_date": "20260807",
+      "ts_code": "06998.HK",
+      "name": "億騰嘉和",
+      "vol": 11839000,
+      "ratio": 0.58,
+      "exchange": "HK"
+    },
+    {
+      "code": "7489",
+      "trade_date": "20260807",
+      "ts_code": "07489.HK",
+      "name": "嵐圖汽車",
+      "vol": 290606457,
+      "ratio": 32.81,
+      "exchange": "HK"
+    },
+    {
+      "code": "7618",
+      "trade_date": "20260807",
+      "ts_code": "07618.HK",
+      "name": "京東工業",
+      "vol": 12355800,
+      "ratio": 0.44,
+      "exchange": "HK"
+    },
+    {
+      "code": "8328",
+      "trade_date": "20260807",
+      "ts_code": "08328.HK",
+      "name": "信義儲電",
+      "vol": 82750,
+      "ratio": 0.01,
+      "exchange": "HK"
+    },
+    {
+      "code": "9606",
+      "trade_date": "20260807",
+      "ts_code": "09606.HK",
+      "name": "映恩生物-B",
+      "vol": 28116251,
+      "ratio": 30.81,
+      "exchange": "HK"
+    },
+    {
+      "code": "9611",
+      "trade_date": "20260807",
+      "ts_code": "09611.HK",
+      "name": "龍旗科技",
+      "vol": 10732100,
+      "ratio": 20.52,
+      "exchange": "HK"
+    },
+    {
+      "code": "9618",
+      "trade_date": "20260807",
+      "ts_code": "09618.HK",
+      "name": "京東集團-SW",
+      "vol": 1600659,
+      "ratio": 0.05,
+      "exchange": "HK"
+    },
+    {
+      "code": "9626",
+      "trade_date": "20260807",
+      "ts_code": "09626.HK",
+      "name": "嗶哩嗶哩-Ｗ",
+      "vol": 92553218,
+      "ratio": 21.77,
+      "exchange": "HK"
+    },
+    {
+      "code": "9630",
+      "trade_date": "20260807",
+      "ts_code": "09630.HK",
+      "name": "CIRCUIT FABOLOGY MICROELECTRONICS EQUIPMENT CO., LTD.",
+      "vol": 837300,
+      "ratio": 5.67,
+      "exchange": "HK"
+    },
+    {
+      "code": "9633",
+      "trade_date": "20260807",
+      "ts_code": "09633.HK",
+      "name": "農夫山泉",
+      "vol": 139077280,
+      "ratio": 2.75,
+      "exchange": "HK"
+    },
+    {
+      "code": "9636",
+      "trade_date": "20260807",
+      "ts_code": "09636.HK",
+      "name": "九方智投控股",
+      "vol": 76800465,
+      "ratio": 16.38,
+      "exchange": "HK"
+    },
+    {
+      "code": "9658",
+      "trade_date": "20260807",
+      "ts_code": "09658.HK",
+      "name": "特海國際",
+      "vol": 43311471,
+      "ratio": 6.65,
+      "exchange": "HK"
+    },
+    {
+      "code": "9660",
+      "trade_date": "20260807",
+      "ts_code": "09660.HK",
+      "name": "地平線機器人-W",
+      "vol": 3315543873,
+      "ratio": 20.78,
+      "exchange": "HK"
+    },
+    {
+      "code": "9668",
+      "trade_date": "20260807",
+      "ts_code": "09668.HK",
+      "name": "渤海銀行",
+      "vol": 298285500,
+      "ratio": 4.8,
+      "exchange": "HK"
+    },
+    {
+      "code": "9669",
+      "trade_date": "20260807",
+      "ts_code": "09669.HK",
+      "name": "北森控股",
+      "vol": 2060200,
+      "ratio": 0.27,
+      "exchange": "HK"
+    },
+    {
+      "code": "9676",
+      "trade_date": "20260807",
+      "ts_code": "09676.HK",
+      "name": "十月稻田",
+      "vol": 66645900,
+      "ratio": 6.23,
+      "exchange": "HK"
+    },
+    {
+      "code": "9678",
+      "trade_date": "20260807",
+      "ts_code": "09678.HK",
+      "name": "雲知聲",
+      "vol": 5521462,
+      "ratio": 12.23,
+      "exchange": "HK"
+    },
+    {
+      "code": "9688",
+      "trade_date": "20260807",
+      "ts_code": "09688.HK",
+      "name": "再鼎醫藥",
+      "vol": 422110379,
+      "ratio": 37.08,
+      "exchange": "HK"
+    },
+    {
+      "code": "9690",
+      "trade_date": "20260807",
+      "ts_code": "09690.HK",
+      "name": "途虎-Ｗ",
+      "vol": 119721717,
+      "ratio": 14.44,
+      "exchange": "HK"
+    },
+    {
+      "code": "9696",
+      "trade_date": "20260807",
+      "ts_code": "09696.HK",
+      "name": "天齊鋰業",
+      "vol": 86605366,
+      "ratio": 36.66,
+      "exchange": "HK"
+    },
+    {
+      "code": "9699",
+      "trade_date": "20260807",
+      "ts_code": "09699.HK",
+      "name": "順豐同城",
+      "vol": 114473688,
+      "ratio": 15.34,
+      "exchange": "HK"
+    },
+    {
+      "code": "9857",
+      "trade_date": "20260807",
+      "ts_code": "09857.HK",
+      "name": "檸萌影視",
+      "vol": 1604300,
+      "ratio": 0.43,
+      "exchange": "HK"
+    },
+    {
+      "code": "9858",
+      "trade_date": "20260807",
+      "ts_code": "09858.HK",
+      "name": "優然牧業",
+      "vol": 1143366738,
+      "ratio": 25.45,
+      "exchange": "HK"
+    },
+    {
+      "code": "9860",
+      "trade_date": "20260807",
+      "ts_code": "09860.HK",
+      "name": "艾迪康控股",
+      "vol": 20866000,
+      "ratio": 2.86,
+      "exchange": "HK"
+    },
+    {
+      "code": "9863",
+      "trade_date": "20260807",
+      "ts_code": "09863.HK",
+      "name": "零跑汽車",
+      "vol": 343298598,
+      "ratio": 30.34,
+      "exchange": "HK"
+    },
+    {
+      "code": "9868",
+      "trade_date": "20260807",
+      "ts_code": "09868.HK",
+      "name": "小鵬集團-W",
+      "vol": 390463112,
+      "ratio": 20.37,
+      "exchange": "HK"
+    },
+    {
+      "code": "9869",
+      "trade_date": "20260807",
+      "ts_code": "09869.HK",
+      "name": "海倫司",
+      "vol": 80692534,
+      "ratio": 6.37,
+      "exchange": "HK"
+    },
+    {
+      "code": "9877",
+      "trade_date": "20260807",
+      "ts_code": "09877.HK",
+      "name": "健世科技-B",
+      "vol": 6192800,
+      "ratio": 1.99,
+      "exchange": "HK"
+    },
+    {
+      "code": "9878",
+      "trade_date": "20260807",
+      "ts_code": "09878.HK",
+      "name": "匯通達網絡",
+      "vol": 34864600,
+      "ratio": 6.57,
+      "exchange": "HK"
+    },
+    {
+      "code": "9880",
+      "trade_date": "20260807",
+      "ts_code": "09880.HK",
+      "name": "優必選",
+      "vol": 134030263,
+      "ratio": 30.58,
+      "exchange": "HK"
+    },
+    {
+      "code": "9885",
+      "trade_date": "20260807",
+      "ts_code": "09885.HK",
+      "name": "藥師幫",
+      "vol": 130297000,
+      "ratio": 18.83,
+      "exchange": "HK"
+    },
+    {
+      "code": "9886",
+      "trade_date": "20260807",
+      "ts_code": "09886.HK",
+      "name": "叮噹健康",
+      "vol": 59124500,
+      "ratio": 4.76,
+      "exchange": "HK"
+    },
+    {
+      "code": "9887",
+      "trade_date": "20260807",
+      "ts_code": "09887.HK",
+      "name": "維立志博-B",
+      "vol": 36869800,
+      "ratio": 18.64,
+      "exchange": "HK"
+    },
+    {
+      "code": "9890",
+      "trade_date": "20260807",
+      "ts_code": "09890.HK",
+      "name": "貪玩",
+      "vol": 61647432,
+      "ratio": 11.52,
+      "exchange": "HK"
+    },
+    {
+      "code": "9896",
+      "trade_date": "20260807",
+      "ts_code": "09896.HK",
+      "name": "名創優品",
+      "vol": 98885990,
+      "ratio": 7.97,
+      "exchange": "HK"
+    },
+    {
+      "code": "9899",
+      "trade_date": "20260807",
+      "ts_code": "09899.HK",
+      "name": "網易雲音樂",
+      "vol": 29743494,
+      "ratio": 14.14,
+      "exchange": "HK"
+    },
+    {
+      "code": "9903",
+      "trade_date": "20260807",
+      "ts_code": "09903.HK",
+      "name": "天數智芯",
+      "vol": 18108533,
+      "ratio": 6.96,
+      "exchange": "HK"
+    },
+    {
+      "code": "9909",
+      "trade_date": "20260807",
+      "ts_code": "09909.HK",
+      "name": "寶龍商業",
+      "vol": 11923500,
+      "ratio": 1.85,
+      "exchange": "HK"
+    },
+    {
+      "code": "9911",
+      "trade_date": "20260807",
+      "ts_code": "09911.HK",
+      "name": "赤子城科技",
+      "vol": 159072355,
+      "ratio": 11.35,
+      "exchange": "HK"
+    },
+    {
+      "code": "9922",
+      "trade_date": "20260807",
+      "ts_code": "09922.HK",
+      "name": "九毛九",
+      "vol": 201129000,
+      "ratio": 15.03,
+      "exchange": "HK"
+    },
+    {
+      "code": "9923",
+      "trade_date": "20260807",
+      "ts_code": "09923.HK",
+      "name": "移卡",
+      "vol": 18932000,
+      "ratio": 4.09,
+      "exchange": "HK"
+    },
+    {
+      "code": "9926",
+      "trade_date": "20260807",
+      "ts_code": "09926.HK",
+      "name": "康方生物",
+      "vol": 441779816,
+      "ratio": 47.95,
+      "exchange": "HK"
+    },
+    {
+      "code": "9927",
+      "trade_date": "20260807",
+      "ts_code": "09927.HK",
+      "name": "賽力斯",
+      "vol": 25953600,
+      "ratio": 23.88,
+      "exchange": "HK"
+    },
+    {
+      "code": "9928",
+      "trade_date": "20260807",
+      "ts_code": "09928.HK",
+      "name": "時代鄰里",
+      "vol": 20366740,
+      "ratio": 2.05,
+      "exchange": "HK"
+    },
+    {
+      "code": "9930",
+      "trade_date": "20260807",
+      "ts_code": "09930.HK",
+      "name": "宏信建發",
+      "vol": 17652622,
+      "ratio": 0.54,
+      "exchange": "HK"
+    },
+    {
+      "code": "9939",
+      "trade_date": "20260807",
+      "ts_code": "09939.HK",
+      "name": "開拓藥業-B",
+      "vol": 74563000,
+      "ratio": 14.94,
+      "exchange": "HK"
+    },
+    {
+      "code": "9955",
+      "trade_date": "20260807",
+      "ts_code": "09955.HK",
+      "name": "智雲健康",
+      "vol": 45656400,
+      "ratio": 7.06,
+      "exchange": "HK"
+    },
+    {
+      "code": "9959",
+      "trade_date": "20260807",
+      "ts_code": "09959.HK",
+      "name": "聯易融科技-W",
+      "vol": 119897000,
+      "ratio": 5.6,
+      "exchange": "HK"
+    },
+    {
+      "code": "9966",
+      "trade_date": "20260807",
+      "ts_code": "09966.HK",
+      "name": "康寧傑瑞製藥-B",
+      "vol": 167304000,
+      "ratio": 17.16,
+      "exchange": "HK"
+    },
+    {
+      "code": "9968",
+      "trade_date": "20260807",
+      "ts_code": "09968.HK",
+      "name": "匯景控股",
+      "vol": 236910000,
+      "ratio": 4.5,
+      "exchange": "HK"
+    },
+    {
+      "code": "9969",
+      "trade_date": "20260807",
+      "ts_code": "09969.HK",
+      "name": "諾誠健華",
+      "vol": 474992678,
+      "ratio": 26.84,
+      "exchange": "HK"
+    },
+    {
+      "code": "9973",
+      "trade_date": "20260807",
+      "ts_code": "09973.HK",
+      "name": "奇瑞汽車",
+      "vol": 68414275,
+      "ratio": 2.9,
+      "exchange": "HK"
+    },
+    {
+      "code": "9979",
+      "trade_date": "20260807",
+      "ts_code": "09979.HK",
+      "name": "綠城管理控股",
+      "vol": 210103000,
+      "ratio": 10.49,
+      "exchange": "HK"
+    },
+    {
+      "code": "9980",
+      "trade_date": "20260807",
+      "ts_code": "09980.HK",
+      "name": "東鵬飲料",
+      "vol": 7516601,
+      "ratio": 12.91,
+      "exchange": "HK"
+    },
+    {
+      "code": "9981",
+      "trade_date": "20260807",
+      "ts_code": "09981.HK",
+      "name": "沃爾核材",
+      "vol": 32689200,
+      "ratio": 23.34,
+      "exchange": "HK"
+    },
+    {
+      "code": "9982",
+      "trade_date": "20260807",
+      "ts_code": "09982.HK",
+      "name": "中原建業",
+      "vol": 20351578,
+      "ratio": 0.52,
+      "exchange": "HK"
+    },
+    {
+      "code": "9983",
+      "trade_date": "20260807",
+      "ts_code": "09983.HK",
+      "name": "建業新生活",
+      "vol": 19972000,
+      "ratio": 1.52,
+      "exchange": "HK"
+    },
+    {
+      "code": "9985",
+      "trade_date": "20260807",
+      "ts_code": "09985.HK",
+      "name": "衛龍美味",
+      "vol": 159604389,
+      "ratio": 6.55,
+      "exchange": "HK"
+    },
+    {
+      "code": "9987",
+      "trade_date": "20260807",
+      "ts_code": "09987.HK",
+      "name": "百勝中國",
+      "vol": 13627055,
+      "ratio": 3.96,
+      "exchange": "HK"
+    },
+    {
+      "code": "9988",
+      "trade_date": "20260807",
+      "ts_code": "09988.HK",
+      "name": "阿里巴巴－W",
+      "vol": 2001603063,
+      "ratio": 10.43,
+      "exchange": "HK"
+    },
+    {
+      "code": "9989",
+      "trade_date": "20260807",
+      "ts_code": "09989.HK",
+      "name": "海普瑞",
+      "vol": 111076500,
+      "ratio": 50.46,
+      "exchange": "HK"
+    },
+    {
+      "code": "9990",
+      "trade_date": "20260807",
+      "ts_code": "09990.HK",
+      "name": "祖龍娛樂",
+      "vol": 43277000,
+      "ratio": 5.4,
+      "exchange": "HK"
+    },
+    {
+      "code": "9992",
+      "trade_date": "20260807",
+      "ts_code": "09992.HK",
+      "name": "泡泡瑪特",
+      "vol": 328512484,
+      "ratio": 24.66,
+      "exchange": "HK"
+    },
+    {
+      "code": "9993",
+      "trade_date": "20260807",
+      "ts_code": "09993.HK",
+      "name": "金輝控股",
+      "vol": 296884000,
+      "ratio": 7.32,
+      "exchange": "HK"
+    },
+    {
+      "code": "9995",
+      "trade_date": "20260807",
+      "ts_code": "09995.HK",
+      "name": "榮昌生物",
+      "vol": 116778141,
+      "ratio": 55.97,
+      "exchange": "HK"
+    },
+    {
+      "code": "9996",
+      "trade_date": "20260807",
+      "ts_code": "09996.HK",
+      "name": "沛嘉醫療-B",
+      "vol": 68036100,
+      "ratio": 10.07,
+      "exchange": "HK"
+    },
+    {
+      "code": "9999",
+      "trade_date": "20260807",
+      "ts_code": "09999.HK",
+      "name": "網易",
+      "vol": 54786450,
+      "ratio": 1.69,
+      "exchange": "HK"
+    }
+  ]
+}

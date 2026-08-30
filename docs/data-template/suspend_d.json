@@ -1,0 +1,49 @@
+{
+  "api_name": "suspend_d",
+  "fetched_at": "2026-08-09T14:16:50.532072+00:00",
+  "query_mode": "trade_date",
+  "params": [
+    {
+      "trade_date": "20260807"
+    }
+  ],
+  "fields": [
+    "ts_code",
+    "trade_date",
+    "suspend_timing",
+    "suspend_type"
+  ],
+  "row_count": 5,
+  "data": [
+    {
+      "ts_code": "300125.SZ",
+      "trade_date": "20260807",
+      "suspend_timing": null,
+      "suspend_type": "R"
+    },
+    {
+      "ts_code": "000838.SZ",
+      "trade_date": "20260807",
+      "suspend_timing": null,
+      "suspend_type": "S"
+    },
+    {
+      "ts_code": "300246.SZ",
+      "trade_date": "20260807",
+      "suspend_timing": null,
+      "suspend_type": "S"
+    },
+    {
+      "ts_code": "300333.SZ",
+      "trade_date": "20260807",
+      "suspend_timing": null,
+      "suspend_type": "S"
+    },
+    {
+      "ts_code": "300862.SZ",
+      "trade_date": "20260807",
+      "suspend_timing": null,
+      "suspend_type": "S"
+    }
+  ]
+}
