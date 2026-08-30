@@ -22,5 +22,3 @@ control-plane/.vscode/extensions.json
 *.njsproj
 *.sln
 *.sw?
-
-.idea
