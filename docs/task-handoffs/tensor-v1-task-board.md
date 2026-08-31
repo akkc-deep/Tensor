@@ -33,7 +33,7 @@
 | 12 | M02-T05 | `DataSourcePlugin`、`DatasetAdapter` 和领域错误 | `COMPLETED` | M00-T03, M02-T02, M02-T03, M02-T04 | docs/task-designs/M02-T05-design.md | docs/task-handoffs/M02-T05-handoff.md |
 | 13 | M03-T01 | YAML 加载、schema 校验和模板对照测试框架 | `COMPLETED` | M00-T02, M02-T03 | docs/task-designs/M03-T01-design.md | docs/task-handoffs/M03-T01-handoff.md |
 | 14 | M03-T02 | 基础与组织 11 数据集 YAML | `COMPLETED` | M03-T01 | docs/task-designs/M03-T02-design.md | docs/task-handoffs/M03-T02-handoff.md |
-| 15 | M03-T03 | 行情与估值 7 数据集 YAML | `NOT_STARTED` | M03-T01 | None | None |
+| 15 | M03-T03 | 行情与估值 7 数据集 YAML | `READY` | M03-T01 | docs/task-designs/M03-T03-design.md | docs/task-handoffs/M03-T03-handoff.md |
 | 16 | M03-T04 | 交易与资金 6 数据集 YAML | `NOT_STARTED` | M03-T01 | None | None |
 | 17 | M03-T05 | 互联互通与转融通 6 数据集 YAML | `NOT_STARTED` | M03-T01 | None | None |
 | 18 | M03-T06 | 财务与披露 9 数据集 YAML | `NOT_STARTED` | M03-T01 | None | None |
@@ -249,7 +249,7 @@
 - **Dependencies:** M03-T01.
 - **Sources:** `docs/superpowers/plans/tensor-modules/M03-tushare-metadata.md` 的 `Task M03-T03` 任务卡。
 - **First action:** 读取 `docs/superpowers/plans/tensor-modules/M03-tushare-metadata.md` 的 `Task M03-T03` 任务卡，并确认其 `Context boundary`、输入和目标文件均可定位。
-- **State evidence:** None.
+- **State evidence:** 2026-09-01：M03-T02 已按严格 TDD、公开 loader harness、最终 reactor 87/87、三层 Enforcer、JAR/范围/格式门禁完成，提交 `5fe20a2` 精确包含 11 个 YAML，看板提交 `fdc5810` 已先记录 `IN_PROGRESS -> COMPLETED`；按预定义顺序选择后继 M03-T03。其唯一直接依赖 M03-T01 为 `COMPLETED`，公开 `DatasetDefinitionLoader`、严格 schema/M02/M03 校验、不可变结果和 classpath schema 打包均可定位，与任务卡、PRD A.2、TRD 9.4 和 7 个授权模板投影无冲突。授权输入未唯一规定 62 列类型/长度/可空性；项目所有者明确同意推荐契约：`ts_code=STRING(64)`、`trade_date=DATE` 且复合键列不可空，其他行情/估值数值为可空 `DECIMAL(38,18)`，`suspend_timing=STRING(255)`、`suspend_type=STRING(64)` 且可空，列 label 使用字段名，filters 固定 `[ts_code, trade_date]`，fixedColumn 固定 `ts_code`。`docs/task-designs/M03-T03-design.md` 已冻结精确 7 文件、62 列顺序/类型、参数、键、失败规则、RED/GREEN 命令和验收；七节顺序、占位符、62 行计数、7 份模板字段逐项 diff、来源与 `git diff --check` 均通过并已回填同一设计路径。`docs/task-handoffs/M03-T03-handoff.md` 已按 `next-task` 模板创建并链接，记录唯一直接依赖 M03-T01、读取顺序和先创建临时完整 harness 取得精确资源缺失 RED 的首个动作，因此执行 `NOT_STARTED -> READY`；尚未开始实现，也未执行 `READY -> IN_PROGRESS`。
 
 ### `M03-T04`
 
