@@ -93,6 +93,8 @@
 
 ### Task M02-T05: SPI 和领域错误（2.0h）
 
+**Design:** [M02-T05-design.md](../../../task-designs/M02-T05-design.md)
+
 **Files:**
 - Create: `data-plane/tensor-plugin-api/src/main/java/com/akkc/tensor/plugin/api/DataSourcePlugin.java`, `data-plane/tensor-plugin-api/src/main/java/com/akkc/tensor/plugin/api/DatasetAdapter.java`
 - Create: `data-plane/tensor-plugin-api/src/main/java/com/akkc/tensor/plugin/api/error/ErrorCode.java`, `data-plane/tensor-plugin-api/src/main/java/com/akkc/tensor/plugin/api/error/TensorException.java`, `data-plane/tensor-plugin-api/src/main/java/com/akkc/tensor/plugin/api/error/SourceException.java`, `data-plane/tensor-plugin-api/src/main/java/com/akkc/tensor/plugin/api/error/AdapterException.java`

@@ -56,7 +56,7 @@
 | M02-T02 | 参数、API、插件描述符和 readiness | 2.0 | M02-T01 |
 | M02-T03 | 数据集字段、业务键、筛选和展示定义 | 2.5 | M02-T01、M02-T02 |
 | M02-T04 | `DownloadEnvelope`、`AdaptedBatch` 和执行结果 | 2.0 | M02-T01、M02-T03 |
-| M02-T05 | `DataSourcePlugin`、`DatasetAdapter` 和领域错误 | 2.0 | M02-T02～T04 |
+| M02-T05 | `DataSourcePlugin`、`DatasetAdapter` 和领域错误 | 2.0 | M00-T03、M02-T02～T04 |
 
 ## M03 Tushare 数据集元数据 — 22h
 
