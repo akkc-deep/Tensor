@@ -32,7 +32,7 @@
 | 11 | M02-T04 | `DownloadEnvelope`、`AdaptedBatch` 和执行结果 | `COMPLETED` | M02-T01, M02-T03 | docs/task-designs/M02-T04-design.md | docs/task-handoffs/M02-T04-handoff.md |
 | 12 | M02-T05 | `DataSourcePlugin`、`DatasetAdapter` 和领域错误 | `COMPLETED` | M00-T03, M02-T02, M02-T03, M02-T04 | docs/task-designs/M02-T05-design.md | docs/task-handoffs/M02-T05-handoff.md |
 | 13 | M03-T01 | YAML 加载、schema 校验和模板对照测试框架 | `COMPLETED` | M00-T02, M02-T03 | docs/task-designs/M03-T01-design.md | docs/task-handoffs/M03-T01-handoff.md |
-| 14 | M03-T02 | 基础与组织 11 数据集 YAML | `READY` | M03-T01 | docs/task-designs/M03-T02-design.md | docs/task-handoffs/M03-T02-handoff.md |
+| 14 | M03-T02 | 基础与组织 11 数据集 YAML | `COMPLETED` | M03-T01 | docs/task-designs/M03-T02-design.md | docs/task-handoffs/M03-T02-handoff.md |
 | 15 | M03-T03 | 行情与估值 7 数据集 YAML | `NOT_STARTED` | M03-T01 | None | None |
 | 16 | M03-T04 | 交易与资金 6 数据集 YAML | `NOT_STARTED` | M03-T01 | None | None |
 | 17 | M03-T05 | 互联互通与转融通 6 数据集 YAML | `NOT_STARTED` | M03-T01 | None | None |
@@ -237,7 +237,9 @@
 - **Dependencies:** M03-T01.
 - **Sources:** `docs/superpowers/plans/tensor-modules/M03-tushare-metadata.md` 的 `Task M03-T02` 任务卡。
 - **First action:** 读取 `docs/superpowers/plans/tensor-modules/M03-tushare-metadata.md` 的 `Task M03-T02` 任务卡，并确认其 `Context boundary`、输入和目标文件均可定位。
-- **State evidence:** 2026-09-01：M03-T01 已按严格 TDD、最终 87/87 reactor 验证、三层 Enforcer、依赖/JAR/schema/API/范围门禁和无残留 Critical/Important 的最终复审完成，并在权威看板中为 `COMPLETED`。准备预定义后继 M03-T02 时，PRD 附录 A.1、TRD 9.4、manifest 与 11 个授权模板投影可定位，但未唯一规定 93 列的类型/长度/可空性和现成的 11-API 永久测试入口；项目所有者明确同意推荐方案：`basic_organization` 分类、固定参数/枚举/related parameter、批准的 DATE/MONTH/LONG/DECIMAL/TEXT/分级 STRING 类型图、COMPOSITE 键不可空、FINGERPRINT/非键可空、规定 filters/fixedColumn，并以 `/private/tmp` 公开-loader harness 执行 0→11 RED/GREEN，永久 49/49 Java 契约留给 M03-T09。`docs/task-designs/M03-T02-design.md` 已冻结精确 11 文件、93 列顺序/类型、参数、键、失败规则、命令和验收；七节顺序、占位符、93 行计数、11 份模板字段逐项 diff、链接、临时 harness classpath 实测和 `git diff --check` 均通过。`docs/task-handoffs/M03-T02-handoff.md` 已按 `next-task` 模板创建并链接，记录唯一直接依赖 M03-T01、读取顺序和先创建临时完整 harness 取得零匹配 RED 的首个动作，因此执行 `NOT_STARTED -> READY`；尚未开始实现，也未执行 `READY -> IN_PROGRESS`。
+- **State evidence:** 2026-09-01：M03-T01 已按严格 TDD、最终 87/87 reactor 验证、三层 Enforcer、依赖/JAR/schema/API/范围门禁和无残留 Critical/Important 的最终复审完成，并在权威看板中为 `COMPLETED`。准备预定义后继 M03-T02 时，PRD 附录 A.1、TRD 9.4、manifest 与 11 个授权模板投影可定位，但未唯一规定 93 列的类型/长度/可空性和现成的 11-API 永久测试入口；项目所有者明确同意推荐方案：`basic_organization` 分类、固定参数/枚举/related parameter、批准的 DATE/MONTH/LONG/DECIMAL/TEXT/分级 STRING 类型图、COMPOSITE 键不可空、FINGERPRINT/非键可空、规定 filters/fixedColumn，并以 `/private/tmp` 公开-loader harness 执行 0→11 RED/GREEN，永久 49/49 Java 契约留给 M03-T09。`docs/task-designs/M03-T02-design.md` 已冻结精确 11 文件、93 列顺序/类型、参数、键、失败规则、命令和验收；七节顺序、占位符、93 行计数、11 份模板字段逐项 diff、链接、临时 harness classpath 实测和 `git diff --check` 均通过。`docs/task-handoffs/M03-T02-handoff.md` 已按 `next-task` 模板创建并链接，记录唯一直接依赖 M03-T01、读取顺序和先创建临时完整 harness 取得零匹配 RED 的首个动作，因此执行 `NOT_STARTED -> READY`。同日用户明确要求按照权威任务看板执行当前任务；已完整读取 M03-T02 设计与既有 `next-task` 交接，确认任务身份、范围、直接依赖、验收和首个 RED 动作一致且无冲突，作为本次 `READY -> IN_PROGRESS` 的启动证据；既有交接路径保留为进入上下文。
+
+- **Completion evidence:** 实施以 `/private/tmp/M03T02MetadataCheck.java` 对公开 `DatasetDefinitionLoader.loadAll` 执行严格 TDD：既有 loader 8/8 基线先通过，harness 编译成功后仅因 `<pattern>: no resources matched` 退出 1；创建 YAML 后同一 harness 只输出 `M03-T02_OK:11`，逐项验证 11 个排序 API、93 列类型/长度/可空性、参数、10 个 COMPOSITE 键、1 个 FINGERPRINT 键、filters、fixedColumn、默认 batchSize 与不可变结果。提交 `5fe20a2`（`feat(metadata): define basic and organization datasets`）精确创建设计指定的 11 个 YAML、225 行，未混入 Java、POM、schema、模板、看板或生成物。主控新鲜运行 reactor `test` 与 `verify` 均为 87/87（plugin-api 79、tushare 8），0 failure、0 error、0 skipped，父项目、plugin-api、tushare 三层 Enforcer 均通过；JAR 与源目录恰含这 11 份运行时 YAML且无额外数据集，暂存/提交范围及 `git diff --check` 通过。范围化本地审查无 Critical、Important 或 Minor；Maven `clean` 成功，临时 harness 与三个模块的 `target` 均已清除。因此满足任务设计、任务卡、范围、提交和结果级验收，执行 `IN_PROGRESS -> COMPLETED`。
 
 ### `M03-T03`
 
