@@ -27,7 +27,7 @@
 | 7 | M01-T03 | Maven Enforcer、ArchUnit 和禁止 Git 能力门禁 | `COMPLETED` | M01-T02 | docs/task-designs/M01-T03-designs.md | docs/task-handoffs/M01-T03-handoff.md |
 | 8 | M02-T01 | `PluginId`、`ApiName`、`DatasetKey`、`TableName`、`RequestId` | `COMPLETED` | M01-T02 | docs/task-designs/M02-T01-designs.md | docs/task-handoffs/M02-T01-handoff.md |
 | 9 | M02-T02 | 参数、API、插件描述符和 readiness | `COMPLETED` | M02-T01 | docs/task-designs/M02-T02-designs.md | docs/task-handoffs/M02-T02-handoff.md |
-| 10 | M02-T03 | 数据集字段、业务键、筛选和展示定义 | `NOT_STARTED` | M02-T01, M02-T02 | docs/task-designs/M02-T03-design.md | None |
+| 10 | M02-T03 | 数据集字段、业务键、筛选和展示定义 | `READY` | M02-T01, M02-T02 | docs/task-designs/M02-T03-design.md | docs/task-handoffs/M02-T03-handoff.md |
 | 11 | M02-T04 | `DownloadEnvelope`、`AdaptedBatch` 和执行结果 | `NOT_STARTED` | M02-T01, M02-T03 | None | None |
 | 12 | M02-T05 | `DataSourcePlugin`、`DatasetAdapter` 和领域错误 | `NOT_STARTED` | M02-T02, M02-T03, M02-T04 | None | None |
 | 13 | M03-T01 | YAML 加载、schema 校验和模板对照测试框架 | `NOT_STARTED` | M00-T02, M02-T03 | None | None |
@@ -196,7 +196,7 @@
 - **Dependencies:** M02-T01, M02-T02.
 - **Sources:** 1. `docs/superpowers/plans/tensor-modules/M02-plugin-api.md` 的 `Task M02-T03` 任务卡；2. `docs/planning/task-index.md` 的 `M02-T03` 行。
 - **First action:** 读取 `docs/superpowers/plans/tensor-modules/M02-plugin-api.md` 的 `Task M02-T03` 任务卡，并确认其 `Context boundary`、输入和目标文件均可定位。
-- **State evidence:** 2026-08-31：执行前 successor 交接核验确认，已批准设计中的 `DatasetDefinition` 直接消费 M02-T01 的 `DatasetKey`/`TableName` 与 M02-T02 的 `QueryMode`/`ParameterDescriptor`；原看板和规划索引仅列 M02-T01，与实际公开 Java 接口不一致。项目所有者批准把 M02-T03 直接依赖修订为 `M02-T01, M02-T02`，并同步权威看板与任务索引；任务保持 `NOT_STARTED`，未生成交接或记录状态转换。
+- **State evidence:** 2026-08-31：执行前 successor 交接核验确认，已批准设计中的 `DatasetDefinition` 直接消费 M02-T01 的 `DatasetKey`/`TableName` 与 M02-T02 的 `QueryMode`/`ParameterDescriptor`；原看板和规划索引仅列 M02-T01，与实际公开 Java 接口不一致。项目所有者批准把 M02-T03 直接依赖修订为 `M02-T01, M02-T02`，并同步权威看板与任务索引；任务保持 `NOT_STARTED`，未生成交接或记录状态转换。依赖修订提交 `4b6ed5e` 后重新完整核验设计、任务卡、实施计划和两项直接依赖；M02-T01 的 `DatasetKey`/`TableName` 与 M02-T02 的 `QueryMode`/`ParameterDescriptor` 均来自已完成提交，当前模块基线 45/45 测试通过，决策和约束无冲突。`docs/task-handoffs/M02-T03-handoff.md` 已按 `next-task` 模板完成并记录同一设计路径、直接输入、读取顺序和具体 RED 首个动作；先链接精确交接路径，再执行 `NOT_STARTED -> READY`。
 
 ### `M02-T04`
 
