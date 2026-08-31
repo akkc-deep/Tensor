@@ -30,7 +30,7 @@
 | 9 | M02-T02 | 参数、API、插件描述符和 readiness | `COMPLETED` | M02-T01 | docs/task-designs/M02-T02-designs.md | docs/task-handoffs/M02-T02-handoff.md |
 | 10 | M02-T03 | 数据集字段、业务键、筛选和展示定义 | `COMPLETED` | M02-T01, M02-T02 | docs/task-designs/M02-T03-design.md | docs/task-handoffs/M02-T03-handoff.md |
 | 11 | M02-T04 | `DownloadEnvelope`、`AdaptedBatch` 和执行结果 | `COMPLETED` | M02-T01, M02-T03 | docs/task-designs/M02-T04-design.md | docs/task-handoffs/M02-T04-handoff.md |
-| 12 | M02-T05 | `DataSourcePlugin`、`DatasetAdapter` 和领域错误 | `NOT_STARTED` | M00-T03, M02-T02, M02-T03, M02-T04 | docs/task-designs/M02-T05-design.md | None |
+| 12 | M02-T05 | `DataSourcePlugin`、`DatasetAdapter` 和领域错误 | `COMPLETED` | M00-T03, M02-T02, M02-T03, M02-T04 | docs/task-designs/M02-T05-design.md | docs/task-handoffs/M02-T05-handoff.md |
 | 13 | M03-T01 | YAML 加载、schema 校验和模板对照测试框架 | `NOT_STARTED` | M00-T02, M02-T03 | None | None |
 | 14 | M03-T02 | 基础与组织 11 数据集 YAML | `NOT_STARTED` | M03-T01 | None | None |
 | 15 | M03-T03 | 行情与估值 7 数据集 YAML | `NOT_STARTED` | M03-T01 | None | None |
@@ -217,7 +217,7 @@
 - **Dependencies:** M00-T03, M02-T02, M02-T03, M02-T04.
 - **Sources:** `docs/superpowers/plans/tensor-modules/M02-plugin-api.md` 的 `Task M02-T05` 任务卡。
 - **First action:** 读取 `docs/superpowers/plans/tensor-modules/M02-plugin-api.md` 的 `Task M02-T05` 任务卡，并确认其 `Context boundary`、输入和目标文件均可定位。
-- **State evidence:** 2026-08-31：准备 M02-T05 设计时确认任务卡要求将 `ErrorCode` 与 `docs/contracts/error-codes.md` 对照，因而直接消费已完成 M00-T03 的 16 项错误码/retryable 契约；原看板与任务索引只列 M02-T02～T04。项目所有者批准把 M02-T05 依赖修订为 `M00-T03, M02-T02, M02-T03, M02-T04`，权威看板详情与任务索引同步；任务保持 `NOT_STARTED`，未生成交接或记录状态转换。项目所有者随后批准最小异常方案：`ErrorCode` 保存固定 retryable 真值且不携带 HTTP，抽象 `TensorException` 保存非空安全消息与错误码并派生 `retryable()`，`SourceException`/`AdapterException` 限制各自错误码类别，SPI 精确沿用任务卡签名且不暴露原始响应、Token 或额外诊断字段。`docs/task-designs/M02-T05-design.md` 已据此创建并从任务卡与看板链接；在书面设计审阅门禁完成前，M02-T05 保持 `NOT_STARTED` 且 Handoff 为 `None`。
+- **State evidence:** 2026-08-31：准备 M02-T05 设计时确认任务卡要求将 `ErrorCode` 与 `docs/contracts/error-codes.md` 对照，因而直接消费已完成 M00-T03 的 16 项错误码/retryable 契约；原看板与任务索引只列 M02-T02～T04。项目所有者批准把 M02-T05 依赖修订为 `M00-T03, M02-T02, M02-T03, M02-T04`，权威看板详情与任务索引同步；任务保持 `NOT_STARTED`，未生成交接或记录状态转换。项目所有者随后批准最小异常方案：`ErrorCode` 保存固定 retryable 真值且不携带 HTTP，抽象 `TensorException` 保存非空安全消息与错误码并派生 `retryable()`，`SourceException`/`AdapterException` 限制各自错误码类别，SPI 精确沿用任务卡签名且不暴露原始响应、Token 或额外诊断字段。`docs/task-designs/M02-T05-design.md` 已据此创建并从任务卡与看板链接；在书面设计审阅门禁完成前，M02-T05 保持 `NOT_STARTED` 且 Handoff 为 `None`。同日已完整复核该设计、任务卡、错误码目录、四项直接依赖与现有 Java 类型，确认七节设计无占位符、冲突或需实施者裁决的材料性缺口；四项依赖均为 `COMPLETED` 且约束互补。`docs/task-handoffs/M02-T05-handoff.md` 已按 `next-task` 模板写入并链接，记录同一设计路径、直接输入、读取顺序与先创建完整测试取得缺失类型 RED 的首个动作，因此执行 `NOT_STARTED -> READY`。用户随后明确要求按照权威任务看板执行当前任务；已再次完整读取同一路径设计与交接，确认任务身份、范围、输入、验收和首个 RED 动作一致且无冲突，作为本次 `READY -> IN_PROGRESS` 的启动证据；交接路径保留为进入上下文。实施先完整创建 `PluginApiSurfaceTest.java`；修正反射 checked exception 后删除生产类型重跑，聚焦命令仅因六个交付类型缺失在 `testCompile` 退出 1，形成可归因 RED。提交 `445b941` 精确创建两个 SPI、16 项 `ErrorCode`、抽象 `TensorException`、两个类别受限最终异常和真实反射/行为测试；独立审查发现的公开性、泛型/声明异常安全扫描、精确 public 方法集与不 trim 门禁均经突变验证修复于 `dd495ee`，范围化复审确认原 Important/Minor 已解决且无新 Critical/Important/Minor，结论 `Ready to merge: Yes`。修复后的聚焦测试 8/8、模块 `verify` 79/79 均为 0 failure、0 error、0 skipped，父项目和模块 Enforcer 通过；`jdeps` 仅输出 `java.base`，禁用依赖扫描无输出且退出 1，`clean`、POM/app 无差异和提交范围格式检查均通过。两个 SPI、错误矩阵、异常构造/类别/消息/retryable 与安全表面逐项满足设计和任务卡，未混入排除职责，因此执行 `IN_PROGRESS -> COMPLETED`。
 
 ### `M03-T01`
 
