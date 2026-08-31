@@ -91,7 +91,7 @@ public record DatasetDefinition(
 
 `DatasetDefinition` 执行下列组合约束：
 
-- `datasetKey`、`queryMode`、`tableName`、`businessKey` 和三个直接列表非 null；`displayName` 非空白且不超过 128 字符，`category` 非空白且不超过 64 字符；
+- `datasetKey`、`queryMode`、`tableName`、`businessKey` 和三个直接列表非 null；`displayName` 非空白且不超过 128 个 Unicode 码点，`category` 非空白且不超过 64 个 Unicode 码点；
 - `columns` 至少一项；参数名、列名和 filter field 在各自列表中唯一；
 - `tableName` 必须等于 `TableName.from(datasetKey)`；
 - 每个 business-key field 和 filter field 必须引用一个已声明列；非 null `fixedColumn` 必须满足标识正则并引用一个已声明列；null `fixedColumn` 保留 schema 的可选语义，默认列选择留给 REST 映射；
@@ -127,9 +127,9 @@ mvn -f data-plane/pom.xml -pl tensor-plugin-api -am \
 
 - 通过 reflection 断言两个枚举的精确值与顺序、四个 records 的精确组件名称/类型，以及 `DatasetDefinition` 的默认批量构造器；
 - 按 M00-T02 示例构造含 11 列、复合键、两个 filters、`ts_code` 固定列的完整 `tushare_pro/daily` 定义，并断言默认 `batchSize == 500`；
-- 拒绝非法列名、空白 label、负 display order、非法长度/精度/scale、缺少 STRING/ENUM length、缺少 DECIMAL precision/scale 和重复 allowed values；
+- 拒绝非法列名、空白 label、负 display order、非法长度/精度/scale（含 `precision=0`、`scale=-1`）、缺少 STRING/ENUM length、缺少 DECIMAL precision/scale 和重复 allowed values；
 - 拒绝空或重复 business-key fields、空 `FINGERPRINT`、非法 filter field、重复参数名/列名/filter field；
-- 拒绝表名不匹配、业务键/筛选/固定列引用缺失及 0、负数、501 的 batch size；接受显式 1 和 500；
+- 拒绝表名不匹配、业务键/筛选/固定列引用缺失及 0、负数、501 的 batch size；接受显式 1 和 500；接受恰好 128/64 个补充平面 Unicode 码点的展示名/分类，并拒绝 129/65 个；
 - 证明参数、列、allowed values、业务键字段和筛选列表是保序不可变副本，访问器返回列表不可修改；
 - 证明 null `fixedColumn` 合法且不会在 plugin-api 内产生 REST 默认值。
 
