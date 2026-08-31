@@ -96,7 +96,7 @@ Expected: all commands exit `0`; the one remaining old-path mention is existing 
 Run:
 
 ```bash
-rg '^- \*\*Sources:\*\* `([^`]+)`' --replace '$1' docs/task-handoffs/tensor-v1-task-board.md | sort -u | while IFS= read -r source_path; do test -f "$source_path" || exit 1; done
+rg '^- \*\*Sources:\*\* `([^`]+)` 的 `Task M[0-9]{2}-T[0-9]{2}` 任务卡。$' --replace '$1' docs/task-handoffs/tensor-v1-task-board.md | sort -u | while IFS= read -r source_path; do test -f "$source_path" || exit 1; done
 ```
 
 Expected: command exits `0` with no missing path.
