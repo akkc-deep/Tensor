@@ -95,7 +95,7 @@ public final class DatasetDefinitionLoader {
             }
             return JsonSchemaFactory.getInstance(VersionFlag.V202012).getSchema(JSON.readTree(input));
         } catch (Exception exception) {
-            diagnostics.add(new Diagnostic(SCHEMA_NAME, safeReason(exception)));
+            diagnostics.add(new Diagnostic(SCHEMA_NAME, schemaReason(exception)));
             return null;
         }
     }
@@ -205,6 +205,13 @@ public final class DatasetDefinitionLoader {
     }
 
     private static String readReason(Exception exception) {
+        if (exception instanceof JsonProcessingException) {
+            return safeReason(exception);
+        }
+        return "resource cannot be read";
+    }
+
+    private static String schemaReason(Exception exception) {
         if (exception instanceof JsonProcessingException) {
             return safeReason(exception);
         }
