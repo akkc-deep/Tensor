@@ -1,0 +1,32 @@
+pluginId: tushare_pro
+apiName: moneyflow
+tableName: tushare_pro__moneyflow
+category: 交易与资金
+displayName: 个股资金流向
+queryMode: trade_date
+parameters:
+  - { name: trade_date, label: 交易日期, type: DATE, required: true }
+columns:
+  - { name: ts_code, label: ts_code, logicalType: STRING, nullable: false, displayOrder: 0, length: 64 }
+  - { name: trade_date, label: trade_date, logicalType: DATE, nullable: false, displayOrder: 1 }
+  - { name: buy_sm_vol, label: buy_sm_vol, logicalType: DECIMAL, nullable: true, displayOrder: 2, precision: 38, scale: 18 }
+  - { name: buy_sm_amount, label: buy_sm_amount, logicalType: DECIMAL, nullable: true, displayOrder: 3, precision: 38, scale: 18 }
+  - { name: sell_sm_vol, label: sell_sm_vol, logicalType: DECIMAL, nullable: true, displayOrder: 4, precision: 38, scale: 18 }
+  - { name: sell_sm_amount, label: sell_sm_amount, logicalType: DECIMAL, nullable: true, displayOrder: 5, precision: 38, scale: 18 }
+  - { name: buy_md_vol, label: buy_md_vol, logicalType: DECIMAL, nullable: true, displayOrder: 6, precision: 38, scale: 18 }
+  - { name: buy_md_amount, label: buy_md_amount, logicalType: DECIMAL, nullable: true, displayOrder: 7, precision: 38, scale: 18 }
+  - { name: sell_md_vol, label: sell_md_vol, logicalType: DECIMAL, nullable: true, displayOrder: 8, precision: 38, scale: 18 }
+  - { name: sell_md_amount, label: sell_md_amount, logicalType: DECIMAL, nullable: true, displayOrder: 9, precision: 38, scale: 18 }
+  - { name: buy_lg_vol, label: buy_lg_vol, logicalType: DECIMAL, nullable: true, displayOrder: 10, precision: 38, scale: 18 }
+  - { name: buy_lg_amount, label: buy_lg_amount, logicalType: DECIMAL, nullable: true, displayOrder: 11, precision: 38, scale: 18 }
+  - { name: sell_lg_vol, label: sell_lg_vol, logicalType: DECIMAL, nullable: true, displayOrder: 12, precision: 38, scale: 18 }
+  - { name: sell_lg_amount, label: sell_lg_amount, logicalType: DECIMAL, nullable: true, displayOrder: 13, precision: 38, scale: 18 }
+  - { name: buy_elg_vol, label: buy_elg_vol, logicalType: DECIMAL, nullable: true, displayOrder: 14, precision: 38, scale: 18 }
+  - { name: buy_elg_amount, label: buy_elg_amount, logicalType: DECIMAL, nullable: true, displayOrder: 15, precision: 38, scale: 18 }
+  - { name: sell_elg_vol, label: sell_elg_vol, logicalType: DECIMAL, nullable: true, displayOrder: 16, precision: 38, scale: 18 }
+  - { name: sell_elg_amount, label: sell_elg_amount, logicalType: DECIMAL, nullable: true, displayOrder: 17, precision: 38, scale: 18 }
+  - { name: net_mf_vol, label: net_mf_vol, logicalType: DECIMAL, nullable: true, displayOrder: 18, precision: 38, scale: 18 }
+  - { name: net_mf_amount, label: net_mf_amount, logicalType: DECIMAL, nullable: true, displayOrder: 19, precision: 38, scale: 18 }
+businessKey: { mode: COMPOSITE, fields: [ts_code, trade_date] }
+filters: [ts_code, trade_date]
+fixedColumn: ts_code

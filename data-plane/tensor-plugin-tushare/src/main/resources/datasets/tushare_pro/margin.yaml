@@ -1,0 +1,22 @@
+pluginId: tushare_pro
+apiName: margin
+tableName: tushare_pro__margin
+category: 交易与资金
+displayName: 融资融券汇总
+queryMode: trade_date
+parameters:
+  - { name: exchange_id, label: 交易所, type: ENUM, required: true, allowedValues: [SSE, SZSE, BSE] }
+  - { name: trade_date, label: 交易日期, type: DATE, required: true }
+columns:
+  - { name: trade_date, label: trade_date, logicalType: DATE, nullable: false, displayOrder: 0 }
+  - { name: exchange_id, label: exchange_id, logicalType: STRING, nullable: false, displayOrder: 1, length: 64 }
+  - { name: rzye, label: rzye, logicalType: DECIMAL, nullable: true, displayOrder: 2, precision: 38, scale: 18 }
+  - { name: rzmre, label: rzmre, logicalType: DECIMAL, nullable: true, displayOrder: 3, precision: 38, scale: 18 }
+  - { name: rzche, label: rzche, logicalType: DECIMAL, nullable: true, displayOrder: 4, precision: 38, scale: 18 }
+  - { name: rqye, label: rqye, logicalType: DECIMAL, nullable: true, displayOrder: 5, precision: 38, scale: 18 }
+  - { name: rqmcl, label: rqmcl, logicalType: DECIMAL, nullable: true, displayOrder: 6, precision: 38, scale: 18 }
+  - { name: rzrqye, label: rzrqye, logicalType: DECIMAL, nullable: true, displayOrder: 7, precision: 38, scale: 18 }
+  - { name: rqyl, label: rqyl, logicalType: DECIMAL, nullable: true, displayOrder: 8, precision: 38, scale: 18 }
+businessKey: { mode: COMPOSITE, fields: [trade_date, exchange_id] }
+filters: [trade_date]
+fixedColumn: trade_date
