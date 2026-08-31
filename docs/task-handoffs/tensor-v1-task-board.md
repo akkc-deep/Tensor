@@ -27,7 +27,7 @@
 | 7 | M01-T03 | Maven Enforcer、ArchUnit 和禁止 Git 能力门禁 | `COMPLETED` | M01-T02 | docs/task-designs/M01-T03-designs.md | docs/task-handoffs/M01-T03-handoff.md |
 | 8 | M02-T01 | `PluginId`、`ApiName`、`DatasetKey`、`TableName`、`RequestId` | `COMPLETED` | M01-T02 | docs/task-designs/M02-T01-designs.md | docs/task-handoffs/M02-T01-handoff.md |
 | 9 | M02-T02 | 参数、API、插件描述符和 readiness | `COMPLETED` | M02-T01 | docs/task-designs/M02-T02-designs.md | docs/task-handoffs/M02-T02-handoff.md |
-| 10 | M02-T03 | 数据集字段、业务键、筛选和展示定义 | `NOT_STARTED` | M02-T01 | docs/task-designs/M02-T03-design.md | None |
+| 10 | M02-T03 | 数据集字段、业务键、筛选和展示定义 | `NOT_STARTED` | M02-T01, M02-T02 | docs/task-designs/M02-T03-design.md | None |
 | 11 | M02-T04 | `DownloadEnvelope`、`AdaptedBatch` 和执行结果 | `NOT_STARTED` | M02-T01, M02-T03 | None | None |
 | 12 | M02-T05 | `DataSourcePlugin`、`DatasetAdapter` 和领域错误 | `NOT_STARTED` | M02-T02, M02-T03, M02-T04 | None | None |
 | 13 | M03-T01 | YAML 加载、schema 校验和模板对照测试框架 | `NOT_STARTED` | M00-T02, M02-T03 | None | None |
@@ -193,10 +193,10 @@
 - **Goal:** 交付“数据集字段、业务键、筛选和展示定义”。
 - **Scope:** 包含该交付物及其直接测试与验证；不包含其他预定义任务的交付物，也不扩展 `docs/superpowers/plans/tensor-modules/M02-plugin-api.md` 中该任务卡明确的文件、主要语言、接口和排除边界。
 - **Acceptance:** “数据集字段、业务键、筛选和展示定义”已按该任务卡指定的位置和行为形成；任务卡列出的全部测试、验证命令和检查得到其注明的预期结果；没有混入排除范围。
-- **Dependencies:** M02-T01.
+- **Dependencies:** M02-T01, M02-T02.
 - **Sources:** 1. `docs/superpowers/plans/tensor-modules/M02-plugin-api.md` 的 `Task M02-T03` 任务卡；2. `docs/planning/task-index.md` 的 `M02-T03` 行。
 - **First action:** 读取 `docs/superpowers/plans/tensor-modules/M02-plugin-api.md` 的 `Task M02-T03` 任务卡，并确认其 `Context boundary`、输入和目标文件均可定位。
-- **State evidence:** None.
+- **State evidence:** 2026-08-31：执行前 successor 交接核验确认，已批准设计中的 `DatasetDefinition` 直接消费 M02-T01 的 `DatasetKey`/`TableName` 与 M02-T02 的 `QueryMode`/`ParameterDescriptor`；原看板和规划索引仅列 M02-T01，与实际公开 Java 接口不一致。项目所有者批准把 M02-T03 直接依赖修订为 `M02-T01, M02-T02`，并同步权威看板与任务索引；任务保持 `NOT_STARTED`，未生成交接或记录状态转换。
 
 ### `M02-T04`
 
