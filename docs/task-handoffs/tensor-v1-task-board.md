@@ -28,7 +28,7 @@
 | 8 | M02-T01 | `PluginId`、`ApiName`、`DatasetKey`、`TableName`、`RequestId` | `COMPLETED` | M01-T02 | docs/task-designs/M02-T01-designs.md | docs/task-handoffs/M02-T01-handoff.md |
 | 9 | M02-T02 | 参数、API、插件描述符和 readiness | `COMPLETED` | M02-T01 | docs/task-designs/M02-T02-designs.md | docs/task-handoffs/M02-T02-handoff.md |
 | 10 | M02-T03 | 数据集字段、业务键、筛选和展示定义 | `COMPLETED` | M02-T01, M02-T02 | docs/task-designs/M02-T03-design.md | docs/task-handoffs/M02-T03-handoff.md |
-| 11 | M02-T04 | `DownloadEnvelope`、`AdaptedBatch` 和执行结果 | `NOT_STARTED` | M02-T01, M02-T03 | docs/task-designs/M02-T04-design.md | None |
+| 11 | M02-T04 | `DownloadEnvelope`、`AdaptedBatch` 和执行结果 | `READY` | M02-T01, M02-T03 | docs/task-designs/M02-T04-design.md | docs/task-handoffs/M02-T04-handoff.md |
 | 12 | M02-T05 | `DataSourcePlugin`、`DatasetAdapter` 和领域错误 | `NOT_STARTED` | M02-T02, M02-T03, M02-T04 | None | None |
 | 13 | M03-T01 | YAML 加载、schema 校验和模板对照测试框架 | `NOT_STARTED` | M00-T02, M02-T03 | None | None |
 | 14 | M03-T02 | 基础与组织 11 数据集 YAML | `NOT_STARTED` | M03-T01 | None | None |
@@ -206,7 +206,7 @@
 - **Dependencies:** M02-T01, M02-T03.
 - **Sources:** 1. `docs/superpowers/plans/tensor-modules/M02-plugin-api.md` 的 `Task M02-T04` 任务卡；2. `docs/planning/task-index.md` 的 `M02-T04` 行。
 - **First action:** 读取 `docs/superpowers/plans/tensor-modules/M02-plugin-api.md` 的 `Task M02-T04` 任务卡，并确认其 `Context boundary`、输入和目标文件均可定位。
-- **State evidence:** None.
+- **State evidence:** 2026-08-31：M02-T03 已按设计、严格 TDD、最终 54/54 模块验证、两层 Enforcer、范围门禁及无 Critical/Important/Minor 的范围化复审完成，权威看板已先记录 `IN_PROGRESS -> COMPLETED`。按预定义顺序选择后继 M02-T04；其直接依赖 M02-T01 提供已校验的 `PluginId`、`ApiName`、`DatasetKey`、`TableName`、`RequestId`，M02-T03 提供已校验的 `BusinessKeyDefinition` 与列名语义，两项依赖均为 `COMPLETED` 且约束无冲突。授权资料未规定失败枚举名、包络 error 类型和计数 Java 类型；项目所有者批准最小无循环契约：`DownloadStatus=SUCCESS|FAILURE`、nullable 安全 `String error`、包络 `int rowCount`、结果 `long` 计数。`docs/task-designs/M02-T04-design.md` 已据此冻结五个公开类型的精确 components、状态/计数/嵌套集合/业务 null/表名/行 key/业务键/时间不变量、完整 RED/GREEN、模块回归、Enforcer、范围和七文件提交门禁，且已从任务卡和看板链接。`docs/task-handoffs/M02-T04-handoff.md` 已按 `next-task` 模板完成并先链接，记录直接依赖的产物、决策、理由、约束、用法、可用证据、读取顺序和只创建两个完整测试后取得缺失类型 RED 的首个动作，因此执行 `NOT_STARTED -> READY`。
 
 ### `M02-T05`
 
