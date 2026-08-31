@@ -42,6 +42,8 @@
 
 ### Task M02-T02: 参数、API 和插件描述符（2.0h）
 
+**Design:** [M02-T02-designs.md](../../../task-designs/M02-T02-designs.md)
+
 **Files:**
 - Create: `data-plane/tensor-plugin-api/src/main/java/com/akkc/tensor/plugin/api/descriptor/ParameterType.java`, `data-plane/tensor-plugin-api/src/main/java/com/akkc/tensor/plugin/api/descriptor/ParameterDescriptor.java`, `data-plane/tensor-plugin-api/src/main/java/com/akkc/tensor/plugin/api/descriptor/QueryMode.java`, `data-plane/tensor-plugin-api/src/main/java/com/akkc/tensor/plugin/api/descriptor/ApiDescriptor.java`, `data-plane/tensor-plugin-api/src/main/java/com/akkc/tensor/plugin/api/descriptor/PluginReadiness.java`, `data-plane/tensor-plugin-api/src/main/java/com/akkc/tensor/plugin/api/descriptor/PluginDescriptor.java`
 - Test: `data-plane/tensor-plugin-api/src/test/java/com/akkc/tensor/plugin/api/descriptor/PluginDescriptorTest.java`

@@ -26,7 +26,7 @@
 | 6 | M01-T02 | Java 21、Boot 3.5.x 和测试依赖管理 | `COMPLETED` | M01-T01 | docs/task-designs/M01-T02-designs.md | docs/task-handoffs/M01-T02-handoff.md |
 | 7 | M01-T03 | Maven Enforcer、ArchUnit 和禁止 Git 能力门禁 | `COMPLETED` | M01-T02 | docs/task-designs/M01-T03-designs.md | docs/task-handoffs/M01-T03-handoff.md |
 | 8 | M02-T01 | `PluginId`、`ApiName`、`DatasetKey`、`TableName`、`RequestId` | `COMPLETED` | M01-T02 | docs/task-designs/M02-T01-designs.md | docs/task-handoffs/M02-T01-handoff.md |
-| 9 | M02-T02 | 参数、API、插件描述符和 readiness | `NOT_STARTED` | M02-T01 | None | None |
+| 9 | M02-T02 | 参数、API、插件描述符和 readiness | `READY` | M02-T01 | docs/task-designs/M02-T02-designs.md | docs/task-handoffs/M02-T02-handoff.md |
 | 10 | M02-T03 | 数据集字段、业务键、筛选和展示定义 | `NOT_STARTED` | M02-T01 | None | None |
 | 11 | M02-T04 | `DownloadEnvelope`、`AdaptedBatch` 和执行结果 | `NOT_STARTED` | M02-T01, M02-T03 | None | None |
 | 12 | M02-T05 | `DataSourcePlugin`、`DatasetAdapter` 和领域错误 | `NOT_STARTED` | M02-T02, M02-T03, M02-T04 | None | None |
@@ -186,7 +186,7 @@
 - **Dependencies:** M02-T01.
 - **Sources:** 1. `docs/superpowers/plans/tensor-modules/M02-plugin-api.md` 的 `Task M02-T02` 任务卡；2. `docs/planning/task-index.md` 的 `M02-T02` 行。
 - **First action:** 读取 `docs/superpowers/plans/tensor-modules/M02-plugin-api.md` 的 `Task M02-T02` 任务卡，并确认其 `Context boundary`、输入和目标文件均可定位。
-- **State evidence:** None.
+- **State evidence:** 2026-08-31：M02-T01 已按设计、严格 TDD、三项新鲜 Maven 验证、范围门禁和两级独立审查完成，权威看板与提交 `72a4208` 已先记录 `IN_PROGRESS -> COMPLETED`。按预定义顺序选择后继 M02-T02；其唯一直接依赖提交 `4078dad6f2becb2cbcd4239c5aa5bace21fed5a5` 提供已校验 `PluginId`、`ApiName` 与 `DatasetKey`，与 M02 任务卡、M00-T02 参数契约、OpenAPI 数据源/API 视图及 TRD 5.2/5.3/6.1/6.2 无冲突。项目所有者批准 `PluginDescriptor.datasets` 固定为 `List<DatasetKey>`，避免提前依赖 M02-T03 的 `DatasetDefinition` 并保持本任务独立编译。`docs/task-designs/M02-T02-designs.md` 已冻结六个公开类型的精确 components、枚举闭集、canonical constructor 不变量、集合复制/重复名/引用校验、readiness 真值与敏感信息边界、完整 RED/GREEN、模块回归、Enforcer、范围和七文件提交门禁；五标题、占位符、任务卡双向链接和 `git diff --check` 均通过，任务卡与看板已回填同一设计路径。`docs/task-handoffs/M02-T02-handoff.md` 已按 `next-task` 模板创建并先链接，记录直接依赖的产物、决策、理由、约束、用法、可用证据、读取顺序、从完整设计开始的测试先行首个动作及非冲突风险，因此执行 `NOT_STARTED -> READY`。
 
 ### `M02-T03`
 
