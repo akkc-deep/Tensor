@@ -29,11 +29,11 @@ public record DatasetDefinition(
     public DatasetDefinition {
         Objects.requireNonNull(datasetKey, "datasetKey");
         requireNonBlank(displayName, "displayName");
-        if (displayName.length() > 128) {
+        if (displayName.codePointCount(0, displayName.length()) > 128) {
             throw new IllegalArgumentException("displayName must be at most 128 characters");
         }
         requireNonBlank(category, "category");
-        if (category.length() > 64) {
+        if (category.codePointCount(0, category.length()) > 64) {
             throw new IllegalArgumentException("category must be at most 64 characters");
         }
         Objects.requireNonNull(queryMode, "queryMode");

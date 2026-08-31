@@ -78,7 +78,11 @@ class DatasetDefinitionTest {
         assertThatIllegalArgumentException().isThrownBy(
                 () -> column("value", "Value", LogicalType.DECIMAL, true, 0, null, 66, 18, List.of(), false));
         assertThatIllegalArgumentException().isThrownBy(
+                () -> column("value", "Value", LogicalType.DECIMAL, true, 0, null, 0, 0, List.of(), false));
+        assertThatIllegalArgumentException().isThrownBy(
                 () -> column("value", "Value", LogicalType.DECIMAL, true, 0, null, 38, 31, List.of(), false));
+        assertThatIllegalArgumentException().isThrownBy(
+                () -> column("value", "Value", LogicalType.DECIMAL, true, 0, null, 38, -1, List.of(), false));
         assertThatIllegalArgumentException().isThrownBy(
                 () -> column("ts_code", "Code", LogicalType.STRING, false, 0, null, null, null, List.of(), false));
         assertThatIllegalArgumentException().isThrownBy(
@@ -121,6 +125,14 @@ class DatasetDefinitionTest {
 
     @Test
     void validatesDatasetTopLevelShape() {
+        String unicodeDisplayName = "😀".repeat(128);
+        String unicodeCategory = "😀".repeat(64);
+        DatasetDefinition unicodeBoundary = definition(
+                unicodeDisplayName, unicodeCategory, List.of(parameter("trade_date")), dailyColumns(),
+                List.of(new FilterDefinition("ts_code")));
+        assertThat(unicodeBoundary.displayName()).isEqualTo(unicodeDisplayName);
+        assertThat(unicodeBoundary.category()).isEqualTo(unicodeCategory);
+
         assertThatIllegalArgumentException().isThrownBy(
                 () -> definition(" ", "market", List.of(parameter("trade_date")), dailyColumns(),
                         List.of(new FilterDefinition("ts_code"))));
@@ -132,6 +144,12 @@ class DatasetDefinitionTest {
                         List.of(new FilterDefinition("ts_code"))));
         assertThatIllegalArgumentException().isThrownBy(
                 () -> definition("Daily", "x".repeat(65), List.of(parameter("trade_date")), dailyColumns(),
+                        List.of(new FilterDefinition("ts_code"))));
+        assertThatIllegalArgumentException().isThrownBy(
+                () -> definition("😀".repeat(129), "market", List.of(parameter("trade_date")), dailyColumns(),
+                        List.of(new FilterDefinition("ts_code"))));
+        assertThatIllegalArgumentException().isThrownBy(
+                () -> definition("Daily", "😀".repeat(65), List.of(parameter("trade_date")), dailyColumns(),
                         List.of(new FilterDefinition("ts_code"))));
         assertThatIllegalArgumentException().isThrownBy(
                 () -> definition("Daily", "market", List.of(parameter("trade_date")), List.of(),
