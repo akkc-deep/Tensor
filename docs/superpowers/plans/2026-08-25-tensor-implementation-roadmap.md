@@ -201,7 +201,7 @@ flowchart LR
 
 ## 5. 任务索引
 
-M00–M14 的 77 个任务、AI 工时、交付物和前置依赖独立维护在 [`docs/planning/task-index.md`](../../planning/task-index.md)。该索引是 Tensor 项目计划，不记录当前执行状态或运行时授权。
+M00–M14 的 77 个任务统一维护在 [`docs/task-handoffs/tensor-v1-task-board.md`](../../task-handoffs/tensor-v1-task-board.md)。该看板是任务身份、顺序、定义、依赖、状态、设计和交接的唯一权威来源；AI 工时、模块交付物和实施细节继续由本路线图及其链接的 15 个模块任务计划提供。
 
 ## 6. 需求追踪总矩阵
 
