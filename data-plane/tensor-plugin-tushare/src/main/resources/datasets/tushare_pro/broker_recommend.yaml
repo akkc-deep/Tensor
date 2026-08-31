@@ -1,0 +1,16 @@
+pluginId: tushare_pro
+apiName: broker_recommend
+tableName: tushare_pro__broker_recommend
+category: basic_organization
+displayName: 券商月度推荐
+queryMode: snapshot
+parameters:
+  - { name: month, label: 月份, type: MONTH, required: true }
+columns:
+  - { name: month, label: month, logicalType: MONTH, nullable: false, displayOrder: 0 }
+  - { name: broker, label: broker, logicalType: STRING, nullable: false, displayOrder: 1, length: 128 }
+  - { name: ts_code, label: ts_code, logicalType: STRING, nullable: false, displayOrder: 2, length: 64 }
+  - { name: name, label: name, logicalType: STRING, nullable: true, displayOrder: 3, length: 128 }
+businessKey: { mode: COMPOSITE, fields: [month, broker, ts_code] }
+filters: [ts_code]
+fixedColumn: ts_code

@@ -1,0 +1,25 @@
+pluginId: tushare_pro
+apiName: new_share
+tableName: tushare_pro__new_share
+category: basic_organization
+displayName: IPO 新股发行信息
+queryMode: date_range
+parameters:
+  - { name: start_date, label: 开始日期, type: DATE_RANGE_MEMBER, required: true, relatedParameter: end_date }
+  - { name: end_date, label: 结束日期, type: DATE_RANGE_MEMBER, required: true, relatedParameter: start_date }
+columns:
+  - { name: ts_code, label: ts_code, logicalType: STRING, nullable: false, displayOrder: 0, length: 64 }
+  - { name: sub_code, label: sub_code, logicalType: STRING, nullable: true, displayOrder: 1, length: 64 }
+  - { name: name, label: name, logicalType: STRING, nullable: true, displayOrder: 2, length: 128 }
+  - { name: ipo_date, label: ipo_date, logicalType: DATE, nullable: true, displayOrder: 3 }
+  - { name: issue_date, label: issue_date, logicalType: DATE, nullable: true, displayOrder: 4 }
+  - { name: amount, label: amount, logicalType: DECIMAL, nullable: true, displayOrder: 5, precision: 38, scale: 18 }
+  - { name: market_amount, label: market_amount, logicalType: DECIMAL, nullable: true, displayOrder: 6, precision: 38, scale: 18 }
+  - { name: price, label: price, logicalType: DECIMAL, nullable: true, displayOrder: 7, precision: 38, scale: 18 }
+  - { name: pe, label: pe, logicalType: DECIMAL, nullable: true, displayOrder: 8, precision: 38, scale: 18 }
+  - { name: limit_amount, label: limit_amount, logicalType: DECIMAL, nullable: true, displayOrder: 9, precision: 38, scale: 18 }
+  - { name: funds, label: funds, logicalType: DECIMAL, nullable: true, displayOrder: 10, precision: 38, scale: 18 }
+  - { name: ballot, label: ballot, logicalType: DECIMAL, nullable: true, displayOrder: 11, precision: 38, scale: 18 }
+businessKey: { mode: COMPOSITE, fields: [ts_code] }
+filters: [ts_code]
+fixedColumn: ts_code

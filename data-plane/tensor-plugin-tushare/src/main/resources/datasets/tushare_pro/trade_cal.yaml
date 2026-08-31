@@ -1,0 +1,18 @@
+pluginId: tushare_pro
+apiName: trade_cal
+tableName: tushare_pro__trade_cal
+category: basic_organization
+displayName: 交易日历
+queryMode: date_range
+parameters:
+  - { name: exchange, label: 交易所, type: ENUM, required: true, allowedValues: [SSE, SZSE, BSE] }
+  - { name: start_date, label: 开始日期, type: DATE_RANGE_MEMBER, required: true, relatedParameter: end_date }
+  - { name: end_date, label: 结束日期, type: DATE_RANGE_MEMBER, required: true, relatedParameter: start_date }
+columns:
+  - { name: exchange, label: exchange, logicalType: STRING, nullable: false, displayOrder: 0, length: 64 }
+  - { name: cal_date, label: cal_date, logicalType: DATE, nullable: false, displayOrder: 1 }
+  - { name: is_open, label: is_open, logicalType: LONG, nullable: true, displayOrder: 2 }
+  - { name: pretrade_date, label: pretrade_date, logicalType: DATE, nullable: true, displayOrder: 3 }
+businessKey: { mode: COMPOSITE, fields: [exchange, cal_date] }
+filters: []
+fixedColumn: exchange

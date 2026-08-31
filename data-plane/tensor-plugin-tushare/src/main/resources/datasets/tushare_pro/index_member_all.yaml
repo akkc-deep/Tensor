@@ -1,0 +1,22 @@
+pluginId: tushare_pro
+apiName: index_member_all
+tableName: tushare_pro__index_member_all
+category: basic_organization
+displayName: 行业分级与完整成分
+queryMode: snapshot
+parameters: []
+columns:
+  - { name: l1_code, label: l1_code, logicalType: STRING, nullable: false, displayOrder: 0, length: 64 }
+  - { name: l1_name, label: l1_name, logicalType: STRING, nullable: true, displayOrder: 1, length: 128 }
+  - { name: l2_code, label: l2_code, logicalType: STRING, nullable: false, displayOrder: 2, length: 64 }
+  - { name: l2_name, label: l2_name, logicalType: STRING, nullable: true, displayOrder: 3, length: 128 }
+  - { name: l3_code, label: l3_code, logicalType: STRING, nullable: false, displayOrder: 4, length: 64 }
+  - { name: l3_name, label: l3_name, logicalType: STRING, nullable: true, displayOrder: 5, length: 128 }
+  - { name: ts_code, label: ts_code, logicalType: STRING, nullable: false, displayOrder: 6, length: 64 }
+  - { name: name, label: name, logicalType: STRING, nullable: true, displayOrder: 7, length: 128 }
+  - { name: in_date, label: in_date, logicalType: DATE, nullable: false, displayOrder: 8 }
+  - { name: out_date, label: out_date, logicalType: DATE, nullable: true, displayOrder: 9 }
+  - { name: is_new, label: is_new, logicalType: STRING, nullable: true, displayOrder: 10, length: 64 }
+businessKey: { mode: COMPOSITE, fields: [l1_code, l2_code, l3_code, ts_code, in_date] }
+filters: [ts_code]
+fixedColumn: ts_code

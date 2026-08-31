@@ -1,0 +1,18 @@
+pluginId: tushare_pro
+apiName: index_classify
+tableName: tushare_pro__index_classify
+category: basic_organization
+displayName: 行业指数分类
+queryMode: snapshot
+parameters: []
+columns:
+  - { name: index_code, label: index_code, logicalType: STRING, nullable: false, displayOrder: 0, length: 64 }
+  - { name: industry_name, label: industry_name, logicalType: STRING, nullable: true, displayOrder: 1, length: 128 }
+  - { name: level, label: level, logicalType: STRING, nullable: true, displayOrder: 2, length: 64 }
+  - { name: industry_code, label: industry_code, logicalType: STRING, nullable: true, displayOrder: 3, length: 64 }
+  - { name: is_pub, label: is_pub, logicalType: STRING, nullable: true, displayOrder: 4, length: 64 }
+  - { name: parent_code, label: parent_code, logicalType: STRING, nullable: true, displayOrder: 5, length: 64 }
+  - { name: src, label: src, logicalType: STRING, nullable: true, displayOrder: 6, length: 64 }
+businessKey: { mode: COMPOSITE, fields: [index_code] }
+filters: []
+fixedColumn: index_code

@@ -1,0 +1,16 @@
+pluginId: tushare_pro
+apiName: index_member
+tableName: tushare_pro__index_member
+category: basic_organization
+displayName: 行业指数成分
+queryMode: snapshot
+parameters: []
+columns:
+  - { name: index_code, label: index_code, logicalType: STRING, nullable: false, displayOrder: 0, length: 64 }
+  - { name: con_code, label: con_code, logicalType: STRING, nullable: false, displayOrder: 1, length: 64 }
+  - { name: in_date, label: in_date, logicalType: DATE, nullable: false, displayOrder: 2 }
+  - { name: out_date, label: out_date, logicalType: DATE, nullable: true, displayOrder: 3 }
+  - { name: is_new, label: is_new, logicalType: STRING, nullable: true, displayOrder: 4, length: 64 }
+businessKey: { mode: COMPOSITE, fields: [index_code, con_code, in_date] }
+filters: []
+fixedColumn: index_code

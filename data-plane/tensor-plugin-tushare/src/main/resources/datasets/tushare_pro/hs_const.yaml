@@ -1,0 +1,17 @@
+pluginId: tushare_pro
+apiName: hs_const
+tableName: tushare_pro__hs_const
+category: basic_organization
+displayName: 沪深港通标的范围
+queryMode: snapshot
+parameters:
+  - { name: hs_type, label: 沪深港通类型, type: ENUM, required: true, allowedValues: [SH, SZ] }
+columns:
+  - { name: ts_code, label: ts_code, logicalType: STRING, nullable: false, displayOrder: 0, length: 64 }
+  - { name: hs_type, label: hs_type, logicalType: STRING, nullable: false, displayOrder: 1, length: 64 }
+  - { name: in_date, label: in_date, logicalType: DATE, nullable: false, displayOrder: 2 }
+  - { name: out_date, label: out_date, logicalType: DATE, nullable: true, displayOrder: 3 }
+  - { name: is_new, label: is_new, logicalType: STRING, nullable: true, displayOrder: 4, length: 64 }
+businessKey: { mode: COMPOSITE, fields: [hs_type, ts_code, in_date] }
+filters: [ts_code]
+fixedColumn: ts_code

@@ -1,0 +1,22 @@
+pluginId: tushare_pro
+apiName: stk_managers
+tableName: tushare_pro__stk_managers
+category: basic_organization
+displayName: 上市公司管理层信息
+queryMode: snapshot
+parameters: []
+columns:
+  - { name: ts_code, label: ts_code, logicalType: STRING, nullable: true, displayOrder: 0, length: 64 }
+  - { name: ann_date, label: ann_date, logicalType: DATE, nullable: true, displayOrder: 1 }
+  - { name: name, label: name, logicalType: STRING, nullable: true, displayOrder: 2, length: 128 }
+  - { name: gender, label: gender, logicalType: STRING, nullable: true, displayOrder: 3, length: 64 }
+  - { name: lev, label: lev, logicalType: STRING, nullable: true, displayOrder: 4, length: 64 }
+  - { name: title, label: title, logicalType: STRING, nullable: true, displayOrder: 5, length: 128 }
+  - { name: edu, label: edu, logicalType: STRING, nullable: true, displayOrder: 6, length: 128 }
+  - { name: national, label: national, logicalType: STRING, nullable: true, displayOrder: 7, length: 128 }
+  - { name: birthday, label: birthday, logicalType: DATE, nullable: true, displayOrder: 8 }
+  - { name: begin_date, label: begin_date, logicalType: DATE, nullable: true, displayOrder: 9 }
+  - { name: end_date, label: end_date, logicalType: DATE, nullable: true, displayOrder: 10 }
+businessKey: { mode: FINGERPRINT, fields: [ts_code, ann_date, name, gender, lev, title, birthday, begin_date] }
+filters: [ts_code, ann_date]
+fixedColumn: ts_code
