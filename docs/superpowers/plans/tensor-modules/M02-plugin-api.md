@@ -59,6 +59,8 @@
 
 ### Task M02-T03: 数据集定义（2.5h）
 
+**Design:** [M02-T03-design.md](../../../task-designs/M02-T03-design.md)
+
 **Files:**
 - Create: `data-plane/tensor-plugin-api/src/main/java/com/akkc/tensor/plugin/api/dataset/LogicalType.java`, `data-plane/tensor-plugin-api/src/main/java/com/akkc/tensor/plugin/api/dataset/ColumnDefinition.java`, `data-plane/tensor-plugin-api/src/main/java/com/akkc/tensor/plugin/api/dataset/BusinessKeyMode.java`, `data-plane/tensor-plugin-api/src/main/java/com/akkc/tensor/plugin/api/dataset/BusinessKeyDefinition.java`, `data-plane/tensor-plugin-api/src/main/java/com/akkc/tensor/plugin/api/dataset/FilterDefinition.java`, `data-plane/tensor-plugin-api/src/main/java/com/akkc/tensor/plugin/api/dataset/DatasetDefinition.java`
 - Test: `data-plane/tensor-plugin-api/src/test/java/com/akkc/tensor/plugin/api/dataset/DatasetDefinitionTest.java`
