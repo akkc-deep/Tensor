@@ -7,7 +7,6 @@ import com.akkc.tensor.plugin.api.dataset.DatasetDefinition;
 import com.akkc.tensor.plugin.api.error.ErrorCode;
 import com.akkc.tensor.plugin.api.error.TensorException;
 import java.io.IOException;
-import java.lang.reflect.Method;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -131,13 +130,36 @@ class DatasetDefinitionLoaderTest {
     }
 
     @Test
-    void doesNotExposeSchemaFactoryExceptionMessages() throws Exception {
-        Method method = DatasetDefinitionLoader.class.getDeclaredMethod("schemaReason", Exception.class);
-        method.setAccessible(true);
+    void rejectsExternalSchemaReferencesWithoutAccessingTheLocalTarget() throws Exception {
+        Path external = tempDir.resolve("external-schema.json");
+        Files.writeString(external, "{\"type\":\"object\"}");
 
-        String reason = (String) method.invoke(null, new IOException("file:///private/tmp/schema-secret"));
+        withClasspathSchema("""
+                {"$schema":"https://json-schema.org/draft/2020-12/schema","$ref":"%s"}
+                """.formatted(external.toUri()), () -> {
+            TensorException exception = misconfigured(() -> loader.loadAll(resolver, "classpath*:datasets/valid-daily.yaml"));
 
-        assertThat(reason).isEqualTo("resource cannot be read");
+            assertThat(exception.getCause()).isNull();
+            assertThat(exception.getMessage()).contains("valid-daily.yaml: schema validation failed")
+                    .doesNotContain(external.toString());
+        });
+    }
+
+    @Test
+    void aggregatesValidationRuntimeFailuresWithoutExposingTheirDetails() throws Exception {
+        write("a-validate.yaml", valid());
+        write("z-parse.yaml", valid().replace("apiName: daily", "apiName: daily\napiName: duplicate"));
+
+        withClasspathSchema("""
+                {"$schema":"https://json-schema.org/draft/2020-12/schema","$ref":"#/$defs/missing"}
+                """, () -> {
+            TensorException exception = misconfigured(() -> loader.loadAll(resolver, temporaryPattern()));
+
+            assertThat(exception.retryable()).isFalse();
+            assertThat(exception.getCause()).isNull();
+            assertThat(exception.getMessage()).contains("a-validate.yaml: schema validation failed", "z-parse.yaml")
+                    .doesNotContain("missing", tempDir.toString());
+        });
     }
 
     private void assertColumns(DatasetDefinition definition) {
@@ -197,6 +219,25 @@ class DatasetDefinitionLoaderTest {
 
     private String temporaryPattern(String glob) {
         return tempDir.resolve(glob).toUri().toString();
+    }
+
+    private void withClasspathSchema(String schema, org.assertj.core.api.ThrowableAssert.ThrowingCallable action)
+            throws Exception {
+        Path schemaPath = Path.of(DatasetDefinitionLoader.class.getClassLoader()
+                .getResource("contracts/dataset-definition.schema.json").toURI());
+        byte[] original = Files.readAllBytes(schemaPath);
+        try {
+            Files.writeString(schemaPath, schema);
+            try {
+                action.call();
+            } catch (Exception exception) {
+                throw exception;
+            } catch (Throwable throwable) {
+                throw new AssertionError(throwable);
+            }
+        } finally {
+            Files.write(schemaPath, original);
+        }
     }
 
     private Resource[] resourcesInFilenameOrder() throws IOException {

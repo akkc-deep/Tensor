@@ -66,5 +66,15 @@
                 <targetPath>contracts</targetPath>
             </resource>
         </resources>
+        <plugins>
+            <plugin>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <systemPropertyVariables>
+                        <slf4j.internal.verbosity>ERROR</slf4j.internal.verbosity>
+                    </systemPropertyVariables>
+                </configuration>
+            </plugin>
+        </plugins>
     </build>
 </project>

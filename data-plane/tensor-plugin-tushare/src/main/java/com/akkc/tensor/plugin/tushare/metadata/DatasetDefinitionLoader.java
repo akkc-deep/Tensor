@@ -25,6 +25,7 @@ import com.networknt.schema.JsonSchema;
 import com.networknt.schema.JsonSchemaFactory;
 import com.networknt.schema.SpecVersion.VersionFlag;
 import com.networknt.schema.ValidationMessage;
+import com.networknt.schema.resource.DisallowSchemaLoader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -93,7 +94,7 @@ public final class DatasetDefinitionLoader {
                 diagnostics.add(new Diagnostic(SCHEMA_NAME, "resource cannot be read"));
                 return null;
             }
-            return JsonSchemaFactory.getInstance(VersionFlag.V202012).getSchema(JSON.readTree(input));
+            return schemaFactory().getSchema(JSON.readTree(input));
         } catch (Exception exception) {
             diagnostics.add(new Diagnostic(SCHEMA_NAME, schemaReason(exception)));
             return null;
@@ -109,7 +110,13 @@ public final class DatasetDefinitionLoader {
             diagnostics.add(new Diagnostic(resourceName, readReason(exception)));
             return;
         }
-        Set<ValidationMessage> messages = schema.validate(node);
+        Set<ValidationMessage> messages;
+        try {
+            messages = schema.validate(node);
+        } catch (RuntimeException exception) {
+            diagnostics.add(new Diagnostic(resourceName, "schema validation failed"));
+            return;
+        }
         if (!messages.isEmpty()) {
             messages.stream()
                     .map(ValidationMessage::getMessage)
@@ -209,6 +216,14 @@ public final class DatasetDefinitionLoader {
             return safeReason(exception);
         }
         return "resource cannot be read";
+    }
+
+    private static JsonSchemaFactory schemaFactory() {
+        return JsonSchemaFactory.getInstance(VersionFlag.V202012, builder -> builder.schemaLoaders(loaders ->
+                loaders.values(values -> {
+                    values.clear();
+                    values.add(DisallowSchemaLoader.getInstance());
+                })));
     }
 
     private static String schemaReason(Exception exception) {
