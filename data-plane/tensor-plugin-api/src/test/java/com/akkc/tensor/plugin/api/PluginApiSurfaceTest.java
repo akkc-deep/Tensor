@@ -48,6 +48,7 @@ class PluginApiSurfaceTest {
     @Test
     void exposesExactDataSourcePluginMethods() throws Exception {
         assertThat(DataSourcePlugin.class.isInterface()).isTrue();
+        assertThat(Modifier.isPublic(DataSourcePlugin.class.getModifiers())).isTrue();
         assertExactInterface(DataSourcePlugin.class, "descriptor", "download", "readiness");
 
         Method descriptor = DataSourcePlugin.class.getDeclaredMethod("descriptor");
@@ -66,6 +67,7 @@ class PluginApiSurfaceTest {
     @Test
     void exposesExactDatasetAdapterMethods() throws Exception {
         assertThat(DatasetAdapter.class.isInterface()).isTrue();
+        assertThat(Modifier.isPublic(DatasetAdapter.class.getModifiers())).isTrue();
         assertExactInterface(DatasetAdapter.class, "adapt", "datasetKey", "definition");
 
         Method datasetKey = DatasetAdapter.class.getDeclaredMethod("datasetKey");
@@ -107,6 +109,8 @@ class PluginApiSurfaceTest {
         assertThat(ErrorCode.class.getDeclaredConstructors()).hasSize(1);
         assertThat(ErrorCode.class.getDeclaredMethod("retryable").getReturnType())
                 .isEqualTo(boolean.class);
+        assertThat(publicDeclaredMethodNames(ErrorCode.class))
+                .containsExactlyInAnyOrder("retryable", "valueOf", "values");
     }
 
     @Test
@@ -130,6 +134,8 @@ class PluginApiSurfaceTest {
 
         assertFinalAccessor("code", ErrorCode.class);
         assertFinalAccessor("retryable", boolean.class);
+        assertThat(publicDeclaredMethodNames(TensorException.class))
+                .containsExactlyInAnyOrder("code", "retryable");
     }
 
     @Test
@@ -141,15 +147,15 @@ class PluginApiSurfaceTest {
     @Test
     void preservesAuthorizedSourceAndAdapterFailures() {
         for (ErrorCode code : SOURCE_CODES) {
-            SourceException exception = new SourceException(code, "source failed");
+            SourceException exception = new SourceException(code, " source failed ");
             assertThat(exception.code()).isEqualTo(code);
-            assertThat(exception.getMessage()).isEqualTo("source failed");
+            assertThat(exception.getMessage()).isEqualTo(" source failed ");
             assertThat(exception.retryable()).isEqualTo(code.retryable());
         }
         for (ErrorCode code : ADAPTER_CODES) {
-            AdapterException exception = new AdapterException(code, "adaptation failed");
+            AdapterException exception = new AdapterException(code, " adaptation failed ");
             assertThat(exception.code()).isEqualTo(code);
-            assertThat(exception.getMessage()).isEqualTo("adaptation failed");
+            assertThat(exception.getMessage()).isEqualTo(" adaptation failed ");
             assertThat(exception.retryable()).isEqualTo(code.retryable());
         }
     }
@@ -199,7 +205,10 @@ class PluginApiSurfaceTest {
 
         assertThat(surface).doesNotContain(
                 "throwable",
-                "org.springframework",
+                "http",
+                "spring",
+                "jdbc",
+                "sql",
                 "java.sql",
                 "javax.sql",
                 "jakarta.persistence",
@@ -208,12 +217,13 @@ class PluginApiSurfaceTest {
                 "jdbctemplate",
                 "token",
                 "credential",
+                "response",
                 "rawresponse",
                 "requestheader",
                 "requestid",
                 "fielderrors",
                 "stacktrace",
-                "configpath");
+                "path");
     }
 
     private static void assertExactInterface(Class<?> type, String... methodNames) {
@@ -255,16 +265,28 @@ class PluginApiSurfaceTest {
 
     private static Stream<String> declaredSurface(Class<?> type) {
         Stream<String> fields = Arrays.stream(type.getDeclaredFields())
-                .flatMap(field -> Stream.of(memberName(field), field.getType().getName()));
+                .flatMap(field -> Stream.of(
+                        memberName(field), field.getType().getName(), field.getGenericType().getTypeName()));
         Stream<String> constructors = Arrays.stream(type.getDeclaredConstructors())
-                .flatMap(constructor -> Stream.concat(
-                        Stream.of(memberName(constructor)),
-                        Arrays.stream(constructor.getParameterTypes()).map(Class::getName)));
+                .flatMap(constructor -> Stream.of(
+                                Stream.of(memberName(constructor)),
+                                Arrays.stream(constructor.getGenericParameterTypes()).map(Type::getTypeName),
+                                Arrays.stream(constructor.getExceptionTypes()).map(Class::getName))
+                        .flatMap(stream -> stream));
         Stream<String> methods = Arrays.stream(type.getDeclaredMethods())
-                .flatMap(method -> Stream.concat(
-                        Stream.of(memberName(method), method.getReturnType().getName()),
-                        Arrays.stream(method.getParameterTypes()).map(Class::getName)));
+                .flatMap(method -> Stream.of(
+                                Stream.of(memberName(method), method.getGenericReturnType().getTypeName()),
+                                Arrays.stream(method.getGenericParameterTypes()).map(Type::getTypeName),
+                                Arrays.stream(method.getExceptionTypes()).map(Class::getName))
+                        .flatMap(stream -> stream));
         return Stream.of(fields, constructors, methods).flatMap(stream -> stream);
+    }
+
+    private static List<String> publicDeclaredMethodNames(Class<?> type) {
+        return Arrays.stream(type.getDeclaredMethods())
+                .filter(method -> Modifier.isPublic(method.getModifiers()))
+                .map(Method::getName)
+                .toList();
     }
 
     private static String memberName(Member member) {
