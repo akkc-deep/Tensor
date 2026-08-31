@@ -76,6 +76,8 @@
 
 ### Task M02-T04: 下载包络、适配批次和结果（2.0h）
 
+**Design:** [M02-T04-design.md](../../../task-designs/M02-T04-design.md)
+
 **Files:**
 - Create: `data-plane/tensor-plugin-api/src/main/java/com/akkc/tensor/plugin/api/download/DownloadStatus.java`, `data-plane/tensor-plugin-api/src/main/java/com/akkc/tensor/plugin/api/download/DownloadEnvelope.java`, `data-plane/tensor-plugin-api/src/main/java/com/akkc/tensor/plugin/api/download/AdaptedBatch.java`, `data-plane/tensor-plugin-api/src/main/java/com/akkc/tensor/plugin/api/download/DownloadOutcome.java`, `data-plane/tensor-plugin-api/src/main/java/com/akkc/tensor/plugin/api/download/DownloadResult.java`
 - Test: `data-plane/tensor-plugin-api/src/test/java/com/akkc/tensor/plugin/api/download/DownloadEnvelopeTest.java`, `data-plane/tensor-plugin-api/src/test/java/com/akkc/tensor/plugin/api/download/AdaptedBatchTest.java`
