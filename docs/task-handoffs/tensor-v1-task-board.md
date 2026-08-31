@@ -34,7 +34,7 @@
 | 13 | M03-T01 | YAML 加载、schema 校验和模板对照测试框架 | `COMPLETED` | M00-T02, M02-T03 | docs/task-designs/M03-T01-design.md | docs/task-handoffs/M03-T01-handoff.md |
 | 14 | M03-T02 | 基础与组织 11 数据集 YAML | `COMPLETED` | M03-T01 | docs/task-designs/M03-T02-design.md | docs/task-handoffs/M03-T02-handoff.md |
 | 15 | M03-T03 | 行情与估值 7 数据集 YAML | `COMPLETED` | M03-T01 | docs/task-designs/M03-T03-design.md | docs/task-handoffs/M03-T03-handoff.md |
-| 16 | M03-T04 | 交易与资金 6 数据集 YAML | `NOT_STARTED` | M03-T01 | None | None |
+| 16 | M03-T04 | 交易与资金 6 数据集 YAML | `READY` | M03-T01 | docs/task-designs/M03-T04-design.md | docs/task-handoffs/M03-T04-handoff.md |
 | 17 | M03-T05 | 互联互通与转融通 6 数据集 YAML | `NOT_STARTED` | M03-T01 | None | None |
 | 18 | M03-T06 | 财务与披露 9 数据集 YAML | `NOT_STARTED` | M03-T01 | None | None |
 | 19 | M03-T07 | 公司行动 3 数据集 YAML | `NOT_STARTED` | M03-T01 | None | None |
@@ -261,7 +261,7 @@
 - **Dependencies:** M03-T01.
 - **Sources:** `docs/superpowers/plans/tensor-modules/M03-tushare-metadata.md` 的 `Task M03-T04` 任务卡。
 - **First action:** 读取 `docs/superpowers/plans/tensor-modules/M03-tushare-metadata.md` 的 `Task M03-T04` 任务卡，并确认其 `Context boundary`、输入和目标文件均可定位。
-- **State evidence:** None.
+- **State evidence:** 2026-09-01：M03-T03 已按严格 TDD、最终 reactor 87/87、三层 Enforcer、公开 loader smoke、JAR/范围/格式门禁和两层无发现审查完成，提交 `3c2e977` 精确包含 7 个 YAML，看板提交 `19e8fe3` 已先记录 `IN_PROGRESS -> COMPLETED`；按预定义顺序选择后继 M03-T04。其唯一直接依赖 M03-T01 为 `COMPLETED`，公开 `DatasetDefinitionLoader`、严格 schema/M02/M03 校验、不可变结果和 classpath schema 打包均可定位，与任务卡、PRD A.3、TRD 9.4 和 6 个授权模板投影无冲突。授权输入未唯一规定 71 列类型/长度/可空性、filters 和 fixedColumn；项目所有者明确同意推荐契约：全部数值列使用 `DECIMAL(38,18)`，`ts_code/exchange_id/side=STRING(64)`、`name=STRING(128)`、`exalter/reason/buyer/seller=STRING(255)`，全部业务键列不可空、其余列可空，`margin.exchange_id` 参数为必填 ENUM `[SSE,SZSE,BSE]`，含 `ts_code` 的定义使用 filters `[ts_code, trade_date]`/fixedColumn `ts_code`，`margin` 使用 filters `[trade_date]`/fixedColumn `trade_date`。`docs/task-designs/M03-T04-design.md` 已冻结精确 6 文件、71 列顺序/类型、参数、键、失败规则、RED/GREEN 命令和验收；七节结构、占位符、71 行计数、6 份模板字段逐项 diff、链接和 `git diff --check` 均通过并已先回填同一设计路径。`docs/task-handoffs/M03-T04-handoff.md` 已按 `next-task` 模板创建并先链接，记录唯一直接依赖 M03-T01、读取顺序和先创建临时完整 harness 取得精确资源缺失 RED 的首个动作，因此执行 `NOT_STARTED -> READY`；尚未开始实现，也未执行 `READY -> IN_PROGRESS`。
 
 ### `M03-T05`
 
