@@ -32,6 +32,8 @@
 **Context boundary:** Read M00-T02 schema, M02 `DatasetDefinition` and one `daily.json`; do not read all 49 templates.
 
 **Files:**
+- Modify: `data-plane/pom.xml`
+- Modify: `data-plane/tensor-plugin-tushare/pom.xml`
 - Create: `data-plane/tensor-plugin-tushare/src/main/java/com/akkc/tensor/plugin/tushare/metadata/DatasetDefinitionLoader.java`
 - Create: `data-plane/tensor-plugin-tushare/src/test/java/com/akkc/tensor/plugin/tushare/metadata/DatasetDefinitionLoaderTest.java`
 - Create: `data-plane/tensor-plugin-tushare/src/test/resources/datasets/valid-daily.yaml`
@@ -39,10 +41,12 @@
 
 **Interfaces:** `List<DatasetDefinition> loadAll(ResourcePatternResolver resolver, String pattern)`; invalid resources return deterministic `DATASET_MISCONFIGURED` diagnostics with resource name.
 
+**Dependencies and packaging:** Manage `com.networknt:json-schema-validator:1.5.9` in the parent POM; consume the Boot-BOM-managed `jackson-dataformat-yaml` `2.21.4` and the managed schema validator in `tensor-plugin-tushare`. Package the authoritative `docs/contracts/dataset-definition.schema.json` into the module JAR as `contracts/dataset-definition.schema.json` while preserving normal `src/main/resources`; do not create a copied schema source.
+
 - [ ] Confirm task design; freeze YAML-to-record mapping and deterministic resource sort by `apiName`.
 - [ ] Write tests for valid daily, duplicate column, table mismatch, missing business key field and invalid filter field.
-- [ ] Run `mvn -pl tensor-plugin-tushare -am -Dtest=DatasetDefinitionLoaderTest test`; expect failure because loader is absent.
-- [ ] Implement Jackson YAML binding, M02 record construction and aggregated validation errors without network access.
+- [ ] Run `mvn -f data-plane/pom.xml -pl tensor-plugin-tushare -am -Dtest=DatasetDefinitionLoaderTest -Dsurefire.failIfNoSpecifiedTests=false test`; expect failure because loader is absent.
+- [ ] Add the approved managed dependencies and schema resource packaging, then implement strict Jackson YAML binding, JSON Schema 2020-12 validation, M02 record construction and aggregated validation errors without network access.
 - [ ] Re-run targeted and module tests; expect valid resource loads once and all invalid resources fail with exact file names.
 - [ ] Commit as `feat(tushare): load validated dataset metadata` when Git exists.
 

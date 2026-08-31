@@ -31,7 +31,7 @@
 | 10 | M02-T03 | 数据集字段、业务键、筛选和展示定义 | `COMPLETED` | M02-T01, M02-T02 | docs/task-designs/M02-T03-design.md | docs/task-handoffs/M02-T03-handoff.md |
 | 11 | M02-T04 | `DownloadEnvelope`、`AdaptedBatch` 和执行结果 | `COMPLETED` | M02-T01, M02-T03 | docs/task-designs/M02-T04-design.md | docs/task-handoffs/M02-T04-handoff.md |
 | 12 | M02-T05 | `DataSourcePlugin`、`DatasetAdapter` 和领域错误 | `COMPLETED` | M00-T03, M02-T02, M02-T03, M02-T04 | docs/task-designs/M02-T05-design.md | docs/task-handoffs/M02-T05-handoff.md |
-| 13 | M03-T01 | YAML 加载、schema 校验和模板对照测试框架 | `NOT_STARTED` | M00-T02, M02-T03 | None | None |
+| 13 | M03-T01 | YAML 加载、schema 校验和模板对照测试框架 | `READY` | M00-T02, M02-T03 | docs/task-designs/M03-T01-design.md | docs/task-handoffs/M03-T01-handoff.md |
 | 14 | M03-T02 | 基础与组织 11 数据集 YAML | `NOT_STARTED` | M03-T01 | None | None |
 | 15 | M03-T03 | 行情与估值 7 数据集 YAML | `NOT_STARTED` | M03-T01 | None | None |
 | 16 | M03-T04 | 交易与资金 6 数据集 YAML | `NOT_STARTED` | M03-T01 | None | None |
@@ -227,7 +227,7 @@
 - **Dependencies:** M00-T02, M02-T03.
 - **Sources:** `docs/superpowers/plans/tensor-modules/M03-tushare-metadata.md` 的 `Task M03-T01` 任务卡。
 - **First action:** 读取 `docs/superpowers/plans/tensor-modules/M03-tushare-metadata.md` 的 `Task M03-T01` 任务卡，并确认其 `Context boundary`、输入和目标文件均可定位。
-- **State evidence:** None.
+- **State evidence:** 2026-08-31：M02-T05 已按设计、任务卡、79/79 模块验证、两层 Enforcer、`jdeps`、范围门禁及无 Critical/Important/Minor 的独立复审完成，权威看板已先记录 `IN_PROGRESS -> COMPLETED`；按预定义顺序选择后继 M03-T01。其直接依赖 M00-T02 提供封闭的 JSON Schema 2020-12 与完整 `daily` 示例，M02-T03 提供不可变 `DatasetDefinition` 公共模型和构造期不变量，两项依赖均为 `COMPLETED` 且序列化/Java 决策互补无冲突。项目所有者批准把任务文件范围扩至 `data-plane/pom.xml` 与 `data-plane/tensor-plugin-tushare/pom.xml`，并随后明确同意推荐设计：networknt 固定 `1.5.9`、Jackson YAML 使用 Boot BOM 的 `2.21.4`、权威 schema 原样打包到 classpath、严格单文档 YAML/schema/M02/跨字段校验、确定性聚合 `DATASET_MISCONFIGURED` 和按 `apiName` 排序的不可变返回。`docs/task-designs/M03-T01-design.md` 已以七节完整设计冻结精确六文件范围、接口、映射、失败规则、测试命令和验收结果并从任务卡与看板链接；结构、占位符、范围、模板字段投影和 `git diff --check` 自审通过。`docs/task-handoffs/M03-T01-handoff.md` 已按 `next-task` 模板创建并先链接，记录同一设计路径、仅两项直接输入、依赖比较、阅读顺序和测试先行首个实施动作，因此执行 `NOT_STARTED -> READY`；尚未开始实现，也未执行 `READY -> IN_PROGRESS`。
 
 ### `M03-T02`
 
