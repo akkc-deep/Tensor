@@ -45,7 +45,7 @@
 | 24 | M04-T03 | V3 互联互通与转融通表 | `COMPLETED` | M03-T05 | docs/task-designs/M04-T03-design.md | docs/task-handoffs/M04-T03-handoff.md |
 | 25 | M04-T04 | V4 财务与披露宽表 | `COMPLETED` | M03-T06 | docs/task-designs/M04-T04-design.md | docs/task-handoffs/M04-T04-handoff.md |
 | 26 | M04-T05 | V5 公司行动、股东与治理表 | `COMPLETED` | M03-T07, M03-T08 | docs/task-designs/M04-T05-design.md | docs/task-handoffs/M04-T05-handoff.md |
-| 27 | M04-T06 | V6 fixture 表与 49 表结构总校验 | `NOT_STARTED` | M04-T01, M04-T02, M04-T03, M04-T04, M04-T05 | docs/task-designs/M04-T06-design.md | None |
+| 27 | M04-T06 | V6 fixture 表与 49 表结构总校验 | `READY` | M04-T01, M04-T02, M04-T03, M04-T04, M04-T05 | docs/task-designs/M04-T06-design.md | docs/task-handoffs/M04-T06-handoff.md |
 | 28 | M05-T01 | `PluginRegistry` 与 `AdapterRegistry` | `NOT_STARTED` | M02-T05 | None | None |
 | 29 | M05-T02 | `DatasetCatalog` 和启动元数据/表结构校验 | `NOT_STARTED` | M03-T09, M04-T06 | None | None |
 | 30 | M05-T03 | 元数据驱动参数校验 | `NOT_STARTED` | M02-T02, M03-T09 | None | None |
@@ -393,7 +393,7 @@
 - **Dependencies:** M04-T01, M04-T02, M04-T03, M04-T04, M04-T05.
 - **Sources:** `docs/superpowers/plans/tensor-modules/M04-flyway-schema.md` 的 `Task M04-T06` 任务卡。
 - **First action:** 读取 `docs/superpowers/plans/tensor-modules/M04-flyway-schema.md` 的 `Task M04-T06` 任务卡，并确认其 `Context boundary`、输入和目标文件均可定位。
-- **State evidence:** None.
+- **State evidence:** 2026-09-02：M04-T05 已按任务设计、官方 MySQL 8.4.6 实际 V1～V5 Flyway/schema 验收、reactor 150/150、JAR/范围/格式/清理门禁及无 Critical/Important 独立审查完成，实现提交 `2790ee5` 精确包含唯一 V5 SQL，看板提交 `d785545` 已先记录 `IN_PROGRESS -> COMPLETED`；按预定义顺序选择后继 M04-T06。其五项直接依赖 M04-T01～T05 均为 `COMPLETED`，最终生产迁移分别为提交 `09dbbfd`、`0967474`、`5fa8ec6`、`9105ad5` 加格式提交 `fcb64e4`、`2790ee5` 的 V1～V5，当前文件相对各自最终提交无差异；五项输入按版本顺序互不重叠，合计 49 表、851 个业务列、1000 个总列、49 个 PRIMARY 和 40 个二级索引，并使用同一表名、机械类型、三个来源字段、主键/最小索引、InnoDB、`utf8mb4_0900_as_cs` 与 UTC 规则，两个 FINGERPRINT 特例无冲突。项目所有者明确批准任务卡文件范围扩展至只修改 `data-plane/tensor-app/pom.xml`，且只增加 BOM 管理的 `org.testcontainers:junit-jupiter`、`org.testcontainers:mysql` 两项 test-scope 依赖；同时批准 `fixture__fixture_daily` 的 `ts_code VARCHAR(64) NOT NULL`、`trade_date DATE NOT NULL`、`amount DECIMAL(38,18) NOT NULL`、`note VARCHAR(255) NULL`、三个来源字段、主键 `(ts_code, trade_date)`、无二级索引、InnoDB、`utf8mb4_0900_as_cs` 与 UTC 精确结构。提交 `d7d55cb` 已创建并回填 `docs/task-designs/M04-T06-design.md`，完整冻结 POM 例外、测试专用 V6、固定 `mysql:8.4.6`、公开 loader、49 个动态加 3 个固定测试、缺测试类/缺 V6 RED、六项 migrate/validate/零项二次 migrate、生产与 fixture totals、资源/JAR 隔离、失败边界和结果级验收；链接后已重新完整读取，七节顺序、无占位符、自洽性、范围和 `git diff --check` 均通过，无待实施者裁决的内容。`docs/task-handoffs/M04-T06-handoff.md` 已按 `next-task` 模板完整创建，只记录 M04-T06 及直接输入 M04-T01～T05，包含逐项 artifact/decision/rationale/constraint/usage/readiness evidence、五项约束比较、设计优先读取顺序和先运行 150/150 基线再取得缺测试类 RED 的首个实施动作；因此执行 `NOT_STARTED -> READY`，实现尚未开始。
 
 ### `M05-T01`
 
