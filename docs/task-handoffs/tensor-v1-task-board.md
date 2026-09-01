@@ -37,7 +37,7 @@
 | 16 | M03-T04 | 交易与资金 6 数据集 YAML | `COMPLETED` | M03-T01 | docs/task-designs/M03-T04-design.md | docs/task-handoffs/M03-T04-handoff.md |
 | 17 | M03-T05 | 互联互通与转融通 6 数据集 YAML | `COMPLETED` | M03-T01 | docs/task-designs/M03-T05-design.md | docs/task-handoffs/M03-T05-handoff.md |
 | 18 | M03-T06 | 财务与披露 9 数据集 YAML | `COMPLETED` | M03-T01 | docs/task-designs/M03-T06-design.md | docs/task-handoffs/M03-T06-handoff.md |
-| 19 | M03-T07 | 公司行动 3 数据集 YAML | `NOT_STARTED` | M03-T01 | docs/task-designs/M03-T07-design.md | None |
+| 19 | M03-T07 | 公司行动 3 数据集 YAML | `READY` | M03-T01 | docs/task-designs/M03-T07-design.md | docs/task-handoffs/M03-T07-handoff.md |
 | 20 | M03-T08 | 股东与治理 7 数据集 YAML | `NOT_STARTED` | M03-T01 | None | None |
 | 21 | M03-T09 | 49/49 名称、字段、参数、键和筛选总契约 | `NOT_STARTED` | M03-T02, M03-T03, M03-T04, M03-T05, M03-T06, M03-T07, M03-T08 | None | None |
 | 22 | M04-T01 | V1 基础与组织表 | `NOT_STARTED` | M03-T02 | None | None |
@@ -293,7 +293,7 @@
 - **Dependencies:** M03-T01.
 - **Sources:** `docs/superpowers/plans/tensor-modules/M03-tushare-metadata.md` 的 `Task M03-T07` 任务卡。
 - **First action:** 读取 `docs/superpowers/plans/tensor-modules/M03-tushare-metadata.md` 的 `Task M03-T07` 任务卡，并确认其 `Context boundary`、输入和目标文件均可定位。
-- **State evidence:** None.
+- **State evidence:** 2026-09-01：M03-T06 已按严格 TDD、公开-loader 完整 harness、提交后 reactor 87/87、`verify`、三层 Enforcer、JAR/源目录/范围门禁及无发现任务级复核完成，提交 `73f9278` 精确包含 9 个 YAML，看板提交 `1931ed4` 已先记录 `IN_PROGRESS -> COMPLETED`；按预定义顺序选择后继 M03-T07。其唯一直接依赖 M03-T01 为 `COMPLETED`，公开 `DatasetDefinitionLoader`、严格 schema/M02/M03 校验、不可变结果、默认 batchSize 和 classpath schema 打包均可定位，与任务卡、PRD A.7、TRD 9.4 和 3 个授权模板投影无冲突。`dividend` 模板没有样例行，且授权输入未唯一规定公司行动字段的字符串长度和可空性；项目所有者明确同意推荐契约：`end_date/ann_date/record_date/ex_date/pay_date/div_listdate/imp_ann_date/exp_date/float_date` 使用 `DATE`，`ts_code/div_proc/proc/share_type` 使用 `STRING(64)`，`holder_name` 使用 `STRING(128)`，其余 11 个数值字段使用 `DECIMAL(38,18)`，业务键列不可空、其余列可空，filters 统一为 `[ts_code, ann_date]`，fixedColumn 统一为 `ts_code`。`docs/task-designs/M03-T07-design.md` 已冻结精确 3 文件、30 列机械映射、参数、键、失败规则、RED/GREEN 命令和验收并由提交 `63bed97` 回填同一设计路径；七节顺序、占位符、14/9/7 字段计数、12 DATE/6 STRING(64)/1 STRING(128)/11 DECIMAL 完整分类、空 `dividend` 模板、链接和 `git diff --check` 均通过。`docs/task-handoffs/M03-T07-handoff.md` 已按 `next-task` 模板创建并链接，记录唯一直接依赖 M03-T01、读取顺序和先创建临时完整 harness、验证空模板后取得精确资源缺失 RED 的首个动作，因此执行 `NOT_STARTED -> READY`；尚未开始实现，也未执行 `READY -> IN_PROGRESS`。
 
 ### `M03-T08`
 
