@@ -42,7 +42,7 @@
 | 21 | M03-T09 | 49/49 名称、字段、参数、键和筛选总契约 | `COMPLETED` | M03-T02, M03-T03, M03-T04, M03-T05, M03-T06, M03-T07, M03-T08 | docs/task-designs/M03-T09-design.md | docs/task-handoffs/M03-T09-handoff.md |
 | 22 | M04-T01 | V1 基础与组织表 | `COMPLETED` | M03-T02 | docs/task-designs/M04-T01-design.md | docs/task-handoffs/M04-T01-handoff.md |
 | 23 | M04-T02 | V2 行情、交易与资金表 | `COMPLETED` | M03-T03, M03-T04 | docs/task-designs/M04-T02-design.md | docs/task-handoffs/M04-T02-handoff.md |
-| 24 | M04-T03 | V3 互联互通与转融通表 | `NOT_STARTED` | M03-T05 | docs/task-designs/M04-T03-design.md | None |
+| 24 | M04-T03 | V3 互联互通与转融通表 | `READY` | M03-T05 | docs/task-designs/M04-T03-design.md | docs/task-handoffs/M04-T03-handoff.md |
 | 25 | M04-T04 | V4 财务与披露宽表 | `NOT_STARTED` | M03-T06 | None | None |
 | 26 | M04-T05 | V5 公司行动、股东与治理表 | `NOT_STARTED` | M03-T07, M03-T08 | None | None |
 | 27 | M04-T06 | V6 fixture 表与 49 表结构总校验 | `NOT_STARTED` | M04-T01, M04-T02, M04-T03, M04-T04, M04-T05 | None | None |
@@ -359,7 +359,7 @@
 - **Dependencies:** M03-T05.
 - **Sources:** `docs/superpowers/plans/tensor-modules/M04-flyway-schema.md` 的 `Task M04-T03` 任务卡。
 - **First action:** 读取 `docs/superpowers/plans/tensor-modules/M04-flyway-schema.md` 的 `Task M04-T03` 任务卡，并确认其 `Context boundary`、输入和目标文件均可定位。
-- **State evidence:** None.
+- **State evidence:** 2026-09-01：M04-T02 已按严格 TDD、官方 MySQL 8.4.6 实际 V1–V2 Flyway/schema 验收、提交前 reactor 150/150、六层 Enforcer、JAR/范围/格式/清理门禁和无发现独立审查完成；实现提交 `0967474` 精确包含唯一 V2 SQL，看板提交 `29c5bdf` 已先记录 `IN_PROGRESS -> COMPLETED`。按预定义顺序选择后继 M04-T03；其唯一直接依赖 M03-T05 为 `COMPLETED`，提交 `09967d4` 交付的 6 个 API、44 个业务列、COMPOSITE 键、filters 及当前运行时 YAML 完全一致。`docs/task-designs/M04-T03-design.md` 已冻结唯一 V3 SQL、6 表/44 业务列/62 V3 总列/6 PRIMARY/4 二级索引、全局 V1–V3 30 表/361 列/30 PRIMARY/22 二级索引、`hk_hold.code/ts_code` 职责、三个 SLB 空样例边界、官方 `mysql:8.4.6` 与真实 TCP readiness，并由提交 `601399b` 回填同一设计路径；机械设计输入校验输出 `M04-T03_DESIGN_INPUT_OK:6:44:62:4:30:361:22`。`docs/task-handoffs/M04-T03-handoff.md` 已按 `next-task` 模板创建并先链接，记录唯一直接依赖、读取顺序和先取得缺 V3 文件 RED 的首个实施动作；因此执行 `NOT_STARTED -> READY`，尚未开始 SQL 实现。
 
 ### `M04-T04`
 
