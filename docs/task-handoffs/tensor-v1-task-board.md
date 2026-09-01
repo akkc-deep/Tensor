@@ -40,7 +40,7 @@
 | 19 | M03-T07 | 公司行动 3 数据集 YAML | `COMPLETED` | M03-T01 | docs/task-designs/M03-T07-design.md | docs/task-handoffs/M03-T07-handoff.md |
 | 20 | M03-T08 | 股东与治理 7 数据集 YAML | `COMPLETED` | M03-T01 | docs/task-designs/M03-T08-design.md | docs/task-handoffs/M03-T08-handoff.md |
 | 21 | M03-T09 | 49/49 名称、字段、参数、键和筛选总契约 | `COMPLETED` | M03-T02, M03-T03, M03-T04, M03-T05, M03-T06, M03-T07, M03-T08 | docs/task-designs/M03-T09-design.md | docs/task-handoffs/M03-T09-handoff.md |
-| 22 | M04-T01 | V1 基础与组织表 | `IN_PROGRESS` | M03-T02 | docs/task-designs/M04-T01-design.md | docs/task-handoffs/M04-T01-handoff.md |
+| 22 | M04-T01 | V1 基础与组织表 | `COMPLETED` | M03-T02 | docs/task-designs/M04-T01-design.md | docs/task-handoffs/M04-T01-handoff.md |
 | 23 | M04-T02 | V2 行情、交易与资金表 | `NOT_STARTED` | M03-T03, M03-T04 | None | None |
 | 24 | M04-T03 | V3 互联互通与转融通表 | `NOT_STARTED` | M03-T05 | None | None |
 | 25 | M04-T04 | V4 财务与披露宽表 | `NOT_STARTED` | M03-T06 | None | None |
@@ -336,6 +336,8 @@
 - **State evidence (environment resolution):** 2026-09-01：项目所有者指出其他项目已在本机 Colima 使用 MySQL 8.4。宿主环境只读复核确认默认 Colima profile 正常 `Running`，Docker daemon 为 linux/arm64 且可响应；本地已有官方 `mysql:8.4.6`，镜像声明 `MYSQL_MAJOR=8.4`、`MYSQL_VERSION=8.4.6-1.el9`，符合设计允许 MySQL 8.4 LTS 维护补丁的约束。为同一镜像补充本地 `mysql:8.4` 标签后，`docker image inspect mysql:8.4` 返回与 `8.4.6` 相同的 `sha256:869218921e61...`，`mysqld --version` 为 MySQL Community Server 8.4.6；设计指定的无挂载、随机端口任务容器随后成功启动，`mysqladmin ping` 输出 `mysqld is alive`。暂停交接的镜像可用及容器可启动条件均已满足，既有 `pause` 交接保留为历史上下文，因此执行 `BLOCKED -> READY`。
 
 - **State evidence (environment restart):** 2026-09-01：提交 `5af2852` 已单独记录环境解阻；随后重新完整核对 M04-T01 设计与同任务 `pause` 交接，确认任务身份、唯一 V1 SQL 范围、实际 MySQL 8.4 Flyway/`information_schema` 门禁及最终提交顺序均未改变。项目所有者要求复用其他项目已使用的本机 MySQL 8.4，并已取得同一官方镜像可启动的客观证据，授权条件与剩余工作均明确，因此执行 `READY -> IN_PROGRESS`。
+
+- **State evidence (completion):** 2026-09-01：实现提交 `09dbbfd` 按固定消息精确新增设计 Files 节的唯一 178 行 V1 SQL，未修改 POM、Java、YAML、schema、模板、其他迁移或模块。提交前与提交后均使用本机原有官方 MySQL Community Server 8.4.6 在无挂载、随机端口的全新 `tensor` schema 中运行完整临时 harness；Flyway 首次 migrate 恰执行 V1、validate 通过、二次 migrate 为零项，`information_schema` 对照确认 11 表、93 个原序业务列、127 总列、11 个主键、六个二级索引、统一来源字段、InnoDB 与 `utf8mb4_0900_as_cs`，最终只输出 `M04-T01_OK:11:93:127:6`。提交后新鲜 reactor `test` 与 `verify` 均为 150/150、0 failure、0 error、0 skipped，六层 Enforcer 通过；生产 JAR 恰含一份 V1 资源，提交范围和 `git diff --check` 通过。独立审查逐列核对设计与 11 份 YAML，并得到 `REVIEW_SCHEMA_OK:11:93:127:11PK:6`，结论 `Ready to merge: Yes`，Critical、Important、Minor 均为 0。最终 Maven `clean`、任务容器、临时 harness/classpath 与本任务添加的浮动镜像标签均已清理，原有 `mysql:8.4.6` 保留且工作树干净；因此满足任务设计与任务卡的结果级验收，执行 `IN_PROGRESS -> COMPLETED`，既有 `pause` 交接路径保留为历史上下文。
 
 ### `M04-T02`
 
