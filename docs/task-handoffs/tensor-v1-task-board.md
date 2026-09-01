@@ -44,7 +44,7 @@
 | 23 | M04-T02 | V2 行情、交易与资金表 | `COMPLETED` | M03-T03, M03-T04 | docs/task-designs/M04-T02-design.md | docs/task-handoffs/M04-T02-handoff.md |
 | 24 | M04-T03 | V3 互联互通与转融通表 | `COMPLETED` | M03-T05 | docs/task-designs/M04-T03-design.md | docs/task-handoffs/M04-T03-handoff.md |
 | 25 | M04-T04 | V4 财务与披露宽表 | `COMPLETED` | M03-T06 | docs/task-designs/M04-T04-design.md | docs/task-handoffs/M04-T04-handoff.md |
-| 26 | M04-T05 | V5 公司行动、股东与治理表 | `READY` | M03-T07, M03-T08 | docs/task-designs/M04-T05-design.md | docs/task-handoffs/M04-T05-handoff.md |
+| 26 | M04-T05 | V5 公司行动、股东与治理表 | `IN_PROGRESS` | M03-T07, M03-T08 | docs/task-designs/M04-T05-design.md | docs/task-handoffs/M04-T05-handoff.md |
 | 27 | M04-T06 | V6 fixture 表与 49 表结构总校验 | `NOT_STARTED` | M04-T01, M04-T02, M04-T03, M04-T04, M04-T05 | None | None |
 | 28 | M05-T01 | `PluginRegistry` 与 `AdapterRegistry` | `NOT_STARTED` | M02-T05 | None | None |
 | 29 | M05-T02 | `DatasetCatalog` 和启动元数据/表结构校验 | `NOT_STARTED` | M03-T09, M04-T06 | None | None |
@@ -383,7 +383,7 @@
 - **Dependencies:** M03-T07, M03-T08.
 - **Sources:** `docs/superpowers/plans/tensor-modules/M04-flyway-schema.md` 的 `Task M04-T05` 任务卡。
 - **First action:** 读取 `docs/superpowers/plans/tensor-modules/M04-flyway-schema.md` 的 `Task M04-T05` 任务卡，并确认其 `Context boundary`、输入和目标文件均可定位。
-- **State evidence:** 2026-09-02：M04-T04 已按任务设计、官方 MySQL 8.4.6 实际 V1～V4 Flyway/schema 验收、reactor 150/150、JAR/范围/格式/清理门禁及无发现独立审查完成，实现提交 `9105ad5` 与格式提交 `fcb64e4` 只涉及唯一 V4 SQL，看板提交 `0a86d98` 已先记录 `IN_PROGRESS -> COMPLETED`；按预定义顺序选择后继 M04-T05。其直接依赖 M03-T07、M03-T08 均为 `COMPLETED`，实现提交 `7cc724e`、`cedb21b` 分别交付互不重叠的 3+7 份运行时 YAML 和 30+61 个业务列，当前十份文件相对各自提交无差异；两项输入使用同一表名公式、字段顺序与机械类型/可空性规则，九个 COMPOSITE 键和 `pledge_detail` 全字段原序 FINGERPRINT 与 V5 的键和最小索引映射无冲突。`docs/task-designs/M04-T05-design.md` 已由提交 `f51042d` 创建并回填同一设计路径，完整冻结唯一 V5 SQL、10 表/91 业务列/122 总列/10 PRIMARY/10 二级索引、全局 V1～V5 49 表/1000 列/49 PRIMARY/40 二级索引、`pledge_detail` 内部键特例、官方 `mysql:8.4.6` RED/GREEN 流程和结果级验收；按 `designing-task-contracts` 复核后无待实施者裁决的内容。`docs/task-handoffs/M04-T05-handoff.md` 已按 `next-task` 模板完整创建并链接，只记录 M04-T05 及直接输入 M03-T07/M03-T08，包含依赖决策/约束比较、设计优先的读取顺序和先取得精确缺 V5 路径 RED 的首个实施动作；因此执行 `NOT_STARTED -> READY`，尚未开始 V5 SQL 实现。
+- **State evidence:** 2026-09-02：M04-T04 已按任务设计、官方 MySQL 8.4.6 实际 V1～V4 Flyway/schema 验收、reactor 150/150、JAR/范围/格式/清理门禁及无发现独立审查完成，实现提交 `9105ad5` 与格式提交 `fcb64e4` 只涉及唯一 V4 SQL，看板提交 `0a86d98` 已先记录 `IN_PROGRESS -> COMPLETED`；按预定义顺序选择后继 M04-T05。其直接依赖 M03-T07、M03-T08 均为 `COMPLETED`，实现提交 `7cc724e`、`cedb21b` 分别交付互不重叠的 3+7 份运行时 YAML 和 30+61 个业务列，当前十份文件相对各自提交无差异；两项输入使用同一表名公式、字段顺序与机械类型/可空性规则，九个 COMPOSITE 键和 `pledge_detail` 全字段原序 FINGERPRINT 与 V5 的键和最小索引映射无冲突。`docs/task-designs/M04-T05-design.md` 已由提交 `f51042d` 创建并回填同一设计路径，完整冻结唯一 V5 SQL、10 表/91 业务列/122 总列/10 PRIMARY/10 二级索引、全局 V1～V5 49 表/1000 列/49 PRIMARY/40 二级索引、`pledge_detail` 内部键特例、官方 `mysql:8.4.6` RED/GREEN 流程和结果级验收；按 `designing-task-contracts` 复核后无待实施者裁决的内容。`docs/task-handoffs/M04-T05-handoff.md` 已按 `next-task` 模板完整创建并链接，只记录 M04-T05 及直接输入 M03-T07/M03-T08，包含依赖决策/约束比较、设计优先的读取顺序和先取得精确缺 V5 路径 RED 的首个实施动作；因此执行 `NOT_STARTED -> READY`，尚未开始 V5 SQL 实现。随后用户明确要求按照权威任务看板执行当前任务；已完整读取 M04-T05 设计和既有 `next-task` 交接，确认任务身份、范围、输入、首个动作和验收均可定位且无冲突，作为本次 `READY -> IN_PROGRESS` 的启动证据；既有交接路径保留为进入上下文。
 
 ### `M04-T06`
 
