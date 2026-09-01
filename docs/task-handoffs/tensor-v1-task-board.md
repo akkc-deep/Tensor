@@ -46,7 +46,7 @@
 | 25 | M04-T04 | V4 财务与披露宽表 | `COMPLETED` | M03-T06 | docs/task-designs/M04-T04-design.md | docs/task-handoffs/M04-T04-handoff.md |
 | 26 | M04-T05 | V5 公司行动、股东与治理表 | `COMPLETED` | M03-T07, M03-T08 | docs/task-designs/M04-T05-design.md | docs/task-handoffs/M04-T05-handoff.md |
 | 27 | M04-T06 | V6 fixture 表与 49 表结构总校验 | `COMPLETED` | M04-T01, M04-T02, M04-T03, M04-T04, M04-T05 | docs/task-designs/M04-T06-design.md | docs/task-handoffs/M04-T06-handoff.md |
-| 28 | M05-T01 | `PluginRegistry` 与 `AdapterRegistry` | `NOT_STARTED` | M02-T05 | docs/task-designs/M05-T01-design.md | None |
+| 28 | M05-T01 | `PluginRegistry` 与 `AdapterRegistry` | `READY` | M02-T05 | docs/task-designs/M05-T01-design.md | docs/task-handoffs/M05-T01-handoff.md |
 | 29 | M05-T02 | `DatasetCatalog` 和启动元数据/表结构校验 | `NOT_STARTED` | M03-T09, M04-T06 | None | None |
 | 30 | M05-T03 | 元数据驱动参数校验 | `NOT_STARTED` | M02-T02, M03-T09 | None | None |
 | 31 | M05-T04 | 严格日期、文本、整数和精确数值转换 | `NOT_STARTED` | M02-T03 | None | None |
@@ -403,7 +403,7 @@
 - **Dependencies:** M02-T05.
 - **Sources:** `docs/superpowers/plans/tensor-modules/M05-core-registry-adapter.md` 的 `Task M05-T01` 任务卡。
 - **First action:** 读取 `docs/superpowers/plans/tensor-modules/M05-core-registry-adapter.md` 的 `Task M05-T01` 任务卡，并确认其 `Context boundary`、输入和目标文件均可定位。
-- **State evidence:** None.
+- **State evidence:** 2026-09-02：M04-T06 已按设计、固定 MySQL 8.4.6 的 52/52 实际 schema 门禁、reactor 150/150、依赖/JAR/资源隔离/范围/清理门禁及两层无 Critical/Important 独立审查完成；实现提交 `e78bd98` 精确包含三个批准文件，看板提交 `337f2a3` 已先记录 `IN_PROGRESS -> COMPLETED`。按预定义顺序选择后继 M05-T01；其唯一直接依赖 M02-T05 为 `COMPLETED`，提交 `445b941` 与契约修复 `dd495ee` 提供精确 `DataSourcePlugin`/`DatasetAdapter` SPI 及其直接引用的描述符、readiness、身份、数据集和下载/适配公共类型，当前消费文件相对最终修复提交无差异。用户明确批准注册语义：只有 ID 唯一且当前可下载的插件进入 `find`；重复 PluginId 的所有实例均排除但各自以固定安全原因保留在按 pluginId/displayName 排序的描述符列表；描述符异常使用固定安全消息记录并跳过；重复 DatasetKey 的所有适配器均排除。`docs/task-designs/M05-T01-design.md` 已据此冻结两个 final 注册表的精确公共表面、readiness 构造期快照、重复/损坏/null/日志/不可变规则、10 项 RED/GREEN、89 项模块回归、三层 Enforcer、范围清理和精确三文件提交门禁，并由提交 `a0af7b4` 创建及回填同一设计路径；重新完整读取后确认七节顺序、无占位符、无依赖冲突或待实施者裁决。`docs/task-handoffs/M05-T01-handoff.md` 已按 `next-task` 模板创建并链接，只记录 M05-T01 和直接依赖 M02-T05，包含精确 artifact/decision/rationale/constraint/usage/readiness evidence、设计优先读取顺序及先跑 79/79 基线后创建完整测试取得缺两类 RED 的首个动作，因此执行 `NOT_STARTED -> READY`；实现尚未开始。
 
 ### `M05-T02`
 
