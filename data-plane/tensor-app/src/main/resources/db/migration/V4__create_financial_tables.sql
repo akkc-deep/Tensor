@@ -560,4 +560,3 @@ CREATE TABLE `tushare_pro__disclosure_date` (
     PRIMARY KEY (`ts_code`, `end_date`),
     KEY `idx_disclosure_date_ann_date` (`ann_date`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_as_cs;
-
