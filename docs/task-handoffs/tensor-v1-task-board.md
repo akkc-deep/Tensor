@@ -42,7 +42,7 @@
 | 21 | M03-T09 | 49/49 名称、字段、参数、键和筛选总契约 | `COMPLETED` | M03-T02, M03-T03, M03-T04, M03-T05, M03-T06, M03-T07, M03-T08 | docs/task-designs/M03-T09-design.md | docs/task-handoffs/M03-T09-handoff.md |
 | 22 | M04-T01 | V1 基础与组织表 | `COMPLETED` | M03-T02 | docs/task-designs/M04-T01-design.md | docs/task-handoffs/M04-T01-handoff.md |
 | 23 | M04-T02 | V2 行情、交易与资金表 | `COMPLETED` | M03-T03, M03-T04 | docs/task-designs/M04-T02-design.md | docs/task-handoffs/M04-T02-handoff.md |
-| 24 | M04-T03 | V3 互联互通与转融通表 | `IN_PROGRESS` | M03-T05 | docs/task-designs/M04-T03-design.md | docs/task-handoffs/M04-T03-handoff.md |
+| 24 | M04-T03 | V3 互联互通与转融通表 | `COMPLETED` | M03-T05 | docs/task-designs/M04-T03-design.md | docs/task-handoffs/M04-T03-handoff.md |
 | 25 | M04-T04 | V4 财务与披露宽表 | `NOT_STARTED` | M03-T06 | None | None |
 | 26 | M04-T05 | V5 公司行动、股东与治理表 | `NOT_STARTED` | M03-T07, M03-T08 | None | None |
 | 27 | M04-T06 | V6 fixture 表与 49 表结构总校验 | `NOT_STARTED` | M04-T01, M04-T02, M04-T03, M04-T04, M04-T05 | None | None |
@@ -362,6 +362,8 @@
 - **State evidence:** 2026-09-01：M04-T02 已按严格 TDD、官方 MySQL 8.4.6 实际 V1–V2 Flyway/schema 验收、提交前 reactor 150/150、六层 Enforcer、JAR/范围/格式/清理门禁和无发现独立审查完成；实现提交 `0967474` 精确包含唯一 V2 SQL，看板提交 `29c5bdf` 已先记录 `IN_PROGRESS -> COMPLETED`。按预定义顺序选择后继 M04-T03；其唯一直接依赖 M03-T05 为 `COMPLETED`，提交 `09967d4` 交付的 6 个 API、44 个业务列、COMPOSITE 键、filters 及当前运行时 YAML 完全一致。`docs/task-designs/M04-T03-design.md` 已冻结唯一 V3 SQL、6 表/44 业务列/62 V3 总列/6 PRIMARY/4 二级索引、全局 V1–V3 30 表/361 列/30 PRIMARY/22 二级索引、`hk_hold.code/ts_code` 职责、三个 SLB 空样例边界、官方 `mysql:8.4.6` 与真实 TCP readiness，并由提交 `601399b` 回填同一设计路径；机械设计输入校验输出 `M04-T03_DESIGN_INPUT_OK:6:44:62:4:30:361:22`。`docs/task-handoffs/M04-T03-handoff.md` 已按 `next-task` 模板创建并先链接，记录唯一直接依赖、读取顺序和先取得缺 V3 文件 RED 的首个实施动作；因此执行 `NOT_STARTED -> READY`，尚未开始 SQL 实现。
 
 - **State evidence (start):** 2026-09-01：用户明确要求按照权威任务看板执行当前任务；已完整读取 `docs/task-designs/M04-T03-design.md` 与 `docs/task-handoffs/M04-T03-handoff.md`，并按交接顺序核对模块任务卡、Global Constraints、Module Gate、上位路线图设计、M03-T05 设计与提交 `09967d4` 的六份运行时 YAML、V1/V2、tensor-app POM 和公开 loader。六份 YAML 与冻结的 44 列、六个 COMPOSITE 键、filters 及 `hk_hold.code/ts_code` 职责一致，任务身份、唯一 SQL 范围、MySQL 8.4.6 验收和首个可归因 RED 动作均可定位且无冲突，作为本次 `READY -> IN_PROGRESS` 的启动证据；既有 `next-task` 交接路径保留为进入上下文。
+
+- **State evidence (completion):** 2026-09-01：实现提交 `5fa8ec6` 以固定消息精确新增唯一 91 行 V3 SQL；严格 TDD 先由完整临时 harness 在数据库连接前只因精确 V3 路径缺失退出 1，再于官方 `mysql:8.4.6`（linux/arm64，`MYSQL_VERSION=8.4.6-1.el9`）全新 schema 中完成 V1/V2/V3 首次 migrate、validate 与零项二次 migrate，实际 `information_schema` 对照只输出 `M04-T03_OK:30:6:44:62:4`。结果确认 V3 恰有 6 表、44 个原序业务列、62 总列、6 PRIMARY、4 二级索引，V1–V3 合计 30 表、361 列、30 PRIMARY、22 二级索引；`hk_hold.code/ts_code` 职责、三个 SLB 的 19 列、来源字段、InnoDB、排序规则与 UTC 均符合设计。控制器在最终提交上重新运行实际 MySQL harness、reactor `test` 与 `verify`；后两者各为 150/150、0 failure、0 error、0 skipped，六层 Enforcer 通过，JAR 恰含 V1/V2/V3。Maven 产物、临时 harness/classpath 和任务容器已清理，提交范围、`git diff --check` 与干净工作树门禁通过；任务审查为规范 `✅`、质量 `Approved` 且 Critical/Important/Minor 为 0/0/0，最终整体审查为 `Ready to merge: Yes` 且三档问题均为 0。因此满足任务设计和任务卡的结果级验收，执行 `IN_PROGRESS -> COMPLETED`，既有 `next-task` 交接保留为历史进入上下文。
 
 ### `M04-T04`
 
