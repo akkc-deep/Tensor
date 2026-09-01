@@ -40,7 +40,7 @@
 | 19 | M03-T07 | 公司行动 3 数据集 YAML | `COMPLETED` | M03-T01 | docs/task-designs/M03-T07-design.md | docs/task-handoffs/M03-T07-handoff.md |
 | 20 | M03-T08 | 股东与治理 7 数据集 YAML | `COMPLETED` | M03-T01 | docs/task-designs/M03-T08-design.md | docs/task-handoffs/M03-T08-handoff.md |
 | 21 | M03-T09 | 49/49 名称、字段、参数、键和筛选总契约 | `COMPLETED` | M03-T02, M03-T03, M03-T04, M03-T05, M03-T06, M03-T07, M03-T08 | docs/task-designs/M03-T09-design.md | docs/task-handoffs/M03-T09-handoff.md |
-| 22 | M04-T01 | V1 基础与组织表 | `READY` | M03-T02 | docs/task-designs/M04-T01-design.md | docs/task-handoffs/M04-T01-handoff.md |
+| 22 | M04-T01 | V1 基础与组织表 | `IN_PROGRESS` | M03-T02 | docs/task-designs/M04-T01-design.md | docs/task-handoffs/M04-T01-handoff.md |
 | 23 | M04-T02 | V2 行情、交易与资金表 | `NOT_STARTED` | M03-T03, M03-T04 | None | None |
 | 24 | M04-T03 | V3 互联互通与转融通表 | `NOT_STARTED` | M03-T05 | None | None |
 | 25 | M04-T04 | V4 财务与披露宽表 | `NOT_STARTED` | M03-T06 | None | None |
@@ -323,7 +323,7 @@
 - **Dependencies:** M03-T02.
 - **Sources:** `docs/superpowers/plans/tensor-modules/M04-flyway-schema.md` 的 `Task M04-T01` 任务卡。
 - **First action:** 读取 `docs/superpowers/plans/tensor-modules/M04-flyway-schema.md` 的 `Task M04-T01` 任务卡，并确认其 `Context boundary`、输入和目标文件均可定位。
-- **State evidence:** 2026-09-01：M03-T09 已按设计交付永久 49/49 元数据总契约，提交 `36230d8` 精确包含唯一测试文件；reactor 137/137、`verify`、三层 Enforcer、生产 JAR 排除、范围/清理门禁及无发现独立审查均通过，看板提交 `33dbbb5` 已先记录 `IN_PROGRESS -> COMPLETED`。按预定义顺序选择后继 M04-T01；其唯一直接依赖 M03-T02 为 `COMPLETED`，提交 `5fe20a2` 中 11 份 YAML 与 `docs/task-designs/M03-T02-design.md` 冻结的 93 列、十个 COMPOSITE 键、一个 FINGERPRINT 键及 filters 可定位，并已由 M03-T09 再次验证，与 M04 任务卡及 TRD 8.3/9.1～9.6 无冲突。`docs/task-designs/M04-T01-design.md` 已完成并由提交 `06663d9` 回填同一设计路径，冻结唯一 V1 SQL、机械 MySQL 类型映射、11 表/127 总列/六个二级索引、来源字段、MySQL 8.4 Flyway RED/GREEN harness、150 项 reactor 门禁、失败边界和精确验收；七节顺序、链接、占位符和 `git diff --check` 均通过。`docs/task-handoffs/M04-T01-handoff.md` 已按 `next-task` 模板创建并链接，只记录直接依赖 M03-T02、约束比较、读取顺序和先创建完整临时 harness 取得缺 V1 文件 RED 的首个动作，因此执行 `NOT_STARTED -> READY`。
+- **State evidence:** 2026-09-01：M03-T09 已按设计交付永久 49/49 元数据总契约，提交 `36230d8` 精确包含唯一测试文件；reactor 137/137、`verify`、三层 Enforcer、生产 JAR 排除、范围/清理门禁及无发现独立审查均通过，看板提交 `33dbbb5` 已先记录 `IN_PROGRESS -> COMPLETED`。按预定义顺序选择后继 M04-T01；其唯一直接依赖 M03-T02 为 `COMPLETED`，提交 `5fe20a2` 中 11 份 YAML 与 `docs/task-designs/M03-T02-design.md` 冻结的 93 列、十个 COMPOSITE 键、一个 FINGERPRINT 键及 filters 可定位，并已由 M03-T09 再次验证，与 M04 任务卡及 TRD 8.3/9.1～9.6 无冲突。`docs/task-designs/M04-T01-design.md` 已完成并由提交 `06663d9` 回填同一设计路径，冻结唯一 V1 SQL、机械 MySQL 类型映射、11 表/127 总列/六个二级索引、来源字段、MySQL 8.4 Flyway RED/GREEN harness、150 项 reactor 门禁、失败边界和精确验收；七节顺序、链接、占位符和 `git diff --check` 均通过。`docs/task-handoffs/M04-T01-handoff.md` 已按 `next-task` 模板创建并链接，只记录直接依赖 M03-T02、约束比较、读取顺序和先创建完整临时 harness 取得缺 V1 文件 RED 的首个动作，因此执行 `NOT_STARTED -> READY`。随后用户明确要求按照权威任务看板执行当前任务；已完整读取 `docs/task-designs/M04-T01-design.md` 与 `docs/task-handoffs/M04-T01-handoff.md`，确认任务身份、范围、唯一直接依赖、首个动作和验收契约均可定位，作为本次 `READY -> IN_PROGRESS` 的启动证据；既有交接路径保留为进入上下文。
 
 ### `M04-T02`
 
