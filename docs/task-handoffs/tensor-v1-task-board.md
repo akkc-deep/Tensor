@@ -40,7 +40,7 @@
 | 19 | M03-T07 | 公司行动 3 数据集 YAML | `COMPLETED` | M03-T01 | docs/task-designs/M03-T07-design.md | docs/task-handoffs/M03-T07-handoff.md |
 | 20 | M03-T08 | 股东与治理 7 数据集 YAML | `COMPLETED` | M03-T01 | docs/task-designs/M03-T08-design.md | docs/task-handoffs/M03-T08-handoff.md |
 | 21 | M03-T09 | 49/49 名称、字段、参数、键和筛选总契约 | `COMPLETED` | M03-T02, M03-T03, M03-T04, M03-T05, M03-T06, M03-T07, M03-T08 | docs/task-designs/M03-T09-design.md | docs/task-handoffs/M03-T09-handoff.md |
-| 22 | M04-T01 | V1 基础与组织表 | `IN_PROGRESS` | M03-T02 | docs/task-designs/M04-T01-design.md | docs/task-handoffs/M04-T01-handoff.md |
+| 22 | M04-T01 | V1 基础与组织表 | `BLOCKED` | M03-T02 | docs/task-designs/M04-T01-design.md | docs/task-handoffs/M04-T01-handoff.md |
 | 23 | M04-T02 | V2 行情、交易与资金表 | `NOT_STARTED` | M03-T03, M03-T04 | None | None |
 | 24 | M04-T03 | V3 互联互通与转融通表 | `NOT_STARTED` | M03-T05 | None | None |
 | 25 | M04-T04 | V4 财务与披露宽表 | `NOT_STARTED` | M03-T06 | None | None |
@@ -330,6 +330,8 @@
 - **State evidence (resolution):** 2026-09-01：项目所有者回复“同意”，授权先以独立缺陷范围修复架构测试误判，并在 reactor 150/150 后恢复、继续 M04-T01。提交 `13d599f` 只修改 `ModuleDependencyTest.java`，将禁止依赖目标收窄到精确 `com.akkc.tensor` 模块包；原失败定向命令为 1/1 通过，暂停交接指定的基线 reactor 命令为 150/150、0 failure、0 error、0 skipped，六层 Enforcer 通过；独立审查确认 ArchUnit 包匹配语义、四条模块方向约束和单文件范围均正确，无 Critical、Important 或 Minor 发现。因此暂停交接的解阻条件已满足，既有 `pause` 交接路径保留为历史上下文，执行 `BLOCKED -> READY`。
 
 - **State evidence (restart):** 2026-09-01：在 `BLOCKED -> READY` 解阻证据记录后，重新完整读取 M04-T01 设计与同任务 `pause` 交接，确认恢复任务仍为 M04-T01，剩余范围为临时 harness、可归因缺 V1 RED、唯一 SQL 实现与全部设计门禁，顺序源和首个动作与交接一致。用户的“同意”明确授权在 reactor 150/150 后恢复并继续 M04-T01，作为本次 `READY -> IN_PROGRESS` 的启动证据；既有 `pause` 交接路径保留为历史与进入上下文。
+
+- **State evidence (environment blocker):** 2026-09-01：恢复后已按设计产生完整临时 harness 并取得只因缺 V1 文件的可归因 RED；唯一 V1 SQL 已创建但未提交，SQL 后 reactor `test`/`verify` 均为 150/150、0 failure、0 error、0 skipped，六层 Enforcer、JAR 单资源、`git diff --check`、范围与清理门禁通过。实现代理两次执行设计指定的 `docker run ... mysql:8.4 ...` 均在 Docker Hub manifest HTTPS 请求阶段超时且未创建容器；控制器随后执行 `docker image inspect mysql:8.4 --format '{{.Id}}' || docker pull mysql:8.4` 的安全重试，确认本地镜像不存在并再次因同类 HTTPS 超时而退出 1。任务设计明确禁止替换 MySQL 8.4 或跳过实际 schema 校验，因此无法产生 Flyway migrate/validate/二次 migrate、`information_schema` 与 `M04-T01_OK:11:93:127:6` GREEN 证据。`docs/task-handoffs/M04-T01-handoff.md` 已在转换前刷新，记录未提交 SQL、已完成验证、未验证范围和可观测解阻条件；因此执行 `IN_PROGRESS -> BLOCKED`。
 
 ### `M04-T02`
 
