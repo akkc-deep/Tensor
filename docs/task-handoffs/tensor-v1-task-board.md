@@ -47,7 +47,7 @@
 | 26 | M04-T05 | V5 公司行动、股东与治理表 | `COMPLETED` | M03-T07, M03-T08 | docs/task-designs/M04-T05-design.md | docs/task-handoffs/M04-T05-handoff.md |
 | 27 | M04-T06 | V6 fixture 表与 49 表结构总校验 | `COMPLETED` | M04-T01, M04-T02, M04-T03, M04-T04, M04-T05 | docs/task-designs/M04-T06-design.md | docs/task-handoffs/M04-T06-handoff.md |
 | 28 | M05-T01 | `PluginRegistry` 与 `AdapterRegistry` | `COMPLETED` | M02-T05 | docs/task-designs/M05-T01-design.md | docs/task-handoffs/M05-T01-handoff.md |
-| 29 | M05-T02 | `DatasetCatalog` 和启动元数据/表结构校验 | `IN_PROGRESS` | M03-T09, M04-T06 | docs/task-designs/M05-T02-design.md | docs/task-handoffs/M05-T02-handoff.md |
+| 29 | M05-T02 | `DatasetCatalog` 和启动元数据/表结构校验 | `COMPLETED` | M03-T09, M04-T06 | docs/task-designs/M05-T02-design.md | docs/task-handoffs/M05-T02-handoff.md |
 | 30 | M05-T03 | 元数据驱动参数校验 | `NOT_STARTED` | M02-T02, M03-T09 | None | None |
 | 31 | M05-T04 | 严格日期、文本、整数和精确数值转换 | `NOT_STARTED` | M02-T03 | None | None |
 | 32 | M05-T05 | `GenericDatasetAdapter`、重复键和指纹键 | `NOT_STARTED` | M05-T02, M05-T03, M05-T04 | None | None |
@@ -416,6 +416,8 @@
 - **State evidence:** 2026-09-02：M05-T01 已按批准设计交付两个不可变注册表和 10 项真实行为测试，实现提交 `7ea252c` 与测试增强提交 `ca39a34` 精确限定在三个批准 Java 文件；聚焦 10/10、模块 `test`/`verify` 89/89、三层 Enforcer、静态/范围/格式/清理门禁和最终无发现审查均已通过，看板提交 `1f0fa6d` 已先记录 `IN_PROGRESS -> COMPLETED`。按预定义顺序选择后继 M05-T02；其直接依赖 M03-T09、M04-T06 均为 `COMPLETED`，提交 `36230d8` 已冻结 49 API、851 个原序业务列、参数/filters、47 个 COMPOSITE 和 2 个 FINGERPRINT 键的独立元数据总契约，提交 `e78bd98` 已在固定 MySQL 8.4.6 上验证 49 张生产表、1000 列、49 PRIMARY、40 个非唯一二级索引、技术列及同一 JDBC 类型/nullability 映射。两项输入分别提供期望定义和实际物理 schema，约束互补且无冲突。项目所有者明确同意 M05-T02 采用 `DatasetStartupValidator(List<DatasetDefinition>, SchemaInspector).validate()`、`SchemaInspector(DataSource).inspect(TableName)` 和只读 `DatasetCatalog.find/list` 合同，局部 schema 失败只排除单数据集、JDBC metadata 整体失败阻止启动且不增加公开 diagnostics；提交 `bdc4eb8` 已创建并回填完整 `docs/task-designs/M05-T02-design.md`，冻结三个生产类、一个 10 项测试类、严格 RED/GREEN、99/99 模块门禁和精确四文件范围，经完整复读确认无待实施者裁决内容。`docs/task-handoffs/M05-T02-handoff.md` 已按 `next-task` 模板创建并链接，只记录 M05-T02、M03-T09 和 M04-T06，包含依赖决策/约束比较、设计优先读取顺序和先运行 89/89 基线再完整创建测试取得缺三类 RED 的首个实施动作；因此执行 `NOT_STARTED -> READY`，实现尚未开始。
 
 - **State evidence (start):** 2026-09-02：用户明确要求按照权威任务看板执行当前任务；已完整读取 M05-T02 设计、既有 `next-task` 交接、模块任务卡、Global Constraints、Module Gate 和两个直接依赖设计，并核对 JDBC/M02 公开类型、core POM、任务身份、冻结公共表面、失败边界、TDD 顺序和精确四文件范围，确认输入可定位且无冲突。该请求作为本次 `READY -> IN_PROGRESS` 的启动证据，既有交接路径保留为进入上下文。
+
+- **State evidence (completion):** 2026-09-02：严格 TDD 先以完整 10 项 `DatasetStartupValidatorTest` 在三个生产类缺失时取得仅源自未解析 `DatasetCatalog`、`SchemaInspector`、`DatasetStartupValidator` 及 nested snapshot 类型的 `tensor-core:testCompile` RED；最终实现提交 `57771b0` 以固定消息 `feat(core): validate dataset catalog at startup` 精确新增三个 `public final` 生产类和一个测试类，提供不可变且确定排序的已验证目录、JDBC metadata 有序快照，以及对 null/重复 key、定义关系、表/列/type/nullability、主键、唯一键和无效键引用的逐数据集隔离。审查发现的 JDBC `TABLE_NAME` pattern 碰撞、无 `COLUMN_NAME` 表达式 UNIQUE 身份和资源关闭覆盖均已在同一最终提交中修复；同一审查代理复核最终 HEAD 后确认无 Critical/Important。主控在最终提交上新鲜运行模块 `test` 与 `verify`，两者均为 plugin-api 79/79、core 20/20、总计 99/99，0 failure、0 error、0 skipped且父项目/plugin-api/core 三层 Enforcer 通过；设计允许的安全运行时 WARNING 保留，未修改 POM。禁用能力扫描无输出并按预期退出 1，非目标 POM/app/plugin-api/plugin-tushare 无差异，`git diff --check`、精确四文件提交形态和 `clean` 后干净工作树门禁通过；公开 API 与设计一致且无 M05-T03～T05 越界行为。因此满足结果级目标、冻结公共表面、失败隔离、严格测试和精确范围，执行 `IN_PROGRESS -> COMPLETED`。
 
 ### `M05-T03`
 
