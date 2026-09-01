@@ -39,7 +39,7 @@
 | 18 | M03-T06 | 财务与披露 9 数据集 YAML | `COMPLETED` | M03-T01 | docs/task-designs/M03-T06-design.md | docs/task-handoffs/M03-T06-handoff.md |
 | 19 | M03-T07 | 公司行动 3 数据集 YAML | `COMPLETED` | M03-T01 | docs/task-designs/M03-T07-design.md | docs/task-handoffs/M03-T07-handoff.md |
 | 20 | M03-T08 | 股东与治理 7 数据集 YAML | `COMPLETED` | M03-T01 | docs/task-designs/M03-T08-design.md | docs/task-handoffs/M03-T08-handoff.md |
-| 21 | M03-T09 | 49/49 名称、字段、参数、键和筛选总契约 | `NOT_STARTED` | M03-T02, M03-T03, M03-T04, M03-T05, M03-T06, M03-T07, M03-T08 | docs/task-designs/M03-T09-design.md | None |
+| 21 | M03-T09 | 49/49 名称、字段、参数、键和筛选总契约 | `READY` | M03-T02, M03-T03, M03-T04, M03-T05, M03-T06, M03-T07, M03-T08 | docs/task-designs/M03-T09-design.md | docs/task-handoffs/M03-T09-handoff.md |
 | 22 | M04-T01 | V1 基础与组织表 | `NOT_STARTED` | M03-T02 | None | None |
 | 23 | M04-T02 | V2 行情、交易与资金表 | `NOT_STARTED` | M03-T03, M03-T04 | None | None |
 | 24 | M04-T03 | V3 互联互通与转融通表 | `NOT_STARTED` | M03-T05 | None | None |
@@ -313,7 +313,7 @@
 - **Dependencies:** M03-T02, M03-T03, M03-T04, M03-T05, M03-T06, M03-T07, M03-T08.
 - **Sources:** `docs/superpowers/plans/tensor-modules/M03-tushare-metadata.md` 的 `Task M03-T09` 任务卡。
 - **First action:** 读取 `docs/superpowers/plans/tensor-modules/M03-tushare-metadata.md` 的 `Task M03-T09` 任务卡，并确认其 `Context boundary`、输入和目标文件均可定位。
-- **State evidence:** None.
+- **State evidence:** 2026-09-01：M03-T08 已按设计、公开-loader RED/GREEN、提交后 reactor 87/87、`verify`、三层 Enforcer、JAR/源目录/范围门禁及无发现独立审查完成；实现提交 `cedb21b` 精确包含 7 个 YAML，看板提交 `7e31f51` 已先记录 `IN_PROGRESS -> COMPLETED`，随后按预定义顺序选择后继 M03-T09。其直接依赖 M03-T02～M03-T08 均为 `COMPLETED`，实现提交 `5fe20a2`、`3c2e977`、`c00ea0d`、`09967d4`、`73f9278`、`7cc724e`、`cedb21b` 分别交付互不重叠的 11+7+6+6+9+3+7 个 API 和 93+62+71+44+490+30+61 列，合计 49 API/851 列；七批均使用同一公开 loader、`tushare_pro__<api>` 表名公式和默认 batchSize 500，参数/filters 分区、模板字段顺序与 TRD 9.4 业务键来源无冲突。用户明确同意采用 bounded 设计：只新增永久 `TushareMetadataContractTest`，以 manifest/流式模板字段、显式 PRD 参数、显式 TRD 键和批准 filters 为独立基线，不修改生产实现、POM、YAML 或模板。`docs/task-designs/M03-T09-design.md` 已冻结单文件范围、49 参数分组、49 业务键转录、filters 五组、流式跳过 `data`、失败边界、可归因 RED、定向 50 项、reactor 137 项、生产 JAR 排除和验收，并由提交 `1d538c9` 回填同一设计路径；七节顺序、占位符、链接、49/851 计数和 `git diff --check` 均通过。`docs/task-handoffs/M03-T09-handoff.md` 已按 `next-task` 模板创建并链接，逐项记录七个直接依赖、决策/约束比较、读取顺序和先安装隔离依赖后取得缺测试类 RED 的首个实施动作，因此执行 `NOT_STARTED -> READY`；尚未开始实现，也未执行 `READY -> IN_PROGRESS`。
 
 ### `M04-T01`
 
