@@ -1,0 +1,23 @@
+pluginId: tushare_pro
+apiName: stk_holdertrade
+tableName: tushare_pro__stk_holdertrade
+category: 股东与治理
+displayName: 股东增减持
+queryMode: ann_date
+parameters:
+  - { name: ann_date, label: 公告日期, type: DATE, required: true }
+columns:
+  - { name: ts_code, label: ts_code, logicalType: STRING, nullable: false, displayOrder: 0, length: 64 }
+  - { name: ann_date, label: ann_date, logicalType: DATE, nullable: false, displayOrder: 1 }
+  - { name: holder_name, label: holder_name, logicalType: STRING, nullable: false, displayOrder: 2, length: 128 }
+  - { name: holder_type, label: holder_type, logicalType: STRING, nullable: true, displayOrder: 3, length: 64 }
+  - { name: in_de, label: in_de, logicalType: STRING, nullable: false, displayOrder: 4, length: 64 }
+  - { name: change_vol, label: change_vol, logicalType: DECIMAL, nullable: false, displayOrder: 5, precision: 38, scale: 18 }
+  - { name: change_ratio, label: change_ratio, logicalType: DECIMAL, nullable: true, displayOrder: 6, precision: 38, scale: 18 }
+  - { name: after_share, label: after_share, logicalType: DECIMAL, nullable: true, displayOrder: 7, precision: 38, scale: 18 }
+  - { name: after_ratio, label: after_ratio, logicalType: DECIMAL, nullable: true, displayOrder: 8, precision: 38, scale: 18 }
+  - { name: avg_price, label: avg_price, logicalType: DECIMAL, nullable: true, displayOrder: 9, precision: 38, scale: 18 }
+  - { name: total_share, label: total_share, logicalType: DECIMAL, nullable: true, displayOrder: 10, precision: 38, scale: 18 }
+businessKey: { mode: COMPOSITE, fields: [ts_code, ann_date, holder_name, in_de, change_vol] }
+filters: [ts_code, ann_date]
+fixedColumn: ts_code

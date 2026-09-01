@@ -1,0 +1,25 @@
+pluginId: tushare_pro
+apiName: pledge_detail
+tableName: tushare_pro__pledge_detail
+category: 股东与治理
+displayName: 股权质押明细
+queryMode: snapshot
+parameters: []
+columns:
+  - { name: ts_code, label: ts_code, logicalType: STRING, nullable: true, displayOrder: 0, length: 64 }
+  - { name: ann_date, label: ann_date, logicalType: DATE, nullable: true, displayOrder: 1 }
+  - { name: holder_name, label: holder_name, logicalType: STRING, nullable: true, displayOrder: 2, length: 128 }
+  - { name: pledge_amount, label: pledge_amount, logicalType: DECIMAL, nullable: true, displayOrder: 3, precision: 38, scale: 18 }
+  - { name: start_date, label: start_date, logicalType: DATE, nullable: true, displayOrder: 4 }
+  - { name: end_date, label: end_date, logicalType: DATE, nullable: true, displayOrder: 5 }
+  - { name: is_release, label: is_release, logicalType: STRING, nullable: true, displayOrder: 6, length: 64 }
+  - { name: release_date, label: release_date, logicalType: DATE, nullable: true, displayOrder: 7 }
+  - { name: pledgor, label: pledgor, logicalType: STRING, nullable: true, displayOrder: 8, length: 128 }
+  - { name: holding_amount, label: holding_amount, logicalType: DECIMAL, nullable: true, displayOrder: 9, precision: 38, scale: 18 }
+  - { name: pledged_amount, label: pledged_amount, logicalType: DECIMAL, nullable: true, displayOrder: 10, precision: 38, scale: 18 }
+  - { name: p_total_ratio, label: p_total_ratio, logicalType: DECIMAL, nullable: true, displayOrder: 11, precision: 38, scale: 18 }
+  - { name: h_total_ratio, label: h_total_ratio, logicalType: DECIMAL, nullable: true, displayOrder: 12, precision: 38, scale: 18 }
+  - { name: is_buyback, label: is_buyback, logicalType: STRING, nullable: true, displayOrder: 13, length: 64 }
+businessKey: { mode: FINGERPRINT, fields: [ts_code, ann_date, holder_name, pledge_amount, start_date, end_date, is_release, release_date, pledgor, holding_amount, pledged_amount, p_total_ratio, h_total_ratio, is_buyback] }
+filters: [ts_code, ann_date]
+fixedColumn: ts_code
