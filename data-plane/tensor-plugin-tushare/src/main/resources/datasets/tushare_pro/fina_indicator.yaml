@@ -1,0 +1,121 @@
+pluginId: tushare_pro
+apiName: fina_indicator
+tableName: tushare_pro__fina_indicator
+category: 财务与披露
+displayName: 财务指标
+queryMode: ann_date
+parameters:
+  - { name: ts_code, label: 股票代码, type: TS_CODE, required: true }
+  - { name: ann_date, label: 公告日期, type: DATE, required: true }
+columns:
+  - { name: ts_code, label: ts_code, logicalType: STRING, nullable: false, displayOrder: 0, length: 64 }
+  - { name: ann_date, label: ann_date, logicalType: DATE, nullable: false, displayOrder: 1 }
+  - { name: end_date, label: end_date, logicalType: DATE, nullable: false, displayOrder: 2 }
+  - { name: eps, label: eps, logicalType: DECIMAL, nullable: true, displayOrder: 3, precision: 38, scale: 18 }
+  - { name: dt_eps, label: dt_eps, logicalType: DECIMAL, nullable: true, displayOrder: 4, precision: 38, scale: 18 }
+  - { name: total_revenue_ps, label: total_revenue_ps, logicalType: DECIMAL, nullable: true, displayOrder: 5, precision: 38, scale: 18 }
+  - { name: revenue_ps, label: revenue_ps, logicalType: DECIMAL, nullable: true, displayOrder: 6, precision: 38, scale: 18 }
+  - { name: capital_rese_ps, label: capital_rese_ps, logicalType: DECIMAL, nullable: true, displayOrder: 7, precision: 38, scale: 18 }
+  - { name: surplus_rese_ps, label: surplus_rese_ps, logicalType: DECIMAL, nullable: true, displayOrder: 8, precision: 38, scale: 18 }
+  - { name: undist_profit_ps, label: undist_profit_ps, logicalType: DECIMAL, nullable: true, displayOrder: 9, precision: 38, scale: 18 }
+  - { name: extra_item, label: extra_item, logicalType: DECIMAL, nullable: true, displayOrder: 10, precision: 38, scale: 18 }
+  - { name: profit_dedt, label: profit_dedt, logicalType: DECIMAL, nullable: true, displayOrder: 11, precision: 38, scale: 18 }
+  - { name: gross_margin, label: gross_margin, logicalType: DECIMAL, nullable: true, displayOrder: 12, precision: 38, scale: 18 }
+  - { name: current_ratio, label: current_ratio, logicalType: DECIMAL, nullable: true, displayOrder: 13, precision: 38, scale: 18 }
+  - { name: quick_ratio, label: quick_ratio, logicalType: DECIMAL, nullable: true, displayOrder: 14, precision: 38, scale: 18 }
+  - { name: cash_ratio, label: cash_ratio, logicalType: DECIMAL, nullable: true, displayOrder: 15, precision: 38, scale: 18 }
+  - { name: ar_turn, label: ar_turn, logicalType: DECIMAL, nullable: true, displayOrder: 16, precision: 38, scale: 18 }
+  - { name: ca_turn, label: ca_turn, logicalType: DECIMAL, nullable: true, displayOrder: 17, precision: 38, scale: 18 }
+  - { name: fa_turn, label: fa_turn, logicalType: DECIMAL, nullable: true, displayOrder: 18, precision: 38, scale: 18 }
+  - { name: assets_turn, label: assets_turn, logicalType: DECIMAL, nullable: true, displayOrder: 19, precision: 38, scale: 18 }
+  - { name: op_income, label: op_income, logicalType: DECIMAL, nullable: true, displayOrder: 20, precision: 38, scale: 18 }
+  - { name: ebit, label: ebit, logicalType: DECIMAL, nullable: true, displayOrder: 21, precision: 38, scale: 18 }
+  - { name: ebitda, label: ebitda, logicalType: DECIMAL, nullable: true, displayOrder: 22, precision: 38, scale: 18 }
+  - { name: fcff, label: fcff, logicalType: DECIMAL, nullable: true, displayOrder: 23, precision: 38, scale: 18 }
+  - { name: fcfe, label: fcfe, logicalType: DECIMAL, nullable: true, displayOrder: 24, precision: 38, scale: 18 }
+  - { name: current_exint, label: current_exint, logicalType: DECIMAL, nullable: true, displayOrder: 25, precision: 38, scale: 18 }
+  - { name: noncurrent_exint, label: noncurrent_exint, logicalType: DECIMAL, nullable: true, displayOrder: 26, precision: 38, scale: 18 }
+  - { name: interestdebt, label: interestdebt, logicalType: DECIMAL, nullable: true, displayOrder: 27, precision: 38, scale: 18 }
+  - { name: netdebt, label: netdebt, logicalType: DECIMAL, nullable: true, displayOrder: 28, precision: 38, scale: 18 }
+  - { name: tangible_asset, label: tangible_asset, logicalType: DECIMAL, nullable: true, displayOrder: 29, precision: 38, scale: 18 }
+  - { name: working_capital, label: working_capital, logicalType: DECIMAL, nullable: true, displayOrder: 30, precision: 38, scale: 18 }
+  - { name: networking_capital, label: networking_capital, logicalType: DECIMAL, nullable: true, displayOrder: 31, precision: 38, scale: 18 }
+  - { name: invest_capital, label: invest_capital, logicalType: DECIMAL, nullable: true, displayOrder: 32, precision: 38, scale: 18 }
+  - { name: retained_earnings, label: retained_earnings, logicalType: DECIMAL, nullable: true, displayOrder: 33, precision: 38, scale: 18 }
+  - { name: diluted2_eps, label: diluted2_eps, logicalType: DECIMAL, nullable: true, displayOrder: 34, precision: 38, scale: 18 }
+  - { name: bps, label: bps, logicalType: DECIMAL, nullable: true, displayOrder: 35, precision: 38, scale: 18 }
+  - { name: ocfps, label: ocfps, logicalType: DECIMAL, nullable: true, displayOrder: 36, precision: 38, scale: 18 }
+  - { name: retainedps, label: retainedps, logicalType: DECIMAL, nullable: true, displayOrder: 37, precision: 38, scale: 18 }
+  - { name: cfps, label: cfps, logicalType: DECIMAL, nullable: true, displayOrder: 38, precision: 38, scale: 18 }
+  - { name: ebit_ps, label: ebit_ps, logicalType: DECIMAL, nullable: true, displayOrder: 39, precision: 38, scale: 18 }
+  - { name: fcff_ps, label: fcff_ps, logicalType: DECIMAL, nullable: true, displayOrder: 40, precision: 38, scale: 18 }
+  - { name: fcfe_ps, label: fcfe_ps, logicalType: DECIMAL, nullable: true, displayOrder: 41, precision: 38, scale: 18 }
+  - { name: netprofit_margin, label: netprofit_margin, logicalType: DECIMAL, nullable: true, displayOrder: 42, precision: 38, scale: 18 }
+  - { name: grossprofit_margin, label: grossprofit_margin, logicalType: DECIMAL, nullable: true, displayOrder: 43, precision: 38, scale: 18 }
+  - { name: cogs_of_sales, label: cogs_of_sales, logicalType: DECIMAL, nullable: true, displayOrder: 44, precision: 38, scale: 18 }
+  - { name: expense_of_sales, label: expense_of_sales, logicalType: DECIMAL, nullable: true, displayOrder: 45, precision: 38, scale: 18 }
+  - { name: profit_to_gr, label: profit_to_gr, logicalType: DECIMAL, nullable: true, displayOrder: 46, precision: 38, scale: 18 }
+  - { name: saleexp_to_gr, label: saleexp_to_gr, logicalType: DECIMAL, nullable: true, displayOrder: 47, precision: 38, scale: 18 }
+  - { name: adminexp_of_gr, label: adminexp_of_gr, logicalType: DECIMAL, nullable: true, displayOrder: 48, precision: 38, scale: 18 }
+  - { name: finaexp_of_gr, label: finaexp_of_gr, logicalType: DECIMAL, nullable: true, displayOrder: 49, precision: 38, scale: 18 }
+  - { name: impai_ttm, label: impai_ttm, logicalType: DECIMAL, nullable: true, displayOrder: 50, precision: 38, scale: 18 }
+  - { name: gc_of_gr, label: gc_of_gr, logicalType: DECIMAL, nullable: true, displayOrder: 51, precision: 38, scale: 18 }
+  - { name: op_of_gr, label: op_of_gr, logicalType: DECIMAL, nullable: true, displayOrder: 52, precision: 38, scale: 18 }
+  - { name: ebit_of_gr, label: ebit_of_gr, logicalType: DECIMAL, nullable: true, displayOrder: 53, precision: 38, scale: 18 }
+  - { name: roe, label: roe, logicalType: DECIMAL, nullable: true, displayOrder: 54, precision: 38, scale: 18 }
+  - { name: roe_waa, label: roe_waa, logicalType: DECIMAL, nullable: true, displayOrder: 55, precision: 38, scale: 18 }
+  - { name: roe_dt, label: roe_dt, logicalType: DECIMAL, nullable: true, displayOrder: 56, precision: 38, scale: 18 }
+  - { name: roa, label: roa, logicalType: DECIMAL, nullable: true, displayOrder: 57, precision: 38, scale: 18 }
+  - { name: npta, label: npta, logicalType: DECIMAL, nullable: true, displayOrder: 58, precision: 38, scale: 18 }
+  - { name: roic, label: roic, logicalType: DECIMAL, nullable: true, displayOrder: 59, precision: 38, scale: 18 }
+  - { name: roe_yearly, label: roe_yearly, logicalType: DECIMAL, nullable: true, displayOrder: 60, precision: 38, scale: 18 }
+  - { name: roa2_yearly, label: roa2_yearly, logicalType: DECIMAL, nullable: true, displayOrder: 61, precision: 38, scale: 18 }
+  - { name: debt_to_assets, label: debt_to_assets, logicalType: DECIMAL, nullable: true, displayOrder: 62, precision: 38, scale: 18 }
+  - { name: assets_to_eqt, label: assets_to_eqt, logicalType: DECIMAL, nullable: true, displayOrder: 63, precision: 38, scale: 18 }
+  - { name: dp_assets_to_eqt, label: dp_assets_to_eqt, logicalType: DECIMAL, nullable: true, displayOrder: 64, precision: 38, scale: 18 }
+  - { name: ca_to_assets, label: ca_to_assets, logicalType: DECIMAL, nullable: true, displayOrder: 65, precision: 38, scale: 18 }
+  - { name: nca_to_assets, label: nca_to_assets, logicalType: DECIMAL, nullable: true, displayOrder: 66, precision: 38, scale: 18 }
+  - { name: tbassets_to_totalassets, label: tbassets_to_totalassets, logicalType: DECIMAL, nullable: true, displayOrder: 67, precision: 38, scale: 18 }
+  - { name: int_to_talcap, label: int_to_talcap, logicalType: DECIMAL, nullable: true, displayOrder: 68, precision: 38, scale: 18 }
+  - { name: eqt_to_talcapital, label: eqt_to_talcapital, logicalType: DECIMAL, nullable: true, displayOrder: 69, precision: 38, scale: 18 }
+  - { name: currentdebt_to_debt, label: currentdebt_to_debt, logicalType: DECIMAL, nullable: true, displayOrder: 70, precision: 38, scale: 18 }
+  - { name: longdeb_to_debt, label: longdeb_to_debt, logicalType: DECIMAL, nullable: true, displayOrder: 71, precision: 38, scale: 18 }
+  - { name: ocf_to_shortdebt, label: ocf_to_shortdebt, logicalType: DECIMAL, nullable: true, displayOrder: 72, precision: 38, scale: 18 }
+  - { name: debt_to_eqt, label: debt_to_eqt, logicalType: DECIMAL, nullable: true, displayOrder: 73, precision: 38, scale: 18 }
+  - { name: eqt_to_debt, label: eqt_to_debt, logicalType: DECIMAL, nullable: true, displayOrder: 74, precision: 38, scale: 18 }
+  - { name: eqt_to_interestdebt, label: eqt_to_interestdebt, logicalType: DECIMAL, nullable: true, displayOrder: 75, precision: 38, scale: 18 }
+  - { name: tangibleasset_to_debt, label: tangibleasset_to_debt, logicalType: DECIMAL, nullable: true, displayOrder: 76, precision: 38, scale: 18 }
+  - { name: tangasset_to_intdebt, label: tangasset_to_intdebt, logicalType: DECIMAL, nullable: true, displayOrder: 77, precision: 38, scale: 18 }
+  - { name: tangibleasset_to_netdebt, label: tangibleasset_to_netdebt, logicalType: DECIMAL, nullable: true, displayOrder: 78, precision: 38, scale: 18 }
+  - { name: ocf_to_debt, label: ocf_to_debt, logicalType: DECIMAL, nullable: true, displayOrder: 79, precision: 38, scale: 18 }
+  - { name: turn_days, label: turn_days, logicalType: DECIMAL, nullable: true, displayOrder: 80, precision: 38, scale: 18 }
+  - { name: roa_yearly, label: roa_yearly, logicalType: DECIMAL, nullable: true, displayOrder: 81, precision: 38, scale: 18 }
+  - { name: roa_dp, label: roa_dp, logicalType: DECIMAL, nullable: true, displayOrder: 82, precision: 38, scale: 18 }
+  - { name: fixed_assets, label: fixed_assets, logicalType: DECIMAL, nullable: true, displayOrder: 83, precision: 38, scale: 18 }
+  - { name: profit_to_op, label: profit_to_op, logicalType: DECIMAL, nullable: true, displayOrder: 84, precision: 38, scale: 18 }
+  - { name: q_saleexp_to_gr, label: q_saleexp_to_gr, logicalType: DECIMAL, nullable: true, displayOrder: 85, precision: 38, scale: 18 }
+  - { name: q_gc_to_gr, label: q_gc_to_gr, logicalType: DECIMAL, nullable: true, displayOrder: 86, precision: 38, scale: 18 }
+  - { name: q_roe, label: q_roe, logicalType: DECIMAL, nullable: true, displayOrder: 87, precision: 38, scale: 18 }
+  - { name: q_dt_roe, label: q_dt_roe, logicalType: DECIMAL, nullable: true, displayOrder: 88, precision: 38, scale: 18 }
+  - { name: q_npta, label: q_npta, logicalType: DECIMAL, nullable: true, displayOrder: 89, precision: 38, scale: 18 }
+  - { name: q_ocf_to_sales, label: q_ocf_to_sales, logicalType: DECIMAL, nullable: true, displayOrder: 90, precision: 38, scale: 18 }
+  - { name: basic_eps_yoy, label: basic_eps_yoy, logicalType: DECIMAL, nullable: true, displayOrder: 91, precision: 38, scale: 18 }
+  - { name: dt_eps_yoy, label: dt_eps_yoy, logicalType: DECIMAL, nullable: true, displayOrder: 92, precision: 38, scale: 18 }
+  - { name: cfps_yoy, label: cfps_yoy, logicalType: DECIMAL, nullable: true, displayOrder: 93, precision: 38, scale: 18 }
+  - { name: op_yoy, label: op_yoy, logicalType: DECIMAL, nullable: true, displayOrder: 94, precision: 38, scale: 18 }
+  - { name: ebt_yoy, label: ebt_yoy, logicalType: DECIMAL, nullable: true, displayOrder: 95, precision: 38, scale: 18 }
+  - { name: netprofit_yoy, label: netprofit_yoy, logicalType: DECIMAL, nullable: true, displayOrder: 96, precision: 38, scale: 18 }
+  - { name: dt_netprofit_yoy, label: dt_netprofit_yoy, logicalType: DECIMAL, nullable: true, displayOrder: 97, precision: 38, scale: 18 }
+  - { name: ocf_yoy, label: ocf_yoy, logicalType: DECIMAL, nullable: true, displayOrder: 98, precision: 38, scale: 18 }
+  - { name: roe_yoy, label: roe_yoy, logicalType: DECIMAL, nullable: true, displayOrder: 99, precision: 38, scale: 18 }
+  - { name: bps_yoy, label: bps_yoy, logicalType: DECIMAL, nullable: true, displayOrder: 100, precision: 38, scale: 18 }
+  - { name: assets_yoy, label: assets_yoy, logicalType: DECIMAL, nullable: true, displayOrder: 101, precision: 38, scale: 18 }
+  - { name: eqt_yoy, label: eqt_yoy, logicalType: DECIMAL, nullable: true, displayOrder: 102, precision: 38, scale: 18 }
+  - { name: tr_yoy, label: tr_yoy, logicalType: DECIMAL, nullable: true, displayOrder: 103, precision: 38, scale: 18 }
+  - { name: or_yoy, label: or_yoy, logicalType: DECIMAL, nullable: true, displayOrder: 104, precision: 38, scale: 18 }
+  - { name: q_sales_yoy, label: q_sales_yoy, logicalType: DECIMAL, nullable: true, displayOrder: 105, precision: 38, scale: 18 }
+  - { name: q_op_qoq, label: q_op_qoq, logicalType: DECIMAL, nullable: true, displayOrder: 106, precision: 38, scale: 18 }
+  - { name: equity_yoy, label: equity_yoy, logicalType: DECIMAL, nullable: true, displayOrder: 107, precision: 38, scale: 18 }
+businessKey: { mode: COMPOSITE, fields: [ts_code, end_date, ann_date] }
+filters: [ts_code, ann_date]
+fixedColumn: ts_code

@@ -1,0 +1,21 @@
+pluginId: tushare_pro
+apiName: fina_mainbz
+tableName: tushare_pro__fina_mainbz
+category: 财务与披露
+displayName: 主营业务构成
+queryMode: ann_date
+parameters:
+  - { name: ts_code, label: 股票代码, type: TS_CODE, required: true }
+  - { name: ann_date, label: 公告日期, type: DATE, required: true }
+columns:
+  - { name: ts_code, label: ts_code, logicalType: STRING, nullable: false, displayOrder: 0, length: 64 }
+  - { name: end_date, label: end_date, logicalType: DATE, nullable: false, displayOrder: 1 }
+  - { name: bz_item, label: bz_item, logicalType: STRING, nullable: false, displayOrder: 2, length: 255 }
+  - { name: bz_code, label: bz_code, logicalType: STRING, nullable: true, displayOrder: 3, length: 64 }
+  - { name: bz_sales, label: bz_sales, logicalType: DECIMAL, nullable: true, displayOrder: 4, precision: 38, scale: 18 }
+  - { name: bz_profit, label: bz_profit, logicalType: DECIMAL, nullable: true, displayOrder: 5, precision: 38, scale: 18 }
+  - { name: bz_cost, label: bz_cost, logicalType: DECIMAL, nullable: true, displayOrder: 6, precision: 38, scale: 18 }
+  - { name: curr_type, label: curr_type, logicalType: STRING, nullable: false, displayOrder: 7, length: 64 }
+businessKey: { mode: COMPOSITE, fields: [ts_code, end_date, bz_item, curr_type] }
+filters: [ts_code]
+fixedColumn: ts_code
