@@ -38,7 +38,7 @@
 | 17 | M03-T05 | 互联互通与转融通 6 数据集 YAML | `COMPLETED` | M03-T01 | docs/task-designs/M03-T05-design.md | docs/task-handoffs/M03-T05-handoff.md |
 | 18 | M03-T06 | 财务与披露 9 数据集 YAML | `COMPLETED` | M03-T01 | docs/task-designs/M03-T06-design.md | docs/task-handoffs/M03-T06-handoff.md |
 | 19 | M03-T07 | 公司行动 3 数据集 YAML | `COMPLETED` | M03-T01 | docs/task-designs/M03-T07-design.md | docs/task-handoffs/M03-T07-handoff.md |
-| 20 | M03-T08 | 股东与治理 7 数据集 YAML | `NOT_STARTED` | M03-T01 | None | None |
+| 20 | M03-T08 | 股东与治理 7 数据集 YAML | `NOT_STARTED` | M03-T01 | docs/task-designs/M03-T08-design.md | None |
 | 21 | M03-T09 | 49/49 名称、字段、参数、键和筛选总契约 | `NOT_STARTED` | M03-T02, M03-T03, M03-T04, M03-T05, M03-T06, M03-T07, M03-T08 | None | None |
 | 22 | M04-T01 | V1 基础与组织表 | `NOT_STARTED` | M03-T02 | None | None |
 | 23 | M04-T02 | V2 行情、交易与资金表 | `NOT_STARTED` | M03-T03, M03-T04 | None | None |
