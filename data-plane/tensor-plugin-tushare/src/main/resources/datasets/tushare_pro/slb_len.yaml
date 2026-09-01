@@ -1,0 +1,18 @@
+pluginId: tushare_pro
+apiName: slb_len
+tableName: tushare_pro__slb_len
+category: 互联互通与转融通
+displayName: 转融通期限与规模
+queryMode: trade_date
+parameters:
+  - { name: trade_date, label: 交易日期, type: DATE, required: true }
+columns:
+  - { name: trade_date, label: trade_date, logicalType: DATE, nullable: false, displayOrder: 0 }
+  - { name: ob, label: ob, logicalType: DECIMAL, nullable: false, displayOrder: 1, precision: 38, scale: 18 }
+  - { name: auc_amount, label: auc_amount, logicalType: DECIMAL, nullable: true, displayOrder: 2, precision: 38, scale: 18 }
+  - { name: repo_amount, label: repo_amount, logicalType: DECIMAL, nullable: true, displayOrder: 3, precision: 38, scale: 18 }
+  - { name: repay_amount, label: repay_amount, logicalType: DECIMAL, nullable: true, displayOrder: 4, precision: 38, scale: 18 }
+  - { name: cb, label: cb, logicalType: DECIMAL, nullable: true, displayOrder: 5, precision: 38, scale: 18 }
+businessKey: { mode: COMPOSITE, fields: [trade_date, ob] }
+filters: [trade_date]
+fixedColumn: trade_date

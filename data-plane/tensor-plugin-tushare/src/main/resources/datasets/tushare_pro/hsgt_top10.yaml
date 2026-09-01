@@ -1,0 +1,23 @@
+pluginId: tushare_pro
+apiName: hsgt_top10
+tableName: tushare_pro__hsgt_top10
+category: 互联互通与转融通
+displayName: 沪深港通十大成交股
+queryMode: trade_date
+parameters:
+  - { name: trade_date, label: 交易日期, type: DATE, required: true }
+columns:
+  - { name: trade_date, label: trade_date, logicalType: DATE, nullable: false, displayOrder: 0 }
+  - { name: ts_code, label: ts_code, logicalType: STRING, nullable: false, displayOrder: 1, length: 64 }
+  - { name: name, label: name, logicalType: STRING, nullable: true, displayOrder: 2, length: 128 }
+  - { name: close, label: close, logicalType: DECIMAL, nullable: true, displayOrder: 3, precision: 38, scale: 18 }
+  - { name: change, label: change, logicalType: DECIMAL, nullable: true, displayOrder: 4, precision: 38, scale: 18 }
+  - { name: rank, label: rank, logicalType: LONG, nullable: true, displayOrder: 5 }
+  - { name: market_type, label: market_type, logicalType: LONG, nullable: false, displayOrder: 6 }
+  - { name: amount, label: amount, logicalType: DECIMAL, nullable: true, displayOrder: 7, precision: 38, scale: 18 }
+  - { name: net_amount, label: net_amount, logicalType: DECIMAL, nullable: true, displayOrder: 8, precision: 38, scale: 18 }
+  - { name: buy, label: buy, logicalType: DECIMAL, nullable: true, displayOrder: 9, precision: 38, scale: 18 }
+  - { name: sell, label: sell, logicalType: DECIMAL, nullable: true, displayOrder: 10, precision: 38, scale: 18 }
+businessKey: { mode: COMPOSITE, fields: [trade_date, ts_code, market_type] }
+filters: [ts_code, trade_date]
+fixedColumn: ts_code

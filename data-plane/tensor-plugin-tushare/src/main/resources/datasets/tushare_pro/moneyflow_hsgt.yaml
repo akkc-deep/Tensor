@@ -1,0 +1,19 @@
+pluginId: tushare_pro
+apiName: moneyflow_hsgt
+tableName: tushare_pro__moneyflow_hsgt
+category: 互联互通与转融通
+displayName: 沪深港通资金流向
+queryMode: trade_date
+parameters:
+  - { name: trade_date, label: 交易日期, type: DATE, required: true }
+columns:
+  - { name: trade_date, label: trade_date, logicalType: DATE, nullable: false, displayOrder: 0 }
+  - { name: ggt_ss, label: ggt_ss, logicalType: DECIMAL, nullable: true, displayOrder: 1, precision: 38, scale: 18 }
+  - { name: ggt_sz, label: ggt_sz, logicalType: DECIMAL, nullable: true, displayOrder: 2, precision: 38, scale: 18 }
+  - { name: hgt, label: hgt, logicalType: DECIMAL, nullable: true, displayOrder: 3, precision: 38, scale: 18 }
+  - { name: sgt, label: sgt, logicalType: DECIMAL, nullable: true, displayOrder: 4, precision: 38, scale: 18 }
+  - { name: north_money, label: north_money, logicalType: DECIMAL, nullable: true, displayOrder: 5, precision: 38, scale: 18 }
+  - { name: south_money, label: south_money, logicalType: DECIMAL, nullable: true, displayOrder: 6, precision: 38, scale: 18 }
+businessKey: { mode: COMPOSITE, fields: [trade_date] }
+filters: [trade_date]
+fixedColumn: trade_date
