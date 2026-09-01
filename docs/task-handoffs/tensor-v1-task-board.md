@@ -40,7 +40,7 @@
 | 19 | M03-T07 | 公司行动 3 数据集 YAML | `COMPLETED` | M03-T01 | docs/task-designs/M03-T07-design.md | docs/task-handoffs/M03-T07-handoff.md |
 | 20 | M03-T08 | 股东与治理 7 数据集 YAML | `COMPLETED` | M03-T01 | docs/task-designs/M03-T08-design.md | docs/task-handoffs/M03-T08-handoff.md |
 | 21 | M03-T09 | 49/49 名称、字段、参数、键和筛选总契约 | `COMPLETED` | M03-T02, M03-T03, M03-T04, M03-T05, M03-T06, M03-T07, M03-T08 | docs/task-designs/M03-T09-design.md | docs/task-handoffs/M03-T09-handoff.md |
-| 22 | M04-T01 | V1 基础与组织表 | `BLOCKED` | M03-T02 | docs/task-designs/M04-T01-design.md | docs/task-handoffs/M04-T01-handoff.md |
+| 22 | M04-T01 | V1 基础与组织表 | `READY` | M03-T02 | docs/task-designs/M04-T01-design.md | docs/task-handoffs/M04-T01-handoff.md |
 | 23 | M04-T02 | V2 行情、交易与资金表 | `NOT_STARTED` | M03-T03, M03-T04 | None | None |
 | 24 | M04-T03 | V3 互联互通与转融通表 | `NOT_STARTED` | M03-T05 | None | None |
 | 25 | M04-T04 | V4 财务与披露宽表 | `NOT_STARTED` | M03-T06 | None | None |
@@ -326,6 +326,8 @@
 - **State evidence:** 2026-09-01：M03-T09 已按设计交付永久 49/49 元数据总契约，提交 `36230d8` 精确包含唯一测试文件；reactor 137/137、`verify`、三层 Enforcer、生产 JAR 排除、范围/清理门禁及无发现独立审查均通过，看板提交 `33dbbb5` 已先记录 `IN_PROGRESS -> COMPLETED`。按预定义顺序选择后继 M04-T01；其唯一直接依赖 M03-T02 为 `COMPLETED`，提交 `5fe20a2` 中 11 份 YAML 与 `docs/task-designs/M03-T02-design.md` 冻结的 93 列、十个 COMPOSITE 键、一个 FINGERPRINT 键及 filters 可定位，并已由 M03-T09 再次验证，与 M04 任务卡及 TRD 8.3/9.1～9.6 无冲突。`docs/task-designs/M04-T01-design.md` 已完成并由提交 `06663d9` 回填同一设计路径，冻结唯一 V1 SQL、机械 MySQL 类型映射、11 表/127 总列/六个二级索引、来源字段、MySQL 8.4 Flyway RED/GREEN harness、150 项 reactor 门禁、失败边界和精确验收；七节顺序、链接、占位符和 `git diff --check` 均通过。`docs/task-handoffs/M04-T01-handoff.md` 已按 `next-task` 模板创建并链接，只记录直接依赖 M03-T02、约束比较、读取顺序和先创建完整临时 harness 取得缺 V1 文件 RED 的首个动作，因此执行 `NOT_STARTED -> READY`。随后用户明确要求按照权威任务看板执行当前任务；已完整读取 `docs/task-designs/M04-T01-design.md` 与 `docs/task-handoffs/M04-T01-handoff.md`，确认任务身份、范围、唯一直接依赖、首个动作和验收契约均可定位，作为本次 `READY -> IN_PROGRESS` 的启动证据；既有交接路径保留为进入上下文。
 
 - **State evidence (blocker):** 2026-09-01：修改前 `mvn -Dmaven.repo.local=/private/tmp/tensor-m2 -f data-plane/pom.xml -pl tensor-app -am test` 在 plugin-api 79/79 和 tushare 58/58 通过后，因 `ModuleDependencyTest` 的唯一测试失败而退出 1；定向命令稳定复现同一结果。根因是架构规则的 `..core..` 模式把 `org.springframework.core` 与 `com.fasterxml.jackson.core` 误判为项目 `tensor-core`，修复需修改 M04-T01 设计明确排除的 Java 测试。`docs/task-handoffs/M04-T01-handoff.md` 已在状态转换前刷新为 `pause` 交接，记录根因、命令结果、未开始的 SQL 实现与解阻条件；因此执行 `IN_PROGRESS -> BLOCKED`。解阻条件是项目所有者授权并完成独立架构测试缺陷修复，且同一基线 reactor 命令以 150/150、0 failure、0 error、0 skipped 退出 0。
+
+- **State evidence (resolution):** 2026-09-01：项目所有者回复“同意”，授权先以独立缺陷范围修复架构测试误判，并在 reactor 150/150 后恢复、继续 M04-T01。提交 `13d599f` 只修改 `ModuleDependencyTest.java`，将禁止依赖目标收窄到精确 `com.akkc.tensor` 模块包；原失败定向命令为 1/1 通过，暂停交接指定的基线 reactor 命令为 150/150、0 failure、0 error、0 skipped，六层 Enforcer 通过；独立审查确认 ArchUnit 包匹配语义、四条模块方向约束和单文件范围均正确，无 Critical、Important 或 Minor 发现。因此暂停交接的解阻条件已满足，既有 `pause` 交接路径保留为历史上下文，执行 `BLOCKED -> READY`。
 
 ### `M04-T02`
 
