@@ -41,7 +41,7 @@
 | 20 | M03-T08 | 股东与治理 7 数据集 YAML | `COMPLETED` | M03-T01 | docs/task-designs/M03-T08-design.md | docs/task-handoffs/M03-T08-handoff.md |
 | 21 | M03-T09 | 49/49 名称、字段、参数、键和筛选总契约 | `COMPLETED` | M03-T02, M03-T03, M03-T04, M03-T05, M03-T06, M03-T07, M03-T08 | docs/task-designs/M03-T09-design.md | docs/task-handoffs/M03-T09-handoff.md |
 | 22 | M04-T01 | V1 基础与组织表 | `COMPLETED` | M03-T02 | docs/task-designs/M04-T01-design.md | docs/task-handoffs/M04-T01-handoff.md |
-| 23 | M04-T02 | V2 行情、交易与资金表 | `IN_PROGRESS` | M03-T03, M03-T04 | docs/task-designs/M04-T02-design.md | docs/task-handoffs/M04-T02-handoff.md |
+| 23 | M04-T02 | V2 行情、交易与资金表 | `COMPLETED` | M03-T03, M03-T04 | docs/task-designs/M04-T02-design.md | docs/task-handoffs/M04-T02-handoff.md |
 | 24 | M04-T03 | V3 互联互通与转融通表 | `NOT_STARTED` | M03-T05 | None | None |
 | 25 | M04-T04 | V4 财务与披露宽表 | `NOT_STARTED` | M03-T06 | None | None |
 | 26 | M04-T05 | V5 公司行动、股东与治理表 | `NOT_STARTED` | M03-T07, M03-T08 | None | None |
@@ -348,6 +348,8 @@
 - **Sources:** `docs/superpowers/plans/tensor-modules/M04-flyway-schema.md` 的 `Task M04-T02` 任务卡。
 - **First action:** 读取 `docs/superpowers/plans/tensor-modules/M04-flyway-schema.md` 的 `Task M04-T02` 任务卡，并确认其 `Context boundary`、输入和目标文件均可定位。
 - **State evidence:** 2026-09-01：M04-T01 已在本机 Colima 的官方 MySQL 8.4.6 上通过 V1 Flyway migrate/validate/二次 migrate、11 表/127 列/键/索引/引擎/排序规则实际 schema 对照、提交后 reactor 150/150、六层 Enforcer、JAR/范围/清理和无发现独立审查；实现提交 `09dbbfd` 精确包含唯一 V1 SQL，看板提交 `88da372` 已先记录 `IN_PROGRESS -> COMPLETED`。按预定义顺序选择后继 M04-T02；其直接依赖 M03-T03、M03-T04 均为 `COMPLETED`，提交 `3c2e977`、`c00ea0d` 分别交付互不重叠的 7+6 个 API 和 62+71 个业务列，合计 13 表/133 列，全部使用冻结的 COMPOSITE 键、同一公开 loader、表名公式和机械 MySQL 类型映射，主键/filters 差异已逐表比较且无冲突。项目所有者批准 M04-T02 采用临时 Java harness、固定官方 `mysql:8.4.6`、13 表/172 V2 总列/12 二级索引及 V1–V2 24 表实际验证，并进一步裁决 M04-T02～T06 均固定使用该版本；提交 `4c32e7d` 已将版本裁决写入模块计划，创建完整 `docs/task-designs/M04-T02-design.md` 并回填同一设计路径。设计七节顺序、占位符、13/133/12 矩阵、依赖路径、版本表述和 `git diff --check` 均通过，书面设计随后获项目所有者明确同意。`docs/task-handoffs/M04-T02-handoff.md` 已按 `next-task` 模板创建并链接，记录两个直接依赖、决策/约束比较、读取顺序和先取得缺 V2 文件 RED 的首个实施动作；因此执行 `NOT_STARTED -> READY`，尚未开始 SQL 实现。2026-09-01：用户明确要求按照权威任务看板执行当前任务；已完整读取 M04-T02 设计、既有 `next-task` 交接、模块任务卡及上位路线图设计，逐项核对 M03-T03/M03-T04 设计、提交与 13 份运行时 YAML，并确认 V1、POM、公开 loader、任务范围、验收和首个 RED 动作均可定位且无冲突，作为本次 `READY -> IN_PROGRESS` 的启动证据；既有交接路径保留为进入上下文。
+
+- **Completion evidence:** 2026-09-01：实施按严格 TDD 先通过 150/150 reactor 基线，再以完整 `/private/tmp/M04T02SchemaCheck.java` 在数据库连接前只因精确 V2 路径缺失退出 1；提交 `0967474`（`feat(db): create market and trading tables`）精确新增唯一 237 行 V2 SQL。固定官方 `mysql:8.4.6` 镜像为 linux/arm64、`MYSQL_VERSION=8.4.6-1.el9`；在隔离全新 `tensor` schema 中，Flyway 首次恰执行 V1/V2 两项、validate 通过、二次 migrate 为零项，`information_schema` 逐表对照最终只输出 `M04-T02_OK:24:13:133:172:12`，确认全局 24 表/299 列/24 PRIMARY/18 二级索引及 V2 13 表/133 业务列/172 总列/13 PRIMARY/12 二级索引、引擎、排序规则、来源字段和 `daily` 特例。提交前新鲜 reactor `test` 与 `verify` 均为 150/150、0 failure、0 error、0 skipped，六层 Enforcer 通过，生产 JAR 恰含 V1/V2 两份迁移；独立审查另行输出 `INDEPENDENT_DDL_YAML_CHECK_OK tables=13 business=133 total=172 pks=13 secondary=12`，结论 `Ready to merge: Yes` 且 Critical、Important、Minor 均为 0。最终 Maven `clean`、任务容器、临时 harness/classpath 均已清理，提交范围、`git diff --check` 与干净工作树门禁通过。因此满足任务设计和任务卡的结果级验收，执行 `IN_PROGRESS -> COMPLETED`，既有 `next-task` 交接路径保留为历史进入上下文。
 
 ### `M04-T03`
 
