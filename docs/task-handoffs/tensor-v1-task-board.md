@@ -40,7 +40,7 @@
 | 19 | M03-T07 | 公司行动 3 数据集 YAML | `COMPLETED` | M03-T01 | docs/task-designs/M03-T07-design.md | docs/task-handoffs/M03-T07-handoff.md |
 | 20 | M03-T08 | 股东与治理 7 数据集 YAML | `COMPLETED` | M03-T01 | docs/task-designs/M03-T08-design.md | docs/task-handoffs/M03-T08-handoff.md |
 | 21 | M03-T09 | 49/49 名称、字段、参数、键和筛选总契约 | `COMPLETED` | M03-T02, M03-T03, M03-T04, M03-T05, M03-T06, M03-T07, M03-T08 | docs/task-designs/M03-T09-design.md | docs/task-handoffs/M03-T09-handoff.md |
-| 22 | M04-T01 | V1 基础与组织表 | `READY` | M03-T02 | docs/task-designs/M04-T01-design.md | docs/task-handoffs/M04-T01-handoff.md |
+| 22 | M04-T01 | V1 基础与组织表 | `IN_PROGRESS` | M03-T02 | docs/task-designs/M04-T01-design.md | docs/task-handoffs/M04-T01-handoff.md |
 | 23 | M04-T02 | V2 行情、交易与资金表 | `NOT_STARTED` | M03-T03, M03-T04 | None | None |
 | 24 | M04-T03 | V3 互联互通与转融通表 | `NOT_STARTED` | M03-T05 | None | None |
 | 25 | M04-T04 | V4 财务与披露宽表 | `NOT_STARTED` | M03-T06 | None | None |
@@ -334,6 +334,8 @@
 - **State evidence (environment blocker):** 2026-09-01：恢复后已按设计产生完整临时 harness 并取得只因缺 V1 文件的可归因 RED；唯一 V1 SQL 已创建但未提交，SQL 后 reactor `test`/`verify` 均为 150/150、0 failure、0 error、0 skipped，六层 Enforcer、JAR 单资源、`git diff --check`、范围与清理门禁通过。实现代理两次执行设计指定的 `docker run ... mysql:8.4 ...` 均在 Docker Hub manifest HTTPS 请求阶段超时且未创建容器；控制器随后执行 `docker image inspect mysql:8.4 --format '{{.Id}}' || docker pull mysql:8.4` 的安全重试，确认本地镜像不存在并再次因同类 HTTPS 超时而退出 1。任务设计明确禁止替换 MySQL 8.4 或跳过实际 schema 校验，因此无法产生 Flyway migrate/validate/二次 migrate、`information_schema` 与 `M04-T01_OK:11:93:127:6` GREEN 证据。`docs/task-handoffs/M04-T01-handoff.md` 已在转换前刷新，记录未提交 SQL、已完成验证、未验证范围和可观测解阻条件；因此执行 `IN_PROGRESS -> BLOCKED`。
 
 - **State evidence (environment resolution):** 2026-09-01：项目所有者指出其他项目已在本机 Colima 使用 MySQL 8.4。宿主环境只读复核确认默认 Colima profile 正常 `Running`，Docker daemon 为 linux/arm64 且可响应；本地已有官方 `mysql:8.4.6`，镜像声明 `MYSQL_MAJOR=8.4`、`MYSQL_VERSION=8.4.6-1.el9`，符合设计允许 MySQL 8.4 LTS 维护补丁的约束。为同一镜像补充本地 `mysql:8.4` 标签后，`docker image inspect mysql:8.4` 返回与 `8.4.6` 相同的 `sha256:869218921e61...`，`mysqld --version` 为 MySQL Community Server 8.4.6；设计指定的无挂载、随机端口任务容器随后成功启动，`mysqladmin ping` 输出 `mysqld is alive`。暂停交接的镜像可用及容器可启动条件均已满足，既有 `pause` 交接保留为历史上下文，因此执行 `BLOCKED -> READY`。
+
+- **State evidence (environment restart):** 2026-09-01：提交 `5af2852` 已单独记录环境解阻；随后重新完整核对 M04-T01 设计与同任务 `pause` 交接，确认任务身份、唯一 V1 SQL 范围、实际 MySQL 8.4 Flyway/`information_schema` 门禁及最终提交顺序均未改变。项目所有者要求复用其他项目已使用的本机 MySQL 8.4，并已取得同一官方镜像可启动的客观证据，授权条件与剩余工作均明确，因此执行 `READY -> IN_PROGRESS`。
 
 ### `M04-T02`
 
