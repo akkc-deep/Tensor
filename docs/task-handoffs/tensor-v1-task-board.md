@@ -53,7 +53,7 @@
 | 32 | M05-T05 | `GenericDatasetAdapter`、重复键和指纹键 | `COMPLETED` | M02-T04, M02-T05, M05-T02, M05-T03, M05-T04 | docs/task-designs/M05-T05-design.md | docs/task-handoffs/M05-T05-handoff.md |
 | 33 | M06-T01 | 白名单 SQL 标识符和 Upsert 模板 | `COMPLETED` | M02-T03, M04-T06 | docs/task-designs/M06-T01-design.md | docs/task-handoffs/M06-T01-handoff.md |
 | 34 | M06-T02 | 复合键与指纹键编码/绑定 | `COMPLETED` | M05-T05 | docs/task-designs/M06-T02-design.md | docs/task-handoffs/M06-T02-handoff.md |
-| 35 | M06-T03 | 已有键预查、数据集锁和插入/更新计数 | `NOT_STARTED` | M06-T01, M06-T02 | docs/task-designs/M06-T03-design.md | None |
+| 35 | M06-T03 | 已有键预查、数据集锁和插入/更新计数 | `READY` | M06-T01, M06-T02 | docs/task-designs/M06-T03-design.md | docs/task-handoffs/M06-T03-handoff.md |
 | 36 | M06-T04 | 单事务批量 Upsert 与回滚 | `NOT_STARTED` | M06-T03 | None | None |
 | 37 | M06-T05 | 查询条件白名单和 COUNT/分页 SQL | `NOT_STARTED` | M02-T03, M04-T06 | None | None |
 | 38 | M06-T06 | `DatasetQueryService`、页码归一化和精度序列化 | `NOT_STARTED` | M06-T05 | None | None |
@@ -503,7 +503,7 @@
 - **Dependencies:** M06-T01, M06-T02.
 - **Sources:** `docs/superpowers/plans/tensor-modules/M06-core-persistence-query.md` 的 `Task M06-T03` 任务卡。
 - **First action:** 读取 `docs/superpowers/plans/tensor-modules/M06-core-persistence-query.md` 的 `Task M06-T03` 任务卡，并确认其 `Context boundary`、输入和目标文件均可定位。
-- **State evidence:** None.
+- **State evidence:** 2026-09-02：M06-T02 已按严格 TDD、reactor `test`/`verify` 146/146、三层 Enforcer、静态/范围/格式/清理门禁及无发现独立审查完成；实现提交 `2bd8996` 精确交付三个生产类和一个测试类，看板提交 `e86e1af` 已先记录 `IN_PROGRESS -> COMPLETED`，按预定义顺序选择最小后继 M06-T03。其直接依赖 M06-T01、M06-T02 均为 `COMPLETED`：前者由提交 `029b344` 提供白名单标识符、参数化 Upsert 模板和 COMPOSITE/FINGERPRINT 物理键规则，后者由提交 `2bd8996` 提供不可变有序 `BusinessKey`、两种键模式提取和无 `setObject` 的明确 JDBC binder；两项输入分别冻结安全物理键列和有序键值/绑定，约束互补且无冲突。项目所有者明确批准已有键 SQL 策略：单物理键列使用参数化 scalar `IN`，多物理键列使用 MySQL row-constructor `IN`，每查询最多 1000 个绑定参数且分块键数为 `floor(1000 / physicalKeyWidth)`；并批准任务卡文件范围只扩展 `data-plane/tensor-core/pom.xml`，只增加由 Spring Boot BOM 管理的 `com.mysql:mysql-connector-j` test-scope 依赖，因为依赖树已证明现有 Testcontainers MySQL 不提供 JDBC driver。提交 `82c7c99` 已创建并回填 `docs/task-designs/M06-T03-design.md`，完整冻结三个生产类型的唯一公开表面、锁 acquisition/释放/引用清理、精确 SQL 与结果映射、JDBC 类型、空/重复/宽度/SQL 失败边界、`WriteCounts.from` 不变量、固定 8 项 MySQL/并发测试、显式 `*IT` 生命周期、146/146 标准回归和精确五文件实现范围；链接后重新完整读取并确认七节齐全、无占位符、矛盾、范围漂移或留给实施者的材料选择。`docs/task-handoffs/M06-T03-handoff.md` 已按 `next-task` 模板先行完整创建，只记录 M06-T03 及直接输入 M06-T01/M06-T02，包含逐项 artifact/decision/rationale/constraint/usage/readiness evidence、约束比较、设计优先读取顺序，以及先确认 146/146 基线和 driver 缺失、再只添加批准 POM 依赖与完整 IT 取得缺三个生产类型 RED 的首个实施动作；因此链接交接并执行真实的 `NOT_STARTED -> READY`，Java 实现尚未开始。
 
 ### `M06-T04`
 
