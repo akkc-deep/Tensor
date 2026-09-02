@@ -52,7 +52,7 @@
 | 31 | M05-T04 | 严格日期、文本、整数和精确数值转换 | `COMPLETED` | M02-T03, M02-T05 | docs/task-designs/M05-T04-design.md | docs/task-handoffs/M05-T04-handoff.md |
 | 32 | M05-T05 | `GenericDatasetAdapter`、重复键和指纹键 | `COMPLETED` | M02-T04, M02-T05, M05-T02, M05-T03, M05-T04 | docs/task-designs/M05-T05-design.md | docs/task-handoffs/M05-T05-handoff.md |
 | 33 | M06-T01 | 白名单 SQL 标识符和 Upsert 模板 | `COMPLETED` | M02-T03, M04-T06 | docs/task-designs/M06-T01-design.md | docs/task-handoffs/M06-T01-handoff.md |
-| 34 | M06-T02 | 复合键与指纹键编码/绑定 | `NOT_STARTED` | M05-T05 | None | None |
+| 34 | M06-T02 | 复合键与指纹键编码/绑定 | `NOT_STARTED` | M05-T05 | docs/task-designs/M06-T02-design.md | None |
 | 35 | M06-T03 | 已有键预查、数据集锁和插入/更新计数 | `NOT_STARTED` | M06-T01, M06-T02 | None | None |
 | 36 | M06-T04 | 单事务批量 Upsert 与回滚 | `NOT_STARTED` | M06-T03 | None | None |
 | 37 | M06-T05 | 查询条件白名单和 COUNT/分页 SQL | `NOT_STARTED` | M02-T03, M04-T06 | None | None |
