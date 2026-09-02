@@ -51,7 +51,7 @@
 | 30 | M05-T03 | 元数据驱动参数校验 | `COMPLETED` | M02-T02, M02-T05, M03-T09 | docs/task-designs/M05-T03-design.md | docs/task-handoffs/M05-T03-handoff.md |
 | 31 | M05-T04 | 严格日期、文本、整数和精确数值转换 | `COMPLETED` | M02-T03, M02-T05 | docs/task-designs/M05-T04-design.md | docs/task-handoffs/M05-T04-handoff.md |
 | 32 | M05-T05 | `GenericDatasetAdapter`、重复键和指纹键 | `COMPLETED` | M02-T04, M02-T05, M05-T02, M05-T03, M05-T04 | docs/task-designs/M05-T05-design.md | docs/task-handoffs/M05-T05-handoff.md |
-| 33 | M06-T01 | 白名单 SQL 标识符和 Upsert 模板 | `IN_PROGRESS` | M02-T03, M04-T06 | docs/task-designs/M06-T01-design.md | docs/task-handoffs/M06-T01-handoff.md |
+| 33 | M06-T01 | 白名单 SQL 标识符和 Upsert 模板 | `BLOCKED` | M02-T03, M04-T06 | docs/task-designs/M06-T01-design.md | docs/task-handoffs/M06-T01-handoff.md |
 | 34 | M06-T02 | 复合键与指纹键编码/绑定 | `NOT_STARTED` | M05-T05 | None | None |
 | 35 | M06-T03 | 已有键预查、数据集锁和插入/更新计数 | `NOT_STARTED` | M06-T01, M06-T02 | None | None |
 | 36 | M06-T04 | 单事务批量 Upsert 与回滚 | `NOT_STARTED` | M06-T03 | None | None |
@@ -474,6 +474,8 @@
 - **State evidence (readiness):** 2026-09-02：M05-T05 已按严格 TDD、最终 reactor `test`/`verify` 132/132、三层 Enforcer、静态/范围/格式/清理门禁及两层审查完成，实现提交 `d7ec551` 与合同修复 `8ca49d0` 已由看板提交 `387ceb8` 记录 `IN_PROGRESS -> COMPLETED`；按预定义顺序选择后继 M06-T01。其直接依赖 M02-T03、M04-T06 均为 `COMPLETED`：前者以提交 `551c18f` 和修复 `0a74740` 冻结保序不可变 `DatasetDefinition`/业务键合同，后者以提交 `e78bd98` 在官方 MySQL 8.4.6 验证业务列原序、两项 FINGERPRINT `business_key`、三个来源字段和 49 张生产表物理主键。两项输入分别提供逻辑元数据与物理映射，结合 TRD 10.3 的参数化 Upsert 结构无冲突。提交 `21eabe6` 已创建并回填 `docs/task-designs/M06-T01-design.md`，完整冻结两个无状态公开类型、白名单正则、COMPOSITE/FINGERPRINT insert/update 差异、`daily` 精确 SQL、6 项严格 TDD、138/138 reactor 和精确三文件范围；完整复读确认七节齐全、无占位符或留给实施者的材料选择。`docs/task-handoffs/M06-T01-handoff.md` 已按 `next-task` 模板创建并先链接，只记录 M06-T01 及直接输入 M02-T03/M04-T06，包含决策/约束比较、设计优先读取顺序和先确认 132/132 基线再取得缺两个生产类型 RED 的首个动作；因此执行 `NOT_STARTED -> READY`，实现尚未开始。
 
 - **State evidence (start):** 2026-09-02：用户明确要求按照权威任务看板执行当前任务；已完整读取 `docs/task-designs/M06-T01-design.md` 与 `docs/task-handoffs/M06-T01-handoff.md`，并核对模块计划的 Global Constraints、Task M06-T01、Module Gate、两项直接依赖设计、当前公开元数据类型、TRD 9.1/9.2/10.2/10.3 以及 `daily`、`stk_managers`、`pledge_detail` 物理映射，确认任务身份、精确三文件范围、冻结公开表面、失败边界、验收和首个 TDD 动作均可定位且无冲突。该请求作为本次 `READY -> IN_PROGRESS` 的启动证据，既有 `next-task` 交接路径保留为进入上下文。
+
+- **State evidence (blocker):** 2026-09-02：精确三个 Java 文件已按严格 TDD 创建并暂存；缺两个生产类型的聚焦 RED 可归因，聚焦 GREEN 为 6/6，授权 JVM 环境 reactor `test`/`verify` 均为 plugin-api 79/79 加 core 59/59、合计 138/138，三层 Enforcer、第一项静态扫描、范围、格式和清理检查通过。独立任务审查确认实现与测试满足功能合同，但发现设计第二项静态门禁以包含裸 `;` 的正则扫描 `UpsertSqlFactory.java` 并要求无输出；合法 Java 必须包含分号，故原命令不可满足，审查把它列为唯一 Important 计划/门禁问题并判定修正前不能满足全部验收。`docs/task-handoffs/M06-T01-handoff.md` 已改写为 `pause` 交接，记录当前暂存产物、验证证据、剩余工作与解阻条件；因此执行 `IN_PROGRESS -> BLOCKED`。解阻条件是项目所有者批准一个精确、可执行且能验证生成 SQL 无末尾分号/危险关键字或注释的替代扫描规则，并把批准裁决记录进任务设计。
 
 ### `M06-T02`
 
