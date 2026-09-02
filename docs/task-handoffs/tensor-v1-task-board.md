@@ -56,7 +56,7 @@
 | 35 | M06-T03 | 已有键预查、数据集锁和插入/更新计数 | `COMPLETED` | M06-T01, M06-T02 | docs/task-designs/M06-T03-design.md | docs/task-handoffs/M06-T03-handoff.md |
 | 36 | M06-T04 | 单事务批量 Upsert 与回滚 | `COMPLETED` | M06-T03 | docs/task-designs/M06-T04-design.md | docs/task-handoffs/M06-T04-handoff.md |
 | 37 | M06-T05 | 查询条件白名单和 COUNT/分页 SQL | `COMPLETED` | M02-T03, M04-T06 | docs/task-designs/M06-T05-design.md | docs/task-handoffs/M06-T05-handoff.md |
-| 38 | M06-T06 | `DatasetQueryService`、页码归一化和精度序列化 | `NOT_STARTED` | M06-T05 | docs/task-designs/M06-T06-design.md | None |
+| 38 | M06-T06 | `DatasetQueryService`、页码归一化和精度序列化 | `READY` | M06-T05 | docs/task-designs/M06-T06-design.md | docs/task-handoffs/M06-T06-handoff.md |
 | 39 | M07-T01 | 配置属性和同步 `RestClient` | `NOT_STARTED` | M02-T05 | None | None |
 | 40 | M07-T02 | Tushare 请求、响应 DTO 和严格返回校验 | `NOT_STARTED` | M03-T09, M07-T01 | None | None |
 | 41 | M07-T03 | 鉴权、权限、限流、网络、超时和格式错误分类 | `NOT_STARTED` | M07-T02 | None | None |
@@ -543,7 +543,7 @@
 - **Dependencies:** M06-T05.
 - **Sources:** `docs/superpowers/plans/tensor-modules/M06-core-persistence-query.md` 的 `Task M06-T06` 任务卡。
 - **First action:** 读取 `docs/superpowers/plans/tensor-modules/M06-core-persistence-query.md` 的 `Task M06-T06` 任务卡，并确认其 `Context boundary`、输入和目标文件均可定位。
-- **State evidence:** None.
+- **State evidence:** 2026-09-03：M06-T05 已按严格 TDD、定向 8/8、两项受控 mutation、提交态 reactor `test`/`verify` 154/154、三层 Enforcer、静态/范围/格式/清理门禁及两层无发现独立审查完成，实现提交 `263513d` 精确包含三个查询生产类型和唯一测试，权威看板提交 `19251a5` 已先记录 `IN_PROGRESS -> COMPLETED`。按预定义顺序选择最小后继 M06-T06；其唯一直接依赖 M06-T05 已为 `COMPLETED`，安全 SQL/绑定/排序生成职责与本任务的 JDBC 执行、COUNT-first、页码归一及精确类型读取职责互补且无冲突。`docs/task-designs/M06-T06-design.md` 已完整冻结三个生产类型的唯一公开表面、页面不变量、显式 JDBC 绑定/类型矩阵、空结果和超界页顺序、固定 MySQL 8.4.6 八项测试、两项 mutation、154/154 回归及精确四文件范围，并由提交 `e9447c3` 创建且回填同一设计路径；七节顺序、任务卡链接、无未决占位符、自洽性与 `git diff --check` 均通过。`docs/task-handoffs/M06-T06-handoff.md` 已按 `next-task` 模板创建并链接，只记录 M06-T06 与直接输入 M06-T05，包含设计优先读取顺序和先确认 154/154 基线、再只创建完整 IT 取得缺三个生产类型 RED 的具体首个动作。因此执行真实的 `NOT_STARTED -> READY`；M06-T06 Java 实现尚未开始。
 
 ### `M07-T01`
 
