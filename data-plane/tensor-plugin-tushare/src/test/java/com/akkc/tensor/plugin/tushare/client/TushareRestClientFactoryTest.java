@@ -2,14 +2,11 @@ package com.akkc.tensor.plugin.tushare.client;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.get;
-import static com.github.tomakehurst.wiremock.client.WireMock.getRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
-import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.akkc.tensor.plugin.api.descriptor.PluginReadiness;
 import com.akkc.tensor.plugin.tushare.config.TushareProperties;
@@ -170,17 +167,20 @@ class TushareRestClientFactoryTest {
         new TushareRestClientFactory().create(properties(wireMock.baseUrl(), SECRET))
                 .get().uri("/status").retrieve().toBodilessEntity();
 
-        wireMock.verify(1, getRequestedFor(urlEqualTo("/status"))
-                .withHeader("User-Agent", com.github.tomakehurst.wiremock.client.WireMock.equalTo("Tensor/1.0")));
         var events = wireMock.getAllServeEvents();
-        assertTrue(events.size() == 1, "exactly one request reaches the upstream server");
-        events.forEach(event -> {
+        boolean oneStatusRequest = events.size() == 1
+                && "GET".equals(events.getFirst().getRequest().getMethod().getName())
+                && "/status".equals(events.getFirst().getRequest().getUrl());
+        assertTrue(oneStatusRequest, "exactly one status request reaches the upstream server");
+        if (oneStatusRequest) {
+            var event = events.getFirst();
             assertTrue(!event.getRequest().getAbsoluteUrl().contains(SECRET), "request URL omits the credential");
-            assertThat(event.getRequest().getHeaders().getHeader("User-Agent").values()).containsExactly("Tensor/1.0");
+            assertTrue(java.util.List.of("Tensor/1.0").equals(event.getRequest().getHeaders()
+                    .getHeader("User-Agent").values()), "request has the fixed user agent");
             assertTrue(event.getRequest().getHeaders().all().stream()
                     .noneMatch(header -> header.values().contains(SECRET)), "request headers omit the credential");
             assertTrue(!event.getRequest().getBodyAsString().contains(SECRET), "request body omits the credential");
-        });
+        }
     }
 
     @Test
@@ -190,10 +190,13 @@ class TushareRestClientFactoryTest {
                 .contains(Duration.ofSeconds(2));
         wireMock.stubFor(get(urlEqualTo("/slow")).willReturn(aResponse().withStatus(200).withFixedDelay(2_000)));
 
-        assertThatThrownBy(() -> new TushareRestClientFactory().create(properties(wireMock.baseUrl(), "", Duration.ofMillis(100)))
-                .get().uri("/slow").retrieve().toBodilessEntity())
-                .isInstanceOf(ResourceAccessException.class);
-        wireMock.verify(1, getRequestedFor(urlEqualTo("/slow")));
+        Throwable timeout = org.assertj.core.api.Assertions.catchThrowable(() -> new TushareRestClientFactory()
+                .create(properties(wireMock.baseUrl(), "", Duration.ofMillis(100)))
+                .get().uri("/slow").retrieve().toBodilessEntity());
+        assertTrue(timeout instanceof ResourceAccessException, "delayed request fails with a resource access exception");
+        var events = wireMock.getAllServeEvents();
+        assertTrue(events.size() == 1 && "GET".equals(events.getFirst().getRequest().getMethod().getName())
+                && "/slow".equals(events.getFirst().getRequest().getUrl()), "exactly one delayed request reaches the upstream server");
     }
 
     @Test
@@ -201,10 +204,13 @@ class TushareRestClientFactoryTest {
     void doesNotRetryAServiceUnavailableResponse() {
         wireMock.stubFor(post(urlEqualTo("/upstream")).willReturn(aResponse().withStatus(HttpStatus.SERVICE_UNAVAILABLE.value())));
 
-        assertThatThrownBy(() -> new TushareRestClientFactory().create(properties(wireMock.baseUrl(), SECRET))
-                .post().uri("/upstream").retrieve().toBodilessEntity())
-                .isInstanceOf(HttpServerErrorException.ServiceUnavailable.class);
-        wireMock.verify(1, postRequestedFor(urlEqualTo("/upstream")));
+        Throwable unavailable = org.assertj.core.api.Assertions.catchThrowable(() -> new TushareRestClientFactory()
+                .create(properties(wireMock.baseUrl(), SECRET)).post().uri("/upstream").retrieve().toBodilessEntity());
+        assertTrue(unavailable instanceof HttpServerErrorException.ServiceUnavailable,
+                "service unavailable response propagates as the standard exception");
+        var events = wireMock.getAllServeEvents();
+        assertTrue(events.size() == 1 && "POST".equals(events.getFirst().getRequest().getMethod().getName())
+                && "/upstream".equals(events.getFirst().getRequest().getUrl()), "exactly one unavailable request reaches the upstream server");
     }
 
     private Constructor<?>[] publicConstructors(Class<?> type) {
