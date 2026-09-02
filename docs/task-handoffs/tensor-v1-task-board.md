@@ -50,7 +50,7 @@
 | 29 | M05-T02 | `DatasetCatalog` 和启动元数据/表结构校验 | `COMPLETED` | M03-T09, M04-T06 | docs/task-designs/M05-T02-design.md | docs/task-handoffs/M05-T02-handoff.md |
 | 30 | M05-T03 | 元数据驱动参数校验 | `COMPLETED` | M02-T02, M02-T05, M03-T09 | docs/task-designs/M05-T03-design.md | docs/task-handoffs/M05-T03-handoff.md |
 | 31 | M05-T04 | 严格日期、文本、整数和精确数值转换 | `COMPLETED` | M02-T03, M02-T05 | docs/task-designs/M05-T04-design.md | docs/task-handoffs/M05-T04-handoff.md |
-| 32 | M05-T05 | `GenericDatasetAdapter`、重复键和指纹键 | `IN_PROGRESS` | M02-T04, M02-T05, M05-T02, M05-T03, M05-T04 | docs/task-designs/M05-T05-design.md | docs/task-handoffs/M05-T05-handoff.md |
+| 32 | M05-T05 | `GenericDatasetAdapter`、重复键和指纹键 | `COMPLETED` | M02-T04, M02-T05, M05-T02, M05-T03, M05-T04 | docs/task-designs/M05-T05-design.md | docs/task-handoffs/M05-T05-handoff.md |
 | 33 | M06-T01 | 白名单 SQL 标识符和 Upsert 模板 | `NOT_STARTED` | M02-T03, M04-T06 | None | None |
 | 34 | M06-T02 | 复合键与指纹键编码/绑定 | `NOT_STARTED` | M05-T05 | None | None |
 | 35 | M06-T03 | 已有键预查、数据集锁和插入/更新计数 | `NOT_STARTED` | M06-T01, M06-T02 | None | None |
@@ -458,6 +458,8 @@
 - **State evidence (readiness):** 2026-09-02：`docs/task-designs/M05-T05-design.md` 已完整冻结 `GenericDatasetAdapter`/`FingerprintKeyCodec` 公开表面、成功包络准入、逐值转换与缺失校验、COMPOSITE/FINGERPRINT 去重、空批次、11 项严格 TDD、132/132 reactor 门禁和精确三文件范围并链接；复读确认七节顺序完整、无占位符、无冲突或留给实施者的材料选择。指纹合同保持项目所有者批准的字段原序、`0x00|0x01` tag、4 字节大端 UTF-8 长度、规范文本及 64 位小写 SHA-256，固定向量字节 `0100000003e4b8ad00010000000234320100000004312e3230` 对应摘要 `c593b786a7708a9b7a106e244094f1cabd200caa3e95fad3b041225c17ac19ad`。五项直接依赖 M02-T04、M02-T05、M05-T02、M05-T03、M05-T04 均为 `COMPLETED`，其数据形状、SPI/错误、已验证定义、参数准入和单值转换职责互补且无冲突。`docs/task-handoffs/M05-T05-handoff.md` 已按 `next-task` 模板完整创建并链接，记录同一设计路径、五项直接输入及约束比较、设计优先读取顺序、风险和先确认 121/121 基线再取得缺两个生产类型 RED 的首个实施动作；因此执行真实的 `NOT_STARTED -> READY`，Java 实现尚未开始。
 
 - **State evidence (start):** 2026-09-02：用户明确要求按照权威任务看板执行当前任务；已完整读取 `docs/task-designs/M05-T05-design.md` 与 `docs/task-handoffs/M05-T05-handoff.md`，确认任务身份、精确三文件范围、验收、读取顺序和首个 TDD 动作均可定位且无冲突，作为本次 `READY -> IN_PROGRESS` 的启动证据；既有 `next-task` 交接路径保留为进入上下文。
+
+- **Completion evidence:** 2026-09-02：严格 TDD 先在只存在完整 `GenericDatasetAdapterTest` 时取得仅因 `GenericDatasetAdapter`/`FingerprintKeyCodec` 缺失的 `testCompile` RED，再由实现提交 `d7ec551` 精确新增设计规定的三个 Java 文件并取得聚焦 11/11 GREEN；最终整体审查发现的 null 指纹字段元素合同偏差又以回归 RED（原 NPE）→GREEN 和提交 `8ca49d0` 修正，范围化复审判定 ADDRESSED、无新问题。最终实现按冻结的成功包络、单批字段索引、逐值转换、必填/业务键校验、COMPOSITE/FINGERPRINT 稳定去重、空批次、固定安全错误与警告以及字段原序、显式 null tag、4 字节大端 UTF-8 长度、五类规范文本和 64 位小写 SHA-256 合同工作，固定向量通过。主控在最终提交上新鲜运行 reactor `test` 与 `verify`，两者均为 plugin-api 79/79 加 core 53/53、合计 132/132，0 failure、0 error、0 skipped，三层 Enforcer 通过；两项禁用模式扫描均无输出，非目标模块无差异，`git diff --check`、精确提交范围与 Maven `clean` 门禁通过，工作树干净。任务级审查为规范 `✅`、质量 `Approved` 且无问题；最终整体审查经唯一修复波后无剩余发现。因此满足任务设计和任务卡的结果级验收，执行 `IN_PROGRESS -> COMPLETED`，既有 `next-task` 交接路径保留为历史进入上下文。
 
 ### `M06-T01`
 
