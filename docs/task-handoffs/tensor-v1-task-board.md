@@ -54,7 +54,7 @@
 | 33 | M06-T01 | 白名单 SQL 标识符和 Upsert 模板 | `COMPLETED` | M02-T03, M04-T06 | docs/task-designs/M06-T01-design.md | docs/task-handoffs/M06-T01-handoff.md |
 | 34 | M06-T02 | 复合键与指纹键编码/绑定 | `COMPLETED` | M05-T05 | docs/task-designs/M06-T02-design.md | docs/task-handoffs/M06-T02-handoff.md |
 | 35 | M06-T03 | 已有键预查、数据集锁和插入/更新计数 | `COMPLETED` | M06-T01, M06-T02 | docs/task-designs/M06-T03-design.md | docs/task-handoffs/M06-T03-handoff.md |
-| 36 | M06-T04 | 单事务批量 Upsert 与回滚 | `NOT_STARTED` | M06-T03 | None | None |
+| 36 | M06-T04 | 单事务批量 Upsert 与回滚 | `NOT_STARTED` | M06-T03 | docs/task-designs/M06-T04-design.md | None |
 | 37 | M06-T05 | 查询条件白名单和 COUNT/分页 SQL | `NOT_STARTED` | M02-T03, M04-T06 | None | None |
 | 38 | M06-T06 | `DatasetQueryService`、页码归一化和精度序列化 | `NOT_STARTED` | M06-T05 | None | None |
 | 39 | M07-T01 | 配置属性和同步 `RestClient` | `NOT_STARTED` | M02-T05 | None | None |
