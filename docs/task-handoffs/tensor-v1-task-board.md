@@ -54,7 +54,7 @@
 | 33 | M06-T01 | 白名单 SQL 标识符和 Upsert 模板 | `COMPLETED` | M02-T03, M04-T06 | docs/task-designs/M06-T01-design.md | docs/task-handoffs/M06-T01-handoff.md |
 | 34 | M06-T02 | 复合键与指纹键编码/绑定 | `COMPLETED` | M05-T05 | docs/task-designs/M06-T02-design.md | docs/task-handoffs/M06-T02-handoff.md |
 | 35 | M06-T03 | 已有键预查、数据集锁和插入/更新计数 | `COMPLETED` | M06-T01, M06-T02 | docs/task-designs/M06-T03-design.md | docs/task-handoffs/M06-T03-handoff.md |
-| 36 | M06-T04 | 单事务批量 Upsert 与回滚 | `NOT_STARTED` | M06-T03 | docs/task-designs/M06-T04-design.md | None |
+| 36 | M06-T04 | 单事务批量 Upsert 与回滚 | `IN_PROGRESS` | M06-T03 | docs/task-designs/M06-T04-design.md | docs/task-handoffs/M06-T04-handoff.md |
 | 37 | M06-T05 | 查询条件白名单和 COUNT/分页 SQL | `NOT_STARTED` | M02-T03, M04-T06 | None | None |
 | 38 | M06-T06 | `DatasetQueryService`、页码归一化和精度序列化 | `NOT_STARTED` | M06-T05 | None | None |
 | 39 | M07-T01 | 配置属性和同步 `RestClient` | `NOT_STARTED` | M02-T05 | None | None |
@@ -515,7 +515,9 @@
 - **Dependencies:** M06-T03.
 - **Sources:** `docs/superpowers/plans/tensor-modules/M06-core-persistence-query.md` 的 `Task M06-T04` 任务卡。
 - **First action:** 读取 `docs/superpowers/plans/tensor-modules/M06-core-persistence-query.md` 的 `Task M06-T04` 任务卡，并确认其 `Context boundary`、输入和目标文件均可定位。
-- **State evidence:** None.
+- **State evidence:** 2026-09-03：M06-T03 已按严格 TDD、固定 MySQL 8.4.6 定向 8/8、reactor `test`/`verify` 146/146、三层 Enforcer、两项受控 mutation、范围/格式/清理门禁及无发现独立复审完成，权威看板已记录 `IN_PROGRESS -> COMPLETED`。按预定义顺序选择后继 M06-T04；其唯一直接依赖 M06-T03 为 `COMPLETED`，提交 `65ad1d7` 与审查修复 `d49d6c2` 提供公平可重入数据集锁、1000 bind 分块已有键预查和集合语义 `WriteCounts`，与已冻结的 M06-T01/T02 SQL、业务键和 JDBC binder 合同相容。项目所有者已明确批准事务同步持锁到最外层 `afterCompletion` 的方案；`docs/task-designs/M06-T04-design.md` 完整冻结两个生产类、一个固定 MySQL 8.4.6 的 8 项集成测试、严格 RED/GREEN、两项 mutation、146/146 回归和精确三文件范围，设计七节、公开表面、错误边界、命令与验收无占位符、矛盾或待实施者裁决。`docs/superpowers/plans/2026-09-03-m06-t04-atomic-persistence.md` 已把批准设计转换为任务级实施计划；`docs/task-handoffs/M06-T04-handoff.md` 已按 `next-task` 模板创建并先链接，只记录 M06-T04 与直接输入 M06-T03、设计优先读取顺序和先确认 146/146 基线再取得缺两个生产类型 RED 的首个动作。因此执行真实的 `NOT_STARTED -> READY`，Java 实现尚未开始。
+
+- **State evidence (start):** 2026-09-03：用户明确要求“按照权威任务看板执行当前任务”，已重新完整读取 M06-T04 设计、既有 `next-task` 交接、任务级实施计划、M06 任务卡与唯一直接依赖设计/产物；确认任务身份、精确三文件范围、公开合同、事务/锁失败边界、严格 TDD 顺序、首个动作和结果级验收均可定位且无冲突。该请求作为本次 `READY -> IN_PROGRESS` 的明确启动证据；既有交接路径保留为进入上下文。
 
 ### `M06-T05`
 
