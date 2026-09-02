@@ -52,7 +52,7 @@
 | 31 | M05-T04 | 严格日期、文本、整数和精确数值转换 | `COMPLETED` | M02-T03, M02-T05 | docs/task-designs/M05-T04-design.md | docs/task-handoffs/M05-T04-handoff.md |
 | 32 | M05-T05 | `GenericDatasetAdapter`、重复键和指纹键 | `COMPLETED` | M02-T04, M02-T05, M05-T02, M05-T03, M05-T04 | docs/task-designs/M05-T05-design.md | docs/task-handoffs/M05-T05-handoff.md |
 | 33 | M06-T01 | 白名单 SQL 标识符和 Upsert 模板 | `COMPLETED` | M02-T03, M04-T06 | docs/task-designs/M06-T01-design.md | docs/task-handoffs/M06-T01-handoff.md |
-| 34 | M06-T02 | 复合键与指纹键编码/绑定 | `NOT_STARTED` | M05-T05 | docs/task-designs/M06-T02-design.md | None |
+| 34 | M06-T02 | 复合键与指纹键编码/绑定 | `READY` | M05-T05 | docs/task-designs/M06-T02-design.md | docs/task-handoffs/M06-T02-handoff.md |
 | 35 | M06-T03 | 已有键预查、数据集锁和插入/更新计数 | `NOT_STARTED` | M06-T01, M06-T02 | None | None |
 | 36 | M06-T04 | 单事务批量 Upsert 与回滚 | `NOT_STARTED` | M06-T03 | None | None |
 | 37 | M06-T05 | 查询条件白名单和 COUNT/分页 SQL | `NOT_STARTED` | M02-T03, M04-T06 | None | None |
@@ -491,7 +491,7 @@
 - **Dependencies:** M05-T05.
 - **Sources:** `docs/superpowers/plans/tensor-modules/M06-core-persistence-query.md` 的 `Task M06-T02` 任务卡。
 - **First action:** 读取 `docs/superpowers/plans/tensor-modules/M06-core-persistence-query.md` 的 `Task M06-T02` 任务卡，并确认其 `Context boundary`、输入和目标文件均可定位。
-- **State evidence:** None.
+- **State evidence:** 2026-09-02：M06-T01 已按结果级验收完成并由提交 `b15bdc1` 记录 `IN_PROGRESS -> COMPLETED`，按预定义顺序选择最小后继 M06-T02。项目所有者批准 `JdbcValueBinder.bind(PreparedStatement,int,Object,int)` 的 typed-null 合同，并在比较最小有序值键、携带模式/字段的键及模式专用类型层次后批准最小方案：COMPOSITE 按定义原序形成结构键，FINGERPRINT 直接消费 M05 已生成的 `business_key`，生产代码不重复哈希；随后批准完整书面设计。提交 `440b9b5` 已创建并回填 `docs/task-designs/M06-T02-design.md`，冻结三个生产类型的公开表面、固定安全错误、五类 setter、UTC Instant、8 项严格 TDD、146/146 reactor 门禁和精确四文件范围；完整复读和自审确认七节齐全、无占位符、矛盾、范围漂移或留给实施者的材料选择。直接依赖 M05-T05 已为 `COMPLETED`，其 `FingerprintKeyCodec`、`GenericDatasetAdapter`、允许值类型与适配行合同通过 132/132 reactor 及最终审查，与本设计职责互补且无冲突。`docs/superpowers/plans/2026-09-02-m06-t02-business-key-binding.md` 已把批准设计转换为严格 RED→GREEN 的逐步实施计划；`docs/task-handoffs/M06-T02-handoff.md` 已按 `next-task` 模板先行完整创建，只记录 M06-T02 及直接输入 M05-T05，并以设计、实施计划和依赖产物为读取顺序，首个实施动作是确认 138/138 基线后只创建测试取得缺三个生产类型的 RED。因此链接交接并执行真实的 `NOT_STARTED -> READY`；Java 实现尚未开始。
 
 ### `M06-T03`
 
