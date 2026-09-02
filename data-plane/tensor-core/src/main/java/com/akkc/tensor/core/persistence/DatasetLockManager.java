@@ -20,10 +20,15 @@ public final class DatasetLockManager {
             selected.references++;
             return selected;
         });
+        boolean acquired = false;
         try {
             entry.lock.lock();
+            acquired = true;
             return new LockHandle(datasetKey, entry);
         } catch (RuntimeException | Error failure) {
+            if (acquired) {
+                entry.lock.unlock();
+            }
             releaseReference(datasetKey, entry);
             throw failure;
         }

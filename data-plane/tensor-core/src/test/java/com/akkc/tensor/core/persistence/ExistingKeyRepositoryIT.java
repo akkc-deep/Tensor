@@ -16,8 +16,13 @@ import com.akkc.tensor.plugin.api.model.ApiName;
 import com.akkc.tensor.plugin.api.model.DatasetKey;
 import com.akkc.tensor.plugin.api.model.PluginId;
 import com.akkc.tensor.plugin.api.model.TableName;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.lang.reflect.Proxy;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -29,11 +34,13 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.Lock;
+import javax.sql.DataSource;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.datasource.AbstractDataSource;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.testcontainers.containers.MySQLContainer;
 import org.testcontainers.junit.jupiter.Container;
@@ -46,13 +53,15 @@ class ExistingKeyRepositoryIT {
     private static final MySQLContainer<?> MYSQL =
             new MySQLContainer<>(DockerImageName.parse("mysql:8.4.6"));
 
+    private static DataSource dataSource;
     private static JdbcTemplate jdbcTemplate;
     private ExistingKeyRepository repository;
 
     @BeforeAll
     static void createTables() {
-        jdbcTemplate = new JdbcTemplate(new DriverManagerDataSource(
-                MYSQL.getJdbcUrl(), MYSQL.getUsername(), MYSQL.getPassword()));
+        dataSource = new DriverManagerDataSource(
+                MYSQL.getJdbcUrl(), MYSQL.getUsername(), MYSQL.getPassword());
+        jdbcTemplate = new JdbcTemplate(dataSource);
         jdbcTemplate.execute("CREATE TABLE m06__single (code VARCHAR(64) NOT NULL PRIMARY KEY)");
         jdbcTemplate.execute("CREATE TABLE m06__fingerprint (business_key CHAR(64) NOT NULL PRIMARY KEY)");
         jdbcTemplate.execute("CREATE TABLE m06__composite (ts_code VARCHAR(64) NOT NULL, trade_date DATE NOT NULL, PRIMARY KEY (ts_code, trade_date))");
@@ -203,10 +212,16 @@ class ExistingKeyRepositoryIT {
         keys.add(key("code1000"));
         jdbcTemplate.update("INSERT INTO m06__single (code) VALUES (?), (?)",
                 "edge-'?-value", "code1000");
+        RecordingDataSource recording = new RecordingDataSource(dataSource);
 
-        Set<BusinessKey> result = repository.findExisting(singleDefinition(), keys);
+        Set<BusinessKey> result = new ExistingKeyRepository(new JdbcTemplate(recording))
+                .findExisting(singleDefinition(), keys);
 
         assertThat(result).containsExactlyInAnyOrder(key("edge-'?-value"), key("code1000"));
+        assertThat(recording.statements()).extracting(RecordedStatement::bindCount)
+                .containsExactly(1000, 1);
+        assertThat(recording.statements()).extracting(statement -> placeholders(statement.sql()))
+                .containsExactly(1000L, 1L);
     }
 
     @Test
@@ -218,12 +233,18 @@ class ExistingKeyRepositoryIT {
         }
         jdbcTemplate.update("INSERT INTO m06__composite (ts_code, trade_date) VALUES (?, ?), (?, ?)",
                 "TS0000", start, "TS0500", start.plusDays(500));
+        RecordingDataSource recording = new RecordingDataSource(dataSource);
 
-        Set<BusinessKey> result = repository.findExisting(compositeDefinition(), keys);
+        Set<BusinessKey> result = new ExistingKeyRepository(new JdbcTemplate(recording))
+                .findExisting(compositeDefinition(), keys);
 
         assertThat(result).containsExactlyInAnyOrder(
                 new BusinessKey(List.of("TS0000", start)),
                 new BusinessKey(List.of("TS0500", start.plusDays(500))));
+        assertThat(recording.statements()).extracting(RecordedStatement::bindCount)
+                .containsExactly(1000, 2);
+        assertThat(recording.statements()).extracting(statement -> placeholders(statement.sql()))
+                .containsExactly(1000L, 2L);
     }
 
     @Test
@@ -237,9 +258,31 @@ class ExistingKeyRepositoryIT {
         Lock outer = manager.acquire(datasetKey);
         Lock nested = manager.acquire(datasetKey);
 
-        Lock independent = manager.acquire(otherKey);
-        independent.unlock();
         nested.unlock();
+        CountDownLatch otherAcquired = new CountDownLatch(1);
+        AtomicReference<Throwable> isolationFailure = new AtomicReference<>();
+        Thread independent = new Thread(() -> {
+            try {
+                Lock handle = manager.acquire(otherKey);
+                try {
+                    otherAcquired.countDown();
+                } finally {
+                    handle.unlock();
+                }
+            } catch (Throwable failure) {
+                isolationFailure.set(failure);
+            }
+        });
+        independent.setDaemon(true);
+        independent.start();
+        boolean isolated = otherAcquired.await(5, TimeUnit.SECONDS);
+        if (!isolated) {
+            outer.unlock();
+        }
+        independent.join(TimeUnit.SECONDS.toMillis(5));
+        assertThat(isolated).isTrue();
+        assertThat(independent.isAlive()).isFalse();
+        assertThat(isolationFailure.get()).isNull();
 
         Thread first = waiter(manager, datasetKey, 1, firstStarted, order);
         first.start();
@@ -277,6 +320,96 @@ class ExistingKeyRepositoryIT {
         return Arrays.stream(type.getDeclaredMethods())
                 .filter(method -> Modifier.isPublic(method.getModifiers()))
                 .toList();
+    }
+
+    private static long placeholders(String sql) {
+        return sql.chars().filter(character -> character == '?').count();
+    }
+
+    private static Object invoke(Object target, Method method, Object[] arguments) throws Throwable {
+        try {
+            return method.invoke(target, arguments);
+        } catch (InvocationTargetException failure) {
+            throw failure.getCause();
+        }
+    }
+
+    private static final class RecordingDataSource extends AbstractDataSource {
+        private static final Set<String> BIND_METHODS = Set.of(
+                "setString", "setDate", "setLong", "setBigDecimal", "setNull", "setTimestamp");
+
+        private final DataSource delegate;
+        private final List<RecordedStatement> statements = new CopyOnWriteArrayList<>();
+
+        private RecordingDataSource(DataSource delegate) {
+            this.delegate = delegate;
+        }
+
+        @Override
+        public Connection getConnection() throws SQLException {
+            return record(delegate.getConnection());
+        }
+
+        @Override
+        public Connection getConnection(String username, String password) throws SQLException {
+            return record(delegate.getConnection(username, password));
+        }
+
+        private List<RecordedStatement> statements() {
+            return List.copyOf(statements);
+        }
+
+        private Connection record(Connection connection) {
+            return (Connection) Proxy.newProxyInstance(
+                    ExistingKeyRepositoryIT.class.getClassLoader(),
+                    new Class<?>[] {Connection.class},
+                    (proxy, method, arguments) -> {
+                        Object result = invoke(connection, method, arguments);
+                        if (method.getName().equals("prepareStatement")
+                                && arguments != null
+                                && arguments.length > 0
+                                && arguments[0] instanceof String sql
+                                && result instanceof PreparedStatement statement) {
+                            RecordedStatement recorded = new RecordedStatement(sql);
+                            statements.add(recorded);
+                            return record(statement, recorded);
+                        }
+                        return result;
+                    });
+        }
+
+        private PreparedStatement record(PreparedStatement statement, RecordedStatement recorded) {
+            return (PreparedStatement) Proxy.newProxyInstance(
+                    ExistingKeyRepositoryIT.class.getClassLoader(),
+                    new Class<?>[] {PreparedStatement.class},
+                    (proxy, method, arguments) -> {
+                        if (BIND_METHODS.contains(method.getName())) {
+                            recorded.incrementBindCount();
+                        }
+                        return invoke(statement, method, arguments);
+                    });
+        }
+    }
+
+    private static final class RecordedStatement {
+        private final String sql;
+        private int bindCount;
+
+        private RecordedStatement(String sql) {
+            this.sql = sql;
+        }
+
+        private String sql() {
+            return sql;
+        }
+
+        private int bindCount() {
+            return bindCount;
+        }
+
+        private void incrementBindCount() {
+            bindCount++;
+        }
     }
 
     private static Thread waiter(
