@@ -50,7 +50,7 @@
 | 29 | M05-T02 | `DatasetCatalog` 和启动元数据/表结构校验 | `COMPLETED` | M03-T09, M04-T06 | docs/task-designs/M05-T02-design.md | docs/task-handoffs/M05-T02-handoff.md |
 | 30 | M05-T03 | 元数据驱动参数校验 | `COMPLETED` | M02-T02, M02-T05, M03-T09 | docs/task-designs/M05-T03-design.md | docs/task-handoffs/M05-T03-handoff.md |
 | 31 | M05-T04 | 严格日期、文本、整数和精确数值转换 | `COMPLETED` | M02-T03, M02-T05 | docs/task-designs/M05-T04-design.md | docs/task-handoffs/M05-T04-handoff.md |
-| 32 | M05-T05 | `GenericDatasetAdapter`、重复键和指纹键 | `NOT_STARTED` | M05-T02, M05-T03, M05-T04 | None | None |
+| 32 | M05-T05 | `GenericDatasetAdapter`、重复键和指纹键 | `NOT_STARTED` | M02-T04, M02-T05, M05-T02, M05-T03, M05-T04 | None | None |
 | 33 | M06-T01 | 白名单 SQL 标识符和 Upsert 模板 | `NOT_STARTED` | M02-T03, M04-T06 | None | None |
 | 34 | M06-T02 | 复合键与指纹键编码/绑定 | `NOT_STARTED` | M05-T05 | None | None |
 | 35 | M06-T03 | 已有键预查、数据集锁和插入/更新计数 | `NOT_STARTED` | M06-T01, M06-T02 | None | None |
@@ -450,10 +450,10 @@
 - **Goal:** 交付“`GenericDatasetAdapter`、重复键和指纹键”。
 - **Scope:** 包含该交付物及其直接测试与验证；不包含其他预定义任务的交付物，也不扩展 `docs/superpowers/plans/tensor-modules/M05-core-registry-adapter.md` 中该任务卡明确的文件、主要语言、接口和排除边界。
 - **Acceptance:** “`GenericDatasetAdapter`、重复键和指纹键”已按该任务卡指定的位置和行为形成；任务卡列出的全部测试、验证命令和检查得到其注明的预期结果；没有混入排除范围。
-- **Dependencies:** M05-T02, M05-T03, M05-T04.
+- **Dependencies:** M02-T04, M02-T05, M05-T02, M05-T03, M05-T04.
 - **Sources:** `docs/superpowers/plans/tensor-modules/M05-core-registry-adapter.md` 的 `Task M05-T05` 任务卡。
 - **First action:** 读取 `docs/superpowers/plans/tensor-modules/M05-core-registry-adapter.md` 的 `Task M05-T05` 任务卡，并确认其 `Context boundary`、输入和目标文件均可定位。
-- **State evidence:** None.
+- **State evidence:** 2026-09-02：准备 M05-T05 设计时确认任务卡要求实现 M02-T05 发布的 `DatasetAdapter`，直接消费 M02-T04 的 `DownloadEnvelope`/`AdaptedBatch`，并以 M02-T05 的 `AdapterException` 表达必填字段和重复键失败，而原看板只列 M05-T02～T04。项目所有者明确批准保留既有三项依赖并补充已完成的 M02-T04、M02-T05；同时批准指纹编码采用字段原序、1 字节 `0=null|1=value` 标记、非空规范文本 UTF-8 前置 4 字节大端长度，拼接后 SHA-256 输出 64 位小写十六进制。M05-T05 保持 `NOT_STARTED`，设计与交接尚未创建。
 
 ### `M06-T01`
 
