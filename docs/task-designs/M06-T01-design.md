@@ -159,7 +159,7 @@ mvn -Dmaven.repo.local=/private/tmp/tensor-m2 -f data-plane/pom.xml \
 rg -n 'org\.springframework|java\.sql|javax\.sql|JdbcTemplate|PreparedStatement|Statement|ResultSet|tushare|RestClient|ServiceLoader|(?i:token|credential)|String\.format|formatted\(' \
   data-plane/tensor-core/src/main/java/com/akkc/tensor/core/persistence/SqlIdentifierPolicy.java \
   data-plane/tensor-core/src/main/java/com/akkc/tensor/core/persistence/UpsertSqlFactory.java
-rg -n 'SELECT|DELETE|DROP|ALTER|CREATE|TRUNCATE|;|--|/\*|\*/' \
+rg -n 'SELECT|DELETE|DROP|ALTER|CREATE|TRUNCATE|--|/\*|\*/' \
   data-plane/tensor-core/src/main/java/com/akkc/tensor/core/persistence/UpsertSqlFactory.java
 mvn -Dmaven.repo.local=/private/tmp/tensor-m2 -f data-plane/pom.xml \
   -pl tensor-core -am clean
@@ -171,7 +171,7 @@ git status --short --untracked-files=all -- \
 git diff --check
 ```
 
-两项扫描均预期无输出并退出 1；`clean` 退出 0；非目标 POM/app/plugin-api/plugin-tushare 无差异；提交前 scoped status 精确新增本任务三个 Java 文件且不列 `target`；格式检查退出 0。提交后 `git show --stat --oneline HEAD` 必须显示固定消息和精确三文件范围，工作树干净。
+2026-09-02 项目所有者批准修正第二项静态门禁：源码扫描只检查危险 SQL 关键字与注释，不再把 Java 语法必需的裸 `;` 作为源码匹配项；生成 SQL 无末尾分号继续由上节第 4 项 `doesNotEndWith(";")` 和第 6 项禁止字符行为断言验证。两项源码扫描均预期无输出并退出 1，聚焦 6/6 必须同时成立；`clean` 退出 0；非目标 POM/app/plugin-api/plugin-tushare 无差异；提交前 scoped status 精确新增本任务三个 Java 文件且不列 `target`；格式检查退出 0。提交后 `git show --stat --oneline HEAD` 必须显示固定消息和精确三文件范围，工作树干净。
 
 ## Acceptance
 
@@ -180,7 +180,7 @@ git diff --check
 - insert 列精确为定义业务列原序、可选 `business_key`、三个来源字段，每列恰有一个 `?` 且 SQL 不含调用方行值、参数值或客户端 SQL 片段；
 - COMPOSITE 更新排除定义业务键，FINGERPRINT 更新排除内部 `business_key` 并包含全部定义业务列；两种模式都按固定顺序更新三个来源字段；
 - `daily` 精确 SQL、仅键 COMPOSITE 和 FINGERPRINT 代表合同通过，输入定义及其集合不被修改，重复调用确定；
-- 严格 TDD 得到缺两个生产类型的可归因 RED 后 6/6 GREEN；模块 `test`/`verify` 138/138、三层 Enforcer、静态、范围、格式、清理和精确三文件提交门禁全部得到预期结果；
+- 严格 TDD 得到缺两个生产类型的可归因 RED 后 6/6 GREEN；模块 `test`/`verify` 138/138、三层 Enforcer、危险 SQL 关键字/注释源码扫描与无末尾分号行为断言、范围、格式、清理和精确三文件提交门禁全部得到预期结果；
 - 未提前实现绑定、预查、锁、计数、事务、仓储、查询、REST 或其他 M06 职责。
 
 ## Risks
