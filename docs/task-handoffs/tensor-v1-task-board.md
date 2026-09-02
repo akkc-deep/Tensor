@@ -49,7 +49,7 @@
 | 28 | M05-T01 | `PluginRegistry` 与 `AdapterRegistry` | `COMPLETED` | M02-T05 | docs/task-designs/M05-T01-design.md | docs/task-handoffs/M05-T01-handoff.md |
 | 29 | M05-T02 | `DatasetCatalog` 和启动元数据/表结构校验 | `COMPLETED` | M03-T09, M04-T06 | docs/task-designs/M05-T02-design.md | docs/task-handoffs/M05-T02-handoff.md |
 | 30 | M05-T03 | 元数据驱动参数校验 | `COMPLETED` | M02-T02, M02-T05, M03-T09 | docs/task-designs/M05-T03-design.md | docs/task-handoffs/M05-T03-handoff.md |
-| 31 | M05-T04 | 严格日期、文本、整数和精确数值转换 | `IN_PROGRESS` | M02-T03, M02-T05 | docs/task-designs/M05-T04-design.md | docs/task-handoffs/M05-T04-handoff.md |
+| 31 | M05-T04 | 严格日期、文本、整数和精确数值转换 | `COMPLETED` | M02-T03, M02-T05 | docs/task-designs/M05-T04-design.md | docs/task-handoffs/M05-T04-handoff.md |
 | 32 | M05-T05 | `GenericDatasetAdapter`、重复键和指纹键 | `NOT_STARTED` | M05-T02, M05-T03, M05-T04 | None | None |
 | 33 | M06-T01 | 白名单 SQL 标识符和 Upsert 模板 | `NOT_STARTED` | M02-T03, M04-T06 | None | None |
 | 34 | M06-T02 | 复合键与指纹键编码/绑定 | `NOT_STARTED` | M05-T05 | None | None |
@@ -442,6 +442,8 @@
 - **Sources:** `docs/superpowers/plans/tensor-modules/M05-core-registry-adapter.md` 的 `Task M05-T04` 任务卡。
 - **First action:** 读取 `docs/superpowers/plans/tensor-modules/M05-core-registry-adapter.md` 的 `Task M05-T04` 任务卡，并确认其 `Context boundary`、输入和目标文件均可定位。
 - **State evidence:** 2026-09-02：准备 M05-T04 设计时确认任务卡要求所有转换失败抛出 M02-T05 定义的 `AdapterException(ErrorCode.ADAPTER_TYPE_INVALID, ...)`，而原看板仅列出提供 `LogicalType` 与 `ColumnDefinition` 的 M02-T03。项目所有者明确批准将已完成的 M02-T05 补充为 M05-T04 的直接依赖。项目所有者随后逐项批准 `ConversionContext(ApiName,int)`、TEXT/空值、来源运行时类型、nullable 职责、精确安全消息、Unicode 长度/ENUM 以及单类 switch 实现方案，并确认接口行为与测试设计准确；`docs/task-designs/M05-T04-design.md` 已据此冻结精确公开表面、七类转换、安全边界、12 项 TDD、121/121 回归和精确三文件范围并回填。新鲜基线在 attach 受限沙箱中只因 Mockito/Byte Buddy `MockMaker` 无法自附加而产生 core 10 errors；同一命令在允许 JVM attach 的环境立即恢复 plugin-api 79/79、core 30/30、三层 Enforcer 全绿，确认是执行环境差异并已写入设计风险。设计完整复读确认七节顺序、无占位符、无冲突或待实施者裁决；M02-T03 与 M02-T05 均为 `COMPLETED`，其元数据类型/列参数与领域错误职责互补。`docs/task-handoffs/M05-T04-handoff.md` 已按 `next-task` 模板创建并链接，只记录这两项直接输入、约束比较、设计优先读取顺序和取得缺两个生产类型 RED 的首个动作，因此执行 `NOT_STARTED -> READY`，Java 实现尚未开始。同日用户明确要求按照权威任务看板执行当前任务；已完整读取并核对同一路径设计、交接、任务卡、两项直接依赖设计及当前公开类型，确认任务身份、范围、输入、验收和首个 RED 动作一致且无冲突，作为本次 `READY -> IN_PROGRESS` 的启动证据；既有交接路径保留为进入上下文。
+
+- **State evidence (completion):** 2026-09-02：严格 TDD 先完整创建 12 项真实行为 `ValueConverterTest.java`，聚焦命令仅因 `ValueConverter` 与 `ConversionContext` 缺失在 `tensor-core:testCompile` 非零，形成可归因 RED；提交 `e609f50`（`feat(core): add strict dataset value conversion`）随后精确创建两个生产类型和同一测试文件，实现 null/TEXT、短字符串 Unicode 码点门禁、开放/闭合 ENUM、ASCII 固定宽度严格 DATE/MONTH、精确 LONG、无 double 且按 `RoundingMode.UNNECESSARY` 固化 scale/precision 的 DECIMAL，以及只含 API、从 0 开始行号和字段名的统一 `ADAPTER_TYPE_INVALID` 安全摘要。主控在允许 JVM attach 的环境新鲜复跑聚焦 12/12、reactor `test` 与 `verify` 各 121/121，均为 0 failure、0 error、0 skipped，父项目、plugin-api、core 三层 Enforcer 全部通过；两项禁用表面/浮点扫描均无匹配，非目标 POM/app/plugin-api/plugin-tushare 无差异，格式、`clean`、无 `target`、精确三文件提交和干净工作树门禁通过。任务级规格/质量审查与最终整体审查均无 Critical、Important 或 Minor，最终结论 `Ready to merge: Yes`；公开表面、七类转换、精度与安全失败边界逐项满足设计和任务卡，且未混入 M05-T05、持久化、下载、REST 或其他排除职责，因此执行 `IN_PROGRESS -> COMPLETED`。
 
 ### `M05-T05`
 
