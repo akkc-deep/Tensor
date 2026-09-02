@@ -52,7 +52,7 @@
 | 31 | M05-T04 | 严格日期、文本、整数和精确数值转换 | `COMPLETED` | M02-T03, M02-T05 | docs/task-designs/M05-T04-design.md | docs/task-handoffs/M05-T04-handoff.md |
 | 32 | M05-T05 | `GenericDatasetAdapter`、重复键和指纹键 | `COMPLETED` | M02-T04, M02-T05, M05-T02, M05-T03, M05-T04 | docs/task-designs/M05-T05-design.md | docs/task-handoffs/M05-T05-handoff.md |
 | 33 | M06-T01 | 白名单 SQL 标识符和 Upsert 模板 | `COMPLETED` | M02-T03, M04-T06 | docs/task-designs/M06-T01-design.md | docs/task-handoffs/M06-T01-handoff.md |
-| 34 | M06-T02 | 复合键与指纹键编码/绑定 | `IN_PROGRESS` | M05-T05 | docs/task-designs/M06-T02-design.md | docs/task-handoffs/M06-T02-handoff.md |
+| 34 | M06-T02 | 复合键与指纹键编码/绑定 | `COMPLETED` | M05-T05 | docs/task-designs/M06-T02-design.md | docs/task-handoffs/M06-T02-handoff.md |
 | 35 | M06-T03 | 已有键预查、数据集锁和插入/更新计数 | `NOT_STARTED` | M06-T01, M06-T02 | None | None |
 | 36 | M06-T04 | 单事务批量 Upsert 与回滚 | `NOT_STARTED` | M06-T03 | None | None |
 | 37 | M06-T05 | 查询条件白名单和 COUNT/分页 SQL | `NOT_STARTED` | M02-T03, M04-T06 | None | None |
@@ -492,6 +492,8 @@
 - **Sources:** `docs/superpowers/plans/tensor-modules/M06-core-persistence-query.md` 的 `Task M06-T02` 任务卡。
 - **First action:** 读取 `docs/superpowers/plans/tensor-modules/M06-core-persistence-query.md` 的 `Task M06-T02` 任务卡，并确认其 `Context boundary`、输入和目标文件均可定位。
 - **State evidence:** 2026-09-02：M06-T01 已按结果级验收完成并由提交 `b15bdc1` 记录 `IN_PROGRESS -> COMPLETED`，按预定义顺序选择最小后继 M06-T02。项目所有者批准 `JdbcValueBinder.bind(PreparedStatement,int,Object,int)` 的 typed-null 合同，并在比较最小有序值键、携带模式/字段的键及模式专用类型层次后批准最小方案：COMPOSITE 按定义原序形成结构键，FINGERPRINT 直接消费 M05 已生成的 `business_key`，生产代码不重复哈希；随后批准完整书面设计。提交 `440b9b5` 已创建并回填 `docs/task-designs/M06-T02-design.md`，冻结三个生产类型的公开表面、固定安全错误、五类 setter、UTC Instant、8 项严格 TDD、146/146 reactor 门禁和精确四文件范围；完整复读和自审确认七节齐全、无占位符、矛盾、范围漂移或留给实施者的材料选择。直接依赖 M05-T05 已为 `COMPLETED`，其 `FingerprintKeyCodec`、`GenericDatasetAdapter`、允许值类型与适配行合同通过 132/132 reactor 及最终审查，与本设计职责互补且无冲突。`docs/superpowers/plans/2026-09-02-m06-t02-business-key-binding.md` 已把批准设计转换为严格 RED→GREEN 的逐步实施计划；`docs/task-handoffs/M06-T02-handoff.md` 已按 `next-task` 模板先行完整创建，只记录 M06-T02 及直接输入 M05-T05，并以设计、实施计划和依赖产物为读取顺序，首个实施动作是确认 138/138 基线后只创建测试取得缺三个生产类型的 RED。因此链接交接并执行真实的 `NOT_STARTED -> READY`；Java 实现尚未开始。2026-09-02：用户明确要求按照权威任务看板执行当前任务；已完整读取 M06-T02 设计、`next-task` 交接、逐步实施计划、M06 任务卡、M05-T05 直接依赖设计与产物，并核对现有指纹 codec、适配器和 M06-T01 测试风格；确认任务身份、范围、四文件产物、首个动作、直接依赖和固定契约均可定位且无冲突，工作树干净，作为本次 `READY -> IN_PROGRESS` 的明确启动证据；既有交接路径保留为进入上下文。
+
+- **Completion evidence:** 2026-09-02：实现提交 `2bd8996` 以固定消息精确新增设计 Files 节的三个生产类和一个测试类。修改前在允许 JVM attach 的环境确认 reactor 基线 plugin-api 79/79、core 59/59，共 138/138；只创建完整测试后，聚焦命令仅因 `BusinessKey`、`BusinessKeyExtractor`、`JdbcValueBinder` 不存在而在 `tensor-core:testCompile` 非零，形成可归因 RED；最小实现后同一聚焦命令 8/8 GREEN。提交后新鲜 `test` 与 `verify` 均为 plugin-api 79/79、core 67/67，合计 146/146、0 failure、0 error、0 skipped，三层 Enforcer 全部通过，仅保留设计允许的 platform-encoding、Mockito/JDK agent 与既有安全 WARNING 类别。两项生产源码扫描均无输出并退出 1，受保护路径无差异，测试恰有 8 个 `@Test`，`clean`、`git diff --check`、精确四文件提交和干净工作树门禁全部通过。独立审查结论为 `Ready to merge: Yes`，Critical、Important、Minor 均为 0；因此满足冻结设计和任务卡的结果级验收，执行 `IN_PROGRESS -> COMPLETED`。
 
 ### `M06-T03`
 
