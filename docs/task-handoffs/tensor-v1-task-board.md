@@ -51,7 +51,7 @@
 | 30 | M05-T03 | 元数据驱动参数校验 | `COMPLETED` | M02-T02, M02-T05, M03-T09 | docs/task-designs/M05-T03-design.md | docs/task-handoffs/M05-T03-handoff.md |
 | 31 | M05-T04 | 严格日期、文本、整数和精确数值转换 | `COMPLETED` | M02-T03, M02-T05 | docs/task-designs/M05-T04-design.md | docs/task-handoffs/M05-T04-handoff.md |
 | 32 | M05-T05 | `GenericDatasetAdapter`、重复键和指纹键 | `COMPLETED` | M02-T04, M02-T05, M05-T02, M05-T03, M05-T04 | docs/task-designs/M05-T05-design.md | docs/task-handoffs/M05-T05-handoff.md |
-| 33 | M06-T01 | 白名单 SQL 标识符和 Upsert 模板 | `READY` | M02-T03, M04-T06 | docs/task-designs/M06-T01-design.md | docs/task-handoffs/M06-T01-handoff.md |
+| 33 | M06-T01 | 白名单 SQL 标识符和 Upsert 模板 | `IN_PROGRESS` | M02-T03, M04-T06 | docs/task-designs/M06-T01-design.md | docs/task-handoffs/M06-T01-handoff.md |
 | 34 | M06-T02 | 复合键与指纹键编码/绑定 | `NOT_STARTED` | M05-T05 | None | None |
 | 35 | M06-T03 | 已有键预查、数据集锁和插入/更新计数 | `NOT_STARTED` | M06-T01, M06-T02 | None | None |
 | 36 | M06-T04 | 单事务批量 Upsert 与回滚 | `NOT_STARTED` | M06-T03 | None | None |
@@ -478,6 +478,8 @@
 - **State evidence (blocker):** 2026-09-02：精确三个 Java 文件已按严格 TDD 创建并暂存；缺两个生产类型的聚焦 RED 可归因，聚焦 GREEN 为 6/6，授权 JVM 环境 reactor `test`/`verify` 均为 plugin-api 79/79 加 core 59/59、合计 138/138，三层 Enforcer、第一项静态扫描、范围、格式和清理检查通过。独立任务审查确认实现与测试满足功能合同，但发现设计第二项静态门禁以包含裸 `;` 的正则扫描 `UpsertSqlFactory.java` 并要求无输出；合法 Java 必须包含分号，故原命令不可满足，审查把它列为唯一 Important 计划/门禁问题并判定修正前不能满足全部验收。`docs/task-handoffs/M06-T01-handoff.md` 已改写为 `pause` 交接，记录当前暂存产物、验证证据、剩余工作与解阻条件；因此执行 `IN_PROGRESS -> BLOCKED`。解阻条件是项目所有者批准一个精确、可执行且能验证生成 SQL 无末尾分号/危险关键字或注释的替代扫描规则，并把批准裁决记录进任务设计。
 
 - **State evidence (resolution):** 2026-09-02：项目所有者回复“同意”，批准将第二项门禁修正为源码 `rg` 只扫描危险 SQL 关键字与注释，生成 SQL 无末尾分号由现有第 4 项 `doesNotEndWith(";")` 和第 6 项禁止字符行为断言验证，并授权随后继续完成任务。提交 `c0de827` 已把精确替代命令、预期结果和验收表述写入既有 `docs/task-designs/M06-T01-design.md`；修订未改变公开合同、生产实现、六项测试数量或三文件范围。暂停交接所列解阻条件因此满足，保留同一交接路径作为历史恢复上下文，执行 `BLOCKED -> READY`。
+
+- **State evidence (restart):** 2026-09-02：项目所有者对“按修正门禁继续完成任务”的提问回复“同意”，构成本次 `READY -> IN_PROGRESS` 的明确启动证据。已重新完整读取修订后的任务设计和同一 `pause` 交接，确认恢复任务仍为 M06-T01，剩余工作仅为执行批准后的门禁、精确三文件提交、最终审查与结果级验收；暂存区仍精确包含三个目标 Java 文件且无冲突改动。既有交接路径保留为历史恢复上下文。
 
 ### `M06-T02`
 
