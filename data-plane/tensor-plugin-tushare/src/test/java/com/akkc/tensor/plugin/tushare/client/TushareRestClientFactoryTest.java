@@ -7,12 +7,13 @@ import static com.github.tomakehurst.wiremock.client.WireMock.post;
 import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.akkc.tensor.plugin.api.descriptor.PluginReadiness;
 import com.akkc.tensor.plugin.tushare.config.TushareProperties;
-import com.github.tomakehurst.wiremock.WireMockServer;
+import com.github.tomakehurst.wiremock.junit5.WireMockExtension;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -20,7 +21,11 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.time.Duration;
 import java.util.Map;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.bind.Bindable;
 import org.springframework.boot.context.properties.bind.BindException;
@@ -30,11 +35,18 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.ResourceAccessException;
 
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class TushareRestClientFactoryTest {
     private static final String PREFIX = "tensor.plugins.tushare-pro";
     private static final String SECRET = "m07-t01-secret-sentinel";
 
+    @RegisterExtension
+    private final WireMockExtension wireMock = WireMockExtension.newInstance()
+            .options(wireMockConfig().dynamicPort())
+            .build();
+
     @Test
+    @Order(1)
     void exposesOnlyTheSpecifiedConfigurationAndFactorySurface() {
         assertThat(TushareProperties.class.isRecord()).isTrue();
         assertThat(Modifier.isPublic(TushareProperties.class.getModifiers())).isTrue();
@@ -60,6 +72,7 @@ class TushareRestClientFactoryTest {
     }
 
     @Test
+    @Order(2)
     void bindsAuthoritativeDefaultsWithoutRequiringAToken() {
         TushareProperties properties = bind(Map.of());
 
@@ -72,6 +85,7 @@ class TushareRestClientFactoryTest {
     }
 
     @Test
+    @Order(3)
     void bindsKebabCaseOverridesIncludingAScalarCredential() {
         TushareProperties properties = bind(Map.of(
                 PREFIX + ".enabled", "false",
@@ -83,13 +97,14 @@ class TushareRestClientFactoryTest {
 
         assertThat(properties.enabled()).isFalse();
         assertThat(properties.baseUrl()).isEqualTo(URI.create("http://localhost:8089/api"));
-        assertThat(properties.token().value()).isEqualTo(SECRET);
+        assertTrue(SECRET.equals(properties.token().value()), "credential binds from the configured scalar");
         assertThat(properties.connectTimeout()).isEqualTo(Duration.ofSeconds(2));
         assertThat(properties.readTimeout()).isEqualTo(Duration.ofSeconds(30));
         assertThat(properties.maxResponseBytes()).isEqualTo(1_048_576);
     }
 
     @Test
+    @Order(4)
     void rejectsInvalidConfigurationWithoutLeakingInputValues() {
         assertInvalidDirect(null, Duration.ofSeconds(5), Duration.ofSeconds(120), 1, "baseUrl must be an absolute HTTP(S) URI without credentials, query, or fragment");
         for (URI uri : new URI[] {URI.create("relative"), URI.create("https://user:pass@example.test"),
@@ -114,6 +129,7 @@ class TushareRestClientFactoryTest {
     }
 
     @Test
+    @Order(5)
     void projectsEnabledAndCredentialStateIntoReadinessWithoutNetworkAccess() {
         assertThat(properties(false, "").readiness()).isEqualTo(new PluginReadiness(false, false, false, "Disabled"));
         assertThat(properties(false, SECRET).readiness()).isEqualTo(new PluginReadiness(false, true, false, "Disabled"));
@@ -125,62 +141,70 @@ class TushareRestClientFactoryTest {
     }
 
     @Test
+    @Order(6)
     void redactsCredentialsFromStringsAndFailureMessages() {
         TushareProperties properties = properties(true, SECRET);
+        String credentialText = properties.token().toString();
+        String propertiesText = properties.toString();
 
-        assertThat(properties.token().toString()).isEqualTo("[REDACTED]");
-        assertThat(properties.toString()).contains("[REDACTED]").doesNotContain(SECRET);
-        assertThatThrownBy(() -> new TushareProperties(true, URI.create("https://example.test?token=" + SECRET),
-                new TushareProperties.Credential(SECRET), Duration.ofSeconds(5), Duration.ofSeconds(120), 1))
-                .hasMessage("baseUrl must be an absolute HTTP(S) URI without credentials, query, or fragment")
-                .hasMessageNotContaining(SECRET);
-        assertThatThrownBy(() -> new TushareRestClientFactory().create(null))
-                .hasMessageNotContaining(SECRET);
+        assertTrue("[REDACTED]".equals(credentialText), "credential string is the redaction marker");
+        assertTrue(!credentialText.contains(SECRET), "credential string omits the credential");
+        assertTrue(propertiesText.contains("[REDACTED]"), "properties string contains the redaction marker");
+        assertTrue(!propertiesText.contains(SECRET), "properties string omits the credential");
+        IllegalArgumentException invalidUrl = expectIllegalArgument(() -> new TushareProperties(true,
+                URI.create("https://example.test?token=" + SECRET), new TushareProperties.Credential(SECRET),
+                Duration.ofSeconds(5), Duration.ofSeconds(120), 1));
+        assertTrue("baseUrl must be an absolute HTTP(S) URI without credentials, query, or fragment"
+                .equals(invalidUrl.getMessage()), "invalid URL message is fixed");
+        assertTrue(!invalidUrl.getMessage().contains(SECRET), "invalid URL message omits the credential");
+        Throwable nullProperties = org.assertj.core.api.Assertions.catchThrowable(() -> new TushareRestClientFactory().create(null));
+        assertTrue(nullProperties != null, "null properties are rejected");
+        assertTrue(!String.valueOf(nullProperties.getMessage()).contains(SECRET), "null properties message omits the credential");
     }
 
     @Test
+    @Order(7)
     void sendsExactlyOneRequestWithOnlyTheFixedUserAgentAndNoCredential() {
-        WireMockServer server = new WireMockServer(wireMockConfig().dynamicPort());
-        server.start();
-        server.stubFor(get(urlEqualTo("/status")).willReturn(aResponse().withStatus(200)));
+        wireMock.stubFor(get(urlEqualTo("/status")).willReturn(aResponse().withStatus(200)));
 
-        new TushareRestClientFactory().create(properties(server.baseUrl(), SECRET))
+        new TushareRestClientFactory().create(properties(wireMock.baseUrl(), SECRET))
                 .get().uri("/status").retrieve().toBodilessEntity();
 
-        server.verify(1, getRequestedFor(urlEqualTo("/status"))
+        wireMock.verify(1, getRequestedFor(urlEqualTo("/status"))
                 .withHeader("User-Agent", com.github.tomakehurst.wiremock.client.WireMock.equalTo("Tensor/1.0")));
-        assertThat(server.getAllServeEvents()).singleElement().satisfies(event -> {
-            assertThat(event.getRequest().getAbsoluteUrl()).doesNotContain(SECRET);
+        var events = wireMock.getAllServeEvents();
+        assertTrue(events.size() == 1, "exactly one request reaches the upstream server");
+        events.forEach(event -> {
+            assertTrue(!event.getRequest().getAbsoluteUrl().contains(SECRET), "request URL omits the credential");
             assertThat(event.getRequest().getHeaders().getHeader("User-Agent").values()).containsExactly("Tensor/1.0");
-            assertThat(event.getRequest().getHeaders().all()).noneMatch(header -> header.values().contains(SECRET));
-            assertThat(event.getRequest().getBodyAsString()).doesNotContain(SECRET);
+            assertTrue(event.getRequest().getHeaders().all().stream()
+                    .noneMatch(header -> header.values().contains(SECRET)), "request headers omit the credential");
+            assertTrue(!event.getRequest().getBodyAsString().contains(SECRET), "request body omits the credential");
         });
     }
 
     @Test
+    @Order(9)
     void appliesJdkConnectAndRequestReadTimeouts() {
         assertThat(TushareRestClientFactory.createHttpClient(Duration.ofSeconds(2)).connectTimeout())
                 .contains(Duration.ofSeconds(2));
-        WireMockServer server = new WireMockServer(wireMockConfig().dynamicPort());
-        server.start();
-        server.stubFor(get(urlEqualTo("/slow")).willReturn(aResponse().withStatus(200).withFixedDelay(2_000)));
+        wireMock.stubFor(get(urlEqualTo("/slow")).willReturn(aResponse().withStatus(200).withFixedDelay(2_000)));
 
-        assertThatThrownBy(() -> new TushareRestClientFactory().create(properties(server.baseUrl(), ""))
+        assertThatThrownBy(() -> new TushareRestClientFactory().create(properties(wireMock.baseUrl(), "", Duration.ofMillis(100)))
                 .get().uri("/slow").retrieve().toBodilessEntity())
                 .isInstanceOf(ResourceAccessException.class);
-        server.verify(1, getRequestedFor(urlEqualTo("/slow")));
+        wireMock.verify(1, getRequestedFor(urlEqualTo("/slow")));
     }
 
     @Test
+    @Order(8)
     void doesNotRetryAServiceUnavailableResponse() {
-        WireMockServer server = new WireMockServer(wireMockConfig().dynamicPort());
-        server.start();
-        server.stubFor(post(urlEqualTo("/upstream")).willReturn(aResponse().withStatus(HttpStatus.SERVICE_UNAVAILABLE.value())));
+        wireMock.stubFor(post(urlEqualTo("/upstream")).willReturn(aResponse().withStatus(HttpStatus.SERVICE_UNAVAILABLE.value())));
 
-        assertThatThrownBy(() -> new TushareRestClientFactory().create(properties(server.baseUrl(), SECRET))
+        assertThatThrownBy(() -> new TushareRestClientFactory().create(properties(wireMock.baseUrl(), SECRET))
                 .post().uri("/upstream").retrieve().toBodilessEntity())
                 .isInstanceOf(HttpServerErrorException.ServiceUnavailable.class);
-        server.verify(1, postRequestedFor(urlEqualTo("/upstream")));
+        wireMock.verify(1, postRequestedFor(urlEqualTo("/upstream")));
     }
 
     private Constructor<?>[] publicConstructors(Class<?> type) {
@@ -200,17 +224,37 @@ class TushareRestClientFactoryTest {
 
     private void assertInvalidDirect(URI baseUrl, Duration connectTimeout, Duration readTimeout, int maxResponseBytes,
                                      String expectedMessage) {
-        assertThatThrownBy(() -> new TushareProperties(true, baseUrl, new TushareProperties.Credential(SECRET),
-                connectTimeout, readTimeout, maxResponseBytes))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage(expectedMessage)
-                .hasMessageNotContaining(SECRET);
+        IllegalArgumentException exception = expectIllegalArgument(() -> new TushareProperties(true, baseUrl,
+                new TushareProperties.Credential(SECRET), connectTimeout, readTimeout, maxResponseBytes));
+        assertTrue(expectedMessage.equals(exception.getMessage()), "invalid configuration reports the fixed message");
+        assertTrue(!exception.getMessage().contains(SECRET), "invalid configuration message omits the credential");
     }
 
     private void assertInvalidBinding(Map<String, Object> values) {
-        assertThatThrownBy(() -> bind(values))
-                .isInstanceOf(BindException.class)
-                .hasMessageNotContaining(SECRET);
+        BindException exception = expectBindException(() -> bind(values));
+        assertTrue(!exception.getMessage().contains(SECRET), "binding failure message omits the credential");
+    }
+
+    private IllegalArgumentException expectIllegalArgument(org.assertj.core.api.ThrowableAssert.ThrowingCallable action) {
+        try {
+            action.call();
+        } catch (IllegalArgumentException exception) {
+            return exception;
+        } catch (Throwable ignored) {
+            throw new AssertionError("configuration rejects invalid URLs with IllegalArgumentException");
+        }
+        throw new AssertionError("configuration rejects invalid URLs");
+    }
+
+    private BindException expectBindException(org.assertj.core.api.ThrowableAssert.ThrowingCallable action) {
+        try {
+            action.call();
+        } catch (BindException exception) {
+            return exception;
+        } catch (Throwable ignored) {
+            throw new AssertionError("binding rejects invalid configuration");
+        }
+        throw new AssertionError("binding rejects invalid configuration");
     }
 
     private TushareProperties properties(boolean enabled, String credential) {
@@ -218,11 +262,16 @@ class TushareRestClientFactoryTest {
     }
 
     private TushareProperties properties(String baseUrl, String credential) {
-        return properties(URI.create(baseUrl), true, credential);
+        return properties(baseUrl, credential, Duration.ofSeconds(5));
+    }
+
+    private TushareProperties properties(String baseUrl, String credential, Duration readTimeout) {
+        return new TushareProperties(true, URI.create(baseUrl), new TushareProperties.Credential(credential),
+                Duration.ofSeconds(5), readTimeout, 1_024);
     }
 
     private TushareProperties properties(URI baseUrl, boolean enabled, String credential) {
         return new TushareProperties(enabled, baseUrl, new TushareProperties.Credential(credential),
-                Duration.ofMillis(100), Duration.ofMillis(100), 1_024);
+                Duration.ofSeconds(5), Duration.ofSeconds(5), 1_024);
     }
 }
