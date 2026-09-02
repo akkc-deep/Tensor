@@ -49,7 +49,7 @@
 | 28 | M05-T01 | `PluginRegistry` 与 `AdapterRegistry` | `COMPLETED` | M02-T05 | docs/task-designs/M05-T01-design.md | docs/task-handoffs/M05-T01-handoff.md |
 | 29 | M05-T02 | `DatasetCatalog` 和启动元数据/表结构校验 | `COMPLETED` | M03-T09, M04-T06 | docs/task-designs/M05-T02-design.md | docs/task-handoffs/M05-T02-handoff.md |
 | 30 | M05-T03 | 元数据驱动参数校验 | `COMPLETED` | M02-T02, M02-T05, M03-T09 | docs/task-designs/M05-T03-design.md | docs/task-handoffs/M05-T03-handoff.md |
-| 31 | M05-T04 | 严格日期、文本、整数和精确数值转换 | `NOT_STARTED` | M02-T03, M02-T05 | docs/task-designs/M05-T04-design.md | None |
+| 31 | M05-T04 | 严格日期、文本、整数和精确数值转换 | `READY` | M02-T03, M02-T05 | docs/task-designs/M05-T04-design.md | docs/task-handoffs/M05-T04-handoff.md |
 | 32 | M05-T05 | `GenericDatasetAdapter`、重复键和指纹键 | `NOT_STARTED` | M05-T02, M05-T03, M05-T04 | None | None |
 | 33 | M06-T01 | 白名单 SQL 标识符和 Upsert 模板 | `NOT_STARTED` | M02-T03, M04-T06 | None | None |
 | 34 | M06-T02 | 复合键与指纹键编码/绑定 | `NOT_STARTED` | M05-T05 | None | None |
@@ -441,7 +441,7 @@
 - **Dependencies:** M02-T03, M02-T05.
 - **Sources:** `docs/superpowers/plans/tensor-modules/M05-core-registry-adapter.md` 的 `Task M05-T04` 任务卡。
 - **First action:** 读取 `docs/superpowers/plans/tensor-modules/M05-core-registry-adapter.md` 的 `Task M05-T04` 任务卡，并确认其 `Context boundary`、输入和目标文件均可定位。
-- **State evidence:** 2026-09-02：准备 M05-T04 设计时确认任务卡要求所有转换失败抛出 M02-T05 定义的 `AdapterException(ErrorCode.ADAPTER_TYPE_INVALID, ...)`，而原看板仅列出提供 `LogicalType` 与 `ColumnDefinition` 的 M02-T03。项目所有者明确批准将已完成的 M02-T05 补充为 M05-T04 的直接依赖。项目所有者随后逐项批准 `ConversionContext(ApiName,int)`、TEXT/空值、来源运行时类型、nullable 职责、精确安全消息、Unicode 长度/ENUM 以及单类 switch 实现方案，并确认接口行为与测试设计准确；`docs/task-designs/M05-T04-design.md` 已据此冻结精确公开表面、七类转换、安全边界、12 项 TDD、121/121 回归和精确三文件范围并回填。新鲜基线在 attach 受限沙箱中只因 Mockito/Byte Buddy `MockMaker` 无法自附加而产生 core 10 errors；同一命令在允许 JVM attach 的环境立即恢复 plugin-api 79/79、core 30/30、三层 Enforcer 全绿，确认是执行环境差异并已写入设计风险。本次只形成并链接设计，任务保持 `NOT_STARTED`，交接仍为 `None`。
+- **State evidence:** 2026-09-02：准备 M05-T04 设计时确认任务卡要求所有转换失败抛出 M02-T05 定义的 `AdapterException(ErrorCode.ADAPTER_TYPE_INVALID, ...)`，而原看板仅列出提供 `LogicalType` 与 `ColumnDefinition` 的 M02-T03。项目所有者明确批准将已完成的 M02-T05 补充为 M05-T04 的直接依赖。项目所有者随后逐项批准 `ConversionContext(ApiName,int)`、TEXT/空值、来源运行时类型、nullable 职责、精确安全消息、Unicode 长度/ENUM 以及单类 switch 实现方案，并确认接口行为与测试设计准确；`docs/task-designs/M05-T04-design.md` 已据此冻结精确公开表面、七类转换、安全边界、12 项 TDD、121/121 回归和精确三文件范围并回填。新鲜基线在 attach 受限沙箱中只因 Mockito/Byte Buddy `MockMaker` 无法自附加而产生 core 10 errors；同一命令在允许 JVM attach 的环境立即恢复 plugin-api 79/79、core 30/30、三层 Enforcer 全绿，确认是执行环境差异并已写入设计风险。设计完整复读确认七节顺序、无占位符、无冲突或待实施者裁决；M02-T03 与 M02-T05 均为 `COMPLETED`，其元数据类型/列参数与领域错误职责互补。`docs/task-handoffs/M05-T04-handoff.md` 已按 `next-task` 模板创建并链接，只记录这两项直接输入、约束比较、设计优先读取顺序和取得缺两个生产类型 RED 的首个动作，因此执行 `NOT_STARTED -> READY`，Java 实现尚未开始。
 
 ### `M05-T05`
 
