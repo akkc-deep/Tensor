@@ -176,7 +176,8 @@ class ParameterValidatorTest {
                 .containsExactly(Map.entry("trade_date", "20240229"));
 
         for (String invalid : List.of(
-                "2024-02-29", " 20240229", "20240229 ", "20240230", "20230229", "20241301")) {
+                "2024-02-29", " 20240229", "20240229 ", "20240230", "20230229", "20241301",
+                "+123450228", "-00010101")) {
             assertInvalid(descriptor, invalid);
         }
     }
@@ -190,7 +191,8 @@ class ParameterValidatorTest {
         assertThat(validator.validate(api, Map.of("month", "202402")).values())
                 .containsExactly(Map.entry("month", "202402"));
 
-        for (String invalid : List.of("2024-02", " 202402", "202402 ", "20242", "202400", "202413")) {
+        for (String invalid : List.of(
+                "2024-02", " 202402", "202402 ", "20242", "202400", "202413", "+1234502")) {
             assertInvalid(descriptor, invalid);
         }
     }
@@ -240,6 +242,11 @@ class ParameterValidatorTest {
                 .isInstanceOfSatisfying(ParameterValidationException.class, exception ->
                         assertThat(exception.fieldErrors()).containsExactly(
                                 new FieldError("lower", "has invalid value")));
+        assertThatThrownBy(() -> validator.validate(
+                        api, Map.of("lower", "+123450228", "upper", "20240201")))
+                .isInstanceOfSatisfying(ParameterValidationException.class, exception ->
+                        assertThat(exception.fieldErrors()).containsExactly(
+                                new FieldError("lower", "has invalid value")));
     }
 
     @Test
@@ -253,6 +260,12 @@ class ParameterValidatorTest {
         assertInvalidMetadata(
                 parameter("bad_default", ParameterType.DATE, false, "20240230", List.of(), null, null),
                 "bad_default");
+        assertInvalidMetadata(
+                parameter("wide_date", ParameterType.DATE, false, "+123450228", List.of(), null, null),
+                "wide_date");
+        assertInvalidMetadata(
+                parameter("wide_month", ParameterType.MONTH, false, "+1234502", List.of(), null, null),
+                "wide_month");
         ApiDescriptor badRange = api(
                 parameter("range_start", ParameterType.DATE_RANGE_MEMBER, false, null, List.of(), null, "range_end"),
                 parameter("range_end", ParameterType.TEXT, false, null, List.of(), null, "range_start"));

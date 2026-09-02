@@ -27,6 +27,8 @@ import java.util.regex.PatternSyntaxException;
 public final class ParameterValidator {
     private static final Pattern PARAMETER_NAME = Pattern.compile("^[a-z][a-z0-9_]{1,63}$");
     private static final Pattern TS_CODE = Pattern.compile("[A-Z0-9]+\\.[A-Z0-9]+");
+    private static final Pattern DATE_VALUE = Pattern.compile("[0-9]{8}");
+    private static final Pattern MONTH_VALUE = Pattern.compile("[0-9]{6}");
     private static final DateTimeFormatter DATE = new DateTimeFormatterBuilder()
             .appendPattern("uuuuMMdd")
             .toFormatter(Locale.ROOT)
@@ -146,10 +148,16 @@ public final class ParameterValidator {
         try {
             normalized = switch (parameter.type()) {
                 case DATE, DATE_RANGE_MEMBER -> {
+                    if (!DATE_VALUE.matcher(value).matches()) {
+                        yield null;
+                    }
                     LocalDate.parse(value, DATE);
                     yield value;
                 }
                 case MONTH -> {
+                    if (!MONTH_VALUE.matcher(value).matches()) {
+                        yield null;
+                    }
                     YearMonth.parse(value, MONTH);
                     yield value;
                 }
