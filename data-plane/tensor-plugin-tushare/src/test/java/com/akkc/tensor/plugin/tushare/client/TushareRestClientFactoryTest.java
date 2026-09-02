@@ -1,6 +1,8 @@
 package com.akkc.tensor.plugin.tushare.client;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
+import static com.github.tomakehurst.wiremock.client.WireMock.any;
+import static com.github.tomakehurst.wiremock.client.WireMock.anyUrl;
 import static com.github.tomakehurst.wiremock.client.WireMock.get;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
@@ -113,8 +115,14 @@ class TushareRestClientFactoryTest {
         assertInvalidDirect(URI.create("https://example.test"), Duration.ZERO, Duration.ofSeconds(120), 1,
                 "connectTimeout must be positive");
         assertInvalidBinding(Map.of(PREFIX + ".connect-timeout", "0s"));
+        assertInvalidDirect(URI.create("https://example.test"), Duration.ofSeconds(-1), Duration.ofSeconds(120), 1,
+                "connectTimeout must be positive");
+        assertInvalidBinding(Map.of(PREFIX + ".connect-timeout", "-1s"));
         assertInvalidDirect(URI.create("https://example.test"), Duration.ofSeconds(5), Duration.ZERO, 1,
                 "readTimeout must be positive and at most 120 seconds");
+        assertInvalidDirect(URI.create("https://example.test"), Duration.ofSeconds(5), Duration.ofSeconds(-1), 1,
+                "readTimeout must be positive and at most 120 seconds");
+        assertInvalidBinding(Map.of(PREFIX + ".read-timeout", "-1s"));
         assertInvalidDirect(URI.create("https://example.test"), Duration.ofSeconds(5), Duration.ofSeconds(121), 1,
                 "readTimeout must be positive and at most 120 seconds");
         assertInvalidBinding(Map.of(PREFIX + ".read-timeout", "121s"));
@@ -162,10 +170,11 @@ class TushareRestClientFactoryTest {
     @Test
     @Order(7)
     void sendsExactlyOneRequestWithOnlyTheFixedUserAgentAndNoCredential() {
-        wireMock.stubFor(get(urlEqualTo("/status")).willReturn(aResponse().withStatus(200)));
+        wireMock.stubFor(any(anyUrl()).willReturn(aResponse().withStatus(200)));
 
-        new TushareRestClientFactory().create(properties(wireMock.baseUrl(), SECRET))
-                .get().uri("/status").retrieve().toBodilessEntity();
+        Throwable requestFailure = org.assertj.core.api.Assertions.catchThrowable(() -> new TushareRestClientFactory()
+                .create(properties(wireMock.baseUrl(), SECRET)).get().uri("/status").retrieve().toBodilessEntity());
+        assertTrue(requestFailure == null, "credential safety request completes");
 
         var events = wireMock.getAllServeEvents();
         boolean oneStatusRequest = events.size() == 1
@@ -205,7 +214,7 @@ class TushareRestClientFactoryTest {
         wireMock.stubFor(post(urlEqualTo("/upstream")).willReturn(aResponse().withStatus(HttpStatus.SERVICE_UNAVAILABLE.value())));
 
         Throwable unavailable = org.assertj.core.api.Assertions.catchThrowable(() -> new TushareRestClientFactory()
-                .create(properties(wireMock.baseUrl(), SECRET)).post().uri("/upstream").retrieve().toBodilessEntity());
+                .create(properties(wireMock.baseUrl(), "")).post().uri("/upstream").retrieve().toBodilessEntity());
         assertTrue(unavailable instanceof HttpServerErrorException.ServiceUnavailable,
                 "service unavailable response propagates as the standard exception");
         var events = wireMock.getAllServeEvents();
