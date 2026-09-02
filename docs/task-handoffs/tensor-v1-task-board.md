@@ -55,7 +55,7 @@
 | 34 | M06-T02 | 复合键与指纹键编码/绑定 | `COMPLETED` | M05-T05 | docs/task-designs/M06-T02-design.md | docs/task-handoffs/M06-T02-handoff.md |
 | 35 | M06-T03 | 已有键预查、数据集锁和插入/更新计数 | `COMPLETED` | M06-T01, M06-T02 | docs/task-designs/M06-T03-design.md | docs/task-handoffs/M06-T03-handoff.md |
 | 36 | M06-T04 | 单事务批量 Upsert 与回滚 | `COMPLETED` | M06-T03 | docs/task-designs/M06-T04-design.md | docs/task-handoffs/M06-T04-handoff.md |
-| 37 | M06-T05 | 查询条件白名单和 COUNT/分页 SQL | `NOT_STARTED` | M02-T03, M04-T06 | docs/task-designs/M06-T05-design.md | None |
+| 37 | M06-T05 | 查询条件白名单和 COUNT/分页 SQL | `READY` | M02-T03, M04-T06 | docs/task-designs/M06-T05-design.md | docs/task-handoffs/M06-T05-handoff.md |
 | 38 | M06-T06 | `DatasetQueryService`、页码归一化和精度序列化 | `NOT_STARTED` | M06-T05 | None | None |
 | 39 | M07-T01 | 配置属性和同步 `RestClient` | `NOT_STARTED` | M02-T05 | None | None |
 | 40 | M07-T02 | Tushare 请求、响应 DTO 和严格返回校验 | `NOT_STARTED` | M03-T09, M07-T01 | None | None |
@@ -529,7 +529,7 @@
 - **Dependencies:** M02-T03, M04-T06.
 - **Sources:** `docs/superpowers/plans/tensor-modules/M06-core-persistence-query.md` 的 `Task M06-T05` 任务卡。
 - **First action:** 读取 `docs/superpowers/plans/tensor-modules/M06-core-persistence-query.md` 的 `Task M06-T05` 任务卡，并确认其 `Context boundary`、输入和目标文件均可定位。
-- **State evidence:** None.
+- **State evidence:** 2026-09-03：M06-T04 已按严格 TDD、固定 MySQL 8.4.6 定向 8/8、提交态 reactor `verify` 146/146、三层 Enforcer、两项受控 mutation、静态/范围/格式/清理门禁和无 Critical/Important/Minor 的独立复审完成，权威看板已先记录 `IN_PROGRESS -> COMPLETED`。按预定义顺序选择最小后继 M06-T05；其直接依赖 M02-T03、M04-T06 均为 `COMPLETED`：前者以提交 `551c18f` 与修复 `0a74740` 提供已校验、保序不可变的 DatasetDefinition/列/filter/业务键公共合同，后者以提交 `e78bd98` 在固定 MySQL 8.4.6 上证明 49 张生产表、COMPOSITE/FINGERPRINT 物理键和三个来源列与元数据一致，两项约束互补且无冲突。`docs/task-designs/M06-T05-design.md` 已完整冻结三个生产类型的唯一公开表面、证券代码/日期/分页值不变量、三字段元数据白名单、参数化 COUNT/分页 SQL、明确列、两种稳定排序、固定八项测试、两项 mutation、154/154 回归和精确四文件范围，七节顺序、无占位符、自洽性与 `git diff --check` 均通过，并已从任务卡和看板链接。`docs/task-handoffs/M06-T05-handoff.md` 已按 `next-task` 模板写入并先链接，只记录 M06-T05 与两项直接输入、设计优先读取顺序和先确认 146/146 基线再只创建完整测试取得缺三个生产类型 RED 的具体首个动作。因此执行真实的 `NOT_STARTED -> READY`；M06-T05 Java 实现尚未开始。
 
 ### `M06-T06`
 
