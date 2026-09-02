@@ -48,7 +48,7 @@
 | 27 | M04-T06 | V6 fixture 表与 49 表结构总校验 | `COMPLETED` | M04-T01, M04-T02, M04-T03, M04-T04, M04-T05 | docs/task-designs/M04-T06-design.md | docs/task-handoffs/M04-T06-handoff.md |
 | 28 | M05-T01 | `PluginRegistry` 与 `AdapterRegistry` | `COMPLETED` | M02-T05 | docs/task-designs/M05-T01-design.md | docs/task-handoffs/M05-T01-handoff.md |
 | 29 | M05-T02 | `DatasetCatalog` 和启动元数据/表结构校验 | `COMPLETED` | M03-T09, M04-T06 | docs/task-designs/M05-T02-design.md | docs/task-handoffs/M05-T02-handoff.md |
-| 30 | M05-T03 | 元数据驱动参数校验 | `NOT_STARTED` | M02-T02, M03-T09 | None | None |
+| 30 | M05-T03 | 元数据驱动参数校验 | `NOT_STARTED` | M02-T02, M02-T05, M03-T09 | docs/task-designs/M05-T03-design.md | None |
 | 31 | M05-T04 | 严格日期、文本、整数和精确数值转换 | `NOT_STARTED` | M02-T03 | None | None |
 | 32 | M05-T05 | `GenericDatasetAdapter`、重复键和指纹键 | `NOT_STARTED` | M05-T02, M05-T03, M05-T04 | None | None |
 | 33 | M06-T01 | 白名单 SQL 标识符和 Upsert 模板 | `NOT_STARTED` | M02-T03, M04-T06 | None | None |
@@ -424,10 +424,10 @@
 - **Goal:** 交付“元数据驱动参数校验”。
 - **Scope:** 包含该交付物及其直接测试与验证；不包含其他预定义任务的交付物，也不扩展 `docs/superpowers/plans/tensor-modules/M05-core-registry-adapter.md` 中该任务卡明确的文件、主要语言、接口和排除边界。
 - **Acceptance:** “元数据驱动参数校验”已按该任务卡指定的位置和行为形成；任务卡列出的全部测试、验证命令和检查得到其注明的预期结果；没有混入排除范围。
-- **Dependencies:** M02-T02, M03-T09.
+- **Dependencies:** M02-T02, M02-T05, M03-T09.
 - **Sources:** `docs/superpowers/plans/tensor-modules/M05-core-registry-adapter.md` 的 `Task M05-T03` 任务卡。
 - **First action:** 读取 `docs/superpowers/plans/tensor-modules/M05-core-registry-adapter.md` 的 `Task M05-T03` 任务卡，并确认其 `Context boundary`、输入和目标文件均可定位。
-- **State evidence:** None.
+- **State evidence:** 2026-09-02：完成 M05-T02 后按预定义顺序选择后继 M05-T03；设计检查确认任务卡要求以 `PARAM_REQUIRED|PARAM_INVALID` 和字段错误表达失败，而原看板依赖只列 M02-T02、M03-T09。项目所有者批准在 `ParameterValidator` 内嵌公开 `ParameterValidationException`/`FieldError`，异常继承 M02-T05 的 `TensorException` 并使用其 `ErrorCode`，因此同步补充已完成 M02-T05 为直接依赖。项目所有者还批准 `ValidatedParameters(Map<String,Object>)` 保存有序不可变规范化字符串、默认值规则、两阶段同类错误聚合，以及互相关联 `DATE_RANGE_MEMBER` 按声明顺序执行前者不晚于后者；`docs/task-designs/M05-T03-design.md` 已据此冻结精确公开表面、六类参数规则、安全边界、10 项 TDD、109/109 回归和精确三文件范围并回填。任务仍为 `NOT_STARTED`，Handoff 保持 `None`，待书面设计复核后再创建 `next-task` 交接并执行准备转换。
 
 ### `M05-T04`
 
