@@ -169,6 +169,8 @@ class GenericDatasetAdapterTest {
         assertThatNullPointerException().isThrownBy(() -> codec.sha256(null, row));
         assertThatNullPointerException().isThrownBy(() -> codec.sha256(fields, null));
         assertThatThrownBy(() -> codec.sha256(List.of(), row)).isInstanceOf(IllegalArgumentException.class);
+        assertThatThrownBy(() -> codec.sha256(Arrays.asList("text", null), row))
+                .isInstanceOf(IllegalArgumentException.class).hasMessage("fields must not contain null");
         assertThatThrownBy(() -> codec.sha256(List.of("text", "text"), row)).isInstanceOf(IllegalArgumentException.class);
         assertThatThrownBy(() -> codec.sha256(List.of("absent"), row)).isInstanceOf(IllegalArgumentException.class);
         assertThatThrownBy(() -> codec.sha256(List.of("bad"), Map.of("bad", Boolean.TRUE)))

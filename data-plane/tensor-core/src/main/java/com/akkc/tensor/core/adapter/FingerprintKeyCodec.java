@@ -25,7 +25,9 @@ public final class FingerprintKeyCodec {
         }
         Set<String> names = new HashSet<>();
         for (String field : fields) {
-            Objects.requireNonNull(field, "field");
+            if (field == null) {
+                throw new IllegalArgumentException("fields must not contain null");
+            }
             if (!names.add(field)) {
                 throw new IllegalArgumentException("fields must not contain duplicates");
             }
