@@ -57,7 +57,7 @@
 | 36 | M06-T04 | 单事务批量 Upsert 与回滚 | `COMPLETED` | M06-T03 | docs/task-designs/M06-T04-design.md | docs/task-handoffs/M06-T04-handoff.md |
 | 37 | M06-T05 | 查询条件白名单和 COUNT/分页 SQL | `COMPLETED` | M02-T03, M04-T06 | docs/task-designs/M06-T05-design.md | docs/task-handoffs/M06-T05-handoff.md |
 | 38 | M06-T06 | `DatasetQueryService`、页码归一化和精度序列化 | `COMPLETED` | M06-T05 | docs/task-designs/M06-T06-design.md | docs/task-handoffs/M06-T06-handoff.md |
-| 39 | M07-T01 | 配置属性和同步 `RestClient` | `IN_PROGRESS` | M02-T05 | docs/task-designs/M07-T01-design.md | docs/task-handoffs/M07-T01-handoff.md |
+| 39 | M07-T01 | 配置属性和同步 `RestClient` | `COMPLETED` | M02-T05 | docs/task-designs/M07-T01-design.md | docs/task-handoffs/M07-T01-handoff.md |
 | 40 | M07-T02 | Tushare 请求、响应 DTO 和严格返回校验 | `NOT_STARTED` | M03-T09, M07-T01 | None | None |
 | 41 | M07-T03 | 鉴权、权限、限流、网络、超时和格式错误分类 | `NOT_STARTED` | M07-T02 | None | None |
 | 42 | M07-T04 | `TushareProPlugin` 描述符、readiness 和 49 接口下载 | `NOT_STARTED` | M07-T02, M07-T03 | None | None |
@@ -554,6 +554,8 @@
 - **Sources:** `docs/superpowers/plans/tensor-modules/M07-tushare-plugin.md` 的 `Task M07-T01` 任务卡。
 - **First action:** 读取 `docs/superpowers/plans/tensor-modules/M07-tushare-plugin.md` 的 `Task M07-T01` 任务卡，并确认其 `Context boundary`、输入和目标文件均可定位。
 - **State evidence:** 2026-09-03：M06-T06 已按严格 TDD、固定 MySQL 8.4.6 定向 8/8、两项受控 mutation、提交态 reactor `test`/`verify` 154/154、三层 Enforcer、静态/范围/格式/清理门禁和无 Critical/Important 的独立复审完成，实现提交 `9c3fa44`，权威看板提交 `a4e0d3d` 已先记录 `IN_PROGRESS -> COMPLETED`。按预定义顺序选择最小后继 M07-T01；其唯一直接依赖 M02-T05 为 `COMPLETED`，提交 `445b941` 与契约修复 `dd495ee` 提供 framework-free `DataSourcePlugin`/`PluginReadiness` 和安全领域错误边界，当前消费类型相对最终提交无差异。原任务卡要求属性 “bind”，但模块缺少配置属性依赖且原三文件范围不含 POM；用户明确选择按注解方式进行，批准将模块 POM 的最小 `spring-boot` 核心依赖和真实 Binder 测试纳入范围。无仓库改动的 Boot 3.5.16 探针已验证 `@DefaultValue` 默认值、单标量 Token 到脱敏嵌套 record 的转换与覆盖绑定可行。设计提交 `9b555ee` 创建并回填 `docs/task-designs/M07-T01-design.md`，完整冻结注解前缀、六组件/凭证/readiness、URI/时长/大小验证、JDK 同步 RestClient、User-Agent、零重试、九项 RED/GREEN、两项 mutation、137 基线/146 最终回归和精确四文件范围；七节顺序、无占位符、依赖比较及 `git diff --check` 自审通过。`docs/task-handoffs/M07-T01-handoff.md` 已按 `next-task` 模板写入并链接，只记录 M07-T01 与直接输入 M02-T05，包含同一设计路径、读取顺序和先确认 137/137 基线、再只加 POM/完整测试取得缺两个生产类 RED 的具体首个动作，因此执行真实的 `NOT_STARTED -> READY`；M07-T01 Java/POM 实现尚未开始。2026-09-03：用户再次明确要求按照权威任务看板执行当前任务，并先读取设计文档与交接文件；已完整读取并确认二者与看板、任务卡和当前模块边界一致，因此作为 `READY -> IN_PROGRESS` 的启动证据，保留既有 next-task 交接为入口上下文。
+
+- **Completion evidence:** 2026-09-03：实现提交 `06682a8` 以精确四文件范围交付注解绑定的六组件 `TushareProperties`、脱敏 `Credential`、M02 readiness 投影和使用 JDK 连接/读取超时、配置 base URL、唯一 `Tensor/1.0` User-Agent、零应用重试且不读取 Token 的同步 `RestClient` factory；测试安全修复提交 `6e09e3a`、`e936287`、`9c49eb6` 依次消除断言/未匹配请求的秘密输出路径、确保 WireMock 生命周期关闭，并补齐正负时长 mutation 覆盖，未修改生产行为或越出原四文件集合。严格 TDD 先确认 137/137 基线，再取得仅缺两个生产类的可归因 RED；最终聚焦测试 9/9，明文、read-timeout、User-Agent、URL 泄漏和负时长受控 mutation 均按预期失败且恢复后通过，完整输出的 `m07-t01-secret-sentinel` 扫描无匹配。提交态 reactor `verify` 为 plugin-api 79/79、tushare 67/67，共 146/146，0 failure、0 error、0 skipped，父项目/plugin-api/tushare 三层 Enforcer 通过；依赖树仅显示 Boot BOM 管理的 `spring-boot:3.5.16`、`spring-web:6.2.19`、`spring-context:6.2.19`，禁用 API、受保护路径、格式和清理门禁均通过。任务级审查经两轮修复后清洁，最终整体审查发现的唯一 Important 和延期 Minor 已在单次最终修复波解决，范围化复审确认无新 Critical/Important；因此任务设计的结果级验收全部成立，执行 `IN_PROGRESS -> COMPLETED`。
 
 ### `M07-T02`
 
