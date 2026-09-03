@@ -67,7 +67,7 @@
 | 46 | M09-T01 | Boot 入口、请求标识和通用 API DTO | `COMPLETED` | M01-T03, M02-T01, M02-T05 | docs/task-designs/M09-T01-design.md | docs/task-handoffs/M09-T01-handoff.md |
 | 47 | M09-T02 | 数据源、接口和数据集元数据 API | `COMPLETED` | M05-T01, M05-T02, M09-T01 | docs/task-designs/M09-T02-design.md | docs/task-handoffs/M09-T02-handoff.md |
 | 48 | M09-T03 | 同步下载 API 与事务提交后结果 | `COMPLETED` | M05-T01, M05-T03, M05-T05, M06-T04, M07-T04, M09-T01 | docs/task-designs/M09-T03-design.md | docs/task-handoffs/M09-T03-handoff.md |
-| 49 | M09-T04 | 数据集定义与只读分页查询 API | `READY` | M05-T02, M06-T06, M09-T01 | docs/task-designs/M09-T04-design.md | docs/task-handoffs/M09-T04-handoff.md |
+| 49 | M09-T04 | 数据集定义与只读分页查询 API | `IN_PROGRESS` | M05-T02, M06-T06, M09-T01 | docs/task-designs/M09-T04-design.md | docs/task-handoffs/M09-T04-handoff.md |
 | 50 | M09-T05 | 全局异常和 HTTP 状态映射 | `NOT_STARTED` | M09-T02, M09-T03, M09-T04 | None | None |
 | 51 | M09-T06 | 配置、脱敏、指标、健康和静态资源安全 | `NOT_STARTED` | M09-T01, M09-T02, M09-T03, M09-T04, M09-T05 | None | None |
 | 52 | M10-T01 | Vue 依赖、Vitest、VTU 和 Playwright 配置 | `NOT_STARTED` | M00-T03 | None | None |
@@ -696,6 +696,8 @@
 - **State evidence:** 2026-09-04：准备 M09-T04 时确认可靠区分不存在数据集的 `409 + DATASET_MISCONFIGURED` 需要 Controller 在调用 `DatasetQueryService` 前直接消费 M05-T02 的 `DatasetCatalog.find`，而原看板只列 M06-T06、M09-T01；项目所有者明确批准方案 1，把 M05-T02 补为直接依赖，并依次批准双依赖薄 Controller、catalog-first 数据流、筛选/criteria 错误边界、PageResponse、只字符串化 boxed Long/BigDecimal 且保留 primitive 分页 number 的 Jackson 方案、固定四文件范围和八项真实 MySQL 集成测试。`docs/task-designs/M09-T04-design.md` 已创建并回填；任务保持 `NOT_STARTED`，Handoff 仍为 `None`，功能实现尚未开始。
 
 - **State evidence (readiness):** 2026-09-04：项目所有者明确批准书面设计；提交 `66673bf` 已创建并回填完整 `docs/task-designs/M09-T04-design.md`，冻结唯一 records GET、catalog-first 409、固定筛选/criteria/MDC 边界、九组件深不可变 PageResponse、boxed Long/BigDecimal plain string 与 primitive 分页 number、固定 MySQL 八项 IT 和精确四文件范围。提交 `0d901a1` 已把批准设计转化为 `docs/superpowers/plans/2026-09-04-m09-t04-read-only-dataset-paging.md` 的 12 步严格 TDD 实施计划；设计七节、计划强制头、接口/类型/参数名、测试定义、8/23/295 计数、mutation、占位符、范围、格式和歧义自审通过，无留给实施者的材料选择。三项直接依赖 M05-T02、M06-T06、M09-T01 均为 `COMPLETED`，其当前 catalog、query/page 和 request-ID/error 消费产物分别相对实现提交 `57771b0`、`9c3fa44`、`367b0d1` 无差异，决策和约束互补且无冲突。`docs/task-handoffs/M09-T04-handoff.md` 已按 `next-task` 模板完整创建并链接，只记录 M09-T04 与三项直接输入，包含同一设计路径、精确 artifact/decision/rationale/constraint/usage/readiness evidence、设计/计划优先读取顺序，以及先确认 295/295 基线再只创建完整 IT 取得缺三个生产类型 RED 的具体首个动作。因此执行真实的 `NOT_STARTED -> READY`；Java 实现尚未开始。
+
+- **State evidence (start):** 2026-09-04：用户明确要求按照权威任务看板执行当前任务；已完整读取 `docs/task-designs/M09-T04-design.md`、既有 `next-task` 交接、12 步实施计划、看板 M09-T04 行与详情、M09 任务卡/Global Constraints/Module Gate、OpenAPI records/PageResponse、三项直接依赖设计和当前 catalog/query/page/request-ID 生产接口，确认任务身份、四文件范围、首个动作、依赖输入及约束均可定位且无冲突。初次基线在受限沙箱中仅因 Mockito/Byte Buddy 无法 self-attach 失败；获准在可 attach 环境重跑后 reactor 为 plugin-api 79、core 75、Tushare 93、fixture 12、app 36，合计 295/295，0 failure、0 error、0 skipped，六层 Enforcer、app ArchUnit 和禁止 Git 门禁通过，作为本次 `READY -> IN_PROGRESS` 的启动证据；既有交接路径保留为进入上下文。
 
 ### `M09-T05`
 
