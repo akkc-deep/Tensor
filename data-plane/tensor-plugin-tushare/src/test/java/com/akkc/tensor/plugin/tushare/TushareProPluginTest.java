@@ -27,6 +27,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.net.URI;
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -129,8 +130,19 @@ class TushareProPluginTest {
                 .containsExactlyElementsOf(API_NAMES);
         assertThat(plugin.descriptor().datasets()).extracting(key -> key.apiName().value())
                 .containsExactlyElementsOf(API_NAMES);
+        TushareProPlugin reversed = plugin(
+                properties(true, SECRET), mock(TushareProClient.class), definitions.reversed());
+        assertThat(reversed.descriptor().apis()).extracting(api -> api.apiName().value())
+                .containsExactlyElementsOf(API_NAMES.reversed());
+        assertThat(reversed.descriptor().datasets()).extracting(key -> key.apiName().value())
+                .containsExactlyElementsOf(API_NAMES.reversed());
         assertThatThrownBy(() -> plugin(properties(true, SECRET), mock(TushareProClient.class),
                 definitions.subList(0, 48)))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("definitions must contain exactly 49 datasets");
+        List<DatasetDefinition> fiftyDefinitions = new ArrayList<>(definitions);
+        fiftyDefinitions.add(definitions.getFirst());
+        assertThatThrownBy(() -> plugin(properties(true, SECRET), mock(TushareProClient.class), fiftyDefinitions))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("definitions must contain exactly 49 datasets");
     }
@@ -209,6 +221,15 @@ class TushareProPluginTest {
         assertThat(disabledUnknown).isInstanceOf(TensorException.class);
         assertThat(((TensorException) disabledUnknown).code()).isEqualTo(ErrorCode.PLUGIN_DISABLED);
         verifyNoInteractions(disabledClient);
+
+        TushareProClient missingCredentialClient = mock(TushareProClient.class);
+        TushareProPlugin missingCredential = plugin(
+                properties(true, ""), missingCredentialClient, definitions());
+        Throwable missingCredentialUnknown = catchThrowable(
+                () -> missingCredential.download(ApiName.of("unknown_api"), Map.of()));
+        assertThat(missingCredentialUnknown).isInstanceOf(TensorException.class);
+        assertThat(((TensorException) missingCredentialUnknown).code()).isEqualTo(ErrorCode.PLUGIN_DISABLED);
+        verifyNoInteractions(missingCredentialClient);
     }
 
     @Test
