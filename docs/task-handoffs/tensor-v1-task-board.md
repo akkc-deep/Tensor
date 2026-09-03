@@ -64,7 +64,7 @@
 | 43 | M08-T01 | fixture 元数据、插件和适配器 | `COMPLETED` | M02-T05, M04-T06, M05-T05 | docs/task-designs/M08-T01-design.md | docs/task-handoffs/M08-T01-handoff.md |
 | 44 | M08-T02 | 成功、空、上游失败、适配失败和写入失败模式 | `COMPLETED` | M08-T01 | docs/task-designs/M08-T02-design.md | docs/task-handoffs/M08-T02-handoff.md |
 | 45 | M08-T03 | fixture 注册→适配→入库→查询集成测试 | `COMPLETED` | M05-T01, M05-T05, M06-T04, M06-T06, M08-T02 | docs/task-designs/M08-T03-design.md | docs/task-handoffs/M08-T03-handoff.md |
-| 46 | M09-T01 | Boot 入口、请求标识和通用 API DTO | `IN_PROGRESS` | M01-T03, M02-T01, M02-T05 | docs/task-designs/M09-T01-design.md | docs/task-handoffs/M09-T01-handoff.md |
+| 46 | M09-T01 | Boot 入口、请求标识和通用 API DTO | `COMPLETED` | M01-T03, M02-T01, M02-T05 | docs/task-designs/M09-T01-design.md | docs/task-handoffs/M09-T01-handoff.md |
 | 47 | M09-T02 | 数据源、接口和数据集元数据 API | `NOT_STARTED` | M05-T02, M09-T01 | None | None |
 | 48 | M09-T03 | 同步下载 API 与事务提交后结果 | `NOT_STARTED` | M05-T03, M05-T05, M06-T04, M07-T04, M09-T01 | None | None |
 | 49 | M09-T04 | 数据集定义与只读分页查询 API | `NOT_STARTED` | M06-T06, M09-T01 | None | None |
@@ -652,6 +652,8 @@
 - **State evidence (readiness):** 2026-09-03：项目所有者明确批准方案 1 和书面设计；提交 `1578374` 已创建并回填完整 `docs/task-designs/M09-T01-design.md`，冻结 Boot 根入口、规范小写 UUID 白名单、响应头/MDC 同值与无条件清理、不可变通用错误 DTO、严格 RED/GREEN、283/283 reactor 和精确六文件实现范围，七节顺序、占位符、内部一致性、范围与歧义自审通过，无留给实施者的材料选择。三项直接依赖 M01-T03、M02-T01、M02-T05 均为 `COMPLETED`，分别提供模块与禁止能力门禁、UUID 请求身份、错误码与 retryable 真值，决策和约束互补且无冲突。`docs/task-handoffs/M09-T01-handoff.md` 已按 `next-task` 模板完整创建并链接，只记录 M09-T01 和三项直接输入，包含同一设计路径、精确 artifact/decision/rationale/constraint/usage/readiness evidence、设计优先读取顺序，以及先完整创建 `RequestIdFilterTest.java` 并取得只因四个生产类型缺失而失败的严格 RED 首个动作。因此执行真实的 `NOT_STARTED -> READY`；功能实现尚未开始。
 
 - **State evidence (start):** 2026-09-03：用户明确要求按照权威任务看板执行当前任务；已完整读取 `docs/task-designs/M09-T01-design.md` 与 `docs/task-handoffs/M09-T01-handoff.md`，核对 M09 任务卡、OpenAPI `ApiError`/`FieldError`、TRD 17.1、三项直接依赖和 app 现有门禁，确认身份、范围、输入、验收和首个 RED 动作一致且无冲突。未改代码的 reactor 基线在允许 Mockito/Byte Buddy attach 的环境通过 plugin-api 79、core 75、Tushare 93、fixture 12、app 13，共 272/272，作为本次 `READY -> IN_PROGRESS` 的启动证据；既有交接路径保留为进入上下文。
+
+- **Completion evidence:** 严格 TDD 先完整创建唯一 `RequestIdFilterTest.java`，聚焦命令仅因 `TensorApplication`、`RequestIdFilter`、`ApiErrorResponse`、`FieldErrorResponse` 四个缺失交付类型在 `tensor-app:testCompile` 非零；最小实现随后创建 Boot 根入口、最高优先级请求关联 Filter、两个不可变错误 DTO 并删除旧示例 Main。提交 `367b0d1`（`feat(app): bootstrap Tensor and request correlation`）精确包含设计规定的五个新增 Java 文件和一个删除文件。最终提交态聚焦测试 11/11，完整 reactor `test` 与 `verify` 均为 plugin-api 79、core 75、Tushare 93、fixture 12、app 24，共 283/283，0 failure、0 error、0 skipped，六层 Enforcer、ArchUnit 和禁止 Git 能力门禁通过；JAR 精确包含四个新生产类型且不含旧 Main，授权/禁用职责扫描、受保护路径、格式、提交范围、Git 跟踪和 Maven `clean` 门禁通过，工作树为空且无 `target/`。独立审查未发现 Critical 或 Important；唯一 Minor“最高优先级未受测试保护”已通过同一 smoke 测试断言和移除 `@Order` 必然失败的 mutation 检查修复，范围化复审确认已解决且无新问题，结论 `Ready to merge: Yes`。Boot 根、规范小写 UUID 白名单、响应头/MDC 同值与异常后无条件清理、错误 DTO/OpenAPI/ErrorCode/不可变性合同和排除边界均满足设计及任务卡，因此执行 `IN_PROGRESS -> COMPLETED`。
 
 ### `M09-T02`
 
