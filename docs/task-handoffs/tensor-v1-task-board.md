@@ -60,7 +60,7 @@
 | 39 | M07-T01 | 配置属性和同步 `RestClient` | `COMPLETED` | M02-T05 | docs/task-designs/M07-T01-design.md | docs/task-handoffs/M07-T01-handoff.md |
 | 40 | M07-T02 | Tushare 请求、响应 DTO 和严格返回校验 | `COMPLETED` | M03-T09, M07-T01 | docs/task-designs/M07-T02-design.md | docs/task-handoffs/M07-T02-handoff.md |
 | 41 | M07-T03 | 鉴权、权限、限流、网络、超时和格式错误分类 | `COMPLETED` | M07-T02 | docs/task-designs/M07-T03-design.md | docs/task-handoffs/M07-T03-handoff.md |
-| 42 | M07-T04 | `TushareProPlugin` 描述符、readiness 和 49 接口下载 | `READY` | M07-T02, M07-T03 | docs/task-designs/M07-T04-design.md | docs/task-handoffs/M07-T04-handoff.md |
+| 42 | M07-T04 | `TushareProPlugin` 描述符、readiness 和 49 接口下载 | `IN_PROGRESS` | M07-T02, M07-T03 | docs/task-designs/M07-T04-design.md | docs/task-handoffs/M07-T04-handoff.md |
 | 43 | M08-T01 | fixture 元数据、插件和适配器 | `NOT_STARTED` | M02-T05, M04-T06 | None | None |
 | 44 | M08-T02 | 成功、空、上游失败、适配失败和写入失败模式 | `NOT_STARTED` | M08-T01 | None | None |
 | 45 | M08-T03 | fixture 注册→适配→入库→查询集成测试 | `NOT_STARTED` | M05-T05, M06-T06, M08-T02 | None | None |
@@ -586,6 +586,8 @@
 - **Sources:** `docs/superpowers/plans/tensor-modules/M07-tushare-plugin.md` 的 `Task M07-T04` 任务卡。
 - **First action:** 读取 `docs/superpowers/plans/tensor-modules/M07-tushare-plugin.md` 的 `Task M07-T04` 任务卡，并确认其 `Context boundary`、输入和目标文件均可定位。
 - **State evidence:** 2026-09-03：M07-T03 已以实现提交 `09c48c5`、审查补强提交 `546f246` 及看板提交 `03d6c54` 按严格 TDD、聚焦 18/18、提交态 reactor `verify` 164/164、三层 Enforcer、六类受控 mutation、秘密/静态/范围/格式/清理门禁和无 Critical/Important/Minor 的独立复审完成。按预定义顺序选择最小未完成后继 M07-T04；其直接依赖 M07-T02/M07-T03 均为 `COMPLETED`，前者提供真实 M03 definition 到同步 `TushareProClient.execute` 与成功/空包络的唯一接缝，后者只补齐同一 client 的七项安全上游异常，当前接口、成功数据流与失败职责互补且无冲突。用户批准 disabled/缺 Token 的直接下载统一使用 private `TensorException`、`PLUGIN_DISABLED` 和固定 `Tushare Pro download is unavailable`，批准未知 API 使用不回显输入的固定 `IllegalArgumentException("Unknown Tushare API")`，并批准 `(TushareProperties,TushareProClient,List<DatasetDefinition>)` 公开构造器、单 Bean 配置形状及 `Tushare Pro`/`Tushare Pro 证券数据源` 固定文案。设计提交 `223a7e0` 创建并回填 `docs/task-designs/M07-T04-design.md`，完整冻结三文件范围、49 名称全集、元数据投影/不可变查找、readiness/拒绝顺序、Spring 本地装配、八项测试、三类 mutation、164/172 计数和门禁；七节顺序、无占位符、显式 49 名称与 49 YAML 同序、依赖比较及格式自审通过。`docs/task-handoffs/M07-T04-handoff.md` 已按 `next-task` 模板写入并链接，只记录 M07-T04 与直接输入 M07-T02/M07-T03，包含同一设计路径、设计优先读取顺序和先确认 164/164 基线、再只写测试取得缺两个生产类型 RED 的具体首个动作，因此执行真实的 `NOT_STARTED -> READY`；M07-T04 Java 实现尚未开始。
+
+- **State evidence (start):** 2026-09-03：用户明确要求按照权威任务看板执行当前任务；已完整读取 `docs/task-designs/M07-T04-design.md` 和 `docs/task-handoffs/M07-T04-handoff.md`，核对 M07 模块 Global Constraints、M07-T04 任务卡/Module Gate、M07-T02/M07-T03 设计及当前 SPI、properties、client、loader 接口，确认任务身份、三文件范围、直接依赖、首个动作与验收合同一致且无冲突。用户的本次请求作为启动证据，因此执行 `READY -> IN_PROGRESS`，既有 `next-task` 交接路径保留为进入上下文。
 
 ### `M08-T01`
 
