@@ -60,7 +60,7 @@
 | 39 | M07-T01 | 配置属性和同步 `RestClient` | `COMPLETED` | M02-T05 | docs/task-designs/M07-T01-design.md | docs/task-handoffs/M07-T01-handoff.md |
 | 40 | M07-T02 | Tushare 请求、响应 DTO 和严格返回校验 | `COMPLETED` | M03-T09, M07-T01 | docs/task-designs/M07-T02-design.md | docs/task-handoffs/M07-T02-handoff.md |
 | 41 | M07-T03 | 鉴权、权限、限流、网络、超时和格式错误分类 | `COMPLETED` | M07-T02 | docs/task-designs/M07-T03-design.md | docs/task-handoffs/M07-T03-handoff.md |
-| 42 | M07-T04 | `TushareProPlugin` 描述符、readiness 和 49 接口下载 | `IN_PROGRESS` | M07-T02, M07-T03 | docs/task-designs/M07-T04-design.md | docs/task-handoffs/M07-T04-handoff.md |
+| 42 | M07-T04 | `TushareProPlugin` 描述符、readiness 和 49 接口下载 | `COMPLETED` | M07-T02, M07-T03 | docs/task-designs/M07-T04-design.md | docs/task-handoffs/M07-T04-handoff.md |
 | 43 | M08-T01 | fixture 元数据、插件和适配器 | `NOT_STARTED` | M02-T05, M04-T06 | None | None |
 | 44 | M08-T02 | 成功、空、上游失败、适配失败和写入失败模式 | `NOT_STARTED` | M08-T01 | None | None |
 | 45 | M08-T03 | fixture 注册→适配→入库→查询集成测试 | `NOT_STARTED` | M05-T05, M06-T06, M08-T02 | None | None |
@@ -588,6 +588,8 @@
 - **State evidence:** 2026-09-03：M07-T03 已以实现提交 `09c48c5`、审查补强提交 `546f246` 及看板提交 `03d6c54` 按严格 TDD、聚焦 18/18、提交态 reactor `verify` 164/164、三层 Enforcer、六类受控 mutation、秘密/静态/范围/格式/清理门禁和无 Critical/Important/Minor 的独立复审完成。按预定义顺序选择最小未完成后继 M07-T04；其直接依赖 M07-T02/M07-T03 均为 `COMPLETED`，前者提供真实 M03 definition 到同步 `TushareProClient.execute` 与成功/空包络的唯一接缝，后者只补齐同一 client 的七项安全上游异常，当前接口、成功数据流与失败职责互补且无冲突。用户批准 disabled/缺 Token 的直接下载统一使用 private `TensorException`、`PLUGIN_DISABLED` 和固定 `Tushare Pro download is unavailable`，批准未知 API 使用不回显输入的固定 `IllegalArgumentException("Unknown Tushare API")`，并批准 `(TushareProperties,TushareProClient,List<DatasetDefinition>)` 公开构造器、单 Bean 配置形状及 `Tushare Pro`/`Tushare Pro 证券数据源` 固定文案。设计提交 `223a7e0` 创建并回填 `docs/task-designs/M07-T04-design.md`，完整冻结三文件范围、49 名称全集、元数据投影/不可变查找、readiness/拒绝顺序、Spring 本地装配、八项测试、三类 mutation、164/172 计数和门禁；七节顺序、无占位符、显式 49 名称与 49 YAML 同序、依赖比较及格式自审通过。`docs/task-handoffs/M07-T04-handoff.md` 已按 `next-task` 模板写入并链接，只记录 M07-T04 与直接输入 M07-T02/M07-T03，包含同一设计路径、设计优先读取顺序和先确认 164/164 基线、再只写测试取得缺两个生产类型 RED 的具体首个动作，因此执行真实的 `NOT_STARTED -> READY`；M07-T04 Java 实现尚未开始。
 
 - **State evidence (start):** 2026-09-03：用户明确要求按照权威任务看板执行当前任务；已完整读取 `docs/task-designs/M07-T04-design.md` 和 `docs/task-handoffs/M07-T04-handoff.md`，核对 M07 模块 Global Constraints、M07-T04 任务卡/Module Gate、M07-T02/M07-T03 设计及当前 SPI、properties、client、loader 接口，确认任务身份、三文件范围、直接依赖、首个动作与验收合同一致且无冲突。用户的本次请求作为启动证据，因此执行 `READY -> IN_PROGRESS`，既有 `next-task` 交接路径保留为进入上下文。
+
+- **State evidence (completion):** 2026-09-03：实现提交 `608a7a0` 以固定消息精确新增设计 Files 节的三个 Java 文件，交付元数据驱动的 public final `TushareProPlugin`、单 Bean `TusharePluginConfiguration` 和八项普通测试；审查补强提交 `ae1a7c2` 仅修改同一测试文件，补齐反序输入保持、48/50 数量边界及缺凭证时 unavailable 优先级。修改前 reactor 基线为 plugin-api 79/79、tushare 85/85；严格 TDD 的纯净 RED 只因 `TushareProPlugin` 与 `TusharePluginConfiguration` 缺失而在 `testCompile` 非零，GREEN 聚焦 8/8，插件与 M03 总契约为 58/58。放宽数量门禁、移除 readiness 前置拒绝和错误 definition 委托三项受控 mutation 均形成可归因失败，恢复后 8/8；最终提交态 reactor `test` 与新鲜 `verify` 均为 plugin-api 79/79、tushare 93/93，合计 172/172、0 failure、0 error、0 skipped，三层 Enforcer 与 JAR 构建通过。禁止 API 名特例/网络/Token/日志/重试扫描无输出并退出 1，授权机制扫描、受保护路径、秘密日志、提交范围、`git diff --check` 与 Maven `clean` 门禁均通过；仅出现既有 platform-encoding 以及 Mockito/JDK 动态 agent 运行环境提示。独立审查先给出 `Ready to merge: Yes` 且无 Critical/Important，两项 Minor 测试盲点补强后复审确认 Critical、Important、Minor 均为 0、`Ready to merge: Yes`。因此满足任务设计和任务卡的结果级验收，执行 `IN_PROGRESS -> COMPLETED`，既有 `next-task` 交接保留为历史进入上下文。
 
 ### `M08-T01`
 
