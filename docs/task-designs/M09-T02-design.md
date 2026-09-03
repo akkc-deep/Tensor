@@ -150,12 +150,13 @@ public record DatasetDefinitionResponse(
 
 ### 依赖与约束比较
 
+- M05-T01 的 `PluginRegistry` 在构造期形成不可变 readiness 快照：`descriptors()` 按 pluginId/displayName 稳定排序并保留禁用、缺凭证和重复冲突项，`find()` 只暴露 ID 唯一且可下载的插件；本任务直接消费描述符快照，不重新调用插件或把列表收集为唯一 key map。
 - M05-T02 的 `DatasetCatalog` 只暴露启动校验通过的定义，`list` 按 apiName 排序、`find` 精确查找；本任务不重新读取 YAML、JDBC metadata 或诊断被隔离定义。
 - M09-T01 的 `RequestIdFilter` 在进入链前设置 `X-Request-Id` 并在当前线程 MDC 中保存同值；独立 MockMvc 显式安装该真实 Filter，Controller 和 DTO 不复制请求 ID 状态。
 - M00-T03 冻结四条本任务路径、三个根响应 schema、参数/筛选/列对象、409 状态与 16 项错误码闭集；本任务不扩展 OpenAPI，也不新增 404/NOT_FOUND。
 - M02-T02/M02-T03 的领域 records 保留描述符、参数、列和筛选原序；REST 仅补充已明确留给 M09 的 filter operator/controlType 和 fixedColumn fallback。
 
-这些输入无冲突。唯一已批准的阶段边界是：M09-T02 用测试替身独立验证 Controller，不交付真实 registry/catalog Bean 装配；M09-T05 完成标准错误体。两者都不得被当前测试结果描述为已经完成。
+这些输入无冲突。M05-T01 提供插件是否已注册及能否下载的安全快照，M05-T02 提供能否查询的已验证数据集目录，M09-T01 提供请求关联；三者分别承担本任务四条路由的唯一运行时输入。唯一已批准的阶段边界是：M09-T02 用测试替身独立验证 Controller，不交付真实 registry/catalog Bean 装配；M09-T05 完成标准错误体。两者都不得被当前测试结果描述为已经完成。
 
 ## Files
 
