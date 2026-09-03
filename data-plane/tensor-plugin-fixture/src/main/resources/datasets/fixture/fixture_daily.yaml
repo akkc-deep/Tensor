@@ -1,0 +1,22 @@
+pluginId: fixture
+apiName: fixture_daily
+tableName: fixture__fixture_daily
+category: 验收
+displayName: Fixture 日线
+queryMode: trade_date
+parameters:
+  - name: scenario
+    label: 场景
+    description: 确定性验收场景
+    type: ENUM
+    required: true
+    defaultValue: SUCCESS
+    allowedValues: [SUCCESS, EMPTY, SOURCE_FAILURE, TYPE_FAILURE, PERSISTENCE_FAILURE]
+columns:
+  - { name: ts_code, label: ts_code, logicalType: STRING, nullable: false, displayOrder: 0, length: 64 }
+  - { name: trade_date, label: trade_date, logicalType: DATE, nullable: false, displayOrder: 1 }
+  - { name: amount, label: amount, logicalType: DECIMAL, nullable: false, displayOrder: 2, precision: 38, scale: 18 }
+  - { name: note, label: note, logicalType: STRING, nullable: true, displayOrder: 3, length: 255 }
+businessKey: { mode: COMPOSITE, fields: [ts_code, trade_date] }
+filters: [ts_code]
+fixedColumn: ts_code

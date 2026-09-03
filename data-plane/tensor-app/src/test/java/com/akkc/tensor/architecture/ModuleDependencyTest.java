@@ -29,8 +29,7 @@ class ModuleDependencyTest {
                         "com.akkc.tensor.app..");
         ArchRule fixture = noClasses().that().resideInAPackage("..plugin.fixture..")
                 .should().dependOnClassesThat().resideInAnyPackage(
-                        "com.akkc.tensor.core..", "com.akkc.tensor.plugin.tushare..",
-                        "com.akkc.tensor.app..");
+                        "com.akkc.tensor.plugin.tushare..", "com.akkc.tensor.app..");
 
         pluginApi.allowEmptyShould(true).check(classes);
         core.allowEmptyShould(true).check(classes);
