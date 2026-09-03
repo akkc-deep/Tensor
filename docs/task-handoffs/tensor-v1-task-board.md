@@ -63,7 +63,7 @@
 | 42 | M07-T04 | `TushareProPlugin` 描述符、readiness 和 49 接口下载 | `COMPLETED` | M07-T02, M07-T03 | docs/task-designs/M07-T04-design.md | docs/task-handoffs/M07-T04-handoff.md |
 | 43 | M08-T01 | fixture 元数据、插件和适配器 | `COMPLETED` | M02-T05, M04-T06, M05-T05 | docs/task-designs/M08-T01-design.md | docs/task-handoffs/M08-T01-handoff.md |
 | 44 | M08-T02 | 成功、空、上游失败、适配失败和写入失败模式 | `COMPLETED` | M08-T01 | docs/task-designs/M08-T02-design.md | docs/task-handoffs/M08-T02-handoff.md |
-| 45 | M08-T03 | fixture 注册→适配→入库→查询集成测试 | `IN_PROGRESS` | M05-T01, M05-T05, M06-T04, M06-T06, M08-T02 | docs/task-designs/M08-T03-design.md | docs/task-handoffs/M08-T03-handoff.md |
+| 45 | M08-T03 | fixture 注册→适配→入库→查询集成测试 | `COMPLETED` | M05-T01, M05-T05, M06-T04, M06-T06, M08-T02 | docs/task-designs/M08-T03-design.md | docs/task-handoffs/M08-T03-handoff.md |
 | 46 | M09-T01 | Boot 入口、请求标识和通用 API DTO | `NOT_STARTED` | M01-T03, M02-T05 | None | None |
 | 47 | M09-T02 | 数据源、接口和数据集元数据 API | `NOT_STARTED` | M05-T02, M09-T01 | None | None |
 | 48 | M09-T03 | 同步下载 API 与事务提交后结果 | `NOT_STARTED` | M05-T03, M05-T05, M06-T04, M07-T04, M09-T01 | None | None |
@@ -636,6 +636,8 @@
 - **State evidence (readiness):** 2026-09-03：项目所有者明确同意 M08-T03 的单文件集成测试设计。提交 `c83cae7` 已创建并回填完整 `docs/task-designs/M08-T03-design.md`，冻结固定 MySQL 8.4.6、六迁移、acceptance/production context、生产 registry/adapter/catalog/persistence/query 装配、真实 batch 后 test-scope DataSource 故障注入、success/empty/type/rollback/production absence 五项测试、严格 RED、5/5、57/57、272/272 和精确一文件实现范围；七节顺序、占位符、内部一致性、范围、歧义与格式自审通过，无留给实施者的材料选择。五项直接依赖 M05-T01、M05-T05、M06-T04、M06-T06、M08-T02 均为 `COMPLETED`，分别提供不可变 registry、通用 typed adapter、单事务持久化、类型保真查询与确定 fixture 场景/marker，决策和约束互补且无冲突。`docs/task-handoffs/M08-T03-handoff.md` 已按 `next-task` 模板完整创建并链接，只记录 M08-T03 和五项直接输入，包含同一设计路径、精确 artifact/decision/rationale/constraint/usage/readiness evidence、设计优先读取顺序，以及先确认 272/272 与 52/52 基线再创建完整 IT 取得 test wiring RED 的具体首个动作。因此执行真实的 `NOT_STARTED -> READY`；`FixtureFlowIT.java` 尚未创建，实现未开始。
 
 - **State evidence (start):** 2026-09-03：用户明确要求按照权威任务看板执行当前任务，并先读取设计文档与交接文件；已完整读取 `docs/task-designs/M08-T03-design.md` 与 `docs/task-handoffs/M08-T03-handoff.md`，确认任务身份、精确一文件范围、五项直接依赖、固定 MySQL/生产流程装配、严格 RED 首个动作和结果级验收一致且无冲突。该请求作为本次 `READY -> IN_PROGRESS` 的明确启动证据；既有 `next-task` 交接路径保留为进入上下文。
+
+- **State evidence (completion):** 2026-09-03：提交 `607e7de`（`test(fixture): verify plugin through core data flow`）创建唯一实现文件 `data-plane/tensor-app/src/test/java/com/akkc/tensor/fixture/FixtureFlowIT.java`，提交 `43773af` 按独立审查唯一 Minor 建议补齐 Java 21 `DataSource` builder 方法显式委托；累计 `26a2583..43773af` 精确只包含该已跟踪 IT。严格 RED 的 production isolation 测试通过，其余四项仅因 `UnsupportedOperationException("Fixture flow not wired")` 失败；完成最小 wiring 后，在固定 MySQL 8.4.6 和六迁移上新鲜通过 `FixtureFlowIT` 5/5、与 `FlywaySchemaContractIT` 联跑 57/57，以及默认 reactor `test` 和 `verify` 各 272/272，均为 0 failure、0 error、0 skipped，六层 Enforcer 与 ArchUnit 通过。依赖树确认 fixture 仅为 app 的 test-scope 依赖；app 生产 JAR 和生产源码能力扫描无命中；授权测试符号、受保护路径、格式、Git 跟踪与累计范围门禁通过；Maven `clean` 后无 `target/` 且工作树干净。测试覆盖 acceptance 注册→生产 adapter→单事务入库→类型保真查询、EMPTY 零连接、TYPE_FAILURE 零数据库访问、真实 `executeBatch()` 后异常的完整回滚，以及 production 即使 enabled 也不注册 fixture；独立复审最终无未处理 Critical/Important。因此执行 `IN_PROGRESS -> COMPLETED`。
 
 ### `M09-T01`
 
