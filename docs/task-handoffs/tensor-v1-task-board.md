@@ -58,7 +58,7 @@
 | 37 | M06-T05 | 查询条件白名单和 COUNT/分页 SQL | `COMPLETED` | M02-T03, M04-T06 | docs/task-designs/M06-T05-design.md | docs/task-handoffs/M06-T05-handoff.md |
 | 38 | M06-T06 | `DatasetQueryService`、页码归一化和精度序列化 | `COMPLETED` | M06-T05 | docs/task-designs/M06-T06-design.md | docs/task-handoffs/M06-T06-handoff.md |
 | 39 | M07-T01 | 配置属性和同步 `RestClient` | `COMPLETED` | M02-T05 | docs/task-designs/M07-T01-design.md | docs/task-handoffs/M07-T01-handoff.md |
-| 40 | M07-T02 | Tushare 请求、响应 DTO 和严格返回校验 | `READY` | M03-T09, M07-T01 | docs/task-designs/M07-T02-design.md | docs/task-handoffs/M07-T02-handoff.md |
+| 40 | M07-T02 | Tushare 请求、响应 DTO 和严格返回校验 | `IN_PROGRESS` | M03-T09, M07-T01 | docs/task-designs/M07-T02-design.md | docs/task-handoffs/M07-T02-handoff.md |
 | 41 | M07-T03 | 鉴权、权限、限流、网络、超时和格式错误分类 | `NOT_STARTED` | M07-T02 | None | None |
 | 42 | M07-T04 | `TushareProPlugin` 描述符、readiness 和 49 接口下载 | `NOT_STARTED` | M07-T02, M07-T03 | None | None |
 | 43 | M08-T01 | fixture 元数据、插件和适配器 | `NOT_STARTED` | M02-T05, M04-T06 | None | None |
@@ -565,7 +565,7 @@
 - **Dependencies:** M03-T09, M07-T01.
 - **Sources:** `docs/superpowers/plans/tensor-modules/M07-tushare-plugin.md` 的 `Task M07-T02` 任务卡。
 - **First action:** 读取 `docs/superpowers/plans/tensor-modules/M07-tushare-plugin.md` 的 `Task M07-T02` 任务卡，并确认其 `Context boundary`、输入和目标文件均可定位。
-- **State evidence:** 2026-09-03：M07-T01 已以实现提交 `06682a8`、测试安全修复 `6e09e3a`、`e936287`、`9c49eb6` 及看板提交 `7b0bec4` 按严格 TDD、聚焦 9/9、提交态 reactor 146/146、三层 Enforcer、依赖树、秘密/禁用 API/范围/格式/清理门禁和最终范围化复审完成。按预定义顺序选择最小未完成后继 M07-T02；其直接依赖 M03-T09 和 M07-T01 均为 `COMPLETED`，M03 冻结的 49 API/851 列元数据原序与 M07-T01 冻结的脱敏配置、同步 `RestClient`、超时、User-Agent、零应用重试和 `maxResponseBytes` 职责互补且无冲突，当前直接消费产物相对各自最终提交无差异。用户批准 M07-T02 对非零业务码使用固定脱敏通用失败，并允许 M07-T03 在 status/code/msg 仍为方法局部值时修改 client/validator 立即映射安全 `SourceException`，原始上游消息不得保存或进入异常、日志或公共包络。设计提交 `29a4349` 创建并回填 `docs/task-designs/M07-T02-design.md`，完整冻结六个新文件、唯一公开客户端 API、精确请求字段、方法局部 Token、`exchange`/`readNBytes(max + 1)`、重复键/尾随根值/禁止标量强制转换的严格 JSON、有序响应校验、固定安全失败、十项测试、三类 mutation、146/156 计数与精确实现范围；七节顺序、任务卡链接、无占位符、六文件计数、依赖比较和格式自审通过。`docs/task-handoffs/M07-T02-handoff.md` 已按 `next-task` 模板写入并链接，只记录 M07-T02 及直接输入 M03-T09/M07-T01，包含设计优先读取顺序和先确认 146/146 基线、再只创建完整测试以取得缺五个生产类 RED 的具体首个动作，因此执行真实的 `NOT_STARTED -> READY`；M07-T02 Java 实现尚未开始。
+- **State evidence:** 2026-09-03：M07-T01 已以实现提交 `06682a8`、测试安全修复 `6e09e3a`、`e936287`、`9c49eb6` 及看板提交 `7b0bec4` 按严格 TDD、聚焦 9/9、提交态 reactor 146/146、三层 Enforcer、依赖树、秘密/禁用 API/范围/格式/清理门禁和最终范围化复审完成。按预定义顺序选择最小未完成后继 M07-T02；其直接依赖 M03-T09 和 M07-T01 均为 `COMPLETED`，M03 冻结的 49 API/851 列元数据原序与 M07-T01 冻结的脱敏配置、同步 `RestClient`、超时、User-Agent、零应用重试和 `maxResponseBytes` 职责互补且无冲突，当前直接消费产物相对各自最终提交无差异。用户批准 M07-T02 对非零业务码使用固定脱敏通用失败，并允许 M07-T03 在 status/code/msg 仍为方法局部值时修改 client/validator 立即映射安全 `SourceException`，原始上游消息不得保存或进入异常、日志或公共包络。设计提交 `29a4349` 创建并回填 `docs/task-designs/M07-T02-design.md`，完整冻结六个新文件、唯一公开客户端 API、精确请求字段、方法局部 Token、`exchange`/`readNBytes(max + 1)`、重复键/尾随根值/禁止标量强制转换的严格 JSON、有序响应校验、固定安全失败、十项测试、三类 mutation、146/156 计数与精确实现范围；七节顺序、任务卡链接、无占位符、六文件计数、依赖比较和格式自审通过。`docs/task-handoffs/M07-T02-handoff.md` 已按 `next-task` 模板写入并链接，只记录 M07-T02 及直接输入 M03-T09/M07-T01，包含设计优先读取顺序和先确认 146/146 基线、再只创建完整测试以取得缺五个生产类 RED 的具体首个动作，因此执行真实的 `NOT_STARTED -> READY`；M07-T02 Java 实现尚未开始。2026-09-03：用户明确要求按照权威任务看板执行当前任务，并先读取设计文档和交接文件；已完整读取并确认 M07-T02 设计、交接、任务卡及直接依赖无冲突，作为 `READY -> IN_PROGRESS` 的显式启动证据。
 
 ### `M07-T03`
 
