@@ -46,10 +46,14 @@ class FixtureEnvelopeFactoryTest {
                 FixtureScenario.TYPE_FAILURE,
                 FixtureScenario.PERSISTENCE_FAILURE);
         assertThat(Modifier.isFinal(FixtureEnvelopeFactory.class.getModifiers())).isTrue();
+        assertThat(FixtureEnvelopeFactory.class.getDeclaredFields()).allSatisfy(field ->
+                assertThat(Modifier.isStatic(field.getModifiers())).isTrue());
         assertThat(FixtureEnvelopeFactory.class.getConstructors()).singleElement().satisfies(constructor ->
                 assertThat(constructor.getParameterTypes()).isEmpty());
         assertThat(FixtureEnvelopeFactory.class.getDeclaredMethods()).singleElement().satisfies(method -> {
             assertThat(method.getName()).isEqualTo("create");
+            assertThat(Modifier.isPublic(method.getModifiers())).isTrue();
+            assertThat(method.getReturnType()).isEqualTo(DownloadEnvelope.class);
             assertThat(method.getParameterTypes()).containsExactly(FixtureScenario.class, Map.class);
         });
 
@@ -64,14 +68,8 @@ class FixtureEnvelopeFactoryTest {
         DownloadEnvelope envelope = factory().create(FixtureScenario.SUCCESS, params);
         params.put("scenario", "EMPTY");
 
-        assertThat(envelope.pluginId()).isEqualTo(PLUGIN_ID);
-        assertThat(envelope.apiName()).isEqualTo(API_NAME);
-        assertThat(envelope.params()).containsExactly(Map.entry("scenario", "SUCCESS"));
-        assertThat(envelope.fields()).containsExactly("ts_code", "trade_date", "amount", "note");
-        assertThat(envelope.rowCount()).isOne();
-        assertThat(envelope.data()).containsExactly(Arrays.asList("000001.SZ", "20260807", "11.23", null));
-        assertThat(envelope.status()).isEqualTo(DownloadStatus.SUCCESS);
-        assertThat(envelope.error()).isNull();
+        assertSuccessfulEnvelope(envelope, "SUCCESS", List.of(
+                Arrays.asList("000001.SZ", "20260807", "11.23", null)));
         assertThat(adapter().adapt(envelope, INGESTED_AT).rows()).containsExactly(linkedRow(
                 "ts_code", "000001.SZ",
                 "trade_date", LocalDate.of(2026, 8, 7),
@@ -81,13 +79,11 @@ class FixtureEnvelopeFactoryTest {
 
     @Test
     void createsAValidEmptyEnvelopeAndRealEmptyBatch() {
-        DownloadEnvelope envelope = factory().create(FixtureScenario.EMPTY, Map.of("scenario", "EMPTY"));
+        Map<String, Object> params = new LinkedHashMap<>(Map.of("scenario", "EMPTY"));
+        DownloadEnvelope envelope = factory().create(FixtureScenario.EMPTY, params);
+        params.put("scenario", "SUCCESS");
 
-        assertThat(envelope.fields()).containsExactly("ts_code", "trade_date", "amount", "note");
-        assertThat(envelope.rowCount()).isZero();
-        assertThat(envelope.data()).isEmpty();
-        assertThat(envelope.status()).isEqualTo(DownloadStatus.SUCCESS);
-        assertThat(envelope.error()).isNull();
+        assertSuccessfulEnvelope(envelope, "EMPTY", List.of());
         assertThat(adapter().adapt(envelope, INGESTED_AT).rows()).isEmpty();
     }
 
@@ -104,10 +100,12 @@ class FixtureEnvelopeFactoryTest {
 
     @Test
     void letsTheRealAdapterRejectTheInvalidAmountWithoutPartialBatch() {
-        DownloadEnvelope envelope = factory().create(FixtureScenario.TYPE_FAILURE, Map.of("scenario", "TYPE_FAILURE"));
+        Map<String, Object> params = new LinkedHashMap<>(Map.of("scenario", "TYPE_FAILURE"));
+        DownloadEnvelope envelope = factory().create(FixtureScenario.TYPE_FAILURE, params);
+        params.put("scenario", "SUCCESS");
 
-        assertThat(envelope.status()).isEqualTo(DownloadStatus.SUCCESS);
-        assertThat(envelope.data()).containsExactly(Arrays.asList("000001.SZ", "20260807", "not-a-decimal", null));
+        assertSuccessfulEnvelope(envelope, "TYPE_FAILURE", List.of(
+                Arrays.asList("000001.SZ", "20260807", "not-a-decimal", null)));
         assertThatThrownBy(() -> adapter().adapt(envelope, INGESTED_AT))
                 .isInstanceOfSatisfying(AdapterException.class, exception -> {
                     assertThat(exception.code()).isEqualTo(ErrorCode.ADAPTER_TYPE_INVALID);
@@ -119,10 +117,12 @@ class FixtureEnvelopeFactoryTest {
 
     @Test
     void createsAnAdaptablePersistenceFailureMarker() {
-        DownloadEnvelope envelope = factory().create(
-                FixtureScenario.PERSISTENCE_FAILURE, Map.of("scenario", "PERSISTENCE_FAILURE"));
+        Map<String, Object> params = new LinkedHashMap<>(Map.of("scenario", "PERSISTENCE_FAILURE"));
+        DownloadEnvelope envelope = factory().create(FixtureScenario.PERSISTENCE_FAILURE, params);
+        params.put("scenario", "SUCCESS");
 
-        assertThat(envelope.data()).containsExactly(List.of("000001.SZ", "20260807", "11.23", "PERSISTENCE_FAILURE"));
+        assertSuccessfulEnvelope(envelope, "PERSISTENCE_FAILURE", List.of(
+                List.of("000001.SZ", "20260807", "11.23", "PERSISTENCE_FAILURE")));
         assertThat(adapter().adapt(envelope, INGESTED_AT).rows()).containsExactly(linkedRow(
                 "ts_code", "000001.SZ",
                 "trade_date", LocalDate.of(2026, 8, 7),
@@ -132,6 +132,18 @@ class FixtureEnvelopeFactoryTest {
 
     private static FixtureEnvelopeFactory factory() {
         return new FixtureEnvelopeFactory();
+    }
+
+    private static void assertSuccessfulEnvelope(
+            DownloadEnvelope envelope, String scenario, List<List<Object>> expectedData) {
+        assertThat(envelope.pluginId()).isEqualTo(PLUGIN_ID);
+        assertThat(envelope.apiName()).isEqualTo(API_NAME);
+        assertThat(envelope.params()).containsExactly(Map.entry("scenario", scenario));
+        assertThat(envelope.fields()).containsExactly("ts_code", "trade_date", "amount", "note");
+        assertThat(envelope.rowCount()).isEqualTo(expectedData.size());
+        assertThat(envelope.data()).containsExactlyElementsOf(expectedData);
+        assertThat(envelope.status()).isEqualTo(DownloadStatus.SUCCESS);
+        assertThat(envelope.error()).isNull();
     }
 
     private static GenericDatasetAdapter adapter() {

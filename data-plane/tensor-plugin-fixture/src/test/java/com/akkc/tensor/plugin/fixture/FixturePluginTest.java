@@ -163,7 +163,7 @@ class FixturePluginTest {
                     assertThat(exception.retryable()).isTrue();
                     assertThat(exception).hasNoCause();
                 });
-        assertThatThrownBy(() -> plugin.download(ApiName.of("fixture_other"), Map.of("scenario", "SUCCESS")))
+        assertThatThrownBy(() -> plugin.download(ApiName.of("fixture_other"), Map.of()))
                 .isInstanceOf(IllegalArgumentException.class).hasMessage("Unknown Fixture API");
         assertThatThrownBy(() -> plugin.download(API_NAME, Map.of()))
                 .isInstanceOf(IllegalArgumentException.class).hasMessage("Unknown Fixture scenario");
