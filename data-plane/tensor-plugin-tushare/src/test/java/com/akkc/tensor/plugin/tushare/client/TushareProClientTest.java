@@ -21,10 +21,16 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.junit5.WireMockExtension;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.net.SocketTimeoutException;
 import java.net.URI;
+import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.ArrayList;
@@ -34,7 +40,11 @@ import java.util.Map;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.client.AbstractClientHttpRequest;
+import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.web.client.RestClient;
 
 class TushareProClientTest {
@@ -178,7 +188,7 @@ class TushareProClientTest {
     }
 
     @Test
-    void rejectsNonSuccessHttpBeforeReadingTheBody() {
+    void classifiesHttpAndTransportFailuresWithoutReadingOrLeaking() {
         stub(HttpStatus.SERVICE_UNAVAILABLE.value(), "{" + SECRET);
 
         Throwable failure = catchThrowable(() -> client(1_024 * 1_024)
@@ -189,6 +199,32 @@ class TushareProClientTest {
         assertTrue(!String.valueOf(failure).contains("503"), "HTTP failure omits the upstream status");
         assertTrue(!String.valueOf(failure).contains(wireMock.baseUrl()), "HTTP failure omits the upstream URI");
         assertTrue(wireMock.getAllServeEvents().size() == 1, "HTTP failure is not retried");
+
+        RestClient unreachable = RestClient.builder()
+                .baseUrl("https://m07-t03.invalid")
+                .requestFactory((uri, method) -> {
+                    throw new UnknownHostException(SECRET);
+                })
+                .build();
+        Throwable networkFailure = catchThrowable(() -> client(unreachable, 1_024 * 1_024)
+                .execute(dailyDefinition(), Map.of("trade_date", "20260902")));
+        assertSourceFailure(networkFailure, ErrorCode.SOURCE_NETWORK_ERROR,
+                "Tushare could not be reached");
+        assertTrue(!String.valueOf(networkFailure).contains(SECRET)
+                && !String.valueOf(networkFailure).contains("m07-t03.invalid"),
+                "network failure omits the transport message and URI");
+
+        InputStream timedOutBody = new InputStream() {
+            @Override
+            public int read() throws IOException {
+                throw new SocketTimeoutException(SECRET);
+            }
+        };
+        Throwable timeoutFailure = catchThrowable(() -> client(restClientReturning(timedOutBody), 1_024 * 1_024)
+                .execute(dailyDefinition(), Map.of("trade_date", "20260902")));
+        assertSourceFailure(timeoutFailure, ErrorCode.SOURCE_TIMEOUT, "Tushare response timed out");
+        assertTrue(!String.valueOf(timeoutFailure).contains(SECRET),
+                "response read timeout omits the transport message");
     }
 
     @Test
@@ -370,6 +406,67 @@ class TushareProClientTest {
                 maxResponseBytes);
         RestClient restClient = new TushareRestClientFactory().create(properties);
         return new TushareProClient(restClient, properties);
+    }
+
+    private TushareProClient client(RestClient restClient, int maxResponseBytes) {
+        TushareProperties properties = new TushareProperties(
+                true,
+                URI.create("https://m07-t03.invalid"),
+                new TushareProperties.Credential(SECRET),
+                Duration.ofSeconds(5),
+                Duration.ofSeconds(5),
+                maxResponseBytes);
+        return new TushareProClient(restClient, properties);
+    }
+
+    private RestClient restClientReturning(InputStream body) {
+        return RestClient.builder()
+                .baseUrl("https://m07-t03.invalid")
+                .requestFactory((uri, method) -> new AbstractClientHttpRequest() {
+                    @Override
+                    public HttpMethod getMethod() {
+                        return method;
+                    }
+
+                    @Override
+                    public URI getURI() {
+                        return uri;
+                    }
+
+                    @Override
+                    protected OutputStream getBodyInternal(HttpHeaders headers) {
+                        return new ByteArrayOutputStream();
+                    }
+
+                    @Override
+                    protected ClientHttpResponse executeInternal(HttpHeaders headers) {
+                        return new ClientHttpResponse() {
+                            @Override
+                            public HttpStatus getStatusCode() {
+                                return HttpStatus.OK;
+                            }
+
+                            @Override
+                            public String getStatusText() {
+                                return "OK";
+                            }
+
+                            @Override
+                            public HttpHeaders getHeaders() {
+                                return new HttpHeaders();
+                            }
+
+                            @Override
+                            public InputStream getBody() {
+                                return body;
+                            }
+
+                            @Override
+                            public void close() {}
+                        };
+                    }
+                })
+                .build();
     }
 
     private DatasetDefinition dailyDefinition() {

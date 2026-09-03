@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.akkc.tensor.plugin.api.error.ErrorCode;
 import com.akkc.tensor.plugin.api.error.SourceException;
+import java.io.IOException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.net.ConnectException;
@@ -95,17 +96,25 @@ class TushareErrorClassifierTest {
     }
 
     @Test
-    void classifiesDnsConnectRouteAndConnectTimeoutFailuresAsNetworkErrors() {
+    void classifiesKnownAndGenericNetworkFailuresAndBoundsCauseTraversal() {
         List<Throwable> failures = List.of(
                 new UnknownHostException(UNTRUSTED),
                 new RuntimeException(new ConnectException(UNTRUSTED)),
                 new RuntimeException(new NoRouteToHostException(UNTRUSTED)),
-                new RuntimeException(new HttpConnectTimeoutException(UNTRUSTED)));
+                new RuntimeException(new HttpConnectTimeoutException(UNTRUSTED)),
+                new IOException(UNTRUSTED));
 
         for (Throwable failure : failures) {
             assertThat(TushareErrorClassifier.classifyTransport(failure).code())
                     .isEqualTo(ErrorCode.SOURCE_NETWORK_ERROR);
         }
+
+        Throwable tooDeep = new SocketTimeoutException(UNTRUSTED);
+        for (int depth = 0; depth < 16; depth++) {
+            tooDeep = new RuntimeException(tooDeep);
+        }
+        assertThat(TushareErrorClassifier.classifyTransport(tooDeep).code())
+                .isEqualTo(ErrorCode.SOURCE_NETWORK_ERROR);
     }
 
     @Test
