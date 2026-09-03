@@ -62,7 +62,7 @@
 | 41 | M07-T03 | 鉴权、权限、限流、网络、超时和格式错误分类 | `COMPLETED` | M07-T02 | docs/task-designs/M07-T03-design.md | docs/task-handoffs/M07-T03-handoff.md |
 | 42 | M07-T04 | `TushareProPlugin` 描述符、readiness 和 49 接口下载 | `COMPLETED` | M07-T02, M07-T03 | docs/task-designs/M07-T04-design.md | docs/task-handoffs/M07-T04-handoff.md |
 | 43 | M08-T01 | fixture 元数据、插件和适配器 | `COMPLETED` | M02-T05, M04-T06, M05-T05 | docs/task-designs/M08-T01-design.md | docs/task-handoffs/M08-T01-handoff.md |
-| 44 | M08-T02 | 成功、空、上游失败、适配失败和写入失败模式 | `NOT_STARTED` | M08-T01 | docs/task-designs/M08-T02-design.md | None |
+| 44 | M08-T02 | 成功、空、上游失败、适配失败和写入失败模式 | `READY` | M08-T01 | docs/task-designs/M08-T02-design.md | docs/task-handoffs/M08-T02-handoff.md |
 | 45 | M08-T03 | fixture 注册→适配→入库→查询集成测试 | `NOT_STARTED` | M05-T05, M06-T06, M08-T02 | None | None |
 | 46 | M09-T01 | Boot 入口、请求标识和通用 API DTO | `NOT_STARTED` | M01-T03, M02-T05 | None | None |
 | 47 | M09-T02 | 数据源、接口和数据集元数据 API | `NOT_STARTED` | M05-T02, M09-T01 | None | None |
@@ -616,6 +616,8 @@
 - **Sources:** `docs/superpowers/plans/tensor-modules/M08-fixture-plugin.md` 的 `Task M08-T02` 任务卡。
 - **First action:** 读取 `docs/superpowers/plans/tensor-modules/M08-fixture-plugin.md` 的 `Task M08-T02` 任务卡，并确认其 `Context boundary`、输入和目标文件均可定位。
 - **State evidence:** 2026-09-03：项目所有者批准 M08-T01/M08-T02 使用两阶段下载接缝；M08-T02 可在自身开始后修改 `FixturePlugin.java`、`FixtureConfiguration.java` 和 `FixturePluginTest.java`，接入五种确定性场景。M08-T02 仍为 `NOT_STARTED`，该批准不构成其设计、准备或启动证据。
+
+- **State evidence (readiness):** 2026-09-03：M08-T01 已以提交 `79cc80d` 交付并由提交 `6ee1fbd` 记录为 `COMPLETED`，其 266/266 reactor、Enforcer、ArchUnit、依赖/JAR/静态/范围/clean 结果及两轮独立无发现审查证明唯一直接输入可用。提交 `9eb385c` 已创建并回填完整 `docs/task-designs/M08-T02-design.md`，冻结六文件范围、五值 enum、无状态工厂、精确 success/empty/source/type/persistence 结果、插件安全分派、双条件与真实 adapter 边界、12/166/272 测试计数和提交门禁；七节顺序、占位符、内部一致性与格式自审通过。`docs/task-handoffs/M08-T02-handoff.md` 已按 `next-task` 模板完整创建，只记录 M08-T02 及其直接消费的 M08-T01 输入，且具体首个动作从已完成设计开始实施。输入职责无冲突，故链接该交接并执行 `NOT_STARTED -> READY`；M08-T02 实现尚未开始。
 
 ### `M08-T03`
 
