@@ -34,7 +34,7 @@ public final class FixtureConfiguration {
 
     @Bean
     public FixturePlugin fixturePlugin() {
-        return new FixturePlugin(DEFINITION);
+        return new FixturePlugin(DEFINITION, new FixtureEnvelopeFactory());
     }
 
     @Bean
