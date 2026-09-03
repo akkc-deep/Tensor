@@ -59,7 +59,7 @@
 | 38 | M06-T06 | `DatasetQueryService`、页码归一化和精度序列化 | `COMPLETED` | M06-T05 | docs/task-designs/M06-T06-design.md | docs/task-handoffs/M06-T06-handoff.md |
 | 39 | M07-T01 | 配置属性和同步 `RestClient` | `COMPLETED` | M02-T05 | docs/task-designs/M07-T01-design.md | docs/task-handoffs/M07-T01-handoff.md |
 | 40 | M07-T02 | Tushare 请求、响应 DTO 和严格返回校验 | `COMPLETED` | M03-T09, M07-T01 | docs/task-designs/M07-T02-design.md | docs/task-handoffs/M07-T02-handoff.md |
-| 41 | M07-T03 | 鉴权、权限、限流、网络、超时和格式错误分类 | `NOT_STARTED` | M07-T02 | docs/task-designs/M07-T03-design.md | None |
+| 41 | M07-T03 | 鉴权、权限、限流、网络、超时和格式错误分类 | `READY` | M07-T02 | docs/task-designs/M07-T03-design.md | docs/task-handoffs/M07-T03-handoff.md |
 | 42 | M07-T04 | `TushareProPlugin` 描述符、readiness 和 49 接口下载 | `NOT_STARTED` | M07-T02, M07-T03 | None | None |
 | 43 | M08-T01 | fixture 元数据、插件和适配器 | `NOT_STARTED` | M02-T05, M04-T06 | None | None |
 | 44 | M08-T02 | 成功、空、上游失败、适配失败和写入失败模式 | `NOT_STARTED` | M08-T01 | None | None |
@@ -575,7 +575,7 @@
 - **Dependencies:** M07-T02.
 - **Sources:** `docs/superpowers/plans/tensor-modules/M07-tushare-plugin.md` 的 `Task M07-T03` 任务卡。
 - **First action:** 读取 `docs/superpowers/plans/tensor-modules/M07-tushare-plugin.md` 的 `Task M07-T03` 任务卡，并确认其 `Context boundary`、输入和目标文件均可定位。
-- **State evidence:** None.
+- **State evidence:** 2026-09-03：M07-T02 已以实现提交 `3244d92` 和看板提交 `16e5bb2` 按严格 TDD、聚焦 10/10、提交态 reactor `test`/`verify` 156/156、三类 mutation、三层 Enforcer、秘密/静态/范围/格式/清理门禁及范围化复审完成。按预定义顺序选择最小未完成后继 M07-T03；其唯一直接依赖 M07-T02 为 `COMPLETED`，当前 client、validator 和 client test 相对实现提交无差异，M07-T02 已明确保留 status、业务 code/msg、transport/parse failure 的局部分类接缝并授权后继修改 client/validator。用户批准业务词表为 `token`/`认证`/`用户不存在`→auth、`每分钟`/`每小时`/`频率`/`限流`→rate、`权限`/`积分`→permission、未知非零业务码→payload invalid，且 rate 在与 permission 冲突时优先；TRD 与 M02 既有合同补充冻结 HTTP 401/403/429/5xx、DNS/connect、read timeout、invalid payload 到七项 `SourceException` 及其 retryable 的映射，原始 status/code/msg/body/Token/URI/cause 不得进入异常。设计提交 `c6b2ffe` 创建并回填 `docs/task-designs/M07-T03-design.md`，完整冻结五文件范围、四个包内静态分类入口、七项固定安全 message、auth→rate→permission 顺序、两遍有界 cause 顺序、M07-T02 client/validator 接缝、八项 classifier 与十项 client 测试、三类 mutation、156/164 计数和门禁；七节顺序、任务卡链接、无占位符、依赖比较和格式自审通过。`docs/task-handoffs/M07-T03-handoff.md` 已按 `next-task` 模板写入并链接，只记录 M07-T03 与直接输入 M07-T02，包含同一设计路径、设计优先读取顺序和先确认 156/156 基线、再只写测试取得缺 classifier RED 的具体首个动作，因此执行真实的 `NOT_STARTED -> READY`；M07-T03 Java 实现尚未开始。
 
 ### `M07-T04`
 
