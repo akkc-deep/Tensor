@@ -215,8 +215,8 @@ mvn -Dmaven.repo.local=/private/tmp/tensor-m2 -f data-plane/pom.xml \
 运行：
 
 ```bash
-mvn -Dmaven.repo.local=/private/tmp/tensor-m2 \
-  -f data-plane/tensor-plugin-fixture/pom.xml dependency:tree \
+mvn -Dmaven.repo.local=/private/tmp/tensor-m2 -f data-plane/pom.xml \
+  -pl tensor-plugin-fixture -am dependency:tree \
   -Dincludes=com.akkc.tensor:tensor-core,org.springframework.boot:spring-boot-autoconfigure
 
 jar tf data-plane/tensor-plugin-fixture/target/tensor-plugin-fixture-1.0-SNAPSHOT.jar \
@@ -235,14 +235,14 @@ git diff --quiet -- \
   data-plane/pom.xml data-plane/tensor-plugin-api data-plane/tensor-core \
   data-plane/tensor-plugin-tushare data-plane/tensor-app/pom.xml \
   data-plane/tensor-app/src/main
+mvn -Dmaven.repo.local=/private/tmp/tensor-m2 -f data-plane/pom.xml clean
 git status --short --untracked-files=all -- \
   data-plane/tensor-plugin-fixture \
   data-plane/tensor-app/src/test/java/com/akkc/tensor/architecture/ModuleDependencyTest.java
 git diff --check
-mvn -Dmaven.repo.local=/private/tmp/tensor-m2 -f data-plane/pom.xml clean
 ```
 
-依赖树必须只显示两项批准的新 direct compile dependency 及其正常传递闭包，不显示 fixture 对 Tushare/app 的依赖。fixture JAR 检查必须找到两个类和一个 YAML；app 生产 JAR 检查无输出并退出 1，证明 test-scope fixture 未进入生产包。禁止扫描无输出并退出 1；授权机制扫描至少命中 profile、property、condition 和通用适配器。受保护路径无差异，scoped status 在提交前精确显示六个 Files 节实现文件且无 `target/`；格式和 clean 通过。提交后 `git show --stat --oneline HEAD` 必须显示固定消息和精确六文件范围，工作树干净。
+依赖树必须显示两项批准的新 direct compile dependency 及其正常传递闭包，不显示 fixture 对 Tushare/app 的依赖。fixture JAR 检查必须找到两个类和一个 YAML；app 生产 JAR 检查无输出并退出 1，证明 test-scope fixture 未进入生产包。禁止扫描无输出并退出 1；授权机制扫描至少命中 profile、property、condition 和通用适配器。受保护路径无差异，clean 通过后 scoped status 在提交前精确显示六个 Files 节实现文件且无 `target/`；格式检查通过。提交后 `git show --stat --oneline HEAD` 必须显示固定消息和精确六文件范围，工作树干净。
 
 ## Acceptance
 
