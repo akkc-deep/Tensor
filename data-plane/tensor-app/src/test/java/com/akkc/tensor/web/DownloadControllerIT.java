@@ -102,6 +102,7 @@ class DownloadControllerIT {
             .withCommand(
                     "--character-set-server=utf8mb4",
                     "--collation-server=utf8mb4_0900_as_cs",
+                    // Required for non-root tensor to create the real SIGNAL rollback trigger.
                     "--log-bin-trust-function-creators=1");
 
     private static DriverManagerDataSource dataSource;
@@ -244,14 +245,7 @@ class DownloadControllerIT {
                 .andExpect(status().isBadRequest());
         verifyNoInteractions(controllerService);
 
-        ApiDescriptor requiredApi = new ApiDescriptor(
-                API_NAME,
-                "Required test API",
-                "test",
-                QueryMode.snapshot,
-                List.of(new ParameterDescriptor(
-                        "required_value", "Required", null, ParameterType.TEXT,
-                        true, null, List.of(), null, null)));
+        ApiDescriptor requiredApi = requiredNoDefaultApi();
         CountingPlugin requiredPlugin = new CountingPlugin(new ReturningPlugin(
                 readyDescriptor(requiredApi), (apiName, params) -> {
                     throw new AssertionError("download must not run");
@@ -344,19 +338,8 @@ class DownloadControllerIT {
                     assertThat(exception).hasMessage("Fixture source unavailable");
                 });
 
-        Map<String, Object> params = Map.of("scenario", "SUCCESS");
-        DownloadEnvelope failure = new DownloadEnvelope(
-                PLUGIN_ID, API_NAME, params, List.of(), 0, List.of(),
-                DownloadStatus.FAILURE, "Safe source failure");
-        DownloadEnvelope mismatched = new DownloadEnvelope(
-                PluginId.of("other"),
-                API_NAME,
-                params,
-                List.of("ts_code", "trade_date", "amount", "note"),
-                0,
-                List.of(),
-                DownloadStatus.SUCCESS,
-                null);
+        DownloadEnvelope failure = failureEnvelope();
+        DownloadEnvelope mismatched = identityMismatchEmptyEnvelope();
 
         assertInvalidEnvelope(failure, "Safe source failure", adapter, persistence);
         assertInvalidEnvelope(null, "Source returned an invalid payload", adapter, persistence);
@@ -556,6 +539,41 @@ class DownloadControllerIT {
 
     private static ApiDescriptor fixtureApi() {
         return fixturePlugin.descriptor().apis().get(0);
+    }
+
+    private static ApiDescriptor requiredNoDefaultApi() {
+        return new ApiDescriptor(
+                API_NAME,
+                "Required test API",
+                "test",
+                QueryMode.snapshot,
+                List.of(new ParameterDescriptor(
+                        "required_value", "Required", null, ParameterType.TEXT,
+                        true, null, List.of(), null, null)));
+    }
+
+    private static DownloadEnvelope failureEnvelope() {
+        return new DownloadEnvelope(
+                PLUGIN_ID,
+                API_NAME,
+                Map.of("scenario", "SUCCESS"),
+                List.of(),
+                0,
+                List.of(),
+                DownloadStatus.FAILURE,
+                "Safe source failure");
+    }
+
+    private static DownloadEnvelope identityMismatchEmptyEnvelope() {
+        return new DownloadEnvelope(
+                PluginId.of("other"),
+                API_NAME,
+                Map.of("scenario", "SUCCESS"),
+                List.of("ts_code", "trade_date", "amount", "note"),
+                0,
+                List.of(),
+                DownloadStatus.SUCCESS,
+                null);
     }
 
     private static PluginDescriptor readyDescriptor(ApiDescriptor api) {
