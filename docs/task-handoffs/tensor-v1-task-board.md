@@ -66,7 +66,7 @@
 | 45 | M08-T03 | fixture 注册→适配→入库→查询集成测试 | `COMPLETED` | M05-T01, M05-T05, M06-T04, M06-T06, M08-T02 | docs/task-designs/M08-T03-design.md | docs/task-handoffs/M08-T03-handoff.md |
 | 46 | M09-T01 | Boot 入口、请求标识和通用 API DTO | `COMPLETED` | M01-T03, M02-T01, M02-T05 | docs/task-designs/M09-T01-design.md | docs/task-handoffs/M09-T01-handoff.md |
 | 47 | M09-T02 | 数据源、接口和数据集元数据 API | `COMPLETED` | M05-T01, M05-T02, M09-T01 | docs/task-designs/M09-T02-design.md | docs/task-handoffs/M09-T02-handoff.md |
-| 48 | M09-T03 | 同步下载 API 与事务提交后结果 | `NOT_STARTED` | M05-T03, M05-T05, M06-T04, M07-T04, M09-T01 | None | None |
+| 48 | M09-T03 | 同步下载 API 与事务提交后结果 | `NOT_STARTED` | M05-T01, M05-T03, M05-T05, M06-T04, M07-T04, M09-T01 | docs/task-designs/M09-T03-design.md | None |
 | 49 | M09-T04 | 数据集定义与只读分页查询 API | `NOT_STARTED` | M06-T06, M09-T01 | None | None |
 | 50 | M09-T05 | 全局异常和 HTTP 状态映射 | `NOT_STARTED` | M09-T02, M09-T03, M09-T04 | None | None |
 | 51 | M09-T06 | 配置、脱敏、指标、健康和静态资源安全 | `NOT_STARTED` | M09-T01, M09-T02, M09-T03, M09-T04, M09-T05 | None | None |
@@ -674,10 +674,10 @@
 - **Goal:** 交付“同步下载 API 与事务提交后结果”。
 - **Scope:** 包含该交付物及其直接测试与验证；不包含其他预定义任务的交付物，也不扩展 `docs/superpowers/plans/tensor-modules/M09-app-api.md` 中该任务卡明确的文件、主要语言、接口和排除边界。
 - **Acceptance:** “同步下载 API 与事务提交后结果”已按该任务卡指定的位置和行为形成；任务卡列出的全部测试、验证命令和检查得到其注明的预期结果；没有混入排除范围。
-- **Dependencies:** M05-T03, M05-T05, M06-T04, M07-T04, M09-T01.
+- **Dependencies:** M05-T01, M05-T03, M05-T05, M06-T04, M07-T04, M09-T01.
 - **Sources:** `docs/superpowers/plans/tensor-modules/M09-app-api.md` 的 `Task M09-T03` 任务卡。
 - **First action:** 读取 `docs/superpowers/plans/tensor-modules/M09-app-api.md` 的 `Task M09-T03` 任务卡，并确认其 `Context boundary`、输入和目标文件均可定位。
-- **State evidence:** None.
+- **State evidence:** 2026-09-04：准备 M09-T03 时确认通用 `DownloadService` 必须直接消费 M05-T01 的 `PluginRegistry` 与 `AdapterRegistry`，而原看板只列 M05-T03/M05-T05/M06-T04/M07-T04/M09-T01；项目所有者批准把 M05-T01 补入直接依赖。项目所有者随后依次批准五依赖构造器与既定 execute 签名、保持任务卡五文件范围并以真实 fixture/MySQL 手工装配 IT 验证、失败包络/异常分类边界、`Map<String,Object>` 请求 DTO，以及完整设计。`docs/task-designs/M09-T03-design.md` 已创建并回填；在书面设计复核和后续交接门禁完成前，任务保持 `NOT_STARTED` 且 Handoff 为 `None`。
 
 ### `M09-T04`
 
