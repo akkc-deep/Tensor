@@ -61,7 +61,7 @@
 | 40 | M07-T02 | Tushare 请求、响应 DTO 和严格返回校验 | `COMPLETED` | M03-T09, M07-T01 | docs/task-designs/M07-T02-design.md | docs/task-handoffs/M07-T02-handoff.md |
 | 41 | M07-T03 | 鉴权、权限、限流、网络、超时和格式错误分类 | `COMPLETED` | M07-T02 | docs/task-designs/M07-T03-design.md | docs/task-handoffs/M07-T03-handoff.md |
 | 42 | M07-T04 | `TushareProPlugin` 描述符、readiness 和 49 接口下载 | `COMPLETED` | M07-T02, M07-T03 | docs/task-designs/M07-T04-design.md | docs/task-handoffs/M07-T04-handoff.md |
-| 43 | M08-T01 | fixture 元数据、插件和适配器 | `NOT_STARTED` | M02-T05, M04-T06, M05-T05 | None | None |
+| 43 | M08-T01 | fixture 元数据、插件和适配器 | `NOT_STARTED` | M02-T05, M04-T06, M05-T05 | docs/task-designs/M08-T01-design.md | None |
 | 44 | M08-T02 | 成功、空、上游失败、适配失败和写入失败模式 | `NOT_STARTED` | M08-T01 | None | None |
 | 45 | M08-T03 | fixture 注册→适配→入库→查询集成测试 | `NOT_STARTED` | M05-T05, M06-T06, M08-T02 | None | None |
 | 46 | M09-T01 | Boot 入口、请求标识和通用 API DTO | `NOT_STARTED` | M01-T03, M02-T05 | None | None |
