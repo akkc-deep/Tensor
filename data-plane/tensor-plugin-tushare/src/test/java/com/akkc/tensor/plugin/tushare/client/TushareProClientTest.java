@@ -11,6 +11,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import com.akkc.tensor.plugin.api.dataset.DatasetDefinition;
 import com.akkc.tensor.plugin.api.download.DownloadEnvelope;
 import com.akkc.tensor.plugin.api.download.DownloadStatus;
+import com.akkc.tensor.plugin.api.error.ErrorCode;
+import com.akkc.tensor.plugin.api.error.SourceException;
 import com.akkc.tensor.plugin.tushare.config.TushareProperties;
 import com.akkc.tensor.plugin.tushare.metadata.DatasetDefinitionLoader;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -182,8 +184,9 @@ class TushareProClientTest {
         Throwable failure = catchThrowable(() -> client(1_024 * 1_024)
                 .execute(dailyDefinition(), Map.of("trade_date", "20260902")));
 
-        assertFixedFailure(failure, "Tushare HTTP request failed");
+        assertSourceFailure(failure, ErrorCode.SOURCE_UNAVAILABLE, "Tushare service is unavailable");
         assertTrue(!String.valueOf(failure).contains(SECRET), "HTTP failure omits the response body and credential");
+        assertTrue(!String.valueOf(failure).contains("503"), "HTTP failure omits the upstream status");
         assertTrue(!String.valueOf(failure).contains(wireMock.baseUrl()), "HTTP failure omits the upstream URI");
         assertTrue(wireMock.getAllServeEvents().size() == 1, "HTTP failure is not retried");
     }
@@ -200,7 +203,8 @@ class TushareProClientTest {
 
         for (String body : invalidBodies) {
             Throwable failure = executeFailure(HttpStatus.OK.value(), body);
-            assertFixedFailure(failure, "Tushare response is invalid JSON");
+            assertSourceFailure(failure, ErrorCode.SOURCE_PAYLOAD_INVALID,
+                    "Tushare returned an invalid payload");
             assertTrue(!String.valueOf(failure).contains(SECRET), "JSON failure omits untrusted response content");
         }
     }
@@ -208,25 +212,36 @@ class TushareProClientTest {
     @Test
     void validatesBusinessCodeBeforeObservingDataOrMessage() {
         Throwable missingCode = executeFailure(HttpStatus.OK.value(), "{\"data\":null}");
-        assertFixedFailure(missingCode, "Tushare response code is missing");
+        assertSourceFailure(missingCode, ErrorCode.SOURCE_PAYLOAD_INVALID,
+                "Tushare returned an invalid payload");
 
         Throwable businessFailure = executeFailure(HttpStatus.OK.value(),
                 "{\"code\":-2001,\"msg\":\"" + SECRET + "\"}");
-        assertFixedFailure(businessFailure, "Tushare business request failed");
+        assertSourceFailure(businessFailure, ErrorCode.SOURCE_PAYLOAD_INVALID,
+                "Tushare returned an invalid payload");
         assertTrue(!String.valueOf(businessFailure).contains("-2001")
                 && !String.valueOf(businessFailure).contains(SECRET),
                 "business failure omits the upstream code and message");
+
+        Throwable authFailure = executeFailure(HttpStatus.OK.value(),
+                "{\"code\":-2002,\"msg\":\"TOKEN " + SECRET + "\"}");
+        assertSourceFailure(authFailure, ErrorCode.SOURCE_AUTH_FAILED,
+                "Tushare credentials were rejected");
+        assertTrue(!String.valueOf(authFailure).contains("-2002")
+                && !String.valueOf(authFailure).contains(SECRET),
+                "classified business failure omits the upstream code and message");
     }
 
     @Test
     void validatesDataFieldsAndItemsInOrder() {
         Map<String, String> cases = new LinkedHashMap<>();
-        cases.put("{\"code\":0}", "Tushare response data is missing");
-        cases.put("{\"code\":0,\"data\":{}}", "Tushare response fields are missing");
-        cases.put("{\"code\":0,\"data\":{\"fields\":[]}}", "Tushare response items are missing");
+        cases.put("{\"code\":0}", "Tushare returned an invalid payload");
+        cases.put("{\"code\":0,\"data\":{}}", "Tushare returned an invalid payload");
+        cases.put("{\"code\":0,\"data\":{\"fields\":[]}}", "Tushare returned an invalid payload");
 
         cases.forEach((body, expectedMessage) ->
-                assertFixedFailure(executeFailure(HttpStatus.OK.value(), body), expectedMessage));
+                assertSourceFailure(executeFailure(HttpStatus.OK.value(), body),
+                        ErrorCode.SOURCE_PAYLOAD_INVALID, expectedMessage));
     }
 
     @Test
@@ -240,26 +255,19 @@ class TushareProClientTest {
         List<String> wrongOrder = new ArrayList<>(DAILY_FIELDS);
         java.util.Collections.swap(wrongOrder, 0, 1);
 
-        assertFixedFailure(executeFailure(HttpStatus.OK.value(), successWith(withNull, "[]")),
-                "Tushare response fields contain duplicates or null");
-        assertFixedFailure(executeFailure(HttpStatus.OK.value(), successWith(withDuplicate, "[]")),
-                "Tushare response fields contain duplicates or null");
-        assertFixedFailure(executeFailure(HttpStatus.OK.value(), successWith(wrongSet, "[]")),
-                "Tushare response fields do not match dataset definition");
-        assertFixedFailure(executeFailure(HttpStatus.OK.value(), successWith(wrongOrder, "[]")),
-                "Tushare response fields do not match dataset definition");
+        assertPayloadFailure(executeFailure(HttpStatus.OK.value(), successWith(withNull, "[]")));
+        assertPayloadFailure(executeFailure(HttpStatus.OK.value(), successWith(withDuplicate, "[]")));
+        assertPayloadFailure(executeFailure(HttpStatus.OK.value(), successWith(wrongSet, "[]")));
+        assertPayloadFailure(executeFailure(HttpStatus.OK.value(), successWith(wrongOrder, "[]")));
     }
 
     @Test
     void rejectsMissingOrWrongWidthRowsAndPreservesLegalNullCells() {
-        assertFixedFailure(executeFailure(HttpStatus.OK.value(), successWith(DAILY_FIELDS, "[null]")),
-                "Tushare response row is missing");
-        assertFixedFailure(executeFailure(HttpStatus.OK.value(), successWith(DAILY_FIELDS,
-                "[[\"000001.SZ\",\"20260902\",1,2,3,4,5,6,7,8]]")),
-                "Tushare response row width does not match fields");
-        assertFixedFailure(executeFailure(HttpStatus.OK.value(), successWith(DAILY_FIELDS,
-                "[[\"000001.SZ\",\"20260902\",1,2,3,4,5,6,7,8,9,10]]")),
-                "Tushare response row width does not match fields");
+        assertPayloadFailure(executeFailure(HttpStatus.OK.value(), successWith(DAILY_FIELDS, "[null]")));
+        assertPayloadFailure(executeFailure(HttpStatus.OK.value(), successWith(DAILY_FIELDS,
+                "[[\"000001.SZ\",\"20260902\",1,2,3,4,5,6,7,8]]")));
+        assertPayloadFailure(executeFailure(HttpStatus.OK.value(), successWith(DAILY_FIELDS,
+                "[[\"000001.SZ\",\"20260902\",1,2,3,4,5,6,7,8,9,10]]")));
 
         stub(HttpStatus.OK.value(), successWith(DAILY_FIELDS,
                 "[[\"000001.SZ\",\"20260902\",null,2,3,4,5,6,7,8,9]]"));
@@ -280,7 +288,7 @@ class TushareProClientTest {
         stub(HttpStatus.OK.value(), EMPTY_JSON + " ");
         Throwable oversized = catchThrowable(() -> client(exactBytes)
                 .execute(dailyDefinition(), Map.of("trade_date", "20260902")));
-        assertFixedFailure(oversized, "Tushare response exceeds maxResponseBytes");
+        assertPayloadFailure(oversized);
     }
 
     private Method[] publicDeclaredMethods(Class<?> type) {
@@ -319,11 +327,20 @@ class TushareProClientTest {
                 .execute(dailyDefinition(), Map.of("trade_date", "20260902")));
     }
 
-    private void assertFixedFailure(Throwable failure, String expectedMessage) {
-        assertTrue(failure instanceof IllegalStateException, "upstream failure uses the fixed client exception type");
-        assertTrue(expectedMessage.equals(failure == null ? null : failure.getMessage()),
+    private void assertPayloadFailure(Throwable failure) {
+        assertSourceFailure(failure, ErrorCode.SOURCE_PAYLOAD_INVALID,
+                "Tushare returned an invalid payload");
+    }
+
+    private void assertSourceFailure(Throwable failure, ErrorCode code, String expectedMessage) {
+        assertTrue(failure instanceof SourceException, "upstream failure uses the source exception type");
+        SourceException sourceFailure = (SourceException) failure;
+        assertThat(sourceFailure.code()).isEqualTo(code);
+        assertTrue(expectedMessage.equals(sourceFailure.getMessage()),
                 "upstream failure uses its fixed safe message");
-        assertTrue(failure != null && failure.getCause() == null, "upstream failure omits its cause");
+        assertThat(sourceFailure.retryable()).isEqualTo(code.retryable());
+        assertTrue(sourceFailure.getCause() == null, "upstream failure omits its cause");
+        assertTrue(sourceFailure.getSuppressed().length == 0, "upstream failure omits suppressed failures");
     }
 
     private String successWith(List<String> fields, String itemsJson) {

@@ -16,6 +16,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import org.springframework.http.MediaType;
+import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestClient;
 
 public final class TushareProClient {
@@ -47,18 +48,22 @@ public final class TushareProClient {
                 fields);
         byte[] requestBody = encode(request);
 
-        return restClient.post()
-                .uri("")
-                .contentType(MediaType.APPLICATION_JSON)
-                .accept(MediaType.APPLICATION_JSON)
-                .body(requestBody)
-                .exchange((outboundRequest, response) -> {
-                    if (!response.getStatusCode().is2xxSuccessful()) {
-                        throw new IllegalStateException("Tushare HTTP request failed");
-                    }
-                    byte[] responseBody = read(response.getBody(), properties.maxResponseBytes());
-                    return TushareResponseValidator.validate(definition, params, decode(responseBody));
-                });
+        try {
+            return restClient.post()
+                    .uri("")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .accept(MediaType.APPLICATION_JSON)
+                    .body(requestBody)
+                    .exchange((outboundRequest, response) -> {
+                        if (!response.getStatusCode().is2xxSuccessful()) {
+                            throw TushareErrorClassifier.classifyHttp(response.getStatusCode().value());
+                        }
+                        byte[] responseBody = read(response.getBody(), properties.maxResponseBytes());
+                        return TushareResponseValidator.validate(definition, params, decode(responseBody));
+                    });
+        } catch (ResourceAccessException failure) {
+            throw TushareErrorClassifier.classifyTransport(failure);
+        }
     }
 
     private static byte[] encode(TushareRequest request) {
@@ -76,11 +81,11 @@ public final class TushareProClient {
         try {
             byte[] body = input.readNBytes(maxResponseBytes + 1);
             if (body.length > maxResponseBytes) {
-                throw new IllegalStateException("Tushare response exceeds maxResponseBytes");
+                throw TushareErrorClassifier.invalidPayload();
             }
             return body;
-        } catch (IOException ignored) {
-            throw new IllegalStateException("Tushare response cannot be read");
+        } catch (IOException failure) {
+            throw TushareErrorClassifier.classifyTransport(failure);
         }
     }
 
@@ -88,7 +93,7 @@ public final class TushareProClient {
         try {
             return JSON.readValue(body, TushareResponse.class);
         } catch (Exception ignored) {
-            throw new IllegalStateException("Tushare response is invalid JSON");
+            throw TushareErrorClassifier.invalidPayload();
         }
     }
 }
