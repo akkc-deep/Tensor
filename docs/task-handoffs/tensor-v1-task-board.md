@@ -58,7 +58,7 @@
 | 37 | M06-T05 | 查询条件白名单和 COUNT/分页 SQL | `COMPLETED` | M02-T03, M04-T06 | docs/task-designs/M06-T05-design.md | docs/task-handoffs/M06-T05-handoff.md |
 | 38 | M06-T06 | `DatasetQueryService`、页码归一化和精度序列化 | `COMPLETED` | M06-T05 | docs/task-designs/M06-T06-design.md | docs/task-handoffs/M06-T06-handoff.md |
 | 39 | M07-T01 | 配置属性和同步 `RestClient` | `COMPLETED` | M02-T05 | docs/task-designs/M07-T01-design.md | docs/task-handoffs/M07-T01-handoff.md |
-| 40 | M07-T02 | Tushare 请求、响应 DTO 和严格返回校验 | `NOT_STARTED` | M03-T09, M07-T01 | None | None |
+| 40 | M07-T02 | Tushare 请求、响应 DTO 和严格返回校验 | `NOT_STARTED` | M03-T09, M07-T01 | docs/task-designs/M07-T02-design.md | None |
 | 41 | M07-T03 | 鉴权、权限、限流、网络、超时和格式错误分类 | `NOT_STARTED` | M07-T02 | None | None |
 | 42 | M07-T04 | `TushareProPlugin` 描述符、readiness 和 49 接口下载 | `NOT_STARTED` | M07-T02, M07-T03 | None | None |
 | 43 | M08-T01 | fixture 元数据、插件和适配器 | `NOT_STARTED` | M02-T05, M04-T06 | None | None |
