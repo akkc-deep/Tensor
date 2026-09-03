@@ -67,7 +67,7 @@
 | 46 | M09-T01 | Boot 入口、请求标识和通用 API DTO | `COMPLETED` | M01-T03, M02-T01, M02-T05 | docs/task-designs/M09-T01-design.md | docs/task-handoffs/M09-T01-handoff.md |
 | 47 | M09-T02 | 数据源、接口和数据集元数据 API | `COMPLETED` | M05-T01, M05-T02, M09-T01 | docs/task-designs/M09-T02-design.md | docs/task-handoffs/M09-T02-handoff.md |
 | 48 | M09-T03 | 同步下载 API 与事务提交后结果 | `COMPLETED` | M05-T01, M05-T03, M05-T05, M06-T04, M07-T04, M09-T01 | docs/task-designs/M09-T03-design.md | docs/task-handoffs/M09-T03-handoff.md |
-| 49 | M09-T04 | 数据集定义与只读分页查询 API | `NOT_STARTED` | M06-T06, M09-T01 | None | None |
+| 49 | M09-T04 | 数据集定义与只读分页查询 API | `NOT_STARTED` | M05-T02, M06-T06, M09-T01 | docs/task-designs/M09-T04-design.md | None |
 | 50 | M09-T05 | 全局异常和 HTTP 状态映射 | `NOT_STARTED` | M09-T02, M09-T03, M09-T04 | None | None |
 | 51 | M09-T06 | 配置、脱敏、指标、健康和静态资源安全 | `NOT_STARTED` | M09-T01, M09-T02, M09-T03, M09-T04, M09-T05 | None | None |
 | 52 | M10-T01 | Vue 依赖、Vitest、VTU 和 Playwright 配置 | `NOT_STARTED` | M00-T03 | None | None |
@@ -690,10 +690,10 @@
 - **Goal:** 交付“数据集定义与只读分页查询 API”。
 - **Scope:** 包含该交付物及其直接测试与验证；不包含其他预定义任务的交付物，也不扩展 `docs/superpowers/plans/tensor-modules/M09-app-api.md` 中该任务卡明确的文件、主要语言、接口和排除边界。
 - **Acceptance:** “数据集定义与只读分页查询 API”已按该任务卡指定的位置和行为形成；任务卡列出的全部测试、验证命令和检查得到其注明的预期结果；没有混入排除范围。
-- **Dependencies:** M06-T06, M09-T01.
+- **Dependencies:** M05-T02, M06-T06, M09-T01.
 - **Sources:** `docs/superpowers/plans/tensor-modules/M09-app-api.md` 的 `Task M09-T04` 任务卡。
 - **First action:** 读取 `docs/superpowers/plans/tensor-modules/M09-app-api.md` 的 `Task M09-T04` 任务卡，并确认其 `Context boundary`、输入和目标文件均可定位。
-- **State evidence:** None.
+- **State evidence:** 2026-09-04：准备 M09-T04 时确认可靠区分不存在数据集的 `409 + DATASET_MISCONFIGURED` 需要 Controller 在调用 `DatasetQueryService` 前直接消费 M05-T02 的 `DatasetCatalog.find`，而原看板只列 M06-T06、M09-T01；项目所有者明确批准方案 1，把 M05-T02 补为直接依赖，并依次批准双依赖薄 Controller、catalog-first 数据流、筛选/criteria 错误边界、PageResponse、只字符串化 boxed Long/BigDecimal 且保留 primitive 分页 number 的 Jackson 方案、固定四文件范围和八项真实 MySQL 集成测试。`docs/task-designs/M09-T04-design.md` 已创建并回填；任务保持 `NOT_STARTED`，Handoff 仍为 `None`，功能实现尚未开始。
 
 ### `M09-T05`
 
