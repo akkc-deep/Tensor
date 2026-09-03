@@ -34,9 +34,11 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.math.BigDecimal;
 import java.sql.Connection;
+import java.sql.ConnectionBuilder;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
+import java.sql.ShardingKeyBuilder;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -285,6 +287,16 @@ class FixtureFlowIT {
         public Connection getConnection(String username, String password) throws SQLException {
             connectionCount.incrementAndGet();
             return connectionProxy(delegate.getConnection(username, password));
+        }
+
+        @Override
+        public ConnectionBuilder createConnectionBuilder() throws SQLException {
+            return delegate.createConnectionBuilder();
+        }
+
+        @Override
+        public ShardingKeyBuilder createShardingKeyBuilder() throws SQLException {
+            return delegate.createShardingKeyBuilder();
         }
 
         @Override
