@@ -65,7 +65,7 @@
 | 44 | M08-T02 | 成功、空、上游失败、适配失败和写入失败模式 | `COMPLETED` | M08-T01 | docs/task-designs/M08-T02-design.md | docs/task-handoffs/M08-T02-handoff.md |
 | 45 | M08-T03 | fixture 注册→适配→入库→查询集成测试 | `COMPLETED` | M05-T01, M05-T05, M06-T04, M06-T06, M08-T02 | docs/task-designs/M08-T03-design.md | docs/task-handoffs/M08-T03-handoff.md |
 | 46 | M09-T01 | Boot 入口、请求标识和通用 API DTO | `COMPLETED` | M01-T03, M02-T01, M02-T05 | docs/task-designs/M09-T01-design.md | docs/task-handoffs/M09-T01-handoff.md |
-| 47 | M09-T02 | 数据源、接口和数据集元数据 API | `READY` | M05-T01, M05-T02, M09-T01 | docs/task-designs/M09-T02-design.md | docs/task-handoffs/M09-T02-handoff.md |
+| 47 | M09-T02 | 数据源、接口和数据集元数据 API | `IN_PROGRESS` | M05-T01, M05-T02, M09-T01 | docs/task-designs/M09-T02-design.md | docs/task-handoffs/M09-T02-handoff.md |
 | 48 | M09-T03 | 同步下载 API 与事务提交后结果 | `NOT_STARTED` | M05-T03, M05-T05, M06-T04, M07-T04, M09-T01 | None | None |
 | 49 | M09-T04 | 数据集定义与只读分页查询 API | `NOT_STARTED` | M06-T06, M09-T01 | None | None |
 | 50 | M09-T05 | 全局异常和 HTTP 状态映射 | `NOT_STARTED` | M09-T02, M09-T03, M09-T04 | None | None |
@@ -664,6 +664,8 @@
 - **Sources:** `docs/superpowers/plans/tensor-modules/M09-app-api.md` 的 `Task M09-T02` 任务卡。
 - **First action:** 读取 `docs/superpowers/plans/tensor-modules/M09-app-api.md` 的 `Task M09-T02` 任务卡，并确认其 `Context boundary`、输入和目标文件均可定位。
 - **State evidence (readiness):** 2026-09-03：项目所有者依次批准 M09-T02 的方案 1、四节完整设计和书面版本，冻结薄 Controller、三个精确投影 DTO、缺 Token 仍允许数据集查询、未知/不可下载插件 API 使用 `409 + PLUGIN_DISABLED`、未知插件/数据集使用 `409 + DATASET_MISCONFIGURED`、由私有 `TensorException` 分阶段携带错误码且标准错误体留给 M09-T05、独立 MockMvc 代替真实 Bean 装配，以及 `tensor-app/pom.xml` 仅增加 test scope `spring-test` 的范围例外。提交 `25ae585` 创建 `docs/task-designs/M09-T02-design.md`，提交 `7d98d49` 根据项目所有者批准把直接消费 `PluginRegistry` 的 M05-T01 补入设计/看板依赖并回填同一 Design 路径；最终设计已完整复读，七节顺序、占位符、内部一致性、范围、歧义和 `git diff --check` 自审通过，无留给实施者的材料选择。三项直接依赖 M05-T01、M05-T02、M09-T01 均为 `COMPLETED`：当前 `PluginRegistry.java`、`DatasetCatalog.java` 和 M09-T01 三项消费产物分别相对实现提交 `7ea252c`、`57771b0`、`367b0d1` 无差异，已记录的最终门禁分别为 89/89、99/99、283/283，决策和约束分别提供插件注册/readiness 快照、已验证数据集目录和请求关联/通用错误 DTO，互补且无冲突。`docs/task-handoffs/M09-T02-handoff.md` 已按 `next-task` 模板完整创建并链接，只记录 M09-T02 和三项直接输入，包含同一设计路径、精确 artifact/decision/rationale/constraint/usage/readiness evidence、依赖比较、设计优先读取顺序，以及先增加测试依赖并完整创建唯一测试取得只因四个生产类型缺失而失败的严格 RED 首个动作。因此执行真实的 `NOT_STARTED -> READY`；功能实现尚未开始。
+
+- **State evidence (start):** 2026-09-03：用户明确要求按照权威任务看板执行当前任务；已完整读取 `docs/task-designs/M09-T02-design.md`、`docs/task-handoffs/M09-T02-handoff.md`、M09 任务卡与 Module Gate，以及 M05-T01、M05-T02、M09-T01 三项直接依赖设计和消费产物，确认任务身份、六文件范围、四条路由、投影/失败合同、严格 TDD 顺序、首个动作与结果级验收均可定位且无冲突。当前为项目明确允许直接工作的 `main` 普通检出；未改代码的 reactor 基线在允许 Mockito/Byte Buddy attach 的环境通过 plugin-api 79、core 75、Tushare 93、fixture 12、app 24，共 283/283，作为本次 `READY -> IN_PROGRESS` 的启动证据；既有 `next-task` 交接路径保留为进入上下文。
 
 ### `M09-T03`
 
