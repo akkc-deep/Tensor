@@ -64,7 +64,7 @@
 | 43 | M08-T01 | fixture 元数据、插件和适配器 | `COMPLETED` | M02-T05, M04-T06, M05-T05 | docs/task-designs/M08-T01-design.md | docs/task-handoffs/M08-T01-handoff.md |
 | 44 | M08-T02 | 成功、空、上游失败、适配失败和写入失败模式 | `COMPLETED` | M08-T01 | docs/task-designs/M08-T02-design.md | docs/task-handoffs/M08-T02-handoff.md |
 | 45 | M08-T03 | fixture 注册→适配→入库→查询集成测试 | `COMPLETED` | M05-T01, M05-T05, M06-T04, M06-T06, M08-T02 | docs/task-designs/M08-T03-design.md | docs/task-handoffs/M08-T03-handoff.md |
-| 46 | M09-T01 | Boot 入口、请求标识和通用 API DTO | `NOT_STARTED` | M01-T03, M02-T01, M02-T05 | docs/task-designs/M09-T01-design.md | None |
+| 46 | M09-T01 | Boot 入口、请求标识和通用 API DTO | `READY` | M01-T03, M02-T01, M02-T05 | docs/task-designs/M09-T01-design.md | docs/task-handoffs/M09-T01-handoff.md |
 | 47 | M09-T02 | 数据源、接口和数据集元数据 API | `NOT_STARTED` | M05-T02, M09-T01 | None | None |
 | 48 | M09-T03 | 同步下载 API 与事务提交后结果 | `NOT_STARTED` | M05-T03, M05-T05, M06-T04, M07-T04, M09-T01 | None | None |
 | 49 | M09-T04 | 数据集定义与只读分页查询 API | `NOT_STARTED` | M06-T06, M09-T01 | None | None |
@@ -648,6 +648,8 @@
 - **Sources:** `docs/superpowers/plans/tensor-modules/M09-app-api.md` 的 `Task M09-T01` 任务卡。
 - **First action:** 读取 `docs/superpowers/plans/tensor-modules/M09-app-api.md` 的 `Task M09-T01` 任务卡，并确认其 `Context boundary`、输入和目标文件均可定位。
 - **State evidence:** 2026-09-03：准备 M09-T01 后继设计时确认任务卡要求 `RequestIdFilter` 生成服务端 UUID、校验并沿用客户端请求标识，而 M02-T01 已交付专用 `RequestId.newId()`，且其设计明确把客户端头沿用逻辑留给后续 `RequestIdFilter`；原看板只列 M01-T03、M02-T05，遗漏了被直接消费的 M02-T01。项目所有者回复“同意”，批准把 M09-T01 的直接依赖修订为 M01-T03、M02-T01、M02-T05；同时批准仅沿用规范小写 UUID，缺失或非法值生成新 UUID，并在请求结束时清理 MDC。任务保持 `NOT_STARTED`，设计与交接仍为 `None`。
+
+- **State evidence (readiness):** 2026-09-03：项目所有者明确批准方案 1 和书面设计；提交 `1578374` 已创建并回填完整 `docs/task-designs/M09-T01-design.md`，冻结 Boot 根入口、规范小写 UUID 白名单、响应头/MDC 同值与无条件清理、不可变通用错误 DTO、严格 RED/GREEN、283/283 reactor 和精确六文件实现范围，七节顺序、占位符、内部一致性、范围与歧义自审通过，无留给实施者的材料选择。三项直接依赖 M01-T03、M02-T01、M02-T05 均为 `COMPLETED`，分别提供模块与禁止能力门禁、UUID 请求身份、错误码与 retryable 真值，决策和约束互补且无冲突。`docs/task-handoffs/M09-T01-handoff.md` 已按 `next-task` 模板完整创建并链接，只记录 M09-T01 和三项直接输入，包含同一设计路径、精确 artifact/decision/rationale/constraint/usage/readiness evidence、设计优先读取顺序，以及先完整创建 `RequestIdFilterTest.java` 并取得只因四个生产类型缺失而失败的严格 RED 首个动作。因此执行真实的 `NOT_STARTED -> READY`；功能实现尚未开始。
 
 ### `M09-T02`
 
