@@ -61,7 +61,7 @@
 | 40 | M07-T02 | Tushare 请求、响应 DTO 和严格返回校验 | `COMPLETED` | M03-T09, M07-T01 | docs/task-designs/M07-T02-design.md | docs/task-handoffs/M07-T02-handoff.md |
 | 41 | M07-T03 | 鉴权、权限、限流、网络、超时和格式错误分类 | `COMPLETED` | M07-T02 | docs/task-designs/M07-T03-design.md | docs/task-handoffs/M07-T03-handoff.md |
 | 42 | M07-T04 | `TushareProPlugin` 描述符、readiness 和 49 接口下载 | `COMPLETED` | M07-T02, M07-T03 | docs/task-designs/M07-T04-design.md | docs/task-handoffs/M07-T04-handoff.md |
-| 43 | M08-T01 | fixture 元数据、插件和适配器 | `NOT_STARTED` | M02-T05, M04-T06 | None | None |
+| 43 | M08-T01 | fixture 元数据、插件和适配器 | `NOT_STARTED` | M02-T05, M04-T06, M05-T05 | None | None |
 | 44 | M08-T02 | 成功、空、上游失败、适配失败和写入失败模式 | `NOT_STARTED` | M08-T01 | None | None |
 | 45 | M08-T03 | fixture 注册→适配→入库→查询集成测试 | `NOT_STARTED` | M05-T05, M06-T06, M08-T02 | None | None |
 | 46 | M09-T01 | Boot 入口、请求标识和通用 API DTO | `NOT_STARTED` | M01-T03, M02-T05 | None | None |
@@ -594,22 +594,22 @@
 ### `M08-T01`
 
 - **Goal:** 交付“fixture 元数据、插件和适配器”。
-- **Scope:** 包含该交付物及其直接测试与验证；不包含其他预定义任务的交付物，也不扩展 `docs/superpowers/plans/tensor-modules/M08-fixture-plugin.md` 中该任务卡明确的文件、主要语言、接口和排除边界。
+- **Scope:** 包含该交付物及其直接测试与验证；经项目所有者批准，额外允许修改 `data-plane/tensor-plugin-fixture/pom.xml` 以增加 Spring Boot 与 `tensor-core` 编译依赖，并修改 `data-plane/tensor-app/src/test/java/com/akkc/tensor/architecture/ModuleDependencyTest.java` 以仅放开 `fixture -> core`；不包含其他预定义任务的交付物，也不作其他任务卡外扩展。
 - **Acceptance:** “fixture 元数据、插件和适配器”已按该任务卡指定的位置和行为形成；任务卡列出的全部测试、验证命令和检查得到其注明的预期结果；没有混入排除范围。
-- **Dependencies:** M02-T05, M04-T06.
+- **Dependencies:** M02-T05, M04-T06, M05-T05.
 - **Sources:** `docs/superpowers/plans/tensor-modules/M08-fixture-plugin.md` 的 `Task M08-T01` 任务卡。
 - **First action:** 读取 `docs/superpowers/plans/tensor-modules/M08-fixture-plugin.md` 的 `Task M08-T01` 任务卡，并确认其 `Context boundary`、输入和目标文件均可定位。
-- **State evidence:** None.
+- **State evidence:** 2026-09-03：在准备 M07-T04 的预定义最小后继时，发现 M08-T01 要求 Spring 条件配置并复用 `GenericDatasetAdapter`，但 fixture POM 仅依赖 plugin-api、既有 ArchUnit 门禁禁止 `fixture -> core`，且看板未列提供适配器的 M05-T05。项目所有者明确批准增加 fixture POM 的 Spring Boot/`tensor-core` 编译依赖、将 M05-T05 加为直接依赖，并把 ArchUnit 规则收窄为只允许 `fixture -> core`、继续禁止 fixture 依赖 Tushare/app；同时批准 profile 精确为 `acceptance`，仅与 `tensor.plugins.fixture.enabled=true` 联合激活。项目所有者还批准 M08-T01 直接构造唯一 `DatasetDefinition`、以测试验证 Java/YAML 一致而不复制或依赖 Tushare loader，冻结 `Fixture`/`Fixture 验收数据源`、`Fixture 日线`、`验收`、`trade_date`、五值必填 `scenario`、`[ts_code, trade_date]` 业务键、`[ts_code]` 过滤器和 `ts_code` 固定列；M08-T01 下载在场景工厂接入前以 `SOURCE_UNAVAILABLE` 和 `Fixture scenarios are not configured` 安全拒绝。任务仍为 `NOT_STARTED`，设计、交接和实现均尚未创建。
 
 ### `M08-T02`
 
 - **Goal:** 交付“成功、空、上游失败、适配失败和写入失败模式”。
-- **Scope:** 包含该交付物及其直接测试与验证；不包含其他预定义任务的交付物，也不扩展 `docs/superpowers/plans/tensor-modules/M08-fixture-plugin.md` 中该任务卡明确的文件、主要语言、接口和排除边界。
+- **Scope:** 包含该交付物及其直接测试与验证；经项目所有者批准，除任务卡列出的两个新生产类型和测试外，允许修改 M08-T01 已创建的 `FixturePlugin.java`、`FixtureConfiguration.java` 和 `FixturePluginTest.java`，使插件从临时安全拒绝切换为委托 `FixtureEnvelopeFactory`；不包含其他预定义任务的交付物，也不作其他任务卡外扩展。
 - **Acceptance:** “成功、空、上游失败、适配失败和写入失败模式”已按该任务卡指定的位置和行为形成；任务卡列出的全部测试、验证命令和检查得到其注明的预期结果；没有混入排除范围。
 - **Dependencies:** M08-T01.
 - **Sources:** `docs/superpowers/plans/tensor-modules/M08-fixture-plugin.md` 的 `Task M08-T02` 任务卡。
 - **First action:** 读取 `docs/superpowers/plans/tensor-modules/M08-fixture-plugin.md` 的 `Task M08-T02` 任务卡，并确认其 `Context boundary`、输入和目标文件均可定位。
-- **State evidence:** None.
+- **State evidence:** 2026-09-03：项目所有者批准 M08-T01/M08-T02 使用两阶段下载接缝；M08-T02 可在自身开始后修改 `FixturePlugin.java`、`FixtureConfiguration.java` 和 `FixturePluginTest.java`，接入五种确定性场景。M08-T02 仍为 `NOT_STARTED`，该批准不构成其设计、准备或启动证据。
 
 ### `M08-T03`
 
