@@ -68,8 +68,8 @@ public final class DownloadService {
 2. 从 `pluginRegistry.descriptors()` 的构造期安全快照中定位同一 `pluginId` 且 `downloadAvailable=true` 的唯一描述符，再按 `apiName` 定位唯一 `ApiDescriptor`；描述符或 API 缺失抛 `DATASET_MISCONFIGURED` 和固定消息 `Download dataset is unavailable`。不得再次调用插件的 `descriptor()`/`readiness()`。
 3. 构造 `DatasetKey.of(pluginId, apiName)` 并调用 `adapterRegistry.find(key)`；缺失同样抛 `DATASET_MISCONFIGURED`，且不调用上游。
 4. 调用 `parameterValidator.validate(apiDescriptor, params)`；把返回的同一不可变、有序 `ValidatedParameters.values()` 传给插件。`PARAM_REQUIRED|PARAM_INVALID` 及字段错误原样传播，不复制规则或错误。
-5. 调用一次 `plugin.download(apiName, validated.values())`；`SourceException` 原样传播，不捕获、重试或生成半包络。
-6. 若插件返回 `DownloadStatus.FAILURE`，以其 M02 已保证安全且非空白的 `error` 构造 `SourceException(SOURCE_PAYLOAD_INVALID, envelope.error())`；失败包络不能转成 `EMPTY`。
+5. 调用一次 `plugin.download(apiName, validated.values())`；`SourceException` 原样传播，不捕获、重试或生成半包络。插件返回 null 时固定抛 `SourceException(SOURCE_PAYLOAD_INVALID, "Source returned an invalid payload")`。
+6. 若非 null 包络为 `DownloadStatus.FAILURE`，以其 M02 已保证安全且非空白的 `error` 构造 `SourceException(SOURCE_PAYLOAD_INVALID, envelope.error())`；失败包络不能转成 `EMPTY`。
 7. 成功包络的 `pluginId`、`apiName` 和 `params` 必须分别等于请求身份及已验证参数，否则抛固定 `SourceException(SOURCE_PAYLOAD_INVALID, "Source returned an invalid payload")`，不回显实际身份或参数。
 8. 身份一致且 `rowCount == 0` 时直接构造 `DownloadResult(requestId, EMPTY, pluginId, apiName, 0, 0, 0, "下载成功，0 条数据")`；不读取时钟、不调用 adapter 或 persistence。
 9. 非空时只调用一次 `clock.instant()`，把该值传给 `adapter.adapt(envelope, ingestedAt)`；`AdapterException` 原样传播且不会调用 persistence。
@@ -183,7 +183,7 @@ env \
 测试固定使用官方 `mysql:8.4.6`、六个 Flyway migration、`acceptance` fixture 配置、固定 `Clock`、真实 registries/validator/adapter/persistence、`RequestIdFilter` 和 standalone MockMvc；不访问公网，不使用 Tushare Token，不在 Docker 不可用时 skip。恰有 10 个普通 `@Test`，10/10 通过：
 
 1. 反射确认四个生产类/records 的 final、构造器、方法、record components、Bean Validation 和 Servlet-only Controller 表面精确；DTO null/blank/计数不变量、参数快照和 `DownloadResponse.from` 正确。
-2. 非法结构以及 fixture 缺失、未知、非字符串场景参数均在插件调用前失败为 Bean Validation 或 M05 `PARAM_REQUIRED|PARAM_INVALID`，插件计数为零且数据库为空。
+2. 非法请求结构、测试专用描述符的缺失必填参数，以及 fixture 的未知、非字符串场景参数均在插件调用前失败为 Bean Validation 或 M05 `PARAM_REQUIRED|PARAM_INVALID`，插件计数为零且数据库为空；fixture 自身缺失场景继续使用既有默认值 `SUCCESS`，不得错误断言为缺失失败。
 3. 禁用/缺失插件产生固定 `PLUGIN_DISABLED`；已注册插件缺 API 描述符或 adapter 产生固定 `DATASET_MISCONFIGURED`，均无上游、适配或数据库副作用。
 4. fixture `SOURCE_FAILURE` 的同一 `SOURCE_UNAVAILABLE` 原样传播；测试专用失败包络转为 `SOURCE_PAYLOAD_INVALID`，身份/参数不一致成功包络转为固定 invalid-payload failure，均不适配、不持久化。
 5. `EMPTY` 的 HTTP 200 JSON 精确为同一 requestId、`EMPTY`、请求身份、三个零计数和固定消息；Filter header 与 body 相同，adapter、clock 和 persistence 均未调用，数据库为空。
