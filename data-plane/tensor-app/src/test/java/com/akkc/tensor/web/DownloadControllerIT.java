@@ -192,9 +192,11 @@ class DownloadControllerIT {
 
         LinkedHashMap<String, Object> source = new LinkedHashMap<>();
         source.put("scenario", "SUCCESS");
+        source.put("requested_by", "test");
         DownloadRequest request = new DownloadRequest("fixture", "fixture_daily", source);
         source.put("extra", "not-copied");
-        assertThat(request.params()).containsExactly(Map.entry("scenario", "SUCCESS"));
+        assertThat(request.params()).containsExactly(
+                Map.entry("scenario", "SUCCESS"), Map.entry("requested_by", "test"));
         assertThatThrownBy(() -> request.params().put("other", "value"))
                 .isInstanceOf(UnsupportedOperationException.class);
         assertThat(beanValidator.validate(new DownloadRequest("Fixture", "FIXTURE", null)))
