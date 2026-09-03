@@ -62,7 +62,7 @@
 | 41 | M07-T03 | 鉴权、权限、限流、网络、超时和格式错误分类 | `COMPLETED` | M07-T02 | docs/task-designs/M07-T03-design.md | docs/task-handoffs/M07-T03-handoff.md |
 | 42 | M07-T04 | `TushareProPlugin` 描述符、readiness 和 49 接口下载 | `COMPLETED` | M07-T02, M07-T03 | docs/task-designs/M07-T04-design.md | docs/task-handoffs/M07-T04-handoff.md |
 | 43 | M08-T01 | fixture 元数据、插件和适配器 | `COMPLETED` | M02-T05, M04-T06, M05-T05 | docs/task-designs/M08-T01-design.md | docs/task-handoffs/M08-T01-handoff.md |
-| 44 | M08-T02 | 成功、空、上游失败、适配失败和写入失败模式 | `IN_PROGRESS` | M08-T01 | docs/task-designs/M08-T02-design.md | docs/task-handoffs/M08-T02-handoff.md |
+| 44 | M08-T02 | 成功、空、上游失败、适配失败和写入失败模式 | `COMPLETED` | M08-T01 | docs/task-designs/M08-T02-design.md | docs/task-handoffs/M08-T02-handoff.md |
 | 45 | M08-T03 | fixture 注册→适配→入库→查询集成测试 | `NOT_STARTED` | M05-T05, M06-T06, M08-T02 | None | None |
 | 46 | M09-T01 | Boot 入口、请求标识和通用 API DTO | `NOT_STARTED` | M01-T03, M02-T05 | None | None |
 | 47 | M09-T02 | 数据源、接口和数据集元数据 API | `NOT_STARTED` | M05-T02, M09-T01 | None | None |
@@ -620,6 +620,8 @@
 - **State evidence (readiness):** 2026-09-03：M08-T01 已以提交 `79cc80d` 交付并由提交 `6ee1fbd` 记录为 `COMPLETED`，其 266/266 reactor、Enforcer、ArchUnit、依赖/JAR/静态/范围/clean 结果及两轮独立无发现审查证明唯一直接输入可用。提交 `9eb385c` 已创建并回填完整 `docs/task-designs/M08-T02-design.md`，冻结六文件范围、五值 enum、无状态工厂、精确 success/empty/source/type/persistence 结果、插件安全分派、双条件与真实 adapter 边界、12/166/272 测试计数和提交门禁；七节顺序、占位符、内部一致性与格式自审通过。`docs/task-handoffs/M08-T02-handoff.md` 已按 `next-task` 模板完整创建，只记录 M08-T02 及其直接消费的 M08-T01 输入，且具体首个动作从已完成设计开始实施。输入职责无冲突，故链接该交接并执行 `NOT_STARTED -> READY`；M08-T02 实现尚未开始。
 
 - **State evidence (start):** 2026-09-03：用户明确要求按照权威任务看板执行当前任务；已完整读取 `docs/task-designs/M08-T02-design.md` 与 `docs/task-handoffs/M08-T02-handoff.md`，并核对任务卡、M08-T01 设计和完成证据，确认任务身份、六文件范围、直接依赖、精确验收与严格 RED 首个动作一致且无冲突，作为本次 `READY -> IN_PROGRESS` 的启动证据；既有交接路径保留为进入上下文。
+
+- **Completion evidence:** 严格 TDD 先完整更新两份测试并在 fixture `testCompile` 取得只因 `FixtureScenario`、`FixtureEnvelopeFactory` 与新插件构造/行为缺失的可归因 RED；提交 `885313d`（`feat(fixture): provide deterministic acceptance scenarios`）精确实现设计六文件，提交 `54c2b30`（`test(fixture): strengthen scenario contracts`）按最终审查只增强两份既有测试的公开表面、无状态、全成功场景参数快照与 API/场景校验顺序门禁。主控在允许 Mockito/Byte Buddy attach 的环境对最终 `54c2b30` 新鲜运行完整 reactor `verify`，plugin-api 79、core 75、Tushare 93、fixture 12、app 13，共 272/272，0 failure、0 error、0 skipped，六层 Enforcer 与 ArchUnit 通过；依赖树仅显示批准的 core 与 Spring Boot autoconfigure direct compile 依赖，fixture JAR 含四个生产类型和 YAML，app JAR 无 fixture 类/资源，授权符号、受保护路径、任务范围、三份新文件跟踪、`git diff --check` 与 Maven clean 门禁通过，最终工作树干净。设计的原始禁用正则仅误命中必须存在的 `DataSourcePlugin` 两处；原始结果已保留，附加的单词边界 JDBC/Spring capability 扫描无匹配，且由依赖/JAR/ArchUnit/范围门禁交叉控制。任务级审查的两项证据问题经一轮复审全部解决；最终整体审查的一项 Important 与一项 Minor 测试门禁问题经唯一修复波全部解决，范围化复审确认无新 Critical/Important，最终没有未处理发现。因此五种确定性结果、真实 adapter 故障边界、插件安全分派、双条件两 Bean 与生产隔离均满足设计和任务卡，执行 `IN_PROGRESS -> COMPLETED`。
 
 ### `M08-T03`
 
