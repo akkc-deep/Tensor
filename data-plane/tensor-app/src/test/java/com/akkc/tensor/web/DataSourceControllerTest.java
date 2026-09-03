@@ -73,12 +73,17 @@ class DataSourceControllerTest {
         PluginDescriptor ready = descriptor("fixture", true, true, true, null, List.of(), List.of());
         PluginDescriptor unavailable = descriptor(
                 "tushare_pro", true, false, false, "credential is not configured", List.of(), List.of());
-        org.mockito.Mockito.when(pluginRegistry.descriptors()).thenReturn(List.of(ready, unavailable));
+        PluginDescriptor duplicateA = descriptor(
+                "zz_duplicate", "Duplicate A", false, false, false, "duplicate plugin id", List.of(), List.of());
+        PluginDescriptor duplicateB = descriptor(
+                "zz_duplicate", "Duplicate B", false, false, false, "duplicate plugin id", List.of(), List.of());
+        org.mockito.Mockito.when(pluginRegistry.descriptors())
+                .thenReturn(List.of(ready, unavailable, duplicateA, duplicateB));
 
         MvcResult result = perform("/api/v1/data-sources", 200);
         JsonNode body = objectMapper.readTree(result.getResponse().getContentAsString());
 
-        assertThat(body).hasSize(2);
+        assertThat(body).hasSize(4);
         assertThat(fieldNames(body.get(0))).containsExactly(
                 "pluginId", "displayName", "description", "enabled", "credentialConfigured",
                 "downloadAvailable", "unavailableReason");
@@ -87,11 +92,16 @@ class DataSourceControllerTest {
         assertThat(body.get(1).get("pluginId").asText()).isEqualTo("tushare_pro");
         assertThat(body.get(1).get("credentialConfigured").asBoolean()).isFalse();
         assertThat(body.get(1).get("unavailableReason").asText()).isEqualTo("credential is not configured");
+        assertThat(body.get(2).get("pluginId").asText()).isEqualTo("zz_duplicate");
+        assertThat(body.get(2).get("displayName").asText()).isEqualTo("Duplicate A");
+        assertThat(body.get(3).get("pluginId").asText()).isEqualTo("zz_duplicate");
+        assertThat(body.get(3).get("displayName").asText()).isEqualTo("Duplicate B");
         assertThat(DataSourceResponse.from(ready).pluginId()).isEqualTo("fixture");
 
         String json = result.getResponse().getContentAsString().toLowerCase();
         assertThat(json).doesNotContain("secret-token", "authorization", "\"apis\"", "\"datasets\"",
                 "tablename", "businesskey", "batchsize");
+        assertConflict("/api/v1/data-sources/zz_duplicate/apis", ErrorCode.PLUGIN_DISABLED);
     }
 
     @Test
@@ -105,6 +115,7 @@ class DataSourceControllerTest {
         assertThat(body).hasSize(49);
         assertThat(body.get(0).get("apiName").asText()).isEqualTo("daily");
         assertThat(body.get(48).get("apiName").asText()).isEqualTo("api_48");
+        assertThat(body.get(0).get("queryMode").asText()).isEqualTo("trade_date");
         assertThat(fieldNames(body.get(0))).containsExactly(
                 "apiName", "displayName", "category", "queryMode", "parameters");
         JsonNode enumParameter = body.get(0).get("parameters").get(0);
@@ -114,6 +125,11 @@ class DataSourceControllerTest {
         assertThat(enumParameter.get("allowedValues").toString()).isEqualTo("[\"SSE\",\"SZSE\"]");
         assertThat(fieldNames(body.get(0).get("parameters").get(1)))
                 .containsExactly("name", "label", "type", "required");
+        assertThat(body.get(1).get("queryMode").asText()).isEqualTo("date_range");
+        assertThat(fieldNames(body.get(1).get("parameters").get(0)))
+                .containsExactly("name", "label", "type", "required", "relatedParameter");
+        assertThat(body.get(1).get("parameters").get(0).get("relatedParameter").asText())
+                .isEqualTo("end_date");
 
         ApiDescriptorResponse response = ApiDescriptorResponse.from(apis.get(0));
         assertThatThrownBy(() -> response.parameters().clear())
@@ -197,6 +213,20 @@ class DataSourceControllerTest {
                 response.queryMode(), response.filters(), response.fixedColumn(), source);
         source.clear();
         assertThat(copy.columns()).hasSize(5);
+
+        List<ColumnDefinition> shuffledColumns = List.of(
+                definition.columns().get(3),
+                definition.columns().get(1),
+                definition.columns().get(4),
+                definition.columns().get(0),
+                definition.columns().get(2));
+        DatasetDefinition shuffled = dataset(
+                "daily", List.of("trade_date", "ts_code"), null, shuffledColumns);
+        DatasetDefinitionResponse shuffledResponse = DatasetDefinitionResponse.from(shuffled);
+        assertThat(shuffledResponse.columns().stream()
+                .map(DatasetDefinitionResponse.ColumnResponse::name).toList())
+                .containsExactly("ts_code", "trade_date", "amount", "note", "name");
+        assertThat(shuffledResponse.fixedColumn()).isEqualTo("ts_code");
     }
 
     @Test
@@ -261,7 +291,12 @@ class DataSourceControllerTest {
     private void assertConflict(String path, ErrorCode code) throws Exception {
         MvcResult result = perform(path, 409);
         assertThat(result.getResolvedException()).isInstanceOf(TensorException.class);
-        assertThat(((TensorException) result.getResolvedException()).code()).isEqualTo(code);
+        TensorException exception = (TensorException) result.getResolvedException();
+        assertThat(exception.code()).isEqualTo(code);
+        assertThat(exception.getMessage()).isEqualTo(
+                code == ErrorCode.PLUGIN_DISABLED
+                        ? "Plugin metadata is unavailable"
+                        : "Dataset metadata is unavailable");
     }
 
     private static List<String> fieldNames(JsonNode node) {
@@ -276,15 +311,21 @@ class DataSourceControllerTest {
                         false, "SSE", List.of("SSE", "SZSE"), "^[A-Z]+$", null),
                 new ParameterDescriptor("ts_code", "股票代码", null, ParameterType.TS_CODE,
                         false, null, List.of(), null, null));
+        List<ParameterDescriptor> rangeParameters = List.of(
+                new ParameterDescriptor("start_date", "开始日期", null, ParameterType.DATE_RANGE_MEMBER,
+                        false, null, List.of(), null, "end_date"),
+                new ParameterDescriptor("end_date", "结束日期", null, ParameterType.DATE_RANGE_MEMBER,
+                        false, null, List.of(), null, "start_date"));
         List<ApiDescriptor> apis = new ArrayList<>();
         apis.add(new ApiDescriptor(ApiName.of("daily"), "日线行情", "market", QueryMode.trade_date, parameters));
-        IntStream.rangeClosed(1, 48).forEach(index -> apis.add(new ApiDescriptor(
+        apis.add(new ApiDescriptor(
+                ApiName.of("api_01"), "接口 1", "market", QueryMode.date_range, rangeParameters));
+        IntStream.rangeClosed(2, 48).forEach(index -> apis.add(new ApiDescriptor(
                 ApiName.of("api_%02d".formatted(index)), "接口 " + index, "market", QueryMode.snapshot, List.of())));
         return apis;
     }
 
     private static DatasetDefinition dataset(String apiName, List<String> filterFields, String fixedColumn) {
-        DatasetKey key = DatasetKey.of(PluginId.of("tushare_pro"), ApiName.of(apiName));
         List<ColumnDefinition> columns = List.of(
                 new ColumnDefinition("ts_code", "股票代码", LogicalType.STRING,
                         false, 0, 16, null, null, List.of(), false),
@@ -296,6 +337,15 @@ class DataSourceControllerTest {
                         true, 3, null, null, null, List.of(), true),
                 new ColumnDefinition("name", "名称", LogicalType.STRING,
                         true, 4, 80, null, null, List.of(), false));
+        return dataset(apiName, filterFields, fixedColumn, columns);
+    }
+
+    private static DatasetDefinition dataset(
+            String apiName,
+            List<String> filterFields,
+            String fixedColumn,
+            List<ColumnDefinition> columns) {
+        DatasetKey key = DatasetKey.of(PluginId.of("tushare_pro"), ApiName.of(apiName));
         return new DatasetDefinition(
                 key,
                 apiName + " dataset",
@@ -317,9 +367,29 @@ class DataSourceControllerTest {
             String unavailableReason,
             List<ApiDescriptor> apis,
             List<DatasetKey> datasets) {
+        return descriptor(
+                pluginId,
+                pluginId + " display",
+                enabled,
+                credentialConfigured,
+                downloadAvailable,
+                unavailableReason,
+                apis,
+                datasets);
+    }
+
+    private static PluginDescriptor descriptor(
+            String pluginId,
+            String displayName,
+            boolean enabled,
+            boolean credentialConfigured,
+            boolean downloadAvailable,
+            String unavailableReason,
+            List<ApiDescriptor> apis,
+            List<DatasetKey> datasets) {
         return new PluginDescriptor(
                 PluginId.of(pluginId),
-                pluginId + " display",
+                displayName,
                 pluginId + " description",
                 enabled,
                 credentialConfigured,
