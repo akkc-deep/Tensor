@@ -61,7 +61,7 @@
 | 40 | M07-T02 | Tushare 请求、响应 DTO 和严格返回校验 | `COMPLETED` | M03-T09, M07-T01 | docs/task-designs/M07-T02-design.md | docs/task-handoffs/M07-T02-handoff.md |
 | 41 | M07-T03 | 鉴权、权限、限流、网络、超时和格式错误分类 | `COMPLETED` | M07-T02 | docs/task-designs/M07-T03-design.md | docs/task-handoffs/M07-T03-handoff.md |
 | 42 | M07-T04 | `TushareProPlugin` 描述符、readiness 和 49 接口下载 | `COMPLETED` | M07-T02, M07-T03 | docs/task-designs/M07-T04-design.md | docs/task-handoffs/M07-T04-handoff.md |
-| 43 | M08-T01 | fixture 元数据、插件和适配器 | `NOT_STARTED` | M02-T05, M04-T06, M05-T05 | docs/task-designs/M08-T01-design.md | None |
+| 43 | M08-T01 | fixture 元数据、插件和适配器 | `READY` | M02-T05, M04-T06, M05-T05 | docs/task-designs/M08-T01-design.md | docs/task-handoffs/M08-T01-handoff.md |
 | 44 | M08-T02 | 成功、空、上游失败、适配失败和写入失败模式 | `NOT_STARTED` | M08-T01 | None | None |
 | 45 | M08-T03 | fixture 注册→适配→入库→查询集成测试 | `NOT_STARTED` | M05-T05, M06-T06, M08-T02 | None | None |
 | 46 | M09-T01 | Boot 入口、请求标识和通用 API DTO | `NOT_STARTED` | M01-T03, M02-T05 | None | None |
@@ -600,6 +600,8 @@
 - **Sources:** `docs/superpowers/plans/tensor-modules/M08-fixture-plugin.md` 的 `Task M08-T01` 任务卡。
 - **First action:** 读取 `docs/superpowers/plans/tensor-modules/M08-fixture-plugin.md` 的 `Task M08-T01` 任务卡，并确认其 `Context boundary`、输入和目标文件均可定位。
 - **State evidence:** 2026-09-03：在准备 M07-T04 的预定义最小后继时，发现 M08-T01 要求 Spring 条件配置并复用 `GenericDatasetAdapter`，但 fixture POM 仅依赖 plugin-api、既有 ArchUnit 门禁禁止 `fixture -> core`，且看板未列提供适配器的 M05-T05。项目所有者明确批准增加 fixture POM 的 Spring Boot/`tensor-core` 编译依赖、将 M05-T05 加为直接依赖，并把 ArchUnit 规则收窄为只允许 `fixture -> core`、继续禁止 fixture 依赖 Tushare/app；同时批准 profile 精确为 `acceptance`，仅与 `tensor.plugins.fixture.enabled=true` 联合激活。项目所有者还批准 M08-T01 直接构造唯一 `DatasetDefinition`、以测试验证 Java/YAML 一致而不复制或依赖 Tushare loader，冻结 `Fixture`/`Fixture 验收数据源`、`Fixture 日线`、`验收`、`trade_date`、五值必填 `scenario`、`[ts_code, trade_date]` 业务键、`[ts_code]` 过滤器和 `ts_code` 固定列；M08-T01 下载在场景工厂接入前以 `SOURCE_UNAVAILABLE` 和 `Fixture scenarios are not configured` 安全拒绝。任务仍为 `NOT_STARTED`，设计、交接和实现均尚未创建。
+
+- **State evidence (readiness):** 2026-09-03：项目所有者明确批准整合后的架构型设计并复核书面设计。提交 `7915ed9` 已创建并回填 `docs/task-designs/M08-T01-design.md`，冻结双条件注册、唯一 definition、精确插件/API/scenario/四列/键/filter 元数据、临时安全下载拒绝、`GenericDatasetAdapter` 复用、POM/ArchUnit 窄例外、六项严格 TDD、260/266 计数和精确六文件实现范围；七节顺序、无占位符、接口/消息/属性一致性和 `git diff --check` 自审通过。提交 `aa4c895` 已创建 `docs/superpowers/plans/2026-09-03-m08-t01-fixture-plugin.md`，把完整测试与生产代码、RED/GREEN、模块/完整 reactor、依赖/JAR/静态/范围/提交/clean 门禁拆为 12 个可执行步骤，并修正为 reactor dependency tree 与 clean 后 scoped status。直接依赖 M02-T05、M04-T06、M05-T05 均为 `COMPLETED`；其 SPI/错误、固定 MySQL 8.4.6 fixture 表和通用适配职责互补，旧 `fixture -> core` 冲突已由项目所有者裁决且无剩余依赖冲突。主控在允许 Mockito/Byte Buddy attach 的环境新鲜运行完整基线 `verify`，plugin-api 79、core 75、Tushare 93、fixture 0、app 13，共 260/260，0 failure、0 error、0 skipped，六层 Enforcer 与既有 ArchUnit 通过；沙箱内同命令只因已知 attach 限制失败。`docs/task-handoffs/M08-T01-handoff.md` 已按 `next-task` 模板完整创建并链接，只记录 M08-T01 与三项直接输入，包含同一设计/计划读取顺序和先确认干净 260/260 基线、再取得只缺两个生产类型 RED 的具体首个动作。因此执行真实的 `NOT_STARTED -> READY`；M08-T01 实现尚未开始。
 
 ### `M08-T02`
 
