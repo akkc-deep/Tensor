@@ -159,7 +159,7 @@ class DataSourceControllerTest {
     void listsSortedDatasetSummariesForAPluginWithoutCredentials() throws Exception {
         org.mockito.Mockito.when(pluginRegistry.descriptors()).thenReturn(List.of(
                 descriptor("tushare_pro", true, false, false, "credential is not configured", List.of(), List.of())));
-        DatasetDefinition daily = dataset("daily", List.of("trade_date", "ts_code"), null);
+        DatasetDefinition daily = dataset("daily", List.of("ts_code", "trade_date"), null);
         DatasetDefinition weekly = dataset("weekly", List.of("ts_code"), "trade_date");
         org.mockito.Mockito.when(datasetCatalog.list(PluginId.of("tushare_pro")))
                 .thenReturn(List.of(daily, weekly));
@@ -173,8 +173,8 @@ class DataSourceControllerTest {
                 "pluginId", "apiName", "displayName", "category", "queryMode", "filters", "fixedColumn");
         assertThat(body.get(0).get("fixedColumn").asText()).isEqualTo("ts_code");
         assertThat(body.get(0).get("filters").toString()).isEqualTo(
-                "[{\"field\":\"trade_date\",\"operator\":\"BETWEEN\",\"controlType\":\"DATE_RANGE\"},"
-                        + "{\"field\":\"ts_code\",\"operator\":\"EQ\",\"controlType\":\"TEXT\"}]");
+                "[{\"field\":\"ts_code\",\"operator\":\"EQ\",\"controlType\":\"TEXT\"},"
+                        + "{\"field\":\"trade_date\",\"operator\":\"BETWEEN\",\"controlType\":\"DATE_RANGE\"}]");
     }
 
     @Test
