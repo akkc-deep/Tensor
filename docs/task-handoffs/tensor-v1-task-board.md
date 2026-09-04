@@ -85,7 +85,7 @@
 | 64 | M12-T04 | 查询 composable、竞态和超界页处理 | `COMPLETED` | M10-T03 | docs/task-designs/M12-T04-design.md | docs/task-handoffs/M12-T04-handoff.md |
 | 65 | M12-T05 | `DatasetView` 页面集成和组件回归 | `COMPLETED` | M12-T01, M12-T02, M12-T03, M12-T04 | docs/task-designs/M12-T05-design.md | docs/task-handoffs/M12-T05-handoff.md |
 | 66 | M13-T01 | 前端确定性构建及静态资源复制 | `COMPLETED` | M10-T02, M11-T05, M12-T05 | docs/task-designs/M13-T01-design.md | docs/task-handoffs/M13-T01-handoff.md |
-| 67 | M13-T02 | 单个可执行 JAR 打包和内容检查 | `NOT_STARTED` | M09-T06, M13-T01 | None | None |
+| 67 | M13-T02 | 单个可执行 JAR 打包和内容检查 | `NOT_STARTED` | M09-T06, M13-T01 | docs/task-designs/M13-T02-design.md | None |
 | 68 | M13-T03 | 生产配置、CORS、SPA fallback 和优雅停机 | `NOT_STARTED` | M09-T06, M13-T02 | None | None |
 | 69 | M13-T04 | 全新环境运行说明和启动 smoke test | `NOT_STARTED` | M13-T03 | None | None |
 | 70 | M14-T01 | fixture 页面端到端主闭环 | `NOT_STARTED` | M13-T04 | None | None |
