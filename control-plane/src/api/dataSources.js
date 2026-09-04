@@ -39,7 +39,7 @@ export async function listDataSources() {
   return data
 }
 
-/** @returns {Promise<ApiDescriptor[]>} */
+/** @param {string} pluginId @returns {Promise<ApiDescriptor[]>} */
 export async function listApis(pluginId) {
   const { data } = await http.get(
     `/data-sources/${encodeURIComponent(pluginId)}/apis`,

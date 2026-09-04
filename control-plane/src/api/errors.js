@@ -7,6 +7,24 @@ const API_ERROR_KEYS = [
 ]
 const FIELD_ERROR_KEYS = ['field', 'message']
 
+/** @typedef {'PARAM_REQUIRED'|'PARAM_INVALID'|'PLUGIN_DISABLED'|'DATASET_MISCONFIGURED'|'SOURCE_AUTH_FAILED'|'SOURCE_PERMISSION_DENIED'|'SOURCE_RATE_LIMITED'|'SOURCE_UNAVAILABLE'|'SOURCE_NETWORK_ERROR'|'SOURCE_TIMEOUT'|'SOURCE_PAYLOAD_INVALID'|'ADAPTER_FIELD_MISSING'|'ADAPTER_TYPE_INVALID'|'PERSISTENCE_FAILED'|'QUERY_FAILED'|'INTERNAL_ERROR'} ApiErrorCode */
+/** @typedef {'TIMEOUT'|'NETWORK'|'INVALID_RESPONSE'|'UNEXPECTED'} ClientErrorKind */
+
+/**
+ * @typedef {object} FieldError
+ * @property {string} field
+ * @property {string} message
+ */
+
+/**
+ * @typedef {object} ApiErrorBody
+ * @property {string} requestId
+ * @property {ApiErrorCode} code
+ * @property {string} message
+ * @property {boolean} retryable
+ * @property {FieldError[]} fieldErrors
+ */
+
 const API_RULES = Object.freeze({
   PARAM_REQUIRED: [400, false],
   PARAM_INVALID: [400, false],
@@ -73,12 +91,18 @@ function outgoingRequestId(error) {
 
 /** A validated OpenAPI FieldError snapshot. */
 export class ApiError extends Error {
-  constructor({ requestId, code, message, retryable, fieldErrors }) {
+  /** @param {ApiErrorBody} error */
+  constructor(error) {
+    const { requestId, code, message, retryable, fieldErrors } = error
     super(message)
     this.name = 'ApiError'
+    /** @type {string} */
     this.requestId = requestId
+    /** @type {ApiErrorCode} */
     this.code = code
+    /** @type {boolean} */
     this.retryable = retryable
+    /** @type {ReadonlyArray<Readonly<FieldError>>} */
     this.fieldErrors = Object.freeze(
       fieldErrors.map(({ field, message: fieldMessage }) =>
         Object.freeze({ field, message: fieldMessage }),
@@ -89,13 +113,17 @@ export class ApiError extends Error {
 
 /** A safe browser-to-application failure without a server error code. */
 export class ClientError extends Error {
+  /** @param {ClientErrorKind} kind @param {string|null} [requestId=null] */
   constructor(kind, requestId = null) {
-    const rule = CLIENT_RULES[kind]
+    const rule = Object.hasOwn(CLIENT_RULES, kind) ? CLIENT_RULES[kind] : null
     if (!rule) throw new TypeError('Unknown client error kind')
     super(rule[0])
     this.name = 'ClientError'
+    /** @type {ClientErrorKind} */
     this.kind = kind
+    /** @type {boolean} */
     this.retryable = rule[1]
+    /** @type {string|null} */
     this.requestId = requestId
   }
 }
@@ -104,7 +132,7 @@ function apiError(response) {
   const body = response.data
   if (!isObjectWithExactKeys(body, API_ERROR_KEYS)) return null
 
-  const rule = API_RULES[body.code]
+  const rule = Object.hasOwn(API_RULES, body.code) ? API_RULES[body.code] : null
   const responseRequestId = header(response.headers, 'X-Request-Id')
   if (
     !rule ||
@@ -121,6 +149,7 @@ function apiError(response) {
   return new ApiError(body)
 }
 
+/** @param {import('axios').AxiosError} error @returns {ApiError|ClientError} */
 export function normalizeError(error) {
   const requestId = outgoingRequestId(error)
   if (error?.code === 'ECONNABORTED' || error?.code === 'ETIMEDOUT') {

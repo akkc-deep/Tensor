@@ -2,11 +2,18 @@ import axios, { AxiosHeaders } from 'axios'
 
 import { normalizeError } from './errors.js'
 
+/**
+ * @typedef {object} HttpOptions
+ * @property {string} [baseURL]
+ * @property {number} [timeout]
+ */
+
 export const http = axios.create({
   baseURL: '/api/v1',
   timeout: 130000,
 })
 
+/** @param {HttpOptions} options @returns {void} */
 export function configureHttp(options) {
   if (options === null || typeof options !== 'object' || Array.isArray(options)) {
     throw new TypeError('HTTP options must be an object')

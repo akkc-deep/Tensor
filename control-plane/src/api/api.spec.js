@@ -124,6 +124,8 @@ describe('API boundary', () => {
       expect(http.defaults.baseURL).toBe('/custom')
       expect(http.defaults.timeout).toBe(1000)
     }
+
+    expect(() => new ClientError('constructor')).toThrow(TypeError)
   })
 
   it('lists data sources and returns response data unchanged', async () => {
@@ -206,6 +208,9 @@ describe('API boundary', () => {
       page: 2,
       pageSize: 100,
     })
+    expect(http.getUri(requests[0])).toBe(
+      '/api/v1/data-sources/fixture%2Fsource/datasets/daily%2Fdetail/records?tsCode=&tradeDateFrom=2026-09-01&annDateFrom=&annDateTo=2026-09-04&page=2&pageSize=100',
+    )
     expect(criteria).toEqual(snapshot)
   })
 

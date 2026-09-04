@@ -73,13 +73,20 @@ function datasetPath(pluginId, apiName = null) {
   return apiName === null ? base : `${base}/${encodeURIComponent(apiName)}`
 }
 
-/** @returns {Promise<DatasetSummary[]>} */
+/** @param {Record<string, string|number|null>} params @returns {string} */
+function serializeQueryParameters(params) {
+  return new URLSearchParams(
+    Object.entries(params).map(([name, value]) => [name, value ?? '']),
+  ).toString()
+}
+
+/** @param {string} pluginId @returns {Promise<DatasetSummary[]>} */
 export async function listDatasets(pluginId) {
   const { data } = await http.get(datasetPath(pluginId))
   return data
 }
 
-/** @returns {Promise<DatasetDefinitionResponse>} */
+/** @param {string} pluginId @param {string} apiName @returns {Promise<DatasetDefinitionResponse>} */
 export async function getDataset(pluginId, apiName) {
   const { data } = await http.get(datasetPath(pluginId, apiName))
   return data
@@ -94,6 +101,7 @@ export async function queryDataset(pluginId, apiName, criteria) {
   )
   const { data } = await http.get(`${datasetPath(pluginId, apiName)}/records`, {
     params,
+    paramsSerializer: serializeQueryParameters,
   })
   return data
 }
