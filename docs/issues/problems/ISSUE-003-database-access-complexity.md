@@ -2,7 +2,7 @@
 
 ## 当前阶段
 
-[Spring JDBC 数据库访问复杂度收敛方案](../proposals/ISSUE-003-spring-jdbc-complexity-reduction.md) 已确认，待制定实施计划；尚未修改生产代码。
+[Spring JDBC 数据库层重构方案](../proposals/ISSUE-003-spring-jdbc-complexity-reduction.md) 的架构设计已确认，待文档复核；尚未修改生产代码。
 
 ## 问题描述
 
@@ -17,7 +17,7 @@
 - `SchemaInspector` 直接使用 `DataSource` 和 `DatabaseMetaData` 检查运行时表结构。
 - 数据集的表名、列、业务键和逻辑类型由运行时元数据决定，数据库访问并非固定表结构下的简单 CRUD。
 
-## 方案设计阶段需要回答的问题
+## 方案设计阶段已回答的问题
 
 - 引入 MyBatis 能否实质减少当前动态 SQL、参数绑定和结果映射的复杂度？
 - 运行时表名和列名如何保持白名单校验及安全引用？
@@ -37,10 +37,15 @@
 ## 已确认决策
 
 - 不迁移 MyBatis；当前复杂度主要来自运行时动态表、动态列和动态业务键，切换框架不能消除这些规则。
-- 保留现有 Spring JDBC、Service、Repository、事务、锁、计数和分页边界。
-- 将重复的 JDBC 类型映射、参数绑定和结果读取收敛到统一的 `JdbcValueCodec`。
-- 将已有业务键查询 SQL 从 `ExistingKeyRepository` 提取到 `ExistingKeySqlFactory`。
-- 保留 `SqlIdentifierPolicy`、`UpsertSqlFactory` 和 `QuerySqlFactory`，不创建通用 DAO 或大一统 SQL 框架。
+- 允许修改 Service、Repository 和 Spring 装配，但不修改数据库、Flyway、插件协议或 HTTP 契约。
+- 为每个已接纳的数据集启动时生成不可变 `DatasetJdbcPlan`，避免重复解析固定元数据和 SQL。
+- 将三个现有 Repository 收敛为 `DatasetWriteRepository` 和 `DatasetReadRepository`。
+- 写入 Repository 封装已有键查询、精确计数和 Batch Upsert；读取 Repository 封装 COUNT、页码归一、Page Query 和结果映射。
+- Service 继续管理用例边界；写入锁和事务仍由 `PersistenceService` 管理。
+- 将重复的 JDBC 类型映射、参数绑定和结果读取收敛到唯一的 `JdbcValueCodec`。
+- `DatasetStartupValidator` 同样使用 `JdbcValueCodec` 的类型映射，避免启动校验与运行时读写规则漂移。
+- 保留 `SqlIdentifierPolicy` 和 `UpsertSqlFactory`；删除旧 Repository、`JdbcValueBinder`、`QuerySql` 和 `QuerySqlFactory`。
+- `SchemaInspector` 继续使用原生 JDBC `DatabaseMetaData`，不纳入业务 Repository。
 - 具体结构、行为边界和验收方式以已确认的 [方案](../proposals/ISSUE-003-spring-jdbc-complexity-reduction.md)为准。
 
 ## 非目标
@@ -51,7 +56,7 @@
 
 ## 后续产物
 
-1. 已确认的 [Spring JDBC 数据库访问复杂度收敛方案](../proposals/ISSUE-003-spring-jdbc-complexity-reduction.md)。
+1. 已确认架构、待文档复核的 [Spring JDBC 数据库层重构方案](../proposals/ISSUE-003-spring-jdbc-complexity-reduction.md)。
 2. 实施计划和可独立验收的任务。
 3. 实现、回归测试及验收证据。
 
