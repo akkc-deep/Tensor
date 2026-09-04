@@ -84,7 +84,7 @@
 | 63 | M12-T03 | 20/50/100 分页组件 | `COMPLETED` | M10-T04 | docs/task-designs/M12-T03-design.md | docs/task-handoffs/M12-T03-handoff.md |
 | 64 | M12-T04 | 查询 composable、竞态和超界页处理 | `COMPLETED` | M10-T03 | docs/task-designs/M12-T04-design.md | docs/task-handoffs/M12-T04-handoff.md |
 | 65 | M12-T05 | `DatasetView` 页面集成和组件回归 | `COMPLETED` | M12-T01, M12-T02, M12-T03, M12-T04 | docs/task-designs/M12-T05-design.md | docs/task-handoffs/M12-T05-handoff.md |
-| 66 | M13-T01 | 前端确定性构建及静态资源复制 | `READY` | M10-T02, M11-T05, M12-T05 | docs/task-designs/M13-T01-design.md | docs/task-handoffs/M13-T01-handoff.md |
+| 66 | M13-T01 | 前端确定性构建及静态资源复制 | `IN_PROGRESS` | M10-T02, M11-T05, M12-T05 | docs/task-designs/M13-T01-design.md | docs/task-handoffs/M13-T01-handoff.md |
 | 67 | M13-T02 | 单个可执行 JAR 打包和内容检查 | `NOT_STARTED` | M09-T06, M13-T01 | None | None |
 | 68 | M13-T03 | 生产配置、CORS、SPA fallback 和优雅停机 | `NOT_STARTED` | M09-T06, M13-T02 | None | None |
 | 69 | M13-T04 | 全新环境运行说明和启动 smoke test | `NOT_STARTED` | M13-T03 | None | None |
@@ -928,6 +928,7 @@
 - **Sources:** `docs/superpowers/plans/tensor-modules/M13-packaging-runbook.md` 的 `Task M13-T01` 任务卡。
 - **First action:** 读取 `docs/superpowers/plans/tensor-modules/M13-packaging-runbook.md` 的 `Task M13-T01` 任务卡，并确认其 `Context boundary`、输入和目标文件均可定位。
 - **State evidence (readiness):** 2026-09-05：M12-T05 已以实现提交 `25b4fae`、测试强化 `60e4a42`、可访问选择器修复 `95d04c8`、Node.js 24.15.0 下聚焦 11/11、完整前端 120/120、稳定 router 3/3、Vite build、范围/安全门禁及无 Critical/Important/Minor 的独立复审完成，并由提交 `1922333` 在权威看板记录 `IN_PROGRESS -> COMPLETED`；按预定义顺序选择最小更大 Order 的后继 M13-T01。项目所有者依次批准 frontend-maven-plugin 1.15.4、Node v24.15.0、npm 11.12.1、maven-resources-plugin 3.4.0、`generate-resources` 的安装→单测→build→复制顺序、精确一新增一修改范围，以及用 `-Dsurefire.failIfNoSpecifiedTests=false` 越过上游模块无匹配测试且仍在 app 运行目标测试的聚焦命令修正。提交 `6f4c281` 已创建并回填 `docs/task-designs/M13-T01-design.md`；项目所有者复核书面设计后再次批准，`docs/superpowers/plans/2026-09-05-m13-t01-frontend-resource-build.md` 已将其展开为不提交 RED 检查点的单一严格 TDD 循环，设计与计划均无占位、矛盾或留给实施者的材料选择。三项直接依赖 M10-T02、M11-T05、M12-T05 均为 `COMPLETED`，其稳定生产入口/路由、完整下载页和完整数据查看页互补且无冲突；当前 `control-plane` 无未提交变化，基线为 20 files / 120 tests，app 的 `target/generated-resources/static` 不存在。`docs/task-handoffs/M13-T01-handoff.md` 已按 `next-task` 模板创建并链接，逐项记录三个直接输入、决策/约束比较、设计与计划优先读取顺序，以及只先创建资源合同测试并取得缺生成资源 RED 的首个动作；范围外 `.idea/misc.xml` 与 `data-plane/**/target/` 必须保留和绕开。因此执行真实的 `NOT_STARTED -> READY`；M13-T01 实现尚未开始。
+- **State evidence (start):** 2026-09-05：用户明确要求按照权威任务看板执行当前任务，并要求先读取设计文档和交接文件；已完整读取看板中的 M13-T01 行与详情、`docs/task-designs/M13-T01-design.md`、`docs/superpowers/plans/2026-09-05-m13-t01-frontend-resource-build.md`、`docs/task-handoffs/M13-T01-handoff.md` 以及模块任务卡，确认任务身份、精确两文件范围、三项直接依赖、验收、剩余工作与首个严格 RED 动作一致且无冲突，作为本次 `READY -> IN_PROGRESS` 的启动证据；既有交接路径保留为进入上下文。
 
 ### `M13-T02`
 
