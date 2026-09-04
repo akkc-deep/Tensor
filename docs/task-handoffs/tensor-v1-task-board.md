@@ -80,7 +80,7 @@
 | 59 | M11-T04 | 成功、空和失败结果组件 | `COMPLETED` | M10-T04, M11-T03 | docs/task-designs/M11-T04-design.md | docs/task-handoffs/M11-T04-handoff.md |
 | 60 | M11-T05 | `DownloadView` 页面集成和组件回归 | `COMPLETED` | M11-T01, M11-T02, M11-T03, M11-T04 | docs/task-designs/M11-T05-design.md | docs/task-handoffs/M11-T05-handoff.md |
 | 61 | M12-T01 | 数据集选择与动态筛选表单 | `COMPLETED` | M10-T03, M10-T04 | docs/task-designs/M12-T01-design.md | docs/task-handoffs/M12-T01-handoff.md |
-| 62 | M12-T02 | 全字段、固定列和横向滚动表格 | `IN_PROGRESS` | M10-T04 | docs/task-designs/M12-T02-design.md | docs/task-handoffs/M12-T02-handoff.md |
+| 62 | M12-T02 | 全字段、固定列和横向滚动表格 | `COMPLETED` | M10-T04 | docs/task-designs/M12-T02-design.md | docs/task-handoffs/M12-T02-handoff.md |
 | 63 | M12-T03 | 20/50/100 分页组件 | `NOT_STARTED` | M10-T04 | None | None |
 | 64 | M12-T04 | 查询 composable、竞态和超界页处理 | `NOT_STARTED` | M10-T03 | None | None |
 | 65 | M12-T05 | `DatasetView` 页面集成和组件回归 | `NOT_STARTED` | M12-T01, M12-T02, M12-T03, M12-T04 | None | None |
@@ -878,6 +878,8 @@
 - **State evidence:** 2026-09-05：M12-T01 已以初始实现提交 `75ee19b`、真实空态修复 `efc86e7`、Escape 搜索复位修复 `e7e42e3`、Node.js 24.15.0 下 16 files / 92 tests、生产构建、精确六文件范围及无未决 Critical/Important 的独立复审完成，权威看板已由提交 `3b16a2d` 记录其 `IN_PROGRESS -> COMPLETED`；按预定义顺序选择最小更大 Order 的后继 M12-T02。项目所有者批准全部列单行省略和纯文本 tooltip、普通/长文本/入库时间列 140/240/180px 最小宽度及来源列字段名标签；`docs/task-designs/M12-T02-design.md` 已据任务卡、PRD 6.5/7.4/AC-015、TRD 12.4/13.5、OpenAPI 和该裁决冻结 `columns/items/loading` 接口、业务列原序加三来源列、固定列、格式化、横向滚动、loading、严格 TDD、17 files / 98 tests 与精确两文件范围，并由提交 `bcd2e24` 创建及回填。唯一直接依赖 M10-T04 为 `COMPLETED`，当前 `date.js`、`format.js`、`validation.js` 和 `FieldError.vue` 相对最终修复提交 `0818fbc` 无差异，其安全格式化合同与 M12-T02 表格职责无冲突。`docs/task-handoffs/M12-T02-handoff.md` 已按 `next-task` 模板创建并链接，只记录 M12-T02 与 M10-T04，包含同一设计路径、精确 artifact/decision/rationale/constraint/usage/readiness evidence、读取顺序和先创建完整 spec 取得缺组件 RED 的首个动作。因此执行 `NOT_STARTED -> READY`；M12-T02 实现尚未开始。
 
 - **State evidence (start):** 2026-09-05：用户明确要求按照权威任务看板执行当前任务；已完整读取 `docs/task-designs/M12-T02-design.md` 与 `docs/task-handoffs/M12-T02-handoff.md`，并核对 M12 Global Constraints、Task M12-T02、Module Gate、PRD 6.5/7.4/AC-015、TRD 12.4/13.5、OpenAPI 数据集/分页合同、M10-T04 设计及当前格式化产物，确认任务身份、精确两文件范围、冻结公开接口、显示/安全边界、严格 TDD 顺序、验收与首个动作均可定位且无冲突。该请求作为本次 `READY -> IN_PROGRESS` 的明确启动证据，既有 `next-task` 交接路径保留为进入上下文。
+
+- **Completion evidence:** 2026-09-05：严格 TDD 先只创建完整六项 `DatasetTable.spec.js`，聚焦命令在收集阶段仅因 `DatasetTable.vue` 不存在而非零；初始实现提交 `1f073ee` 以固定消息 `feat(ui): render complete dataset tables` 精确新增设计批准的两个文件。实现只消费 `columns/items/loading`，按输入原序追加三个来源列，复用 `formatCell`，以 140/240/180px 最小宽度、纯文本 tooltip、横向滚动和 loading/ARIA 覆盖 152 业务列。独立审查发现 Element Plus 原生 `fixed` 会把非首位 `ts_code` 移到表头最前；修复提交 `c75b4eb` 先以真实非首位 `ts_code` DOM 断言取得失败，再用仅作用于目标表头/表体单元格的 sticky 定位同时保持元数据顺序与左侧固定，并补齐空业务列及格式化入库时间 tooltip 合同。复审发现普通单元格与 sticky 单元格层叠级别相同；修复提交 `cd8f7ab` 先取得数值层级失败，再改为 Element Plus 同源的 `calc(var(--el-table-index) + 1)`。最终提交上 Node.js 24.15.0 聚焦测试 1 file / 6 tests、完整前端回归 17 files / 98 tests 全部通过，生产构建退出 0 且只有既有 chunk-size 提示；格式、完整暂存区、受保护路径和精确两文件提交范围检查通过，禁止 HTML 注入、网络、具体数据集分支、排序/选择及数值转换扫描无输出并按预期退出 1。最终独立复审无 Critical、Important 或 Minor，结论 `Ready to merge: Yes`；因此结果级目标、范围和全部验收满足，执行 `IN_PROGRESS -> COMPLETED`，既有交接路径保留为历史进入上下文。
 
 ### `M12-T03`
 
