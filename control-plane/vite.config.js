@@ -1,7 +1,16 @@
 import vue from '@vitejs/plugin-vue'
 import { defineConfig } from 'vite'
 
-// https://vite.dev/config/
+const backendUrl = process.env.TENSOR_BACKEND_URL || 'http://127.0.0.1:8080'
+
 export default defineConfig({
   plugins: [vue()],
+  server: {
+    proxy: {
+      '/api': {
+        target: backendUrl,
+        changeOrigin: true,
+      },
+    },
+  },
 })
