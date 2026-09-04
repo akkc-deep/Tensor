@@ -497,66 +497,100 @@ describe('DatasetView', () => {
 
   it('renders successful records and delegates page and page-size changes with server facts', async () => {
     const currentDefinition = definition()
-    const wrapper = await mountWithDefinition({ currentDefinition })
-    const first = pageResponse({ totalElements: 80, totalPages: 2 })
-    api.queryDataset.mockResolvedValueOnce(first)
-    await setCode(wrapper, '000001.SZ')
-    await button(wrapper, '查询').trigger('click')
-    await flushPromises()
-
-    expect(wrapper.getComponent(DatasetTable).props()).toMatchObject({
-      columns: currentDefinition.columns,
-      items: first.items,
-    })
-    expect(wrapper.getComponent(DatasetPagination).props()).toMatchObject({
-      page: 1,
-      pageSize: 50,
-      totalElements: 80,
-      totalPages: 2,
-      disabled: false,
+    const wrapper = await mountWithDefinition({
+      currentDefinition,
+      attachTo: document.body,
     })
 
-    const normalized = pageResponse({
-      requestId: 'page-request',
-      page: 2,
-      totalElements: 80,
-      totalPages: 2,
-      items: [{ ...first.items[0], ts_code: '000002.SZ' }],
-    })
-    api.queryDataset.mockResolvedValueOnce(normalized)
-    wrapper.getComponent(DatasetPagination).vm.$emit('update:page', 3)
-    await flushPromises()
-    expect(api.queryDataset).toHaveBeenLastCalledWith('fixture', 'daily', {
-      tsCode: '000001.SZ',
-      page: 3,
-      pageSize: 50,
-    })
-    expect(wrapper.getComponent(DatasetPagination).props('page')).toBe(2)
-    expect(wrapper.getComponent(DatasetTable).props('items')).toBe(
-      normalized.items,
-    )
+    try {
+      const first = pageResponse({ totalElements: 80, totalPages: 3 })
+      api.queryDataset.mockResolvedValueOnce(first)
+      await setCode(wrapper, '000001.SZ')
+      await button(wrapper, '查询').trigger('click')
+      await flushPromises()
 
-    const resized = pageResponse({
-      requestId: 'size-request',
-      page: 1,
-      pageSize: 20,
-      totalElements: 80,
-      totalPages: 4,
-    })
-    api.queryDataset.mockResolvedValueOnce(resized)
-    wrapper.getComponent(DatasetPagination).vm.$emit('update:pageSize', 20)
-    await flushPromises()
-    expect(api.queryDataset).toHaveBeenLastCalledWith('fixture', 'daily', {
-      tsCode: '000001.SZ',
-      page: 1,
-      pageSize: 20,
-    })
-    expect(wrapper.getComponent(DatasetPagination).props()).toMatchObject({
-      page: 1,
-      pageSize: 20,
-      totalElements: 80,
-      totalPages: 4,
-    })
+      expect(wrapper.getComponent(DatasetTable).props()).toMatchObject({
+        columns: currentDefinition.columns,
+        items: first.items,
+      })
+      expect(wrapper.getComponent(DatasetPagination).props()).toMatchObject({
+        page: 1,
+        pageSize: 50,
+        totalElements: 80,
+        totalPages: 3,
+        disabled: false,
+      })
+
+      api.queryDataset.mockResolvedValueOnce(
+        pageResponse({ page: 2, totalElements: 80, totalPages: 3 }),
+      )
+      await wrapper
+        .getComponent(DatasetPagination)
+        .get('.btn-next')
+        .trigger('click')
+      await flushPromises()
+      expect(api.queryDataset).toHaveBeenLastCalledWith('fixture', 'daily', {
+        tsCode: '000001.SZ',
+        page: 2,
+        pageSize: 50,
+      })
+
+      const normalized = pageResponse({
+        requestId: 'page-request',
+        page: 2,
+        totalElements: 80,
+        totalPages: 2,
+        items: [{ ...first.items[0], ts_code: '000002.SZ' }],
+      })
+      api.queryDataset.mockResolvedValueOnce(normalized)
+      await wrapper
+        .getComponent(DatasetPagination)
+        .get('.btn-next')
+        .trigger('click')
+      await flushPromises()
+      expect(api.queryDataset).toHaveBeenLastCalledWith('fixture', 'daily', {
+        tsCode: '000001.SZ',
+        page: 3,
+        pageSize: 50,
+      })
+      expect(wrapper.getComponent(DatasetPagination).props('page')).toBe(2)
+      expect(wrapper.getComponent(DatasetTable).props('items')).toBe(
+        normalized.items,
+      )
+
+      const resized = pageResponse({
+        requestId: 'size-request',
+        page: 1,
+        pageSize: 20,
+        totalElements: 80,
+        totalPages: 4,
+      })
+      api.queryDataset.mockResolvedValueOnce(resized)
+      await wrapper
+        .getComponent(DatasetPagination)
+        .get('input[role="combobox"]')
+        .trigger('click')
+      await flushPromises()
+      const size20 = [...document.body.querySelectorAll(
+        '.el-select-dropdown__item',
+      )].find((option) => option.textContent.trim() === '20/page')
+      expect(size20).toBeDefined()
+      await size20.click()
+      await flushPromises()
+      expect(api.queryDataset).toHaveBeenLastCalledWith('fixture', 'daily', {
+        tsCode: '000001.SZ',
+        page: 1,
+        pageSize: 20,
+      })
+      expect(wrapper.getComponent(DatasetPagination).props()).toMatchObject({
+        page: 1,
+        pageSize: 20,
+        totalElements: 80,
+        totalPages: 4,
+      })
+    } finally {
+      wrapper.unmount()
+    }
   })
 
   it('keeps pagination for empty results and retries only retryable record failures', async () => {
@@ -701,7 +735,22 @@ describe('DatasetView', () => {
         '设置筛选条件后查询',
       )
 
+      const staleSourceQuery = deferred()
+      api.queryDataset.mockReturnValueOnce(staleSourceQuery.promise)
+      await button(wrapper, '查询').trigger('click')
+      await nextTick()
+      expect(wrapper.getComponent(AsyncStatePanel).props('title')).toBe(
+        '正在查询数据',
+      )
       await selectSource(wrapper, 'second')
+      await flushPromises()
+      staleSourceQuery.resolve(
+        pageResponse({
+          requestId: 'stale-source-query',
+          pluginId: 'first',
+          apiName: 'weekly',
+        }),
+      )
       await flushPromises()
       expect(wrapper.getComponent(DatasetSelect).props('modelValue')).toBe('')
       expect(wrapper.findComponent(DynamicFilterForm).exists()).toBe(false)
@@ -711,6 +760,11 @@ describe('DatasetView', () => {
 
       await selectDataset(wrapper, 'monthly')
       await flushPromises()
+      expect(wrapper.findComponent(DatasetTable).exists()).toBe(false)
+      expect(wrapper.find('[role="alert"]').exists()).toBe(false)
+      expect(wrapper.getComponent(AsyncStatePanel).props('title')).toBe(
+        '设置筛选条件后查询',
+      )
       const sourceInput = wrapper
         .getComponent(DataSourceSelect)
         .get('input[role="combobox"]')
