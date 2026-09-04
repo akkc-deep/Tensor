@@ -71,7 +71,7 @@
 | 50 | M09-T05 | 全局异常和 HTTP 状态映射 | `COMPLETED` | M09-T02, M09-T03, M09-T04 | docs/task-designs/M09-T05-design.md | docs/task-handoffs/M09-T05-handoff.md |
 | 51 | M09-T06 | 配置、脱敏、指标、健康和静态资源安全 | `COMPLETED` | M09-T01, M09-T02, M09-T03, M09-T04, M09-T05 | docs/task-designs/M09-T06-design.md | docs/task-handoffs/M09-T06-handoff.md |
 | 52 | M10-T01 | Vue 依赖、Vitest、VTU 和 Playwright 配置 | `COMPLETED` | M00-T03 | docs/task-designs/M10-T01-design.md | docs/task-handoffs/M10-T01-handoff.md |
-| 53 | M10-T02 | `/downloads`、`/datasets` 路由和桌面布局 | `IN_PROGRESS` | M10-T01 | docs/task-designs/M10-T02-design.md | docs/task-handoffs/M10-T02-handoff.md |
+| 53 | M10-T02 | `/downloads`、`/datasets` 路由和桌面布局 | `COMPLETED` | M10-T01 | docs/task-designs/M10-T02-design.md | docs/task-handoffs/M10-T02-handoff.md |
 | 54 | M10-T03 | Axios 客户端、DTO 和错误拦截 | `NOT_STARTED` | M00-T03, M10-T01 | None | None |
 | 55 | M10-T04 | 日期、空值、精度格式化和无障碍状态组件 | `NOT_STARTED` | M10-T01 | None | None |
 | 56 | M11-T01 | 数据源与接口分组搜索选择组件 | `NOT_STARTED` | M10-T03 | None | None |
@@ -752,6 +752,8 @@
 - **State evidence (resolution):** 2026-09-04：项目所有者回复“同意”，明确批准把全量 Element Plus 导致的唯一、可重复 `Some chunks are larger than 500 kB after minification` 提示记录为非阻断风险，保持 `.use(ElementPlus)`、Element Plus CSS、既有 Vite 配置和 16 文件范围继续完成任务。提交 `a06d5fc` 已把该裁决写入既有设计与实施计划：构建仍须退出 0，只允许这一项提示，不接受其他 warning/error，不提高 `chunkSizeWarningLimit`，也不改为按需注册。暂停交接的 Resolution condition 因此完整满足；保留 `docs/task-handoffs/M10-T02-handoff.md` 作为历史恢复上下文，执行 `BLOCKED -> READY`。
 
 - **State evidence (restart):** 2026-09-04：项目所有者的同一条“同意”明确授权保持全量 Element Plus 与既定 16 文件范围继续完成 M10-T02，作为本次 `READY -> IN_PROGRESS` 的启动证据。已再次完整读取修订后的 `docs/task-designs/M10-T02-design.md` 与历史 `pause` 交接，确认恢复任务仍为 M10-T02；剩余工作精确为按批准后的构建合同重跑验证、暂存并提交 16 文件、独立审查和提交态最终门禁，读取顺序仍为设计、实施计划、看板、历史交接及当前入口/配置，首个动作是重新运行聚焦/完整单测和生产构建并确认只出现获批的 Element Plus chunk-size 提示。当前工作树仍精确保留 7 新增、4 修改、5 删除，不含设计外生产变更；历史交接路径继续保留为恢复上下文。
+
+- **Completion evidence:** 2026-09-04：实现提交 `d3d4be7`（`feat(ui): add Tensor routes and desktop layout`）精确包含设计规定的 16 个 `control-plane` 路径（7 新增、4 修改、5 删除），交付四条路由、三个稳定路由名、语义化两项顶部导航、三个无状态 view、可恢复 404、生产 router/Element Plus 入口和 1280px 桌面壳；修复提交 `993dd3c`（`fix(ui): improve shell color contrast`）仅修改同一范围内的 layout 测试与 CSS，以 `#1f5f99` 使交互文字对白色和 `#ecf5ff` 分别达到 6.656:1、6.045:1，并以真实 CSSOM 回归保护 active、focus 和 404 action。严格 TDD 初始 RED 仅因目标 router/layout 模块缺失；最终 Node 24.15.0 下聚焦与完整单测均为 3 files/7 tests，官方 registry `npm ci` 安装 172 packages 后两套提交态测试仍为 7/7，离线审计缓存报告 0 vulnerabilities；在线审计端点因网络超时未形成成功证据。Vite 8.2.2 构建转换 1599 modules 并生成 361.67 kB CSS、1004.62 kB JS，退出 0 且只有项目所有者已批准的 Element Plus chunk-size 提示。示例引用、敏感前缀扫描均无匹配，五个示例路径不存在，三个生成路径继续被忽略，M10-T01 package/lock/Vite/Vitest/Playwright/setup 配置无差异，格式、精确范围、干净工作树和普通 `main` checkout 门禁通过。最终独立复审为 Critical 0、Important 0、Minor 0，确认先前对比度问题已解决且无范围回归；因此达到设计与任务卡的结果级验收，执行 `IN_PROGRESS -> COMPLETED`。
 
 ### `M10-T03`
 
