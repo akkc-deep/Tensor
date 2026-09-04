@@ -76,7 +76,7 @@
 | 55 | M10-T04 | 日期、空值、精度格式化和无障碍状态组件 | `COMPLETED` | M10-T01 | docs/task-designs/M10-T04-design.md | docs/task-handoffs/M10-T04-handoff.md |
 | 56 | M11-T01 | 数据源与接口分组搜索选择组件 | `COMPLETED` | M10-T03 | docs/task-designs/M11-T01-design.md | docs/task-handoffs/M11-T01-handoff.md |
 | 57 | M11-T02 | 元数据驱动动态参数表单 | `COMPLETED` | M10-T03, M10-T04 | docs/task-designs/M11-T02-design.md | docs/task-handoffs/M11-T02-handoff.md |
-| 58 | M11-T03 | 下载 composable、控件锁定和请求世代 | `NOT_STARTED` | M10-T03 | None | None |
+| 58 | M11-T03 | 下载 composable、控件锁定和请求世代 | `NOT_STARTED` | M10-T03 | docs/task-designs/M11-T03-design.md | None |
 | 59 | M11-T04 | 成功、空和失败结果组件 | `NOT_STARTED` | M10-T04, M11-T03 | None | None |
 | 60 | M11-T05 | `DownloadView` 页面集成和组件回归 | `NOT_STARTED` | M11-T01, M11-T02, M11-T03, M11-T04 | None | None |
 | 61 | M12-T01 | 数据集选择与动态筛选表单 | `NOT_STARTED` | M10-T03, M10-T04 | None | None |
