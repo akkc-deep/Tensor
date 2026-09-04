@@ -101,7 +101,9 @@ div.tensor-shell
 
 先完整创建 `router/index.spec.js`、`layouts/AppLayout.spec.js`，并把现有 `App.spec.js` 改成路由应用壳 smoke test；此时不创建 router/layout/views，也不修改生产入口，聚焦命令必须因目标模块不存在而 RED。测试要捕获的生产回归分别是错误路由表/重定向、未知路径未进入 404、导航语义或激活态丢失、链接不可获得键盘焦点，以及根 App 未接入布局。
 
-GREEN 只实现本设计的 router、layout、三个 view、入口和 CSS，然后删除确定无引用的示例文件。路由和 layout 测试使用真实 Vue Router memory history、真实 RouterLink/RouterView 和真实 view，不 stub 路由组件、不断言 mock 元素。任何 Vue warning、未处理导航 rejection、测试后残留 DOM、构建警告或丢失资源都视为缺陷；不得通过静默 warning、跳过用例或保留无引用示例资源绕过。
+GREEN 只实现本设计的 router、layout、三个 view、入口和 CSS，然后删除确定无引用的示例文件。路由和 layout 测试使用真实 Vue Router memory history、真实 RouterLink/RouterView 和真实 view，不 stub 路由组件、不断言 mock 元素。任何 Vue warning、未处理导航 rejection、测试后残留 DOM、丢失资源或下述已批准提示之外的构建警告都视为缺陷；不得通过静默 warning、跳过用例或保留无引用示例资源绕过。
+
+2026-09-04，项目所有者批准把生产入口按既定合同全量安装 Element Plus 后，Vite 对约 1.00 MB JS 超过默认 500 kB 阈值产生的唯一 `Some chunks are larger than 500 kB after minification` 提示记录为非阻断风险。本任务保持 `.use(ElementPlus)`、`element-plus/dist/index.css`、既有 Vite 配置与 16 文件范围，不提高 `chunkSizeWarningLimit` 掩盖 bundle 体积，也不改成会改变 M11/M12 消费合同的按需注册；构建仍必须退出 0，且不能出现其他 warning 或 error。
 
 ## Files
 
@@ -181,7 +183,7 @@ npm test
 npm run build
 ```
 
-预期：3 files/7 tests 全部通过；Vite 生产构建退出 0，生成 `dist/index.html` 与哈希 assets，不出现未解析组件、路由、CSS、示例资源或 chunk 错误。
+预期：3 files/7 tests 全部通过；Vite 生产构建退出 0，生成 `dist/index.html` 与哈希 assets，不出现未解析组件、路由、CSS、示例资源、chunk 错误或其他 warning；仅允许 TDD and failure handling 中批准的 Element Plus chunk-size 提示。
 
 5. 示例清理合同：
 
@@ -220,12 +222,13 @@ git check-ignore control-plane/node_modules control-plane/dist \
 - 应用每页都显示语义化顶部导航，导航内恰有“数据下载”“数据查看”两个 RouterLink；当前项同时具有 `aria-current="page"` 与可见激活样式，链接可获得键盘焦点且焦点轮廓未被移除；
 - `main.js` 在生产入口安装同一 router 和 Element Plus，`App.vue` 只承载应用壳；测试不以全局 setup 掩盖生产入口缺少 Element Plus 注册；
 - 1280px 及以上完整呈现 header/nav/main；更窄 viewport 使用浏览器横向滚动，不折叠、不隐藏导航或未来主操作；
-- M10-T01 的 Vue/Vitest/VTU/Playwright/package 基线保持不变，3 files/7 tests 与生产构建通过且不访问网络；
+- M10-T01 的 Vue/Vitest/VTU/Playwright/package 基线保持不变，3 files/7 tests 与生产构建通过且不访问网络；构建最多只出现已批准的 Element Plus chunk-size 提示，不出现其他 warning 或 error；
 - 所有已无引用的示例组件和资源按 Files 节删除，仍被 `index.html` 引用的 favicon 保留；未引入 API client、业务页面实现、状态存储、E2E 或后端变更；
 - 实现提交精确为 Files 节 16 个文件（7 新增、4 修改、5 删除），提交消息固定且不包含设计、交接、看板或生成物。
 
 ## Risks
 
+- 全量 `.use(ElementPlus)` 为后续 M11/M12 保留全局组件消费合同，但当前生产 bundle 约 1.00 MB JS，并触发 Vite 默认 500 kB chunk-size 提示。项目所有者已批准该唯一提示不阻断 M10-T02；本任务不调高阈值或越界优化，后续若有真实加载性能目标，应另行设计按需注册或拆包并验证对 M11/M12 的兼容性。
 - 生产 router 使用 `createWebHistory()`；开发服务器可处理 history fallback，但打包 JAR 对 `/downloads`、`/datasets` 和未知前端地址的直接刷新支持明确属于 M13-T03。本任务只保证客户端导航和生产 bundle，不把后端 fallback 未实现误报为路由缺陷。
 - `src/test/setup.js` 已全局安装 Element Plus，可能让组件测试在 `main.js` 未安装生产 plugin 时仍通过；因此本设计明确要求 `main.js` 安装 Element Plus，并用入口/范围审查确认，不能只依赖测试 setup。
 - Vitest/jsdom 能证明语义导航、真实路由、active 属性和 DOM focus，不能替代桌面 Chrome 的像素布局、横向滚动和焦点可见性 E2E；本任务以 CSS/构建门禁冻结基线，最终浏览器行为由 M14-T03 验证。

@@ -17,6 +17,7 @@
 - Freeze route names as `downloads`, `datasets`, and `not-found`; `/` redirects to `downloads`, and `/:pathMatch(.*)*` preserves the unknown URL while rendering the 404 view.
 - Keep both business views stateless and network-free with their final titles and exact incomplete-module guidance; do not create forms, clients, stores, composables, fake data, or business states.
 - Install the existing production router and Element Plus in `main.js`; keep M10-T01 package versions, lockfile, Vite/Vitest/Playwright configuration, and scripts unchanged.
+- Preserve the owner-approved full Element Plus installation even though it produces the single reproducible Vite `Some chunks are larger than 500 kB after minification` advisory for the approximately 1.00 MB JS bundle. Treat only that advisory as non-blocking; do not raise `chunkSizeWarningLimit`, switch to on-demand registration, or accept any other warning or error.
 - Use `body { min-width: 1280px; }` and browser-native horizontal scrolling below that width; never hide overflow, collapse navigation, or remove focus outlines.
 - Create/modify/delete exactly the 16 paths named by the design: 7 additions, 4 modifications, and 5 deletions; keep `public/favicon.svg` because `index.html` still references it.
 - Do not implement server-side SPA fallback; direct-refresh support for history routes remains M13-T03 scope.
@@ -514,7 +515,7 @@ npm test
 npm run build
 ```
 
-Expected: `npm test` reports 3 files/7 tests; Vite builds `dist/index.html` plus hashed assets and exits 0 without unresolved router, component, CSS, or deleted-resource errors.
+Expected: `npm test` reports 3 files/7 tests; Vite builds `dist/index.html` plus hashed assets and exits 0 without unresolved router, component, CSS, deleted-resource, or chunk errors. The only permitted build advisory is the owner-approved Element Plus chunk-size message named in Global Constraints; no other warning or error is permitted.
 
 - [ ] **Step 14: Verify cleanup, scope, security, and generated-path boundaries**
 
@@ -597,4 +598,4 @@ git diff --check
 git status --short
 ```
 
-Expected: official-registry clean install succeeds with 0 vulnerabilities; both test commands report 3 files/7 tests; build and formatting exit 0; independent review has no unresolved Critical/Important; working tree is empty. Only then may the task board record `IN_PROGRESS -> COMPLETED` and its outcome-level evidence.
+Expected: official-registry clean install succeeds with 0 vulnerabilities; both test commands report 3 files/7 tests; build and formatting exit 0, with at most the single owner-approved Element Plus chunk-size advisory and no other warning or error; independent review has no unresolved Critical/Important; working tree is empty. Only then may the task board record `IN_PROGRESS -> COMPLETED` and its outcome-level evidence.
