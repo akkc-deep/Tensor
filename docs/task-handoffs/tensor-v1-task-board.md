@@ -85,7 +85,7 @@
 | 64 | M12-T04 | 查询 composable、竞态和超界页处理 | `COMPLETED` | M10-T03 | docs/task-designs/M12-T04-design.md | docs/task-handoffs/M12-T04-handoff.md |
 | 65 | M12-T05 | `DatasetView` 页面集成和组件回归 | `COMPLETED` | M12-T01, M12-T02, M12-T03, M12-T04 | docs/task-designs/M12-T05-design.md | docs/task-handoffs/M12-T05-handoff.md |
 | 66 | M13-T01 | 前端确定性构建及静态资源复制 | `COMPLETED` | M10-T02, M11-T05, M12-T05 | docs/task-designs/M13-T01-design.md | docs/task-handoffs/M13-T01-handoff.md |
-| 67 | M13-T02 | 单个可执行 JAR 打包和内容检查 | `NOT_STARTED` | M09-T06, M13-T01 | docs/task-designs/M13-T02-design.md | None |
+| 67 | M13-T02 | 单个可执行 JAR 打包和内容检查 | `READY` | M09-T06, M13-T01 | docs/task-designs/M13-T02-design.md | docs/task-handoffs/M13-T02-handoff.md |
 | 68 | M13-T03 | 生产配置、CORS、SPA fallback 和优雅停机 | `NOT_STARTED` | M09-T06, M13-T02 | None | None |
 | 69 | M13-T04 | 全新环境运行说明和启动 smoke test | `NOT_STARTED` | M13-T03 | None | None |
 | 70 | M14-T01 | fixture 页面端到端主闭环 | `NOT_STARTED` | M13-T04 | None | None |
@@ -939,7 +939,7 @@
 - **Dependencies:** M09-T06, M13-T01.
 - **Sources:** `docs/superpowers/plans/tensor-modules/M13-packaging-runbook.md` 的 `Task M13-T02` 任务卡。
 - **First action:** 读取 `docs/superpowers/plans/tensor-modules/M13-packaging-runbook.md` 的 `Task M13-T02` 任务卡，并确认其 `Context boundary`、输入和目标文件均可定位。
-- **State evidence:** None.
+- **State evidence (readiness):** 2026-09-05：M13-T01 已以实现提交 `3296877`、测试修复 `aa7f55d`、前端 120/120、Java 2/2、完整 reactor 79/75/93/12/81、资源/范围/禁止 Git 门禁和最终范围化复审完成，并由提交 `f5368ce` 在权威看板记录 `IN_PROGRESS -> COMPLETED`；按预定义顺序选择最小更大 Order 的后继 M13-T02。项目所有者批准标准 Spring Boot 嵌套 JAR、`${spring-boot.version}` 3.5.16 repackage、生成前端主资源、Tushare YAML保留在内层模块 JAR、Surefire exclusion/Failsafe 3.5.6 post-package 合同、精确一新增一修改范围和完整 RED/GREEN/内容门禁；提交 `54b4acc` 已创建并回填 `docs/task-designs/M13-T02-design.md`，七个模板章节、插件/执行时序、外层/内层资源合同、命令、预期结果、排除项、占位符、矛盾、范围和歧义自审通过，无留给实施者的材料选择。两个直接依赖 M09-T06、M13-T01 均为 `COMPLETED`；当前 M09-T06 的 Boot 入口、环境化配置和 V1–V5/V6 资源边界相对实现提交 `d7a47f3` 无差异，M13-T01 的 app POM和资源合同相对修复提交 `aa7f55d` 无差异，源目录恰有 49 个 Tushare 主 YAML、五个生产 migration 和一个 test-only V6。二者分别固定后端生产/测试/秘密边界与前端生成目录，约束互补且无冲突。`docs/task-handoffs/M13-T02-handoff.md` 已按 `next-task` 模板创建并链接，只记录 M13-T02 与两个直接输入，包含同一设计路径、精确 artifact/decision/rationale/constraint/usage/readiness evidence、设计优先读取顺序，以及只先创建完整打包合同并取得缺最终 JAR RED 的具体首个动作；范围外 `.idea/misc.xml` 必须保留，Maven `target` 仅由批准的 `clean` 生命周期重建且不得提交。因此执行真实的 `NOT_STARTED -> READY`；M13-T02 实现尚未开始。
 
 ### `M13-T03`
 
