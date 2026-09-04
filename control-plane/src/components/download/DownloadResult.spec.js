@@ -106,12 +106,12 @@ describe('DownloadResult', () => {
     expect(wrapper.text()).not.toMatch(/上游返回数|插入数|更新数|下载失败|重试|占位/)
   })
 
-  it('shows retryable failures as safe alert text and emits retry', () => {
+  it('shows caller-authorized retry as safe alert text and emits retry', () => {
     const error = new ApiError({
       requestId: 'request-unsafe',
-      code: 'SOURCE_RATE_LIMITED',
+      code: 'SOURCE_AUTH_FAILED',
       message: '<strong>请稍后重试</strong>',
-      retryable: true,
+      retryable: false,
       fieldErrors: [{ field: 'token', message: 'SECRET_TOKEN' }],
     })
     error.stack = 'SECRET_STACK'
@@ -130,7 +130,7 @@ describe('DownloadResult', () => {
     expect(wrapper.text()).toContain('请求 ID：request-unsafe')
     expect(wrapper.find('strong').exists()).toBe(false)
     expect(wrapper.text()).not.toMatch(
-      /SOURCE_RATE_LIMITED|SECRET_TOKEN|SECRET_STACK|SECRET_CAUSE/,
+      /SOURCE_AUTH_FAILED|SECRET_TOKEN|SECRET_STACK|SECRET_CAUSE/,
     )
 
     wrapper.getComponent(ElButton).vm.$emit('click')
@@ -142,12 +142,14 @@ describe('DownloadResult', () => {
       props: {
         state: 'FAILURE',
         result: response(),
-        error: new ClientError('UNEXPECTED'),
+        error: new ClientError('NETWORK'),
         canRetry: false,
       },
     })
 
-    expect(wrapper.get('[role="alert"]').text()).toContain('请求未能发送。')
+    expect(wrapper.get('[role="alert"]').text()).toContain(
+      '无法连接服务，请检查网络后重试。',
+    )
     expect(wrapper.findComponent(ElButton).exists()).toBe(false)
     expect(wrapper.text()).not.toMatch(
       /请求 ID|internal success detail|fieldErrors|Token|进度|百分比/,
