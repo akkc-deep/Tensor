@@ -68,7 +68,7 @@
 | 47 | M09-T02 | 数据源、接口和数据集元数据 API | `COMPLETED` | M05-T01, M05-T02, M09-T01 | docs/task-designs/M09-T02-design.md | docs/task-handoffs/M09-T02-handoff.md |
 | 48 | M09-T03 | 同步下载 API 与事务提交后结果 | `COMPLETED` | M05-T01, M05-T03, M05-T05, M06-T04, M07-T04, M09-T01 | docs/task-designs/M09-T03-design.md | docs/task-handoffs/M09-T03-handoff.md |
 | 49 | M09-T04 | 数据集定义与只读分页查询 API | `COMPLETED` | M05-T02, M06-T06, M09-T01 | docs/task-designs/M09-T04-design.md | docs/task-handoffs/M09-T04-handoff.md |
-| 50 | M09-T05 | 全局异常和 HTTP 状态映射 | `NOT_STARTED` | M09-T02, M09-T03, M09-T04 | None | None |
+| 50 | M09-T05 | 全局异常和 HTTP 状态映射 | `NOT_STARTED` | M09-T02, M09-T03, M09-T04 | docs/task-designs/M09-T05-design.md | None |
 | 51 | M09-T06 | 配置、脱敏、指标、健康和静态资源安全 | `NOT_STARTED` | M09-T01, M09-T02, M09-T03, M09-T04, M09-T05 | None | None |
 | 52 | M10-T01 | Vue 依赖、Vitest、VTU 和 Playwright 配置 | `NOT_STARTED` | M00-T03 | None | None |
 | 53 | M10-T02 | `/downloads`、`/datasets` 路由和桌面布局 | `NOT_STARTED` | M10-T01 | None | None |
