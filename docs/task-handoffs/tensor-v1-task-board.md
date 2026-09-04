@@ -74,7 +74,7 @@
 | 53 | M10-T02 | `/downloads`、`/datasets` 路由和桌面布局 | `COMPLETED` | M10-T01 | docs/task-designs/M10-T02-design.md | docs/task-handoffs/M10-T02-handoff.md |
 | 54 | M10-T03 | Axios 客户端、DTO 和错误拦截 | `COMPLETED` | M00-T03, M10-T01 | docs/task-designs/M10-T03-design.md | docs/task-handoffs/M10-T03-handoff.md |
 | 55 | M10-T04 | 日期、空值、精度格式化和无障碍状态组件 | `COMPLETED` | M10-T01 | docs/task-designs/M10-T04-design.md | docs/task-handoffs/M10-T04-handoff.md |
-| 56 | M11-T01 | 数据源与接口分组搜索选择组件 | `NOT_STARTED` | M10-T03 | docs/task-designs/M11-T01-design.md | None |
+| 56 | M11-T01 | 数据源与接口分组搜索选择组件 | `READY` | M10-T03 | docs/task-designs/M11-T01-design.md | docs/task-handoffs/M11-T01-handoff.md |
 | 57 | M11-T02 | 元数据驱动动态参数表单 | `NOT_STARTED` | M10-T03, M10-T04 | None | None |
 | 58 | M11-T03 | 下载 composable、控件锁定和请求世代 | `NOT_STARTED` | M10-T03 | None | None |
 | 59 | M11-T04 | 成功、空和失败结果组件 | `NOT_STARTED` | M10-T04, M11-T03 | None | None |
@@ -797,7 +797,7 @@
 - **Dependencies:** M10-T03.
 - **Sources:** `docs/superpowers/plans/tensor-modules/M11-download-ui.md` 的 `Task M11-T01` 任务卡。
 - **First action:** 读取 `docs/superpowers/plans/tensor-modules/M11-download-ui.md` 的 `Task M11-T01` 任务卡，并确认其 `Context boundary`、输入和目标文件均可定位。
-- **State evidence:** None.
+- **State evidence (readiness):** 2026-09-04：M10-T04 已以初始实现 `0a61e3f`、严格时间戳修复 `0818fbc`、Node 24.15.0 下聚焦 15/15、全量 34/34、双宿主时区断言、生产构建、精确七文件范围和最终独立复审无 Critical/Important 完成，并由提交 `e999fb5` 在权威看板记录 `IN_PROGRESS -> COMPLETED`；按预定义顺序选择最小更大 Order 的后继 M11-T01。准备设计时发现 PRD 八分类与当前元数据七分类冲突，项目所有者明确决定暂不拆分；据此修订 M11 任务卡为按描述符 category 通用分组、当前 49 项保持七组，并批准三个受控组件的接口、单来源默认、不可用原因、搜索、选择、说明、职责边界和测试方案。提交 `d17f81a` 已创建并回填 `docs/task-designs/M11-T01-design.md`，冻结精确六文件、10/44 测试计数、七组事实、严格 RED/GREEN、固定实现提交和失败边界；提交 `2252a7b` 已把设计转化为 `docs/superpowers/plans/2026-09-04-m11-t01-download-selectors.md` 的 11 步实施计划，三个 JavaScript 测试块共 10 项、三个 Vue SFC 块均通过 Node 24 语法/编译检查，覆盖、占位符、类型、范围和格式自审通过。唯一直接依赖 M10-T03 为 `COMPLETED`，当前 `dataSources.js`/`api.spec.js` 相对其最终实现提交 `890ed88` 无差异，公开来源/API 描述符和现有 Vue/Element Plus/Vitest 基线与本设计互补且无冲突。`docs/task-handoffs/M11-T01-handoff.md` 已按 `next-task` 模板完整创建并链接，只记录 M11-T01 和直接输入 M10-T03，包含同一设计路径、依赖 artifact/decision/rationale/constraint/usage/readiness evidence、设计/计划读取顺序，以及先只创建三个完整 spec 并取得目标 SFC 缺失 RED 的具体首个动作。因此执行真实的 `NOT_STARTED -> READY`；生产和测试代码均尚未开始。
 
 ### `M11-T02`
 
