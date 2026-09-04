@@ -71,10 +71,16 @@ describe('DynamicParameterForm', () => {
       ),
     ).toEqual(allTypes().map(({ name }) => name))
     expect(
-      wrapper.findAllComponents(ElDatePicker).map((picker) =>
-        picker.props('type'),
-      ),
-    ).toEqual(['date', 'date', 'date', 'month'])
+      wrapper.findAllComponents(ElDatePicker).map((picker) => ({
+        type: picker.props('type'),
+        valueFormat: picker.props('valueFormat'),
+      })),
+    ).toEqual([
+      { type: 'date', valueFormat: 'YYYY-MM-DD' },
+      { type: 'date', valueFormat: 'YYYY-MM-DD' },
+      { type: 'date', valueFormat: 'YYYY-MM-DD' },
+      { type: 'month', valueFormat: 'YYYY-MM' },
+    ])
     expect(field(wrapper, 'ts_code').getComponent(ElInput).exists()).toBe(true)
     expect(field(wrapper, 'keyword').getComponent(ElInput).exists()).toBe(true)
     expect(wrapper.findAllComponents(ElSelect)).toHaveLength(1)
@@ -119,9 +125,23 @@ describe('DynamicParameterForm', () => {
     await setValue(wrapper, 'trade_date', '2026-09-05')
     expect(await wrapper.vm.validate()).toBe(true)
     expect(wrapper.vm.normalizedValues()).not.toEqual({})
+    await setValue(wrapper, 'trade_date', '2026-02-30')
+    expect(await wrapper.vm.validate()).toBe(false)
+    expect(field(wrapper, 'trade_date').get('.field-error').text()).toBe(
+      '请选择有效日期',
+    )
+    expect(
+      field(wrapper, 'trade_date').get('input').attributes('aria-invalid'),
+    ).toBe('true')
     wrapper.vm.reset()
     await nextTick()
     expect(inputComponent(wrapper, 'trade_date').props('modelValue')).toBe('2026-09-04')
+    expect(field(wrapper, 'trade_date').find('.field-error').exists()).toBe(
+      false,
+    )
+    expect(
+      field(wrapper, 'trade_date').get('input').attributes('aria-invalid'),
+    ).toBeUndefined()
     expect(wrapper.vm.normalizedValues()).toEqual({})
 
     await wrapper.setProps({
@@ -135,7 +155,10 @@ describe('DynamicParameterForm', () => {
   })
 
   it('normalizes valid values into fresh descriptor-ordered snapshots', async () => {
-    const parameters = allTypes()
+    const parameters = [
+      ...allTypes(),
+      parameter({ name: 'constructor', label: '构造器字段', type: 'TEXT' }),
+    ]
     const original = structuredClone(parameters)
     const wrapper = mount(DynamicParameterForm, { props: { parameters } })
 
@@ -147,6 +170,7 @@ describe('DynamicParameterForm', () => {
       ['ts_code', ' 000001.sz '],
       ['exchange', 'SZSE'],
       ['keyword', '  年报 查询  '],
+      ['constructor', '  valid metadata  '],
     ]) {
       await setValue(wrapper, name, value)
     }
@@ -162,6 +186,7 @@ describe('DynamicParameterForm', () => {
       ts_code: '000001.SZ',
       exchange: 'SZSE',
       keyword: '年报 查询',
+      constructor: 'valid metadata',
     })
     expect(Object.keys(first)).toEqual(parameters.map(({ name }) => name))
     expect(second).toEqual(first)

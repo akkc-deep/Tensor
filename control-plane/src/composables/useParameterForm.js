@@ -61,7 +61,7 @@ function typeError(parameter, value) {
 
 export function useParameterForm(parameters) {
   const values = reactive({})
-  const errors = reactive({})
+  const errors = reactive(Object.create(null))
   const firstError = ref(null)
   let snapshot = null
 
