@@ -139,6 +139,14 @@ function button(wrapper, text) {
   return result.get('button')
 }
 
+function nativeButton(wrapper, text) {
+  const result = wrapper
+    .findAll('button')
+    .find((candidate) => candidate.text().includes(text))
+  if (!result) throw new Error(`Missing native button: ${text}`)
+  return result
+}
+
 function expectBefore(first, second) {
   expect(
     first.compareDocumentPosition(second) & Node.DOCUMENT_POSITION_FOLLOWING,
@@ -524,10 +532,10 @@ describe('DatasetView', () => {
       api.queryDataset.mockResolvedValueOnce(
         pageResponse({ page: 2, totalElements: 80, totalPages: 3 }),
       )
-      await wrapper
-        .getComponent(DatasetPagination)
-        .get('.btn-next')
-        .trigger('click')
+      await nativeButton(
+        wrapper.getComponent(DatasetPagination),
+        '下一页',
+      ).trigger('click')
       await flushPromises()
       expect(api.queryDataset).toHaveBeenLastCalledWith('fixture', 'daily', {
         tsCode: '000001.SZ',
@@ -543,10 +551,10 @@ describe('DatasetView', () => {
         items: [{ ...first.items[0], ts_code: '000002.SZ' }],
       })
       api.queryDataset.mockResolvedValueOnce(normalized)
-      await wrapper
-        .getComponent(DatasetPagination)
-        .get('.btn-next')
-        .trigger('click')
+      await nativeButton(
+        wrapper.getComponent(DatasetPagination),
+        '下一页',
+      ).trigger('click')
       await flushPromises()
       expect(api.queryDataset).toHaveBeenLastCalledWith('fixture', 'daily', {
         tsCode: '000001.SZ',
@@ -571,9 +579,8 @@ describe('DatasetView', () => {
         .get('input[role="combobox"]')
         .trigger('click')
       await flushPromises()
-      const size20 = [...document.body.querySelectorAll(
-        '.el-select-dropdown__item',
-      )].find((option) => option.textContent.trim() === '20/page')
+      const size20 = [...document.body.querySelectorAll('[role="option"]')]
+        .find((option) => option.textContent.trim() === '20/page')
       expect(size20).toBeDefined()
       await size20.click()
       await flushPromises()
