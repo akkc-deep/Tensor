@@ -6,9 +6,11 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.jar.Attributes;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
@@ -74,11 +76,14 @@ class PackagedJarContractTest {
                     .toList()).containsExactlyInAnyOrderElementsOf(TENSOR_MODULE_JARS);
             assertThat(outerEntries).noneMatch(name -> name.startsWith("BOOT-INF/lib/tensor-plugin-fixture-"));
 
+            Map<String, List<String>> tensorEntriesByJar = new HashMap<>();
             List<String> tensorEntries = new ArrayList<>();
             for (String moduleJar : TENSOR_MODULE_JARS) {
-                tensorEntries.addAll(innerJarEntryNames(jarFile, moduleJar));
+                List<String> innerEntries = innerJarEntryNames(jarFile, moduleJar);
+                tensorEntriesByJar.put(moduleJar, innerEntries);
+                tensorEntries.addAll(innerEntries);
             }
-            assertTushareResources(outerEntries, tensorEntries);
+            assertTushareResources(outerEntries, tensorEntriesByJar);
             assertExcludedResources(outerEntries);
             assertExcludedResources(tensorEntries);
             assertNoSensitiveFiles(outerEntries);
@@ -113,20 +118,29 @@ class PackagedJarContractTest {
                 .orElseThrow(() -> new AssertionError("Missing hashed " + suffix + " asset referenced by index"));
     }
 
-    private static void assertTushareResources(List<String> outerEntries, List<String> tensorEntries) {
+    private static void assertTushareResources(
+            List<String> outerEntries, Map<String, List<String>> tensorEntriesByJar) {
         List<String> outerTushare = outerEntries.stream()
                 .filter(name -> name.startsWith("BOOT-INF/classes/" + TUSHARE_PREFIX))
                 .filter(name -> name.endsWith(".yaml"))
                 .toList();
-        List<String> allTushare = new ArrayList<>(outerTushare);
-        tensorEntries.stream()
+        List<String> tushareEntries = tensorEntriesByJar
+                .get("BOOT-INF/lib/tensor-plugin-tushare-1.0-SNAPSHOT.jar").stream()
                 .filter(name -> name.startsWith(TUSHARE_PREFIX))
                 .filter(name -> name.endsWith(".yaml"))
-                .forEach(allTushare::add);
+                .toList();
 
         assertThat(outerTushare).isEmpty();
-        assertThat(allTushare).hasSize(49);
-        assertThat(new HashSet<>(allTushare)).hasSize(49);
+        assertThat(tushareEntries).hasSize(49);
+        assertThat(new HashSet<>(tushareEntries)).hasSize(49);
+        assertThat(tensorEntriesByJar.get("BOOT-INF/lib/tensor-plugin-api-1.0-SNAPSHOT.jar").stream()
+                .filter(name -> name.startsWith(TUSHARE_PREFIX))
+                .filter(name -> name.endsWith(".yaml")))
+                .isEmpty();
+        assertThat(tensorEntriesByJar.get("BOOT-INF/lib/tensor-core-1.0-SNAPSHOT.jar").stream()
+                .filter(name -> name.startsWith(TUSHARE_PREFIX))
+                .filter(name -> name.endsWith(".yaml")))
+                .isEmpty();
     }
 
     private static void assertExcludedResources(List<String> entries) {
