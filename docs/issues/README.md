@@ -17,3 +17,4 @@
 | --- | --- | --- | --- |
 | ISSUE-001 | Controller 方法入口参数不够聚合 | Download 方案已确认，待正式设计 | [详情](problems/ISSUE-001-method-input-aggregation.md) · [方案](proposals/ISSUE-001-download-request-aggregation.md) |
 | ISSUE-002 | Controller 承担过多业务逻辑 | 分层方案已确认，待实施计划 | [详情](problems/ISSUE-002-controller-business-logic-layering.md) · [方案](proposals/ISSUE-002-controller-service-layering.md) |
+| ISSUE-003 | 数据库交互逻辑较复杂 | Spring JDBC 收敛方案已确认，待实施计划 | [详情](problems/ISSUE-003-database-access-complexity.md) · [设计](../superpowers/specs/2026-09-05-spring-jdbc-complexity-reduction-design.md) |
