@@ -108,6 +108,7 @@ describe('DatasetTable', () => {
       '', 'sticky', '', '', '', '',
     ])
     expect(withTsHeaders[1].element.style.left).toBe('0px')
+    expect(withTsHeaders[1].element.style.zIndex).toBe('calc(var(--el-table-index) + 1)')
 
     const withTsCells = withTsCode.findAll('.el-table__body tbody tr')[0].findAll('td')
     expect(withTsCells.map((cell) => cell.get('.cell').text())).toEqual([
@@ -116,12 +117,14 @@ describe('DatasetTable', () => {
     expect(withTsCells.map((cell) => cell.element.style.position)).toEqual([
       '', 'sticky', '', '', '', '',
     ])
+    expect(withTsCells[1].element.style.zIndex).toBe('calc(var(--el-table-index) + 1)')
 
     const withoutTsHeaders = withoutTsCode.findAll('.el-table__header th')
     expect(withoutTsHeaders.map((header) => header.element.style.position)).toEqual([
       'sticky', '', '', '', '',
     ])
     expect(withoutTsHeaders[0].element.style.left).toBe('0px')
+    expect(withoutTsHeaders[0].element.style.zIndex).toBe('calc(var(--el-table-index) + 1)')
 
     const emptyHeaders = withoutBusinessColumns.findAll('.el-table__header th')
     expect(emptyHeaders.map((header) => header.get('.cell').text())).toEqual([

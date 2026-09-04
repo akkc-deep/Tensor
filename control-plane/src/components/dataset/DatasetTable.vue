@@ -25,17 +25,22 @@ function minWidth(column) {
   return column.longText === true ? 240 : 140
 }
 
-function stickyStyle(column, zIndex) {
+function stickyStyle(column) {
   if (column.property !== fixedColumn.value) return undefined
-  return { position: 'sticky', left: '0', zIndex, background: 'var(--el-bg-color, #fff)' }
+  return {
+    position: 'sticky',
+    left: '0',
+    zIndex: 'calc(var(--el-table-index) + 1)',
+    background: 'var(--el-bg-color, #fff)',
+  }
 }
 
 function cellStyle({ column }) {
-  return stickyStyle(column, 1)
+  return stickyStyle(column)
 }
 
 function headerCellStyle({ column }) {
-  return stickyStyle(column, 2)
+  return stickyStyle(column)
 }
 </script>
 
