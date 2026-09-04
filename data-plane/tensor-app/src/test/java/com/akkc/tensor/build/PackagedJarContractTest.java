@@ -1,7 +1,11 @@
 package com.akkc.tensor.build;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.ByteBuffer;
+import java.nio.charset.CharacterCodingException;
+import java.nio.charset.CodingErrorAction;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -20,6 +24,7 @@ import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class PackagedJarContractTest {
 
@@ -43,6 +48,25 @@ class PackagedJarContractTest {
             "datasets/valid-daily.yaml");
 
     @Test
+    void rejectsNestedTushareYamlPaths() {
+        assertThatThrownBy(() -> directTushareYamlEntries(
+                List.of("datasets/tushare_pro/nested/daily.yaml"), TUSHARE_PREFIX))
+                .isInstanceOf(AssertionError.class);
+    }
+
+    @Test
+    void rejectsDuplicateArchiveEntries() {
+        assertThatThrownBy(() -> assertUniqueEntries(List.of("application.yml", "application.yml")))
+                .isInstanceOf(AssertionError.class);
+    }
+
+    @Test
+    void rejectsMalformedUtf8() {
+        assertThatThrownBy(() -> readUtf8(new ByteArrayInputStream(new byte[] {(byte) 0xc3, 0x28})))
+                .isInstanceOf(CharacterCodingException.class);
+    }
+
+    @Test
     void packagesOnlyTheProductionExecutableJarAndItsContractedContents() throws IOException {
         List<String> appJars;
         try (Stream<Path> paths = Files.list(APP_JAR.getParent())) {
@@ -57,6 +81,7 @@ class PackagedJarContractTest {
 
         try (JarFile jarFile = new JarFile(APP_JAR.toFile())) {
             List<String> outerEntries = entryNames(jarFile);
+            assertUniqueEntries(outerEntries);
             assertThat(jarFile.getManifest().getMainAttributes().getValue(Attributes.Name.MAIN_CLASS))
                     .isEqualTo("org.springframework.boot.loader.launch.JarLauncher");
             assertThat(jarFile.getManifest().getMainAttributes().getValue("Start-Class"))
@@ -80,6 +105,7 @@ class PackagedJarContractTest {
             List<String> tensorEntries = new ArrayList<>();
             for (String moduleJar : TENSOR_MODULE_JARS) {
                 List<String> innerEntries = innerJarEntryNames(jarFile, moduleJar);
+                assertUniqueEntries(innerEntries);
                 tensorEntriesByJar.put(moduleJar, innerEntries);
                 tensorEntries.addAll(innerEntries);
             }
@@ -97,7 +123,7 @@ class PackagedJarContractTest {
         assertThat(entries).contains(indexEntry);
         String indexHtml;
         try (InputStream input = jarFile.getInputStream(jarFile.getJarEntry(indexEntry))) {
-            indexHtml = new String(input.readAllBytes(), StandardCharsets.UTF_8);
+            indexHtml = readUtf8(input);
         }
         List<String> staticAssets = entries.stream()
                 .filter(name -> name.startsWith("BOOT-INF/classes/static/assets/"))
@@ -120,27 +146,21 @@ class PackagedJarContractTest {
 
     private static void assertTushareResources(
             List<String> outerEntries, Map<String, List<String>> tensorEntriesByJar) {
-        List<String> outerTushare = outerEntries.stream()
-                .filter(name -> name.startsWith("BOOT-INF/classes/" + TUSHARE_PREFIX))
-                .filter(name -> name.endsWith(".yaml"))
-                .toList();
-        List<String> tushareEntries = tensorEntriesByJar
-                .get("BOOT-INF/lib/tensor-plugin-tushare-1.0-SNAPSHOT.jar").stream()
-                .filter(name -> name.startsWith(TUSHARE_PREFIX))
-                .filter(name -> name.endsWith(".yaml"))
-                .toList();
+        List<String> outerTushare = directTushareYamlEntries(
+                outerEntries, "BOOT-INF/classes/" + TUSHARE_PREFIX);
+        List<String> tushareEntries = directTushareYamlEntries(
+                tensorEntriesByJar.get("BOOT-INF/lib/tensor-plugin-tushare-1.0-SNAPSHOT.jar"),
+                TUSHARE_PREFIX);
 
         assertThat(outerTushare).isEmpty();
         assertThat(tushareEntries).hasSize(49);
         assertThat(new HashSet<>(tushareEntries)).hasSize(49);
-        assertThat(tensorEntriesByJar.get("BOOT-INF/lib/tensor-plugin-api-1.0-SNAPSHOT.jar").stream()
-                .filter(name -> name.startsWith(TUSHARE_PREFIX))
-                .filter(name -> name.endsWith(".yaml")))
-                .isEmpty();
-        assertThat(tensorEntriesByJar.get("BOOT-INF/lib/tensor-core-1.0-SNAPSHOT.jar").stream()
-                .filter(name -> name.startsWith(TUSHARE_PREFIX))
-                .filter(name -> name.endsWith(".yaml")))
-                .isEmpty();
+        assertThat(directTushareYamlEntries(
+                tensorEntriesByJar.get("BOOT-INF/lib/tensor-plugin-api-1.0-SNAPSHOT.jar"),
+                TUSHARE_PREFIX)).isEmpty();
+        assertThat(directTushareYamlEntries(
+                tensorEntriesByJar.get("BOOT-INF/lib/tensor-core-1.0-SNAPSHOT.jar"),
+                TUSHARE_PREFIX)).isEmpty();
     }
 
     private static void assertExcludedResources(List<String> entries) {
@@ -170,7 +190,7 @@ class PackagedJarContractTest {
         JarEntry application = jarFile.getJarEntry("BOOT-INF/classes/application.yml");
         assertThat(application).isNotNull();
         try (InputStream input = jarFile.getInputStream(application)) {
-            String configuration = new String(input.readAllBytes(), StandardCharsets.UTF_8);
+            String configuration = readUtf8(input);
             assertThat(configuration).contains(
                     "password: ${TENSOR_DB_PASSWORD}",
                     "token: ${TENSOR_TUSHARE_TOKEN:}");
@@ -179,6 +199,27 @@ class PackagedJarContractTest {
 
     private static List<String> entryNames(JarFile jarFile) {
         return jarFile.stream().map(JarEntry::getName).toList();
+    }
+
+    private static List<String> directTushareYamlEntries(List<String> entries, String resourcePrefix) {
+        List<String> yamlEntries = entries.stream()
+                .filter(name -> name.startsWith(resourcePrefix))
+                .filter(name -> name.endsWith(".yaml"))
+                .toList();
+        assertThat(yamlEntries).allMatch(name -> !name.substring(resourcePrefix.length()).contains("/"));
+        return yamlEntries;
+    }
+
+    private static void assertUniqueEntries(List<String> entries) {
+        assertThat(entries).doesNotHaveDuplicates();
+    }
+
+    private static String readUtf8(InputStream input) throws IOException {
+        return StandardCharsets.UTF_8.newDecoder()
+                .onMalformedInput(CodingErrorAction.REPORT)
+                .onUnmappableCharacter(CodingErrorAction.REPORT)
+                .decode(ByteBuffer.wrap(input.readAllBytes()))
+                .toString();
     }
 
     private static List<String> innerJarEntryNames(JarFile outerJar, String innerJarName) throws IOException {
