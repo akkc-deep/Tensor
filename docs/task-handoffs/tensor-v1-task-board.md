@@ -74,7 +74,7 @@
 | 53 | M10-T02 | `/downloads`、`/datasets` 路由和桌面布局 | `COMPLETED` | M10-T01 | docs/task-designs/M10-T02-design.md | docs/task-handoffs/M10-T02-handoff.md |
 | 54 | M10-T03 | Axios 客户端、DTO 和错误拦截 | `COMPLETED` | M00-T03, M10-T01 | docs/task-designs/M10-T03-design.md | docs/task-handoffs/M10-T03-handoff.md |
 | 55 | M10-T04 | 日期、空值、精度格式化和无障碍状态组件 | `COMPLETED` | M10-T01 | docs/task-designs/M10-T04-design.md | docs/task-handoffs/M10-T04-handoff.md |
-| 56 | M11-T01 | 数据源与接口分组搜索选择组件 | `IN_PROGRESS` | M10-T03 | docs/task-designs/M11-T01-design.md | docs/task-handoffs/M11-T01-handoff.md |
+| 56 | M11-T01 | 数据源与接口分组搜索选择组件 | `COMPLETED` | M10-T03 | docs/task-designs/M11-T01-design.md | docs/task-handoffs/M11-T01-handoff.md |
 | 57 | M11-T02 | 元数据驱动动态参数表单 | `NOT_STARTED` | M10-T03, M10-T04 | None | None |
 | 58 | M11-T03 | 下载 composable、控件锁定和请求世代 | `NOT_STARTED` | M10-T03 | None | None |
 | 59 | M11-T04 | 成功、空和失败结果组件 | `NOT_STARTED` | M10-T04, M11-T03 | None | None |
@@ -800,6 +800,8 @@
 - **State evidence (readiness):** 2026-09-04：M10-T04 已以初始实现 `0a61e3f`、严格时间戳修复 `0818fbc`、Node 24.15.0 下聚焦 15/15、全量 34/34、双宿主时区断言、生产构建、精确七文件范围和最终独立复审无 Critical/Important 完成，并由提交 `e999fb5` 在权威看板记录 `IN_PROGRESS -> COMPLETED`；按预定义顺序选择最小更大 Order 的后继 M11-T01。准备设计时发现 PRD 八分类与当前元数据七分类冲突，项目所有者明确决定暂不拆分；据此修订 M11 任务卡为按描述符 category 通用分组、当前 49 项保持七组，并批准三个受控组件的接口、单来源默认、不可用原因、搜索、选择、说明、职责边界和测试方案。提交 `d17f81a` 已创建并回填 `docs/task-designs/M11-T01-design.md`，冻结精确六文件、10/44 测试计数、七组事实、严格 RED/GREEN、固定实现提交和失败边界；提交 `2252a7b` 已把设计转化为 `docs/superpowers/plans/2026-09-04-m11-t01-download-selectors.md` 的 11 步实施计划，三个 JavaScript 测试块共 10 项、三个 Vue SFC 块均通过 Node 24 语法/编译检查，覆盖、占位符、类型、范围和格式自审通过。唯一直接依赖 M10-T03 为 `COMPLETED`，当前 `dataSources.js`/`api.spec.js` 相对其最终实现提交 `890ed88` 无差异，公开来源/API 描述符和现有 Vue/Element Plus/Vitest 基线与本设计互补且无冲突。`docs/task-handoffs/M11-T01-handoff.md` 已按 `next-task` 模板完整创建并链接，只记录 M11-T01 和直接输入 M10-T03，包含同一设计路径、依赖 artifact/decision/rationale/constraint/usage/readiness evidence、设计/计划读取顺序，以及先只创建三个完整 spec 并取得目标 SFC 缺失 RED 的具体首个动作。因此执行真实的 `NOT_STARTED -> READY`；生产和测试代码均尚未开始。
 
 - **State evidence (start):** 2026-09-04：用户明确要求按照权威任务看板执行当前任务；已完整读取 `docs/task-designs/M11-T01-design.md`、`docs/task-handoffs/M11-T01-handoff.md` 和 11 步任务级实施计划，并核对 M11 模块任务卡、唯一直接依赖 M10-T03 的设计与当前 API/前端测试配置。确认任务身份、精确六文件范围、三个受控组件接口、当前七组元数据决策、严格 TDD 顺序、首个 RED 动作和结果级验收均可定位且无冲突；普通 `main` 检出工作树为空，Node 24.15.0 下新鲜基线为 6 files / 34 tests 全部通过，Vite 构建退出 0 且只有已批准的 Element Plus chunk-size 提示。该请求作为本次 `READY -> IN_PROGRESS` 的明确启动证据，既有 `next-task` 交接路径保留为进入上下文。
+
+- **Completion evidence:** 2026-09-04：严格 TDD 先完整创建三份 spec，聚焦命令在收集阶段仅因三个目标 SFC 缺失而按预期非零；最小实现首跑 9/10 后，依据 Element Plus 2.14.5 键盘状态机定位到首次 `ArrowDown` 只展开而不推进高亮索引，以公开 `default-first-option` 单行修复恢复“ArrowDown 不发事件、Enter 选择首项”语义。实现提交 `e08f467` 以固定消息精确新增设计规定的六个文件；独立审查提出两个键盘事件验证 Important，提交 `38ddb8a` 仅强化既有 `ApiSelect` 第五项测试，明确断言 ArrowDown 前置无事件及 disabled 后键盘输入不增加事件，复审确认两项均关闭且 Critical、Important、Minor 全为 0，结论 `Ready to merge: Yes`。Node 24.15.0 最终提交态新鲜门禁中，聚焦为 3 files / 10 tests、全量为 9 files / 44 tests，全部通过；Vite 转换 1599 modules 并退出 0，仅含已批准的 Element Plus chunk-size 提示。`71a3f27..38ddb8a` 总范围精确为六个新增组件/测试文件，格式检查通过，禁止网络、错误解释、凭证和 HTML 注入扫描无输出，受保护依赖、配置、API、通用组件、工具、路由、布局、页面和样式路径无差异，工作树为空。因此三个受控组件的来源默认/不可用说明、七组元数据投影、双字段搜索、键盘/禁用事件、查询方式和纯文本渲染均达到结果级验收，执行 `IN_PROGRESS -> COMPLETED`。
 
 ### `M11-T02`
 
