@@ -79,28 +79,55 @@ describe('DatasetTable', () => {
     }
   })
 
-  it('fixes only ts_code when present and otherwise only the first business column', () => {
+  it('fixes one business column without changing rendered metadata order', async () => {
     const withTsCode = mount(DatasetTable, {
       props: {
         columns: [column('trade_date'), column('ts_code'), column('close', '收盘价', 'DECIMAL')],
-        items: [],
+        items: [{
+          trade_date: '2026-09-04',
+          ts_code: '000001.SZ',
+          close: '12.34',
+          source_plugin: 'tushare_pro',
+          source_api: 'daily',
+          ingested_at: '2026-09-05T00:00:00Z',
+        }],
       },
     })
     const withoutTsCode = mount(DatasetTable, {
       props: { columns: [column('ann_date', '公告日期', 'DATE'), column('end_date')], items: [] },
     })
+    const withoutBusinessColumns = mount(DatasetTable, { props: { columns: [], items: [] } })
 
-    expect(renderedColumns(withTsCode)
-      .filter((current) => current.props('fixed') === 'left')
-      .map((current) => current.props('prop'))).toEqual(['ts_code'])
-    expect(renderedColumns(withTsCode).slice(0, 3).map((current) => current.props('prop'))).toEqual([
-      'trade_date', 'ts_code', 'close',
+    await flushPromises()
+
+    const withTsHeaders = withTsCode.findAll('.el-table__header th')
+    expect(withTsHeaders.map((header) => header.get('.cell').text())).toEqual([
+      'trade_date', 'ts_code', '收盘价', 'source_plugin', 'source_api', 'ingested_at',
     ])
-    expect(renderedColumns(withoutTsCode)
-      .filter((current) => current.props('fixed') === 'left')
-      .map((current) => current.props('prop'))).toEqual(['ann_date'])
-    expect(renderedColumns(withTsCode).slice(-3).every((current) => !current.props('fixed'))).toBe(true)
-    expect(renderedColumns(withoutTsCode).slice(-3).every((current) => !current.props('fixed'))).toBe(true)
+    expect(withTsHeaders.map((header) => header.element.style.position)).toEqual([
+      '', 'sticky', '', '', '', '',
+    ])
+    expect(withTsHeaders[1].element.style.left).toBe('0px')
+
+    const withTsCells = withTsCode.findAll('.el-table__body tbody tr')[0].findAll('td')
+    expect(withTsCells.map((cell) => cell.get('.cell').text())).toEqual([
+      '2026-09-04', '000001.SZ', '12.34', 'tushare_pro', 'daily', '2026-09-05 08:00:00',
+    ])
+    expect(withTsCells.map((cell) => cell.element.style.position)).toEqual([
+      '', 'sticky', '', '', '', '',
+    ])
+
+    const withoutTsHeaders = withoutTsCode.findAll('.el-table__header th')
+    expect(withoutTsHeaders.map((header) => header.element.style.position)).toEqual([
+      'sticky', '', '', '', '',
+    ])
+    expect(withoutTsHeaders[0].element.style.left).toBe('0px')
+
+    const emptyHeaders = withoutBusinessColumns.findAll('.el-table__header th')
+    expect(emptyHeaders.map((header) => header.get('.cell').text())).toEqual([
+      'source_plugin', 'source_api', 'ingested_at',
+    ])
+    expect(emptyHeaders.every((header) => header.element.style.position !== 'sticky')).toBe(true)
   })
 
   it('formats empty, exact numeric, date, and ingestion values in real cells without precision loss', async () => {
@@ -187,6 +214,16 @@ describe('DatasetTable', () => {
       expect(tooltip.textContent).toBe(rawValue)
       expect(wrapper.find('strong').exists()).toBe(false)
       expect(tooltip.querySelector('strong')).toBeNull()
+
+      const ingestionCell = wrapper.findAll('.el-table__body tbody tr')[0].findAll('td')[4]
+      const ingestionContent = ingestionCell.get('.cell').element
+      Object.defineProperty(ingestionContent, 'scrollWidth', { configurable: true, value: 400 })
+      ingestionContent.getBoundingClientRect = content.getBoundingClientRect
+      await ingestionCell.trigger('mouseenter')
+      await vi.waitFor(() => {
+        expect(document.body.querySelector('.el-popper')?.textContent).toBe('2026-08-25 10:30:15')
+      })
+      expect(rangeSpy).toHaveBeenCalledTimes(2)
     } finally {
       wrapper.unmount()
     }

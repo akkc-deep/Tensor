@@ -24,6 +24,19 @@ function minWidth(column) {
   if (column.name === 'ingested_at') return 180
   return column.longText === true ? 240 : 140
 }
+
+function stickyStyle(column, zIndex) {
+  if (column.property !== fixedColumn.value) return undefined
+  return { position: 'sticky', left: '0', zIndex, background: 'var(--el-bg-color, #fff)' }
+}
+
+function cellStyle({ column }) {
+  return stickyStyle(column, 1)
+}
+
+function headerCellStyle({ column }) {
+  return stickyStyle(column, 2)
+}
 </script>
 
 <template>
@@ -33,13 +46,16 @@ function minWidth(column) {
     :aria-busy="loading"
     style="max-width: 100%; overflow-x: auto"
   >
-    <el-table :data="items">
+    <el-table
+      :data="items"
+      :cell-style="cellStyle"
+      :header-cell-style="headerCellStyle"
+    >
       <el-table-column
         v-for="column in displayColumns"
         :key="column.name"
         :prop="column.name"
         :label="column.label"
-        :fixed="column.name === fixedColumn ? 'left' : undefined"
         :min-width="minWidth(column)"
         show-overflow-tooltip
       >
