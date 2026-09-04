@@ -135,9 +135,13 @@ describe('DatasetPagination', () => {
       const input = pageSizeInput(wrapper)
       input.element.focus()
       expect(document.activeElement).toBe(input.element)
-      pagination(wrapper).vm.$emit('update:page-size', 20)
-      await nextTick()
+      await input.trigger('click')
+      await flushPromises()
+      const options = [...document.body.querySelectorAll('.el-select-dropdown__item')]
+      await options[0].click()
+      await flushPromises()
       expect(wrapper.emitted('update:pageSize')).toEqual([[20]])
+      expect(wrapper.emitted('update:page')).toBeUndefined()
     } finally {
       wrapper.unmount()
     }

@@ -12,7 +12,7 @@ const props = defineProps({
 const emit = defineEmits(['update:page', 'update:pageSize'])
 
 function updatePage(page) {
-  if (!props.disabled) emit('update:page', page)
+  if (!props.disabled && page !== props.page) emit('update:page', page)
 }
 
 function updatePageSize(pageSize) {
