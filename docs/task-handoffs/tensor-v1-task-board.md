@@ -80,7 +80,7 @@
 | 59 | M11-T04 | 成功、空和失败结果组件 | `COMPLETED` | M10-T04, M11-T03 | docs/task-designs/M11-T04-design.md | docs/task-handoffs/M11-T04-handoff.md |
 | 60 | M11-T05 | `DownloadView` 页面集成和组件回归 | `COMPLETED` | M11-T01, M11-T02, M11-T03, M11-T04 | docs/task-designs/M11-T05-design.md | docs/task-handoffs/M11-T05-handoff.md |
 | 61 | M12-T01 | 数据集选择与动态筛选表单 | `COMPLETED` | M10-T03, M10-T04 | docs/task-designs/M12-T01-design.md | docs/task-handoffs/M12-T01-handoff.md |
-| 62 | M12-T02 | 全字段、固定列和横向滚动表格 | `NOT_STARTED` | M10-T04 | docs/task-designs/M12-T02-design.md | None |
+| 62 | M12-T02 | 全字段、固定列和横向滚动表格 | `READY` | M10-T04 | docs/task-designs/M12-T02-design.md | docs/task-handoffs/M12-T02-handoff.md |
 | 63 | M12-T03 | 20/50/100 分页组件 | `NOT_STARTED` | M10-T04 | None | None |
 | 64 | M12-T04 | 查询 composable、竞态和超界页处理 | `NOT_STARTED` | M10-T03 | None | None |
 | 65 | M12-T05 | `DatasetView` 页面集成和组件回归 | `NOT_STARTED` | M12-T01, M12-T02, M12-T03, M12-T04 | None | None |
@@ -875,7 +875,7 @@
 - **Dependencies:** M10-T04.
 - **Sources:** `docs/superpowers/plans/tensor-modules/M12-dataset-ui.md` 的 `Task M12-T02` 任务卡。
 - **First action:** 读取 `docs/superpowers/plans/tensor-modules/M12-dataset-ui.md` 的 `Task M12-T02` 任务卡，并确认其 `Context boundary`、输入和目标文件均可定位。
-- **State evidence:** None.
+- **State evidence:** 2026-09-05：M12-T01 已以初始实现提交 `75ee19b`、真实空态修复 `efc86e7`、Escape 搜索复位修复 `e7e42e3`、Node.js 24.15.0 下 16 files / 92 tests、生产构建、精确六文件范围及无未决 Critical/Important 的独立复审完成，权威看板已由提交 `3b16a2d` 记录其 `IN_PROGRESS -> COMPLETED`；按预定义顺序选择最小更大 Order 的后继 M12-T02。项目所有者批准全部列单行省略和纯文本 tooltip、普通/长文本/入库时间列 140/240/180px 最小宽度及来源列字段名标签；`docs/task-designs/M12-T02-design.md` 已据任务卡、PRD 6.5/7.4/AC-015、TRD 12.4/13.5、OpenAPI 和该裁决冻结 `columns/items/loading` 接口、业务列原序加三来源列、固定列、格式化、横向滚动、loading、严格 TDD、17 files / 98 tests 与精确两文件范围，并由提交 `bcd2e24` 创建及回填。唯一直接依赖 M10-T04 为 `COMPLETED`，当前 `date.js`、`format.js`、`validation.js` 和 `FieldError.vue` 相对最终修复提交 `0818fbc` 无差异，其安全格式化合同与 M12-T02 表格职责无冲突。`docs/task-handoffs/M12-T02-handoff.md` 已按 `next-task` 模板创建并链接，只记录 M12-T02 与 M10-T04，包含同一设计路径、精确 artifact/decision/rationale/constraint/usage/readiness evidence、读取顺序和先创建完整 spec 取得缺组件 RED 的首个动作。因此执行 `NOT_STARTED -> READY`；M12-T02 实现尚未开始。
 
 ### `M12-T03`
 
