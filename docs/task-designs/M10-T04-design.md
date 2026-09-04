@@ -17,7 +17,7 @@
 包含：
 
 - 创建严格字符串日期工具 `toApiDate`、`toApiMonth` 和 `formatDate`；
-- 创建入库时间与表格单元格工具 `formatIngestedAt` 和 `formatCell`；
+- 创建严格校验显式偏移时间戳的入库时间工具 `formatIngestedAt` 和表格单元格工具 `formatCell`；
 - 创建校验原语 `hasValue`、`matchesPattern` 和 `isRangeOrdered`；
 - 创建仅表达 `INITIAL | LOADING | EMPTY | FAILURE` 的 `AsyncStatePanel.vue`；
 - 创建安全显示字段错误文本的 `FieldError.vue`；
@@ -62,7 +62,9 @@ formatIngestedAt(value, timeZone = 'Asia/Shanghai'): unknown
 formatCell(value, column, timeZone = 'Asia/Shanghai'): unknown
 ```
 
-`formatIngestedAt` 接受服务端入库时间字符串，把可解析为有效时刻的值转换到指定 IANA 时区，并固定输出 `YYYY-MM-DD HH:mm:ss`。调用方可显式传入合法 IANA 时区；未传时使用 `Asia/Shanghai`。非法时区不向 UI 抛出 `RangeError`，而是回退 `Asia/Shanghai`；非法时间或非字符串值保持原值。实现使用平台 `Intl.DateTimeFormat` 的 `formatToParts` 组装固定 ASCII 数字和分隔符，并使用 24 小时制，不把宿主环境的本地时区或本地化标点泄漏到结果。
+`formatIngestedAt` 只转换严格的服务端入库时间字符串：`YYYY-MM-DDTHH:mm:ss[.fraction](Z|±HH:mm)`。日期必须是四位非零年份中的真实公历日期；小时为 `00`～`23`，分钟和秒为 `00`～`59`；可选小数秒为 1～9 位；数值偏移的小时为 `00`～`23`、分钟为 `00`～`59`。这同时接受后端 `Instant` 的 `Z` 输出和 OpenAPI 示例的 `+08:00` 输出，但拒绝无偏移字符串、仅日期、宽松分隔符、不存在日期、`24:00:00`、闰秒和越界偏移。只有形状、日历与时间范围均通过后才构造 `Date`；构造结果仍无效时保持原值，不能依赖 `Date#getTime()` 单独承担输入校验。
+
+有效时刻转换到指定 IANA 时区，并固定输出 `YYYY-MM-DD HH:mm:ss`。调用方可显式传入合法 IANA 时区；未传时使用 `Asia/Shanghai`。非法显示时区不向 UI 抛出 `RangeError`，而是回退 `Asia/Shanghai`；非法时间、无显式偏移时间或非字符串值保持原值。实现使用平台 `Intl.DateTimeFormat` 的 `formatToParts` 组装固定 ASCII 数字和分隔符，并使用 24 小时制，不把宿主环境的本地时区或本地化标点泄漏到结果。
 
 `formatCell` 按以下固定优先级处理值：
 
@@ -112,7 +114,7 @@ allowed state: INITIAL | LOADING | EMPTY | FAILURE
 
 ### 数据流和失败边界
 
-M11 的数据流固定为“控件中的 `YYYY-MM-DD`/`YYYY-MM` 字符串 → `hasValue`、`matchesPattern`、`isRangeOrdered` → `toApiDate`/`toApiMonth` → 紧凑下载参数”。M12 的筛选日期保持 ISO 字符串直接交给 M10-T03 API；M12 的记录展示为“服务端字符串记录 + column 元数据 + 可选显示时区 → `formatCell` → 文本单元格”。
+M11 的数据流固定为“控件中的 `YYYY-MM-DD`/`YYYY-MM` 字符串 → `hasValue`、`matchesPattern`、`isRangeOrdered` → `toApiDate`/`toApiMonth` → 紧凑下载参数”。M12 的筛选日期保持 ISO 字符串直接交给 M10-T03 API；M12 的记录展示为“服务端字符串记录 + column 元数据 + 可选显示时区 → `formatCell` → 文本单元格”。`ingested_at` 只有在严格显式偏移语法通过后进入时区转换，拒绝值原样显示以暴露服务端契约异常。
 
 所有工具函数都在不可信值或非法元数据下返回 `null`、`false` 或原值，不向 UI 抛出面向用户的异常。业务请求失败、服务端 `ApiError`、重试提示、成功内容和页面级 live region 均留给 M11/M12。
 
@@ -128,7 +130,7 @@ M11 的数据流固定为“控件中的 `YYYY-MM-DD`/`YYYY-MM` 字符串 → `h
 - `control-plane/src/utils/format.spec.js`：三个工具模块的 9 项行为测试；
 - `control-plane/src/components/common/AsyncStatePanel.spec.js`：两个通用组件的 6 项行为测试。
 
-不修改或删除其他生产、测试、依赖、配置和文档文件。实现提交固定为 `feat(ui): add shared display and accessibility utilities`，精确包含上述 7 个文件；本设计、后续实施计划、交接和看板不得混入该实现提交。
+不修改或删除其他生产、测试、依赖、配置和文档文件。初始实现提交固定为 `feat(ui): add shared display and accessibility utilities`，精确包含上述 7 个文件；审查发现的时间戳边界修复只修改既有 `format.js` 与 `format.spec.js`，以 `fix(ui): validate ingestion timestamps before formatting` 单独提交。本设计、实施计划、交接和看板不得混入任一实现提交。
 
 ## Tests
 
@@ -161,7 +163,7 @@ npm run test:unit -- --run src/utils/format.spec.js src/components/common/AsyncS
 3. `toApiMonth` 只转换严格有效的 `YYYY-MM`，其他输入返回 `null`；
 4. `formatDate` 保持严格有效 ISO 日期，非法日期和非字符串保持原值；
 5. `formatIngestedAt` 默认以 `Asia/Shanghai` 输出到秒且丢弃毫秒显示；
-6. `formatIngestedAt` 接受显式 IANA 时区，非法时区回退上海，非法时间保持原值；
+6. `formatIngestedAt` 接受 `Z`/数值偏移和显式 IANA 显示时区，非法显示时区回退上海；无偏移、不存在日期、非法时间/偏移和非字符串保持原值；
 7. `formatCell` 把 `null`/`undefined` 映射为 `--`，同时保持数值 `0` 和空字符串不同；
 8. `formatCell` 原样保留 `DECIMAL`/`LONG` 字符串，并按 column 分派 DATE 和 `ingested_at`；
 9. `hasValue`、`matchesPattern`、`isRangeOrdered` 覆盖正常、空值、逆序、类型错误和非法正则边界。
@@ -190,6 +192,8 @@ npm run build
 
 预期：聚焦测试为 2 files / 15 tests 全部通过；完整前端回归为 6 files / 34 tests 全部通过；Vite 生产构建退出 0。构建只允许 M10-T02 已接受的 Element Plus bundle chunk-size 提示，不允许新增 Vue、可访问性、测试或编译警告。
 
+审查修复必须先只修改 `format.spec.js` 第 6 项，加入 `+08:00` 正向值以及不存在日期、无偏移、`24:00:00` 和越界偏移保持原值的断言；在生产修改前运行该文件，预期 1 file / 1 failed / 8 passed，失败值来自现有宽松 `new Date(value)`。最小修改 `format.js` 后，同一文件恢复 9/9。随后分别在 `TZ=UTC` 和 `TZ=America/New_York` 下运行 Node 断言，两个环境都必须让无偏移与不存在日期输入保持原值，并把同一带 `Z` 输入格式化为相同上海时间。
+
 ### 范围、公开表面和安全检查
 
 ```bash
@@ -210,7 +214,7 @@ rg -n 'v-html|innerHTML|axios|fetch\(|ApiError|Authorization|token|password|pars
 
 - `date.js` 只导出 `toApiDate`、`toApiMonth`、`formatDate`；下载转换只接受严格字符串，合法日期/月返回紧凑格式，空值、类型错误、宽松格式和不存在日期返回 `null`；
 - M12 查询日期保持 `YYYY-MM-DD`，没有被共享工具误转为下载格式；
-- `formatIngestedAt` 默认以 `Asia/Shanghai` 输出 `YYYY-MM-DD HH:mm:ss`，支持显式合法 IANA 时区，非法时区回退上海，非法时间保持原文；
+- `formatIngestedAt` 只转换严格 `YYYY-MM-DDTHH:mm:ss[.fraction](Z|±HH:mm)`、真实公历日期和有效时间/偏移；默认以 `Asia/Shanghai` 输出 `YYYY-MM-DD HH:mm:ss`，支持显式合法 IANA 显示时区，非法显示时区回退上海，无偏移、不存在日期、非法时间/偏移和非字符串保持原文；
 - `formatCell` 将 `null`/`undefined` 显示为 `--`，保持 `0` 与空字符串不同，原样保留 `DECIMAL`/`LONG` 字符串，并正确分派 DATE 和 `ingested_at`；
 - `validation.js` 只导出 `hasValue`、`matchesPattern`、`isRangeOrdered`，非法元数据正则返回 `false`，所有失败边界均不抛面向用户的异常；
 - `AsyncStatePanel` 的状态闭集为 `INITIAL | LOADING | EMPTY | FAILURE`，初始状态不播报，加载/空状态礼貌播报，失败使用 alert，成功内容由调用方渲染；
@@ -223,5 +227,6 @@ rg -n 'v-html|innerHTML|axios|fetch\(|ApiError|Authorization|token|password|pars
 
 - `Intl.DateTimeFormat` 的默认字符串在不同运行时会包含不同标点、顺序或午夜表示。实现必须用 `formatToParts` 和 24 小时制组装固定输出；测试在任务基线 Node.js 24.15.0/jsdom 中验证结果。
 - `formatDate` 刻意不使用 `Date`，避免纯日期因宿主时区偏移到前一天；`formatIngestedAt` 则必须按真实时刻转换，两条路径不可合并。
+- JavaScript `Date` 会归一化不存在日期并按宿主时区解释无偏移字符串；`formatIngestedAt` 必须在构造前完成严格形状、日历和时间范围校验，且跨 `TZ` 验证拒绝路径一致。
 - 元数据 pattern 由受信服务端契约提供，但其语法仍可能非法；`matchesPattern` 捕获构造错误并返回 `false`。本任务不增加 regex 超时机制，也不接受用户自行提供 pattern。
 - `role="alert"` 在组件首次挂载时即可能播报。调用方应只在真实失败或字段错误出现时挂载相应内容，不得把隐藏的预创建错误节点作为状态缓存。

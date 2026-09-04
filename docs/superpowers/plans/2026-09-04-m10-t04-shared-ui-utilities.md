@@ -10,17 +10,19 @@
 
 **Spec:** `docs/task-designs/M10-T04-design.md`
 
+**Approved review correction:** 2026-09-04，项目所有者批准在初始实现审查后增加 Task 2；最终实现必须完成 Task 1 和 Task 2，不能停在宽松 `new Date(value)` 的 Task 1 历史检查点。
+
 ## Global Constraints
 
 - Work only in the seven new files named by the spec; do not modify dependencies, configuration, router, layout, views, API clients, styles, Java, SQL, or contracts.
 - Export only `toApiDate`, `toApiMonth`, `formatDate` from `date.js`; only `formatIngestedAt`, `formatCell` from `format.js`; and only `hasValue`, `matchesPattern`, `isRangeOrdered` from `validation.js`.
 - Accept only strict string `YYYY-MM-DD`/`YYYY-MM` values for download conversion; never accept `Date` or convert M12 ISO query filters to compact values.
 - Map only `null` and `undefined` cells to `--`; preserve numeric `0`, the empty string, and every `DECIMAL`/`LONG` string without parsing, rounding, computation, sorting, or localization.
-- Format valid ingestion instants as `YYYY-MM-DD HH:mm:ss`; default or fall back to `Asia/Shanghai`, and preserve invalid inputs.
+- Format only strict `YYYY-MM-DDTHH:mm:ss[.fraction](Z|±HH:mm)` ingestion instants as `YYYY-MM-DD HH:mm:ss`; validate calendar/time/offset before `Date`, default or fall back to `Asia/Shanghai`, and preserve invalid or offset-free inputs.
 - Limit `AsyncStatePanel` to `INITIAL | LOADING | EMPTY | FAILURE`; keep success content, business state, requests, `ApiError` interpretation, retry rules, `aria-describedby`, and focus movement in later callers.
 - Render every message as text through Vue interpolation; do not use `v-html`, `innerHTML`, Element Plus internals, or third-party date/validation libraries.
 - Use Node.js `24.15.0`; the production build must exit 0 and may contain only the previously approved Element Plus chunk-size warning.
-- Preserve the single approved implementation commit `feat(ui): add shared display and accessibility utilities` with exactly seven new files, so intermediate RED/GREEN checkpoints remain uncommitted until final verification.
+- Preserve the approved initial implementation commit `feat(ui): add shared display and accessibility utilities` with exactly seven new files; commit the approved review correction separately as `fix(ui): validate ingestion timestamps before formatting` with only `format.js` and `format.spec.js`.
 
 ---
 
@@ -613,3 +615,206 @@ git status --short
 ```
 
 Expected: both status outputs are empty; `git show` reports the exact message and seven added files; focused 15/15 and full 34/34 tests pass; build exits 0 with only the approved chunk-size warning; exact-export check and committed diff check exit 0.
+
+---
+
+### Task 2: Validate ingestion timestamp grammar after review
+
+**Files:**
+- Modify: `control-plane/src/utils/format.spec.js`
+- Modify: `control-plane/src/utils/format.js`
+
+**Interfaces:**
+- Consumes: the existing `toApiDate(value)` calendar validator, service `Instant` JSON ending in `Z`, the OpenAPI `ingested_at` example ending in `+08:00`, platform `Date`, and `Intl.DateTimeFormat`.
+- Preserves: the exact public exports `formatIngestedAt(value, timeZone?)` and `formatCell(value, column, timeZone?)`.
+- Tightens: only strict `YYYY-MM-DDTHH:mm:ss[.fraction](Z|±HH:mm)` values with a real calendar date, `00`–`23` hour, `00`–`59` minute/second, 1–9 optional fraction digits, and `00`–`23`/`00`–`59` numeric-offset parts are formatted; all rejected values remain unchanged.
+
+- [ ] **Step 18: Confirm the approved correction and clean committed baseline**
+
+Run from the repository root:
+
+```bash
+git status --short
+git log -3 --oneline
+sed -n '48,74p' docs/task-designs/M10-T04-design.md
+sed -n '1,180p' docs/task-handoffs/M10-T04-handoff.md
+export PATH="/Users/qiangzhiwei/.nvm/versions/node/v24.15.0/bin:$PATH"
+cd control-plane
+node --version
+npm run test:unit -- --run src/utils/format.spec.js
+```
+
+Expected: status is empty before the design/plan state commits; history contains initial implementation `0a61e3f`; the revised design and pause handoff contain the approved strict explicit-offset boundary; Node is `v24.15.0`; the pre-correction utility suite is 1 file / 9 tests passing.
+
+- [ ] **Step 19: Add the focused regression assertions before production changes**
+
+In the existing sixth `it` of `control-plane/src/utils/format.spec.js`, add these assertions after the invalid-display-zone assertion and before `not-a-time`:
+
+```js
+    expect(
+      formatIngestedAt('2026-08-25T10:30:15.123+08:00', 'UTC'),
+    ).toBe('2026-08-25 02:30:15')
+
+    for (const value of [
+      '2026-02-30T02:30:15Z',
+      '2026-08-25T02:30:15',
+      '2026-08-25T24:00:00Z',
+      '2026-08-25T02:30:15+24:00',
+    ]) {
+      expect(formatIngestedAt(value)).toBe(value)
+    }
+```
+
+The positive numeric-offset expectation protects the OpenAPI example shape. The four literal negative values independently protect real calendar validation, mandatory input offset, 24-hour bounds, and numeric-offset bounds; no mock is used.
+
+- [ ] **Step 20: Run the utility suite and verify the review RED**
+
+Run from `control-plane`:
+
+```bash
+npm run test:unit -- --run src/utils/format.spec.js
+```
+
+Expected: exit non-zero with 1 file / 1 failed / 8 passed. The sixth test fails because `2026-02-30T02:30:15Z` is normalized instead of preserved; there must be no import, syntax, setup, or unrelated assertion failure.
+
+- [ ] **Step 21: Add strict input validation before constructing Date**
+
+Replace `control-plane/src/utils/format.js` with exactly this final content:
+
+```js
+import { formatDate, toApiDate } from './date.js'
+
+const DEFAULT_TIME_ZONE = 'Asia/Shanghai'
+const INSTANT_PATTERN = /^(\d{4}-\d{2}-\d{2})T(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d(?:\.\d{1,9})?(?:Z|[+-](?:[01]\d|2[0-3]):[0-5]\d)$/
+
+function formatter(timeZone) {
+  return new Intl.DateTimeFormat('en-CA', {
+    timeZone,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hourCycle: 'h23',
+  })
+}
+
+function formatterFor(timeZone) {
+  try {
+    return formatter(timeZone)
+  } catch {
+    return formatter(DEFAULT_TIME_ZONE)
+  }
+}
+
+function parseInstant(value) {
+  if (typeof value !== 'string') return null
+
+  const match = INSTANT_PATTERN.exec(value)
+  if (!match || toApiDate(match[1]) === null) return null
+
+  const instant = new Date(value)
+  return Number.isNaN(instant.getTime()) ? null : instant
+}
+
+export function formatIngestedAt(value, timeZone = DEFAULT_TIME_ZONE) {
+  const instant = parseInstant(value)
+  if (instant === null) return value
+
+  const parts = Object.fromEntries(
+    formatterFor(timeZone)
+      .formatToParts(instant)
+      .filter(({ type }) => type !== 'literal')
+      .map(({ type, value: part }) => [type, part]),
+  )
+
+  return `${parts.year}-${parts.month}-${parts.day} ${parts.hour}:${parts.minute}:${parts.second}`
+}
+
+export function formatCell(value, column, timeZone = DEFAULT_TIME_ZONE) {
+  if (value === null || value === undefined) return '--'
+  if (column?.name === 'ingested_at') {
+    return formatIngestedAt(value, timeZone)
+  }
+  if (column?.logicalType === 'DATE') return formatDate(value)
+  return value
+}
+```
+
+- [ ] **Step 22: Run the utility suite and verify review GREEN**
+
+Run from `control-plane`:
+
+```bash
+npm run test:unit -- --run src/utils/format.spec.js
+```
+
+Expected: 1 file / 9 tests pass; numeric-offset input formats correctly, all four rejected strings stay byte-for-byte unchanged, and there are no warnings.
+
+- [ ] **Step 23: Prove rejected inputs cannot depend on host timezone**
+
+Run both commands from `control-plane`:
+
+```bash
+TZ=UTC node --input-type=module -e 'import assert from "node:assert/strict"; import {formatIngestedAt} from "./src/utils/format.js"; assert.equal(formatIngestedAt("2026-08-25T02:30:15"),"2026-08-25T02:30:15"); assert.equal(formatIngestedAt("2026-02-30T02:30:15Z"),"2026-02-30T02:30:15Z"); assert.equal(formatIngestedAt("2026-08-25T02:30:15.123Z"),"2026-08-25 10:30:15")'
+TZ=America/New_York node --input-type=module -e 'import assert from "node:assert/strict"; import {formatIngestedAt} from "./src/utils/format.js"; assert.equal(formatIngestedAt("2026-08-25T02:30:15"),"2026-08-25T02:30:15"); assert.equal(formatIngestedAt("2026-02-30T02:30:15Z"),"2026-02-30T02:30:15Z"); assert.equal(formatIngestedAt("2026-08-25T02:30:15.123Z"),"2026-08-25 10:30:15")'
+```
+
+Expected: both commands exit 0 with no output, proving the same accepted and rejected values behave identically under two host timezones.
+
+- [ ] **Step 24: Run the complete corrected-state gates**
+
+Run from `control-plane`:
+
+```bash
+npm run test:unit -- --run src/utils/format.spec.js src/components/common/AsyncStatePanel.spec.js
+npm run test:unit -- --run
+npm run build
+node --input-type=module -e 'import assert from "node:assert/strict"; import * as d from "./src/utils/date.js"; import * as f from "./src/utils/format.js"; import * as v from "./src/utils/validation.js"; assert.deepEqual(Object.keys(d).sort(),["formatDate","toApiDate","toApiMonth"]); assert.deepEqual(Object.keys(f).sort(),["formatCell","formatIngestedAt"]); assert.deepEqual(Object.keys(v).sort(),["hasValue","isRangeOrdered","matchesPattern"]); assert.equal(f.formatIngestedAt("2026-08-25T10:30:15.123+08:00","UTC"),"2026-08-25 02:30:15"); assert.equal(f.formatIngestedAt("2026-08-25T02:30:15"),"2026-08-25T02:30:15")'
+```
+
+Expected: focused 2 files / 15 tests and full 6 files / 34 tests pass; build exits 0 with only the approved chunk-size warning; exact exports and corrected timestamp boundaries pass outside Vitest.
+
+From the repository root run:
+
+```bash
+git diff --check
+git status --short --untracked-files=all -- control-plane
+rg -n 'v-html|innerHTML|axios|fetch\(|ApiError|Authorization|token|password|parseFloat|parseInt|BigInt\(' \
+  control-plane/src/utils/date.js \
+  control-plane/src/utils/format.js \
+  control-plane/src/utils/validation.js \
+  control-plane/src/components/common/AsyncStatePanel.vue \
+  control-plane/src/components/common/FieldError.vue
+git diff -- control-plane/package.json control-plane/package-lock.json \
+  control-plane/vite.config.js control-plane/vitest.config.js \
+  control-plane/src/api control-plane/src/router control-plane/src/layouts \
+  control-plane/src/views control-plane/src/style.css
+```
+
+Expected: format check exits 0; status contains only `format.js` and `format.spec.js`; forbidden-capability scan has no output and exits 1; protected paths have no diff.
+
+- [ ] **Step 25: Commit only the two-file review correction**
+
+Run from the repository root:
+
+```bash
+git add control-plane/src/utils/format.js control-plane/src/utils/format.spec.js
+git diff --cached --check
+git diff --cached --name-status
+git commit -m "fix(ui): validate ingestion timestamps before formatting"
+```
+
+Expected: staged output contains exactly two modified files and the commit succeeds with the fixed message.
+
+- [ ] **Step 26: Re-run result gates and request final review from committed state**
+
+Repeat Steps 23 and 24 after commit, then run:
+
+```bash
+git diff 0a61e3f..HEAD --check
+git status --short
+```
+
+Expected: all corrected-state gates retain their Step 23/24 results, the review-fix diff check exits 0, the working tree is empty, and final independent review finds no remaining Critical or Important issue before task completion.
