@@ -45,10 +45,10 @@
 - `tensor.display-zone=${TENSOR_DISPLAY_ZONE:Asia/Shanghai}`；
 - `tensor.plugins.tushare-pro.enabled=${TENSOR_TUSHARE_ENABLED:true}`、`base-url=${TENSOR_TUSHARE_BASE_URL:https://api.tushare.pro}`、`token=${TENSOR_TUSHARE_TOKEN:}`，连接/读取超时保持既有 `5s`/`120s`，`max-response-bytes=67108864`；
 - `tensor.persistence.batch-size=500`、`tensor.query.default-page-size=50`、`tensor.query.allowed-page-sizes=[20,50,100]` 只冻结 TRD 名称和值；本任务不复制已经由 M06/M09 固定的 repository 或 HTTP 分页行为；
-- `management.endpoints.web.base-path=/actuator` 且默认 exposure 只有 `health`；health probes 启用、components 始终显示、details 永不显示，数据库 health contributor 保持启用；
+- `management.endpoints.web.base-path=/actuator`、discovery 关闭且默认 exposure 只有 `health`；health probes 启用、components 始终显示、details 永不显示，数据库 health contributor 保持启用；
 - 即使外部环境将 env/configprops 端点加入 exposure，`management.endpoint.env.show-values=never` 与 `management.endpoint.configprops.show-values=never` 仍禁止显示值。
 
-因此默认可访问的管理路径只有 `/actuator/health`、`/actuator/health/liveness` 和 `/actuator/health/readiness`。Micrometer 指标保存在应用 registry 中，但默认没有 HTTP 暴露；部署方未来只能通过受保护的外部配置显式增加采集通道。
+因此默认可访问的管理路径只有 `/actuator/health`、`/actuator/health/liveness` 和 `/actuator/health/readiness`，`/actuator` discovery 也不开放。Micrometer 指标保存在应用 registry 中，但默认没有 HTTP 暴露；部署方未来只能通过受保护的外部配置显式增加采集通道。
 
 ### Servlet 生产 Bean 图
 
@@ -227,7 +227,7 @@ mvn -Dmaven.repo.local=/private/tmp/tensor-m2 -f data-plane/pom.xml \
 
 1. 以 DB URL/username/password 哨兵、production profile 和空 Token 启动完整 Servlet app；断言 Flyway 六项迁移、唯一 registry/catalog/services/metrics/logger、49 个 Tushare definitions 与 49 个有效 adapters、三个 Controller、request/security Filter 和全局 advice 均存在；
 2. 断言 Tushare descriptor 为 enabled、credentialConfigured false、downloadAvailable false；`/actuator/health` 为 200/UP 且显示 db component，不出现 JDBC URL、用户名、密码、Token 或配置值；
-3. 断言 `/api/v1/data-sources` 仍返回安全插件摘要和 request/security headers；`/actuator/env`、`/actuator/configprops`、`/actuator/metrics` 均不可访问且响应不含秘密；
+3. 断言 `/api/v1/data-sources` 仍返回安全插件摘要和 request/security headers；`/actuator`、`/actuator/env`、`/actuator/configprops`、`/actuator/metrics` 均不可访问且响应不含秘密；
 4. 关闭首个 context，再以同一数据库和非空 Token 哨兵启动第二个 context，扫描启动日志、health 和元数据 JSON 均不含 Token/密码；
 5. 停止 MySQL 后在固定短 Hikari connection timeout 下调用 health，断言 503/DOWN；不把 Tushare 网络纳入探测，也不因插件 Token 状态改变数据库结论。
 
@@ -306,7 +306,7 @@ git status --short
 - 有效 MySQL 配置下，完整 production Servlet context 在 Flyway 后建立唯一 plugin/adapter/catalog/JDBC/transaction/download/query/observability Bean 图，49 个 Tushare definition 与 adapter 全部通过真实 schema 校验；非 Web smoke 不被数据库装配破坏；
 - `application.yml` 只引用 TRD 附录 B 七个环境变量，不含真实秘密；数据库三项无默认值，Tushare Token 可空，既有超时/大小和 Core 分页/批次默认值保持冻结；
 - 缺 Token 时 Tushare 只表现为 download unavailable，元数据/既有数据查询和根 health 仍可用；MySQL 中断后根 health 为 DOWN/503；不探测真实 Tushare 网络；
-- 默认只公开 health/liveness/readiness；env、configprops、metrics 及其他管理端点不可访问，health/log/响应不包含 Token、密码、JDBC URL 或配置值；
+- 默认只公开 health/liveness/readiness，Actuator discovery 关闭；env、configprops、metrics 及其他管理端点不可访问；日志、health 和响应不包含 Token/密码，health 和响应也不包含 JDBC URL 或配置值；
 - 五项指标名、meter 类型、tag key 与 outcome/kind 闭集精确符合 TRD 17.3；只有启动快照中的插件/API 产生指标，没有 requestId、证券代码、参数/筛选值、错误文本或任意客户端标签；
 - 每个已知 download/query 只产生一个 `tensor.operation.completed`，成功计数与 response 一致，失败 stage/code 稳定；日志只含白名单参数/筛选名，不含值、原异常/cause/stack/SQL/秘密，supplier 的结果和异常 identity 不变；
 - API、Actuator、错误与静态资源响应具有六个固定安全头；`/assets/**` 一年 public immutable，`/`/`index.html`/API/Actuator no-store，其他 no-cache；不提前实现 CORS 或 SPA fallback；
