@@ -75,6 +75,35 @@ describe('DatasetSelect', () => {
     expect(datasets).toEqual(original)
   })
 
+  it('shows distinct visible empty states for unavailable datasets and unmatched searches', async () => {
+    const empty = mount(DatasetSelect, {
+      attachTo: document.body,
+      props: { modelValue: '', datasets: [] },
+    })
+
+    try {
+      await empty.get('input[role="combobox"]').trigger('click')
+      await flushPromises()
+      expect(document.body.textContent).toContain('暂无数据集')
+    } finally {
+      empty.unmount()
+    }
+
+    const wrapper = mount(DatasetSelect, {
+      attachTo: document.body,
+      props: { modelValue: '', datasets: [dataset('daily', '日线行情')] },
+    })
+
+    try {
+      await wrapper.get('input[role="combobox"]').trigger('click')
+      await filter(wrapper, '不存在')
+      await flushPromises()
+      expect(document.body.textContent).toContain('无匹配数据集')
+    } finally {
+      wrapper.unmount()
+    }
+  })
+
   it('is controlled and emits exactly one apiName without writing its prop', async () => {
     const wrapper = mount(DatasetSelect, {
       props: { modelValue: 'daily', datasets: [dataset('daily', '日线行情'), dataset('weekly', '周线行情')] },

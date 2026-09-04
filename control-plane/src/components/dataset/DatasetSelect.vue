@@ -52,6 +52,9 @@ function updateValue(value) {
       aria-label="数据集"
       @update:model-value="updateValue"
     >
+      <template #empty>
+        {{ query.trim() && datasets.length ? '无匹配数据集' : '暂无数据集' }}
+      </template>
       <el-option-group
         v-for="group in groups"
         :key="group.category"
