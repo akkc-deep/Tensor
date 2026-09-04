@@ -77,7 +77,7 @@
 | 56 | M11-T01 | 数据源与接口分组搜索选择组件 | `COMPLETED` | M10-T03 | docs/task-designs/M11-T01-design.md | docs/task-handoffs/M11-T01-handoff.md |
 | 57 | M11-T02 | 元数据驱动动态参数表单 | `COMPLETED` | M10-T03, M10-T04 | docs/task-designs/M11-T02-design.md | docs/task-handoffs/M11-T02-handoff.md |
 | 58 | M11-T03 | 下载 composable、控件锁定和请求世代 | `COMPLETED` | M10-T03 | docs/task-designs/M11-T03-design.md | docs/task-handoffs/M11-T03-handoff.md |
-| 59 | M11-T04 | 成功、空和失败结果组件 | `IN_PROGRESS` | M10-T04, M11-T03 | docs/task-designs/M11-T04-design.md | docs/task-handoffs/M11-T04-handoff.md |
+| 59 | M11-T04 | 成功、空和失败结果组件 | `COMPLETED` | M10-T04, M11-T03 | docs/task-designs/M11-T04-design.md | docs/task-handoffs/M11-T04-handoff.md |
 | 60 | M11-T05 | `DownloadView` 页面集成和组件回归 | `NOT_STARTED` | M11-T01, M11-T02, M11-T03, M11-T04 | None | None |
 | 61 | M12-T01 | 数据集选择与动态筛选表单 | `NOT_STARTED` | M10-T03, M10-T04 | None | None |
 | 62 | M12-T02 | 全字段、固定列和横向滚动表格 | `NOT_STARTED` | M10-T04 | None | None |
@@ -841,6 +841,7 @@
 - **First action:** 读取 `docs/superpowers/plans/tensor-modules/M11-download-ui.md` 的 `Task M11-T04` 任务卡，并确认其 `Context boundary`、输入和目标文件均可定位。
 - **State evidence (readiness):** 2026-09-04：M11-T03 已以实现提交 `e893d0f` 交付唯一 `useDownloadFlow()`、七态、锁定、generation 和三类操作感知重试，并由提交 `90bffd7` 在权威看板记录 `IN_PROGRESS -> COMPLETED`；按预定义顺序选择最小更大 Order 的后继 M11-T04。项目所有者明确批准 `DownloadAction(disabled, submitting)`/`submit` 与 `DownloadResult(state, result, error, canRetry)`/`retry` 的最小公开接口，以及固定“开始下载”、SUCCESS 三计数、精确 EMPTY 文案、FAILURE 安全摘要/请求 ID/受控原参数重试边界；提交 `2a2f05b` 已创建并回填 `docs/task-designs/M11-T04-design.md`，其七个必需章节冻结精确三文件范围、两个受控组件、三态无障碍语义、纯文本安全边界、严格 RED、6/67 测试计数、固定实现提交和失败边界，没有占位或未决材料。两项直接依赖 M10-T04、M11-T03 均为 `COMPLETED`；当前 `AsyncStatePanel.vue`/spec 相对 M10-T04 最终修复提交 `0818fbc` 无差异，当前 `useDownloadFlow.js`/spec 相对 M11-T03 实现提交 `e893d0f` 无差异，通用 EMPTY/FAILURE 容器与唯一最终状态/响应/错误/重试判定互补且无冲突。Node 24.15.0 下重新验证当前前端基线为 11 files / 61 tests 全通过，Vite 8.2.2 构建转换 1599 modules 并退出 0，只产生既有 Element Plus chunk-size 提示。`docs/task-handoffs/M11-T04-handoff.md` 已按 `next-task` 模板完整创建并链接，只记录 M11-T04 与两项直接输入，包含同一设计路径、精确 artifact/decision/rationale/constraint/usage/readiness evidence、设计优先读取顺序，以及确认干净 Node 24 基线后只创建完整 `DownloadResult.spec.js` 并取得目标组件缺失 RED 的具体首个动作。因此执行真实的 `NOT_STARTED -> READY`；实现尚未开始。
 - **State evidence (start):** 2026-09-04：用户明确要求按照权威任务看板执行当前任务；已完整读取 `docs/task-designs/M11-T04-design.md` 与 `docs/task-handoffs/M11-T04-handoff.md`，并按交接顺序核对任务卡、M10-T04/M11-T03 直接依赖及 PRD 5.6、5.7、7.2、9 节，确认任务身份、范围、接口、验收、读取顺序和严格 RED 首个动作一致且无冲突，作为本次 `READY -> IN_PROGRESS` 的启动证据；既有交接路径保留为进入上下文。
+- **Completion evidence:** 2026-09-05：严格 TDD 先完整创建 `DownloadResult.spec.js`，聚焦命令仅因 `DownloadResult.vue` 缺失在收集阶段退出 1；提交 `8bb9959` 以固定消息精确新增 `DownloadAction.vue`、`DownloadResult.vue` 和 6 项真实组件测试，交付受控提交按钮、SUCCESS 三计数礼貌播报、EMPTY 精确成功文案、FAILURE 安全摘要/可用请求 ID/受 `canRetry` 唯一控制的原参数重试。逐项本地审查发现原测试未排除组件自行读取 `error.retryable`，提交 `c78d4f3` 以相反的内部 retryable/`canRetry` 值强化边界；错误实现突变产生精确 1 项失败，恢复受控实现后聚焦 6/6。最终新鲜验证在 Node.js 24.15.0 下聚焦 1 file / 6 tests、完整前端 12 files / 67 tests 全通过，Vite 8.2.2 构建转换 1599 modules 并退出 0，仅有既有 Element Plus chunk-size 提示；累计差异精确为设计三文件，初始实现提交范围与消息准确，安全扫描无命中且退出 1，受保护路径无差异，`git diff --check` 通过并且工作树干净。结果级检查确认所有公开 props/emits、锁定、三态、无障碍、纯文本和不泄漏边界逐项满足设计与任务卡，未混入排除范围，因此执行 `IN_PROGRESS -> COMPLETED`。
 
 ### `M11-T05`
 
