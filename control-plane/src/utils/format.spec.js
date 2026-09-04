@@ -52,6 +52,18 @@ describe('display utilities', () => {
     expect(
       formatIngestedAt('2026-08-25T02:30:15.123Z', 'Not/A_Zone'),
     ).toBe('2026-08-25 10:30:15')
+    expect(
+      formatIngestedAt('2026-08-25T10:30:15.123+08:00', 'UTC'),
+    ).toBe('2026-08-25 02:30:15')
+
+    for (const value of [
+      '2026-02-30T02:30:15Z',
+      '2026-08-25T02:30:15',
+      '2026-08-25T24:00:00Z',
+      '2026-08-25T02:30:15+24:00',
+    ]) {
+      expect(formatIngestedAt(value)).toBe(value)
+    }
     expect(formatIngestedAt('not-a-time')).toBe('not-a-time')
 
     const nonString = { value: '2026-08-25T02:30:15.123Z' }

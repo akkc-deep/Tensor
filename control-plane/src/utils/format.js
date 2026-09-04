@@ -1,6 +1,7 @@
-import { formatDate } from './date.js'
+import { formatDate, toApiDate } from './date.js'
 
 const DEFAULT_TIME_ZONE = 'Asia/Shanghai'
+const INSTANT_PATTERN = /^(\d{4}-\d{2}-\d{2})T(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d(?:\.\d{1,9})?(?:Z|[+-](?:[01]\d|2[0-3]):[0-5]\d)$/
 
 function formatter(timeZone) {
   return new Intl.DateTimeFormat('en-CA', {
@@ -23,11 +24,19 @@ function formatterFor(timeZone) {
   }
 }
 
-export function formatIngestedAt(value, timeZone = DEFAULT_TIME_ZONE) {
-  if (typeof value !== 'string') return value
+function parseInstant(value) {
+  if (typeof value !== 'string') return null
+
+  const match = INSTANT_PATTERN.exec(value)
+  if (!match || toApiDate(match[1]) === null) return null
 
   const instant = new Date(value)
-  if (Number.isNaN(instant.getTime())) return value
+  return Number.isNaN(instant.getTime()) ? null : instant
+}
+
+export function formatIngestedAt(value, timeZone = DEFAULT_TIME_ZONE) {
+  const instant = parseInstant(value)
+  if (instant === null) return value
 
   const parts = Object.fromEntries(
     formatterFor(timeZone)
