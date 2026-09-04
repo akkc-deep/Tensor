@@ -111,21 +111,42 @@ describe('app router', () => {
 Create `control-plane/src/layouts/AppLayout.spec.js` exactly as follows:
 
 ```js
+import { readFileSync } from 'node:fs'
+
 import { flushPromises, mount } from '@vue/test-utils'
 import { createMemoryHistory } from 'vue-router'
 
 import { createAppRouter } from '../router/index.js'
 import AppLayout from './AppLayout.vue'
-import '../style.css'
+
+const styles = readFileSync('src/style.css', 'utf8')
+
+let styleElement
+
+beforeAll(() => {
+  styleElement = document.createElement('style')
+  styleElement.textContent = styles
+  document.head.append(styleElement)
+})
+
+afterAll(() => styleElement.remove())
+
+function declaration(selector, property) {
+  const rule = [...styleElement.sheet.cssRules].find((candidate) =>
+    candidate.selectorText
+      ?.split(',')
+      .map((part) => part.trim())
+      .includes(selector),
+  )
+
+  return rule.style.getPropertyValue(property).trim()
+}
 
 function resolveColor(value) {
-  const match = value.match(/^var\((--[\w-]+)(?:,\s*(#[\da-f]{6}))?\)$/i)
-  if (!match) return value
+  const variable = value.match(/var\((--[\w-]+)(?:,\s*(#[\da-f]{6}))?\)/i)
+  if (variable) return declaration(':root', variable[1]) || variable[2]
 
-  return (
-    getComputedStyle(document.documentElement).getPropertyValue(match[1]).trim() ||
-    match[2]
-  )
+  return value.match(/#[\da-f]{6}/i)[0]
 }
 
 function luminance(hex) {
@@ -176,9 +197,15 @@ describe('AppLayout', () => {
       ])
       expect(links[0].attributes('aria-current')).toBe('page')
       expect(links[1].attributes('aria-current')).toBeUndefined()
-      const activeColor = resolveColor(getComputedStyle(links[0].element).color)
+      const activeColor = resolveColor(
+        declaration('.tensor-nav a.router-link-active', 'color'),
+      )
       expect(contrastRatio(activeColor, '#ffffff')).toBeGreaterThanOrEqual(4.5)
       expect(contrastRatio(activeColor, '#ecf5ff')).toBeGreaterThanOrEqual(4.5)
+      const focusColor = resolveColor(
+        declaration('.tensor-nav a:focus-visible', 'outline'),
+      )
+      expect(contrastRatio(focusColor, '#ffffff')).toBeGreaterThanOrEqual(3)
       expect(wrapper.get('main h1').text()).toBe('数据下载')
       expect(wrapper.get('main p').text()).toBe(
         '数据下载模块尚未完成，后续任务将提供数据源、接口、参数和下载结果。',
@@ -220,7 +247,7 @@ describe('AppLayout', () => {
       const returnLink = wrapper.get('main a')
       expect(returnLink.text()).toBe('返回数据下载')
       expect(returnLink.attributes('href')).toBe('/downloads')
-      const actionColor = resolveColor(getComputedStyle(returnLink.element).color)
+      const actionColor = resolveColor(declaration('.page__action', 'color'))
       expect(contrastRatio(actionColor, '#ffffff')).toBeGreaterThanOrEqual(4.5)
     } finally {
       wrapper.unmount()
