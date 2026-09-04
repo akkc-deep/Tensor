@@ -1,14 +1,14 @@
-# Spring JDBC 数据库访问复杂度收敛设计
+# ISSUE-003：Spring JDBC 数据库访问复杂度收敛方案
 
-状态：已确认，待制定实施计划。
+方案状态：已确认，待制定实施计划。
 
-关联问题：[ISSUE-003：数据库交互逻辑较复杂](../../issues/problems/ISSUE-003-database-access-complexity.md)
+关联问题：[ISSUE-003：数据库交互逻辑较复杂](../problems/ISSUE-003-database-access-complexity.md)
 
 ## 背景与结论
 
 当前业务数据访问使用 Spring JDBC。复杂度主要来自运行时元数据决定的表名、列、逻辑类型、业务键和批大小，而不是缺少 ORM 或 Mapper 框架。MyBatis 仍需保留这些动态规则，并会额外引入 SqlProvider、动态结果映射和 Batch Executor 配置，因此本次不迁移 MyBatis。
 
-本设计保留现有 Spring JDBC 和业务边界，以最小重构收敛重复的 JDBC 类型处理，并从已有键 Repository 中分离 SQL 构造。目标是让类型变化只有一个维护点，让 Repository 只保留各自的查询或写入编排，不改变任何外部行为。
+本方案保留现有 Spring JDBC 和业务边界，以最小重构收敛重复的 JDBC 类型处理，并从已有键 Repository 中分离 SQL 构造。目标是让类型变化只有一个维护点，让 Repository 只保留各自的查询或写入编排，不改变任何外部行为。
 
 ## 目标
 
@@ -157,7 +157,7 @@ public final class ExistingKeySqlFactory {
 - 所有当前精确 SQL 文本和参数顺序保持不变。
 - 标识符只能来自已准入的 `DatasetDefinition` 或固定技术列，并在 SQL 边界再次校验。
 - 所有数据值继续由 PreparedStatement 绑定，禁止值字符串插值。
-- Codec 的 null、索引和不支持绑定类型失败保持当前异常类别及已测试消息；不支持的读取类型使用设计冻结的新固定消息。
+- Codec 的 null、索引和不支持绑定类型失败保持当前异常类别及已测试消息；不支持的读取类型使用方案冻结的新固定消息。
 - SQL、连接、绑定或读取失败继续由 Spring 转换为 `DataAccessException`。
 - 本次不改变 Service 对数据库失败的处理；相关业务错误语义属于其他已记录问题。
 - 不记录或回显业务数据、Token、凭证或完整 SQL 参数。

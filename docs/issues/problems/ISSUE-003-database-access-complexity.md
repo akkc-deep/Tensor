@@ -2,7 +2,7 @@
 
 ## 当前阶段
 
-[Spring JDBC 数据库访问复杂度收敛设计](../../superpowers/specs/2026-09-05-spring-jdbc-complexity-reduction-design.md) 已确认，待制定实施计划；尚未修改生产代码。
+[Spring JDBC 数据库访问复杂度收敛方案](../proposals/ISSUE-003-spring-jdbc-complexity-reduction.md) 已确认，待制定实施计划；尚未修改生产代码。
 
 ## 问题描述
 
@@ -41,7 +41,7 @@
 - 将重复的 JDBC 类型映射、参数绑定和结果读取收敛到统一的 `JdbcValueCodec`。
 - 将已有业务键查询 SQL 从 `ExistingKeyRepository` 提取到 `ExistingKeySqlFactory`。
 - 保留 `SqlIdentifierPolicy`、`UpsertSqlFactory` 和 `QuerySqlFactory`，不创建通用 DAO 或大一统 SQL 框架。
-- 具体结构、行为边界和验收方式以已确认的 [正式设计](../../superpowers/specs/2026-09-05-spring-jdbc-complexity-reduction-design.md)为准。
+- 具体结构、行为边界和验收方式以已确认的 [方案](../proposals/ISSUE-003-spring-jdbc-complexity-reduction.md)为准。
 
 ## 非目标
 
@@ -51,7 +51,7 @@
 
 ## 后续产物
 
-1. 已确认的 [Spring JDBC 数据库访问复杂度收敛设计](../../superpowers/specs/2026-09-05-spring-jdbc-complexity-reduction-design.md)。
+1. 已确认的 [Spring JDBC 数据库访问复杂度收敛方案](../proposals/ISSUE-003-spring-jdbc-complexity-reduction.md)。
 2. 实施计划和可独立验收的任务。
 3. 实现、回归测试及验收证据。
 
