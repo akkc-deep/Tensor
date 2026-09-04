@@ -37,7 +37,7 @@ function updateValue(value) {
 </script>
 
 <template>
-  <div class="dataset-select">
+  <div class="dataset-select" @keydown.capture.esc="filter('')">
     <label class="dataset-select__label" for="dataset-select">数据集</label>
     <el-select
       id="dataset-select"
