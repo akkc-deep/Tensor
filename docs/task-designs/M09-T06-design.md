@@ -105,7 +105,7 @@ public PageResponse query(
 
 包装器先确认 key 是启动快照中的已知插件/API。未知 key 不产生业务完成日志或指标，但必须原样执行 supplier，让既有 Controller/handler 返回批准的 400/409；该安全拒绝仍由 M09-T05 的全局日志覆盖。已知 key 使用单调时钟包围 supplier：成功时记录结果后返回同一对象；`RuntimeException` 时记录失败后重新抛出同一实例，不吞掉、不替换、不重试。
 
-下载成功完成事件名固定为 `tensor.operation.completed`，字段为 `requestId, operation=download, pluginId, apiName, paramSummary, sourceRowCount, insertedRows, updatedRows, durationMs, outcome, failureStage, errorCode`。查询事件字段为 `requestId, operation=query, pluginId, apiName, filterNames, page, pageSize, resultCount, totalElements, durationMs, outcome, errorCode`。使用 SLF4J 参数化 `key=value` 文本，不使用字符串拼接或 Throwable 参数。
+下载成功完成事件名固定为 `tensor.operation.completed`，字段为 `requestId, operation=download, pluginId, apiName, paramSummary, sourceRowCount, insertedRows, updatedRows, durationMs, outcome, failureStage, errorCode`。查询事件字段为 `requestId, operation=query, pluginId, apiName, filterNames, page, pageSize, resultCount, totalElements, durationMs, outcome, failureStage, errorCode`。使用 SLF4J 参数化 `key=value` 文本，不使用字符串拼接或 Throwable 参数。
 
 `paramSummary` 只列 descriptor 中声明且本次 map 包含的参数名，保持 descriptor 原序；不记录任何值，未声明键和大小写包含 `token|authorization|cookie|password|credential` 的键不会出现。`filterNames` 只由 Controller 按 `ts_code,trade_date,ann_date` 固定顺序传入存在值的已批准筛选名；不记录证券代码或日期值。MDC 缺少 requestId 继续由现有 Controller 在调用包装器前失败。
 
