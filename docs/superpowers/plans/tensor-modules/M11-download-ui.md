@@ -28,10 +28,10 @@
 - Create: `control-plane/src/components/download/DataSourceSelect.vue`, `ApiSelect.vue`, `ApiDescription.vue`
 - Test: `control-plane/src/components/download/DataSourceSelect.spec.js`, `control-plane/src/components/download/ApiSelect.spec.js`, `control-plane/src/components/download/ApiDescription.spec.js`
 
-**Interfaces:** Props use M10 normalized descriptors; emits `update:modelValue`; API options group by eight categories and search apiName/displayName.
+**Interfaces:** Props use M10 normalized descriptors; emits `update:modelValue`; API options group by descriptor category and search apiName/displayName. Per the project owner's 2026-09-04 decision, the current 49 descriptors remain in seven metadata groups; do not split the combined connectivity/securities-lending group in the UI.
 
 - [ ] Confirm task design; freeze selection/reset and unavailable-reason presentation.
-- [ ] Test single-source default, unavailable source disabled, 49 grouped options, search and change emits.
+- [ ] Test single-source default, unavailable source disabled, 49 options across the current seven metadata groups, search and change emits.
 - [ ] Run component tests and confirm missing components fail.
 - [ ] Implement visible labels and keyboard-operable Element Plus controls without embedding the 49 API list.
 - [ ] Run tests and commit as `feat(ui): add download source and API selectors` when Git exists.
