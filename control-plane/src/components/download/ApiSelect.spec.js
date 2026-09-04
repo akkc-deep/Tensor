@@ -126,6 +126,8 @@ describe('ApiSelect', () => {
 
       await combobox.trigger('keydown', { key: 'ArrowDown' })
       await flushPromises()
+      expect(wrapper.emitted('update:modelValue')).toBeUndefined()
+
       await combobox.trigger('keydown', { key: 'Enter' })
       await flushPromises()
       expect(wrapper.emitted('update:modelValue')).toEqual([['daily']])
@@ -135,6 +137,10 @@ describe('ApiSelect', () => {
       expect(wrapper.get('input[role="combobox"]').attributes('disabled')).toBe(
         '',
       )
+      await combobox.trigger('keydown', { key: 'ArrowDown' })
+      await combobox.trigger('keydown', { key: 'Enter' })
+      await flushPromises()
+      expect(wrapper.emitted('update:modelValue')).toEqual([['daily']])
     } finally {
       wrapper.unmount()
     }
