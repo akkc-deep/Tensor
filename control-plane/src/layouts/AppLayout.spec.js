@@ -3,6 +3,17 @@ import { readFileSync } from 'node:fs'
 import { flushPromises, mount } from '@vue/test-utils'
 import { createMemoryHistory } from 'vue-router'
 
+const metadataApi = vi.hoisted(() => ({
+  listDataSources: vi.fn(),
+  listApis: vi.fn(),
+}))
+
+vi.mock('../api/dataSources.js', () => ({
+  listDataSources: metadataApi.listDataSources,
+  listApis: metadataApi.listApis,
+}))
+
+import DownloadAction from '../components/download/DownloadAction.vue'
 import { createAppRouter } from '../router/index.js'
 import AppLayout from './AppLayout.vue'
 
@@ -17,6 +28,11 @@ beforeAll(() => {
 })
 
 afterAll(() => styleElement.remove())
+
+beforeEach(() => {
+  vi.resetAllMocks()
+  metadataApi.listDataSources.mockResolvedValue([])
+})
 
 function declaration(selector, property) {
   const rule = [...styleElement.sheet.cssRules].find((candidate) =>
@@ -61,13 +77,15 @@ async function mountAt(path) {
   await router.push(path)
   await router.isReady()
 
-  return {
+  const result = {
     router,
     wrapper: mount(AppLayout, {
       attachTo: document.body,
       global: { plugins: [router] },
     }),
   }
+  await flushPromises()
+  return result
 }
 
 describe('AppLayout', () => {
@@ -94,9 +112,11 @@ describe('AppLayout', () => {
       )
       expect(contrastRatio(focusColor, '#ffffff')).toBeGreaterThanOrEqual(3)
       expect(wrapper.get('main h1').text()).toBe('数据下载')
-      expect(wrapper.get('main p').text()).toBe(
-        '数据下载模块尚未完成，后续任务将提供数据源、接口、参数和下载结果。',
+      expect(wrapper.get('main h2').text()).toBe('请选择数据接口')
+      expect(wrapper.getComponent(DownloadAction).props('disabled')).toBe(
+        true,
       )
+      expect(wrapper.text()).not.toContain('数据下载模块尚未完成')
     } finally {
       wrapper.unmount()
     }
