@@ -75,7 +75,7 @@
 | 54 | M10-T03 | Axios 客户端、DTO 和错误拦截 | `COMPLETED` | M00-T03, M10-T01 | docs/task-designs/M10-T03-design.md | docs/task-handoffs/M10-T03-handoff.md |
 | 55 | M10-T04 | 日期、空值、精度格式化和无障碍状态组件 | `COMPLETED` | M10-T01 | docs/task-designs/M10-T04-design.md | docs/task-handoffs/M10-T04-handoff.md |
 | 56 | M11-T01 | 数据源与接口分组搜索选择组件 | `COMPLETED` | M10-T03 | docs/task-designs/M11-T01-design.md | docs/task-handoffs/M11-T01-handoff.md |
-| 57 | M11-T02 | 元数据驱动动态参数表单 | `READY` | M10-T03, M10-T04 | docs/task-designs/M11-T02-design.md | docs/task-handoffs/M11-T02-handoff.md |
+| 57 | M11-T02 | 元数据驱动动态参数表单 | `IN_PROGRESS` | M10-T03, M10-T04 | docs/task-designs/M11-T02-design.md | docs/task-handoffs/M11-T02-handoff.md |
 | 58 | M11-T03 | 下载 composable、控件锁定和请求世代 | `NOT_STARTED` | M10-T03 | None | None |
 | 59 | M11-T04 | 成功、空和失败结果组件 | `NOT_STARTED` | M10-T04, M11-T03 | None | None |
 | 60 | M11-T05 | `DownloadView` 页面集成和组件回归 | `NOT_STARTED` | M11-T01, M11-T02, M11-T03, M11-T04 | None | None |
@@ -812,6 +812,8 @@
 - **Sources:** `docs/superpowers/plans/tensor-modules/M11-download-ui.md` 的 `Task M11-T02` 任务卡。
 - **First action:** 读取 `docs/superpowers/plans/tensor-modules/M11-download-ui.md` 的 `Task M11-T02` 任务卡，并确认其 `Context boundary`、输入和目标文件均可定位。
 - **State evidence (readiness):** 2026-09-04：M11-T01 已以实现提交 `e08f467`、审查测试修复 `38ddb8a`、Node 24.15.0 下聚焦 10/10、全量 44/44、生产构建、精确六文件范围和最终独立复审无问题完成，并由提交 `5c6064a` 在权威看板记录 `IN_PROGRESS -> COMPLETED`；按预定义顺序选择最小更大 Order 的后继 M11-T02。项目所有者已明确批准参数表单的公开接口、六类控件映射、显示/提交格式、默认值/reset/快照失效、必填/类型/pattern/范围错误、首错聚焦和 9 项测试设计；提交 `ca947e7` 已创建并回填 `docs/task-designs/M11-T02-design.md`，其七个必需章节冻结精确三文件范围、严格 RED、聚焦 9/9、全量 53/53、固定实现提交和失败边界，没有占位或未决材料。两项直接依赖 M10-T03、M10-T04 均为 `COMPLETED`；当前 `dataSources.js`/相关 API 测试相对 M10-T03 最终修复提交 `890ed88` 无差异，当前 `date.js`、`validation.js`、`FieldError.vue` 及相关测试相对 M10-T04 最终修复提交 `0818fbc` 无差异，参数描述符合同与通用转换、校验和错误渲染原语互补且无冲突。Node 24.15.0 下重新验证当前前端基线为 9 files / 44 tests 全通过，Vite 8.2.2 构建转换 1599 modules 并退出 0，只产生既有 Element Plus chunk-size 提示。`docs/task-handoffs/M11-T02-handoff.md` 已按 `next-task` 模板完整创建并链接，只记录 M11-T02 与两项直接输入，包含同一设计路径、精确 artifact/decision/rationale/constraint/usage/readiness evidence、设计优先读取顺序，以及确认干净 Node 24 基线后只创建完整 spec 并取得缺组件 RED 的具体首个动作。因此执行真实的 `NOT_STARTED -> READY`；实现尚未开始。
+
+- **State evidence (start):** 2026-09-04：用户明确要求按照权威任务看板执行当前任务；已完整读取 `docs/task-designs/M11-T02-design.md`、`docs/task-handoffs/M11-T02-handoff.md`、M11-T02 任务卡、M10-T03/M10-T04 直接依赖设计与其当前产物，并确认公开接口、六类控件、校验/快照边界、精确三文件范围、严格 TDD 顺序和首个动作均可定位且无冲突。普通 `main` 检出由仓库级 `AGENTS.md` 明确授权原地工作；开始前工作树干净，Node.js 24.15.0 下前端基线为 9 files / 44 tests 全通过。该请求构成本次 `READY -> IN_PROGRESS` 的明确启动证据；既有 `next-task` 交接路径保留为进入上下文。
 
 ### `M11-T03`
 
