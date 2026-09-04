@@ -69,7 +69,7 @@
 | 48 | M09-T03 | 同步下载 API 与事务提交后结果 | `COMPLETED` | M05-T01, M05-T03, M05-T05, M06-T04, M07-T04, M09-T01 | docs/task-designs/M09-T03-design.md | docs/task-handoffs/M09-T03-handoff.md |
 | 49 | M09-T04 | 数据集定义与只读分页查询 API | `COMPLETED` | M05-T02, M06-T06, M09-T01 | docs/task-designs/M09-T04-design.md | docs/task-handoffs/M09-T04-handoff.md |
 | 50 | M09-T05 | 全局异常和 HTTP 状态映射 | `COMPLETED` | M09-T02, M09-T03, M09-T04 | docs/task-designs/M09-T05-design.md | docs/task-handoffs/M09-T05-handoff.md |
-| 51 | M09-T06 | 配置、脱敏、指标、健康和静态资源安全 | `READY` | M09-T01, M09-T02, M09-T03, M09-T04, M09-T05 | docs/task-designs/M09-T06-design.md | docs/task-handoffs/M09-T06-handoff.md |
+| 51 | M09-T06 | 配置、脱敏、指标、健康和静态资源安全 | `IN_PROGRESS` | M09-T01, M09-T02, M09-T03, M09-T04, M09-T05 | docs/task-designs/M09-T06-design.md | docs/task-handoffs/M09-T06-handoff.md |
 | 52 | M10-T01 | Vue 依赖、Vitest、VTU 和 Playwright 配置 | `NOT_STARTED` | M00-T03 | None | None |
 | 53 | M10-T02 | `/downloads`、`/datasets` 路由和桌面布局 | `NOT_STARTED` | M10-T01 | None | None |
 | 54 | M10-T03 | Axios 客户端、DTO 和错误拦截 | `NOT_STARTED` | M00-T03, M10-T01 | None | None |
@@ -720,6 +720,7 @@
 - **Sources:** `docs/superpowers/plans/tensor-modules/M09-app-api.md` 的 `Task M09-T06` 任务卡。
 - **First action:** 读取 `docs/superpowers/plans/tensor-modules/M09-app-api.md` 的 `Task M09-T06` 任务卡，并确认其 `Context boundary`、输入和目标文件均可定位。
 - **State evidence (readiness):** 2026-09-04：项目所有者依次批准把 M09-T02～T05 明确延期的生产 Bean 总装配纳入 M09-T06、以显式 Controller wrapper 接入观测而不使用 AOP/请求响应缓存、日志/指标/健康/静态资源安全方案、13 文件实现与验证范围，以及最终书面设计；提交 `7d46800` 创建并回填 `docs/task-designs/M09-T06-design.md`，提交 `afe6200` 澄清 query 完成日志边界，提交 `b4ea49e` 将批准设计转化为 `docs/superpowers/plans/2026-09-04-m09-t06-safe-configuration-observability.md` 的 16 步严格 TDD 计划。设计七节、计划强制头、7 新增/6 修改文件范围、四个新生产类型 RED、18/51/1/53/338 测试计数、五项 mutation、固定指标/标签/安全头/缓存/Actuator/秘密边界、单一审查、JAR/范围/格式/跟踪/clean 门禁和固定实现提交均已完整复读和自审，无留给实施者的材料选择。五项直接依赖 M09-T01～T05 均为 `COMPLETED`，当前生产消费文件分别相对实现提交 `367b0d1`、`2c40b53`、`ade4995`、`4617f22`、`b2dbb09` 无差异；它们提供的 Boot/请求身份、元数据装配缺口、下载事务边界、只读查询/精度语义和唯一脱敏错误出口互补且无冲突。`docs/task-handoffs/M09-T06-handoff.md` 已按 `next-task` 模板完整创建并链接，只记录 M09-T06 与五项直接输入，包含同一设计路径、精确 artifact/decision/rationale/constraint/usage/readiness evidence、设计/计划优先读取顺序，以及先确认工作树为空和 320/320 基线、再完整创建两个测试文件并取得只因四个新生产类型缺失而失败的严格 RED 首个动作。因此执行真实的 `NOT_STARTED -> READY`；功能实现尚未开始。
+- **State evidence (start):** 2026-09-04：用户明确要求按照权威任务看板执行当前任务；已完整读取 `docs/task-designs/M09-T06-design.md`、实施计划、`docs/task-handoffs/M09-T06-handoff.md`、任务卡及其强制依赖输入，确认任务身份、13 文件范围、严格 TDD 顺序、验收计数和首个动作均可定位且无冲突；工作树为空，仓库指引允许直接在 `main` 工作。该请求作为本次 `READY -> IN_PROGRESS` 的显式启动证据，既有交接路径保留为进入上下文。
 
 ### `M10-T01`
 
