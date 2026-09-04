@@ -95,7 +95,7 @@ onMounted(load)
     >
       <template v-if="error.requestId || canRetry" #actions>
         <p v-if="error.requestId">请求 ID：{{ error.requestId }}</p>
-        <el-button v-if="canRetry" native-type="button" @click="retry">
+        <el-button v-if="canRetry" native-type="button" @click="retry()">
           重新加载
         </el-button>
       </template>
