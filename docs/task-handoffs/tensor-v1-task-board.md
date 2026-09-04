@@ -72,7 +72,7 @@
 | 51 | M09-T06 | 配置、脱敏、指标、健康和静态资源安全 | `COMPLETED` | M09-T01, M09-T02, M09-T03, M09-T04, M09-T05 | docs/task-designs/M09-T06-design.md | docs/task-handoffs/M09-T06-handoff.md |
 | 52 | M10-T01 | Vue 依赖、Vitest、VTU 和 Playwright 配置 | `COMPLETED` | M00-T03 | docs/task-designs/M10-T01-design.md | docs/task-handoffs/M10-T01-handoff.md |
 | 53 | M10-T02 | `/downloads`、`/datasets` 路由和桌面布局 | `COMPLETED` | M10-T01 | docs/task-designs/M10-T02-design.md | docs/task-handoffs/M10-T02-handoff.md |
-| 54 | M10-T03 | Axios 客户端、DTO 和错误拦截 | `NOT_STARTED` | M00-T03, M10-T01 | docs/task-designs/M10-T03-design.md | None |
+| 54 | M10-T03 | Axios 客户端、DTO 和错误拦截 | `READY` | M00-T03, M10-T01 | docs/task-designs/M10-T03-design.md | docs/task-handoffs/M10-T03-handoff.md |
 | 55 | M10-T04 | 日期、空值、精度格式化和无障碍状态组件 | `NOT_STARTED` | M10-T01 | None | None |
 | 56 | M11-T01 | 数据源与接口分组搜索选择组件 | `NOT_STARTED` | M10-T03 | None | None |
 | 57 | M11-T02 | 元数据驱动动态参数表单 | `NOT_STARTED` | M10-T03, M10-T04 | None | None |
@@ -763,7 +763,7 @@
 - **Dependencies:** M00-T03, M10-T01.
 - **Sources:** `docs/superpowers/plans/tensor-modules/M10-frontend-foundation.md` 的 `Task M10-T03` 任务卡。
 - **First action:** 读取 `docs/superpowers/plans/tensor-modules/M10-frontend-foundation.md` 的 `Task M10-T03` 任务卡，并确认其 `Context boundary`、输入和目标文件均可定位。
-- **State evidence:** None.
+- **State evidence (readiness):** 2026-09-04：M10-T02 已以提交 `d3d4be7`、范围内对比度修复 `993dd3c`、提交态 3 files/7 tests、Vite 构建仅含项目所有者批准的 Element Plus chunk-size 提示、精确 16 文件范围和独立复审无问题完成，权威看板已记录其 `IN_PROGRESS -> COMPLETED`；按预定义顺序选择最小更大 Order 的后继 M10-T03。项目所有者依次批准前端逐请求生成 UUID `X-Request-Id`、唯一 Axios 实例默认 `/api/v1`/130000ms 并由显式函数覆盖、服务端 `ApiError` 与四类 `ClientError` 分离、五模块显式边界，以及完整架构/错误/测试设计；提交 `aa601f1` 创建并回填 `docs/task-designs/M10-T03-design.md`，提交 `9b14b12` 将其转换为 `docs/superpowers/plans/2026-09-04-m10-t03-api-client.md` 的 14 步严格 TDD 计划。设计七节完整冻结六个公开请求函数、JSDoc DTO、错误校验、12/19 测试计数、6 个新增文件和固定实现提交；计划的测试与五个生产代码块均通过 JavaScript 语法检查，无占位符、范围或类型表面缺口。两项直接依赖 M00-T03、M10-T01 均为 `COMPLETED`；当前 OpenAPI/错误码相对 `068f001` 无差异，当前 package/lock/Vite/Vitest/Playwright/setup 相对 `90c2029` 无差异，两者提供的六路径/九 DTO/16 错误/精度安全合同与 Axios 1.20.0、Node 24、测试/代理基线互补且无冲突。`docs/task-handoffs/M10-T03-handoff.md` 已按 `next-task` 模板完整创建并链接，只记录 M10-T03 与两项直接输入，包含同一设计路径、精确 artifact/decision/rationale/constraint/usage/readiness evidence、设计/计划优先读取顺序，以及确认空工作树和 Node 24.15 后只创建完整 `api.spec.js` 并取得缺目标模块 RED 的具体首个动作。因此执行真实的 `NOT_STARTED -> READY`；API 客户端实现尚未开始。
 
 ### `M10-T04`
 
