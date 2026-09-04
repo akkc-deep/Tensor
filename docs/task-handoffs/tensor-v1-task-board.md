@@ -78,7 +78,7 @@
 | 57 | M11-T02 | 元数据驱动动态参数表单 | `COMPLETED` | M10-T03, M10-T04 | docs/task-designs/M11-T02-design.md | docs/task-handoffs/M11-T02-handoff.md |
 | 58 | M11-T03 | 下载 composable、控件锁定和请求世代 | `COMPLETED` | M10-T03 | docs/task-designs/M11-T03-design.md | docs/task-handoffs/M11-T03-handoff.md |
 | 59 | M11-T04 | 成功、空和失败结果组件 | `COMPLETED` | M10-T04, M11-T03 | docs/task-designs/M11-T04-design.md | docs/task-handoffs/M11-T04-handoff.md |
-| 60 | M11-T05 | `DownloadView` 页面集成和组件回归 | `NOT_STARTED` | M11-T01, M11-T02, M11-T03, M11-T04 | docs/task-designs/M11-T05-design.md | None |
+| 60 | M11-T05 | `DownloadView` 页面集成和组件回归 | `READY` | M11-T01, M11-T02, M11-T03, M11-T04 | docs/task-designs/M11-T05-design.md | docs/task-handoffs/M11-T05-handoff.md |
 | 61 | M12-T01 | 数据集选择与动态筛选表单 | `NOT_STARTED` | M10-T03, M10-T04 | None | None |
 | 62 | M12-T02 | 全字段、固定列和横向滚动表格 | `NOT_STARTED` | M10-T04 | None | None |
 | 63 | M12-T03 | 20/50/100 分页组件 | `NOT_STARTED` | M10-T04 | None | None |
@@ -851,7 +851,7 @@
 - **Dependencies:** M11-T01, M11-T02, M11-T03, M11-T04.
 - **Sources:** `docs/superpowers/plans/tensor-modules/M11-download-ui.md` 的 `Task M11-T05` 任务卡。
 - **First action:** 读取 `docs/superpowers/plans/tensor-modules/M11-download-ui.md` 的 `Task M11-T05` 任务卡，并确认其 `Context boundary`、输入和目标文件均可定位。
-- **State evidence:** None.
+- **State evidence (readiness):** 2026-09-05：M11-T04 已以实现提交 `8bb9959`、受控重试边界强化 `c78d4f3`、Node.js 24.15.0 下聚焦 6/6、全量 67/67、生产构建、安全/范围门禁和结果级逐项检查完成，并由提交 `f9f9a5d` 在权威看板记录 `IN_PROGRESS -> COMPLETED`；按预定义顺序选择最小更大 Order 的后继 M11-T05。项目所有者明确批准页面 mounted 自动加载、非最终状态独立面板、仅下载最终态使用 `DownloadResult`、稳定 router 不改，以及为自动加载副作用把 `App.spec.js`/`AppLayout.spec.js` 纳入精确四文件范围。提交 `4add580` 已创建并回填 `docs/task-designs/M11-T05-design.md`，其七个必需章节冻结唯一页面 composable、六段组件顺序、元数据/下载 FAILURE 分流、表单校验—快照—提交、锁定/重试/切换、严格 RED、聚焦 12/12、全量 75/75、固定实现提交和失败边界，没有占位或未决材料。四项直接依赖 M11-T01～T04 均为 `COMPLETED`，其当前产物分别相对完成提交 `38ddb8a`、`e6024c7`、`e893d0f`、`c78d4f3` 无差异，受控选择、参数表单、唯一流程和最终结果合同互补且无冲突。Node.js 24.15.0 下交接前新鲜基线为 12 files / 67 tests 全通过，Vite 8.2.2 构建转换 1599 modules 并退出 0，只含既有 Element Plus chunk-size 提示。`docs/task-handoffs/M11-T05-handoff.md` 已按 `next-task` 模板完整创建并先链接，记录同一设计路径、四项直接输入、读取顺序和只先修改测试取得既有占位页 RED 的具体首个动作；当前范围外 `.idea/misc.xml` 与 `data-plane/**/target/` 变化已在交接中标明须保留和绕开。因此执行真实的 `NOT_STARTED -> READY`；M11-T05 实现尚未开始。
 
 ### `M12-T01`
 
