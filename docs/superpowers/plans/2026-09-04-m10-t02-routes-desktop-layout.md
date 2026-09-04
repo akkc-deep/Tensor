@@ -19,6 +19,7 @@
 - Install the existing production router and Element Plus in `main.js`; keep M10-T01 package versions, lockfile, Vite/Vitest/Playwright configuration, and scripts unchanged.
 - Preserve the owner-approved full Element Plus installation even though it produces the single reproducible Vite `Some chunks are larger than 500 kB after minification` advisory for the approximately 1.00 MB JS bundle. Treat only that advisory as non-blocking; do not raise `chunkSizeWarningLimit`, switch to on-demand registration, or accept any other warning or error.
 - Use `body { min-width: 1280px; }` and browser-native horizontal scrolling below that width; never hide overflow, collapse navigation, or remove focus outlines.
+- Use the shell-specific `--tensor-interactive-color: #1f5f99` for hover/active/action text and focus outlines; it must retain at least 4.5:1 contrast against white and the active `#ecf5ff` background without overriding Element Plus's global primary theme.
 - Create/modify/delete exactly the 16 paths named by the design: 7 additions, 4 modifications, and 5 deletions; keep `public/favicon.svg` because `index.html` still references it.
 - Do not implement server-side SPA fallback; direct-refresh support for history routes remains M13-T03 scope.
 - Use strict test-first order and finish with the single implementation commit `feat(ui): add Tensor routes and desktop layout`.
@@ -115,6 +116,37 @@ import { createMemoryHistory } from 'vue-router'
 
 import { createAppRouter } from '../router/index.js'
 import AppLayout from './AppLayout.vue'
+import '../style.css'
+
+function resolveColor(value) {
+  const match = value.match(/^var\((--[\w-]+)(?:,\s*(#[\da-f]{6}))?\)$/i)
+  if (!match) return value
+
+  return (
+    getComputedStyle(document.documentElement).getPropertyValue(match[1]).trim() ||
+    match[2]
+  )
+}
+
+function luminance(hex) {
+  const channels = hex
+    .match(/[\da-f]{2}/gi)
+    .map((channel) => Number.parseInt(channel, 16) / 255)
+    .map((channel) =>
+      channel <= 0.04045
+        ? channel / 12.92
+        : ((channel + 0.055) / 1.055) ** 2.4,
+    )
+
+  return 0.2126 * channels[0] + 0.7152 * channels[1] + 0.0722 * channels[2]
+}
+
+function contrastRatio(foreground, background) {
+  const values = [luminance(foreground), luminance(background)].sort(
+    (left, right) => right - left,
+  )
+  return (values[0] + 0.05) / (values[1] + 0.05)
+}
 
 async function mountAt(path) {
   const router = createAppRouter(createMemoryHistory())
@@ -144,6 +176,9 @@ describe('AppLayout', () => {
       ])
       expect(links[0].attributes('aria-current')).toBe('page')
       expect(links[1].attributes('aria-current')).toBeUndefined()
+      const activeColor = resolveColor(getComputedStyle(links[0].element).color)
+      expect(contrastRatio(activeColor, '#ffffff')).toBeGreaterThanOrEqual(4.5)
+      expect(contrastRatio(activeColor, '#ecf5ff')).toBeGreaterThanOrEqual(4.5)
       expect(wrapper.get('main h1').text()).toBe('数据下载')
       expect(wrapper.get('main p').text()).toBe(
         '数据下载模块尚未完成，后续任务将提供数据源、接口、参数和下载结果。',
@@ -185,6 +220,8 @@ describe('AppLayout', () => {
       const returnLink = wrapper.get('main a')
       expect(returnLink.text()).toBe('返回数据下载')
       expect(returnLink.attributes('href')).toBe('/downloads')
+      const actionColor = resolveColor(getComputedStyle(returnLink.element).color)
+      expect(contrastRatio(actionColor, '#ffffff')).toBeGreaterThanOrEqual(4.5)
     } finally {
       wrapper.unmount()
     }
@@ -371,6 +408,8 @@ Replace `control-plane/src/style.css` with:
 
 ```css
 :root {
+  --tensor-interactive-color: #1f5f99;
+
   font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   color: var(--el-text-color-primary, #303133);
   background: var(--el-bg-color-page, #f5f7fa);
@@ -435,17 +474,17 @@ body {
 }
 
 .tensor-nav a:hover {
-  color: var(--el-color-primary, #409eff);
+  color: var(--tensor-interactive-color);
 }
 
 .tensor-nav a.router-link-active {
-  color: var(--el-color-primary, #409eff);
+  color: var(--tensor-interactive-color);
   background: var(--el-color-primary-light-9, #ecf5ff);
 }
 
 .tensor-nav a:focus-visible,
 .page__action:focus-visible {
-  outline: 3px solid var(--el-color-primary, #409eff);
+  outline: 3px solid var(--tensor-interactive-color);
   outline-offset: 3px;
 }
 
@@ -474,7 +513,7 @@ body {
 .page__action {
   display: inline-block;
   margin-top: 24px;
-  color: var(--el-color-primary, #409eff);
+  color: var(--tensor-interactive-color);
 }
 ```
 

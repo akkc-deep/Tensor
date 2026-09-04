@@ -89,11 +89,11 @@ div.tensor-shell
 
 `style.css` 删除全部 Vite 示例选择器和嵌套 demo 样式，固定以下最小规则：
 
-- `:root` 使用系统无衬线字体、`color-scheme: light`、Element Plus 的背景/文字/边框/主色变量及对应安全 fallback；
+- `:root` 使用系统无衬线字体、`color-scheme: light`、Element Plus 的背景/文字/边框变量及对应安全 fallback，并定义壳层专用 `--tensor-interactive-color: #1f5f99`；该颜色对白色和 active 浅蓝 `#ecf5ff` 的对比度分别为 6.656:1 和 6.045:1；
 - `* { box-sizing: border-box; }`，`html`、`body`、`#app` 至少占满视口高度；
 - `body` 为零 margin 且 `min-width: 1280px`，较窄 viewport 因此产生浏览器原生横向滚动，不使用 `overflow-x: hidden`；
 - header 为白色背景和下边框，内部高度 64px、左右 padding 32px，品牌与导航横向排列；品牌字号 20px、字重 600，导航链接间距 8px、单项 padding 8px 16px；
-- 导航链接为无下划线圆角文本，hover 与 active 使用 Element Plus 主色变量，active 具有浅色背景；`:focus-visible` 使用 3px 主色 outline 和 3px offset；
+- 导航链接为无下划线圆角文本，hover、active、404 返回链接与 focus outline 使用 `--tensor-interactive-color`，active 具有 Element Plus 浅色背景；`:focus-visible` 使用 3px outline 和 3px offset；
 - `main` 使用 32px padding；`.page` 使用白色背景、1px 边框、8px 圆角和 32px padding；页面 `h1` 为 28px 且正文保持可读行高；
 - 不增加窄屏 media query，不折叠导航，不隐藏主操作，不恢复示例 dark mode 或动画。
 
@@ -101,7 +101,7 @@ div.tensor-shell
 
 先完整创建 `router/index.spec.js`、`layouts/AppLayout.spec.js`，并把现有 `App.spec.js` 改成路由应用壳 smoke test；此时不创建 router/layout/views，也不修改生产入口，聚焦命令必须因目标模块不存在而 RED。测试要捕获的生产回归分别是错误路由表/重定向、未知路径未进入 404、导航语义或激活态丢失、链接不可获得键盘焦点，以及根 App 未接入布局。
 
-GREEN 只实现本设计的 router、layout、三个 view、入口和 CSS，然后删除确定无引用的示例文件。路由和 layout 测试使用真实 Vue Router memory history、真实 RouterLink/RouterView 和真实 view，不 stub 路由组件、不断言 mock 元素。任何 Vue warning、未处理导航 rejection、测试后残留 DOM、丢失资源或下述已批准提示之外的构建警告都视为缺陷；不得通过静默 warning、跳过用例或保留无引用示例资源绕过。
+GREEN 只实现本设计的 router、layout、三个 view、入口和 CSS，然后删除确定无引用的示例文件。路由和 layout 测试使用真实 Vue Router memory history、真实 RouterLink/RouterView 和真实 view，不 stub 路由组件、不断言 mock 元素；layout 测试加载真实 `style.css`，解析最终交互色并验证 active/404 链接在批准背景上的对比度至少 4.5:1。任何 Vue warning、未处理导航 rejection、测试后残留 DOM、丢失资源或下述已批准提示之外的构建警告都视为缺陷；不得通过静默 warning、跳过用例或保留无引用示例资源绕过。
 
 2026-09-04，项目所有者批准把生产入口按既定合同全量安装 Element Plus 后，Vite 对约 1.00 MB JS 超过默认 500 kB 阈值产生的唯一 `Some chunks are larger than 500 kB after minification` 提示记录为非阻断风险。本任务保持 `.use(ElementPlus)`、`element-plus/dist/index.css`、既有 Vite 配置与 16 文件范围，不提高 `chunkSizeWarningLimit` 掩盖 bundle 体积，也不改成会改变 M11/M12 消费合同的按需注册；构建仍必须退出 0，且不能出现其他 warning 或 error。
 
@@ -219,7 +219,7 @@ git check-ignore control-plane/node_modules control-plane/dist \
 
 - `/` 真实重定向到 named route `downloads`；`/downloads`、`/datasets` 和 catch-all 404 路由按固定 name/path/component 工作，未知地址不被重写成其他前端地址；
 - 每个页面都有且只有一个最终标题：数据下载、数据查看或页面不存在；两个业务页显示明确未完成引导且不伪造表单、数据或业务状态，404 可返回数据下载页；
-- 应用每页都显示语义化顶部导航，导航内恰有“数据下载”“数据查看”两个 RouterLink；当前项同时具有 `aria-current="page"` 与可见激活样式，链接可获得键盘焦点且焦点轮廓未被移除；
+- 应用每页都显示语义化顶部导航，导航内恰有“数据下载”“数据查看”两个 RouterLink；当前项同时具有 `aria-current="page"` 与可见激活样式，链接可获得键盘焦点且焦点轮廓未被移除；壳层交互色对白色和 active 浅蓝的对比度均至少 4.5:1，因此同色 focus outline 也超过 3:1；
 - `main.js` 在生产入口安装同一 router 和 Element Plus，`App.vue` 只承载应用壳；测试不以全局 setup 掩盖生产入口缺少 Element Plus 注册；
 - 1280px 及以上完整呈现 header/nav/main；更窄 viewport 使用浏览器横向滚动，不折叠、不隐藏导航或未来主操作；
 - M10-T01 的 Vue/Vitest/VTU/Playwright/package 基线保持不变，3 files/7 tests 与生产构建通过且不访问网络；构建最多只出现已批准的 Element Plus chunk-size 提示，不出现其他 warning 或 error；
