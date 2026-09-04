@@ -83,7 +83,7 @@
 | 62 | M12-T02 | 全字段、固定列和横向滚动表格 | `COMPLETED` | M10-T04 | docs/task-designs/M12-T02-design.md | docs/task-handoffs/M12-T02-handoff.md |
 | 63 | M12-T03 | 20/50/100 分页组件 | `COMPLETED` | M10-T04 | docs/task-designs/M12-T03-design.md | docs/task-handoffs/M12-T03-handoff.md |
 | 64 | M12-T04 | 查询 composable、竞态和超界页处理 | `COMPLETED` | M10-T03 | docs/task-designs/M12-T04-design.md | docs/task-handoffs/M12-T04-handoff.md |
-| 65 | M12-T05 | `DatasetView` 页面集成和组件回归 | `NOT_STARTED` | M12-T01, M12-T02, M12-T03, M12-T04 | docs/task-designs/M12-T05-design.md | None |
+| 65 | M12-T05 | `DatasetView` 页面集成和组件回归 | `READY` | M12-T01, M12-T02, M12-T03, M12-T04 | docs/task-designs/M12-T05-design.md | docs/task-handoffs/M12-T05-handoff.md |
 | 66 | M13-T01 | 前端确定性构建及静态资源复制 | `NOT_STARTED` | M10-T02, M11-T05, M12-T05 | None | None |
 | 67 | M13-T02 | 单个可执行 JAR 打包和内容检查 | `NOT_STARTED` | M09-T06, M13-T01 | None | None |
 | 68 | M13-T03 | 生产配置、CORS、SPA fallback 和优雅停机 | `NOT_STARTED` | M09-T06, M13-T02 | None | None |
@@ -915,7 +915,7 @@
 - **Dependencies:** M12-T01, M12-T02, M12-T03, M12-T04.
 - **Sources:** `docs/superpowers/plans/tensor-modules/M12-dataset-ui.md` 的 `Task M12-T05` 任务卡。
 - **First action:** 读取 `docs/superpowers/plans/tensor-modules/M12-dataset-ui.md` 的 `Task M12-T05` 任务卡，并确认其 `Context boundary`、输入和目标文件均可定位。
-- **State evidence:** None.
+- **State evidence (readiness):** 2026-09-05：M12-T04 已以实现提交 `8b89828`、Node.js 24.15.0 下聚焦 8/8、完整前端 112/112、生产构建、导出/安全/范围门禁及两轮无 Critical/Important/Minor 的独立审查完成，并由提交 `b420778` 在权威看板记录 `IN_PROGRESS -> COMPLETED`；按预定义顺序选择最小更大 Order 的后继 M12-T05。项目所有者明确批准页面局部元数据 generation、复用 M12-T01～T04 公开组件/composable、选择切换失效旧请求、五态渲染、精确一新增两修改文件范围，以及保持既有 `/datasets` router 无差异；提交 `c0516c0` 已创建并回填 `docs/task-designs/M12-T05-design.md`，其七个必需章节冻结元数据状态/失败快照、页面顺序、筛选—查询—表格—分页数据流、安全失败边界、严格 RED、20 files / 120 tests 和固定实现提交，无占位、矛盾或留给实施者的材料选择。四项直接依赖 M12-T01、M12-T02、M12-T03、M12-T04 均为 `COMPLETED`，其选择/筛选、全字段表格、受控服务端分页和 records 查询生命周期职责互补且无冲突；`docs/task-handoffs/M12-T05-handoff.md` 已按 `next-task` 模板完整创建并链接，逐项记录同一设计路径、四项直接输入、决策/约束比较、读取顺序和先确认 19 files / 112 tests 基线再创建完整页面 spec 与更新壳层断言取得占位页面行为 RED 的首个动作。因此执行真实的 `NOT_STARTED -> READY`；M12-T05 实现尚未开始。
 
 ### `M13-T01`
 
