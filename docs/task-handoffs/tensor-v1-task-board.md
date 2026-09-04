@@ -76,7 +76,7 @@
 | 55 | M10-T04 | 日期、空值、精度格式化和无障碍状态组件 | `COMPLETED` | M10-T01 | docs/task-designs/M10-T04-design.md | docs/task-handoffs/M10-T04-handoff.md |
 | 56 | M11-T01 | 数据源与接口分组搜索选择组件 | `COMPLETED` | M10-T03 | docs/task-designs/M11-T01-design.md | docs/task-handoffs/M11-T01-handoff.md |
 | 57 | M11-T02 | 元数据驱动动态参数表单 | `COMPLETED` | M10-T03, M10-T04 | docs/task-designs/M11-T02-design.md | docs/task-handoffs/M11-T02-handoff.md |
-| 58 | M11-T03 | 下载 composable、控件锁定和请求世代 | `IN_PROGRESS` | M10-T03 | docs/task-designs/M11-T03-design.md | docs/task-handoffs/M11-T03-handoff.md |
+| 58 | M11-T03 | 下载 composable、控件锁定和请求世代 | `COMPLETED` | M10-T03 | docs/task-designs/M11-T03-design.md | docs/task-handoffs/M11-T03-handoff.md |
 | 59 | M11-T04 | 成功、空和失败结果组件 | `NOT_STARTED` | M10-T04, M11-T03 | None | None |
 | 60 | M11-T05 | `DownloadView` 页面集成和组件回归 | `NOT_STARTED` | M11-T01, M11-T02, M11-T03, M11-T04 | None | None |
 | 61 | M12-T01 | 数据集选择与动态筛选表单 | `NOT_STARTED` | M10-T03, M10-T04 | None | None |
@@ -828,6 +828,8 @@
 - **State evidence (readiness):** 2026-09-04：M11-T02 已以实现提交 `3e2b3ce`、原型字段名修复 `e6024c7`、Node 24.15.0 下聚焦 9/9、全量 53/53、生产构建、精确三文件范围和最终独立复审无问题完成，并由提交 `0948ae3` 在权威看板记录 `IN_PROGRESS -> COMPLETED`；按预定义顺序选择最小更大 Order 的后继 M11-T03。项目所有者批准“操作感知重试”方案；提交 `bcd8cdb` 已创建并回填 `docs/task-designs/M11-T03-design.md`，其七个必需章节完整冻结 `useDownloadFlow()` 唯一导出、七态、公开 refs/computed/actions、元数据与选择清理、提交锁定、单调 generation、`SOURCES | APIS | DOWNLOAD` 重试、下载参数快照、严格 RED、8/61 测试计数、精确两个新增文件和固定实现提交，没有占位或未决材料。唯一直接依赖 M10-T03 为 `COMPLETED`；当前 `dataSources.js`、`downloads.js`、`errors.js`、`http.js` 和 `api.spec.js` 相对其最终修复提交 `890ed88` 无差异，未改写成功 DTO 与已归一化安全错误边界和本任务的页面内存态编排职责互补且无冲突。Node 24.15.0 下重新验证当前前端基线为 10 files / 53 tests 全通过。`docs/task-handoffs/M11-T03-handoff.md` 已按 `next-task` 模板完整创建并链接，只记录 M11-T03 与直接输入 M10-T03，包含同一设计路径、精确 artifact/decision/rationale/constraint/usage/readiness evidence、设计优先读取顺序，以及确认干净 Node 24 基线后只创建完整 `useDownloadFlow.spec.js` 并取得缺生产 composable RED 的具体首个动作。因此执行真实的 `NOT_STARTED -> READY`；实现尚未开始。
 
 - **State evidence (start):** 2026-09-04：用户明确要求按照权威任务看板执行当前任务；已完整读取 `docs/task-designs/M11-T03-design.md`、`docs/task-handoffs/M11-T03-handoff.md`、M11-T03 任务卡与 M10-T03 直接依赖设计和当前 API 产物，确认公开接口、七态、清理/锁定/generation/重试边界、精确两文件范围、严格 TDD 顺序和首个动作均可定位且无冲突。普通 `main` 检出由仓库级 `AGENTS.md` 明确授权原地工作；开始前工作树干净，Node.js 24.15.0 下前端基线为 10 files / 53 tests 全通过。该请求构成本次 `READY -> IN_PROGRESS` 的明确启动证据；既有 `next-task` 交接路径保留为进入上下文。
+
+- **State evidence (completion):** 2026-09-04：严格 TDD RED 在仅新增完整 `useDownloadFlow.spec.js`、尚无生产 composable 时执行，套件只因 `./useDownloadFlow.js` 不存在而在收集阶段失败；实现提交 `e893d0f`（`feat(ui): manage download request lifecycle`）精确新增 `useDownloadFlow.js` 与同目录 8 项行为测试。最终实现只导出无参数 `useDownloadFlow()`，交付七态、元数据与选择清理、派生描述符、提交锁定、重复提交防护、单调 generation、原样成功/安全失败和 `SOURCES | APIS | DOWNLOAD` 操作感知重试；未修改 M10 API、组件、依赖、配置、路由、页面、样式或后端合同。Node.js 24.15.0 下聚焦 1 file / 8 tests、全量 11 files / 61 tests 均通过且无未处理 rejection、console 或 Vue warning；Vite 8.2.2 构建转换 1599 modules 并退出 0，只产生既有 Element Plus chunk-size 提示。唯一导出、`git diff --check`、禁止能力/具体 ID 分支扫描、受保护路径无差异及精确两文件暂存范围门禁均得到预期结果；逐项差异自审未发现 Critical/Important 问题。因此具备结果级验收与验证证据，执行 `IN_PROGRESS -> COMPLETED`。
 
 ### `M11-T04`
 
