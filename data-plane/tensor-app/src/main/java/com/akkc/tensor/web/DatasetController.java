@@ -4,6 +4,7 @@ import com.akkc.tensor.core.catalog.DatasetCatalog;
 import com.akkc.tensor.core.query.DatasetPage;
 import com.akkc.tensor.core.query.DatasetQueryService;
 import com.akkc.tensor.core.query.QueryCriteria;
+import com.akkc.tensor.observability.OperationLogger;
 import com.akkc.tensor.plugin.api.dataset.DatasetDefinition;
 import com.akkc.tensor.plugin.api.error.ErrorCode;
 import com.akkc.tensor.plugin.api.error.TensorException;
@@ -12,6 +13,8 @@ import com.akkc.tensor.plugin.api.model.DatasetKey;
 import com.akkc.tensor.plugin.api.model.PluginId;
 import com.akkc.tensor.web.dto.PageResponse;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -35,13 +38,16 @@ public final class DatasetController {
 
     private final DatasetCatalog datasetCatalog;
     private final DatasetQueryService datasetQueryService;
+    private final OperationLogger operationLogger;
 
     public DatasetController(
             DatasetCatalog datasetCatalog,
-            DatasetQueryService datasetQueryService) {
+            DatasetQueryService datasetQueryService,
+            OperationLogger operationLogger) {
         this.datasetCatalog = Objects.requireNonNull(datasetCatalog, "datasetCatalog");
         this.datasetQueryService =
                 Objects.requireNonNull(datasetQueryService, "datasetQueryService");
+        this.operationLogger = Objects.requireNonNull(operationLogger, "operationLogger");
     }
 
     @GetMapping("/{pluginId}/datasets/{apiName}/records")
@@ -98,13 +104,24 @@ public final class DatasetController {
         if (requestId == null) {
             throw new IllegalStateException("Request ID is unavailable");
         }
-        DatasetPage result;
-        try {
-            result = datasetQueryService.query(key, criteria);
-        } catch (IllegalArgumentException exception) {
-            throw new DatasetQueryAccessException();
+        List<String> filterNames = new ArrayList<>();
+        if (tsCode != null) {
+            filterNames.add("ts_code");
         }
-        return PageResponse.from(requestId, key, result);
+        if (tradeDateFrom != null || tradeDateTo != null) {
+            filterNames.add("trade_date");
+        }
+        if (annDateFrom != null || annDateTo != null) {
+            filterNames.add("ann_date");
+        }
+        return operationLogger.query(key, filterNames, page, pageSize, () -> {
+            try {
+                DatasetPage result = datasetQueryService.query(key, criteria);
+                return PageResponse.from(requestId, key, result);
+            } catch (IllegalArgumentException exception) {
+                throw new DatasetQueryAccessException();
+            }
+        });
     }
 
     private static DatasetKey key(String pluginId, String apiName) {

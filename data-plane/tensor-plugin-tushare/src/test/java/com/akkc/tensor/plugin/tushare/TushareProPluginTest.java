@@ -71,13 +71,23 @@ class TushareProPluginTest {
                 .containsExactly(TushareProperties.class);
         assertThat(TusharePluginConfiguration.class.getConstructors()).singleElement()
                 .satisfies(constructor -> assertThat(constructor.getParameterCount()).isZero());
-        assertThat(publicDeclaredMethods(TusharePluginConfiguration.class)).singleElement()
-                .satisfies(method -> {
-                    assertThat(method.getName()).isEqualTo("tushareProPlugin");
-                    assertThat(method.getParameterTypes()).containsExactly(TushareProperties.class);
-                    assertThat(method.getReturnType()).isEqualTo(TushareProPlugin.class);
-                    assertThat(method.getAnnotation(Bean.class)).isNotNull();
-                });
+        assertThat(publicDeclaredMethods(TusharePluginConfiguration.class))
+                .extracting(Method::getName)
+                .containsExactlyInAnyOrder("tushareDatasetDefinitions", "tushareProPlugin");
+        Method definitionsBean = Arrays.stream(publicDeclaredMethods(TusharePluginConfiguration.class))
+                .filter(method -> method.getName().equals("tushareDatasetDefinitions"))
+                .findFirst().orElseThrow();
+        assertThat(definitionsBean.getParameterTypes()).isEmpty();
+        assertThat(definitionsBean.getReturnType()).isEqualTo(List.class);
+        assertThat(definitionsBean.getAnnotation(Bean.class).value())
+                .containsExactly("tushareDatasetDefinitions");
+        Method pluginBean = Arrays.stream(publicDeclaredMethods(TusharePluginConfiguration.class))
+                .filter(method -> method.getName().equals("tushareProPlugin"))
+                .findFirst().orElseThrow();
+        assertThat(pluginBean.getParameterTypes())
+                .containsExactly(TushareProperties.class, List.class);
+        assertThat(pluginBean.getReturnType()).isEqualTo(TushareProPlugin.class);
+        assertThat(pluginBean.getAnnotation(Bean.class)).isNotNull();
 
         assertThat(TushareProPlugin.class.getDeclaredClasses()).singleElement().satisfies(type -> {
             int modifiers = type.getModifiers();
@@ -308,9 +318,17 @@ class TushareProPluginTest {
             assertThat(context.getBeansOfType(TushareProperties.class)).hasSize(1);
             assertThat(context.getBeansOfType(DataSourcePlugin.class)).hasSize(1);
             assertThat(context.getBeansOfType(TushareProPlugin.class)).hasSize(1);
+            List<?> definitions = context.getBean("tushareDatasetDefinitions", List.class);
+            assertThat(definitions).hasSize(49).allSatisfy(
+                    definition -> assertThat(definition).isInstanceOf(DatasetDefinition.class));
             TushareProPlugin plugin = context.getBean(TushareProPlugin.class);
-            assertThat(plugin.descriptor().apis()).hasSize(49);
-            assertThat(plugin.descriptor().datasets()).hasSize(49);
+            assertThat(definitions).extracting(definition ->
+                            ((DatasetDefinition) definition).datasetKey().apiName().value())
+                    .containsExactlyElementsOf(API_NAMES);
+            assertThat(plugin.descriptor().apis()).extracting(api -> api.apiName().value())
+                    .containsExactlyElementsOf(API_NAMES);
+            assertThat(plugin.descriptor().datasets()).extracting(key -> key.apiName().value())
+                    .containsExactlyElementsOf(API_NAMES);
             assertThat(plugin.readiness()).isEqualTo(
                     new PluginReadiness(enabled, credentialConfigured, false, unavailableReason));
         }

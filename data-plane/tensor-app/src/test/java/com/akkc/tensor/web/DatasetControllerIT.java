@@ -16,6 +16,9 @@ import com.akkc.tensor.core.catalog.SchemaInspector;
 import com.akkc.tensor.core.query.DatasetPage;
 import com.akkc.tensor.core.query.DatasetQueryService;
 import com.akkc.tensor.core.query.GenericQueryRepository;
+import com.akkc.tensor.core.registry.PluginRegistry;
+import com.akkc.tensor.observability.OperationLogger;
+import com.akkc.tensor.observability.TensorMetrics;
 import com.akkc.tensor.plugin.api.dataset.BusinessKeyDefinition;
 import com.akkc.tensor.plugin.api.dataset.BusinessKeyMode;
 import com.akkc.tensor.plugin.api.dataset.ColumnDefinition;
@@ -34,6 +37,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import java.io.PrintWriter;
 import java.lang.reflect.Modifier;
 import java.math.BigDecimal;
@@ -141,7 +145,10 @@ class DatasetControllerIT {
         assertThat(DatasetController.class.getConstructors())
                 .singleElement()
                 .satisfies(constructor -> assertThat(constructor.getParameterTypes())
-                        .containsExactly(DatasetCatalog.class, DatasetQueryService.class));
+                        .containsExactly(
+                                DatasetCatalog.class,
+                                DatasetQueryService.class,
+                                OperationLogger.class));
         assertThat(Arrays.stream(DatasetController.class.getDeclaredMethods())
                 .filter(method -> Modifier.isPublic(method.getModifiers())))
                 .singleElement()
@@ -510,7 +517,8 @@ class DatasetControllerIT {
                 .featuresToDisable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
                 .build();
         StandaloneMockMvcBuilder builder = MockMvcBuilders
-                .standaloneSetup(new DatasetController(catalog, queryService))
+                .standaloneSetup(new DatasetController(
+                        catalog, queryService, operationLogger()))
                 .setMessageConverters(new MappingJackson2HttpMessageConverter(objectMapper));
         if (installRequestIdFilter) {
             builder.addFilters(new RequestIdFilter());
@@ -518,6 +526,12 @@ class DatasetControllerIT {
         MockMvc mockMvc = builder.build();
         dataSource.reset();
         return new Flow(mockMvc, objectMapper, dataSource);
+    }
+
+    private static OperationLogger operationLogger() {
+        PluginRegistry plugins = new PluginRegistry(List.of());
+        return new OperationLogger(
+                plugins, new TensorMetrics(new SimpleMeterRegistry(), plugins));
     }
 
     private static void insert(

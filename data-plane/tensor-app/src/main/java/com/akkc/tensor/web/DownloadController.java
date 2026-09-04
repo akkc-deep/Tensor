@@ -1,7 +1,9 @@
 package com.akkc.tensor.web;
 
 import com.akkc.tensor.core.download.DownloadService;
+import com.akkc.tensor.observability.OperationLogger;
 import com.akkc.tensor.plugin.api.model.ApiName;
+import com.akkc.tensor.plugin.api.model.DatasetKey;
 import com.akkc.tensor.plugin.api.model.PluginId;
 import com.akkc.tensor.plugin.api.model.RequestId;
 import com.akkc.tensor.web.dto.DownloadRequest;
@@ -21,9 +23,12 @@ import org.springframework.web.bind.annotation.RestController;
 @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
 public final class DownloadController {
     private final DownloadService downloadService;
+    private final OperationLogger operationLogger;
 
-    public DownloadController(DownloadService downloadService) {
+    public DownloadController(
+            DownloadService downloadService, OperationLogger operationLogger) {
         this.downloadService = Objects.requireNonNull(downloadService, "downloadService");
+        this.operationLogger = Objects.requireNonNull(operationLogger, "operationLogger");
     }
 
     @PostMapping
@@ -33,10 +38,11 @@ public final class DownloadController {
         if (value == null) {
             throw new IllegalStateException("Request ID is unavailable");
         }
-        return DownloadResponse.from(downloadService.execute(
-                PluginId.of(request.pluginId()),
-                ApiName.of(request.apiName()),
-                request.params(),
-                new RequestId(UUID.fromString(value))));
+        DatasetKey key = DatasetKey.of(
+                PluginId.of(request.pluginId()), ApiName.of(request.apiName()));
+        RequestId requestId = new RequestId(UUID.fromString(value));
+        return operationLogger.download(key, request.params(), () -> DownloadResponse.from(
+                downloadService.execute(
+                        key.pluginId(), key.apiName(), request.params(), requestId)));
     }
 }

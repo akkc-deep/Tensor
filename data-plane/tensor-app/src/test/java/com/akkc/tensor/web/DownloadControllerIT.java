@@ -26,6 +26,8 @@ import com.akkc.tensor.core.registry.AdapterRegistry;
 import com.akkc.tensor.core.registry.PluginRegistry;
 import com.akkc.tensor.core.validation.ParameterValidator;
 import com.akkc.tensor.core.validation.ParameterValidator.ParameterValidationException;
+import com.akkc.tensor.observability.OperationLogger;
+import com.akkc.tensor.observability.TensorMetrics;
 import com.akkc.tensor.plugin.api.DataSourcePlugin;
 import com.akkc.tensor.plugin.api.DatasetAdapter;
 import com.akkc.tensor.plugin.api.dataset.DatasetDefinition;
@@ -51,6 +53,7 @@ import com.akkc.tensor.plugin.api.model.RequestId;
 import com.akkc.tensor.plugin.fixture.FixtureConfiguration;
 import com.akkc.tensor.web.dto.DownloadRequest;
 import com.akkc.tensor.web.dto.DownloadResponse;
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import java.lang.reflect.Modifier;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
@@ -180,7 +183,7 @@ class DownloadControllerIT {
         assertThat(DownloadController.class.getConstructors())
                 .singleElement()
                 .satisfies(constructor -> assertThat(constructor.getParameterTypes())
-                        .containsExactly(DownloadService.class));
+                        .containsExactly(DownloadService.class, OperationLogger.class));
         assertThat(Arrays.stream(DownloadController.class.getDeclaredMethods())
                 .filter(method -> Modifier.isPublic(method.getModifiers())))
                 .singleElement()
@@ -516,10 +519,16 @@ class DownloadControllerIT {
     }
 
     private static MockMvc mockMvc(DownloadService service) {
-        return MockMvcBuilders.standaloneSetup(new DownloadController(service))
+        return MockMvcBuilders.standaloneSetup(new DownloadController(service, operationLogger()))
                 .setValidator(beanValidator)
                 .addFilters(new RequestIdFilter())
                 .build();
+    }
+
+    private static OperationLogger operationLogger() {
+        PluginRegistry plugins = new PluginRegistry(List.of());
+        return new OperationLogger(
+                plugins, new TensorMetrics(new SimpleMeterRegistry(), plugins));
     }
 
     private static void assertInvalidEnvelope(
