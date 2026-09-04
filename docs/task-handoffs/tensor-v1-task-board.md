@@ -82,7 +82,7 @@
 | 61 | M12-T01 | 数据集选择与动态筛选表单 | `COMPLETED` | M10-T03, M10-T04 | docs/task-designs/M12-T01-design.md | docs/task-handoffs/M12-T01-handoff.md |
 | 62 | M12-T02 | 全字段、固定列和横向滚动表格 | `COMPLETED` | M10-T04 | docs/task-designs/M12-T02-design.md | docs/task-handoffs/M12-T02-handoff.md |
 | 63 | M12-T03 | 20/50/100 分页组件 | `COMPLETED` | M10-T04 | docs/task-designs/M12-T03-design.md | docs/task-handoffs/M12-T03-handoff.md |
-| 64 | M12-T04 | 查询 composable、竞态和超界页处理 | `READY` | M10-T03 | docs/task-designs/M12-T04-design.md | docs/task-handoffs/M12-T04-handoff.md |
+| 64 | M12-T04 | 查询 composable、竞态和超界页处理 | `IN_PROGRESS` | M10-T03 | docs/task-designs/M12-T04-design.md | docs/task-handoffs/M12-T04-handoff.md |
 | 65 | M12-T05 | `DatasetView` 页面集成和组件回归 | `NOT_STARTED` | M12-T01, M12-T02, M12-T03, M12-T04 | None | None |
 | 66 | M13-T01 | 前端确定性构建及静态资源复制 | `NOT_STARTED` | M10-T02, M11-T05, M12-T05 | None | None |
 | 67 | M13-T02 | 单个可执行 JAR 打包和内容检查 | `NOT_STARTED` | M09-T06, M13-T01 | None | None |
@@ -903,7 +903,7 @@
 - **Dependencies:** M10-T03.
 - **Sources:** `docs/superpowers/plans/tensor-modules/M12-dataset-ui.md` 的 `Task M12-T04` 任务卡。
 - **First action:** 读取 `docs/superpowers/plans/tensor-modules/M12-dataset-ui.md` 的 `Task M12-T04` 任务卡，并确认其 `Context boundary`、输入和目标文件均可定位。
-- **State evidence:** None.
+- **State evidence (start):** 2026-09-05：用户明确要求按照权威任务看板执行当前任务；已完整读取 `docs/task-designs/M12-T04-design.md`、`docs/task-handoffs/M12-T04-handoff.md` 与 `docs/superpowers/plans/2026-09-05-m12-t04-query-lifecycle.md`，并核对 M12 任务卡与模块门禁、路线图设计、PRD 6.6/6.7/7.4/AC-014、TRD 11.2/12.4/13.5～13.7/20.4、OpenAPI records/PageResponse/ApiError 合同、唯一直接依赖 M10-T03 的设计与公开 API，以及现有筛选、分页和 generation 局部模式；确认任务身份、精确两文件范围、公开接口、严格 RED 首动作、失败边界和结果级验收均可定位且无冲突。该请求作为本次 `READY -> IN_PROGRESS` 的明确启动证据；既有 `next-task` 交接路径保留为进入上下文。
 
 ### `M12-T05`
 
