@@ -83,7 +83,7 @@
 | 62 | M12-T02 | 全字段、固定列和横向滚动表格 | `COMPLETED` | M10-T04 | docs/task-designs/M12-T02-design.md | docs/task-handoffs/M12-T02-handoff.md |
 | 63 | M12-T03 | 20/50/100 分页组件 | `COMPLETED` | M10-T04 | docs/task-designs/M12-T03-design.md | docs/task-handoffs/M12-T03-handoff.md |
 | 64 | M12-T04 | 查询 composable、竞态和超界页处理 | `COMPLETED` | M10-T03 | docs/task-designs/M12-T04-design.md | docs/task-handoffs/M12-T04-handoff.md |
-| 65 | M12-T05 | `DatasetView` 页面集成和组件回归 | `IN_PROGRESS` | M12-T01, M12-T02, M12-T03, M12-T04 | docs/task-designs/M12-T05-design.md | docs/task-handoffs/M12-T05-handoff.md |
+| 65 | M12-T05 | `DatasetView` 页面集成和组件回归 | `COMPLETED` | M12-T01, M12-T02, M12-T03, M12-T04 | docs/task-designs/M12-T05-design.md | docs/task-handoffs/M12-T05-handoff.md |
 | 66 | M13-T01 | 前端确定性构建及静态资源复制 | `NOT_STARTED` | M10-T02, M11-T05, M12-T05 | None | None |
 | 67 | M13-T02 | 单个可执行 JAR 打包和内容检查 | `NOT_STARTED` | M09-T06, M13-T01 | None | None |
 | 68 | M13-T03 | 生产配置、CORS、SPA fallback 和优雅停机 | `NOT_STARTED` | M09-T06, M13-T02 | None | None |
@@ -917,6 +917,7 @@
 - **First action:** 读取 `docs/superpowers/plans/tensor-modules/M12-dataset-ui.md` 的 `Task M12-T05` 任务卡，并确认其 `Context boundary`、输入和目标文件均可定位。
 - **State evidence (readiness):** 2026-09-05：M12-T04 已以实现提交 `8b89828`、Node.js 24.15.0 下聚焦 8/8、完整前端 112/112、生产构建、导出/安全/范围门禁及两轮无 Critical/Important/Minor 的独立审查完成，并由提交 `b420778` 在权威看板记录 `IN_PROGRESS -> COMPLETED`；按预定义顺序选择最小更大 Order 的后继 M12-T05。项目所有者明确批准页面局部元数据 generation、复用 M12-T01～T04 公开组件/composable、选择切换失效旧请求、五态渲染、精确一新增两修改文件范围，以及保持既有 `/datasets` router 无差异；提交 `c0516c0` 已创建并回填 `docs/task-designs/M12-T05-design.md`，其七个必需章节冻结元数据状态/失败快照、页面顺序、筛选—查询—表格—分页数据流、安全失败边界、严格 RED、20 files / 120 tests 和固定实现提交，无占位、矛盾或留给实施者的材料选择。四项直接依赖 M12-T01、M12-T02、M12-T03、M12-T04 均为 `COMPLETED`，其选择/筛选、全字段表格、受控服务端分页和 records 查询生命周期职责互补且无冲突；`docs/task-handoffs/M12-T05-handoff.md` 已按 `next-task` 模板完整创建并链接，逐项记录同一设计路径、四项直接输入、决策/约束比较、读取顺序和先确认 19 files / 112 tests 基线再创建完整页面 spec 与更新壳层断言取得占位页面行为 RED 的首个动作。因此执行真实的 `NOT_STARTED -> READY`；M12-T05 实现尚未开始。
 - **State evidence (start):** 2026-09-05：用户明确要求按照权威任务看板执行当前任务，并要求先读取设计文档和交接文件；已完整读取看板中的 M12-T05 行与详情、`docs/task-designs/M12-T05-design.md` 和 `docs/task-handoffs/M12-T05-handoff.md`，确认任务身份、范围、四项直接依赖、验收、剩余工作与首个严格 RED 动作一致且无冲突，作为本次 `READY -> IN_PROGRESS` 的启动证据；既有交接路径保留为进入上下文。
+- **Completion evidence:** 实施按严格 TDD 先只创建完整 `DatasetView.spec.js` 并更新 `AppLayout.spec.js`，两文件命令 11 项中 9 项仅因现有占位页缺少批准行为失败、2 项既有壳层测试通过，无语法、mock、依赖或未处理 Promise 错误；提交 `25b4fae`（`feat(ui): complete dataset query page`）精确以一新增两修改文件完成页面局部元数据 generation、来源/数据集/定义安全重试、选择切换失效、筛选校验、records 五态、全字段表格、服务端分页和 reset 接线。独立审查首轮结论 `Ready to merge: Yes` 且无 Critical/Important，提出的两项 Minor 测试深度问题由 `60e4a42` 增强为真实分页控件和来源切换期间在途查询失效验证；复审提出的内部 CSS 选择器 Minor 由 `95d04c8` 改为可见“下一页”和 `role=option` 交互，最终复审确认无 Critical、Important 或 Minor，结论 `Ready to merge: Yes`。Node.js 24.15.0 下已提交树的最终聚焦测试 2 files / 11 tests、完整前端 20 files / 120 tests、稳定 router 1 file / 3 tests 全部通过；Vite 生产构建退出 0，仅有设计允许的既有大 chunk 提示。最终范围仍精确为 `DatasetView.spec.js` 新增、`DatasetView.vue` 与 `AppLayout.spec.js` 修改，受保护路径无差异，`git diff --check` 通过，禁止 HTML 注入、直接网络、取消/定时器/持久化、凭证/日志、客户端分页计算和切片的扫描无匹配，control-plane 工作区无残留。因此页面结果级行为、范围、安全、构建和测试均满足任务设计与任务卡，执行 `IN_PROGRESS -> COMPLETED`。
 
 ### `M13-T01`
 
