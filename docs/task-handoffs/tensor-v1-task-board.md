@@ -79,7 +79,7 @@
 | 58 | M11-T03 | 下载 composable、控件锁定和请求世代 | `COMPLETED` | M10-T03 | docs/task-designs/M11-T03-design.md | docs/task-handoffs/M11-T03-handoff.md |
 | 59 | M11-T04 | 成功、空和失败结果组件 | `COMPLETED` | M10-T04, M11-T03 | docs/task-designs/M11-T04-design.md | docs/task-handoffs/M11-T04-handoff.md |
 | 60 | M11-T05 | `DownloadView` 页面集成和组件回归 | `COMPLETED` | M11-T01, M11-T02, M11-T03, M11-T04 | docs/task-designs/M11-T05-design.md | docs/task-handoffs/M11-T05-handoff.md |
-| 61 | M12-T01 | 数据集选择与动态筛选表单 | `IN_PROGRESS` | M10-T03, M10-T04 | docs/task-designs/M12-T01-design.md | docs/task-handoffs/M12-T01-handoff.md |
+| 61 | M12-T01 | 数据集选择与动态筛选表单 | `COMPLETED` | M10-T03, M10-T04 | docs/task-designs/M12-T01-design.md | docs/task-handoffs/M12-T01-handoff.md |
 | 62 | M12-T02 | 全字段、固定列和横向滚动表格 | `NOT_STARTED` | M10-T04 | None | None |
 | 63 | M12-T03 | 20/50/100 分页组件 | `NOT_STARTED` | M10-T04 | None | None |
 | 64 | M12-T04 | 查询 composable、竞态和超界页处理 | `NOT_STARTED` | M10-T03 | None | None |
@@ -865,6 +865,7 @@
 - **First action:** 读取 `docs/superpowers/plans/tensor-modules/M12-dataset-ui.md` 的 `Task M12-T01` 任务卡，并确认其 `Context boundary`、输入和目标文件均可定位。
 - **State evidence (readiness):** 2026-09-05：M11-T05 已以实现提交 `dda4f9d`、元数据重试边界修复 `e84f21c`、Node.js 24.15.0 下完整 13 files / 75 tests、生产构建仅含已批准 Element Plus chunk-size 提示、精确四文件范围和独立复审无 Critical/Important 完成，权威看板已由提交 `df4f238` 记录其 `IN_PROGRESS -> COMPLETED`；按预定义顺序选择最小更大 Order 的后继 M12-T01。项目所有者依次批准数据源选择留在页面组合层、`useDatasetFilters.reset()` 只清除筛选/错误/成功快照、受控元数据组件架构、五字段映射、严格 ISO 日期与单边范围、可访问错误、3 files / 15 tests 和精确六文件范围；提交 `bcbdcd9` 已创建并回填 `docs/task-designs/M12-T01-design.md`，其七节完整冻结组件/composable 接口、数据流、失败边界、严格 TDD、90 项完整回归和固定实现提交，无占位、矛盾或未决材料。两项直接依赖 M10-T03、M10-T04 均为 `COMPLETED`；当前 `datasets.js` 相对最终修复提交 `890ed88` 无差异，当前 `date.js`、`validation.js`、`FieldError.vue` 相对最终修复提交 `0818fbc` 无差异，元数据/查询键合同与严格日期/校验/错误原语互补且无冲突。Node.js 24.15.0 下交接前新鲜基线为 13 files / 75 tests 全通过，Vite 8.2.2 构建转换 1676 modules 并退出 0，仅有既有 chunk-size 提示。`docs/task-handoffs/M12-T01-handoff.md` 已按 `next-task` 模板创建并链接，只记录 M12-T01 与两项直接输入，包含同一设计路径、精确 artifact/decision/rationale/constraint/usage/readiness evidence、设计优先读取顺序，以及只先创建三份完整 spec 并取得缺目标生产模块 RED 的首个动作；范围外 `.idea/misc.xml`、`docs/issues` 与 `data-plane/**/target/` 变化须保留和绕开。因此执行真实的 `NOT_STARTED -> READY`；M12-T01 实现尚未开始。
 - **State evidence (start):** 2026-09-05：用户明确要求按照权威任务看板执行当前任务，并要求先读取设计文档和交接文件；已完整读取 `docs/task-designs/M12-T01-design.md` 与 `docs/task-handoffs/M12-T01-handoff.md`，核对 M12 任务卡、OpenAPI 筛选合同、M10-T03/M10-T04 直接依赖及当前消费文件，确认任务身份、范围、验收、剩余工作和严格 RED 首个动作一致且无冲突，作为本次 `READY -> IN_PROGRESS` 的启动证据；既有交接路径保留为进入上下文。
+- **Completion evidence:** 实施按严格 TDD 先只创建三份完整 spec，聚焦命令的三个 suite 均只因 `DatasetSelect.vue`、`DynamicFilterForm.vue` 和 `useDatasetFilters.js` 尚不存在而无法收集，形成可归因 RED；提交 `75ee19b` 精确创建设计指定六文件，交付受控分组/搜索选择器、仅按三个封闭筛选描述符渲染的可访问表单，以及五个固定查询键、严格 ISO 日期、代码规范化、单边/双边范围、AND 条件、首错和成功快照状态。任务审查发现的真实空态文案缺口由测试先行修复提交 `efc86e7` 解决；最终整体审查发现的 Escape 内外搜索状态不同步由测试先行修复提交 `e7e42e3` 解决，两次范围化复审均确认 findings 已解决且无新 Critical/Important，最终无未决审查问题。主控在最终 `e7e42e3` 上以 Node.js 24.15.0 新鲜复跑完整前端回归为 16 files / 92 tests 全通过；Vite 8.2.2 构转换 1676 modules 并退出 0，仅有既有 Element Plus chunk-size 提示。公开导出断言、提交范围六文件、受保护路径、`git diff --check` 与禁止 HTML 注入/网络/具体数据集分支/数值转换扫描均达到设计预期；用户 `.idea`、`docs/issues` 与后端 `target/` 变化保持未混入实现提交。因此结果级验收满足，执行 `IN_PROGRESS -> COMPLETED`。
 
 ### `M12-T02`
 
