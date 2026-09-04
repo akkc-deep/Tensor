@@ -113,7 +113,7 @@ GREEN 只实现本设计的 router、layout、三个 view、入口和 CSS，然�
 - `control-plane/src/views/DatasetView.vue`：最终“数据查看”标题与未完成引导；
 - `control-plane/src/views/NotFoundView.vue`：轻量 404 和返回下载页入口；
 - `control-plane/src/router/index.spec.js`：3 个真实 router 场景；
-- `control-plane/src/layouts/AppLayout.spec.js`：2 个真实导航、激活和焦点场景。
+- `control-plane/src/layouts/AppLayout.spec.js`：3 个真实导航、激活、焦点和 404 恢复场景。
 
 修改：
 
@@ -162,16 +162,17 @@ npm run test:unit -- --run \
 
 预期：退出非 0，直接原因只是不解析 `src/router/index.js`、`src/layouts/AppLayout.vue` 或其 view import；测试语法、Vue/VTU API、Node 版本和依赖安装不是有效 RED。
 
-3. GREEN 聚焦测试固定 6 项：
+3. GREEN 聚焦测试固定 7 项：
 
 - router factory 暴露 named `/downloads` 与 `/datasets` 路由；
 - 导航 `/` 后当前 route 为 `downloads` 和 `/downloads`；
 - 未知路径保持原 path 并命中 `not-found`；
-- 应用壳恰有一个 `nav[aria-label="主导航"]`、两个真实链接，下载链接在下载页具有 `aria-current="page"`；
-- 数据查看链接可取得 DOM focus，点击后 route/view/`aria-current` 切换且下载链接不再 active；
+- 应用壳恰有一个 `nav[aria-label="主导航"]`、两个真实链接，下载链接在下载页具有 `aria-current="page"`，并显示批准的下载模块未完成引导；
+- 数据查看链接可取得 DOM focus，点击后 route/view/`aria-current` 切换且下载链接不再 active，并显示批准的数据查看模块未完成引导；
+- 未知地址显示“页面不存在”和“当前地址不存在。”，并提供 href 为 `/downloads` 的“返回数据下载”链接；
 - 根 App 通过 memory router 真实挂载，恰有一个 header、nav、main 和标题“数据下载”。
 
-实现后重跑同一聚焦命令，预期 3 files/6 tests 全部通过，无 warning、error 或网络请求。
+实现后重跑同一聚焦命令，预期 3 files/7 tests 全部通过，无 warning、error 或网络请求。
 
 4. 完整回归与构建：
 
@@ -180,7 +181,7 @@ npm test
 npm run build
 ```
 
-预期：3 files/6 tests 全部通过；Vite 生产构建退出 0，生成 `dist/index.html` 与哈希 assets，不出现未解析组件、路由、CSS、示例资源或 chunk 错误。
+预期：3 files/7 tests 全部通过；Vite 生产构建退出 0，生成 `dist/index.html` 与哈希 assets，不出现未解析组件、路由、CSS、示例资源或 chunk 错误。
 
 5. 示例清理合同：
 
@@ -219,7 +220,7 @@ git check-ignore control-plane/node_modules control-plane/dist \
 - 应用每页都显示语义化顶部导航，导航内恰有“数据下载”“数据查看”两个 RouterLink；当前项同时具有 `aria-current="page"` 与可见激活样式，链接可获得键盘焦点且焦点轮廓未被移除；
 - `main.js` 在生产入口安装同一 router 和 Element Plus，`App.vue` 只承载应用壳；测试不以全局 setup 掩盖生产入口缺少 Element Plus 注册；
 - 1280px 及以上完整呈现 header/nav/main；更窄 viewport 使用浏览器横向滚动，不折叠、不隐藏导航或未来主操作；
-- M10-T01 的 Vue/Vitest/VTU/Playwright/package 基线保持不变，3 files/6 tests 与生产构建通过且不访问网络；
+- M10-T01 的 Vue/Vitest/VTU/Playwright/package 基线保持不变，3 files/7 tests 与生产构建通过且不访问网络；
 - 所有已无引用的示例组件和资源按 Files 节删除，仍被 `index.html` 引用的 favicon 保留；未引入 API client、业务页面实现、状态存储、E2E 或后端变更；
 - 实现提交精确为 Files 节 16 个文件（7 新增、4 修改、5 删除），提交消息固定且不包含设计、交接、看板或生成物。
 
