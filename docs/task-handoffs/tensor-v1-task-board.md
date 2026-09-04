@@ -70,7 +70,7 @@
 | 49 | M09-T04 | 数据集定义与只读分页查询 API | `COMPLETED` | M05-T02, M06-T06, M09-T01 | docs/task-designs/M09-T04-design.md | docs/task-handoffs/M09-T04-handoff.md |
 | 50 | M09-T05 | 全局异常和 HTTP 状态映射 | `COMPLETED` | M09-T02, M09-T03, M09-T04 | docs/task-designs/M09-T05-design.md | docs/task-handoffs/M09-T05-handoff.md |
 | 51 | M09-T06 | 配置、脱敏、指标、健康和静态资源安全 | `COMPLETED` | M09-T01, M09-T02, M09-T03, M09-T04, M09-T05 | docs/task-designs/M09-T06-design.md | docs/task-handoffs/M09-T06-handoff.md |
-| 52 | M10-T01 | Vue 依赖、Vitest、VTU 和 Playwright 配置 | `READY` | M00-T03 | docs/task-designs/M10-T01-design.md | docs/task-handoffs/M10-T01-handoff.md |
+| 52 | M10-T01 | Vue 依赖、Vitest、VTU 和 Playwright 配置 | `IN_PROGRESS` | M00-T03 | docs/task-designs/M10-T01-design.md | docs/task-handoffs/M10-T01-handoff.md |
 | 53 | M10-T02 | `/downloads`、`/datasets` 路由和桌面布局 | `NOT_STARTED` | M10-T01 | None | None |
 | 54 | M10-T03 | Axios 客户端、DTO 和错误拦截 | `NOT_STARTED` | M00-T03, M10-T01 | None | None |
 | 55 | M10-T04 | 日期、空值、精度格式化和无障碍状态组件 | `NOT_STARTED` | M10-T01 | None | None |
@@ -732,6 +732,7 @@
 - **Sources:** `docs/superpowers/plans/tensor-modules/M10-frontend-foundation.md` 的 `Task M10-T01` 任务卡。
 - **First action:** 读取 `docs/superpowers/plans/tensor-modules/M10-frontend-foundation.md` 的 `Task M10-T01` 任务卡，并确认其 `Context boundary`、输入和目标文件均可定位。
 - **State evidence (readiness):** 2026-09-04：M09-T06 已以实现提交 `d7a47f3`、提交态生产上下文 1/1 和默认 reactor `verify` 338/338、五项受控 mutation、静态/JAR/秘密/范围/格式/跟踪/clean 门禁及独立审查修复完成，权威看板已记录其 `IN_PROGRESS -> COMPLETED`；按预定义顺序选择最小更大 Order 的后继 M10-T01。`docs/task-designs/M10-T01-design.md` 已完整冻结 Node `>=24.15.0 <25`、十个精确依赖版本、六个 npm scripts、不 rewrite 的 `/api` 代理、Vitest/VTU 清理、桌面 Chrome Playwright 基线、严格 RED/GREEN、5 新增/2 修改文件和固定实现提交；七个模板章节、版本/文件/命令、占位符、生成路径忽略及格式门禁通过，无留给实施者的材料选择。唯一直接依赖 M00-T03 为 `COMPLETED`，当前 `docs/contracts/openapi-v1.yaml` 与 `docs/contracts/error-codes.md` 相对实现提交 `068f001` 无差异；其六条 `/api/v1` 路径、九个公开 schema、16 项错误码、大小写/精度/安全约束与 M10-T01 的透传代理和依赖基线互补且无冲突。`docs/task-handoffs/M10-T01-handoff.md` 已按 `next-task` 模板完整创建并链接，只记录 M10-T01 与直接输入 M00-T03，包含同一设计路径、精确 artifact/decision/rationale/constraint/usage/readiness evidence、读取顺序，以及先切换 Node 24.15+、再只创建完整 App smoke test 并取得缺少 `test:unit` script RED 的具体首个动作。因此执行真实的 `NOT_STARTED -> READY`；当前默认 Node 22.22.3 仅作为已记录的实施前置风险，前端实现尚未开始。
+- **State evidence (start):** 2026-09-04：用户明确要求按照权威任务看板执行当前任务；已完整读取 `docs/task-designs/M10-T01-design.md`、`docs/task-handoffs/M10-T01-handoff.md`、M10 任务卡与 Global Constraints、唯一直接依赖 M00-T03 的 OpenAPI/错误码契约，以及当前 `control-plane` 前端基线，确认任务身份、7 文件范围、精确版本、严格 TDD 顺序、验收与首个动作均可定位且无冲突；工作树为空且仓库指引允许直接在 `main` 工作。该请求作为本次 `READY -> IN_PROGRESS` 的显式启动证据，既有交接路径保留为进入上下文；本机默认 Node 22.22.3 仍须先切换到设计要求的 Node 24.15+，再开始 npm 与 RED/GREEN 操作。
 
 ### `M10-T02`
 
