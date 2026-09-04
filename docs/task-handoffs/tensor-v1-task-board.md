@@ -81,7 +81,7 @@
 | 60 | M11-T05 | `DownloadView` 页面集成和组件回归 | `COMPLETED` | M11-T01, M11-T02, M11-T03, M11-T04 | docs/task-designs/M11-T05-design.md | docs/task-handoffs/M11-T05-handoff.md |
 | 61 | M12-T01 | 数据集选择与动态筛选表单 | `COMPLETED` | M10-T03, M10-T04 | docs/task-designs/M12-T01-design.md | docs/task-handoffs/M12-T01-handoff.md |
 | 62 | M12-T02 | 全字段、固定列和横向滚动表格 | `COMPLETED` | M10-T04 | docs/task-designs/M12-T02-design.md | docs/task-handoffs/M12-T02-handoff.md |
-| 63 | M12-T03 | 20/50/100 分页组件 | `IN_PROGRESS` | M10-T04 | docs/task-designs/M12-T03-design.md | docs/task-handoffs/M12-T03-handoff.md |
+| 63 | M12-T03 | 20/50/100 分页组件 | `COMPLETED` | M10-T04 | docs/task-designs/M12-T03-design.md | docs/task-handoffs/M12-T03-handoff.md |
 | 64 | M12-T04 | 查询 composable、竞态和超界页处理 | `NOT_STARTED` | M10-T03 | None | None |
 | 65 | M12-T05 | `DatasetView` 页面集成和组件回归 | `NOT_STARTED` | M12-T01, M12-T02, M12-T03, M12-T04 | None | None |
 | 66 | M13-T01 | 前端确定性构建及静态资源复制 | `NOT_STARTED` | M10-T02, M11-T05, M12-T05 | None | None |
@@ -892,6 +892,8 @@
 - **State evidence (readiness):** 2026-09-05：M12-T02 已以初始实现提交 `1f073ee`、列顺序修复 `c75b4eb`、sticky 层级修复 `cd8f7ab`、Node.js 24.15.0 下聚焦 6/6、完整前端 98/98、生产构建仅含既有 chunk-size 提示、精确两文件范围和独立复审无 Critical/Important/Minor 完成，并由提交 `6a79fec` 在权威看板记录 `IN_PROGRESS -> COMPLETED`；按预定义顺序选择最小更大 Order 的后继 M12-T03。项目所有者批准公开事件为 `update:page/update:pageSize`、零页仍显示 `共 0 条，第 1 / 0 页` 并保留 page-size 选择器、整体控件只由 `disabled` prop 禁用；提交 `e487394` 已创建并回填 `docs/task-designs/M12-T03-design.md`，其七个必需章节冻结 1/50/0/0/false 默认值、20/50/100 选择、服务端 `totalPages` 权威、受控事件、零页/禁用/键盘语义、严格 RED、18 files / 104 tests、精确两文件范围和固定实现提交，无占位、矛盾或未决材料。唯一直接依赖 M10-T04 为 `COMPLETED`；当前设计、`AsyncStatePanel.vue` 和其 spec 相对最终修复提交 `0818fbc` 无差异，其查询状态/无障碍职责边界与 M12-T03 的分页摘要及控件职责互补且无冲突。Node.js 24.15.0 下交接前新鲜基线为 17 files / 98 tests 全通过，Vite 8.2.2 构建转换 1676 modules 并退出 0，仅有既有 Element Plus chunk-size 提示。`docs/task-handoffs/M12-T03-handoff.md` 已按 `next-task` 模板完整创建并链接，记录同一设计路径、M10-T04 直接输入、读取顺序和只先创建完整 spec 取得缺组件 RED 的首个动作；范围外 `.idea/misc.xml`、`docs/issues` 与 `data-plane/**/target/` 变化须保留和绕开。因此执行真实的 `NOT_STARTED -> READY`；M12-T03 实现尚未开始。
 
 - **State evidence (start):** 2026-09-05：用户明确要求按照权威任务看板执行当前任务；已先完整读取 `docs/task-designs/M12-T03-design.md` 与 `docs/task-handoffs/M12-T03-handoff.md`，并核对看板任务明细、M12 模块任务卡与门禁、PRD 6.6/7.4/AC-014、TRD 11.2/12.4/13.5～13.7/20.4、OpenAPI records 分页合同及唯一直接依赖 M10-T04 的职责边界，确认任务身份、范围、接口、严格 RED 首动作与验收均明确且无冲突，作为本次 `READY -> IN_PROGRESS` 的启动证据；既有 `next-task` 交接路径保留为进入上下文。
+
+- **State evidence (completion):** 2026-09-05：初始实现提交 `f19d4ff` 精确创建 `DatasetPagination.vue` 与 `DatasetPagination.spec.js`，实现五个受控 prop、固定 20/50/100、服务端 `totalPages` 权威摘要、原生 Element Plus 分页表面、零页及显式禁用语义；严格 RED 只因组件不存在而无法收集，GREEN 为聚焦 6/6。最终整体复审通过真实零页 size 选择复现 Element Plus 2.14.5 会额外回送同值 `update:current-page(1)`，提交 `7918e8e` 以同值受控页去重并把零页测试改为真实选择器，修复前该断言稳定失败、修复后通过且真实下一页 2→3 仍受覆盖。控制器在最终树上以 Node.js 24.15.0 新鲜复验聚焦 6/6、完整前端 18 files / 104 tests、Vite 生产构建转换 1676 modules 并退出 0，仅有既有 chunk-size 提示；两次实现提交均只含设计规定的两个分页文件，受保护路径与 `git diff --check` 通过，禁止 HTML 注入、网络、查询、定时器、客户端页数计算/切片及隐式页码 1 扫描无输出并按预期退出 1。任务级修复复审与最终整体复审均确认规范符合、质量通过、`Ready to merge: Yes`，Critical、Important、Minor 均为 0；因此满足设计与任务卡的结果级验收，执行 `IN_PROGRESS -> COMPLETED`，既有 `next-task` 交接路径保留为历史进入上下文。
 
 ### `M12-T04`
 
