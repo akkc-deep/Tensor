@@ -71,7 +71,7 @@
 | 50 | M09-T05 | 全局异常和 HTTP 状态映射 | `COMPLETED` | M09-T02, M09-T03, M09-T04 | docs/task-designs/M09-T05-design.md | docs/task-handoffs/M09-T05-handoff.md |
 | 51 | M09-T06 | 配置、脱敏、指标、健康和静态资源安全 | `COMPLETED` | M09-T01, M09-T02, M09-T03, M09-T04, M09-T05 | docs/task-designs/M09-T06-design.md | docs/task-handoffs/M09-T06-handoff.md |
 | 52 | M10-T01 | Vue 依赖、Vitest、VTU 和 Playwright 配置 | `COMPLETED` | M00-T03 | docs/task-designs/M10-T01-design.md | docs/task-handoffs/M10-T01-handoff.md |
-| 53 | M10-T02 | `/downloads`、`/datasets` 路由和桌面布局 | `READY` | M10-T01 | docs/task-designs/M10-T02-design.md | docs/task-handoffs/M10-T02-handoff.md |
+| 53 | M10-T02 | `/downloads`、`/datasets` 路由和桌面布局 | `IN_PROGRESS` | M10-T01 | docs/task-designs/M10-T02-design.md | docs/task-handoffs/M10-T02-handoff.md |
 | 54 | M10-T03 | Axios 客户端、DTO 和错误拦截 | `NOT_STARTED` | M00-T03, M10-T01 | None | None |
 | 55 | M10-T04 | 日期、空值、精度格式化和无障碍状态组件 | `NOT_STARTED` | M10-T01 | None | None |
 | 56 | M11-T01 | 数据源与接口分组搜索选择组件 | `NOT_STARTED` | M10-T03 | None | None |
@@ -750,6 +750,8 @@
 - **State evidence (blocker):** 2026-09-04：严格 TDD 已先取得三个 suite 仅因缺少 `src/router/index.js` 而失败的预期 RED，再形成设计规定的 7 新增、4 修改、5 删除实现；聚焦与完整单测均为 3 files/7 tests，清理、敏感前缀、生成路径 ignore、M10-T01 配置不变、格式和精确范围门禁通过。生产构建退出 0 且 1599 modules transformed，但全量 `.use(ElementPlus)` 与 `element-plus/dist/index.css` 产生 1004.62 kB JS，稳定触发 Vite 默认 500 kB chunk size warning；基线未安装生产 Element Plus 时仅 16 modules/63.72 kB JS 且无该提示，根因已定位。已批准设计同时强制生产全量安装 Element Plus、禁止修改 Vite 配置、固定 16 文件范围，并规定任何构建警告视为缺陷，现有约束无法同时满足；提高阈值只会隐藏症状，按需注册或拆包会改变既定安装/文件合同，均不能擅自实施。`docs/task-handoffs/M10-T02-handoff.md` 已改写为 `pause` 并记录当前 16 文件工作树、全部验证、剩余工作和解阻条件；因此执行 `IN_PROGRESS -> BLOCKED`。解阻条件是项目所有者明确批准把这一唯一已知 Element Plus 体积提示作为非阻断风险并修订设计，或批准修改安装策略、Vite 配置和文件范围的精确替代合同；实现尚未提交或独立审查。
 
 - **State evidence (resolution):** 2026-09-04：项目所有者回复“同意”，明确批准把全量 Element Plus 导致的唯一、可重复 `Some chunks are larger than 500 kB after minification` 提示记录为非阻断风险，保持 `.use(ElementPlus)`、Element Plus CSS、既有 Vite 配置和 16 文件范围继续完成任务。提交 `a06d5fc` 已把该裁决写入既有设计与实施计划：构建仍须退出 0，只允许这一项提示，不接受其他 warning/error，不提高 `chunkSizeWarningLimit`，也不改为按需注册。暂停交接的 Resolution condition 因此完整满足；保留 `docs/task-handoffs/M10-T02-handoff.md` 作为历史恢复上下文，执行 `BLOCKED -> READY`。
+
+- **State evidence (restart):** 2026-09-04：项目所有者的同一条“同意”明确授权保持全量 Element Plus 与既定 16 文件范围继续完成 M10-T02，作为本次 `READY -> IN_PROGRESS` 的启动证据。已再次完整读取修订后的 `docs/task-designs/M10-T02-design.md` 与历史 `pause` 交接，确认恢复任务仍为 M10-T02；剩余工作精确为按批准后的构建合同重跑验证、暂存并提交 16 文件、独立审查和提交态最终门禁，读取顺序仍为设计、实施计划、看板、历史交接及当前入口/配置，首个动作是重新运行聚焦/完整单测和生产构建并确认只出现获批的 Element Plus chunk-size 提示。当前工作树仍精确保留 7 新增、4 修改、5 删除，不含设计外生产变更；历史交接路径继续保留为恢复上下文。
 
 ### `M10-T03`
 
