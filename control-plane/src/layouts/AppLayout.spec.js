@@ -1,8 +1,60 @@
+import { readFileSync } from 'node:fs'
+
 import { flushPromises, mount } from '@vue/test-utils'
 import { createMemoryHistory } from 'vue-router'
 
 import { createAppRouter } from '../router/index.js'
 import AppLayout from './AppLayout.vue'
+
+const styles = readFileSync('src/style.css', 'utf8')
+
+let styleElement
+
+beforeAll(() => {
+  styleElement = document.createElement('style')
+  styleElement.textContent = styles
+  document.head.append(styleElement)
+})
+
+afterAll(() => styleElement.remove())
+
+function declaration(selector, property) {
+  const rule = [...styleElement.sheet.cssRules].find((candidate) =>
+    candidate.selectorText
+      ?.split(',')
+      .map((part) => part.trim())
+      .includes(selector),
+  )
+
+  return rule.style.getPropertyValue(property).trim()
+}
+
+function resolveColor(value) {
+  const variable = value.match(/var\((--[\w-]+)(?:,\s*(#[\da-f]{6}))?\)/i)
+  if (variable) return declaration(':root', variable[1]) || variable[2]
+
+  return value.match(/#[\da-f]{6}/i)[0]
+}
+
+function luminance(hex) {
+  const channels = hex
+    .match(/[\da-f]{2}/gi)
+    .map((channel) => Number.parseInt(channel, 16) / 255)
+    .map((channel) =>
+      channel <= 0.04045
+        ? channel / 12.92
+        : ((channel + 0.055) / 1.055) ** 2.4,
+    )
+
+  return 0.2126 * channels[0] + 0.7152 * channels[1] + 0.0722 * channels[2]
+}
+
+function contrastRatio(foreground, background) {
+  const values = [luminance(foreground), luminance(background)].sort(
+    (left, right) => right - left,
+  )
+  return (values[0] + 0.05) / (values[1] + 0.05)
+}
 
 async function mountAt(path) {
   const router = createAppRouter(createMemoryHistory())
@@ -32,6 +84,15 @@ describe('AppLayout', () => {
       ])
       expect(links[0].attributes('aria-current')).toBe('page')
       expect(links[1].attributes('aria-current')).toBeUndefined()
+      const activeColor = resolveColor(
+        declaration('.tensor-nav a.router-link-active', 'color'),
+      )
+      expect(contrastRatio(activeColor, '#ffffff')).toBeGreaterThanOrEqual(4.5)
+      expect(contrastRatio(activeColor, '#ecf5ff')).toBeGreaterThanOrEqual(4.5)
+      const focusColor = resolveColor(
+        declaration('.tensor-nav a:focus-visible', 'outline'),
+      )
+      expect(contrastRatio(focusColor, '#ffffff')).toBeGreaterThanOrEqual(3)
       expect(wrapper.get('main h1').text()).toBe('数据下载')
       expect(wrapper.get('main p').text()).toBe(
         '数据下载模块尚未完成，后续任务将提供数据源、接口、参数和下载结果。',
@@ -73,6 +134,8 @@ describe('AppLayout', () => {
       const returnLink = wrapper.get('main a')
       expect(returnLink.text()).toBe('返回数据下载')
       expect(returnLink.attributes('href')).toBe('/downloads')
+      const actionColor = resolveColor(declaration('.page__action', 'color'))
+      expect(contrastRatio(actionColor, '#ffffff')).toBeGreaterThanOrEqual(4.5)
     } finally {
       wrapper.unmount()
     }
