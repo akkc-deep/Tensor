@@ -73,7 +73,7 @@
 | 52 | M10-T01 | Vue 依赖、Vitest、VTU 和 Playwright 配置 | `COMPLETED` | M00-T03 | docs/task-designs/M10-T01-design.md | docs/task-handoffs/M10-T01-handoff.md |
 | 53 | M10-T02 | `/downloads`、`/datasets` 路由和桌面布局 | `COMPLETED` | M10-T01 | docs/task-designs/M10-T02-design.md | docs/task-handoffs/M10-T02-handoff.md |
 | 54 | M10-T03 | Axios 客户端、DTO 和错误拦截 | `COMPLETED` | M00-T03, M10-T01 | docs/task-designs/M10-T03-design.md | docs/task-handoffs/M10-T03-handoff.md |
-| 55 | M10-T04 | 日期、空值、精度格式化和无障碍状态组件 | `READY` | M10-T01 | docs/task-designs/M10-T04-design.md | docs/task-handoffs/M10-T04-handoff.md |
+| 55 | M10-T04 | 日期、空值、精度格式化和无障碍状态组件 | `IN_PROGRESS` | M10-T01 | docs/task-designs/M10-T04-design.md | docs/task-handoffs/M10-T04-handoff.md |
 | 56 | M11-T01 | 数据源与接口分组搜索选择组件 | `NOT_STARTED` | M10-T03 | None | None |
 | 57 | M11-T02 | 元数据驱动动态参数表单 | `NOT_STARTED` | M10-T03, M10-T04 | None | None |
 | 58 | M11-T03 | 下载 composable、控件锁定和请求世代 | `NOT_STARTED` | M10-T03 | None | None |
@@ -784,6 +784,8 @@
 - **State evidence (blocker):** 2026-09-04：严格 TDD 与批准计划逐步执行完成；实现提交 `0a61e3f` 以固定消息精确新增七个设计文件，提交态聚焦 15/15、全量 34/34、Vite 构建、精确导出、范围、格式和禁止能力门禁均通过。独立审查发现一项 Important：`formatIngestedAt` 使用宽松 `new Date(value)`，Node 24 会把 `2026-02-30T02:30:15Z` 静默归一化为 3 月 2 日，并按宿主时区解释无偏移字符串；`TZ=UTC`/`TZ=America/New_York` 复现分别得到不同结果，违反同一设计的“非法时间保持原值、宿主时区不泄漏”保证。后端集成测试的实际 `Instant` JSON 为带 `Z` 的 ISO 字符串，OpenAPI 示例为带 `+08:00` 的字符串，现有权威输入足以限定兼容边界，但收紧已批准设计仍需项目所有者明确批准。`docs/task-handoffs/M10-T04-handoff.md` 已改写为 `pause`，完整记录现状、验证、两文件最小修复和解阻条件；因此执行 `IN_PROGRESS -> BLOCKED`。解阻条件是项目所有者明确批准严格日历日期、完整时分秒和必需 `Z`/数值偏移的最小修订合同，并授权写入设计/计划后继续严格 TDD。
 
 - **State evidence (resolution):** 2026-09-04：项目所有者回复“同意”，明确批准 pause 交接中的最小修订合同并授权继续：`formatIngestedAt` 只转换严格 `YYYY-MM-DDTHH:mm:ss[.fraction](Z|±HH:mm)`、真实日历日期和有效时间/偏移，无偏移、不存在日期、非法时间/偏移及非字符串保持原值，同时继续接受后端 `Z` 与 OpenAPI 数值偏移。提交 `d5e9990` 已把该裁决写入既有 `docs/task-designs/M10-T04-design.md`，并在任务级实施计划增加精确两文件 RED/GREEN、双宿主时区验证、完整门禁和修复提交步骤；公开 API、依赖、组件和七文件总体范围不变。pause 交接的解阻条件因此满足，同一交接路径保留为历史恢复上下文，执行 `BLOCKED -> READY`。
+
+- **State evidence (restart):** 2026-09-04：项目所有者的“同意”同时明确授权按批准的最小修订设计继续完成 M10-T04；在提交 `be7d0f2` 记录 `BLOCKED -> READY` 后，已重新完整读取修订设计与同一 `pause` 交接，确认恢复任务、剩余两文件修复、来源顺序、首个回归 RED 动作和最终验证均可定位且无冲突，工作树为空。该授权构成本次 `READY -> IN_PROGRESS` 的明确启动证据，既有交接路径保留为历史恢复上下文。
 
 ### `M11-T01`
 
