@@ -115,7 +115,10 @@ export class ApiError extends Error {
 export class ClientError extends Error {
   /** @param {ClientErrorKind} kind @param {string|null} [requestId=null] */
   constructor(kind, requestId = null) {
-    const rule = Object.hasOwn(CLIENT_RULES, kind) ? CLIENT_RULES[kind] : null
+    const rule =
+      typeof kind === 'string' && Object.hasOwn(CLIENT_RULES, kind)
+        ? CLIENT_RULES[kind]
+        : null
     if (!rule) throw new TypeError('Unknown client error kind')
     super(rule[0])
     this.name = 'ClientError'
@@ -132,7 +135,10 @@ function apiError(response) {
   const body = response.data
   if (!isObjectWithExactKeys(body, API_ERROR_KEYS)) return null
 
-  const rule = Object.hasOwn(API_RULES, body.code) ? API_RULES[body.code] : null
+  const rule =
+    typeof body.code === 'string' && Object.hasOwn(API_RULES, body.code)
+      ? API_RULES[body.code]
+      : null
   const responseRequestId = header(response.headers, 'X-Request-Id')
   if (
     !rule ||

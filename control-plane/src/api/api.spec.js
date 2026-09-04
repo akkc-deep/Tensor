@@ -126,6 +126,7 @@ describe('API boundary', () => {
     }
 
     expect(() => new ClientError('constructor')).toThrow(TypeError)
+    expect(() => new ClientError(['TIMEOUT'])).toThrow(TypeError)
   })
 
   it('lists data sources and returns response data unchanged', async () => {
@@ -278,6 +279,7 @@ describe('API boundary', () => {
     })
     const failures = [
       (id) => ({ status: 400, body: { ...valid(id), code: 'UNKNOWN' } }),
+      (id) => ({ status: 400, body: { ...valid(id), code: ['PARAM_REQUIRED'] } }),
       (id) => ({ status: 500, body: valid(id) }),
       (id) => ({ status: 400, body: { ...valid(id), retryable: true } }),
       (id) => {
