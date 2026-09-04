@@ -12,7 +12,7 @@
 
 包含：
 
-- 创建 `GlobalExceptionHandler`，以 `@RestControllerAdvice` 统一处理 `TensorException`、Core 参数字段错误、Bean Validation、MVC 输入绑定、持久化/查询失败和未知异常；
+- 创建 `GlobalExceptionHandler`，以 `@RestControllerAdvice` 统一处理 `TensorException`、Core 参数字段错误、Bean Validation、MVC 输入绑定、值对象输入、持久化/查询失败和未知异常；
 - 把全部 16 个 `ErrorCode` 映射到冻结的 400、409、422、500、502、504 状态，并使用 `ErrorCode.retryable()` 作为唯一重试真值；
 - 把 M05 `ParameterValidationException` 的字段错误，以及当前 `DownloadRequest` Bean Validation 的结构错误，投影为安全、稳定的 `FieldErrorResponse`；
 - 按当前固定 API 路径区分同步下载持久化失败、records 查询失败和其他内部失败；
@@ -91,6 +91,7 @@ MVC 输入异常使用独立、具体的 handler，避免进入未知异常分�
 - `MissingServletRequestParameterException` → `400 + PARAM_REQUIRED`，字段名为 parameter name，消息 `is required`；
 - `MethodArgumentTypeMismatchException` → `400 + PARAM_INVALID`，字段名为 argument name，消息 `has invalid value`；
 - `HttpMessageNotReadableException` → `400 + PARAM_INVALID`，固定字段 `request`，消息 `has invalid value`。
+- Controller 值对象工厂传播的 `IllegalArgumentException` → `400 + PARAM_INVALID`，空字段数组和固定摘要；该 handler 不读取异常消息，也不按具体值对象类型分支。
 
 这些 handler 不回显非法日期、数值、JSON、目标 Java 类型、解析器消息或 cause。当前代码没有方法级约束或类级对象约束，因此不增加 `ConstraintViolationException`、`HandlerMethodValidationException` 或任意全局对象错误协议；未来出现真实消费方时再独立设计。
 
@@ -166,7 +167,7 @@ mvn -Dmaven.repo.local=/private/tmp/tensor-m2 -f data-plane/pom.xml \
 1. 参数化 16 次：测试专用最小 `TensorException` 依次携带全部 16 个 `ErrorCode`，断言精确 HTTP、固定 message、enum code、`code.retryable()`、空字段错误、Header/body requestId 一致；异常原消息包含 SQL/绝对路径/stacktrace/Token 哨兵，响应均不得出现；
 2. 参数化 2 次：测试 Controller 通过真实 `ParameterValidator` 分别触发 `PARAM_REQUIRED` 与 `PARAM_INVALID`，断言 Core 字段顺序和安全 field/message 原样投影；
 3. 单次：以 `DownloadRequest` 的真实 Bean Validation 覆盖纯缺失、纯格式错误和混合失败，断言 code 选择、每字段唯一、排序和固定安全字段消息；
-4. 单次：覆盖缺失 request parameter、非法整数/日期类型绑定和 malformed JSON，断言 `PARAM_REQUIRED|PARAM_INVALID` 与不回显原值/解析诊断；
+4. 单次：覆盖缺失 request parameter、非法整数/日期类型绑定、malformed JSON 和值对象 `IllegalArgumentException`，断言 `PARAM_REQUIRED|PARAM_INVALID` 与不回显原值/解析诊断；
 5. 参数化 3 次：分别在精确 downloads POST、records GET 和其他路由抛带敏感消息的数据库/运行时异常，断言 `PERSISTENCE_FAILED`、`QUERY_FAILED`、`INTERNAL_ERROR`；
 6. 单次：普通未知异常固定为 `500 + INTERNAL_ERROR`，不受异常消息、cause 或 `@ResponseStatus` 影响；
 7. 单次：反射确认 advice final/Servlet-only/唯一职责表面，并捕获 WARN/ERROR 日志，验证只含固定事件、requestId/code/type，5xx 有脱敏堆栈且日志/响应均无敏感哨兵。
@@ -195,7 +196,7 @@ mvn -Dmaven.repo.local=/private/tmp/tensor-m2 -f data-plane/pom.xml \
 运行结构、敏感信息、范围、JAR、格式、跟踪和清理检查：
 
 ```bash
-rg -n '@RestControllerAdvice|@ExceptionHandler|TensorException|MethodArgumentNotValidException|MethodArgumentTypeMismatchException|HttpMessageNotReadableException|DataAccessException|TransactionException|PERSISTENCE_FAILED|QUERY_FAILED|INTERNAL_ERROR|RequestIdFilter\.MDC_KEY' \
+rg -n '@RestControllerAdvice|@ExceptionHandler|TensorException|MethodArgumentNotValidException|MethodArgumentTypeMismatchException|HttpMessageNotReadableException|IllegalArgumentException|DataAccessException|TransactionException|PERSISTENCE_FAILED|QUERY_FAILED|INTERNAL_ERROR|RequestIdFilter\.MDC_KEY' \
   data-plane/tensor-app/src/main/java/com/akkc/tensor/web/GlobalExceptionHandler.java
 rg -n 'getMessage\(|getQueryString|getParameter\(|getHeader\(|getCookies\(|request\.getReader|request\.getInputStream|(?i:authorization|credential|password|token)|SELECT |INSERT |UPDATE |DELETE ' \
   data-plane/tensor-app/src/main/java/com/akkc/tensor/web/GlobalExceptionHandler.java
@@ -231,7 +232,7 @@ mvn -Dmaven.repo.local=/private/tmp/tensor-m2 -f data-plane/pom.xml \
 
 - `GlobalExceptionHandler` 是唯一 Servlet `@RestControllerAdvice`，所有当前 API 错误使用既有 `ApiErrorResponse`，Header/body requestId 与 Filter MDC 同值且不生成第二个 ID；
 - 全部 16 个 `ErrorCode` 的 HTTP 和 retryable 与 M00 错误目录精确一致，只产生 400/409/422/500/502/504，不自行增加或复用错误码实现 404/503；
-- 普通领域错误使用固定安全 message 和空字段数组；Core 参数错误保持安全字段顺序，Bean Validation/MVC 输入错误使用稳定 code、字段名和固定消息；
+- 普通领域错误使用固定安全 message 和空字段数组；Core 参数错误保持安全字段顺序，Bean Validation/MVC/值对象输入错误使用稳定 code、字段名和固定消息；
 - downloads 数据库/事务失败为 `PERSISTENCE_FAILED`，records 未处理查询失败为 `QUERY_FAILED`，其他未知失败为 `INTERNAL_ERROR`；所有客户端 500 message 固定且不按异常文本分类；
 - 响应和日志不包含原始 SQL、Token、请求数据、异常消息、cause 消息、绝对路径或 `stacktrace` 哨兵；4xx 无堆栈，5xx 仅保留已脱敏堆栈与固定低信息量字段；
 - 严格 RED 只来自缺失生产 handler；GREEN 聚焦 25/25、reactor `test`/`verify` 320/320、三项 mutation、Enforcer、ArchUnit、禁止 Git、JAR、静态、范围、格式、跟踪和 clean 门禁得到预期结果；

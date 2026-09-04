@@ -32,7 +32,7 @@
 
 **Interfaces:**
 - Consumes: `TensorException.code()`, `ErrorCode.retryable()`, `ParameterValidator.ParameterValidationException.fieldErrors()`, `RequestIdFilter.MDC_KEY`, `ApiErrorResponse(String, ErrorCode, String, boolean, List<FieldErrorResponse>)`, and Spring MVC exception types.
-- Produces: one Servlet-only `GlobalExceptionHandler`; six `@ExceptionHandler` method groups for domain, Bean Validation, missing parameter, type mismatch, unreadable body, and catch-all failures; safe JSON for every current API error.
+- Produces: one Servlet-only `GlobalExceptionHandler`; seven `@ExceptionHandler` method groups for domain, Bean Validation, missing parameter, type mismatch, unreadable body, value-object input, and catch-all failures; safe JSON for every current API error.
 
 - [ ] **Step 1: Re-read authoritative inputs and confirm the clean 295-test baseline**
 
@@ -178,6 +178,11 @@ private static final class FailureController {
         throw new IllegalStateException(SENSITIVE);
     }
 
+    @GetMapping("/test/identifier/{value}")
+    void identifier(@PathVariable("value") String value) {
+        PluginId.of(value);
+    }
+
     @GetMapping("/test/annotated")
     void annotated() {
         throw new TeapotException();
@@ -197,10 +202,10 @@ Add exactly these seven test methods, whose parameterized sources yield 25 Suref
 1. `mapsEveryDomainCodeToTheFrozenContract` is `@ParameterizedTest @EnumSource(ErrorCode.class)` and therefore runs 16 times. For each code, perform `GET /test/domain/{code}` with the fixed request header. Assert the exact status/message table from the design, body field order `requestId,code,message,retryable,fieldErrors`, `retryable == code.retryable()`, empty fields, and Header/body ID equality. Lowercase response JSON must not contain `select`, `secret_token`, `/private/`, `stacktrace`, `tensorException`, or `java.`.
 2. `projectsCoreParameterErrorsWithoutChangingTheirOrder` is `@ParameterizedTest @ValueSource(strings = {"required", "invalid"})` and runs twice. Call `/test/core/{kind}`; assert `PARAM_REQUIRED` with `trade_date/is required`, or `PARAM_INVALID` with `trade_date/has invalid value`, matching the real Core exception's field order and text exactly.
 3. `mapsBeanValidationToUniqueSortedSafeFields` is one `@Test`. POST three JSON bodies to `/test/bean`: all three fields absent, two syntactically invalid IDs with non-null params, and a mixed missing/invalid body. Assert pure missing is `PARAM_REQUIRED`, any non-missing constraint makes the response `PARAM_INVALID`, each field appears once in lexical order, and messages are only `is required|has invalid value`; rejected strings never appear.
-4. `mapsMvcInputFailuresWithoutParserDetails` is one `@Test`. Call `/test/input` once without `required`, once with `number=not-an-integer`, once with `date=not-a-date`, then POST malformed JSON to `/test/bean`. Assert the exact `PARAM_REQUIRED|PARAM_INVALID` field/message rules and verify the invalid values, Java target types, Jackson messages, and sensitive sentinel never appear.
+4. `mapsMvcAndValueObjectInputFailuresWithoutParserDetails` is one `@Test`. Call `/test/input` once without `required`, once with `number=not-an-integer`, once with `date=not-a-date`, POST malformed JSON to `/test/bean`, then call `/test/identifier/BAD-ID`. Assert the exact `PARAM_REQUIRED|PARAM_INVALID` field/message rules and verify the invalid values, Java target types, Jackson messages, and sensitive sentinel never appear. The identifier failure must use an empty field array because no stable OpenAPI field name is carried by `IllegalArgumentException`.
 5. `classifiesUntypedFailuresByExactOperation` is `@ParameterizedTest @CsvSource` with exactly three rows: `POST,/api/v1/downloads,PERSISTENCE_FAILED`; `GET,/api/v1/data-sources/test/datasets/test/records,QUERY_FAILED`; `GET,/test/unknown,INTERNAL_ERROR`. Build each request with `MockMvcRequestBuilders.request(HttpMethod.valueOf(method), URI.create(path))`; assert 500, the selected code, fixed message, retryable truth, empty fields, and no sensitive response content.
 6. `mapsAnUnknownResponseStatusExceptionToInternalError` is one `@Test`. Call `/test/annotated` and assert the catch-all returns fixed `500 + INTERNAL_ERROR`, proving the mapping does not delegate to annotations or messages.
-7. `exposesOnlyTheApprovedSurfaceAndWritesSanitizedLogs` is one `@Test`. Assert the advice class is final and has `@RestControllerAdvice` plus `@ConditionalOnWebApplication(SERVLET)`; assert its only field is a private static final SLF4J logger and exactly six methods carry `@ExceptionHandler`. Attach a Logback `ListAppender<ILoggingEvent>` to `LoggerFactory.getLogger(GlobalExceptionHandler.class)`, make one 400 domain request and one 500 unknown request, then assert one WARN has no Throwable, one ERROR has a Throwable proxy whose message is exactly `Request failure details redacted`, cause is null, and stack frames are non-empty. Concatenate formatted messages and Throwable messages and assert none contain `SELECT`, `secret_token`, `/private/internal/path`, or the raw `stacktrace` sentinel. Always detach/stop the appender in `finally`.
+7. `exposesOnlyTheApprovedSurfaceAndWritesSanitizedLogs` is one `@Test`. Assert the advice class is final and has `@RestControllerAdvice` plus `@ConditionalOnWebApplication(SERVLET)`; assert its only field is a private static final SLF4J logger and exactly seven methods carry `@ExceptionHandler`. Attach a Logback `ListAppender<ILoggingEvent>` to `LoggerFactory.getLogger(GlobalExceptionHandler.class)`, make one 400 domain request and one 500 unknown request, then assert one WARN has no Throwable, one ERROR has a Throwable proxy whose message is exactly `Request failure details redacted`, cause is null, and stack frames are non-empty. Concatenate formatted messages and Throwable messages and assert none contain `SELECT`, `secret_token`, `/private/internal/path`, or the raw `stacktrace` sentinel. Always detach/stop the appender in `finally`.
 
 Use one helper for every JSON request so the correlation contract cannot be skipped:
 
@@ -327,6 +332,12 @@ public final class GlobalExceptionHandler {
                 ErrorCode.PARAM_INVALID,
                 List.of(new FieldErrorResponse("request", "has invalid value")),
                 exception);
+    }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    ResponseEntity<ApiErrorResponse> handleInvalidArgument(
+            IllegalArgumentException exception) {
+        return response(ErrorCode.PARAM_INVALID, List.of(), exception);
     }
 
     @ExceptionHandler(Exception.class)
@@ -489,7 +500,7 @@ Expected for each command: plugin-api 79, core 75, Tushare 93, fixture 12, app 6
 Run:
 
 ```bash
-rg -n '@RestControllerAdvice|@ExceptionHandler|TensorException|MethodArgumentNotValidException|MethodArgumentTypeMismatchException|HttpMessageNotReadableException|DataAccessException|TransactionException|PERSISTENCE_FAILED|QUERY_FAILED|INTERNAL_ERROR|RequestIdFilter\.MDC_KEY' \
+rg -n '@RestControllerAdvice|@ExceptionHandler|TensorException|MethodArgumentNotValidException|MethodArgumentTypeMismatchException|HttpMessageNotReadableException|IllegalArgumentException|DataAccessException|TransactionException|PERSISTENCE_FAILED|QUERY_FAILED|INTERNAL_ERROR|RequestIdFilter\.MDC_KEY' \
   data-plane/tensor-app/src/main/java/com/akkc/tensor/web/GlobalExceptionHandler.java
 rg -n 'getMessage\(|getQueryString|getParameter\(|getHeader\(|getCookies\(|request\.getReader|request\.getInputStream|(?i:authorization|credential|password|token)|SELECT |INSERT |UPDATE |DELETE ' \
   data-plane/tensor-app/src/main/java/com/akkc/tensor/web/GlobalExceptionHandler.java
@@ -521,7 +532,7 @@ Expected: authorization scan finds all approved handler/classification symbols; 
 
 - [ ] **Step 11: Review and commit the exact two-file implementation**
 
-Review both files against every design Acceptance bullet. Confirm the six handler groups, 16-code switches, 25 invocation count, fixed messages, route predicates, MDC-only ID, field ordering, response/log leak scans, and all mutation restorations.
+Review both files against every design Acceptance bullet. Confirm the seven handler groups, 16-code switches, 25 invocation count, fixed messages, route predicates, MDC-only ID, field ordering, response/log leak scans, and all mutation restorations.
 
 Run:
 
