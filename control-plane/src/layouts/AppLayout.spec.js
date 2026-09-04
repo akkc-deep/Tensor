@@ -137,9 +137,11 @@ describe('AppLayout', () => {
       expect(links[0].attributes('aria-current')).toBeUndefined()
       expect(links[1].attributes('aria-current')).toBe('page')
       expect(wrapper.get('main h1').text()).toBe('数据查看')
+      expect(wrapper.get('main h2').text()).toBe('请选择数据源')
       expect(wrapper.get('main p').text()).toBe(
-        '数据查看模块尚未完成，后续任务将提供数据集筛选、表格和分页。',
+        '选择数据源后加载可查询的数据集。',
       )
+      expect(wrapper.text()).not.toContain('数据查看模块尚未完成')
     } finally {
       wrapper.unmount()
     }
