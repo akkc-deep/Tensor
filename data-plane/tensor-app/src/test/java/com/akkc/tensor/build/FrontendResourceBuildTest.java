@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -31,18 +32,37 @@ class FrontendResourceBuildTest {
         try (Stream<Path> paths = Files.list(assets)) {
             assetFiles = paths.filter(Files::isRegularFile).toList();
         }
-        Path javascript = requireAsset(assetFiles, HASHED_JAVASCRIPT, "hashed JavaScript");
-        Path stylesheet = requireAsset(assetFiles, HASHED_STYLESHEET, "hashed stylesheet");
         String indexHtml = Files.readString(index, StandardCharsets.UTF_8);
+        Path javascript = requireAsset(assetFiles, indexHtml, HASHED_JAVASCRIPT, "hashed JavaScript");
+        Path stylesheet = requireAsset(assetFiles, indexHtml, HASHED_STYLESHEET, "hashed stylesheet");
 
         assertThat(indexHtml).contains(
                 "assets/" + javascript.getFileName(),
                 "assets/" + stylesheet.getFileName());
     }
 
-    private static Path requireAsset(List<Path> assets, Pattern pattern, String description) {
+    @Test
+    void selectsOnlyAssetsReferencedByIndexWhenOldAndNewHashesCoexist(@TempDir Path tempDirectory)
+            throws IOException {
+        Path assets = Files.createDirectories(tempDirectory.resolve("assets"));
+        Path oldJavascript = Files.createFile(assets.resolve("index-oldhash.js"));
+        Path newJavascript = Files.createFile(assets.resolve("index-newhash.js"));
+        Path oldStylesheet = Files.createFile(assets.resolve("index-oldhash.css"));
+        Path newStylesheet = Files.createFile(assets.resolve("index-newhash.css"));
+        String indexHtml = "<script type=\"module\" src=\"assets/index-newhash.js\"></script>"
+                + "<link rel=\"stylesheet\" href=\"assets/index-newhash.css\">";
+
+        assertThat(requireAsset(List.of(oldJavascript, newJavascript), indexHtml,
+                HASHED_JAVASCRIPT, "hashed JavaScript")).isEqualTo(newJavascript);
+        assertThat(requireAsset(List.of(oldStylesheet, newStylesheet), indexHtml,
+                HASHED_STYLESHEET, "hashed stylesheet")).isEqualTo(newStylesheet);
+    }
+
+    private static Path requireAsset(
+            List<Path> assets, String indexHtml, Pattern pattern, String description) {
         return assets.stream()
                 .filter(path -> pattern.matcher(path.getFileName().toString()).matches())
+                .filter(path -> indexHtml.contains("assets/" + path.getFileName()))
                 .findFirst()
                 .orElseThrow(() -> new AssertionError("Missing " + description + " asset"));
     }
