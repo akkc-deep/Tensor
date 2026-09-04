@@ -73,7 +73,7 @@
 | 52 | M10-T01 | Vue 依赖、Vitest、VTU 和 Playwright 配置 | `COMPLETED` | M00-T03 | docs/task-designs/M10-T01-design.md | docs/task-handoffs/M10-T01-handoff.md |
 | 53 | M10-T02 | `/downloads`、`/datasets` 路由和桌面布局 | `COMPLETED` | M10-T01 | docs/task-designs/M10-T02-design.md | docs/task-handoffs/M10-T02-handoff.md |
 | 54 | M10-T03 | Axios 客户端、DTO 和错误拦截 | `COMPLETED` | M00-T03, M10-T01 | docs/task-designs/M10-T03-design.md | docs/task-handoffs/M10-T03-handoff.md |
-| 55 | M10-T04 | 日期、空值、精度格式化和无障碍状态组件 | `READY` | M10-T01 | docs/task-designs/M10-T04-design.md | docs/task-handoffs/M10-T04-handoff.md |
+| 55 | M10-T04 | 日期、空值、精度格式化和无障碍状态组件 | `IN_PROGRESS` | M10-T01 | docs/task-designs/M10-T04-design.md | docs/task-handoffs/M10-T04-handoff.md |
 | 56 | M11-T01 | 数据源与接口分组搜索选择组件 | `NOT_STARTED` | M10-T03 | None | None |
 | 57 | M11-T02 | 元数据驱动动态参数表单 | `NOT_STARTED` | M10-T03, M10-T04 | None | None |
 | 58 | M11-T03 | 下载 composable、控件锁定和请求世代 | `NOT_STARTED` | M10-T03 | None | None |
@@ -778,6 +778,8 @@
 - **Sources:** `docs/superpowers/plans/tensor-modules/M10-frontend-foundation.md` 的 `Task M10-T04` 任务卡。
 - **First action:** 读取 `docs/superpowers/plans/tensor-modules/M10-frontend-foundation.md` 的 `Task M10-T04` 任务卡，并确认其 `Context boundary`、输入和目标文件均可定位。
 - **State evidence (readiness):** 2026-09-04：M10-T03 已以实现提交 `8e4ff0d`、审查修复 `caa9987`/`890ed88`、Node 24.15.0 下聚焦 12/12、全量 19/19、Vite 构建仅含已批准 Element Plus chunk-size 提示、精确六文件范围和最终独立复审无问题完成，权威看板已记录其 `IN_PROGRESS -> COMPLETED`；按预定义顺序选择最小更大 Order 的后继 M10-T04。项目所有者逐节批准并最终确认书面设计；提交 `f6cea50` 创建并回填 `docs/task-designs/M10-T04-design.md`，提交 `3086430` 将其转化为 `docs/superpowers/plans/2026-09-04-m10-t04-shared-ui-utilities.md` 的 17 步严格 TDD 计划。设计七节完整冻结 8 个纯函数、四态/字段错误 ARIA 语义、M11 紧凑下载日期与 M12 ISO 查询分界、默认/回退 `Asia/Shanghai`、DECIMAL/LONG 字符串精度、15/34 测试计数、精确 7 个新增文件和固定实现提交；计划覆盖全部设计要求，5 个 JavaScript 与 2 个 Vue 代码块通过 Node 24/`@vue/compiler-sfc` 语法编译检查，9/6 测试计数、占位符、类型、范围和格式自审通过，无留给实施者的材料选择。唯一直接依赖 M10-T01 为 `COMPLETED`，当前 package、lock、Vite、Vitest 和 setup 相对其完成提交 `90c2029` 无差异；Node 24.15.0 下重新验证当前基线为 4 files / 19 tests 全通过，Vite 转换 1599 modules 并退出 0，只产生已批准 chunk-size 提示，其运行时、测试和构建约束与 M10-T04 设计互补且无冲突。`docs/task-handoffs/M10-T04-handoff.md` 已按 `next-task` 模板完整创建并链接，只记录 M10-T04 和直接输入 M10-T01，包含同一设计路径、精确 artifact/decision/rationale/constraint/usage/readiness evidence、设计与计划优先读取顺序，以及只创建两个完整 spec 并取得目标生产模块缺失 RED 的具体首个动作。因此执行真实的 `NOT_STARTED -> READY`；生产和测试代码均尚未开始。
+
+- **State evidence (start):** 2026-09-04：用户明确要求按照权威任务看板执行当前任务；已完整读取 `docs/task-designs/M10-T04-design.md`、`docs/task-handoffs/M10-T04-handoff.md` 和 17 步任务级实施计划，并核对 M10 模块任务卡、唯一直接依赖 M10-T01 的设计与当前前端测试配置。确认任务身份、精确七文件范围、冻结公开函数与 ARIA 语义、严格 TDD 顺序、首个 RED 动作和结果级验收均可定位且无冲突；普通 `main` 检出工作树为空，Node 24.15.0 下新鲜基线为 4 files / 19 tests 全通过，Vite 构建退出 0 且只有已批准的 Element Plus chunk-size 提示。该请求作为本次 `READY -> IN_PROGRESS` 的明确启动证据，既有 `next-task` 交接路径保留为进入上下文。
 
 ### `M11-T01`
 
