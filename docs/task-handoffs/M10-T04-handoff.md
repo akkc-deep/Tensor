@@ -1,51 +1,74 @@
-# Next Task Handoff
+# Pause Handoff
 
 ## Handoff Type
 
-next-task
+pause
 
 ## Task Link
 
 - **Task board:** `docs/task-handoffs/tensor-v1-task-board.md`
-- **Completed task:** `M10-T03`
-- **Next task:** `M10-T04`
-- **Design document:** `docs/task-designs/M10-T04-design.md`
-- **Expected next status:** `READY`
-
-## Next Task
-
 - **Task ID:** `M10-T04`
-- **Title:** 日期、空值、精度格式化和无障碍状态组件
-- **Goal:** 为 M11 下载页和 M12 数据集页交付严格下载日期转换、时区明确且精度安全的展示/校验工具，以及无业务状态的可访问异步状态和字段错误组件。
-- **Scope:** 精确创建 `date.js`、`format.js`、`validation.js`、`AsyncStatePanel.vue`、`FieldError.vue` 和两个测试文件；只提供已批准的 8 个纯函数、四态提示、actions 插槽与文本错误。不修改依赖、配置、路由、布局、页面或 API 客户端，不创建 M11/M12 业务组件、composable 或成功结果，不请求数据、不解释 `ApiError`，不解析 `DECIMAL`/`LONG` 字符串。
-- **Acceptance:** 严格日期/月字符串按 M11 规则转换而 M12 查询日期保持 ISO；入库时间默认/回退 `Asia/Shanghai` 并固定输出到秒；`null`/`undefined`、`0`、空字符串和高精度字符串保持明确区分；三个校验原语在非法正则等边界不抛用户异常；`INITIAL` 不播报、`LOADING`/`EMPTY` 礼貌播报、`FAILURE` 与非空字段错误使用 alert，所有消息为纯文本。Node 24.15.0 下严格 RED 原因正确，聚焦 15/15、全量 34/34 和生产构建满足设计结果，单个实现提交精确包含 7 个新增文件。
+- **Transition:** `IN_PROGRESS -> BLOCKED`
 
-## Dependencies
+## Current State
 
-### `M10-T01`
+- **Complete:** 已完整消费设计、17 步实施计划和进入交接，并以提交 `e609063` 记录 `READY -> IN_PROGRESS`。严格 TDD 先只创建两个完整 spec，聚焦命令在收集期仅因 `date.js` 与 `FieldError.vue` 等目标生产模块不存在而退出 1；实现提交 `0a61e3f` 以固定消息精确新增设计规定的 7 个文件。提交态聚焦为 2 files / 15 tests、全量为 6 files / 34 tests，均全部通过；Vite 构建退出 0 且只有已批准的 Element Plus chunk-size 提示；精确导出、范围、格式与禁止能力门禁通过。
+- **Partial:** 当前实现逐字符合已批准设计和计划，但独立审查发现 `formatIngestedAt` 对非法日历时间与无偏移时间的处理违反设计自己的“非法时间保持原值、宿主时区不泄漏”保证；尚未修订设计/计划，也尚未写入审查修复。
+- **Blocked:** 修复需要把已批准的输入边界收紧为严格日历日期、完整时分秒和必需 `Z`/数值偏移，并按设计修订流程取得项目所有者明确批准。
+- **Unverified:** 严格时间戳边界的新 RED/GREEN、跨 `TZ` 确定性验证、修复后完整回归/构建和最终独立复审尚未执行；任务未达到完成门禁。
 
-- **Artifact:** `control-plane/package.json`、`control-plane/package-lock.json`、`control-plane/vite.config.js`、`control-plane/vitest.config.js` 和 `control-plane/src/test/setup.js`；对应完成提交为 `90c2029`。
-- **Decision:** 前端固定使用 Node `>=24.15.0 <25`、Vue `3.5.42`、Vitest `4.1.11`、Vue Test Utils `2.5.0` 与 jsdom `30.0.1`；`test:unit` 运行 Vitest，测试匹配 `src/**/*.spec.js`，setup 全局安装 Element Plus 并在每个用例后清理 DOM、mock、global 和 environment stub；生产构建使用现有 Vite 8.2.2 配置。
-- **Rationale:** M10-T01 建立了可重复安装、真实 SFC mount、DOM 清理和生产构建的统一前端基础，使 M10-T04 不必重新选择运行时、测试器、DOM 环境或插件安装策略。
-- **Constraint:** 使用 Node 24.15.0 执行 RED/GREEN、回归和构建；不得修改 package、lock、Vite/Vitest 配置或共享 setup，不得绕开现有清理与 Element Plus 测试行为，也不得引入新依赖。
-- **Usage:** 两个新增 spec 由现有 Vitest/jsdom/VTU 链路收集并挂载 Vue SFC；五个生产模块使用当前 Vue/JavaScript/Intl 能力；最终以现有 `test:unit` 与 `build` scripts 验证 34 项回归和生产 bundle。
-- **Readiness evidence:** M10-T01 在权威看板中为 `COMPLETED`；上述 package、lock、Vite、Vitest 和 setup 文件当前相对提交 `90c2029` 无差异。2026-09-04 以 Node 24.15.0 重新运行当前前端基线，Vitest 为 4 files / 19 tests 全部通过，Vite 转换 1599 modules 并退出 0，只产生已批准的 Element Plus chunk-size 提示。
+## Changed Files
 
-M10-T04 仅有这一项权威直接依赖，其运行时、测试和构建约束与 M10-T04 的纯工具、原生语义组件、严格 TDD 和七文件范围互补，无冲突。
+- `control-plane/src/utils/date.js`：提交 `0a61e3f` 新增严格下载日期/月转换和 DATE 原样展示。
+- `control-plane/src/utils/format.js`：提交 `0a61e3f` 新增入库时间和单元格格式化；其中宽松 `new Date(value)` 是待修复边界。
+- `control-plane/src/utils/validation.js`：提交 `0a61e3f` 新增三个校验原语。
+- `control-plane/src/utils/format.spec.js`：提交 `0a61e3f` 新增 9 项工具测试；待在现有第 6 项中加入非法日历时间、无偏移时间和显式偏移回归。
+- `control-plane/src/components/common/AsyncStatePanel.vue`：提交 `0a61e3f` 新增四态可访问状态面板。
+- `control-plane/src/components/common/FieldError.vue`：提交 `0a61e3f` 新增文本型字段错误 alert。
+- `control-plane/src/components/common/AsyncStatePanel.spec.js`：提交 `0a61e3f` 新增 6 项真实组件测试。
+
+## Verification
+
+- `PATH="/Users/qiangzhiwei/.nvm/versions/node/v24.15.0/bin:$PATH" npm run test:unit -- --run`（实现前）：4 files / 19 tests 全部通过。
+- `PATH="/Users/qiangzhiwei/.nvm/versions/node/v24.15.0/bin:$PATH" npm run build`（实现前）：1599 modules transformed，退出 0；仅有已批准的 chunk-size 提示。
+- `npm run test:unit -- --run src/utils/format.spec.js src/components/common/AsyncStatePanel.spec.js`（仅两个测试文件）：2 suites 在收集期失败，退出 1；唯一错误是目标生产模块不存在，形成严格 RED。
+- 同一聚焦命令（提交态）：2 files / 15 tests 全部通过。
+- `npm run test:unit -- --run`（提交态）：6 files / 34 tests 全部通过。
+- `npm run build`（提交态）：1599 modules transformed，退出 0；仅有已批准的 chunk-size 提示。
+- 计划中的 Node 精确导出/边界断言：退出 0，无输出；`git diff HEAD^ HEAD --check`：退出 0；提交范围精确为 7 个新增文件，工作树为空。
+- 禁止能力扫描：无输出并退出 1；受保护现有路径无差异。
+- 独立审查：无 Critical/Minor；一项 Important 指出 `new Date(value)` 会归一化非法日历日期并按宿主时区解释无偏移字符串，结论为 `Ready to merge: With fixes`。
+- `TZ=UTC` 与 `TZ=America/New_York` 的 Node 24 复现：`2026-02-30T02:30:15Z` 均被错误显示为 `2026-03-02 10:30:15`；`2026-08-25T02:30:15` 分别显示为 `2026-08-25 10:30:15` 和 `2026-08-25 14:30:15`，确认审查问题。
+- 权威输入核对：后端 `DatasetControllerIT` 固定实际 `Instant` JSON 为 `2026-08-07T08:09:10.123Z`；OpenAPI 示例的 `ingested_at` 为 `2026-08-25T10:30:15.123+08:00`，两者均含显式偏移。
+
+## Remaining Work
+
+- 取得项目所有者对严格时间戳最小修订设计的明确批准，并把同一裁决写入 `docs/task-designs/M10-T04-design.md` 与任务级实施计划。
+- 在 `format.spec.js` 现有第 6 项中先加入不存在日期、无偏移时间和显式数值偏移断言，取得可归因 RED。
+- 最小修改 `format.js`：只在严格 `YYYY-MM-DDTHH:mm:ss[.fraction](Z|±HH:mm)` 形状、真实公历日期和有效时分秒通过后构造 `Date`；其他字符串保持原值，公开导出不变。
+- 运行聚焦、全量、构建、精确导出、范围、安全及 `TZ=UTC`/`TZ=America/New_York` 确定性门禁，创建只含 `format.js`/`format.spec.js` 的审查修复提交并请求最终独立复审。
+- 依据结果级证据完成 M10-T04，并按权威看板顺序准备后继任务。
+
+## Resume Task
+
+恢复 `M10-T04`“日期、空值、精度格式化和无障碍状态组件”，继续其目标：为 M11/M12 提供严格日期转换、时区明确且精度安全的展示/校验工具，以及无业务状态的可访问状态与字段错误组件。
 
 ## Start Here
 
-1. `docs/task-designs/M10-T04-design.md` 全文。
-2. `docs/superpowers/plans/2026-09-04-m10-t04-shared-ui-utilities.md` 全文。
-3. `docs/task-handoffs/tensor-v1-task-board.md` 的 `M10-T04` 行与任务详情。
-4. `docs/superpowers/plans/tensor-modules/M10-frontend-foundation.md` 的 Global Constraints、M10-T04 任务卡和 Module Gate。
-5. `docs/task-designs/M10-T01-design.md`，以及 `control-plane/package.json`、`control-plane/vitest.config.js`、`control-plane/src/test/setup.js` 和现有四个 spec 的测试风格。
-6. **First action:** 从仓库根确认工作树为空且 Node 为 `v24.15.0`，然后只创建完整的 `control-plane/src/utils/format.spec.js` 与 `control-plane/src/components/common/AsyncStatePanel.spec.js`，运行 `cd control-plane && npm run test:unit -- --run src/utils/format.spec.js src/components/common/AsyncStatePanel.spec.js`，记录两个 suite 只因目标生产模块尚不存在而在收集期失败的严格 RED。
+1. `docs/task-designs/M10-T04-design.md` 全文，重点是入库时间失败边界、Tests 和 Acceptance。
+2. `docs/superpowers/plans/2026-09-04-m10-t04-shared-ui-utilities.md` 全文，重点是步骤 2、7、12～17。
+3. `docs/task-handoffs/tensor-v1-task-board.md` 的 M10-T04 行与详情。
+4. 本交接的 Current State、Verification 与 Blocker。
+5. `docs/contracts/openapi-v1.yaml` 的查询响应示例、`data-plane/tensor-app/src/test/java/com/akkc/tensor/web/DatasetControllerIT.java` 的 `ingested_at` JSON 断言，以及提交 `0a61e3f` 的 `format.js`/`format.spec.js`。
+6. **First action:** 由项目所有者明确批准本交接 Blocker 中的最小修订设计；批准前不修改设计、计划、测试或生产代码。
+
+## Blocker
+
+- **Reason:** 独立审查与 Node 24 双时区复现证明，已批准计划规定的宽松 `new Date(value)` 与同一设计的非法输入保持和宿主时区独立保证冲突；收紧已批准公开输入边界前必须取得项目所有者明确批准。
+- **Resolution condition:** 项目所有者明确批准以下可观察合同并授权继续：`formatIngestedAt` 只转换严格 `YYYY-MM-DDTHH:mm:ss[.fraction](Z|±HH:mm)`、真实日历日期及有效 24 小时时分秒；无偏移、不存在日期、非法时间/偏移和非字符串均保持原值；继续接受后端 `Z` 与 OpenAPI 示例数值偏移，公开 API、依赖、组件和七文件总体范围不变。随后把批准裁决写入任务设计/计划并取得新增 RED。
 
 ## Risks
 
-- `Intl.DateTimeFormat` 的默认字符串依赖运行时 locale；实现必须按设计使用 `formatToParts`、24 小时制和固定 ASCII 分隔符，不能直接返回本地化字符串。
-- 纯 DATE 不得经过 `Date` 或时区转换，入库时间则必须按真实时刻和指定 IANA 时区转换；合并两条路径会产生日期偏移。
-- 元数据 pattern 可能语法非法；`matchesPattern` 必须返回 `false`，不能把 `RegExp` 构造异常泄漏到 UI。
-- 当前生产构建稳定产生已批准的 Element Plus chunk-size 提示；它是唯一允许的 warning，不得通过修改 Vite 阈值或依赖注册方式隐藏，也不得接受新增 warning。
-- `role="alert"` 在挂载时可能立即播报；后续调用方只能在真实失败或字段错误存在时渲染相应内容。
+- 仅检查 `Date#getTime()` 不能阻止日期归一化；必须在构造前校验严格形状和日历真实性。
+- 允许无偏移字符串会重新引入宿主 `TZ` 差异；时区标识必须是输入合同的必填组成。
+- 修复不得把 `ingested_at` 与纯 `DATE` 路径合并，也不得新增依赖或导出。
