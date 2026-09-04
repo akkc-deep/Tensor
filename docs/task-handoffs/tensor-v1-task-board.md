@@ -82,7 +82,7 @@
 | 61 | M12-T01 | 数据集选择与动态筛选表单 | `COMPLETED` | M10-T03, M10-T04 | docs/task-designs/M12-T01-design.md | docs/task-handoffs/M12-T01-handoff.md |
 | 62 | M12-T02 | 全字段、固定列和横向滚动表格 | `COMPLETED` | M10-T04 | docs/task-designs/M12-T02-design.md | docs/task-handoffs/M12-T02-handoff.md |
 | 63 | M12-T03 | 20/50/100 分页组件 | `COMPLETED` | M10-T04 | docs/task-designs/M12-T03-design.md | docs/task-handoffs/M12-T03-handoff.md |
-| 64 | M12-T04 | 查询 composable、竞态和超界页处理 | `NOT_STARTED` | M10-T03 | docs/task-designs/M12-T04-design.md | None |
+| 64 | M12-T04 | 查询 composable、竞态和超界页处理 | `READY` | M10-T03 | docs/task-designs/M12-T04-design.md | docs/task-handoffs/M12-T04-handoff.md |
 | 65 | M12-T05 | `DatasetView` 页面集成和组件回归 | `NOT_STARTED` | M12-T01, M12-T02, M12-T03, M12-T04 | None | None |
 | 66 | M13-T01 | 前端确定性构建及静态资源复制 | `NOT_STARTED` | M10-T02, M11-T05, M12-T05 | None | None |
 | 67 | M13-T02 | 单个可执行 JAR 打包和内容检查 | `NOT_STARTED` | M09-T06, M13-T01 | None | None |
@@ -469,7 +469,7 @@
 - **Dependencies:** M02-T03, M04-T06.
 - **Sources:** `docs/superpowers/plans/tensor-modules/M06-core-persistence-query.md` 的 `Task M06-T01` 任务卡。
 - **First action:** 读取 `docs/superpowers/plans/tensor-modules/M06-core-persistence-query.md` 的 `Task M06-T01` 任务卡，并确认其 `Context boundary`、输入和目标文件均可定位。
-- **State evidence:** None.
+- **State evidence (readiness):** 2026-09-05：M12-T03 已以实现提交 `f19d4ff`、零页真实 size 事件修复 `7918e8e`、Node.js 24.15.0 下聚焦 6/6、完整前端 104/104、生产构建、精确两文件范围及无 Critical/Important/Minor 的任务/最终复审完成，并由提交 `157a64c` 在权威看板记录 `IN_PROGRESS -> COMPLETED`；按预定义顺序选择最小更大 Order 的后继 M12-T04。项目所有者依次批准 composable 内部不可变查询快照、retryable 失败完整快照重试、加载时新 query/reset 取代旧请求而分页/重试无效、单一 composable 方案，以及公开接口、数据流、失败边界与 8 项测试设计；提交 `61eccee` 已创建并回填 `docs/task-designs/M12-T04-design.md`，书面设计随后获项目所有者明确批准，七个必需章节冻结五态、1/50 默认值、服务端 totals/page 权威、generation、分页/重试/reset、严格 RED、19 files / 112 tests、精确两文件范围和固定实现提交，无占位、矛盾或未决材料。提交 `09b6171` 将同一设计转换为 `docs/superpowers/plans/2026-09-05-m12-t04-query-lifecycle.md` 的 8 步严格 TDD 实施计划，覆盖全部 8 项测试、最小生产实现、验证和精确提交。唯一直接依赖 M10-T03 为 `COMPLETED`，其 `queryDataset` 七参数投影、原样 `PageResponse` 与安全错误合同同 M12-T04 的状态/快照/generation 边界互补且无冲突；`docs/task-handoffs/M12-T04-handoff.md` 已按 `next-task` 模板完整创建并链接，记录相同设计路径、唯一直接输入、读取顺序及先确认 104 项基线再只创建完整 spec 取得缺生产模块 RED 的首个动作。因此执行真实的 `NOT_STARTED -> READY`，M12-T04 实现尚未开始。
 
 - **State evidence (readiness):** 2026-09-02：M05-T05 已按严格 TDD、最终 reactor `test`/`verify` 132/132、三层 Enforcer、静态/范围/格式/清理门禁及两层审查完成，实现提交 `d7ec551` 与合同修复 `8ca49d0` 已由看板提交 `387ceb8` 记录 `IN_PROGRESS -> COMPLETED`；按预定义顺序选择后继 M06-T01。其直接依赖 M02-T03、M04-T06 均为 `COMPLETED`：前者以提交 `551c18f` 和修复 `0a74740` 冻结保序不可变 `DatasetDefinition`/业务键合同，后者以提交 `e78bd98` 在官方 MySQL 8.4.6 验证业务列原序、两项 FINGERPRINT `business_key`、三个来源字段和 49 张生产表物理主键。两项输入分别提供逻辑元数据与物理映射，结合 TRD 10.3 的参数化 Upsert 结构无冲突。提交 `21eabe6` 已创建并回填 `docs/task-designs/M06-T01-design.md`，完整冻结两个无状态公开类型、白名单正则、COMPOSITE/FINGERPRINT insert/update 差异、`daily` 精确 SQL、6 项严格 TDD、138/138 reactor 和精确三文件范围；完整复读确认七节齐全、无占位符或留给实施者的材料选择。`docs/task-handoffs/M06-T01-handoff.md` 已按 `next-task` 模板创建并先链接，只记录 M06-T01 及直接输入 M02-T03/M04-T06，包含决策/约束比较、设计优先读取顺序和先确认 132/132 基线再取得缺两个生产类型 RED 的首个动作；因此执行 `NOT_STARTED -> READY`，实现尚未开始。
 
