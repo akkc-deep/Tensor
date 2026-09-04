@@ -81,7 +81,7 @@
 | 60 | M11-T05 | `DownloadView` 页面集成和组件回归 | `COMPLETED` | M11-T01, M11-T02, M11-T03, M11-T04 | docs/task-designs/M11-T05-design.md | docs/task-handoffs/M11-T05-handoff.md |
 | 61 | M12-T01 | 数据集选择与动态筛选表单 | `COMPLETED` | M10-T03, M10-T04 | docs/task-designs/M12-T01-design.md | docs/task-handoffs/M12-T01-handoff.md |
 | 62 | M12-T02 | 全字段、固定列和横向滚动表格 | `COMPLETED` | M10-T04 | docs/task-designs/M12-T02-design.md | docs/task-handoffs/M12-T02-handoff.md |
-| 63 | M12-T03 | 20/50/100 分页组件 | `NOT_STARTED` | M10-T04 | docs/task-designs/M12-T03-design.md | None |
+| 63 | M12-T03 | 20/50/100 分页组件 | `READY` | M10-T04 | docs/task-designs/M12-T03-design.md | docs/task-handoffs/M12-T03-handoff.md |
 | 64 | M12-T04 | 查询 composable、竞态和超界页处理 | `NOT_STARTED` | M10-T03 | None | None |
 | 65 | M12-T05 | `DatasetView` 页面集成和组件回归 | `NOT_STARTED` | M12-T01, M12-T02, M12-T03, M12-T04 | None | None |
 | 66 | M13-T01 | 前端确定性构建及静态资源复制 | `NOT_STARTED` | M10-T02, M11-T05, M12-T05 | None | None |
@@ -889,7 +889,7 @@
 - **Dependencies:** M10-T04.
 - **Sources:** `docs/superpowers/plans/tensor-modules/M12-dataset-ui.md` 的 `Task M12-T03` 任务卡。
 - **First action:** 读取 `docs/superpowers/plans/tensor-modules/M12-dataset-ui.md` 的 `Task M12-T03` 任务卡，并确认其 `Context boundary`、输入和目标文件均可定位。
-- **State evidence:** None.
+- **State evidence (readiness):** 2026-09-05：M12-T02 已以初始实现提交 `1f073ee`、列顺序修复 `c75b4eb`、sticky 层级修复 `cd8f7ab`、Node.js 24.15.0 下聚焦 6/6、完整前端 98/98、生产构建仅含既有 chunk-size 提示、精确两文件范围和独立复审无 Critical/Important/Minor 完成，并由提交 `6a79fec` 在权威看板记录 `IN_PROGRESS -> COMPLETED`；按预定义顺序选择最小更大 Order 的后继 M12-T03。项目所有者批准公开事件为 `update:page/update:pageSize`、零页仍显示 `共 0 条，第 1 / 0 页` 并保留 page-size 选择器、整体控件只由 `disabled` prop 禁用；提交 `e487394` 已创建并回填 `docs/task-designs/M12-T03-design.md`，其七个必需章节冻结 1/50/0/0/false 默认值、20/50/100 选择、服务端 `totalPages` 权威、受控事件、零页/禁用/键盘语义、严格 RED、18 files / 104 tests、精确两文件范围和固定实现提交，无占位、矛盾或未决材料。唯一直接依赖 M10-T04 为 `COMPLETED`；当前设计、`AsyncStatePanel.vue` 和其 spec 相对最终修复提交 `0818fbc` 无差异，其查询状态/无障碍职责边界与 M12-T03 的分页摘要及控件职责互补且无冲突。Node.js 24.15.0 下交接前新鲜基线为 17 files / 98 tests 全通过，Vite 8.2.2 构建转换 1676 modules 并退出 0，仅有既有 Element Plus chunk-size 提示。`docs/task-handoffs/M12-T03-handoff.md` 已按 `next-task` 模板完整创建并链接，记录同一设计路径、M10-T04 直接输入、读取顺序和只先创建完整 spec 取得缺组件 RED 的首个动作；范围外 `.idea/misc.xml`、`docs/issues` 与 `data-plane/**/target/` 变化须保留和绕开。因此执行真实的 `NOT_STARTED -> READY`；M12-T03 实现尚未开始。
 
 ### `M12-T04`
 
