@@ -73,7 +73,7 @@
 | 52 | M10-T01 | Vue 依赖、Vitest、VTU 和 Playwright 配置 | `COMPLETED` | M00-T03 | docs/task-designs/M10-T01-design.md | docs/task-handoffs/M10-T01-handoff.md |
 | 53 | M10-T02 | `/downloads`、`/datasets` 路由和桌面布局 | `COMPLETED` | M10-T01 | docs/task-designs/M10-T02-design.md | docs/task-handoffs/M10-T02-handoff.md |
 | 54 | M10-T03 | Axios 客户端、DTO 和错误拦截 | `COMPLETED` | M00-T03, M10-T01 | docs/task-designs/M10-T03-design.md | docs/task-handoffs/M10-T03-handoff.md |
-| 55 | M10-T04 | 日期、空值、精度格式化和无障碍状态组件 | `IN_PROGRESS` | M10-T01 | docs/task-designs/M10-T04-design.md | docs/task-handoffs/M10-T04-handoff.md |
+| 55 | M10-T04 | 日期、空值、精度格式化和无障碍状态组件 | `COMPLETED` | M10-T01 | docs/task-designs/M10-T04-design.md | docs/task-handoffs/M10-T04-handoff.md |
 | 56 | M11-T01 | 数据源与接口分组搜索选择组件 | `NOT_STARTED` | M10-T03 | None | None |
 | 57 | M11-T02 | 元数据驱动动态参数表单 | `NOT_STARTED` | M10-T03, M10-T04 | None | None |
 | 58 | M11-T03 | 下载 composable、控件锁定和请求世代 | `NOT_STARTED` | M10-T03 | None | None |
@@ -786,6 +786,8 @@
 - **State evidence (resolution):** 2026-09-04：项目所有者回复“同意”，明确批准 pause 交接中的最小修订合同并授权继续：`formatIngestedAt` 只转换严格 `YYYY-MM-DDTHH:mm:ss[.fraction](Z|±HH:mm)`、真实日历日期和有效时间/偏移，无偏移、不存在日期、非法时间/偏移及非字符串保持原值，同时继续接受后端 `Z` 与 OpenAPI 数值偏移。提交 `d5e9990` 已把该裁决写入既有 `docs/task-designs/M10-T04-design.md`，并在任务级实施计划增加精确两文件 RED/GREEN、双宿主时区验证、完整门禁和修复提交步骤；公开 API、依赖、组件和七文件总体范围不变。pause 交接的解阻条件因此满足，同一交接路径保留为历史恢复上下文，执行 `BLOCKED -> READY`。
 
 - **State evidence (restart):** 2026-09-04：项目所有者的“同意”同时明确授权按批准的最小修订设计继续完成 M10-T04；在提交 `be7d0f2` 记录 `BLOCKED -> READY` 后，已重新完整读取修订设计与同一 `pause` 交接，确认恢复任务、剩余两文件修复、来源顺序、首个回归 RED 动作和最终验证均可定位且无冲突，工作树为空。该授权构成本次 `READY -> IN_PROGRESS` 的明确启动证据，既有交接路径保留为历史恢复上下文。
+
+- **Completion evidence:** 2026-09-04：严格 TDD 的初始实现提交 `0a61e3f` 以固定消息精确新增设计规定的七个文件；项目所有者批准审查修订后，回归先取得 1 failed / 8 passed 的可归因 RED，修复提交 `0818fbc` 仅修改 `format.js` 与 `format.spec.js`，在构造 `Date` 前验证显式偏移时间戳的严格形状、真实公历日期、时分秒和偏移范围。Node 24.15.0 提交态新鲜门禁中，`TZ=UTC` 与 `TZ=America/New_York` 断言均退出 0，聚焦测试为 2 files / 15 tests、全量测试为 6 files / 34 tests 且全部通过，Vite 转换 1599 modules 并退出 0，仅含已批准的 Element Plus chunk-size 提示；精确公开导出、禁止能力扫描、受保护路径、格式、两提交范围和七文件总体范围均符合设计，工作树为空。最终只读复审确认原 Important 已关闭且无 Critical/Important，结论 `Ready to merge: Yes`；仅记录现实入库数据不可达的公元纪元边界 Minor，不阻塞当前 M11/M12 共享原语交付。因此日期转换、显式偏移入库时间、精度安全单元格、校验原语及四态/字段错误无障碍组件均达到结果级验收，执行 `IN_PROGRESS -> COMPLETED`。
 
 ### `M11-T01`
 
