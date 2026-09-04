@@ -72,7 +72,7 @@
 | 51 | M09-T06 | 配置、脱敏、指标、健康和静态资源安全 | `COMPLETED` | M09-T01, M09-T02, M09-T03, M09-T04, M09-T05 | docs/task-designs/M09-T06-design.md | docs/task-handoffs/M09-T06-handoff.md |
 | 52 | M10-T01 | Vue 依赖、Vitest、VTU 和 Playwright 配置 | `COMPLETED` | M00-T03 | docs/task-designs/M10-T01-design.md | docs/task-handoffs/M10-T01-handoff.md |
 | 53 | M10-T02 | `/downloads`、`/datasets` 路由和桌面布局 | `COMPLETED` | M10-T01 | docs/task-designs/M10-T02-design.md | docs/task-handoffs/M10-T02-handoff.md |
-| 54 | M10-T03 | Axios 客户端、DTO 和错误拦截 | `IN_PROGRESS` | M00-T03, M10-T01 | docs/task-designs/M10-T03-design.md | docs/task-handoffs/M10-T03-handoff.md |
+| 54 | M10-T03 | Axios 客户端、DTO 和错误拦截 | `COMPLETED` | M00-T03, M10-T01 | docs/task-designs/M10-T03-design.md | docs/task-handoffs/M10-T03-handoff.md |
 | 55 | M10-T04 | 日期、空值、精度格式化和无障碍状态组件 | `NOT_STARTED` | M10-T01 | None | None |
 | 56 | M11-T01 | 数据源与接口分组搜索选择组件 | `NOT_STARTED` | M10-T03 | None | None |
 | 57 | M11-T02 | 元数据驱动动态参数表单 | `NOT_STARTED` | M10-T03, M10-T04 | None | None |
@@ -766,6 +766,8 @@
 - **State evidence (readiness):** 2026-09-04：M10-T02 已以提交 `d3d4be7`、范围内对比度修复 `993dd3c`、提交态 3 files/7 tests、Vite 构建仅含项目所有者批准的 Element Plus chunk-size 提示、精确 16 文件范围和独立复审无问题完成，权威看板已记录其 `IN_PROGRESS -> COMPLETED`；按预定义顺序选择最小更大 Order 的后继 M10-T03。项目所有者依次批准前端逐请求生成 UUID `X-Request-Id`、唯一 Axios 实例默认 `/api/v1`/130000ms 并由显式函数覆盖、服务端 `ApiError` 与四类 `ClientError` 分离、五模块显式边界，以及完整架构/错误/测试设计；提交 `aa601f1` 创建并回填 `docs/task-designs/M10-T03-design.md`，提交 `9b14b12` 将其转换为 `docs/superpowers/plans/2026-09-04-m10-t03-api-client.md` 的 14 步严格 TDD 计划。设计七节完整冻结六个公开请求函数、JSDoc DTO、错误校验、12/19 测试计数、6 个新增文件和固定实现提交；计划的测试与五个生产代码块均通过 JavaScript 语法检查，无占位符、范围或类型表面缺口。两项直接依赖 M00-T03、M10-T01 均为 `COMPLETED`；当前 OpenAPI/错误码相对 `068f001` 无差异，当前 package/lock/Vite/Vitest/Playwright/setup 相对 `90c2029` 无差异，两者提供的六路径/九 DTO/16 错误/精度安全合同与 Axios 1.20.0、Node 24、测试/代理基线互补且无冲突。`docs/task-handoffs/M10-T03-handoff.md` 已按 `next-task` 模板完整创建并链接，只记录 M10-T03 与两项直接输入，包含同一设计路径、精确 artifact/decision/rationale/constraint/usage/readiness evidence、设计/计划优先读取顺序，以及确认空工作树和 Node 24.15 后只创建完整 `api.spec.js` 并取得缺目标模块 RED 的具体首个动作。因此执行真实的 `NOT_STARTED -> READY`；API 客户端实现尚未开始。
 
 - **State evidence (start):** 2026-09-04：用户明确要求按照权威任务看板执行当前任务，并连续回复“同意”授权继续；已完整读取 `docs/task-designs/M10-T03-design.md` 与 `docs/task-handoffs/M10-T03-handoff.md`，确认任务身份、精确六文件范围、冻结公开接口与错误边界、严格 TDD 顺序、结果级验收、直接依赖、读取顺序和首个 RED 动作均可定位且无冲突。准备提交 `bbb955c` 已将完整 `next-task` 交接链接到看板并执行 `NOT_STARTED -> READY`，当前工作树为空；上述请求和确认作为本次 `READY -> IN_PROGRESS` 的明确启动证据，既有交接路径保留为进入上下文。
+
+- **Completion evidence:** 2026-09-04：严格 TDD 先只创建完整 `api.spec.js`，聚焦命令在收集阶段仅因 `./dataSources.js` 等五个目标生产模块不存在而退出 1；实现提交 `8e4ff0d`（`feat(ui): add typed API client boundaries`）精确新增设计规定的六个 API 文件，交付唯一可原子配置的 Axios 实例、逐请求 UUID `X-Request-Id`、六个路径与 DTO 对齐的业务函数、16-code `ApiError` 校验和四类固定安全 `ClientError`。独立审查发现 Axios 1.20 默认序列化会省略已提供的 `null` query、公开 JSDoc 表面不完整及普通对象闭集查找的继承属性问题；修复提交 `caa9987` 以最终 URL 回归和显式 serializer 保留 `annDateFrom=`、补齐配置/路径/错误输入输出类型，并使用 own-property 查找。复审进一步以运行时证据确认 property-key 强制转换可让数组判别值穿透；第二轮 RED 精确得到 2 failed/10 passed，提交 `890ed88` 以 primitive string 守卫和数组 kind/code 回归关闭该边界。最终 Node 24.15.0 下聚焦测试为 1 file/12 tests，完整前端为 4 files/19 tests，均 0 failure；Vite 8.2.2 构建转换 1599 modules 并退出 0，只含项目所有者已批准的 Element Plus chunk-size 提示。默认 `/api/v1`/130000ms 和精确导出检查退出 0，敏感能力扫描无输出并退出 1，禁止修改路径无差异，三个生成路径保持忽略，`fb34bb2..890ed88` 合并范围精确为六个新增 API 文件，格式与干净工作树门禁通过。最终只读复审确认全部先前发现关闭且无新问题，Critical/Important/Minor 均为 None，结论 `Ready to merge: Yes`；因此结果级目标、错误安全、精度/字段保持、测试、构建和范围验收全部成立，执行 `IN_PROGRESS -> COMPLETED`。
 
 ### `M10-T04`
 
