@@ -86,7 +86,7 @@
 | 65 | M12-T05 | `DatasetView` 页面集成和组件回归 | `COMPLETED` | M12-T01, M12-T02, M12-T03, M12-T04 | docs/task-designs/M12-T05-design.md | docs/task-handoffs/M12-T05-handoff.md |
 | 66 | M13-T01 | 前端确定性构建及静态资源复制 | `COMPLETED` | M10-T02, M11-T05, M12-T05 | docs/task-designs/M13-T01-design.md | docs/task-handoffs/M13-T01-handoff.md |
 | 67 | M13-T02 | 单个可执行 JAR 打包和内容检查 | `COMPLETED` | M09-T06, M13-T01 | docs/task-designs/M13-T02-design.md | docs/task-handoffs/M13-T02-handoff.md |
-| 68 | M13-T03 | 生产配置、CORS、SPA fallback 和优雅停机 | `READY` | M09-T06, M13-T02 | docs/task-designs/M13-T03-design.md | docs/task-handoffs/M13-T03-handoff.md |
+| 68 | M13-T03 | 生产配置、CORS、SPA fallback 和优雅停机 | `IN_PROGRESS` | M09-T06, M13-T02 | docs/task-designs/M13-T03-design.md | docs/task-handoffs/M13-T03-handoff.md |
 | 69 | M13-T04 | 全新环境运行说明和启动 smoke test | `NOT_STARTED` | M13-T03 | None | None |
 | 70 | M14-T01 | fixture 页面端到端主闭环 | `NOT_STARTED` | M13-T04 | None | None |
 | 71 | M14-T02 | 下载失败、空结果、幂等和回滚矩阵 | `NOT_STARTED` | M14-T01 | None | None |
@@ -952,6 +952,8 @@
 - **Sources:** `docs/superpowers/plans/tensor-modules/M13-packaging-runbook.md` 的 `Task M13-T03` 任务卡。
 - **First action:** 读取 `docs/superpowers/plans/tensor-modules/M13-packaging-runbook.md` 的 `Task M13-T03` 任务卡，并确认其 `Context boundary`、输入和目标文件均可定位。
 - **State evidence (readiness):** 2026-09-05：M13-T02 已以实现 `c9ae5b1`、测试强化 `9c34e6e`/`0032094`、前端 120/120、后端 79/75/93/12/81、Failsafe 4/4、唯一 Boot JAR 内容合同及最终复审完成，并由提交 `b81e864` 在权威看板记录 `IN_PROGRESS -> COMPLETED`；按预定义顺序选择最小更大 Order 的后继 M13-T03。项目所有者依次批准空值生产关闭且单一精确 dev origin 的 `/api/v1/**` CORS、GET/POST/OPTIONS 与 `Content-Type|X-Request-Id`/credentials false 边界、`120s < 130s <= proxy`、每阶段 70s graceful shutdown、无扩展名 UI forward 与 `api|actuator|assets`/文件型真实 404，以及完整路由/缓存/测试设计；提交 `105c0fe` 创建并回填 `docs/task-designs/M13-T03-design.md`，项目所有者复核书面设计后再次批准，提交 `b6cfea3` 将其展开为 `docs/superpowers/plans/2026-09-05-m13-t03-production-web.md` 的单一严格 TDD 任务和 10 个无占位实施步骤。Spring Framework 6.2.19 的 PathPattern 已以独立探针验证；设计七节、计划强制头、精确三文件范围、严格 RED/GREEN、五项 mutation、完整 `clean verify`、Failsafe 4/4 及范围/格式/跟踪门禁均自审通过，无留给实施者的材料选择。两个直接依赖 M09-T06、M13-T02 均为 `COMPLETED`；当前配置、安全 Filter、POM、目标路径无工作树差异，现有 JAR、classpath index 和哈希 assets 可定位，其安全/缓存/404/health-only 基线与单 JAR 静态资源合同互补且无未解决冲突。`docs/task-handoffs/M13-T03-handoff.md` 已按 `next-task` 模板创建并链接，只记录 M13-T03 与两个直接输入，包含同一设计路径、实施计划、精确 artifact/decision/rationale/constraint/usage/readiness evidence、读取顺序，以及只先创建完整生产 Web 测试并取得缺生产配置类 testCompile RED 的首个动作；范围外 `.idea/misc.xml` 和 Maven `target` 必须保留且不得提交。因此执行真实的 `NOT_STARTED -> READY`；M13-T03 实现尚未开始。
+
+- **State evidence (start):** 2026-09-05：用户明确要求按照权威任务看板执行当前任务，并先读取设计文档和交接文件；已完整读取 M13-T03 设计、实施计划、交接和看板当前行/详情，核对模块任务卡、两个直接依赖及现有 YAML、安全 Filter、POM、生成后的 classpath index/assets。三个目标路径无重叠修改，两个新 Java 文件尚不存在；任务范围、路由/CORS/停机合同、严格 RED 和验收步骤一致。依据本次明确启动请求执行 `READY -> IN_PROGRESS`，保留原交接为进入上下文；按仓库指示直接在 main 工作，范围外 `.idea/misc.xml` 与生成 `target/` 保留且不提交。
 
 ### `M13-T04`
 
