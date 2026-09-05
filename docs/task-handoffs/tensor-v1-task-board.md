@@ -90,7 +90,7 @@
 | 69 | M13-T04 | 全新环境运行说明和启动 smoke test | `COMPLETED` | M13-T03 | docs/task-designs/M13-T04-design.md | docs/task-handoffs/M13-T04-handoff.md |
 | 70 | M13-T05 | 独立 acceptance JAR 打包及启停验收 | `COMPLETED` | M13-T04, M08-T02, M04-T06 | docs/task-designs/M13-T05-design.md | docs/task-handoffs/M13-T05-handoff.md |
 | 71 | M14-T01 | fixture 页面端到端主闭环 | `COMPLETED` | M13-T04, M13-T05 | docs/task-designs/M14-T01-design.md | docs/task-handoffs/M14-T01-handoff.md |
-| 72 | M14-T02 | 下载失败、空结果、幂等和回滚矩阵 | `NOT_STARTED` | M14-T01 | docs/task-designs/M14-T02-design.md | None |
+| 72 | M14-T02 | 下载失败、空结果、幂等和回滚矩阵 | `READY` | M14-T01 | docs/task-designs/M14-T02-design.md | docs/task-handoffs/M14-T02-handoff.md |
 | 73 | M14-T03 | 查询、分页、宽表、竞态和无障碍 E2E | `NOT_STARTED` | M14-T01 | None | None |
 | 74 | M14-T04 | 49 数据集自动契约与页面回归驱动 | `NOT_STARTED` | M03-T09, M04-T06, M14-T01 | None | None |
 | 75 | M14-T05 | 真实 Tushare 49 接口受控页面验收 | `NOT_STARTED` | M14-T04 | None | None |
@@ -1014,7 +1014,7 @@
 - **Dependencies:** M14-T01.
 - **Sources:** `docs/superpowers/plans/tensor-modules/M14-integration-release.md` 的 `Task M14-T02` 任务卡。
 - **First action:** 读取 `docs/superpowers/plans/tensor-modules/M14-integration-release.md` 的 `Task M14-T02` 任务卡，并确认其 `Context boundary`、输入和目标文件均可定位。
-- **State evidence:** None.
+- **State evidence (readiness):** 2026-09-05：M14-T01由 `23addbe` 实现、`afb3b85` 记录COMPLETED后，严格按预定义Order选中后继72/M14-T02，观测NOT_STARTED、Design/Handoff为None。使用任务契约设计技能完成 `docs/task-designs/M14-T02-design.md`，独立就绪审查要求按M09-T06区分私有日志/公开响应的JDBC扫描边界，并排除MySQL login-path/include/环境连接覆盖；两项均已修订，复审Ready for implementation: Yes，无Critical/Important/Minor。`d4880ab`提交最终设计并仅回填Design document，已完整读取，冻结两个新实施文件、15串行用例/14页面POST/8本机stub调用、两项客户端0POST、重复SUCCESS、EMPTY、七SOURCE错误、TYPE及真实AFTER UPDATE触发器回滚、精确摘要/事件/时限/环境隔离与清理。唯一直接依赖M14-T01的实际产物、决策、理由、约束、用途、可用性证据在交接逐项记录，无输入冲突；先写完整 `docs/task-handoffs/M14-T02-handoff.md`，验证模板/引用/目标文件未存在后链接，再真实执行 `NOT_STARTED -> READY`。首个实施动作是按完成设计写完整矩阵并准备新的独立运行环境；本次未创建后继实施文件、未运行新增15项矩阵，不宣称后继验收通过。
 
 ### `M14-T03`
 
