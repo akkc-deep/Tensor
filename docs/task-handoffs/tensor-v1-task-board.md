@@ -93,7 +93,7 @@
 | 72 | M14-T02 | 下载失败、空结果、幂等和回滚矩阵 | `COMPLETED` | M14-T01 | docs/task-designs/M14-T02-design.md | docs/task-handoffs/M14-T02-handoff.md |
 | 73 | M14-T03 | 查询、分页、宽表、竞态和无障碍 E2E | `COMPLETED` | M14-T01 | docs/task-designs/M14-T03-design.md | docs/task-handoffs/M14-T03-handoff.md |
 | 74 | M14-T04 | 49 数据集自动契约与页面回归驱动 | `COMPLETED` | M03-T09, M04-T06, M14-T01 | docs/task-designs/M14-T04-design.md | docs/task-handoffs/M14-T04-handoff.md |
-| 75 | M14-T05 | 真实 Tushare 49 接口受控页面验收 | `READY` | M14-T04 | docs/task-designs/M14-T05-design.md | docs/task-handoffs/M14-T05-handoff.md |
+| 75 | M14-T05 | 真实 Tushare 49 接口受控页面验收 | `IN_PROGRESS` | M14-T04 | docs/task-designs/M14-T05-design.md | docs/task-handoffs/M14-T05-handoff.md |
 | 76 | M14-T06 | `daily` 与 `balancesheet` 性能验证 | `NOT_STARTED` | M14-T03, M14-T05 | None | None |
 | 77 | M14-T07 | Token、SQL、依赖、网络和运行安全验证 | `NOT_STARTED` | M14-T02, M14-T03, M14-T04, M14-T05 | None | None |
 | 78 | M14-T08 | 全新环境 AC-001～018 与发布证据包 | `NOT_STARTED` | M14-T01, M14-T02, M14-T03, M14-T04, M14-T05, M14-T06, M14-T07 | None | None |
@@ -1059,6 +1059,8 @@
 - **Sources:** `docs/superpowers/plans/tensor-modules/M14-integration-release.md` 的 `Task M14-T05` 任务卡。
 - **First action:** 按已完成 `docs/task-designs/M14-T05-design.md` 创建 `control-plane/e2e/tushare-live.spec.js` 的49接口/58样例串行流程、接口级判定与安全生命周期，先同函数纯本地及Playwright失败产物探针、语法/49项发现，再在运行条件确认后准备新空schema执行真实矩阵。
 - **State evidence (readiness):** 2026-09-06：M14-T04完成记录 `80a9491` 已先独立提交，再按预定义Order选中75/M14-T05，观测NOT_STARTED、Design/Handoff为None。使用任务契约设计技能完成145行 `docs/task-designs/M14-T05-design.md`，就绪审查3Important/1Minor经定点修正全部Addressed、无新Critical/Important/Minor，Ready for implementation: Yes；修正精确DownloadResponse八键、600/330秒分阶段钩子预算、CLI完全退出后的独占产物扫描/删除与页面静态资源允许列表。`9b3d263` 提交设计并仅回填Design document，链接后完整读取。设计冻结两实施文件、原验收JAR、manifest49接口/58样例、37ok/12empty接口级判定、98次真实dataset查询、独立fixture2POST/3查询、真实Token环境/账户权限频率额度前置确认、单worker/零重试、新空schema、按不同业务键的计数和页面记录/来源/时间核对、安全与正常清理。结构/引用/manifest数量哈希、两实施文件缺席、依赖决定及约束一致性均已核对；唯一任务依赖仍M14-T04，M14-T02公开fixture合同仅作为任务卡指定补充来源。先按完整模板写 `docs/task-handoffs/M14-T05-handoff.md`，列清直接输入的产物/决定/理由/约束/用途/既有可用性证据，链接后执行真实 `NOT_STARTED -> READY`。本轮只设计/交接，live spec及实际证据尚未创建，本地安全探针、账户权限/额度/Token和真实上游矩阵未验证；首动作直接实施完成设计，不补设计、不将预期写成实跑通过。用户并行ISSUE-004及target资源未纳入提交。
+
+- **State evidence (start):** 2026-09-06：用户明确要求按权威任务看板执行当前任务、先读取设计和交接。已完整读取 M14-T05 所链接设计与交接，核对任务卡、全局约束和 READY 来源状态，两实施目标不存在且无重叠修改；以本次请求执行 `READY -> IN_PROGRESS`，保留入口交接。按仓库授权直接在 main 实施，使用既定子代理实施与独立审查流程。本地仅检查环境变量存在性，Token、调用间隔和三个DB变量均未配置；已请求运行者提供账户权限/频率/额度的非秘密确认，先完成设计允许的静态实施与本地探针，真实矩阵不得在前置条件缺失时启动。用户已有ISSUE-004暂存和target产物保持原状。
 
 ### `M14-T06`
 
