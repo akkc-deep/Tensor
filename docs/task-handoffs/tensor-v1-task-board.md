@@ -87,7 +87,7 @@
 | 66 | M13-T01 | 前端确定性构建及静态资源复制 | `COMPLETED` | M10-T02, M11-T05, M12-T05 | docs/task-designs/M13-T01-design.md | docs/task-handoffs/M13-T01-handoff.md |
 | 67 | M13-T02 | 单个可执行 JAR 打包和内容检查 | `COMPLETED` | M09-T06, M13-T01 | docs/task-designs/M13-T02-design.md | docs/task-handoffs/M13-T02-handoff.md |
 | 68 | M13-T03 | 生产配置、CORS、SPA fallback 和优雅停机 | `COMPLETED` | M09-T06, M13-T02 | docs/task-designs/M13-T03-design.md | docs/task-handoffs/M13-T03-handoff.md |
-| 69 | M13-T04 | 全新环境运行说明和启动 smoke test | `IN_PROGRESS` | M13-T03 | docs/task-designs/M13-T04-design.md | docs/task-handoffs/M13-T04-handoff.md |
+| 69 | M13-T04 | 全新环境运行说明和启动 smoke test | `COMPLETED` | M13-T03 | docs/task-designs/M13-T04-design.md | docs/task-handoffs/M13-T04-handoff.md |
 | 70 | M14-T01 | fixture 页面端到端主闭环 | `NOT_STARTED` | M13-T04 | None | None |
 | 71 | M14-T02 | 下载失败、空结果、幂等和回滚矩阵 | `NOT_STARTED` | M14-T01 | None | None |
 | 72 | M14-T03 | 查询、分页、宽表、竞态和无障碍 E2E | `NOT_STARTED` | M14-T01 | None | None |
@@ -969,6 +969,9 @@
 
 
 - **State evidence (start):** 2026-09-05：用户明确要求按权威看板执行当前任务并先读设计和交接；已完整读取 M13-T04 设计、交接、当前行/详情、模块任务卡，以及 M13-T03 运行配置、TRD 14/19/附录 B 和 OpenAPI 数据源列表输入。三个实施文件不存在，无重叠修改；本次启动请求作为 `READY -> IN_PROGRESS` 证据，保留交接路径。按仓库授权直接在 main 工作，保留 `.idea/misc.xml` 和未跟踪 target；实施限于两份 runbook 与只读 smoke 脚本，完成临时响应矩阵、完整构建及独立 MySQL 全新目录验收后再记录完成。
+
+
+- **Completion evidence:** 2026-09-05：实现提交 `59acec3`（`docs: add reproducible Tensor first-run guide`）精确包含 `docs/runbook/first-run.md`、`docs/runbook/configuration.md`、`scripts/smoke-test.sh` 三项新增，前两项 100644、脚本 100755。两份说明提供 schema/来源 host/最小授权、八项配置、隐藏秘密输入与恢复回显 trap、单 JAR 启动/健康/页面、每阶段 70s 停机、非覆盖备份与前向兼容回退；保留 `120s < 130s <= proxy`。主控于 14:00:04（Asia/Shanghai）原样执行正常 JVM 权限的 `mvn -f data-plane/pom.xml clean verify`，退出 0、BUILD SUCCESS：前端 120、后端 Surefire 79/75/93/12/109 共 368、Failsafe JAR 合同 4，全部零失败/错误/跳过，repackage 成功；首次沙箱失败已定位为 Byte Buddy self-attach，未改配置或 skip。最终 `sh -n` 与临时 HTTP 黑盒矩阵 107/107 通过，覆盖四项 GET、每 probe 非200/重定向/错误内容、跨行敏感键、JDBC/敏感header、字面秘密含通配符/末尾换行、子进程 argv 无秘密、参数拒绝、curlrc 干扰与三种信号清理；跨行漏洞先得到预期1实际0的失败证据，修复后全矩阵由主控再次通过。真实验收使用 Java 21.0.11、一次性 MySQL 8.4.6、全新临时分发目录，仅复制同一 JAR/两说明/脚本，用文档规定的 `tensor.*` CREATE/SELECT/INSERT/UPDATE 应用账号及运行时生成凭证，非管理员启动；执行 `java -jar tensor-app-1.0-SNAPSHOT.jar --server.address=127.0.0.1 --server.port=8080` 与分发目录内 `sh scripts/smoke-test.sh http://127.0.0.1:8080`，health 200/根UP、downloads 200/HTML、datasets 200/HTML、data-sources 200/JSON 全通过。V1–V5 恰好五条成功 history、49张业务表与独立 history 表，无 V6/fixture。缺 Token 首跑及 SIGTERM 正常退出后的同库重启均通过，迁移不重复；临时 Token 哨兵重启后只做 GET，两个配置状态从 false 变 true，已知值无响应泄漏，未下载或请求上游。浏览器连接不可用后使用独立临时 Chrome 验证两页直接打开/刷新 HTTP200、Vue实际渲染，无JS错误；无Token时下载API列表409是 M09-T02 已冻结的 PLUGIN_DISABLED 行为，文档已明确数据源列表/数据集元数据/查询可用与下载页配置不可用提示的边界，Token哨兵状态下相关API均200。三次 JVM 均 SIGTERM 自行退出且确认 Web graceful 与 datasource 清理；一次性数据库已停止删除，未操作用户现有进程/数据库。独立审查及范围复审 `Ready to merge: Yes`，唯一超时措辞 Minor 已修正，最终无遗留项。范围/格式/文档相对链接及Git跟踪门禁通过；生产Java/YAML/POM/前端/OpenAPI/migration无修改，target/响应/日志/凭证/备份未提交，未执行实际数据库恢复。结果级验收满足，执行 `IN_PROGRESS -> COMPLETED`，M13 模块门禁完成。
 
 ### `M14-T01`
 
