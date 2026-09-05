@@ -8,7 +8,7 @@
 - `control-plane/e2e/tushare-metadata.spec.js`：从原样验收 JAR 页面串行执行 49 个 `metadataContract:<api>` 配对用例；逐项验证下载接口、数据集、参数与筛选，禁止下载 POST、records GET 和上游调用。
 - 本任务没有修改生产 Java、Vue、YAML、SQL、POM、依赖、配置、manifest、模板、既有测试或验收 JAR。
 
-脚本在每次真实构建前，以同一 XML/ZIP 校验函数执行 10 个合成拒绝探针：缺报告、零 tests、skipped、重复 testcase、failure 节点、损坏 XML、计数不匹配、49 总数但错误 API 名、嵌套额外 YAML、重复 ZIP 条目。探针只使用本轮私有临时目录，不产生提交文件。
+脚本在每次真实构建前，以同一 XML/ZIP 校验函数执行 11 个合成拒绝探针：缺报告、额外目标 suite、零 tests、skipped、重复 testcase、failure 节点、损坏 XML、计数不匹配、49 总数但错误 API 名、嵌套额外 YAML、重复 ZIP 条目。探针只使用本轮私有临时目录，不产生提交文件。
 
 ## 自动验证结果
 
@@ -17,35 +17,37 @@
 | shell 语法 | `sh -n scripts/verify-49-contracts.sh` | exit 0 |
 | Node 语法 | `cd control-plane && node --check e2e/tushare-metadata.spec.js` | exit 0 |
 | Playwright 发现 | `cd control-plane && npx playwright test e2e/tushare-metadata.spec.js --list` | exit 0；1 文件、49 tests |
-| Maven/报告/归档总门禁 | `scripts/verify-49-contracts.sh` | exit 0；2026-09-05T17:40:16.075144Z～17:40:47.371912Z |
-| 页面 49 配对矩阵 | `cd control-plane && npx playwright test e2e/tushare-metadata.spec.js` | Run6 exit 0；49 passed、0 failed/skipped/retry，4.4m |
+| Maven/报告/归档总门禁 | `scripts/verify-49-contracts.sh` | exit 0；2026-09-05T18:01:03.008432Z～18:01:36.701110Z |
+| 页面 49 配对矩阵 | `cd control-plane && npx playwright test e2e/tushare-metadata.spec.js` | Run7 exit 0；49 passed、0 failed/skipped/retry，4.5m |
 | 格式与范围 | `git diff --check` 及精确三文件检查 | 提交前新鲜复核 exit 0；实施文件精确为三项 |
 
-最终 shell 私有白名单 JSON 位于 `/var/folders/s5/h3vynqy544lc7vwtz0zjy39m0000gn/T/tensor-m14-t04.QgjcVrwu/verification.json`，SHA-256 为 `4f6a63cd42252ace6acf5b8055c3c7e05149ca04166fd3f563a872e86565fe77`。本轮基线为 `707215c9495b2652617092c5bd21e337033799bb`，Maven exit 0；内嵌合成门禁完成 10 个规定反例，容器身份另完成正常双 ID、无关 ID、缺少预期对、预先存在 ID、Maven 非零时部分 ID 和零 ID 检查，并证明非零原始退出码及已生成报告计数会保留。Testcontainers 私有日志中提取的本轮 Ryuk/MySQL 两个完整 ID 均不在前置 inventory，结束 inventory 与其交集为 0，未处理控制器或其他会话容器。
+最终 shell 私有白名单 JSON 位于 `/var/folders/s5/h3vynqy544lc7vwtz0zjy39m0000gn/T/tensor-m14-t04.LoZPeZff/verification.json`，SHA-256 为 `dc6eb12e85fe89e260dd46c524a81bc55d8b132c51af7332be648564a7d16896`。本轮基线为 `f96c7b1f2df80c94b67cad09a4a4fa20453a7571`，Maven exit 0；内嵌合成门禁完成 11 个规定反例，容器身份另完成正常双 ID、无关 ID、缺少预期对、预先存在 ID、Maven 非零时部分 ID 和零 ID 检查，并证明非零原始退出码及已生成报告计数会保留。独立同函数探针还证明 Maven 37 在固定安全诊断后仍返回 37。Testcontainers 私有日志中提取的本轮 Ryuk/MySQL 两个完整 ID 均不在前置 inventory，结束 inventory 与其交集为 0，未处理控制器或其他会话容器。
 
 | 本轮报告 | tests | failures/errors/skipped | SHA-256 |
 |---|---:|---:|---|
-| `TushareMetadataContractTest` | 50 | 0/0/0 | `90ef4fca338600a4a0209690ca14e3f377324b5a75c03626765c656c68cedf07` |
-| `FlywaySchemaContractIT` | 52 | 0/0/0 | `6716f327c725fc210df6eb300eefc31c29abb8a6e0b2ae4d399fc48de450213c` |
-| `PackagedJarContractTest` | 4 | 0/0/0 | `c5c8e9aa7c1ab6682d0037a858b6b471c35d85a2379b65eddc54dc00ac1cc697` |
+| `TushareMetadataContractTest` | 50 | 0/0/0 | `d1db46e339b2f5a56e80711cc73b13054e0bf118f964b6683007bbcaa42cff8c` |
+| `FlywaySchemaContractIT` | 52 | 0/0/0 | `fc1f5d1f93684ba7b27b17a81733171fb2c2eed019d0ce2904dbbc3f948735ce` |
+| `PackagedJarContractTest` | 4 | 0/0/0 | `0532c6f6b0bc6abc02a7c1ed884aaaac74e04cba439ca43335a5f339fbc9d230` |
 
-Failsafe summary 为 completed 4、errors/failures/skipped 0，SHA-256 `b147141cd8c7e33d2920f5e57398d17dc840856cf8e18be8066e8362d20e4383`。新生产 JAR SHA-256 为 `21a6f6b8e9262c763bc56d364661409e53bc6a56770d91a4a6602aebd0dccc57`；源目录 49 份 YAML 与嵌套 `tensor-plugin-tushare` JAR 中 49 份同名资源逐文件字节哈希一致，没有其他位置副本。成功的 M04 结果级合同表示 49 张生产表；测试 fixture 另增 1 张，合计 50 张业务表、1007 列和 50 个主键。前端回归由同一 Maven 生命周期执行，实际为 20 files / 120 tests passed。
+Failsafe summary 为 completed 4、errors/failures/skipped 0，SHA-256 `b147141cd8c7e33d2920f5e57398d17dc840856cf8e18be8066e8362d20e4383`。新生产 JAR SHA-256 为 `e6c7266df6c1253401b97602d46df4319085954522db314bcae3e662fb3ad182`；源目录 49 份 YAML 与嵌套 `tensor-plugin-tushare` JAR 中 49 份同名资源逐文件字节哈希一致，没有其他位置副本。成功的 M04 结果级合同表示 49 张生产表；测试 fixture 另增 1 张，合计 50 张业务表、1007 列和 50 个主键。前端回归由同一 Maven 生命周期执行，实际为 20 files / 120 tests passed，5.79s。
 
-最终 Run6 页面证据 JSON 位于 `/var/folders/s5/h3vynqy544lc7vwtz0zjy39m0000gn/T/tensor-m14-t04-NBBtkE/metadata-evidence.json`，SHA-256 `6dccbf12802864b7c3b40774006601ccbc3b70f55f3b4682a71aa1cbcbfbe699`；2026-09-05T17:33:17.397Z～17:37:43.409Z 实际 49 passed，0 failed/skipped/retry，49/49 API、49/49 dataset、43 必填拦截、6 无参数、下载 POST 0、records GET 0、上游调用 0。每项由页面产生 5 个 metadata GET，共 245 个 HTTP 200：data-sources 98、apis 49、dataset summaries 49、49 个逐项 definition。七组实际分布为 11/7/6/6/9/3/7；filters 实际五组为 `[]` 3、`[ts_code]` 8、`[trade_date]` 3、`[ts_code,trade_date]` 16、`[ts_code,ann_date]` 19。页面不提交合法下载，不执行数据查询，因此本任务不构成 49 个真实 Tushare 下载；真实上游验收属于 M14-T05。
+最终 Run7 页面证据 JSON 位于 `/var/folders/s5/h3vynqy544lc7vwtz0zjy39m0000gn/T/tensor-m14-t04-ds9oSf/metadata-evidence.json`，SHA-256 `c76855246a74445d8b097b232ad3bbdece9ee446c0521d0b7350f3806150c783`；2026-09-05T18:01:21.664Z～18:05:49.534Z 实际 49 passed，0 failed/skipped/retry，49/49 API、49/49 dataset、43 必填拦截、6 无参数、下载 POST 0、records GET 0、上游调用 0。每项由页面产生 5 个 metadata GET，共 245 个 HTTP 200：data-sources 98、apis 49、dataset summaries 49、49 个逐项 definition。七组实际分布为 11/7/6/6/9/3/7；filters 实际五组为 `[]` 3、`[ts_code]` 8、`[trade_date]` 3、`[ts_code,trade_date]` 16、`[ts_code,ann_date]` 19。页面不提交合法下载，不执行数据查询，因此本任务不构成 49 个真实 Tushare 下载；真实上游验收属于 M14-T05。
 
 首次页面 Run1 在 JVM 启动前以未初始化哨兵环境失败；修正后 Run2 到达 `stock_basic`，以 Element Plus 枚举外层/输入重复 `aria-required` 暴露了测试定位问题；Run3 通过前三项后，公开 accessibility snapshot 证明非枚举标签需容纳必填星号。三次均保留原失败，分别用条件注入、按精确 role/label 逐控件校验、锚定完整标签正则最小修正，没有删减产品断言。Run4 功能全部通过；其 13 张 PNG 人工审阅发现关闭动画残影，因此功能结果保留、截图不作为最终视觉证据，测试增加公开 popover 收起/展开状态和动画完成等待后重跑。
+
+Run6 后的独立审查用同一监视函数复现 pending request 可越过旧边界，并指出通用日期分支未验证真实浮层。修订以 request/requestfinished/requestfailed 完整跟踪并循环排空运行中新增的响应扫描，在自有 `page.close()` 后再做最终错误检查；日期和月份控件均验证 `aria-haspopup=dialog`、展开状态、`aria-controls` 关联浮层可见和 Escape 关闭。另用 `AggregateError` 保留启动与清理双失败。聚焦同函数探针分别证明 pending request 会阻塞、关闭边界晚到 HTTP 500 会失败、picker 开闭关联成立、主错误和清理错误均保留；最终在新空 schema 完整运行 Run7。
 
 ## 运行安全与环境
 
 原验收 JAR 入口 SHA-256 必须在运行前后保持 `a69874afa6ce783d4ef4e16a678ddb0ff457f2948b68f509a8e4a2c00440bcac`。每次完整页面运行使用新的 `tensor_m14_t04_<随机值>` 空 schema 和只含 CREATE、SELECT、INSERT、UPDATE 的应用账号；浏览器测试只接收三个 `TENSOR_DB_*` 输入与 `ACCEPTANCE_JAR`，JVM 使用测试生成的假 Token 和回环零调用哨兵。schema、host、账号、密码、JDBC、假 Token、原始响应与日志均不进入本文件。
 
-Run6 使用 Node.js v24.15.0、Java 21、Playwright 1.62.1、Chromium 151.0.7922.34。原验收 JAR 前后 SHA-256 均为 `a69874afa6ce783d4ef4e16a678ddb0ff457f2948b68f509a8e4a2c00440bcac`。测试正常 SIGTERM 自有 JVM、关闭哨兵及 socket、验证端口释放并完成私有日志扫描，三个 cleanup 标记均为 true。
+Run7 使用 Node.js v24.15.0、Java 21、Playwright 1.62.1、Chromium 151.0.7922.34。原验收 JAR 前后 SHA-256 均为 `a69874afa6ce783d4ef4e16a678ddb0ff457f2948b68f509a8e4a2c00440bcac`。测试正常 SIGTERM 自有 JVM、关闭哨兵及 socket、验证端口释放并完成私有日志扫描，三个 cleanup 标记均为 true。
 
-控制器独立只读验证在 Run6 启动完成后和结束后各执行一次：`/private/tmp/tensor-m14-t04-controller-lutpgcyi/run-6-database-after-startup.json`（SHA-256 `72b27bd256c8e2824a3699461fac738e4628241e34cd7eb32196c8c7860ba501`）与 `/private/tmp/tensor-m14-t04-controller-lutpgcyi/run-6-database.json`（SHA-256 `96c04cba90298d410d5f3b102ab1072af0c9debb3ff9d6e4ab71c0c857242b2d`）均证明 6 次迁移成功、50 张业务表，其中 49 张生产表逐表均为 0 行。运行账号只有目标 schema 上 CREATE、SELECT、INSERT、UPDATE；schema、host、账号、密码、JDBC 和私有响应未写入本文件。控制器按精确名称与所有权标签删除自有 MySQL 容器及匿名卷，并删除私有状态与凭证文件；`cleanup.json` SHA-256 为 `de94bad514e7da3cda749b7796c71a7d5754c408b273ead584e102e11db80543`，三项结果均为 true，结束 Docker inventory 为空。
+控制器独立只读验证在 Run7 启动完成后和结束后各执行一次：`/private/tmp/tensor-m14-t04-controller-lutpgcyi/run-7-database-after-startup.json`（SHA-256 `f63dbc361d68c4d6dd858034687b959439811253b9b2677e05f031d09287ce26`）与 `/private/tmp/tensor-m14-t04-controller-lutpgcyi/run-7-database.json`（SHA-256 `90b07bf9956bff6b93bc905310922ca2168baae4e168a0378d509bce48416696`）均证明 6 次迁移成功、50 张业务表，其中 49 张生产表逐表均为 0 行。运行账号只有目标 schema 上 CREATE、SELECT、INSERT、UPDATE；schema、host、账号、密码、JDBC 和私有响应未写入本文件。控制器按精确名称与所有权标签删除自有 MySQL 容器及匿名卷，并删除私有状态与凭证文件；`cleanup.json` SHA-256 为 `c99dff35ecff1d6c948571c92d705d8f375dd0712e3d8a1b9059b3b0a21dc07e`，三项结果均为 true，结束 Docker inventory 为空。
 
 ## 截图人工审阅
 
-最终 Run6 生成以下 13 张 PNG，文件哈希已与 JSON 逐项复核；每张均与控制器已人工接受的 Run5 对应图片逐字节相同，因此人工结论按内容身份转移到 Run6。自动 JSON 如实保留 `manuallyReviewed=false`；13/13 页面无关闭动画残影、无秘密暴露，月份完整显示，`trade_cal` 三个必填错误及首控件焦点正确。
+最终 Run7 生成以下 13 张 PNG，文件哈希已与 JSON 逐项复核；每张均与控制器已人工接受的 Run5 对应图片逐字节相同，因此人工结论按内容身份转移到 Run7。自动 JSON 如实保留 `manuallyReviewed=false`；13/13 页面无关闭动画残影、无秘密暴露，月份完整显示，`trade_cal` 三个必填错误及首控件焦点正确。
 
 | 截图 | SHA-256 | 本地相对路径（位于 `control-plane/`） |
 |---|---|---|
@@ -65,4 +67,4 @@ Run6 使用 Node.js v24.15.0、Java 21、Playwright 1.62.1、Chromium 151.0.7922
 
 ## 实施文件哈希时点
 
-最终 shell 门禁运行时记录的脚本 SHA-256 为 `4c6cac4f511fc6e9ff277bfa6ba195195904e6b11fed28676706f2f4c366e552`；最终 Run6 使用的 spec SHA-256 为 `8e85b848a2b8000ce4ec35aa89e3dfa9e98f17a892c982547c772d55d3dae39f`，运行前后相同。验证文档自身持续补录实际结果，因此不使用运行中自哈希作为最终内容身份；提交对象由 Git commit 固定。
+最终 shell 门禁运行时记录的脚本 SHA-256 为 `33d0e04d2616ad3fdbfc5a9912300137347b9a4baab4bc8f6e14d9321ff05117`；最终 Run7 使用的 spec SHA-256 为 `113e63235b34d97d9e98a012ff479d7971085bd6de838b9c06d62a42982bc722`，运行前后相同。验证文档自身持续补录实际结果，因此不使用运行中自哈希作为最终内容身份；提交对象由 Git commit 固定。

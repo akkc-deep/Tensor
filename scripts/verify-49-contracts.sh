@@ -8,6 +8,11 @@ fail() {
   exit 1
 }
 
+maven_failure() {
+  printf 'M14-T04 failed: maven-contracts\n' >&2
+  return "$1"
+}
+
 script_dir=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd -P) || fail script-directory
 repository=$(CDPATH= cd -- "$script_dir/.." && pwd -P) || fail repository-root
 manifest="$repository/docs/data-template/manifest.json"
@@ -55,6 +60,13 @@ report_summary="$owned_root/report-summary.json"
 resource_summary="$owned_root/resource-summary.json"
 evidence="$owned_root/verification.json"
 owned_containers="$owned_root/docker-owned.txt"
+
+set +e
+maven_failure 37 2>"$owned_root/maven-failure-probe.log"
+maven_failure_probe=$?
+set -e
+[ "$maven_failure_probe" -eq 37 ] || fail maven-exit-probe
+[ "$(cat "$owned_root/maven-failure-probe.log")" = 'M14-T04 failed: maven-contracts' ] || fail maven-diagnostic-probe
 
 cat >"$helper" <<'PY'
 import hashlib
@@ -238,6 +250,13 @@ def validate_failsafe_summary(path):
 
 def validate_reports(data_plane, output):
     data_plane = Path(data_plane)
+    expected_by_directory = {}
+    for relative, _, _, _ in REPORTS:
+        report_path = Path(relative)
+        expected_by_directory.setdefault(report_path.parent, set()).add(report_path.name)
+    for directory, expected in expected_by_directory.items():
+        actual = {path.name for path in (data_plane / directory).glob("TEST-*.xml") if path.is_file()}
+        check(actual == expected, "report-suite-files")
     reports = [validate_report(data_plane / relative, class_name, count, methods)
                for relative, class_name, count, methods in REPORTS]
     summary_path = data_plane / "tensor-app/target/failsafe-reports/failsafe-summary.xml"
@@ -423,6 +442,12 @@ def self_probe(root):
     (malformed / first_relative).write_text("<testsuite>", encoding="utf-8")
     rejects(lambda: validate_reports(malformed, probe_root / "malformed.json"), "malformed-xml")
 
+    extra = probe_root / "extra-suite"
+    shutil.copytree(valid, extra)
+    extra_report = extra / Path(first_relative).parent / "TEST-extra-target-suite.xml"
+    write_suite(extra_report, class_name, methods)
+    rejects(lambda: validate_reports(extra, probe_root / "extra-suite.json"), "extra-target-suite")
+
     resources = probe_root / "resources"
     make_valid_resources(resources)
     synthetic_entries = [{"api_name": api} for api in APIS]
@@ -488,7 +513,7 @@ def self_probe(root):
                                           probe_root / "overlapping-containers.txt", 0),
         "preexisting-owned-container",
     )
-    return 10
+    return 11
 
 
 def run_maven(snapshot, repository, log_path, status_path):
@@ -570,7 +595,7 @@ PY
 chmod 600 "$helper" || fail helper-permissions
 
 preflight=$(python3 "$helper" preflight "$manifest" "$owned_root") || fail synthetic-contract-probes
-[ "$preflight" = '{"manifestCount": 49, "syntheticRejections": 10}' ] || fail preflight-result
+[ "$preflight" = '{"manifestCount": 49, "syntheticRejections": 11}' ] || fail preflight-result
 
 git -C "$repository" archive --format=tar --output="$archive" "$head_commit" || fail git-archive
 mkdir "$snapshot" || fail snapshot-directory
@@ -618,7 +643,9 @@ if [ -n "$remaining_containers" ]; then
   fail owned-container-leftover
 fi
 
-[ "$maven_exit" -eq 0 ] || fail maven-contracts
+if [ "$maven_exit" -ne 0 ]; then
+  maven_failure "$maven_exit" || exit $?
+fi
 [ "$report_exit" -eq 0 ] || fail report-contracts
 [ "$resource_exit" -eq 0 ] || fail resource-contracts
 
@@ -664,7 +691,7 @@ result = {
         "tableEvidence": "successful FlywaySchemaContractIT result-level assertions",
         "fixtureTotals": {"businessTables": 50, "totalColumns": 1007, "primaryKeys": 50},
     },
-    "syntheticRejections": 10,
+    "syntheticRejections": 11,
 }
 Path(output).write_text(json.dumps(result, indent=2, sort_keys=True) + "\n", encoding="utf-8")
 os.chmod(output, 0o600)

@@ -430,12 +430,16 @@ async function doubleAnimationFrame(page) {
 function monitorPage(page) {
   const failures = []
   const scans = []
+  const pendingRequests = new Map()
   const started = new WeakMap()
   const metadata = []
   let downloadPosts = 0
   let recordsGets = 0
   page.on('pageerror', () => failures.push('page-error'))
   page.on('request', (request) => {
+    let complete
+    const done = new Promise((resolve) => { complete = resolve })
+    pendingRequests.set(request, { complete, done })
     started.set(request, Date.now())
     const url = new URL(request.url())
     if (url.origin !== BASE_URL) failures.push('external-request')
@@ -443,7 +447,16 @@ function monitorPage(page) {
     else if (!['GET', 'HEAD', 'OPTIONS'].includes(request.method())) failures.push('write-request')
     if (request.method() === 'GET' && url.pathname.endsWith('/records')) recordsGets += 1
   })
-  page.on('requestfailed', () => failures.push('request-failed'))
+  const finishRequest = (request) => {
+    const pending = pendingRequests.get(request)
+    if (pending) pending.complete()
+    pendingRequests.delete(request)
+  }
+  page.on('requestfinished', finishRequest)
+  page.on('requestfailed', (request) => {
+    failures.push('request-failed')
+    finishRequest(request)
+  })
   page.on('response', (response) => {
     const url = new URL(response.url())
     if (url.pathname.startsWith('/api/v1/')) {
@@ -458,13 +471,26 @@ function monitorPage(page) {
     }
     if (response.status() >= 400) failures.push('http-error')
   })
+  let scanned = 0
+  const drain = async () => {
+    while (pendingRequests.size || scanned < scans.length) {
+      const current = [
+        ...[...pendingRequests.values()].map(({ done }) => done),
+        ...scans.slice(scanned),
+      ]
+      scanned = scans.length
+      await Promise.all(current)
+    }
+  }
   return {
     downloadPosts: () => downloadPosts,
     recordsGets: () => recordsGets,
     metadata: () => structuredClone(metadata),
     async assertClean() {
-      await Promise.all(scans)
+      await drain()
       await assertPageSafety(page, 'test boundary')
+      try { await page.close() } catch { failures.push('page-close') }
+      await drain()
       expect({ downloadPosts, recordsGets }).toEqual({ downloadPosts: 0, recordsGets: 0 })
       expect(failures).toEqual([])
     },
@@ -605,6 +631,19 @@ function parameterControl(page, parameter) {
     : page.getByLabel(new RegExp(`^${escapeRegex(parameter.label)}\\s*\\*?$`))
 }
 
+async function openAndClosePicker(page, control) {
+  await expect(control).toHaveAttribute('aria-haspopup', 'dialog')
+  await control.click()
+  await expect(control).toHaveAttribute('aria-expanded', 'true')
+  const popupId = await control.getAttribute('aria-controls')
+  safeCheck(/^[A-Za-z][A-Za-z0-9_-]*$/.test(popupId ?? ''), 'picker aria controls')
+  const popup = page.locator(`#${popupId}`)
+  await expect(popup).toBeVisible()
+  await control.press('Escape')
+  await expect(control).toHaveAttribute('aria-expanded', 'false')
+  await expect(popup).toBeHidden()
+}
+
 async function screenshot(page, testInfo, name) {
   await assertPageSafety(page, 'screenshot')
   await doubleAnimationFrame(page)
@@ -678,8 +717,7 @@ async function validateParameters(page, contract, testInfo) {
         end_date: '2026-08-07', month: '2026-08', ts_code: '000001.SZ',
       }
       if (['DATE', 'DATE_RANGE_MEMBER', 'MONTH'].includes(parameter.type)) {
-        await control.click()
-        await control.press('Escape')
+        await openAndClosePicker(page, control)
       }
       await control.fill(values[parameter.name])
       await control.press('Tab')
@@ -745,6 +783,15 @@ async function validateFilterControls(page, contract, testInfo) {
   if (DATASET_SCREENSHOTS.has(contract.apiName)) await screenshot(page, testInfo, `dataset-${contract.apiName}.png`)
 }
 
+async function cleanupAfterStartupFailure(startupError, cleanup = cleanupRuntime) {
+  try {
+    await cleanup()
+  } catch (cleanupError) {
+    throw new AggregateError([startupError, cleanupError], 'M14-T04 startup and cleanup failed')
+  }
+  throw startupError
+}
+
 test.use({
   viewport: { width: 1440, height: 1000 },
   trace: 'off',
@@ -787,8 +834,7 @@ test.describe('Tushare 49 metadata contracts', () => {
       await startSentinel()
       await startApplication()
     } catch (error) {
-      await cleanupRuntime()
-      throw error
+      await cleanupAfterStartupFailure(error)
     }
   })
 
