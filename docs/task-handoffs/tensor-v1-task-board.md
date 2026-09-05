@@ -90,7 +90,7 @@
 | 69 | M13-T04 | 全新环境运行说明和启动 smoke test | `COMPLETED` | M13-T03 | docs/task-designs/M13-T04-design.md | docs/task-handoffs/M13-T04-handoff.md |
 | 70 | M13-T05 | 独立 acceptance JAR 打包及启停验收 | `COMPLETED` | M13-T04, M08-T02, M04-T06 | docs/task-designs/M13-T05-design.md | docs/task-handoffs/M13-T05-handoff.md |
 | 71 | M14-T01 | fixture 页面端到端主闭环 | `COMPLETED` | M13-T04, M13-T05 | docs/task-designs/M14-T01-design.md | docs/task-handoffs/M14-T01-handoff.md |
-| 72 | M14-T02 | 下载失败、空结果、幂等和回滚矩阵 | `IN_PROGRESS` | M14-T01 | docs/task-designs/M14-T02-design.md | docs/task-handoffs/M14-T02-handoff.md |
+| 72 | M14-T02 | 下载失败、空结果、幂等和回滚矩阵 | `COMPLETED` | M14-T01 | docs/task-designs/M14-T02-design.md | docs/task-handoffs/M14-T02-handoff.md |
 | 73 | M14-T03 | 查询、分页、宽表、竞态和无障碍 E2E | `NOT_STARTED` | M14-T01 | None | None |
 | 74 | M14-T04 | 49 数据集自动契约与页面回归驱动 | `NOT_STARTED` | M03-T09, M04-T06, M14-T01 | None | None |
 | 75 | M14-T05 | 真实 Tushare 49 接口受控页面验收 | `NOT_STARTED` | M14-T04 | None | None |
@@ -1017,6 +1017,9 @@
 - **State evidence (readiness):** 2026-09-05：M14-T01由 `23addbe` 实现、`afb3b85` 记录COMPLETED后，严格按预定义Order选中后继72/M14-T02，观测NOT_STARTED、Design/Handoff为None。使用任务契约设计技能完成 `docs/task-designs/M14-T02-design.md`，独立就绪审查要求按M09-T06区分私有日志/公开响应的JDBC扫描边界，并排除MySQL login-path/include/环境连接覆盖；两项均已修订，复审Ready for implementation: Yes，无Critical/Important/Minor。`d4880ab`提交最终设计并仅回填Design document，已完整读取，冻结两个新实施文件、15串行用例/14页面POST/8本机stub调用、两项客户端0POST、重复SUCCESS、EMPTY、七SOURCE错误、TYPE及真实AFTER UPDATE触发器回滚、精确摘要/事件/时限/环境隔离与清理。唯一直接依赖M14-T01的实际产物、决策、理由、约束、用途、可用性证据在交接逐项记录，无输入冲突；先写完整 `docs/task-handoffs/M14-T02-handoff.md`，验证模板/引用/目标文件未存在后链接，再真实执行 `NOT_STARTED -> READY`。首个实施动作是按完成设计写完整矩阵并准备新的独立运行环境；本次未创建后继实施文件、未运行新增15项矩阵，不宣称后继验收通过。
 
 - **State evidence (start):** 2026-09-05：用户明确要求按权威看板执行当前任务并先读设计/交接；已完整读取本行链接的 M14-T02 设计、交接及任务卡，确认两个目标实施文件不存在且无重叠修改。以此启动证据执行 `READY -> IN_PROGRESS`，保留原交接作为入口上下文。按授权直接在 main 工作，仅实施当前任务；独立环境准备与测试实现分工，验收/审查通过后记录完成并按 Order 准备后继。
+
+
+- **State evidence (completion):** 2026-09-05：实现 `db6e853`（`test(e2e): verify download outcome matrix`），审查修正 `41feb92`、`f60f35d`，精确交付 `control-plane/e2e/download-outcomes.spec.js` 与 `docs/verification/M14-T02-download-outcomes.md` 两个100644新增文件。原验收JAR SHA-256 `a69874afa6ce783d4ef4e16a678ddb0ff457f2948b68f509a8e4a2c00440bcac` 未变；真实Java21.0.11/MySQL8.4.6/Node24.15.0/Playwright1.62.1/Chromium151.0.7922.34环境，最终新空库Run9恰15 passed/2.7m、0失败/跳过/重试。两项客户端各0 POST；重复fixture SUCCESS为1/1/0→1/0/1、唯一业务行且时间严格增加1807ms；EMPTY及全部失败后页面完整行含时间不变；实际AFTER UPDATE/SIGNAL触发500/PERSISTENCE_FAILED、persistence事件和完整基线保留共同证明单行更新回滚。七类SOURCE错误精确分类，真实read timeout为120089ms，前端按时接收504并恢复控件；14页面POST/17页面查询/8本机stub调用、31个唯一实际完成事件一致。最终前端20文件/120测试、语法、15用例发现、范围/格式、公开与私有分表面秘密扫描通过；4PNG控制器逐张核对，daily视口截断仅作可见布局证据、完整值由DOM/API证明。安全JSON实际路径/哈希 `4c3d6e574b562aa0441d7752e34aeed891a6b8de04a6a2c69e8eab1f4b3ab22f`、请求ID、时间和PNG哈希在证据文档并独立匹配；trigger/JVM/stub清理全true，独立DB复核6迁移/50业务表/fixture1/daily1/trigger0，自有MySQL容器、匿名卷与临时凭证随后清理。测试实现问题和Run8精确字段表漏项如实记录，最终按OpenAPI精确9键核对；未削弱验收断言、修改生产/config/runbook或使用真实Tushare。任务审查及最终整体审查的遗留问题全部修复，最终scoped复审Ready to complete: Yes，4/4发现关闭、相关MYSQL_*隔离通过，10项独立合成检查通过，无Critical/Important/Minor遗留。已完整读取本行设计并核对结果级验收，执行 `IN_PROGRESS -> COMPLETED`，保留入口交接；后继设计准备在本完成记录之后独立进行。
 
 ### `M14-T03`
 
