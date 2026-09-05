@@ -184,6 +184,48 @@ async function runWithCleanup(action, cleanup, message) {
   if (cleanupFailure) throw cleanupFailure
 }
 
+async function withinDeadline(promise, timeout, name) {
+  let timer
+  const deadline = new Promise((_, reject) => {
+    timer = setTimeout(() => reject(new Error(`Safe check failed: ${name}`)), timeout)
+  })
+  try {
+    return await Promise.race([promise, deadline])
+  } finally {
+    clearTimeout(timer)
+  }
+}
+
+function watchRequestSettlement(page, predicate) {
+  let active = true
+  let finishedHandler
+  let failedHandler
+  const removeListeners = () => {
+    page.off('requestfinished', finishedHandler)
+    page.off('requestfailed', failedHandler)
+  }
+  const promise = new Promise((resolve) => {
+    const settle = (type, request) => {
+      if (!active || !predicate(request)) return
+      active = false
+      removeListeners()
+      resolve({ type, request })
+    }
+    finishedHandler = (request) => settle('finished', request)
+    failedHandler = (request) => settle('failed', request)
+    page.on('requestfinished', finishedHandler)
+    page.on('requestfailed', failedHandler)
+  })
+  return {
+    promise,
+    cancel() {
+      if (!active) return
+      active = false
+      removeListeners()
+    },
+  }
+}
+
 function parseDefaultsText(text) {
   safeCheck(!text.startsWith('\ufeff'), 'MySQL defaults excludes BOM')
   safeCheck(!/\r(?!\n)/.test(text), 'MySQL defaults line endings are valid')
@@ -332,6 +374,21 @@ async function syntheticProbes() {
   }
   safeCheck(aggregate instanceof AggregateError, 'dual failure probe is aggregate')
   safeCheck(aggregate.errors.length === 2, 'dual failure probe retains both errors')
+
+  safeCheck(
+    await withinDeadline(Promise.resolve('complete'), 1_000, 'resolved deadline probe') === 'complete',
+    'resolved deadline probe passes',
+  )
+  let deadlineMessage = ''
+  try {
+    await withinDeadline(new Promise(() => {}), 1, 'synthetic deadline expires')
+  } catch (error) {
+    deadlineMessage = error.message
+  }
+  safeCheck(
+    deadlineMessage === 'Safe check failed: synthetic deadline expires',
+    'expired deadline probe has fixed failure',
+  )
 
   const original = process.env.MYSQL_PWD
   process.env.MYSQL_PWD = 'probe-only'
@@ -1549,21 +1606,25 @@ test.describe('dataset query UX', () => {
     expect(body).toMatchObject({ page: 1, pageSize: 20, totalElements: 126, totalPages: 7 })
     assertBusinessRows(body, allRows.slice(0, 20))
     await assertTable(page, definition, body)
+    await assertSummary(page, 126, 1, 7)
     body = await queryByAction(page, 'daily', { page: '2', pageSize: '20' }, () =>
       pagination(page).getByRole('button', { name: /下一页/ }).click())
     expect(body).toMatchObject({ page: 2, pageSize: 20, totalElements: 126, totalPages: 7 })
     assertBusinessRows(body, allRows.slice(20, 40))
     await assertTable(page, definition, body)
+    await assertSummary(page, 126, 2, 7)
 
     body = await queryByAction(page, 'daily', { page: '1', pageSize: '100' }, () => selectPageSize(page, 100))
     expect(body).toMatchObject({ page: 1, pageSize: 100, totalElements: 126, totalPages: 2 })
     assertBusinessRows(body, allRows.slice(0, 100))
     await assertTable(page, definition, body)
+    await assertSummary(page, 126, 1, 2)
     body = await queryByAction(page, 'daily', { page: '2', pageSize: '100' }, () =>
       pagination(page).getByRole('button', { name: /下一页/ }).click())
     expect(body).toMatchObject({ page: 2, pageSize: 100, totalElements: 126, totalPages: 2 })
     assertBusinessRows(body, allRows.slice(100))
     await assertTable(page, definition, body)
+    await assertSummary(page, 126, 2, 2)
     await monitor.assertClean([])
   })
 
@@ -1585,6 +1646,7 @@ test.describe('dataset query UX', () => {
     expect(body).toMatchObject({ totalElements: 1, totalPages: 1 })
     assertBusinessRows(body, [dailyExpected('000001.SZ', '2026-08-07')])
     await assertTable(page, definition, body)
+    await assertSummary(page, 1, 1, 1)
 
     await code.fill('')
     await to.fill('')
@@ -1592,6 +1654,8 @@ test.describe('dataset query UX', () => {
     body = await queryByButton(page, 'daily', { tradeDateFrom: '2026-08-07', page: '1', pageSize: '50' })
     expect(body).toMatchObject({ totalElements: 123, totalPages: 3 })
     assertBusinessRows(body, dailyExpectedRows().filter(({ trade_date }) => trade_date === '2026-08-07').slice(0, 50))
+    await assertTable(page, definition, body)
+    await assertSummary(page, 123, 1, 3)
 
     await from.fill('')
     await from.press('Tab')
@@ -1600,6 +1664,8 @@ test.describe('dataset query UX', () => {
     body = await queryByButton(page, 'daily', { tradeDateTo: '2026-08-06', page: '1', pageSize: '50' })
     expect(body).toMatchObject({ totalElements: 3, totalPages: 1 })
     assertBusinessRows(body, [1, 2, 3].map((ordinal) => dailyExpected(`${String(ordinal).padStart(6, '0')}.SZ`, '2026-08-06')))
+    await assertTable(page, definition, body)
+    await assertSummary(page, 3, 1, 1)
 
     await code.fill('000001.SZ')
     await from.fill('2026-08-05')
@@ -1629,17 +1695,26 @@ test.describe('dataset query UX', () => {
   test('resetsSelectionStateAndRejectsInvalidRanges', async ({ page }) => {
     const monitor = monitorPage(page)
     await openRoute(page, '/datasets', '数据查看')
-    await chooseDataset(page, 'daily')
+    const definition = await chooseDataset(page, 'daily')
     const code = page.getByLabel(FILTER_LABELS.tsCode, { exact: true })
     const from = page.getByLabel(FILTER_LABELS.tradeDateFrom, { exact: true })
     const to = page.getByLabel(FILTER_LABELS.tradeDateTo, { exact: true })
     await from.fill('2026-08-07')
     await from.press('Tab')
     await page.keyboard.press('Escape')
-    await queryByButton(page, 'daily', { tradeDateFrom: '2026-08-07', page: '1', pageSize: '50' })
-    await queryByAction(page, 'daily', { tradeDateFrom: '2026-08-07', page: '1', pageSize: '20' }, () => selectPageSize(page, 20))
-    await queryByAction(page, 'daily', { tradeDateFrom: '2026-08-07', page: '2', pageSize: '20' }, () =>
+    let body = await queryByButton(page, 'daily', { tradeDateFrom: '2026-08-07', page: '1', pageSize: '50' })
+    assertBusinessRows(body, dailyExpectedRows().filter(({ trade_date }) => trade_date === '2026-08-07').slice(0, 50))
+    await assertTable(page, definition, body)
+    await assertSummary(page, 123, 1, 3)
+    body = await queryByAction(page, 'daily', { tradeDateFrom: '2026-08-07', page: '1', pageSize: '20' }, () => selectPageSize(page, 20))
+    assertBusinessRows(body, dailyExpectedRows().filter(({ trade_date }) => trade_date === '2026-08-07').slice(0, 20))
+    await assertTable(page, definition, body)
+    await assertSummary(page, 123, 1, 7)
+    body = await queryByAction(page, 'daily', { tradeDateFrom: '2026-08-07', page: '2', pageSize: '20' }, () =>
       pagination(page).getByRole('button', { name: /下一页/ }).click())
+    assertBusinessRows(body, dailyExpectedRows().filter(({ trade_date }) => trade_date === '2026-08-07').slice(20, 40))
+    await assertTable(page, definition, body)
+    await assertSummary(page, 123, 2, 7)
     const beforeReset = monitor.recordsRequests()
     await page.getByRole('button', { name: '重置', exact: true }).click()
     await doubleAnimationFrame(page)
@@ -1651,8 +1726,11 @@ test.describe('dataset query UX', () => {
     await expect(page.getByRole('columnheader')).toHaveCount(0)
     await expect(pagination(page)).toHaveCount(0)
 
-    const body = await queryByButton(page, 'daily', { page: '1', pageSize: '50' })
+    body = await queryByButton(page, 'daily', { page: '1', pageSize: '50' })
     expect(body).toMatchObject({ page: 1, pageSize: 50, totalElements: 126, totalPages: 3 })
+    assertBusinessRows(body, dailyExpectedRows().slice(0, 50))
+    await assertTable(page, definition, body)
+    await assertSummary(page, 126, 1, 3)
 
     let beforeValidation = monitor.recordsRequests()
     await code.fill('invalid-code')
@@ -1712,15 +1790,18 @@ test.describe('dataset query UX', () => {
     expect(body).toMatchObject({ page: 1, pageSize: 50, totalElements: 123, totalPages: 3 })
     assertBusinessRows(body, Array.from({ length: 50 }, (_, index) => disclosureExpected(index + 1, '2026-08-07')))
     await assertTable(page, definition, body)
+    await assertSummary(page, 123, 1, 3)
 
     const updater = await context.newPage()
     const updaterMonitor = monitorPage(updater)
-    try {
-      await performDownload(updater, 'disclosure-corrected', [123, 0, 123])
-      await updaterMonitor.assertClean(['POST /api/v1/downloads'])
-    } finally {
-      await updater.close()
-    }
+    await runWithCleanup(
+      async () => {
+        await performDownload(updater, 'disclosure-corrected', [123, 0, 123])
+        await updaterMonitor.assertClean(['POST /api/v1/downloads'])
+      },
+      () => updater.close(),
+      'disclosure update and page cleanup failed',
+    )
     for (const key of [...ingestionBaselines.keys()]) {
       if (key.startsWith('disclosure_date:')) ingestionBaselines.delete(key)
     }
@@ -1739,12 +1820,18 @@ test.describe('dataset query UX', () => {
       annDateFrom: '2026-08-07', annDateTo: '2026-08-07', page: '1', pageSize: '20',
     }, () => selectPageSize(page, 20))
     expect(body).toMatchObject({ page: 1, pageSize: 20, totalElements: 1, totalPages: 1 })
+    assertBusinessRows(body, [disclosureExpected(1)])
+    await assertTable(page, definition, body)
+    await assertSummary(page, 1, 1, 1)
 
     await code.fill('900002.SZ')
     body = await queryByButton(page, 'disclosure_date', {
       tsCode: '900002.SZ', annDateFrom: '2026-08-07', annDateTo: '2026-08-07', page: '1', pageSize: '20',
     })
     expect(body).toMatchObject({ totalElements: 0, totalPages: 0, items: [] })
+    await expect(page.getByRole('heading', { name: '未找到符合条件的数据' })).toBeVisible()
+    await expect(page.getByRole('columnheader')).toHaveCount(0)
+    await assertSummary(page, 0, 1, 0)
     await from.fill('2026-08-08')
     await from.press('Tab')
     await to.fill('2026-08-08')
@@ -1754,6 +1841,8 @@ test.describe('dataset query UX', () => {
     })
     expect(body).toMatchObject({ totalElements: 1, totalPages: 1 })
     assertBusinessRows(body, [disclosureExpected(2)])
+    await assertTable(page, definition, body)
+    await assertSummary(page, 1, 1, 1)
 
     await code.fill('')
     await to.fill('')
@@ -1764,6 +1853,8 @@ test.describe('dataset query UX', () => {
     expect(body).toMatchObject({ page: 1, pageSize: 20, totalElements: 122, totalPages: 7 })
     assertBusinessRows(body, Array.from({ length: 20 }, (_, index) => disclosureExpected(index + 2)))
     expect(body.items[0].ts_code).toBe('900002.SZ')
+    await assertTable(page, definition, body)
+    await assertSummary(page, 122, 1, 7)
 
     await from.fill('')
     await from.press('Tab')
@@ -1774,6 +1865,8 @@ test.describe('dataset query UX', () => {
     })
     expect(body).toMatchObject({ page: 1, pageSize: 20, totalElements: 1, totalPages: 1 })
     assertBusinessRows(body, [disclosureExpected(1)])
+    await assertTable(page, definition, body)
+    await assertSummary(page, 1, 1, 1)
     await monitor.assertClean([])
   })
 
@@ -1795,6 +1888,7 @@ test.describe('dataset query UX', () => {
     })
     assertBusinessRows(body, [balanceExpected])
     await assertTable(page, definition, body)
+    await assertSummary(page, 1, 1, 1)
     await expect(page.getByRole('columnheader')).toHaveCount(155)
     await expect(page.getByRole('cell')).toHaveCount(155)
     await expect(page.getByText('business_key', { exact: true })).toHaveCount(0)
@@ -1860,6 +1954,7 @@ test.describe('dataset query UX', () => {
     })
     assertBusinessRows(body, [companyExpected])
     await assertTable(page, definition, body)
+    await assertSummary(page, 1, 1, 1)
     const companyCells = page.getByRole('row').filter({ has: page.getByRole('cell') }).getByRole('cell')
     const businessScopeCell = companyCells.nth(fieldsByApi.stock_company.indexOf('business_scope'))
     const mainBusinessCell = companyCells.nth(fieldsByApi.stock_company.indexOf('main_business'))
@@ -1894,6 +1989,7 @@ test.describe('dataset query UX', () => {
     }
     assertBusinessRows(body, [indexExpected])
     await assertTable(page, definition, body)
+    await assertSummary(page, 1, 1, 1)
     const indexLabel = definition.columns[0].label
     const industryLabel = definition.columns[1].label
     const indexHeader = page.getByRole('columnheader', { name: indexLabel, exact: true })
@@ -1935,39 +2031,62 @@ test.describe('dataset query UX', () => {
   test('ignoresReleasedResponseFromPreviousDataset', async ({ page }, testInfo) => {
     const monitor = monitorPage(page)
     await openRoute(page, '/datasets', '数据查看')
-    await chooseDataset(page, 'daily')
+    const dailyDefinition = await chooseDataset(page, 'daily')
     const first = await queryByButton(page, 'daily', { page: '1', pageSize: '50' })
     expect(first).toMatchObject({ totalElements: 126, totalPages: 3 })
+    assertBusinessRows(first, dailyExpectedRows().slice(0, 50))
+    await assertTable(page, dailyDefinition, first)
+    await assertSummary(page, 126, 1, 3)
 
     let release
     let held = false
-    let finishHandler
-    const heldPromise = new Promise((resolve) => { finishHandler = resolve })
+    let heldResolve
+    let handlerDoneResolve
+    let handlerError
+    const heldPromise = new Promise((resolve) => { heldResolve = resolve })
+    const handlerDonePromise = new Promise((resolve) => { handlerDoneResolve = resolve })
     const releasePromise = new Promise((resolve) => { release = resolve })
     const handler = async (route) => {
       const url = new URL(route.request().url())
       if (!held && url.searchParams.get('page') === '1' && url.searchParams.get('pageSize') === '50') {
         held = true
         evidence.raceReleaseOrder.push('dataset-switch:daily-held')
-        finishHandler('held')
-        await releasePromise
-        await route.continue()
-        evidence.raceReleaseOrder.push('dataset-switch:daily-continued')
-        finishHandler('finished')
+        heldResolve()
+        let holdError
+        try {
+          await withinDeadline(releasePromise, 30_000, 'dataset race hold is released within 30 seconds')
+        } catch (error) {
+          holdError = error
+        }
+        try {
+          await route.continue()
+          evidence.raceReleaseOrder.push('dataset-switch:daily-continued')
+        } catch (error) {
+          handlerError = holdError
+            ? new AggregateError([holdError, error], 'dataset hold deadline and continue failed')
+            : error
+        } finally {
+          handlerDoneResolve()
+        }
+        if (holdError && !handlerError) handlerError = holdError
       } else {
         await route.continue()
       }
     }
     await page.route(`**${recordsPath('daily')}*`, handler)
     const oldResponsePromise = page.waitForResponse((response) => isRecordsResponse(response, 'daily'))
-    const oldFinishedPromise = page.waitForEvent('requestfinished', {
-      predicate: (request) => new URL(request.url()).pathname === recordsPath('daily'),
+    const oldSettlement = watchRequestSettlement(page, (request) => {
+      const url = new URL(request.url())
+      return url.pathname === recordsPath('daily')
+        && url.searchParams.get('page') === '1'
+        && url.searchParams.get('pageSize') === '50'
     })
+    let settledRequest
     let mainError
     let cleanupError
     try {
       await page.getByRole('button', { name: '查询', exact: true }).click()
-      await heldPromise
+      await withinDeadline(heldPromise, 10_000, 'dataset race request is intercepted within 10 seconds')
       await expect(page.getByRole('heading', { name: '正在查询数据' })).toBeVisible()
       await expect(page.getByRole('columnheader')).toHaveCount(0)
       await expect(pagination(page)).toHaveCount(0)
@@ -1983,10 +2102,12 @@ test.describe('dataset query UX', () => {
         is_pub: null, parent_code: '0', src: 'SW2021',
       }])
       await assertTable(page, indexDefinition, index)
+      await assertSummary(page, 1, 1, 1)
       evidence.raceReleaseOrder.push('dataset-switch:index-visible')
       release()
       const old = await captureQueryResponse(await oldResponsePromise, 'daily', { page: '1', pageSize: '50' })
-      await oldFinishedPromise
+      settledRequest = await withinDeadline(oldSettlement.promise, 30_000, 'dataset race request settles after release')
+      safeCheck(settledRequest.type === 'finished', 'dataset race request finishes successfully')
       expect(old).toMatchObject({ page: 1, pageSize: 50, totalElements: 126, totalPages: 3 })
       await doubleAnimationFrame(page)
       await expect(page.getByRole('columnheader')).toHaveText([
@@ -1999,9 +2120,29 @@ test.describe('dataset query UX', () => {
       await recordScreenshot(page.locator('main'), testInfo, 'stale-daily-after-index.png')
     } catch (error) { mainError = error }
     try {
-      release?.()
-      if (held) await expect.poll(() => evidence.raceReleaseOrder.includes('dataset-switch:daily-continued'), { timeout: 30_000 }).toBe(true)
-      await page.unroute(`**${recordsPath('daily')}*`, handler)
+      await runWithCleanup(
+        async () => {
+          release?.()
+          if (held) {
+            await runWithCleanup(
+              () => withinDeadline(handlerDonePromise, 35_000, 'dataset race handler completes during cleanup'),
+              async () => {
+                settledRequest ??= await withinDeadline(
+                  oldSettlement.promise, 35_000, 'dataset race request settles during cleanup',
+                )
+                safeCheck(['finished', 'failed'].includes(settledRequest.type), 'dataset race cleanup observes request settlement')
+              },
+              'dataset race handler and request settlement failed',
+            )
+          }
+          if (handlerError) throw handlerError
+        },
+        async () => {
+          oldSettlement.cancel()
+          await page.unroute(`**${recordsPath('daily')}*`, handler)
+        },
+        'dataset race release and unroute failed',
+      )
     } catch (error) { cleanupError = error }
     if (mainError && cleanupError) throw new AggregateError([mainError, cleanupError], 'dataset race and cleanup failed')
     if (mainError) throw mainError
@@ -2012,20 +2153,27 @@ test.describe('dataset query UX', () => {
   test('keepsResetStateAfterPendingQueryCompletes', async ({ page }) => {
     const monitor = monitorPage(page)
     await openRoute(page, '/datasets', '数据查看')
-    await chooseDataset(page, 'daily')
+    const definition = await chooseDataset(page, 'daily')
     const from = page.getByLabel(FILTER_LABELS.tradeDateFrom, { exact: true })
     await from.fill('2026-08-07')
     await from.press('Tab')
     await page.keyboard.press('Escape')
-    await queryByButton(page, 'daily', { tradeDateFrom: '2026-08-07', page: '1', pageSize: '50' })
-    await queryByAction(page, 'daily', { tradeDateFrom: '2026-08-07', page: '1', pageSize: '20' }, () => selectPageSize(page, 20))
+    let body = await queryByButton(page, 'daily', { tradeDateFrom: '2026-08-07', page: '1', pageSize: '50' })
+    assertBusinessRows(body, dailyExpectedRows().filter(({ trade_date }) => trade_date === '2026-08-07').slice(0, 50))
+    await assertTable(page, definition, body)
+    await assertSummary(page, 123, 1, 3)
+    body = await queryByAction(page, 'daily', { tradeDateFrom: '2026-08-07', page: '1', pageSize: '20' }, () => selectPageSize(page, 20))
+    assertBusinessRows(body, dailyExpectedRows().filter(({ trade_date }) => trade_date === '2026-08-07').slice(0, 20))
+    await assertTable(page, definition, body)
+    await assertSummary(page, 123, 1, 7)
 
     let release
     let held = false
     let heldResolve
-    let continuedResolve
+    let handlerDoneResolve
+    let handlerError
     const heldPromise = new Promise((resolve) => { heldResolve = resolve })
-    const continuedPromise = new Promise((resolve) => { continuedResolve = resolve })
+    const handlerDonePromise = new Promise((resolve) => { handlerDoneResolve = resolve })
     const releasePromise = new Promise((resolve) => { release = resolve })
     const handler = async (route) => {
       const url = new URL(route.request().url())
@@ -2033,22 +2181,39 @@ test.describe('dataset query UX', () => {
         held = true
         evidence.raceReleaseOrder.push('reset:page2-held')
         heldResolve()
-        await releasePromise
-        await route.continue()
-        evidence.raceReleaseOrder.push('reset:page2-continued')
-        continuedResolve()
+        let holdError
+        try {
+          await withinDeadline(releasePromise, 30_000, 'reset race hold is released within 30 seconds')
+        } catch (error) {
+          holdError = error
+        }
+        try {
+          await route.continue()
+          evidence.raceReleaseOrder.push('reset:page2-continued')
+        } catch (error) {
+          handlerError = holdError
+            ? new AggregateError([holdError, error], 'reset hold deadline and continue failed')
+            : error
+        } finally {
+          handlerDoneResolve()
+        }
+        if (holdError && !handlerError) handlerError = holdError
       } else await route.continue()
     }
     await page.route(`**${recordsPath('daily')}*`, handler)
     const oldResponsePromise = page.waitForResponse((response) => isRecordsResponse(response, 'daily'))
-    const oldFinishedPromise = page.waitForEvent('requestfinished', {
-      predicate: (request) => new URL(request.url()).pathname === recordsPath('daily'),
+    const oldSettlement = watchRequestSettlement(page, (request) => {
+      const url = new URL(request.url())
+      return url.pathname === recordsPath('daily')
+        && url.searchParams.get('page') === '2'
+        && url.searchParams.get('pageSize') === '20'
     })
+    let settledRequest
     let mainError
     let cleanupError
     try {
       await pagination(page).getByRole('button', { name: /下一页/ }).click()
-      await heldPromise
+      await withinDeadline(heldPromise, 10_000, 'reset race request is intercepted within 10 seconds')
       await expect(page.getByRole('heading', { name: '正在查询数据' })).toBeVisible()
       await page.getByRole('button', { name: '重置', exact: true }).click()
       evidence.raceReleaseOrder.push('reset:state-visible')
@@ -2062,7 +2227,8 @@ test.describe('dataset query UX', () => {
       const old = await captureQueryResponse(await oldResponsePromise, 'daily', {
         tradeDateFrom: '2026-08-07', page: '2', pageSize: '20',
       })
-      await oldFinishedPromise
+      settledRequest = await withinDeadline(oldSettlement.promise, 30_000, 'reset race request settles after release')
+      safeCheck(settledRequest.type === 'finished', 'reset race request finishes successfully')
       expect(old).toMatchObject({ page: 2, pageSize: 20, totalElements: 123, totalPages: 7 })
       await doubleAnimationFrame(page)
       await expect(page.getByRole('heading', { name: '设置筛选条件后查询' })).toBeVisible()
@@ -2070,11 +2236,34 @@ test.describe('dataset query UX', () => {
       evidence.raceReleaseOrder.push('reset:stale-ignored')
       const fresh = await queryByButton(page, 'daily', { page: '1', pageSize: '50' })
       expect(fresh).toMatchObject({ page: 1, pageSize: 50, totalElements: 126, totalPages: 3 })
+      assertBusinessRows(fresh, dailyExpectedRows().slice(0, 50))
+      await assertTable(page, definition, fresh)
+      await assertSummary(page, 126, 1, 3)
     } catch (error) { mainError = error }
     try {
-      release?.()
-      if (held) await continuedPromise
-      await page.unroute(`**${recordsPath('daily')}*`, handler)
+      await runWithCleanup(
+        async () => {
+          release?.()
+          if (held) {
+            await runWithCleanup(
+              () => withinDeadline(handlerDonePromise, 35_000, 'reset race handler completes during cleanup'),
+              async () => {
+                settledRequest ??= await withinDeadline(
+                  oldSettlement.promise, 35_000, 'reset race request settles during cleanup',
+                )
+                safeCheck(['finished', 'failed'].includes(settledRequest.type), 'reset race cleanup observes request settlement')
+              },
+              'reset race handler and request settlement failed',
+            )
+          }
+          if (handlerError) throw handlerError
+        },
+        async () => {
+          oldSettlement.cancel()
+          await page.unroute(`**${recordsPath('daily')}*`, handler)
+        },
+        'reset race release and unroute failed',
+      )
     } catch (error) { cleanupError = error }
     if (mainError && cleanupError) throw new AggregateError([mainError, cleanupError], 'reset race and cleanup failed')
     if (mainError) throw mainError
@@ -2085,12 +2274,15 @@ test.describe('dataset query UX', () => {
   test('recoversFromQueryNetworkFailureWithoutOldRows', async ({ page }) => {
     const monitor = monitorPage(page)
     await openRoute(page, '/datasets', '数据查看')
-    await chooseDataset(page, 'daily')
+    const definition = await chooseDataset(page, 'daily')
     const from = page.getByLabel(FILTER_LABELS.tradeDateFrom, { exact: true })
     await from.fill('2026-08-07')
     await from.press('Tab')
     await page.keyboard.press('Escape')
-    await queryByButton(page, 'daily', { tradeDateFrom: '2026-08-07', page: '1', pageSize: '50' })
+    const initial = await queryByButton(page, 'daily', { tradeDateFrom: '2026-08-07', page: '1', pageSize: '50' })
+    assertBusinessRows(initial, dailyExpectedRows().filter(({ trade_date }) => trade_date === '2026-08-07').slice(0, 50))
+    await assertTable(page, definition, initial)
+    await assertSummary(page, 123, 1, 3)
 
     let aborted = false
     const handler = async (route) => {
@@ -2141,6 +2333,7 @@ test.describe('dataset query UX', () => {
       }, () => page.getByRole('button', { name: '重新查询', exact: true }).click())
       expect(recovered).toMatchObject({ page: 2, pageSize: 50, totalElements: 123, totalPages: 3 })
       assertBusinessRows(recovered, dailyExpectedRows().filter(({ trade_date }) => trade_date === '2026-08-07').slice(50, 100))
+      await assertTable(page, definition, recovered)
       await assertSummary(page, 123, 2, 3)
     } catch (error) { mainError = error }
     try { await page.unroute(`**${recordsPath('daily')}*`, handler) } catch (error) { cleanupError = error }
@@ -2215,6 +2408,7 @@ test.describe('dataset query UX', () => {
     expect(body).toMatchObject({ totalElements: 1, totalPages: 1 })
     assertBusinessRows(body, [dailyExpected('000001.SZ', '2026-08-07')])
     await assertTable(page, definition, body)
+    await assertSummary(page, 1, 1, 1)
 
     await focusByTab(page, code, { backwards: true })
     await page.keyboard.press(process.platform === 'darwin' ? 'Meta+A' : 'Control+A')
@@ -2226,6 +2420,8 @@ test.describe('dataset query UX', () => {
       tradeDateFrom: '2026-08-07', tradeDateTo: '2026-08-07', page: '1', pageSize: '50',
     })
     expect(body).toMatchObject({ page: 1, pageSize: 50, totalElements: 123, totalPages: 3 })
+    assertBusinessRows(body, dailyExpectedRows().filter(({ trade_date }) => trade_date === '2026-08-07').slice(0, 50))
+    await assertTable(page, definition, body)
     await assertSummary(page, 123, 1, 3)
 
     const size = pagination(page).getByRole('combobox')
@@ -2236,6 +2432,8 @@ test.describe('dataset query UX', () => {
       tradeDateFrom: '2026-08-07', tradeDateTo: '2026-08-07', page: '1', pageSize: '20',
     })
     expect(body).toMatchObject({ page: 1, pageSize: 20, totalElements: 123, totalPages: 7 })
+    assertBusinessRows(body, dailyExpectedRows().filter(({ trade_date }) => trade_date === '2026-08-07').slice(0, 20))
+    await assertTable(page, definition, body)
     await assertSummary(page, 123, 1, 7)
 
     const next = pagination(page).getByRole('button', { name: /下一页/ })
@@ -2248,6 +2446,7 @@ test.describe('dataset query UX', () => {
     })
     expect(body).toMatchObject({ page: 2, pageSize: 20, totalElements: 123, totalPages: 7 })
     assertBusinessRows(body, dailyExpectedRows().filter(({ trade_date }) => trade_date === '2026-08-07').slice(20, 40))
+    await assertTable(page, definition, body)
     await assertSummary(page, 123, 2, 7)
     const nextAfterRender = pagination(page).getByRole('button', { name: /下一页/ })
     await focusByTab(page, nextAfterRender)

@@ -66,23 +66,25 @@ Run12 增加 `company-empty-null-zero.png` 并把三个已核对单元格滚入�
 
 ## 最终完整矩阵
 
-最终冻结的 `dataset-query.spec.js` SHA-256 为 `bb05f1d4c05a2779566b3f5f6abbfabcfe379e016e37861616f23e130d2653b9`。Run14 使用新的空 schema，于 2026-09-05T14:15:39.017Z～14:16:21.912Z 以单 worker 完成：11 passed，43.3s，退出 0。安全日志凭证扫描为 `no matches`。安全 JSON 位于本机受限临时目录 `tensor-m14-t03-2aBgoO/evidence.json`，SHA-256 为 `5d9756e55942619fbe31232cbb46197d1863c7e98d51a8694967de30708691c3`。
+Run14 曾在截图修订后以 11 passed / 43.3s 全绿，控制器也完成 15 张 PNG 和数据库的独立审阅。随后的代码审查指出，若页面没有按正确响应重绘，部分 20/100 分页、单边日期、网络恢复和键盘分页断言仍可能通过；两个竞态门闩也缺少独立的 10 秒截获、30 秒最大持有及 finally 实际请求结算证明。修订为每个要求状态同时核对独立期望行、完整表格/行数和摘要；门闩在触发前监听 `requestfinished`/`requestfailed`，finally 按释放、handler 完成、真实请求结算、unroute 顺序清理，并保留主异常和清理异常。更新页面的下载与关闭也改由同一双异常聚合 helper 执行。
+
+最终冻结的 `dataset-query.spec.js` SHA-256 为 `6d491eb623a0f77030195c2676959937b7e410ee698e5fb0322022fdc3281b42`。Run15 使用新的空 schema，于 2026-09-05T14:52:34.288Z～14:53:24.559Z 以单 worker 完成：11 passed，50.7s，退出 0。安全日志凭证扫描为 `no matches`。安全 JSON 位于本机受限临时目录 `tensor-m14-t03-55r9Fl/evidence.json`，SHA-256 为 `d5d2e46ca5788513590b30759bad730634caf883ada4728079859897f03bd3ea`。
 
 | # | 用例 | 耗时 |
 | --- | --- | --- |
 | 1 | `seedsQueryDatasetsThroughDownloadPages` | 6.5s |
-| 2 | `showsOnlyDeclaredFiltersWithoutAutoQuery` | 5.5s |
-| 3 | `paginatesAllRowsWithServerTotals` | 5.5s |
-| 4 | `combinesTradeDateFiltersAndKeepsEmptyPaging` | 2.4s |
-| 5 | `resetsSelectionStateAndRejectsInvalidRanges` | 2.5s |
-| 6 | `normalizesLastPageAfterAnnDateCorrection` | 3.6s |
-| 7 | `rendersWideColumnsAndExactTextValues` | 3.5s |
+| 2 | `showsOnlyDeclaredFiltersWithoutAutoQuery` | 5.6s |
+| 3 | `paginatesAllRowsWithServerTotals` | 5.8s |
+| 4 | `combinesTradeDateFiltersAndKeepsEmptyPaging` | 3.8s |
+| 5 | `resetsSelectionStateAndRejectsInvalidRanges` | 4.1s |
+| 6 | `normalizesLastPageAfterAnnDateCorrection` | 4.7s |
+| 7 | `rendersWideColumnsAndExactTextValues` | 3.4s |
 | 8 | `ignoresReleasedResponseFromPreviousDataset` | 2.3s |
-| 9 | `keepsResetStateAfterPendingQueryCompletes` | 1.9s |
-| 10 | `recoversFromQueryNetworkFailureWithoutOldRows` | 1.5s |
-| 11 | `queriesAndPaginatesUsingKeyboard` | 1.6s |
+| 9 | `keepsResetStateAfterPendingQueryCompletes` | 3.2s |
+| 10 | `recoversFromQueryNetworkFailureWithoutOldRows` | 2.4s |
+| 11 | `queriesAndPaginatesUsingKeyboard` | 2.5s |
 
-Run14 记录 47 个业务请求：7 个下载 POST 和 40 个 records GET。下载均得到真实响应；records 中 39 个得到真实响应，另 1 个是第 10 项预登记且由浏览器实际中断的网络请求。46 个收到服务端响应的业务请求均关联唯一 `tensor.operation.completed` 完成事件，中断请求明确为 `response=null`、`completionEvent=false`。最终计数为 7 次页面下载、7 次替身调用、39 次 records 响应、1 次允许的中断；没有额外写请求、外部网络请求、未预期 HTTP 错误或页面异常。
+Run15 记录 47 个业务请求：7 个下载 POST 和 40 个 records GET。下载均得到真实响应；records 中 39 个得到真实响应，另 1 个是第 10 项预登记且由浏览器实际中断的网络请求。46 个收到服务端响应的业务请求均关联唯一 `tensor.operation.completed` 完成事件，中断请求明确为 `response=null`、`completionEvent=false`。最终计数为 7 次页面下载、7 次替身调用、39 次 records 响应、1 次允许的中断；没有额外写请求、外部网络请求、未预期 HTTP 错误或页面异常。beforeAll 同时实际执行新增 deadline 合成探针：已完成 promise 在期限内返回，永不完成 promise 被固定安全错误名拒绝。
 
 分页实际覆盖 daily 的 50 条每页 1/2/3 页（50/50/26）、20 条每页 1/2 页及 100 条每页 1/2 页（100/26），总数始终为 126。disclosure_date 在第二次页面下载把同一 123 个业务键中的 122 行公告日改为 2026-08-08 后，旧页面发出的 page=3/pageSize=50 请求由服务端归一为 page=1/totalPages=1/totalElements=1；后续单边和 AND 条件分别得到 122、1、0、1 条，页面摘要与响应一致。空结果仍保留 page=1/totalPages=0 与可用页大小控件。
 
@@ -105,39 +107,39 @@ Run14 记录 47 个业务请求：7 个下载 POST 和 40 个 records GET。下�
 | --- | --- | --- |
 | `control-plane` | `node --check e2e/dataset-query.spec.js` | exit 0 |
 | `control-plane` | `npx playwright test e2e/dataset-query.spec.js --list` | exit 0；恰 11 个 Chromium 用例 |
-| `control-plane` | `npx playwright test e2e/dataset-query.spec.js` | exit 0；11 passed，43.3s |
+| `control-plane` | `npx playwright test e2e/dataset-query.spec.js` | exit 0；11 passed，50.7s |
 | `control-plane` | `npm run test:unit -- --run` | exit 0；20 files / 120 tests passed，5.05s |
 
 ## 宽表与截图证据
 
 balancesheet 实际渲染 152 个业务列和 3 个来源列。高精度值的单元格 `clientWidth=138`、`scrollWidth=310`、文本宽度 `286.015625`，计算样式为 `overflow:hidden`、`text-overflow:ellipsis`，真实 tooltip 显示完整纯文本。company 长文本单元格 `clientWidth=238`、`scrollWidth=4578`、文本宽度 `4554.34375`，同样得到完整纯文本 tooltip；空字符串、null 和零分别显示为空、`--` 和 `0`。index 表格从 `scrollLeft=0` 实际移动到 `130`，容器 `clientWidth=1310`、`scrollWidth=1440`；首列保持固定，普通列发生位移。
 
-Run14 保存以下 15 张 PNG。路径均位于 Git 忽略的 `control-plane/node_modules/.cache/tensor-playwright/` 下；表中的路径为该目录内实际相对路径。测试生成 JSON 时 15 项均如实保留 `manuallyReviewed:false`，因为自动测试不自证人工审阅；控制器的后续逐张查看是独立证据。
+Run15 保存以下 15 张 PNG。路径均位于 Git 忽略的 `control-plane/node_modules/.cache/tensor-playwright/` 下；表中的路径为该目录内实际相对路径。测试生成 JSON 时 15 项均如实保留 `manuallyReviewed:false`，因为自动测试不自证人工审阅；控制器的后续逐张查看是独立证据。
 
 | 截图 | 实际相对路径 | SHA-256 |
 | --- | --- | --- |
 | `daily-page-2-of-3.png` | `dataset-query-dataset-quer-7a690-atesAllRowsWithServerTotals-chromium/daily-page-2-of-3.png` | `1c06ea4daf6e2759f5f95b800a6bf44110e042d849ecda88c8cc925c21c9170f` |
 | `daily-last-page-50.png` | `dataset-query-dataset-quer-7a690-atesAllRowsWithServerTotals-chromium/daily-last-page-50.png` | `521b3526f3f31d612f34dc31192c4b33c1573167ec7b5f8a0dd2f631fd539c61` |
-| `disclosure-normalized-page.png` | `dataset-query-dataset-quer-f068e-tPageAfterAnnDateCorrection-chromium/disclosure-normalized-page.png` | `44252d4e47e0c59ef5701cb445bef60c47550831dfbdf06c0f651a5d3927c9d5` |
-| `balancesheet-left.png` | `dataset-query-dataset-quer-71f5c-deColumnsAndExactTextValues-chromium/balancesheet-left.png` | `f9c74f37bf084cd4126c0120299ed07c22e9c55fbc2832e79effd21844489418` |
-| `balancesheet-right.png` | `dataset-query-dataset-quer-71f5c-deColumnsAndExactTextValues-chromium/balancesheet-right.png` | `484ac91d3722b2d2326766bff1d4318c88fbd3925f4d3445360f176d98113a56` |
-| `balancesheet-precision-target.png` | `dataset-query-dataset-quer-71f5c-deColumnsAndExactTextValues-chromium/balancesheet-precision-target.png` | `91f60916f9bd12d1a9c7f6a103b34371b8cdf3f5e136c9fedec76b2f35b07d72` |
+| `disclosure-normalized-page.png` | `dataset-query-dataset-quer-f068e-tPageAfterAnnDateCorrection-chromium/disclosure-normalized-page.png` | `51bd406d82580e036e9074cd160a809c37b047004e40bff07eab0d0c7f4a5917` |
+| `balancesheet-left.png` | `dataset-query-dataset-quer-71f5c-deColumnsAndExactTextValues-chromium/balancesheet-left.png` | `5ba9545ef527960147a657d7984a990f3ca60875427f594ed68a55db3ff87dac` |
+| `balancesheet-right.png` | `dataset-query-dataset-quer-71f5c-deColumnsAndExactTextValues-chromium/balancesheet-right.png` | `5d82d9eaab4245c5543895e41352057697278fa43da56b06714b5a4cdd2c9a32` |
+| `balancesheet-precision-target.png` | `dataset-query-dataset-quer-71f5c-deColumnsAndExactTextValues-chromium/balancesheet-precision-target.png` | `d9cbe5e409c6e96cba76de968b6aed28f2d21a105f667c71b21a01a01b796dff` |
 | `balancesheet-precision-tooltip.png` | `dataset-query-dataset-quer-71f5c-deColumnsAndExactTextValues-chromium/balancesheet-precision-tooltip.png` | `836acc16bc84a91d6b4dde1db72c204d859c6edc70515d97844fca947cbeda2c` |
-| `company-long-text-target.png` | `dataset-query-dataset-quer-71f5c-deColumnsAndExactTextValues-chromium/company-long-text-target.png` | `20045cc5d1e1a5d28f50ab09705728fc4125e1e51b67c70bec32398d1ab66e46` |
-| `company-empty-null-zero-tooltip.png` | `dataset-query-dataset-quer-71f5c-deColumnsAndExactTextValues-chromium/company-empty-null-zero-tooltip.png` | `3cb59f7b6a7110cdf22cb04b727bddab4540b750fbdbe8b6ebe3ed449e751792` |
+| `company-long-text-target.png` | `dataset-query-dataset-quer-71f5c-deColumnsAndExactTextValues-chromium/company-long-text-target.png` | `b18472aa48690be05a0443aff215861148f5535bc0d0efd9839dfffcda51c9a9` |
+| `company-empty-null-zero-tooltip.png` | `dataset-query-dataset-quer-71f5c-deColumnsAndExactTextValues-chromium/company-empty-null-zero-tooltip.png` | `854d3042f3f9138a206659bf84ca0c4e62314f1b76be65b821b3e6781f87861c` |
 | `company-empty-null-zero.png` | `dataset-query-dataset-quer-71f5c-deColumnsAndExactTextValues-chromium/company-empty-null-zero.png` | `dd54a5eb81194e326ec2bee51af74476e528dd6d8bf70db9815bb78fec326337` |
-| `index-left.png` | `dataset-query-dataset-quer-71f5c-deColumnsAndExactTextValues-chromium/index-left.png` | `e78baa9c2e7e3ae329a61fde355b6feee3351efab40fabcddcb9ac58d100adda` |
-| `index-right.png` | `dataset-query-dataset-quer-71f5c-deColumnsAndExactTextValues-chromium/index-right.png` | `8ffd2f1e19caada494c319a085b6bfaaea5d5c316b7223ee91eb14befcddb3db` |
-| `stale-daily-after-index.png` | `dataset-query-dataset-quer-d29cb-ResponseFromPreviousDataset-chromium/stale-daily-after-index.png` | `d4c27eaac92ef4a4cef5723b63e8d448cae02d95c0d15bd4f09bd59aaed85110` |
-| `keyboard-invalid-focus.png` | `dataset-query-dataset-quer-901cb-esAndPaginatesUsingKeyboard-chromium/keyboard-invalid-focus.png` | `79f018b28cf7e796a20084bcf0dc2a5d78f23faf073a97ff62aa06b6890ecb2b` |
+| `index-left.png` | `dataset-query-dataset-quer-71f5c-deColumnsAndExactTextValues-chromium/index-left.png` | `35671538c9b53b47e521d14ef5bf27e0f3c40664eb0470e247bd0d0167fda6ac` |
+| `index-right.png` | `dataset-query-dataset-quer-71f5c-deColumnsAndExactTextValues-chromium/index-right.png` | `d03e3591099ec79ed74622efd26b8be25464a515b67b04c1a4e0893522939a66` |
+| `stale-daily-after-index.png` | `dataset-query-dataset-quer-d29cb-ResponseFromPreviousDataset-chromium/stale-daily-after-index.png` | `a5eb9a51620038822cfb24798e72472a32445106a8349df13c0f4390494b00ee` |
+| `keyboard-invalid-focus.png` | `dataset-query-dataset-quer-901cb-esAndPaginatesUsingKeyboard-chromium/keyboard-invalid-focus.png` | `45a76ce6b1b74f1ea55fef9fa0cf55b9308f367f5ce3f540390d3ced039f655d` |
 | `keyboard-page-2-focus.png` | `dataset-query-dataset-quer-901cb-esAndPaginatesUsingKeyboard-chromium/keyboard-page-2-focus.png` | `62dd2945d04dd327c020af35ef9ebcd32f6103b061766492bb11317bf2c0d495` |
 
 控制器随后独立确认 15 个路径都存在、文件 SHA-256 与 JSON 逐项一致，并实际查看全部图片。daily 截图可见 2/3 页 50 行和 3/3 页 26 行摘要；disclosure 截图可见归一后的 1/1 页及唯一 `900001.SZ`。balancesheet 左右端可见固定代码和末端来源列，高精度目标确实省略而 tooltip 显示完整值；company 的 LONG_TEXT tooltip 显示完整文本，新增对照帧同时清楚显示 business_scope 空白、employees `0`、main_business `--`。index 左右图显示真实横向移动与固定首列；过期响应图仍只显示 index；两张键盘图分别显示文字错误/首错焦点和“下一页”蓝色可见焦点。全部图片未见凭证。
 
 ## 最终只读投影与清理
 
-Run14 启动时确认 schema 为空；Flyway V1～V6 全部成功并建立 50 张业务表，五张目标表初始均为 0 行。完成后测试内只读投影为 daily 126、stock_company 1、index_classify 1、balancesheet 1、disclosure_date 123；disclosure_date 的 ann_date 分布精确为 2026-08-07 一行、2026-08-08 一百二十二行。JAR SHA-256 从准备到最终运行保持为批准值；自有 JVM 和上游替身的结构化清理标志均为 true。
+Run15 启动时确认 schema 为空；Flyway V1～V6 全部成功并建立 50 张业务表，五张目标表初始均为 0 行。完成后测试内只读投影为 daily 126、stock_company 1、index_classify 1、balancesheet 1、disclosure_date 123；disclosure_date 的 ann_date 分布精确为 2026-08-07 一行、2026-08-08 一百二十二行。JAR SHA-256 从准备到最终运行保持为批准值；自有 JVM 和上游替身的结构化清理标志均为 true。
 
-控制器又通过 runner 对 Run14 最新 schema 执行独立只读复核，退出 0：成功迁移数 6、业务表 50、daily 126、stock_company 1、index_classify 1、balancesheet 1、disclosure_date 123，公告日分布为 2026-08-07 一行和 2026-08-08 一百二十二行，与测试内投影完全一致。
+控制器又通过 runner 对 Run15 schema 执行独立只读复核，退出 0：成功迁移数 6、业务表 50、daily 126、stock_company 1、index_classify 1、balancesheet 1、disclosure_date 123，公告日分布为 2026-08-07 一行和 2026-08-08 一百二十二行，与测试内投影完全一致。
 
-既有前端回归在 Run11 后的 2026-09-05 21:33:01 +08:00 执行；其后测试代码变动只涉及 E2E 截图顺序。20 个测试文件的 120 项测试全部通过，耗时 5.05s。所有合成安全探针、请求/响应、页面、事件白名单和证据 JSON 扫描均通过，没有把应用/工具密码、假 Token、JDBC 配置、原始 SQL 或完整上游包络写入公共证据。Run1～Run9 与 Run12～Run13 暴露的均是测试交互、定位器、证据构图或合同解释问题；逐项修订并在新空 schema 全量复跑后，Run14 未发现产品缺陷。
+既有前端回归在 Run11 后的 2026-09-05 21:33:01 +08:00 执行，20 个测试文件的 120 项测试全部通过，耗时 5.05s。此后 E2E 变动包括截图顺序、渲染状态断言和竞态门闩清理加强；最终均由 Run15 全矩阵覆盖。所有合成安全探针、请求/响应、页面、事件白名单和证据 JSON 扫描均通过，没有把应用/工具密码、假 Token、JDBC 配置、原始 SQL 或完整上游包络写入公共证据。Run1～Run9 与 Run12～Run13 暴露的均是测试交互、定位器、证据构图或合同解释问题；逐项修订并在新空 schema 全量复跑后，Run15 未发现产品缺陷。
