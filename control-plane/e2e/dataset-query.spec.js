@@ -390,6 +390,100 @@ async function syntheticProbes() {
     'expired deadline probe has fixed failure',
   )
 
+  const previousFields = fieldsByApi
+  fieldsByApi = Object.fromEntries(Object.entries(DATASETS).map(([api]) => [api, ['probe']]))
+  const malformedUpstream = createUpstream('probe-token')
+  try {
+    await new Promise((resolve, reject) => {
+      malformedUpstream.server.once('error', reject)
+      malformedUpstream.server.listen(0, '127.0.0.1', resolve)
+    })
+    const address = malformedUpstream.server.address()
+    safeCheck(typeof address === 'object' && address !== null, 'malformed upstream probe address exists')
+    const cases = [
+      ['daily-main', null],
+      ['daily-earlier', false],
+      ['company', 0],
+      ['index', ''],
+      ['balance', {}],
+    ]
+    for (const [mode, value] of cases) {
+      malformedUpstream.setMode(mode)
+      const response = await fetch(`http://127.0.0.1:${address.port}/`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(value),
+      })
+      const body = await response.json()
+      safeCheck(response.status === 500 && body.code === -1, 'malformed upstream envelope fails closed')
+      for (const check of ['keys', 'api', 'token', 'params', 'fields']) {
+        safeCheck(
+          malformedUpstream.failures.includes(`${mode}:${check}`),
+          'malformed upstream envelope records every field failure',
+        )
+      }
+    }
+  } finally {
+    fieldsByApi = previousFields
+    if (malformedUpstream.server.listening) {
+      malformedUpstream.server.closeAllConnections()
+      await new Promise((resolve, reject) => malformedUpstream.server.close((error) => {
+        if (error) reject(error)
+        else resolve()
+      }))
+    }
+  }
+
+  const probePage = () => {
+    const listeners = new Map()
+    return {
+      on(name, handler) {
+        if (!listeners.has(name)) listeners.set(name, new Set())
+        listeners.get(name).add(handler)
+      },
+      off(name, handler) { listeners.get(name)?.delete(handler) },
+      emit(name, value) {
+        for (const handler of listeners.get(name) ?? []) handler(value)
+      },
+      locator() { return { innerText: async () => '' } },
+    }
+  }
+  const probeRequest = (pathname) => ({
+    method: () => 'GET',
+    url: () => `${BASE_URL}${pathname}`,
+  })
+  const resourceResponsePage = probePage()
+  const resourceResponseMonitor = monitorPage(resourceResponsePage)
+  resourceResponsePage.emit('response', {
+    status: () => 404,
+    url: () => `${BASE_URL}/probe.css`,
+  })
+  let resourceResponseRejected = false
+  try { await resourceResponseMonitor.assertClean() } catch { resourceResponseRejected = true }
+  safeCheck(resourceResponseRejected, 'same-origin resource HTTP error probe is rejected')
+
+  const resourceFailurePage = probePage()
+  const resourceFailureMonitor = monitorPage(resourceFailurePage)
+  resourceFailurePage.emit('requestfailed', probeRequest('/probe.css'))
+  let resourceFailureRejected = false
+  try { await resourceFailureMonitor.assertClean() } catch { resourceFailureRejected = true }
+  safeCheck(resourceFailureRejected, 'same-origin resource failure probe is rejected')
+
+  const abortPage = probePage()
+  const abortMonitor = monitorPage(abortPage)
+  const expectedAbort = probeRequest(`${recordsPath('daily')}?probe=expected`)
+  abortMonitor.allowOneRecordsFailure((request) => request === expectedAbort)
+  abortPage.emit('requestfailed', expectedAbort)
+  await abortMonitor.assertClean()
+
+  const unexpectedFailurePage = probePage()
+  const unexpectedFailureMonitor = monitorPage(unexpectedFailurePage)
+  unexpectedFailureMonitor.allowOneRecordsFailure((request) => request === expectedAbort)
+  unexpectedFailurePage.emit('requestfailed', probeRequest(`${recordsPath('daily')}?probe=other`))
+  let unexpectedFailureRejected = false
+  try { await unexpectedFailureMonitor.assertClean() } catch { unexpectedFailureRejected = true }
+  safeCheck(unexpectedFailureRejected, 'unregistered request failure probe is rejected')
+
   const original = process.env.MYSQL_PWD
   process.env.MYSQL_PWD = 'probe-only'
   try {
@@ -694,21 +788,28 @@ function createUpstream(token) {
       } catch {
         checks.json = false
       }
-      if (body && definition) {
-        checks.keys =
-          JSON.stringify(Object.keys(body).sort()) ===
+      const objectBody =
+        body !== null &&
+        typeof body === 'object' &&
+        !Array.isArray(body) &&
+        Object.getPrototypeOf(body) === Object.prototype
+      checks.keys = objectBody &&
+        JSON.stringify(Object.keys(body).sort()) ===
           JSON.stringify(['api_name', 'fields', 'params', 'token'])
-        checks.api = body.api_name === definition.api
-        checks.token = body.token === token
-        checks.params =
-          body.params !== null &&
-          typeof body.params === 'object' &&
-          !Array.isArray(body.params) &&
-          JSON.stringify(Object.keys(body.params).sort()) ===
-            JSON.stringify(Object.keys(definition.params).sort()) &&
-          Object.entries(definition.params).every(([key, value]) => body.params[key] === value)
-        checks.fields = body.fields === fieldsByApi[definition.api].join(',')
-      }
+      checks.api = objectBody && Boolean(definition) && body.api_name === definition.api
+      checks.token = objectBody && body.token === token
+      checks.params =
+        objectBody &&
+        Boolean(definition) &&
+        body.params !== null &&
+        typeof body.params === 'object' &&
+        !Array.isArray(body.params) &&
+        JSON.stringify(Object.keys(body.params).sort()) ===
+          JSON.stringify(Object.keys(definition.params).sort()) &&
+        Object.entries(definition.params).every(([key, value]) => body.params[key] === value)
+      checks.fields = objectBody &&
+        Boolean(definition) &&
+        body.fields === fieldsByApi[definition.api].join(',')
       for (const [name, passed] of Object.entries(checks)) {
         if (!passed) failures.push(`${currentMode}:${name}`)
       }
@@ -879,7 +980,7 @@ function monitorPage(page) {
   const writes = []
   const responseScans = []
   let recordsRequests = 0
-  let allowedFailure = 0
+  let allowedFailure
   page.on('pageerror', () => failures.push('page error'))
   page.on('request', (request) => {
     const url = new URL(request.url())
@@ -897,12 +998,8 @@ function monitorPage(page) {
     }
   })
   page.on('requestfailed', (request) => {
-    const url = new URL(request.url())
-    if (request.method() === 'GET' && url.pathname.endsWith('/records') && allowedFailure > 0) {
-      allowedFailure -= 1
-    } else if (url.pathname.startsWith('/api/v1/')) {
-      failures.push('failed business request')
-    }
+    if (allowedFailure?.(request)) allowedFailure = undefined
+    else failures.push('failed request')
   })
   page.on('response', (response) => {
     const url = new URL(response.url())
@@ -912,17 +1009,21 @@ function monitorPage(page) {
           .then((text) => assertPublicSurface(text, 'API response'))
           .catch(() => failures.push('API response safety scan')),
       )
-      if (response.status() >= 400) failures.push('unexpected business HTTP error')
     }
+    if (response.status() >= 400) failures.push('unexpected HTTP error')
   })
   return {
     recordsRequests: () => recordsRequests,
-    allowOneRecordsFailure() { allowedFailure += 1 },
+    allowOneRecordsFailure(predicate) {
+      safeCheck(allowedFailure === undefined, 'only one request failure exemption is registered')
+      safeCheck(typeof predicate === 'function', 'request failure exemption is explicit')
+      allowedFailure = predicate
+    },
     async assertClean(expectedWrites = []) {
       await Promise.all(responseScans)
       await assertPageSafety(page, 'test boundary')
       expect(writes).toEqual(expectedWrites)
-      expect(allowedFailure).toBe(0)
+      expect(allowedFailure).toBeUndefined()
       expect(failures).toEqual([])
     },
   }
@@ -2293,12 +2394,18 @@ test.describe('dataset query UX', () => {
       } else await route.continue()
     }
     await page.route(`**${recordsPath('daily')}*`, handler)
-    monitor.allowOneRecordsFailure()
+    const expectedAbortParams = { tradeDateFrom: '2026-08-07', page: '2', pageSize: '50' }
+    const isExpectedAbort = (request) => {
+      const url = new URL(request.url())
+      return request.method() === 'GET' &&
+        url.origin === BASE_URL &&
+        url.pathname === recordsPath('daily') &&
+        [...url.searchParams].length === Object.keys(expectedAbortParams).length &&
+        Object.entries(expectedAbortParams).every(([name, value]) => url.searchParams.get(name) === value)
+    }
+    monitor.allowOneRecordsFailure(isExpectedAbort)
     const failedPromise = page.waitForEvent('requestfailed', {
-      predicate: (request) => {
-        const url = new URL(request.url())
-        return url.pathname === recordsPath('daily') && url.searchParams.get('page') === '2'
-      },
+      predicate: isExpectedAbort,
     })
     let mainError
     let cleanupError
