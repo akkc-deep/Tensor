@@ -660,6 +660,12 @@ async function assertNoExtraFeatures(page) {
   await expect(page.getByText(/下载中|适配中|入库中|百分比|进度/)).toHaveCount(0)
 }
 
+async function assertNoSuccessResult(page) {
+  await expect(page.getByRole('status')).toHaveCount(0)
+  await expect(page.getByRole('heading', { name: /^下载成功/ })).toHaveCount(0)
+  await expect(page.getByText('本次请求没有可写入的数据。')).toHaveCount(0)
+}
+
 async function submitDownload(
   page,
   { title, requestBody, status, success, error, timeout = 15_000 },
@@ -726,6 +732,7 @@ async function submitDownload(
     await expect(alert).not.toContainText('not-a-decimal')
     const retry = alert.getByRole('button', { name: '使用原参数重试' })
     await expect(retry).toHaveCount(error.retryable ? 1 : 0)
+    await assertNoSuccessResult(page)
     expectedEvents.push({
       requestId,
       operation: 'download',
@@ -753,8 +760,13 @@ async function submitDownload(
   return { response, body, requestId, durationMs }
 }
 
-async function queryDataset(page, { plugin, api, option, code }) {
-  await openRoute(page, '/datasets', '数据查看')
+async function queryDataset(page, { plugin, api, option, code, navigate = false }) {
+  if (navigate) {
+    await page.getByRole('link', { name: '数据查看', exact: true }).click()
+    await expect(page.getByRole('heading', { level: 1, name: '数据查看' })).toBeVisible()
+  } else {
+    await openRoute(page, '/datasets', '数据查看')
+  }
   await chooseDataset(page, plugin, option)
   if (code) await page.getByLabel('证券代码 (ts_code)', { exact: true }).fill(code)
   const responsePromise = page.waitForResponse((response) =>
@@ -921,6 +933,31 @@ async function assertDailyUnchanged(page) {
   return body
 }
 
+function parseCompletedEvent(line) {
+  const marker = 'tensor.operation.completed'
+  const start = line.indexOf(marker)
+  if (start < 0) throw new Error('Completion event marker missing')
+  const text = line.slice(start + marker.length).trim()
+  const fields = {}
+  const pattern = /([A-Za-z]+)=(\[[^\]]*\]|\S+)/g
+  let cursor = 0
+  for (const match of text.matchAll(pattern)) {
+    if (text.slice(cursor, match.index).trim() !== '') {
+      throw new Error('Completion event contains an unparsed token')
+    }
+    const [, key, value] = match
+    if (Object.hasOwn(fields, key)) {
+      throw new Error(`Completion event repeats field ${key}`)
+    }
+    fields[key] = value
+    cursor = match.index + match[0].length
+  }
+  if (text.slice(cursor).trim() !== '') {
+    throw new Error('Completion event contains trailing unparsed text')
+  }
+  return fields
+}
+
 async function readCompletedEvent(expected) {
   let matches = []
   await expect
@@ -942,9 +979,6 @@ async function readCompletedEvent(expected) {
     )
     .toBe(1)
   const line = matches[0]
-  for (const [key, value] of Object.entries(expected)) {
-    expect(line).toContain(`${key}=${value}`)
-  }
   const allowed =
     expected.operation === 'download'
       ? new Set([
@@ -976,14 +1010,18 @@ async function readCompletedEvent(expected) {
           'failureStage',
           'errorCode',
         ])
-  const eventText = line.slice(line.indexOf('tensor.operation.completed'))
-  const keys = [...eventText.matchAll(/(?:^| )([A-Za-z]+)=/g)].map((match) => match[1])
-  expect(keys.every((key) => allowed.has(key))).toBe(true)
-  expect(eventText).not.toMatch(/message=|cause=|stack=|throwable=/i)
-  const projection = Object.fromEntries(
-    Object.entries(expected).filter(([key]) => key !== 'requestId'),
+  const actual = parseCompletedEvent(line)
+  expect(Object.keys(actual).sort()).toEqual([...allowed].sort())
+  for (const [key, value] of Object.entries(expected)) {
+    expect(actual[key], `${expected.requestId} ${key}`).toBe(String(value))
+  }
+  expect(actual).not.toHaveProperty('message')
+  expect(actual).not.toHaveProperty('cause')
+  expect(actual).not.toHaveProperty('stack')
+  expect(actual).not.toHaveProperty('throwable')
+  evidence.events.push(
+    Object.fromEntries([...allowed].map((key) => [key, actual[key]])),
   )
-  evidence.events.push({ requestId: expected.requestId, ...projection })
 }
 
 async function verifyEventsAndSafety() {
@@ -1221,6 +1259,7 @@ test.describe('download outcome matrix', () => {
       api: 'fixture_daily',
       option: FIXTURE_API,
       code: '000001.SZ',
+      navigate: true,
     })
     const first = structuredClone(fixtureRow(body))
     await assertFixtureBody(page, body, first)
@@ -1535,6 +1574,7 @@ test.describe('download outcome matrix', () => {
       await expect(alert.getByRole('button', { name: '使用原参数重试' })).toHaveCount(
         scenario.retryable ? 1 : 0,
       )
+      await assertNoSuccessResult(page)
       expectedEvents.push({
         requestId,
         operation: 'download',
