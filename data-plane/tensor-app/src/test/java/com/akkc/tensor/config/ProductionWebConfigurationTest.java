@@ -152,7 +152,12 @@ class ProductionWebConfigurationTest {
     }
 
     @ParameterizedTest
-    @ValueSource(strings = {"http://127.0.0.1:5173,https://other.example", "http://127.0.0.1:5173/"})
+    @ValueSource(strings = {
+        "http://127.0.0.1:5173,https://other.example",
+        "http://127.0.0.1:5173/",
+        "*,https://other.example",
+        "*/"
+    })
     void disablesCorsForMalformedDevelopmentOrigin(String origin) throws Exception {
         try (WebFixture web = web(origin)) {
             MvcResult actual = web.mockMvc().perform(get("/api/v1/probe")
@@ -165,6 +170,18 @@ class ProductionWebConfigurationTest {
                     .andExpect(status().isForbidden())
                     .andReturn();
             assertNoCorsPermission(preflight);
+        }
+    }
+
+    @Test
+    void doesNotForwardUiRoutesForPost() throws Exception {
+        try (WebFixture web = web("")) {
+            MvcResult result = web.mockMvc().perform(post("/downloads"))
+                    .andExpect(status().isMethodNotAllowed())
+                    .andExpect(header().string("Cache-Control", "no-cache"))
+                    .andReturn();
+            assertThat(result.getResponse().getForwardedUrl()).isNull();
+            assertSecurityHeaders(result);
         }
     }
 
