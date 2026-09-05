@@ -91,7 +91,7 @@
 | 70 | M13-T05 | 独立 acceptance JAR 打包及启停验收 | `COMPLETED` | M13-T04, M08-T02, M04-T06 | docs/task-designs/M13-T05-design.md | docs/task-handoffs/M13-T05-handoff.md |
 | 71 | M14-T01 | fixture 页面端到端主闭环 | `COMPLETED` | M13-T04, M13-T05 | docs/task-designs/M14-T01-design.md | docs/task-handoffs/M14-T01-handoff.md |
 | 72 | M14-T02 | 下载失败、空结果、幂等和回滚矩阵 | `COMPLETED` | M14-T01 | docs/task-designs/M14-T02-design.md | docs/task-handoffs/M14-T02-handoff.md |
-| 73 | M14-T03 | 查询、分页、宽表、竞态和无障碍 E2E | `NOT_STARTED` | M14-T01 | docs/task-designs/M14-T03-design.md | None |
+| 73 | M14-T03 | 查询、分页、宽表、竞态和无障碍 E2E | `READY` | M14-T01 | docs/task-designs/M14-T03-design.md | docs/task-handoffs/M14-T03-handoff.md |
 | 74 | M14-T04 | 49 数据集自动契约与页面回归驱动 | `NOT_STARTED` | M03-T09, M04-T06, M14-T01 | None | None |
 | 75 | M14-T05 | 真实 Tushare 49 接口受控页面验收 | `NOT_STARTED` | M14-T04 | None | None |
 | 76 | M14-T06 | `daily` 与 `balancesheet` 性能验证 | `NOT_STARTED` | M14-T03, M14-T05 | None | None |
@@ -1029,7 +1029,7 @@
 - **Dependencies:** M14-T01.
 - **Sources:** `docs/superpowers/plans/tensor-modules/M14-integration-release.md` 的 `Task M14-T03` 任务卡。
 - **First action:** 读取 `docs/superpowers/plans/tensor-modules/M14-integration-release.md` 的 `Task M14-T03` 任务卡，并确认其 `Context boundary`、输入和目标文件均可定位。
-- **State evidence:** None.
+- **State evidence (readiness):** 2026-09-05：M14-T02由 `db6e853` 实现及 `41feb92`/`f60f35d` 完成审查修正、`71d9618` 记录COMPLETED之后，按预定义Order选中后继73/M14-T03，观测NOT_STARTED、Design/Handoff为None。使用任务契约设计技能完成 `docs/task-designs/M14-T03-design.md`，独立就绪审查要求补齐公告日期单边查询，与既定两类日期验收一致；已补充122行/1行精确输入、分页和清空对端规则，并明确每阶段单次15秒只读CLI batch及最终150+15+15秒清理预算，定点复审Ready for implementation: Yes，无未解决发现。`e8501c2` 提交最终200行设计并仅回填Design document，随后完整读取。冻结两个新实施文件、11串行Chromium用例、五现有数据集/7页面下载/7本机stub调用、daily126行、balance152+3列、两类日期/动态筛选/20-50-100分页/重置/真实ann_date更新归一最后页、原页面请求延迟放行竞态与键盘闭环；不读后端生产实现或改产品/配置/JAR，不伪造响应或API/SQL种数。唯一直接依赖M14-T01的产物、决策、理由、约束、用途和3/3等既有可用性证据逐项写入交接，前驱M14-T02不新增为依赖。已核实无现成双日期定义、STRING空串转null而TEXT保留的公开兼容事实，无输入冲突；控制器检查设计结构/引用、11标题、模板字段数及确定性行/分页/AND算术通过。先写完整 `docs/task-handoffs/M14-T03-handoff.md`，验证模板、依赖和首动作、目标实施文件未创建，再链接并执行真实 `NOT_STARTED -> READY`。首个实施动作是按完成设计写完整11项测试并准备另一新空schema；本次未实施/运行后继，不把设计预期当验收结果。
 
 ### `M14-T04`
 
