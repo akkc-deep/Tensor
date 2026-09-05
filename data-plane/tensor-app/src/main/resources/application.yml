@@ -5,8 +5,15 @@ spring:
     password: ${TENSOR_DB_PASSWORD}
   flyway:
     enabled: true
+  lifecycle:
+    timeout-per-shutdown-phase: 70s
+
+server:
+  shutdown: graceful
 
 tensor:
+  web:
+    dev-allowed-origin: ${TENSOR_DEV_CORS_ALLOWED_ORIGIN:}
   display-zone: ${TENSOR_DISPLAY_ZONE:Asia/Shanghai}
   plugins:
     tushare-pro:
