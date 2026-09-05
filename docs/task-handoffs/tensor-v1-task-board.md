@@ -87,7 +87,7 @@
 | 66 | M13-T01 | 前端确定性构建及静态资源复制 | `COMPLETED` | M10-T02, M11-T05, M12-T05 | docs/task-designs/M13-T01-design.md | docs/task-handoffs/M13-T01-handoff.md |
 | 67 | M13-T02 | 单个可执行 JAR 打包和内容检查 | `COMPLETED` | M09-T06, M13-T01 | docs/task-designs/M13-T02-design.md | docs/task-handoffs/M13-T02-handoff.md |
 | 68 | M13-T03 | 生产配置、CORS、SPA fallback 和优雅停机 | `COMPLETED` | M09-T06, M13-T02 | docs/task-designs/M13-T03-design.md | docs/task-handoffs/M13-T03-handoff.md |
-| 69 | M13-T04 | 全新环境运行说明和启动 smoke test | `NOT_STARTED` | M13-T03 | docs/task-designs/M13-T04-design.md | None |
+| 69 | M13-T04 | 全新环境运行说明和启动 smoke test | `READY` | M13-T03 | docs/task-designs/M13-T04-design.md | docs/task-handoffs/M13-T04-handoff.md |
 | 70 | M14-T01 | fixture 页面端到端主闭环 | `NOT_STARTED` | M13-T04 | None | None |
 | 71 | M14-T02 | 下载失败、空结果、幂等和回滚矩阵 | `NOT_STARTED` | M14-T01 | None | None |
 | 72 | M14-T03 | 查询、分页、宽表、竞态和无障碍 E2E | `NOT_STARTED` | M14-T01 | None | None |
@@ -965,7 +965,7 @@
 - **Dependencies:** M13-T03.
 - **Sources:** `docs/superpowers/plans/tensor-modules/M13-packaging-runbook.md` 的 `Task M13-T04` 任务卡。
 - **First action:** 读取 `docs/superpowers/plans/tensor-modules/M13-packaging-runbook.md` 的 `Task M13-T04` 任务卡，并确认其 `Context boundary`、输入和目标文件均可定位。
-- **State evidence:** None.
+- **State evidence (readiness):** 2026-09-05：M13-T03 已由 `455d253` 记录完成，按预定义最小更大 Order 选择后继 M13-T04，观察其原状态为 `NOT_STARTED`。使用 designing-task-contracts 完成 `docs/task-designs/M13-T04-design.md`，由 `f8aa577` 创建并只回填设计单元格；已完整读取并核对七节、三个精确实施文件、只读四 probe 接口、退出码/失败/秘密检查、全新目录与真实 MySQL 首跑/重启验收、完整模块构建以及范围/格式/Git 门禁。任务卡、TRD 14/19/附录 B、OpenAPI 数据源列表和当前配置/打包公开产物提供所需输入，无待定功能或依赖冲突；唯一直接依赖 M13-T03 的 120/368/4 最终构建、28 项 Web 合同、组件扫描与独立审查证据可用。`docs/task-handoffs/M13-T04-handoff.md` 已按 next-task 模板创建并链接，包含同一设计路径、唯一直接输入的 artifact/decision/rationale/constraint/usage/readiness、读取顺序，以及创建只读 smoke 脚本并验证语法/临时响应矩阵的实施首个动作。代理响应超时至少 130s、70s 每阶段停机不等于 JVM 总期限、Token 可选与真实首跑尚未执行等边界已明确传递。设计、交接结构和引用核对通过，三个实施文件仍未创建，因此执行真实 `NOT_STARTED -> READY`；本次仅准备后继，不开始 M13-T04 实现。
 
 ### `M14-T01`
 
