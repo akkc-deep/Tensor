@@ -75,7 +75,7 @@ daily 字段固定为 `[ts_code, trade_date, open, high, low, close, pre_close, 
 | 操作 | 精确公开选择器/值 |
 |---|---|
 | 入口与导航 | `/downloads` heading level1“数据下载”，`/datasets` heading level1“数据查看”；导航使用 link“数据下载”/“数据查看”。直接入口返回200；至少一次实际导航到查询页。 |
-| 源/接口/数据集 | combobox 名称 exact `数据源`/`数据接口`/`数据集`；focus→Enter→可见 option.click。源 `Fixture` 或 `Tushare Pro`；接口/数据集 option `/Fixture 日线.*fixture_daily/`、下载接口 `/^日线行情daily$/`、查询数据集 `/日线行情.*\(daily\)/`；范围用 `/IPO 新股发行信息.*new_share/`。不使用 Element Plus CSS、force 或内部 Vue 状态。 |
+| 源/接口/数据集 | combobox 名称 exact `数据源`/`数据接口`/`数据集`；focus→Enter→可见 option.click。源 `Fixture` 或 `Tushare Pro`；接口/数据集 option `/Fixture 日线.*fixture_daily/`、下载接口与查询数据集均 `/^日线行情daily$/`；范围用 `/IPO 新股发行信息.*new_share/`。不使用 Element Plus CSS、force 或内部 Vue 状态。 |
 | fixture 参数 | combobox `/场景/`，option exact 五值之一；默认 SUCCESS 通过打开下拉后的 selected option 验证，不读内部只读 input.value。 |
 | 日期参数 | `getByLabel('交易日期', {exact:false})`、`getByLabel('开始日期', {exact:false})`、`getByLabel('结束日期', {exact:false})`；输入 `YYYY-MM-DD` 后 Tab 提交 picker 值；点击下载前核对显示值。 |
 | 下载 | button exact“开始下载”；先登记唯一 POST `/api/v1/downloads` response promise 再点击；核对页面实际请求的身份/params。默认响应等待 15 秒，真实 timeout 项显式 135 秒。 |
@@ -206,4 +206,4 @@ git diff --cached --check
 
 ### 实施时选择器勘误（2026-09-05）
 
-首轮真实 JAR 的公开可访问快照显示下载接口 option 为 `日线行情daily`（标题与 code 连续文本），不是带括号的文本；下拉框已正常展开。将下载接口定位修正为上述精确名称，数据集保留其公开括号格式。此项是测试定位与实际公开组件的一致性修正；API 身份 `daily`、日期参数、结果及全部验收断言保持不变，不修改产品。首次失败发生在第一个业务 POST 前（0 POST），不作为产品缺陷或通过证据。
+首轮真实 JAR 的公开可访问快照显示下载接口 option 为 `日线行情daily`（标题与 code 连续文本），不是带括号的文本；下拉框已正常展开。第四轮查询页的公开快照同样确认其 option 为 `日线行情daily`，因此下载接口与查询数据集均修正为上述精确名称。此项是测试定位与实际公开组件的一致性修正；API 身份 `daily`、日期参数、结果及全部验收断言保持不变，不修改产品。首次失败发生在第一个业务 POST 前（0 POST），不作为产品缺陷或通过证据。
