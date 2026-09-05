@@ -89,7 +89,7 @@
 | 68 | M13-T03 | 生产配置、CORS、SPA fallback 和优雅停机 | `COMPLETED` | M09-T06, M13-T02 | docs/task-designs/M13-T03-design.md | docs/task-handoffs/M13-T03-handoff.md |
 | 69 | M13-T04 | 全新环境运行说明和启动 smoke test | `COMPLETED` | M13-T03 | docs/task-designs/M13-T04-design.md | docs/task-handoffs/M13-T04-handoff.md |
 | 70 | M13-T05 | 独立 acceptance JAR 打包及启停验收 | `COMPLETED` | M13-T04, M08-T02, M04-T06 | docs/task-designs/M13-T05-design.md | docs/task-handoffs/M13-T05-handoff.md |
-| 71 | M14-T01 | fixture 页面端到端主闭环 | `READY` | M13-T04, M13-T05 | docs/task-designs/M14-T01-design.md | docs/task-handoffs/M14-T01-handoff.md |
+| 71 | M14-T01 | fixture 页面端到端主闭环 | `IN_PROGRESS` | M13-T04, M13-T05 | docs/task-designs/M14-T01-design.md | docs/task-handoffs/M14-T01-handoff.md |
 | 72 | M14-T02 | 下载失败、空结果、幂等和回滚矩阵 | `NOT_STARTED` | M14-T01 | None | None |
 | 73 | M14-T03 | 查询、分页、宽表、竞态和无障碍 E2E | `NOT_STARTED` | M14-T01 | None | None |
 | 74 | M14-T04 | 49 数据集自动契约与页面回归驱动 | `NOT_STARTED` | M03-T09, M04-T06, M14-T01 | None | None |
@@ -1001,6 +1001,8 @@
 - **Sources:** `docs/superpowers/plans/tensor-modules/M14-integration-release.md` 的 `Task M14-T01` 任务卡。
 - **First action:** 读取 `docs/superpowers/plans/tensor-modules/M14-integration-release.md` 的 `Task M14-T01` 任务卡，并确认其 `Context boundary`、输入和目标文件均可定位。
 - **State evidence (readiness):** 2026-09-05：M13-T05已由 `b500f3b` 实现、`e74feac` 记录COMPLETED后，严格按预定义Order选中后继71/M14-T01，观测状态NOT_STARTED、Design/Handoff为None。使用任务契约设计技能完成 `docs/task-designs/M14-T01-design.md`，`07fc039` 提交并仅回填Design document；链接后完整读取设计，冻结精确两个新文件、同文件最小JAR进程所有权、三个串行用例、页面角色/label、空schema与负向对照、SUCCESS/EMPTY/禁用结果及前端120回归/证据门禁。独立只读设计审查发现第三用例180秒不能覆盖150秒停机+90秒就绪，修订为该用例360秒（前两项/钩子180秒），复审Ready for implementation: Yes，无Critical/Important/Minor；最终自检修正激活参数true→false文字，无接口或范围改变。M13-T04与M13-T05两个直接输入的产物/决策/理由/约束/用途/已记录可用性证据在交接中逐项列明，生产五迁移/49表与验收六迁移/50表分库互补，双开关、权限、秘密与停机规则一致。先写完整 `docs/task-handoffs/M14-T01-handoff.md` 并链接，交接结构/引用/目标文件未存在检查通过，再执行真实 `NOT_STARTED -> READY`。首个实施动作是依完成设计写三个Playwright用例并用原生产包作Fixture缺席负向对照；本次仅准备后继，未创建E2E/验收证据实现文件，未执行页面下载或宣称新增E2E通过。
+
+- **State evidence (start):** 2026-09-05：用户明确要求“按照权威任务看板执行当前任务；先读取其设计文档和交接文件（如有），再按既定工作流完成任务”。已完整读取本行链接的 M14-T01 设计、交接及任务卡，确认两个目标文件无现有修改，按此启动证据执行 `READY -> IN_PROGRESS`，保留原交接作为入口上下文。本次只实施 M14-T01，完成后按 Order 准备后继。
 
 ### `M14-T02`
 
