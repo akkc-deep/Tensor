@@ -26,6 +26,14 @@ const DOWNLOAD_KEYS = [
   'updatedRows', 'message',
 ]
 const ERROR_KEYS = ['requestId', 'code', 'message', 'retryable', 'fieldErrors']
+const FIELD_ERROR_KEYS = ['field', 'message']
+const API_ERROR_CODES = new Set([
+  'PARAM_REQUIRED', 'PARAM_INVALID', 'PLUGIN_DISABLED', 'DATASET_MISCONFIGURED',
+  'SOURCE_AUTH_FAILED', 'SOURCE_PERMISSION_DENIED', 'SOURCE_RATE_LIMITED',
+  'SOURCE_UNAVAILABLE', 'SOURCE_NETWORK_ERROR', 'SOURCE_TIMEOUT',
+  'SOURCE_PAYLOAD_INVALID', 'ADAPTER_FIELD_MISSING', 'ADAPTER_TYPE_INVALID',
+  'PERSISTENCE_FAILED', 'QUERY_FAILED', 'INTERNAL_ERROR',
+])
 const PAGE_KEYS = [
   'requestId', 'pluginId', 'apiName', 'columns', 'items', 'page', 'pageSize',
   'totalElements', 'totalPages',
@@ -214,6 +222,20 @@ export function validateDownloadSuccess(body, pluginId, apiName) {
   return body
 }
 
+export function validateApiError(body) {
+  objectWithExactKeys(body, ERROR_KEYS, 'API error')
+  safeCheck(typeof body.requestId === 'string' && body.requestId.length > 0, 'API error request ID')
+  safeCheck(API_ERROR_CODES.has(body.code), 'API error public code')
+  safeCheck(typeof body.message === 'string' && body.message.length > 0, 'API error public message')
+  safeCheck(typeof body.retryable === 'boolean' && Array.isArray(body.fieldErrors), 'API error shape')
+  for (const fieldError of body.fieldErrors) {
+    objectWithExactKeys(fieldError, FIELD_ERROR_KEYS, 'field error')
+    safeCheck(typeof fieldError.field === 'string' && fieldError.field.length > 0, 'field error field')
+    safeCheck(typeof fieldError.message === 'string' && fieldError.message.length > 0, 'field error message')
+  }
+  return body
+}
+
 export function validateInterfaceOutcomes(status, outcomes) {
   safeCheck(Array.isArray(outcomes) && outcomes.length > 0, 'interface outcomes present')
   if (status === 'ok') {
@@ -321,17 +343,30 @@ export class SafeLogSink {
     this.secrets = secrets.flatMap((value) => {
       const escaped = JSON.stringify(value).slice(1, -1)
       return escaped === value ? [value] : [value, escaped]
-    })
+    }).map((value) => Buffer.from(value, 'utf8'))
+    this.overlap = Math.max(
+      0,
+      ...this.secrets.map(({ length }) => length - 1),
+      Buffer.byteLength('"fields":') - 1,
+      Buffer.byteLength('"items":') - 1,
+      Buffer.byteLength('"token":') - 1,
+    )
     this.write = write
-    this.buffers = new Map([['stdout', ''], ['stderr', '']])
+    this.buffers = new Map([['stdout', Buffer.alloc(0)], ['stderr', Buffer.alloc(0)]])
     this.queue = Promise.resolve()
     this.failed = false
     this.onFailure = () => {}
   }
 
-  scan(text) {
-    safeCheck(this.secrets.every((secret) => !text.includes(secret)), 'application log secret scan')
-    safeCheck(!/"(?:fields|items|token)"\s*:/i.test(text), 'application log envelope scan')
+  scan(bytes) {
+    safeCheck(this.secrets.every((secret) => bytes.indexOf(secret) < 0), 'application log secret scan')
+    safeCheck(!/"(?:fields|items|token)"\s*:/i.test(bytes.toString('utf8')), 'application log envelope scan')
+    let start = 0
+    for (let newline = bytes.indexOf(0x0a, start); newline >= 0; newline = bytes.indexOf(0x0a, start)) {
+      safeCheck(newline + 1 - start <= MAX_LOG_LINE, 'application log line length')
+      start = newline + 1
+    }
+    safeCheck(bytes.length - start <= MAX_LOG_LINE, 'application log line length')
   }
 
   enqueue(text) {
@@ -345,34 +380,33 @@ export class SafeLogSink {
 
   accept(channel, chunk) {
     if (this.failed) return
-    let value = (this.buffers.get(channel) ?? '') + chunk.toString('utf8')
+    let value = Buffer.concat([this.buffers.get(channel) ?? Buffer.alloc(0), Buffer.from(chunk)])
     try {
       this.scan(value)
-      while (value.includes('\n')) {
-        const end = value.indexOf('\n') + 1
-        const line = value.slice(0, end)
-        safeCheck(Buffer.byteLength(line) <= MAX_LOG_LINE, 'application log line length')
-        this.enqueue(line)
-        value = value.slice(end)
-        this.scan(value)
+      const safeLimit = Math.max(0, value.length - this.overlap)
+      let writeEnd = -1
+      for (let newline = value.indexOf(0x0a); newline >= 0 && newline < safeLimit; newline = value.indexOf(0x0a, newline + 1)) {
+        writeEnd = newline + 1
       }
-      safeCheck(Buffer.byteLength(value) <= MAX_LOG_LINE, 'application log line length')
+      if (writeEnd > 0) {
+        this.enqueue(Buffer.from(value.subarray(0, writeEnd)))
+        value = Buffer.from(value.subarray(writeEnd))
+      }
       this.buffers.set(channel, value)
     } catch {
       this.failed = true
-      this.buffers.set(channel, '')
+      this.buffers.set(channel, Buffer.alloc(0))
       this.onFailure()
     }
   }
 
   async end(channel) {
     if (this.failed) return
-    const value = this.buffers.get(channel) ?? ''
+    const value = this.buffers.get(channel) ?? Buffer.alloc(0)
     try {
       this.scan(value)
-      safeCheck(Buffer.byteLength(value) <= MAX_LOG_LINE, 'application log line length')
-      if (value) this.enqueue(value)
-      this.buffers.set(channel, '')
+      if (value.length) this.enqueue(Buffer.from(value))
+      this.buffers.set(channel, Buffer.alloc(0))
       await this.queue
     } catch {
       this.failed = true
@@ -382,6 +416,103 @@ export class SafeLogSink {
 
   async idle() {
     await this.queue
+  }
+
+  pendingText() {
+    safeCheck(!this.failed, 'application log safety')
+    return [...this.buffers.values()]
+      .filter((bytes) => bytes.length > 0)
+      .map((bytes) => bytes.toString('utf8'))
+      .join('\n')
+  }
+}
+
+export async function beforeDeadline(promise, deadlineAt, name, onTimeout = () => {}) {
+  const remaining = Math.max(0, deadlineAt - Date.now())
+  let timer
+  const settled = Promise.resolve(promise).then(
+    (value) => ({ type: 'value', value }),
+    (error) => ({ type: 'error', error }),
+  )
+  const timeout = new Promise((resolve) => {
+    timer = setTimeout(() => resolve({ type: 'timeout' }), remaining)
+  })
+  const result = await Promise.race([settled, timeout])
+  clearTimeout(timer)
+  if (result.type === 'timeout') {
+    try { onTimeout() } catch { /* fixed failure below */ }
+    throw new Error(`Safe check failed: ${name} timeout`)
+  }
+  if (result.type === 'error') {
+    if (result.error instanceof Error && /^Safe (?:check failed|live blocker):/.test(result.error.message)) {
+      throw result.error
+    }
+    throw new Error(`Safe check failed: ${name}`)
+  }
+  return result.value
+}
+
+export async function cleanupOwnedResources(owned, deadlineAt, limits = {}) {
+  const failures = []
+  const run = async (operation, milliseconds, name) => {
+    const phaseDeadline = Math.min(deadlineAt, Date.now() + milliseconds)
+    try { await beforeDeadline(operation(), phaseDeadline, name) } catch { failures.push(new Error(`Safe check failed: ${name}`)) }
+  }
+  owned.cancelled = true
+  if (!owned.context && owned.contextPromise) {
+    await run(async () => { owned.context = await owned.contextPromise }, limits.creation ?? 10_000, 'context ownership cleanup')
+  }
+  if (!owned.page && owned.pagePromise) {
+    await run(async () => { owned.page = await owned.pagePromise }, limits.creation ?? 10_000, 'page ownership cleanup')
+  }
+  if (owned.monitor) await run(() => owned.monitor.drain(Math.min(deadlineAt, Date.now() + (limits.firstDrain ?? 60_000))), limits.firstDrain ?? 60_000, 'network drain')
+  if (owned.page) await run(() => owned.page.close(), limits.pageClose ?? 10_000, 'page close')
+  if (owned.monitor) await run(() => owned.monitor.drain(Math.min(deadlineAt, Date.now() + (limits.secondDrain ?? 60_000))), limits.secondDrain ?? 60_000, 'post-close network drain')
+  if (owned.context) await run(() => owned.context.close(), limits.contextClose ?? 15_000, 'context close')
+  if (owned.monitor) monitors.delete(owned.monitor)
+  if (failures.length) throw new AggregateError(failures, 'Safe cleanup failed')
+}
+
+export class RunCounters {
+  constructor() {
+    this.attempted = new Set()
+    this.failed = new Set()
+    this.completed = new Set()
+    this.traffic = {
+      liveDownloadPosts: 0,
+      fixtureDownloadPosts: 0,
+      liveRecordsGets: 0,
+      fixtureRecordsGets: 0,
+    }
+  }
+
+  enter(apiName) {
+    this.attempted.add(apiName)
+  }
+
+  fail(apiName) {
+    safeCheck(this.attempted.has(apiName), 'failed case was attempted')
+    this.failed.add(apiName)
+  }
+
+  complete(apiName) {
+    safeCheck(this.attempted.has(apiName) && !this.failed.has(apiName), 'completed case state')
+    this.completed.add(apiName)
+  }
+
+  observe(name) {
+    safeCheck(Object.hasOwn(this.traffic, name), 'observed traffic counter')
+    this.traffic[name] += 1
+  }
+
+  snapshot(totalCases) {
+    return {
+      attemptedCases: this.attempted.size,
+      failedCases: this.failed.size,
+      completedCases: this.completed.size,
+      unexecutedCases: totalCases - this.attempted.size,
+      ...this.traffic,
+    }
   }
 }
 
@@ -401,7 +532,10 @@ let jarHashBefore
 let runtimeFailure
 let setupFailed = false
 let fixturePassed = false
-let completedCases = 0
+let artifactInitialized = false
+let jarValidated = false
+let evidenceWritten = false
+const runCounters = new RunCounters()
 const monitors = new Set()
 const ledger = new RequestLedger()
 const expectedEvents = new Map()
@@ -519,6 +653,7 @@ async function validatePreconditions(testInfo) {
   applicationLogPath = path.join(runDirectory, 'application.log')
   const handle = await open(applicationLogPath, 'wx', 0o600)
   await handle.close()
+  artifactInitialized = true
 
   safeCheck(testInfo.config.workers === 1, 'single Playwright worker')
   safeCheck((process.env.PLAYWRIGHT_BASE_URL ?? BASE_URL) === BASE_URL, 'isolated base URL')
@@ -540,6 +675,7 @@ async function validatePreconditions(testInfo) {
   safeCheck(jarState.isFile() && !jarState.isSymbolicLink(), 'acceptance JAR ordinary file')
   jarHashBefore = await sha256(process.env.ACCEPTANCE_JAR)
   safeCheck(jarHashBefore === JAR_SHA, 'acceptance JAR hash')
+  jarValidated = true
 
   const java = await execFileAsync('java', ['-version'], { env: publicEnvironment(), timeout: 10_000 })
   const javaVersion = `${java.stdout}\n${java.stderr}`
@@ -653,6 +789,7 @@ function createMonitor(page, pluginId, apiName) {
         ledger.observeWrite(method, pathname, request.postDataJSON())
         downloadRequests.add(request)
         downloads += 1
+        runCounters.observe(pluginId === 'fixture' ? 'fixtureDownloadPosts' : 'liveDownloadPosts')
       } else {
         safeCheck(method === 'GET', 'browser read method')
         const normal = pathname === '/' || pathname === '/downloads' || pathname === '/datasets' ||
@@ -665,6 +802,7 @@ function createMonitor(page, pluginId, apiName) {
         if (pathname === recordPath) {
           ledger.observeQuery(pathname)
           records += 1
+          runCounters.observe(pluginId === 'fixture' ? 'fixtureRecordsGets' : 'liveRecordsGets')
         } else safeCheck(normal || metadata, 'browser request allowlist')
       }
     } catch {
@@ -689,13 +827,13 @@ function createMonitor(page, pluginId, apiName) {
   const current = {
     records: () => records,
     downloads: () => downloads,
-    async drain(timeout = 135_000) {
-      await bounded((async () => {
+    async drain(deadlineAt = Date.now() + 135_000) {
+      await beforeDeadline((async () => {
         while (pending.size || scans.length) {
           const currentScans = scans.splice(0)
           await Promise.all([...pending.values(), ...currentScans])
         }
-      })(), timeout, 'network drain')
+      })(), deadlineAt, 'network drain')
       ledger.assertDrained()
       ledger.assertExpectedTrafficConsumed()
       safeCheck(failures.length === 0, 'browser network monitor')
@@ -705,14 +843,32 @@ function createMonitor(page, pluginId, apiName) {
   return current
 }
 
-async function closeOwnedPage(page, context, monitor) {
-  const failures = []
-  try { await monitor.drain() } catch { failures.push(new Error('Safe check failed: network drain')) }
-  try { await page.close() } catch { failures.push(new Error('Safe check failed: page close')) }
-  try { await monitor.drain() } catch { failures.push(new Error('Safe check failed: post-close network drain')) }
-  try { await context.close() } catch { failures.push(new Error('Safe check failed: context close')) }
-  monitors.delete(monitor)
-  if (failures.length) throw new AggregateError(failures, 'Safe cleanup failed')
+function cancelOwned(owned) {
+  owned.cancelled = true
+  if (owned.context) void owned.context.close().catch(() => {})
+  else if (owned.contextPromise) {
+    void owned.contextPromise.then((context) => context.close()).catch(() => {})
+  }
+}
+
+async function initializeOwnedPage(browser, owned, deadlineAt, pluginId, apiName) {
+  owned.contextPromise = browser.newContext({ viewport: { width: 1440, height: 1000 } })
+  void owned.contextPromise.then((context) => {
+    owned.context = context
+    if (owned.cancelled) return context.close()
+  }).catch(() => {})
+  owned.context = await beforeDeadline(
+    owned.contextPromise, deadlineAt, 'browser context creation', () => cancelOwned(owned),
+  )
+  owned.pagePromise = owned.context.newPage()
+  void owned.pagePromise.then((page) => {
+    owned.page = page
+    if (owned.cancelled) return page.close()
+  }).catch(() => {})
+  owned.page = await beforeDeadline(
+    owned.pagePromise, deadlineAt, 'browser page creation', () => cancelOwned(owned),
+  )
+  owned.monitor = createMonitor(owned.page, pluginId, apiName)
 }
 
 async function drainAllMonitors() {
@@ -880,7 +1036,7 @@ async function correlateEvent(expected) {
   await expect.poll(async () => {
     await logSink.idle()
     safeCheck(!logSink.failed && !runtimeFailure, 'application log safety')
-    const text = await readFile(applicationLogPath, 'utf8')
+    const text = `${await readFile(applicationLogPath, 'utf8')}\n${logSink.pendingText()}`
     assertSafeText(text, 'application log')
     matching = text.split(/\r?\n/).filter((line) =>
       line.includes('tensor.operation.completed') &&
@@ -934,6 +1090,14 @@ async function queryDataset(page, monitor, pluginId, contract, definition, { cod
     'records query string',
   )
   safeCheck(monitor.records() === priorRecords + 1, 'one records request')
+  const projection = {
+    apiName: contract.apiName,
+    outcome: 'SUCCESS',
+    totalElements: body.totalElements,
+    resultCount: body.items.length,
+    requestId: body.requestId,
+  }
+  evidence[pluginId === 'fixture' ? 'fixture' : 'queries'].push(projection)
   const durationMs = await correlateEvent({
     requestId: body.requestId,
     operation: 'query',
@@ -948,15 +1112,7 @@ async function queryDataset(page, monitor, pluginId, contract, definition, { cod
     failureStage: 'none',
     errorCode: 'none',
   })
-  const projection = {
-    apiName: contract.apiName,
-    outcome: 'SUCCESS',
-    totalElements: body.totalElements,
-    resultCount: body.items.length,
-    requestId: body.requestId,
-    durationMs,
-  }
-  evidence[pluginId === 'fixture' ? 'fixture' : 'queries'].push(projection)
+  projection.durationMs = durationMs
   return body
 }
 
@@ -1009,12 +1165,16 @@ async function submitDownload(page, monitor, pluginId, contract, params, fixture
   safeCheck(monitor.downloads() === beforePosts + 1, 'one download POST')
   safeCheck(response.headers()['x-request-id'] === body.requestId, 'download header request ID')
   ledger.rememberRequestId(body.requestId)
-  await assertPageSafe(page, 'download result')
 
   if (response.status() !== 200) {
-    objectWithExactKeys(body, ERROR_KEYS, 'download error')
-    safeCheck(typeof body.code === 'string' && typeof body.message === 'string', 'download error public fields')
-    safeCheck(typeof body.retryable === 'boolean' && Array.isArray(body.fieldErrors), 'download error shape')
+    validateApiError(body)
+    const projection = {
+      apiName: contract.apiName,
+      outcome: body.code,
+      requestId: body.requestId,
+    }
+    evidence[fixture ? 'fixture' : 'downloads'].push(projection)
+    await assertPageSafe(page, 'download result')
     const alert = page.getByRole('alert')
     await expect(alert.getByRole('heading', { name: '下载失败' })).toBeVisible()
     const alertText = await alert.innerText()
@@ -1029,17 +1189,22 @@ async function submitDownload(page, monitor, pluginId, contract, params, fixture
       outcome: 'failure',
       errorCode: body.code,
     })
-    evidence.downloads.push({
-      apiName: contract.apiName,
-      outcome: body.code,
-      requestId: body.requestId,
-      durationMs,
-    })
+    projection.durationMs = durationMs
     await monitor.drain()
     throw new Error(`Safe live blocker: ${body.code}`)
   }
 
   validateDownloadSuccess(body, pluginId, contract.apiName)
+  const projection = {
+    apiName: contract.apiName,
+    outcome: body.outcome,
+    sourceRowCount: body.sourceRowCount,
+    insertedRows: body.insertedRows,
+    updatedRows: body.updatedRows,
+    requestId: body.requestId,
+  }
+  evidence[fixture ? 'fixture' : 'downloads'].push(projection)
+  await assertPageSafe(page, 'download result')
   const panel = page.getByRole('status')
   if (body.outcome === 'EMPTY') {
     await expect(panel.getByRole('heading', { name: '下载成功，0 条数据' })).toBeVisible()
@@ -1074,16 +1239,7 @@ async function submitDownload(page, monitor, pluginId, contract, params, fixture
     failureStage: 'none',
     errorCode: 'none',
   })
-  const projection = {
-    apiName: contract.apiName,
-    outcome: body.outcome,
-    sourceRowCount: body.sourceRowCount,
-    insertedRows: body.insertedRows,
-    updatedRows: body.updatedRows,
-    requestId: body.requestId,
-    durationMs,
-  }
-  evidence[fixture ? 'fixture' : 'downloads'].push(projection)
+  projection.durationMs = durationMs
   await monitor.drain()
   return { body, startedAt, finishedAt: Date.now() }
 }
@@ -1119,148 +1275,160 @@ async function assertVisibleRow(page, definition, row) {
 }
 
 async function runFixture(browser) {
-  const context = await browser.newContext({ viewport: { width: 1440, height: 1000 } })
-  const page = await context.newPage()
   const contract = { apiName: 'fixture_daily', displayName: 'Fixture 日线', parameters: ['scenario'], columns: 4 }
-  const monitor = createMonitor(page, 'fixture', contract.apiName)
+  const owned = { cancelled: false }
+  const cleanupDeadline = Date.now() + 120_000
+  const workDeadline = cleanupDeadline - 45_000
   let primary
-  let budgetExpired = false
-  const budgetTimer = setTimeout(() => {
-    budgetExpired = true
-    void context.close()
-  }, 120_000)
   try {
-    const definition = await openDataset(page, monitor, 'fixture', contract)
-    let body = await queryDataset(page, monitor, 'fixture', contract, definition)
-    safeCheck(body.totalElements === 0 && body.items.length === 0, 'fixture initially empty')
+    await beforeDeadline((async () => {
+      await initializeOwnedPage(browser, owned, workDeadline, 'fixture', contract.apiName)
+      const { page, monitor } = owned
+      const definition = await openDataset(page, monitor, 'fixture', contract)
+      let body = await queryDataset(page, monitor, 'fixture', contract, definition)
+      safeCheck(body.totalElements === 0 && body.items.length === 0, 'fixture initially empty')
 
-    await openDownloadFromDataset(page, 'fixture', contract)
-    const scenario = page.getByRole('combobox', { name: /场景/ })
-    await scenario.focus()
-    await scenario.press('Enter')
-    await expect(page.getByRole('option', { name: 'SUCCESS', exact: true, selected: true })).toBeVisible()
-    await scenario.press('Escape')
-    const success = await submitDownload(page, monitor, 'fixture', contract, { scenario: 'SUCCESS' }, true)
-    safeCheck(
-      success.body.outcome === 'SUCCESS' && success.body.sourceRowCount === 1 &&
-      success.body.insertedRows === 1 && success.body.updatedRows === 0,
-      'fixture SUCCESS counts',
-    )
+      await openDownloadFromDataset(page, 'fixture', contract)
+      const scenario = page.getByRole('combobox', { name: /场景/ })
+      await scenario.focus()
+      await scenario.press('Enter')
+      await expect(page.getByRole('option', { name: 'SUCCESS', exact: true, selected: true })).toBeVisible()
+      await scenario.press('Escape')
+      const success = await submitDownload(page, monitor, 'fixture', contract, { scenario: 'SUCCESS' }, true)
+      safeCheck(
+        success.body.outcome === 'SUCCESS' && success.body.sourceRowCount === 1 &&
+        success.body.insertedRows === 1 && success.body.updatedRows === 0,
+        'fixture SUCCESS counts',
+      )
 
-    const afterSuccessDefinition = await openDataset(page, monitor, 'fixture', contract, true)
-    body = await queryDataset(page, monitor, 'fixture', contract, afterSuccessDefinition, { code: '000001.SZ' })
-    safeCheck(JSON.stringify(body.columns) === JSON.stringify(FIXTURE_COLUMNS), 'fixture columns')
-    safeCheck(body.totalElements === 1 && body.items.length === 1, 'fixture SUCCESS row')
-    const row = body.items[0]
-    objectWithExactKeys(row, FIXTURE_COLUMNS, 'fixture row')
-    safeCheck(
-      row.ts_code === '000001.SZ' && row.trade_date === '2026-08-07' &&
-      row.amount === '11.230000000000000000' && row.note === null &&
-      row.source_plugin === 'fixture' && row.source_api === 'fixture_daily',
-      'fixture row contract',
-    )
-    validateBusinessRow(
-      row, FIXTURE_COLUMNS, 'fixture', 'fixture_daily', success.startedAt, success.finishedAt,
-    )
-    await assertVisibleRow(page, afterSuccessDefinition, row)
+      const afterSuccessDefinition = await openDataset(page, monitor, 'fixture', contract, true)
+      body = await queryDataset(page, monitor, 'fixture', contract, afterSuccessDefinition, { code: '000001.SZ' })
+      safeCheck(JSON.stringify(body.columns) === JSON.stringify(FIXTURE_COLUMNS), 'fixture columns')
+      safeCheck(body.totalElements === 1 && body.items.length === 1, 'fixture SUCCESS row')
+      const row = body.items[0]
+      objectWithExactKeys(row, FIXTURE_COLUMNS, 'fixture row')
+      safeCheck(
+        row.ts_code === '000001.SZ' && row.trade_date === '2026-08-07' &&
+        row.amount === '11.230000000000000000' && row.note === null &&
+        row.source_plugin === 'fixture' && row.source_api === 'fixture_daily',
+        'fixture row contract',
+      )
+      validateBusinessRow(
+        row, FIXTURE_COLUMNS, 'fixture', 'fixture_daily', success.startedAt, success.finishedAt,
+      )
+      await assertVisibleRow(page, afterSuccessDefinition, row)
 
-    await openDownloadFromDataset(page, 'fixture', contract)
-    await selectOption(page, /场景/, 'EMPTY')
-    const empty = await submitDownload(page, monitor, 'fixture', contract, { scenario: 'EMPTY' }, true)
-    safeCheck(empty.body.outcome === 'EMPTY', 'fixture EMPTY outcome')
+      await openDownloadFromDataset(page, 'fixture', contract)
+      await selectOption(page, /场景/, 'EMPTY')
+      const empty = await submitDownload(page, monitor, 'fixture', contract, { scenario: 'EMPTY' }, true)
+      safeCheck(empty.body.outcome === 'EMPTY', 'fixture EMPTY outcome')
 
-    const afterEmptyDefinition = await openDataset(page, monitor, 'fixture', contract, true)
-    const afterEmpty = await queryDataset(page, monitor, 'fixture', contract, afterEmptyDefinition)
-    safeCheck(afterEmpty.totalElements === 1 && afterEmpty.items.length === 1, 'fixture row retained')
-    safeCheck(JSON.stringify(afterEmpty.items[0]) === JSON.stringify(row), 'fixture row unchanged')
-    await assertVisibleRow(page, afterEmptyDefinition, row)
-  } catch {
-    primary = new Error(
-      budgetExpired
-        ? 'Safe check failed: fixture preparation timeout'
-        : 'Safe check failed: fixture preparation',
-    )
-    throw primary
-  } finally {
-    clearTimeout(budgetTimer)
-    try {
-      await closeOwnedPage(page, context, monitor)
-    } catch (cleanupError) {
-      if (primary) throw new AggregateError([primary, cleanupError], 'Safe fixture failure and cleanup failure')
-      throw cleanupError
-    }
+      const afterEmptyDefinition = await openDataset(page, monitor, 'fixture', contract, true)
+      const afterEmpty = await queryDataset(page, monitor, 'fixture', contract, afterEmptyDefinition)
+      safeCheck(afterEmpty.totalElements === 1 && afterEmpty.items.length === 1, 'fixture row retained')
+      safeCheck(JSON.stringify(afterEmpty.items[0]) === JSON.stringify(row), 'fixture row unchanged')
+      await assertVisibleRow(page, afterEmptyDefinition, row)
+    })(), workDeadline, 'fixture preparation', () => cancelOwned(owned))
+  } catch (error) {
+    primary = error instanceof Error && error.message.startsWith('Safe')
+      ? error
+      : new Error('Safe check failed: fixture preparation')
   }
+  let cleanupFailure
+  try {
+    await cleanupOwnedResources(owned, cleanupDeadline, {
+      creation: 5_000, firstDrain: 15_000, pageClose: 5_000,
+      secondDrain: 15_000, contextClose: 5_000,
+    })
+  } catch {
+    cleanupFailure = new Error('Safe check failed: fixture cleanup')
+  }
+  if (primary && cleanupFailure) throw new AggregateError([primary, cleanupFailure], 'Safe fixture failure and cleanup failure')
+  if (primary) throw primary
+  if (cleanupFailure) throw cleanupFailure
   fixturePassed = true
 }
 
+function liveCaseTimeoutMs(sampleCount) {
+  return 240_000 + sampleCount * (150_000 + intervalMs)
+}
+
 async function runLiveInterface(browser, entry) {
-  const context = await browser.newContext({ viewport: { width: 1440, height: 1000 } })
-  const page = await context.newPage()
   const contract = entry.contract
-  const monitor = createMonitor(page, 'tushare_pro', contract.apiName)
+  runCounters.enter(contract.apiName)
+  const outerTimeout = liveCaseTimeoutMs(entry.params.length)
+  const cleanupDeadline = Date.now() + outerTimeout - 5_000
+  const workDeadline = cleanupDeadline - 150_000
+  const owned = { cancelled: false }
   let primary
   try {
-    const definition = await openDataset(page, monitor, 'tushare_pro', contract)
-    await expect(page.getByRole('heading', { name: '设置筛选条件后查询' })).toBeVisible()
-    const initial = await queryDataset(page, monitor, 'tushare_pro', contract, definition)
-    safeCheck(initial.totalElements === 0 && initial.items.length === 0, 'live dataset initially empty')
+    await beforeDeadline((async () => {
+      await initializeOwnedPage(browser, owned, workDeadline, 'tushare_pro', contract.apiName)
+      const { page, monitor } = owned
+      const definition = await openDataset(page, monitor, 'tushare_pro', contract)
+      await expect(page.getByRole('heading', { name: '设置筛选条件后查询' })).toBeVisible()
+      const initial = await queryDataset(page, monitor, 'tushare_pro', contract, definition)
+      safeCheck(initial.totalElements === 0 && initial.items.length === 0, 'live dataset initially empty')
 
-    await openDownloadFromDataset(page, 'tushare_pro', contract)
-    const results = []
-    let firstDownloadAt
-    let lastDownloadAt
-    for (let index = 0; index < entry.params.length; index += 1) {
-      if (index > 0) {
-        await openDataset(page, monitor, 'tushare_pro', contract, true)
-        await openDownloadFromDataset(page, 'tushare_pro', contract)
+      await openDownloadFromDataset(page, 'tushare_pro', contract)
+      const results = []
+      let firstDownloadAt
+      let lastDownloadAt
+      for (let index = 0; index < entry.params.length; index += 1) {
+        if (index > 0) {
+          await openDataset(page, monitor, 'tushare_pro', contract, true)
+          await openDownloadFromDataset(page, 'tushare_pro', contract)
+        }
+        await fillSample(page, contract, entry.params[index])
+        const result = await submitDownload(
+          page, monitor, 'tushare_pro', contract, entry.params[index], false,
+        )
+        firstDownloadAt ??= result.startedAt
+        lastDownloadAt = result.finishedAt
+        results.push(result.body)
       }
-      await fillSample(page, contract, entry.params[index])
-      const result = await submitDownload(
-        page, monitor, 'tushare_pro', contract, entry.params[index], false,
-      )
-      firstDownloadAt ??= result.startedAt
-      lastDownloadAt = result.finishedAt
-      results.push(result.body)
-    }
-    validateInterfaceOutcomes(entry.status, results)
+      validateInterfaceOutcomes(entry.status, results)
 
-    const finalDefinition = await openDataset(page, monitor, 'tushare_pro', contract, true)
-    const finalBody = await queryDataset(page, monitor, 'tushare_pro', contract, finalDefinition)
-    const insertedRows = results.reduce((sum, result) => sum + result.insertedRows, 0)
-    validateFinalDataset({
-      manifestStatus: entry.status,
-      insertedRows,
-      body: finalBody,
-      definition: finalDefinition,
-      startedAt: firstDownloadAt,
-      finishedAt: lastDownloadAt,
-    })
-    if (entry.status === 'ok') await assertVisibleRow(page, finalDefinition, finalBody.items[0])
-    else {
-      await expect(page.getByText('未找到符合条件的数据')).toBeVisible()
-      safeCheck(await page.getByRole('row').count() <= 1, 'empty interface has no placeholder row')
-    }
-    await monitor.drain()
+      const finalDefinition = await openDataset(page, monitor, 'tushare_pro', contract, true)
+      const finalBody = await queryDataset(page, monitor, 'tushare_pro', contract, finalDefinition)
+      const insertedRows = results.reduce((sum, result) => sum + result.insertedRows, 0)
+      validateFinalDataset({
+        manifestStatus: entry.status,
+        insertedRows,
+        body: finalBody,
+        definition: finalDefinition,
+        startedAt: firstDownloadAt,
+        finishedAt: lastDownloadAt,
+      })
+      if (entry.status === 'ok') await assertVisibleRow(page, finalDefinition, finalBody.items[0])
+      else {
+        await expect(page.getByText('未找到符合条件的数据')).toBeVisible()
+        safeCheck(await page.getByRole('row').count() <= 1, 'empty interface has no placeholder row')
+      }
+      await monitor.drain(Math.min(workDeadline, Date.now() + 135_000))
+    })(), workDeadline, 'live interface work', () => cancelOwned(owned))
   } catch (error) {
     primary = error instanceof Error && /^Safe (?:check failed|live blocker):/.test(error.message)
       ? error
       : new Error('Safe check failed: live interface execution')
-    throw primary
-  } finally {
-    try {
-      await closeOwnedPage(page, context, monitor)
-    } catch (cleanupError) {
-      if (primary) throw new AggregateError([primary, cleanupError], 'Safe live failure and cleanup failure')
-      throw cleanupError
-    }
   }
-  completedCases += 1
+  let cleanupFailure
+  try {
+    await cleanupOwnedResources(owned, cleanupDeadline)
+  } catch {
+    cleanupFailure = new Error('Safe check failed: live interface cleanup')
+  }
+  if (primary || cleanupFailure) runCounters.fail(contract.apiName)
+  if (primary && cleanupFailure) throw new AggregateError([primary, cleanupFailure], 'Safe live failure and cleanup failure')
+  if (primary) throw primary
+  if (cleanupFailure) throw cleanupFailure
+  runCounters.complete(contract.apiName)
 }
 
 async function verifyAllEvents() {
   await logSink?.idle()
   safeCheck(Boolean(applicationLogPath), 'application log initialized')
-  const text = await readFile(applicationLogPath, 'utf8')
+  const text = `${await readFile(applicationLogPath, 'utf8')}\n${logSink?.pendingText() ?? ''}`
   assertSafeText(text, 'final application log')
   const completed = text.split(/\r?\n/).filter((line) => line.includes('tensor.operation.completed'))
   safeCheck(completed.length === expectedEvents.size, 'completion event total')
@@ -1268,15 +1436,22 @@ async function verifyAllEvents() {
 }
 
 async function writeSafeEvidence() {
+  if (evidenceWritten) return
   evidence.finishedAt = new Date().toISOString()
+  const counters = runCounters.snapshot(INTERFACES.length)
   evidence.totals = {
     registeredCases: INTERFACES.length,
-    completedCases,
-    unexecutedCases: INTERFACES.length - completedCases,
+    attemptedCases: counters.attemptedCases,
+    failedCases: counters.failedCases,
+    completedCases: counters.completedCases,
+    unexecutedCases: counters.unexecutedCases,
     manifestSamples: sampleCount,
-    liveDownloadPosts: evidence.downloads.length,
-    fixtureDownloadPosts: evidence.fixture.filter(({ sourceRowCount }) => sourceRowCount !== undefined).length,
-    datasetQueries: evidence.queries.length,
+    liveDownloadPostsObserved: counters.liveDownloadPosts,
+    fixtureDownloadPostsObserved: counters.fixtureDownloadPosts,
+    liveRecordsGetsObserved: counters.liveRecordsGets,
+    fixtureRecordsGetsObserved: counters.fixtureRecordsGets,
+    liveDownloadResultsRecorded: evidence.downloads.length,
+    liveQueryResultsRecorded: evidence.queries.length,
     callIntervalMs: intervalMs,
   }
   evidence.inputs.specSha256 = await sha256(new URL(import.meta.url))
@@ -1287,15 +1462,30 @@ async function writeSafeEvidence() {
   const serialized = `${JSON.stringify(evidence, null, 2)}\n`
   assertSafeText(serialized, 'safe evidence')
   const target = path.join(runDirectory, 'safe-results.json')
-  await writeFile(target, serialized, { encoding: 'utf8', flag: 'wx', mode: 0o600 })
+  try {
+    await writeFile(target, serialized, { encoding: 'utf8', flag: 'wx', mode: 0o600 })
+  } catch (error) {
+    if (error?.code !== 'EEXIST') throw error
+    const existingState = await lstat(target)
+    safeCheck(existingState.isFile() && !existingState.isSymbolicLink(), 'existing safe evidence ordinary file')
+    safeCheck((existingState.mode & 0o777) === 0o600, 'existing safe evidence mode')
+    assertSafeText(await readFile(target, 'utf8'), 'existing safe evidence')
+    evidenceWritten = true
+    return
+  }
   await chmod(target, 0o600)
+  evidenceWritten = true
   console.info(`M14-T05 safe results: ${target}`)
 }
 
 async function cleanupAfterSetupFailure(error) {
   const failures = [error]
-  try { await drainAllMonitors() } catch (cleanupError) { failures.push(cleanupError) }
-  try { await stopApplication() } catch (cleanupError) { failures.push(cleanupError) }
+  if (monitors.size) {
+    try { await drainAllMonitors() } catch (cleanupError) { failures.push(cleanupError) }
+  }
+  if (application) {
+    try { await stopApplication() } catch (cleanupError) { failures.push(cleanupError) }
+  }
   throw failures.length === 1 ? error : new AggregateError(failures, 'Safe setup and cleanup failure')
 }
 
@@ -1333,18 +1523,26 @@ function registerTests() {
       const failures = []
       try { await bounded(drainAllMonitors(), 135_000, 'final network drain') } catch { failures.push(new Error('Safe check failed: final network drain')) }
       try { await stopApplication() } catch { failures.push(new Error('Safe check failed: JVM cleanup')) }
-      try {
-        safeCheck(Boolean(jarHashBefore && process.env.ACCEPTANCE_JAR), 'acceptance JAR initialized')
-        safeCheck(await sha256(process.env.ACCEPTANCE_JAR) === jarHashBefore, 'acceptance JAR unchanged')
-        safeCheck(createHash('sha256').update(await readFile(manifestPath)).digest('hex') === MANIFEST_SHA, 'manifest unchanged')
-      } catch { failures.push(new Error('Safe check failed: immutable input verification')) }
-      try { await verifyAllEvents() } catch { failures.push(new Error('Safe check failed: final log correlation')) }
-      if (!setupFailed && completedCases === INTERFACES.length) {
+      if (jarValidated) {
+        try {
+          safeCheck(await sha256(process.env.ACCEPTANCE_JAR) === jarHashBefore, 'acceptance JAR unchanged')
+          safeCheck(createHash('sha256').update(await readFile(manifestPath)).digest('hex') === MANIFEST_SHA, 'manifest unchanged')
+        } catch { failures.push(new Error('Safe check failed: immutable input verification')) }
+      }
+      if (artifactInitialized) {
+        try { await verifyAllEvents() } catch { failures.push(new Error('Safe check failed: final log correlation')) }
+      }
+      if (!setupFailed && runCounters.completed.size === INTERFACES.length) {
         try {
           safeCheck(fixturePassed, 'fixture preparation completed')
           safeCheck(evidence.downloads.length === 58, '58 live downloads completed')
           safeCheck(evidence.queries.length === 98, '98 live queries completed')
           safeCheck(evidence.fixture.length === 5, '2 fixture downloads and 3 fixture queries completed')
+          safeCheck(runCounters.traffic.liveDownloadPosts === 58, '58 live download POSTs observed')
+          safeCheck(runCounters.traffic.fixtureDownloadPosts === 2, '2 fixture download POSTs observed')
+          safeCheck(runCounters.traffic.liveRecordsGets === 98, '98 live records GETs observed')
+          safeCheck(runCounters.traffic.fixtureRecordsGets === 3, '3 fixture records GETs observed')
+          safeCheck(runCounters.attempted.size === 49 && runCounters.failed.size === 0, '49 live cases attempted without failure')
         } catch { failures.push(new Error('Safe check failed: complete matrix totals')) }
       }
       let immutableInputs = false
@@ -1358,16 +1556,18 @@ function registerTests() {
       evidence.cleanup = {
         networkDrained: failures.every(({ message }) => !message.includes('network')),
         jvmStopped: !(await canConnectToPort()),
-        logScanned: !logSink?.failed,
-        immutableInputs,
       }
-      try { await writeSafeEvidence() } catch { failures.push(new Error('Safe check failed: evidence write')) }
+      if (artifactInitialized) evidence.cleanup.logScanned = !logSink?.failed
+      if (jarValidated) evidence.cleanup.immutableInputs = immutableInputs
+      if (artifactInitialized) {
+        try { await writeSafeEvidence() } catch { failures.push(new Error('Safe check failed: evidence write')) }
+      }
       if (failures.length) throw new AggregateError(failures, 'Safe M14-T05 cleanup failure')
     })
 
     for (const entry of INTERFACES) {
       test(`liveTushare:${entry.api_name}`, async ({ browser }) => {
-        test.setTimeout(240_000 + entry.params.length * (150_000 + intervalMs))
+        test.setTimeout(liveCaseTimeoutMs(entry.params.length))
         await runLiveInterface(browser, entry)
       })
     }
