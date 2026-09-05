@@ -93,7 +93,7 @@
 | 72 | M14-T02 | 下载失败、空结果、幂等和回滚矩阵 | `COMPLETED` | M14-T01 | docs/task-designs/M14-T02-design.md | docs/task-handoffs/M14-T02-handoff.md |
 | 73 | M14-T03 | 查询、分页、宽表、竞态和无障碍 E2E | `COMPLETED` | M14-T01 | docs/task-designs/M14-T03-design.md | docs/task-handoffs/M14-T03-handoff.md |
 | 74 | M14-T04 | 49 数据集自动契约与页面回归驱动 | `COMPLETED` | M03-T09, M04-T06, M14-T01 | docs/task-designs/M14-T04-design.md | docs/task-handoffs/M14-T04-handoff.md |
-| 75 | M14-T05 | 真实 Tushare 49 接口受控页面验收 | `NOT_STARTED` | M14-T04 | None | None |
+| 75 | M14-T05 | 真实 Tushare 49 接口受控页面验收 | `NOT_STARTED` | M14-T04 | docs/task-designs/M14-T05-design.md | None |
 | 76 | M14-T06 | `daily` 与 `balancesheet` 性能验证 | `NOT_STARTED` | M14-T03, M14-T05 | None | None |
 | 77 | M14-T07 | Token、SQL、依赖、网络和运行安全验证 | `NOT_STARTED` | M14-T02, M14-T03, M14-T04, M14-T05 | None | None |
 | 78 | M14-T08 | 全新环境 AC-001～018 与发布证据包 | `NOT_STARTED` | M14-T01, M14-T02, M14-T03, M14-T04, M14-T05, M14-T06, M14-T07 | None | None |
