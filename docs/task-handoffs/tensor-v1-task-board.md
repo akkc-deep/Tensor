@@ -88,7 +88,7 @@
 | 67 | M13-T02 | 单个可执行 JAR 打包和内容检查 | `COMPLETED` | M09-T06, M13-T01 | docs/task-designs/M13-T02-design.md | docs/task-handoffs/M13-T02-handoff.md |
 | 68 | M13-T03 | 生产配置、CORS、SPA fallback 和优雅停机 | `COMPLETED` | M09-T06, M13-T02 | docs/task-designs/M13-T03-design.md | docs/task-handoffs/M13-T03-handoff.md |
 | 69 | M13-T04 | 全新环境运行说明和启动 smoke test | `COMPLETED` | M13-T03 | docs/task-designs/M13-T04-design.md | docs/task-handoffs/M13-T04-handoff.md |
-| 70 | M13-T05 | 独立 acceptance JAR 打包及启停验收 | `READY` | M13-T04, M08-T02, M04-T06 | docs/task-designs/M13-T05-design.md | docs/task-handoffs/M13-T05-handoff.md |
+| 70 | M13-T05 | 独立 acceptance JAR 打包及启停验收 | `COMPLETED` | M13-T04, M08-T02, M04-T06 | docs/task-designs/M13-T05-design.md | docs/task-handoffs/M13-T05-handoff.md |
 | 71 | M14-T01 | fixture 页面端到端主闭环 | `NOT_STARTED` | M13-T04, M13-T05 | None | None |
 | 72 | M14-T02 | 下载失败、空结果、幂等和回滚矩阵 | `NOT_STARTED` | M14-T01 | None | None |
 | 73 | M14-T03 | 查询、分页、宽表、竞态和无障碍 E2E | `NOT_STARTED` | M14-T01 | None | None |
@@ -976,6 +976,7 @@
 
 ### `M13-T05`
 
+- **State evidence (start):** 2026-09-05：用户明确要求“按照权威任务看板执行当前任务；先读取其设计文档和交接文件（如有），再按既定工作流完成任务”。完整读取本任务设计、关联交接和任务卡，确认观测状态 READY、三文件实施范围无重叠用户修改，执行 `READY -> IN_PROGRESS`，保留原交接作为入口上下文。依仓库授权直接在 main 实施；从完整归档测试与最小 Failsafe 绑定开始，先取得缺验收 JAR RED，再运行规定构建与真实启动矩阵，结果尚待验证。
 - **Goal:** 为 M14-T01 提供可独立 `java -jar` 启动、含 fixture 与 V6 的验收 JAR，并维持现有生产 JAR 内容合同。
 - **Scope:** 显式 Maven acceptance 构建、独立子目录产物、三个归档合同测试及验收运行说明；只修改 app POM，新增验收打包测试和运行说明，不修改业务 Java、Vue、YAML、SQL、fixture 行为或生产打包合同。
 - **Acceptance:** 默认构建维持单生产 JAR及现有全部门禁；显式构建在独立 acceptance 目录生成单验收 JAR，复用生产入口/页面/API/依赖且只附加 fixture 模块与原始 V6；完整归档对比、Boot可运行存储、真实 MySQL 下双开关/禁用/重启验证及范围/秘密隔离门禁通过。
@@ -984,6 +985,12 @@
 - **First action:** 完整读取本任务设计和交接后，先创建验收归档测试及最小测试绑定，取得验收 JAR 缺失的可归因 RED。
 - **State evidence (registration):** 2026-09-05：M13-T04 已由 `bb26660` 记录完成；准备 M14-T01 时核对到生产 JAR 按合同排除 fixture/V6，而现有五模块没有验收 JAR 打包入口。用户对“是否先设计一个独立的验收打包任务”回复“同意”，批准登记本增补任务 M13-T05，Order 70；原 M14-T01～T08 顺延为 71～78，任务ID及相对顺序不变，M14-T01 增加对本产物的直接依赖。该批准是设计与衔接授权，不是实现已开始或验收已通过的证据；初始状态 `NOT_STARTED`，待设计完成和交接链接后再准备。
 - **State evidence (readiness):** 2026-09-05：依据上述设计与衔接授权，在已完成的 M13-T04 之后准备 Order 70 的 M13-T05。提交 `ab5ce88` 已完成并回填 `docs/task-designs/M13-T05-design.md`；链接后完整读取七节设计，冻结精确三文件范围、显式 AntRun 3.1.0 装配、原生产合同/fixture test scope、归档三测、严格 RED、四次构建门禁及四种真实启动状态，无待定实施选择。独立只读设计审查核对 Maven 3.9.15 profile 合并后的 Boot→AntRun 顺序、两个 Failsafe 3.5.6 execution 及汇总行为、扫描/适配器接缝和归档边界，结论 `Ready for implementation: Yes`，无 Critical/Important/Minor；未执行新构建或运行验收。三个直接输入分别以 M13-T04 的 `59acec3`/`bb26660`、120/368/4 构建、107 项 smoke 与真实首跑/重启，M08-T02 的 `885313d`/`54c2b30`、历史 272/272 与 fixture 12 项，M04-T06 的 `e78bd98`、真实 MySQL schema 52/52 提供已记录可用性证据；生产排除、双条件目录暴露和 V6 test-resource/独立 schema 约束互补，无未解决冲突。`docs/task-handoffs/M13-T05-handoff.md` 已按 next-task 模板写入并先链接，逐项记录三个直接输入的 artifact/decision/rationale/constraint/usage/readiness evidence、同一设计路径、读取顺序及先写完整归档测试和最小绑定取得缺验收 JAR RED 的首个实施动作。交接结构、引用和目标文件不存在检查通过，因此执行真实 `NOT_STARTED -> READY`；本次仅完成设计与后继准备，M13-T05 实现及新增构建/运行验收尚未开始。
+
+
+- **Completion evidence:** 2026-09-05：实现提交 `b500f3b`（`build: add isolated acceptance jar`）精确包含 app POM 修改、`AcceptancePackagedJarContractTest.java` 与 `docs/runbook/acceptance.md` 两项新增，三文件均 100644。显式 AntRun 3.1.0 在原 Boot repackage 后装配独立 acceptance 子目录产物；fixture 仍 test scope，仅附加同次原 fixture JAR/原 V6，保留生产内容并移除旧 manifest/两索引、生成规定 manifest，嵌套库 STORED。三个真实归档合同逐项验证精确普通文件集合、全部保留内容与 fixture/V6 原始 SHA-256、重复条目、入口与资源/秘密排除、存储方式和输出隔离；原生产四测未修改。
+- **Build verification:** 先仅写完整测试与绑定，原样 `mvn -f data-plane/pom.xml -Pacceptance clean verify` 在正常 JVM 权限下取得严格 RED：前端120、Surefire79/75/93/12/109共368、原Failsafe4全部通过，新3项仅因验收JAR缺失断言失败，0 errors/skip。首次沙箱 Byte Buddy self-attach 失败单独归因为环境，未改JVM配置或skip；第三测从缺目录异常改为先断言缺JAR后重新取得上述严格RED。加入装配后依次运行默认 `clean verify`、`-Pacceptance clean verify`、`-Pacceptance verify`、最后默认 `clean verify`，均退出0/BUILD SUCCESS；每轮前端120/Surefire368均零失败/错误/跳过，默认原Failsafe4、两次显式原4+新3且两个execution/XML报告均存在。主控独立复核日志/报告和Boot→AntRun顺序；最终默认构建于15:18:16（Asia/Shanghai）完成，acceptance目录已被clean清除、顶层仅原生产JAR。额外以实际POM提取Ant target在临时目录执行10/10黑盒检查：三个输入缺失/目录六项、损坏归档/重复条目两项均非零且无旧final；正常和变更V6无clean重建两项成功、内容更新、无tmp，所有场景保留无关文件。未增加永久实现镜像测试。
+- **Runtime verification:** Java21.0.11、一次性MySQL8.4.6、两个全新分发目录和独立空 `tensor_acceptance`/`tensor_production_check` schema，凭证运行时生成，仅授予实际容器网关来源账号各schema的CREATE/SELECT/INSERT/UPDATE。从同次显式构建复制原生产包与验收包后，依说明执行四状态：验收包acceptance+true返回fixture/tushare_pro精确两源，fixture三状态true/无原因，唯一fixture_daily API/数据集、SUCCESS默认/五值、四业务列/来源列物理七列/ts_code筛选准确，六项成功迁移/50业务表；正常停机同库acceptance+false重启与production+true均只含Tushare且摘要与初次完全一致，仍六迁移/50表；原生产包另一空schema即使acceptance+true也仅Tushare、五迁移/49表、无fixture。四状态根health200/UP与原四项smoke均通过；独立临时Chrome完成两页直接访问/刷新200、预期Vue标题，启用状态能选择Fixture/fixture_daily并显示SUCCESS及五场景。浏览器分别21/24/24/24个本地GET响应，零JS错误、写请求或外部请求；仅Tushare无Token接口列表409符合既有合同。临时脚本最初input点击被Element Plus占位层拦截，改用实际键盘Enter后全部通过，未改产品。四个JVM均SIGTERM自行退出、Web graceful与datasource清理成立，生成凭证未出现在响应/日志；一次性容器已停止移除、临时凭证状态已清理，未操作现有数据库/进程。
+- **Review and completion:** 独立全任务审查及小范围复审无Critical/Important/Minor遗留；唯一Minor“退出专用shell后重启需重新注入环境”已在运行说明明确。主控随后完成审查当时尚待的最终clean与剩余运行门禁。POM XML、8段POSIX shell语法、文档相对链接、格式、受保护路径无差异及精确三文件Git范围全部通过；未改业务Java/Vue/YAML/SQL、fixture行为、生产说明/smoke/原打包合同，未提交target、临时工具、响应、日志、数据库或凭证。结果级验收满足，执行 `IN_PROGRESS -> COMPLETED`；仅完成本任务的打包/只读启停，不宣称M14页面下载或故障矩阵已通过。
 
 ### `M14-T01`
 
