@@ -89,7 +89,7 @@
 | 68 | M13-T03 | 生产配置、CORS、SPA fallback 和优雅停机 | `COMPLETED` | M09-T06, M13-T02 | docs/task-designs/M13-T03-design.md | docs/task-handoffs/M13-T03-handoff.md |
 | 69 | M13-T04 | 全新环境运行说明和启动 smoke test | `COMPLETED` | M13-T03 | docs/task-designs/M13-T04-design.md | docs/task-handoffs/M13-T04-handoff.md |
 | 70 | M13-T05 | 独立 acceptance JAR 打包及启停验收 | `COMPLETED` | M13-T04, M08-T02, M04-T06 | docs/task-designs/M13-T05-design.md | docs/task-handoffs/M13-T05-handoff.md |
-| 71 | M14-T01 | fixture 页面端到端主闭环 | `NOT_STARTED` | M13-T04, M13-T05 | None | None |
+| 71 | M14-T01 | fixture 页面端到端主闭环 | `NOT_STARTED` | M13-T04, M13-T05 | docs/task-designs/M14-T01-design.md | None |
 | 72 | M14-T02 | 下载失败、空结果、幂等和回滚矩阵 | `NOT_STARTED` | M14-T01 | None | None |
 | 73 | M14-T03 | 查询、分页、宽表、竞态和无障碍 E2E | `NOT_STARTED` | M14-T01 | None | None |
 | 74 | M14-T04 | 49 数据集自动契约与页面回归驱动 | `NOT_STARTED` | M03-T09, M04-T06, M14-T01 | None | None |
