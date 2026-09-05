@@ -85,6 +85,30 @@
 - [ ] Follow the runbook from a clean temporary environment without reading source; record any missing step and fix it within this task.
 - [ ] Commit as `docs: add reproducible Tensor first-run guide` when Git exists.
 
+### Task M13-T05: 独立 acceptance JAR 打包及启停验收（Maven/XML、Java test）
+
+本任务由项目所有者于 2026-09-05 批准增补，用于补齐 M14-T01 的验收包输入；M13-T01～T04 的生产交付与完成证据保持有效。
+
+**Design:** `docs/task-designs/M13-T05-design.md`。
+
+**Context boundary:** Read the app packaging POM/contract, M13 runbooks, fixture public descriptor/configuration, existing V6 and the application's component-discovery/adapter-extension seams. Do not change business implementation.
+
+**Files:**
+- Modify: `data-plane/tensor-app/pom.xml`
+- Create: `data-plane/tensor-app/src/test/java/com/akkc/tensor/build/AcceptancePackagedJarContractTest.java`
+- Create: `docs/runbook/acceptance.md`
+
+**Interfaces:** `mvn -f data-plane/pom.xml -Pacceptance clean verify` additionally produces `data-plane/tensor-app/target/acceptance/tensor-app-1.0-SNAPSHOT-acceptance.jar`. Only the explicit runtime combination `--spring.profiles.active=acceptance --tensor.plugins.fixture.enabled=true` exposes fixture. The original top-level production JAR remains the only production artifact and excludes fixture/V6.
+
+- [ ] Read the completed design and confirm its three-file implementation boundary.
+- [ ] Write the three acceptance archive contract tests and only the Surefire/Failsafe test wiring; get RED caused by the missing acceptance JAR.
+- [ ] Add the opt-in AntRun archive assembly after Boot repackage, retaining fixture test scope and copying only the exact V6 test resource.
+- [ ] Verify default and acceptance builds, byte-level archive preservation, nested JAR storage and output isolation.
+- [ ] From an isolated distribution directory and fresh MySQL schema, verify health/pages/metadata, both activation conditions, disabled-fixture restart and unchanged Tushare summary; write reproducible acceptance instructions.
+- [ ] Record results and commit the exact three implementation files as `build: add isolated acceptance jar` when Git exists.
+
 ## Module Gate
 
 Run `mvn -f data-plane/pom.xml clean verify` and the smoke script against the packaged JAR. M13 is complete only when one JAR serves both pages/API, contains all required resources, excludes fixture/secrets and a clean environment follows the runbook successfully.
+
+M13-T05 的增补门禁另要求显式 acceptance 构建与验收包真实启停矩阵通过；它不能放宽上述生产门禁，也不回滚 M13-T01～T04 的既有完成状态。

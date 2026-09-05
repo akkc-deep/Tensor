@@ -35,7 +35,7 @@
 **Interfaces:** Browser flows cover app start, both routes, fixture selection, valid download, dataset query and plugin disable behavior.
 
 - [ ] Confirm task design; freeze test selectors by role/label rather than CSS internals.
-- [ ] Start packaged JAR with acceptance profile, clean MySQL schema and fixture enabled; wait for health readiness.
+- [ ] Consume the completed M13-T05 acceptance JAR and `docs/runbook/acceptance.md`; start it with acceptance profile, clean MySQL schema and fixture enabled, then wait for health readiness. Do not assemble or modify the JAR in this E2E task.
 - [ ] Write Playwright tests that select fixture, submit SUCCESS, assert source/insert/update counts, open datasets, filter by `000001.SZ`, query and verify the row/source fields.
 - [ ] Add EMPTY flow and fixture-disable restart; assert empty feedback and absence of fixture while Tushare descriptor remains unaffected.
 - [ ] Run `cd control-plane && npx playwright test e2e/fixture-flow.spec.js`; expect all tests pass.

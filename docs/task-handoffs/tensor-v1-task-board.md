@@ -4,8 +4,8 @@
 
 - **Project ID:** `tensor-v1`.
 - **Goal:** 按契约优先的模块化单体路线图交付 Tensor v1：完成 49 个 Tushare Pro 数据集的下载、适配、单事务 Upsert、只读查询、Vue 控制面、单 JAR 打包及发布验证。
-- **Scope:** 包含 M00–M14 的 77 个预定义任务；排除路线图明确范围外的热加载、外部插件 JAR、任务队列、登录权限、导出、插件市场，以及后续发现后另行规划的缺陷修复任务。
-- **Completion condition:** 77 个预定义任务全部为 `COMPLETED`，其任务验收和模块门禁全部通过，并满足路线图中 49/49 数据集契约、AC-001～018、性能、安全、单 JAR 和全新环境页面闭环条件。
+- **Scope:** 包含 M00–M14 的 77 个原预定义任务及 2026-09-05 批准增补的 M13-T05 验收打包任务（共 78 项）；排除路线图明确范围外的热加载、外部插件 JAR、任务队列、登录权限、导出、插件市场，以及后续发现后另行规划的缺陷修复任务。
+- **Completion condition:** 78 个已登记任务全部为 `COMPLETED`，其任务验收和模块门禁全部通过，并满足路线图中 49/49 数据集契约、AC-001～018、性能、安全、单 JAR 和全新环境页面闭环条件。
 
 ## Workflow
 
@@ -88,14 +88,15 @@
 | 67 | M13-T02 | 单个可执行 JAR 打包和内容检查 | `COMPLETED` | M09-T06, M13-T01 | docs/task-designs/M13-T02-design.md | docs/task-handoffs/M13-T02-handoff.md |
 | 68 | M13-T03 | 生产配置、CORS、SPA fallback 和优雅停机 | `COMPLETED` | M09-T06, M13-T02 | docs/task-designs/M13-T03-design.md | docs/task-handoffs/M13-T03-handoff.md |
 | 69 | M13-T04 | 全新环境运行说明和启动 smoke test | `COMPLETED` | M13-T03 | docs/task-designs/M13-T04-design.md | docs/task-handoffs/M13-T04-handoff.md |
-| 70 | M14-T01 | fixture 页面端到端主闭环 | `NOT_STARTED` | M13-T04 | None | None |
-| 71 | M14-T02 | 下载失败、空结果、幂等和回滚矩阵 | `NOT_STARTED` | M14-T01 | None | None |
-| 72 | M14-T03 | 查询、分页、宽表、竞态和无障碍 E2E | `NOT_STARTED` | M14-T01 | None | None |
-| 73 | M14-T04 | 49 数据集自动契约与页面回归驱动 | `NOT_STARTED` | M03-T09, M04-T06, M14-T01 | None | None |
-| 74 | M14-T05 | 真实 Tushare 49 接口受控页面验收 | `NOT_STARTED` | M14-T04 | None | None |
-| 75 | M14-T06 | `daily` 与 `balancesheet` 性能验证 | `NOT_STARTED` | M14-T03, M14-T05 | None | None |
-| 76 | M14-T07 | Token、SQL、依赖、网络和运行安全验证 | `NOT_STARTED` | M14-T02, M14-T03, M14-T04, M14-T05 | None | None |
-| 77 | M14-T08 | 全新环境 AC-001～018 与发布证据包 | `NOT_STARTED` | M14-T01, M14-T02, M14-T03, M14-T04, M14-T05, M14-T06, M14-T07 | None | None |
+| 70 | M13-T05 | 独立 acceptance JAR 打包及启停验收 | `NOT_STARTED` | M13-T04, M08-T02, M04-T06 | docs/task-designs/M13-T05-design.md | None |
+| 71 | M14-T01 | fixture 页面端到端主闭环 | `NOT_STARTED` | M13-T04, M13-T05 | None | None |
+| 72 | M14-T02 | 下载失败、空结果、幂等和回滚矩阵 | `NOT_STARTED` | M14-T01 | None | None |
+| 73 | M14-T03 | 查询、分页、宽表、竞态和无障碍 E2E | `NOT_STARTED` | M14-T01 | None | None |
+| 74 | M14-T04 | 49 数据集自动契约与页面回归驱动 | `NOT_STARTED` | M03-T09, M04-T06, M14-T01 | None | None |
+| 75 | M14-T05 | 真实 Tushare 49 接口受控页面验收 | `NOT_STARTED` | M14-T04 | None | None |
+| 76 | M14-T06 | `daily` 与 `balancesheet` 性能验证 | `NOT_STARTED` | M14-T03, M14-T05 | None | None |
+| 77 | M14-T07 | Token、SQL、依赖、网络和运行安全验证 | `NOT_STARTED` | M14-T02, M14-T03, M14-T04, M14-T05 | None | None |
+| 78 | M14-T08 | 全新环境 AC-001～018 与发布证据包 | `NOT_STARTED` | M14-T01, M14-T02, M14-T03, M14-T04, M14-T05, M14-T06, M14-T07 | None | None |
 
 ## Task Details
 
@@ -973,12 +974,22 @@
 
 - **Completion evidence:** 2026-09-05：实现提交 `59acec3`（`docs: add reproducible Tensor first-run guide`）精确包含 `docs/runbook/first-run.md`、`docs/runbook/configuration.md`、`scripts/smoke-test.sh` 三项新增，前两项 100644、脚本 100755。两份说明提供 schema/来源 host/最小授权、八项配置、隐藏秘密输入与恢复回显 trap、单 JAR 启动/健康/页面、每阶段 70s 停机、非覆盖备份与前向兼容回退；保留 `120s < 130s <= proxy`。主控于 14:00:04（Asia/Shanghai）原样执行正常 JVM 权限的 `mvn -f data-plane/pom.xml clean verify`，退出 0、BUILD SUCCESS：前端 120、后端 Surefire 79/75/93/12/109 共 368、Failsafe JAR 合同 4，全部零失败/错误/跳过，repackage 成功；首次沙箱失败已定位为 Byte Buddy self-attach，未改配置或 skip。最终 `sh -n` 与临时 HTTP 黑盒矩阵 107/107 通过，覆盖四项 GET、每 probe 非200/重定向/错误内容、跨行敏感键、JDBC/敏感header、字面秘密含通配符/末尾换行、子进程 argv 无秘密、参数拒绝、curlrc 干扰与三种信号清理；跨行漏洞先得到预期1实际0的失败证据，修复后全矩阵由主控再次通过。真实验收使用 Java 21.0.11、一次性 MySQL 8.4.6、全新临时分发目录，仅复制同一 JAR/两说明/脚本，用文档规定的 `tensor.*` CREATE/SELECT/INSERT/UPDATE 应用账号及运行时生成凭证，非管理员启动；执行 `java -jar tensor-app-1.0-SNAPSHOT.jar --server.address=127.0.0.1 --server.port=8080` 与分发目录内 `sh scripts/smoke-test.sh http://127.0.0.1:8080`，health 200/根UP、downloads 200/HTML、datasets 200/HTML、data-sources 200/JSON 全通过。V1–V5 恰好五条成功 history、49张业务表与独立 history 表，无 V6/fixture。缺 Token 首跑及 SIGTERM 正常退出后的同库重启均通过，迁移不重复；临时 Token 哨兵重启后只做 GET，两个配置状态从 false 变 true，已知值无响应泄漏，未下载或请求上游。浏览器连接不可用后使用独立临时 Chrome 验证两页直接打开/刷新 HTTP200、Vue实际渲染，无JS错误；无Token时下载API列表409是 M09-T02 已冻结的 PLUGIN_DISABLED 行为，文档已明确数据源列表/数据集元数据/查询可用与下载页配置不可用提示的边界，Token哨兵状态下相关API均200。三次 JVM 均 SIGTERM 自行退出且确认 Web graceful 与 datasource 清理；一次性数据库已停止删除，未操作用户现有进程/数据库。独立审查及范围复审 `Ready to merge: Yes`，唯一超时措辞 Minor 已修正，最终无遗留项。范围/格式/文档相对链接及Git跟踪门禁通过；生产Java/YAML/POM/前端/OpenAPI/migration无修改，target/响应/日志/凭证/备份未提交，未执行实际数据库恢复。结果级验收满足，执行 `IN_PROGRESS -> COMPLETED`，M13 模块门禁完成。
 
+### `M13-T05`
+
+- **Goal:** 为 M14-T01 提供可独立 `java -jar` 启动、含 fixture 与 V6 的验收 JAR，并维持现有生产 JAR 内容合同。
+- **Scope:** 显式 Maven acceptance 构建、独立子目录产物、三个归档合同测试及验收运行说明；只修改 app POM，新增验收打包测试和运行说明，不修改业务 Java、Vue、YAML、SQL、fixture 行为或生产打包合同。
+- **Acceptance:** 默认构建维持单生产 JAR及现有全部门禁；显式构建在独立 acceptance 目录生成单验收 JAR，复用生产入口/页面/API/依赖且只附加 fixture 模块与原始 V6；完整归档对比、Boot可运行存储、真实 MySQL 下双开关/禁用/重启验证及范围/秘密隔离门禁通过。
+- **Dependencies:** M13-T04, M08-T02, M04-T06.
+- **Sources:** `docs/superpowers/plans/tensor-modules/M13-packaging-runbook.md` 的 `Task M13-T05`；M13-T04 生产分发与运行说明；M08-T02 fixture 公开产物；M04-T06 测试 V6。
+- **First action:** 完整读取本任务设计和交接后，先创建验收归档测试及最小测试绑定，取得验收 JAR 缺失的可归因 RED。
+- **State evidence (registration):** 2026-09-05：M13-T04 已由 `bb26660` 记录完成；准备 M14-T01 时核对到生产 JAR 按合同排除 fixture/V6，而现有五模块没有验收 JAR 打包入口。用户对“是否先设计一个独立的验收打包任务”回复“同意”，批准登记本增补任务 M13-T05，Order 70；原 M14-T01～T08 顺延为 71～78，任务ID及相对顺序不变，M14-T01 增加对本产物的直接依赖。该批准是设计与衔接授权，不是实现已开始或验收已通过的证据；初始状态 `NOT_STARTED`，待设计完成和交接链接后再准备。
+
 ### `M14-T01`
 
 - **Goal:** 交付“fixture 页面端到端主闭环”。
 - **Scope:** 包含该交付物及其直接测试与验证；不包含其他预定义任务的交付物，也不扩展 `docs/superpowers/plans/tensor-modules/M14-integration-release.md` 中该任务卡明确的文件、主要语言、接口和排除边界。
 - **Acceptance:** “fixture 页面端到端主闭环”已按该任务卡指定的位置和行为形成；任务卡列出的全部测试、验证命令和检查得到其注明的预期结果；没有混入排除范围。
-- **Dependencies:** M13-T04.
+- **Dependencies:** M13-T04, M13-T05.
 - **Sources:** `docs/superpowers/plans/tensor-modules/M14-integration-release.md` 的 `Task M14-T01` 任务卡。
 - **First action:** 读取 `docs/superpowers/plans/tensor-modules/M14-integration-release.md` 的 `Task M14-T01` 任务卡，并确认其 `Context boundary`、输入和目标文件均可定位。
 - **State evidence:** None.
