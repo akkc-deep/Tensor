@@ -92,7 +92,7 @@
 | 71 | M14-T01 | fixture 页面端到端主闭环 | `COMPLETED` | M13-T04, M13-T05 | docs/task-designs/M14-T01-design.md | docs/task-handoffs/M14-T01-handoff.md |
 | 72 | M14-T02 | 下载失败、空结果、幂等和回滚矩阵 | `COMPLETED` | M14-T01 | docs/task-designs/M14-T02-design.md | docs/task-handoffs/M14-T02-handoff.md |
 | 73 | M14-T03 | 查询、分页、宽表、竞态和无障碍 E2E | `COMPLETED` | M14-T01 | docs/task-designs/M14-T03-design.md | docs/task-handoffs/M14-T03-handoff.md |
-| 74 | M14-T04 | 49 数据集自动契约与页面回归驱动 | `NOT_STARTED` | M03-T09, M04-T06, M14-T01 | docs/task-designs/M14-T04-design.md | None |
+| 74 | M14-T04 | 49 数据集自动契约与页面回归驱动 | `READY` | M03-T09, M04-T06, M14-T01 | docs/task-designs/M14-T04-design.md | docs/task-handoffs/M14-T04-handoff.md |
 | 75 | M14-T05 | 真实 Tushare 49 接口受控页面验收 | `NOT_STARTED` | M14-T04 | None | None |
 | 76 | M14-T06 | `daily` 与 `balancesheet` 性能验证 | `NOT_STARTED` | M14-T03, M14-T05 | None | None |
 | 77 | M14-T07 | Token、SQL、依赖、网络和运行安全验证 | `NOT_STARTED` | M14-T02, M14-T03, M14-T04, M14-T05 | None | None |
@@ -1042,8 +1042,8 @@
 - **Acceptance:** “49 数据集自动契约与页面回归驱动”已按该任务卡指定的位置和行为形成；任务卡列出的全部测试、验证命令和检查得到其注明的预期结果；没有混入排除范围。
 - **Dependencies:** M03-T09, M04-T06, M14-T01.
 - **Sources:** `docs/superpowers/plans/tensor-modules/M14-integration-release.md` 的 `Task M14-T04` 任务卡。
-- **First action:** 读取 `docs/superpowers/plans/tensor-modules/M14-integration-release.md` 的 `Task M14-T04` 任务卡，并确认其 `Context boundary`、输入和目标文件均可定位。
-- **State evidence:** None.
+- **First action:** 按已完成 `docs/task-designs/M14-T04-design.md` 创建 `scripts/verify-49-contracts.sh` 的隔离快照/报告/归档门禁与 `control-plane/e2e/tushare-metadata.spec.js` 的完整49配对用例，先语法和合成拒绝探针，再执行脚本及新空schema页面矩阵。
+- **State evidence (readiness):** 2026-09-06：M14-T03完成记录 `139c2c0` 已先独立提交，再按预定义Order选中74/M14-T04，观测NOT_STARTED、Design/Handoff为None。使用任务契约设计技能完成 `docs/task-designs/M14-T04-design.md`，独立审查两项Important已修正：显式 `TENSOR_TUSHARE_BASE_URL` 回环哨兵地址及正确XML `testsuite@name`/`testcase@classname`、允许成功空failureMessage；定点复审两项Addressed、无新Critical/Important，Ready for implementation: Yes。`8526b97` 提交217行详细设计并仅回填Design document，链接后完整读取。设计冻结三个新实施文件、Git HEAD新临时快照运行原Maven契约50+52+4及120前端回归、manifest/源YAML/生产表/打包YAML49全集、原验收JAR49个接口/数据集配对用例、43必填/6无参数/5组filters、零业务写入/records/真实上游、13截图和私有日志/清理规则。独立PRD与manifest表核对49API/851字段、七组11/7/6/6/9/3/7、五组filters无重复覆盖49、结构/引用/格式通过；保留M11-T01项目所有者已批准七组分类、range→date_range及49生产+1fixture的兼容决定。三个直接依赖M03-T09、M04-T06、M14-T01的产物/决策/理由/约束/用途及既有50/52/3项等可用性证据逐项写入交接，未新增顺序前驱为依赖，无输入冲突。先写完整 `docs/task-handoffs/M14-T04-handoff.md` 并通过模板/3依赖/首动作核对，再链接并执行真实 `NOT_STARTED -> READY`。三个目标实施文件仍未创建，新脚本/49项E2E未运行；首动作从已完成设计开始实施，不补设计、不把预期作为实际结果。工作区用户无关暂存及target资源不纳入本次提交。
 
 ### `M14-T05`
 
