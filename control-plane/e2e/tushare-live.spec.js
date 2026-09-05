@@ -421,9 +421,10 @@ export class SafeLogSink {
   pendingText() {
     safeCheck(!this.failed, 'application log safety')
     return [...this.buffers.values()]
+      .map((bytes) => bytes.subarray(0, bytes.lastIndexOf(0x0a) + 1))
       .filter((bytes) => bytes.length > 0)
       .map((bytes) => bytes.toString('utf8'))
-      .join('\n')
+      .join('')
   }
 }
 
