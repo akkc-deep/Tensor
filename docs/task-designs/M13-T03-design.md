@@ -77,7 +77,7 @@ Spring MVC 的具体 Controller handler 继续优先于 SPA controller；`/api/v
 | `/index.html` | 真实静态入口，200 | `no-store` |
 | `/downloads`、`/datasets`、`/reports/daily`、未知无扩展名 UI 路径 | 内部 forward 到 `/index.html`，200 | `no-cache` |
 | 已存在的 `/assets/<hash>.js|css` | 真实静态资源，200 | `public, max-age=31536000, immutable` |
-| `/api`、未知 `/api/v1/**`、`/actuator/**`、`/assets/**` | 不 fallback；不存在时空 404 | API/Actuator `no-store`，assets 保持 immutable 规则 |
+| `/api`、未知 `/api/v1/**`、`/actuator/**`、`/assets/**` | 不 fallback；不存在时空 404 | `/api` 为 `no-cache`，`/api/**`/Actuator 为 `no-store`，assets 保持 immutable 规则 |
 | `/favicon.ico`、`/foo.json`、`/reports/file.csv` 等不存在文件 | 不 fallback；空 404 | 沿用当前 path-based 规则 |
 
 `WebSecurityHeadersConfiguration` 的 `OncePerRequestFilter` 在原始请求路径上只运行一次。因而 UI forward 响应保留原路径的 `no-cache`，而直接入口仍为更严格的 `no-store`；本任务不重复写 header，也不把缓存策略移入 SPA controller。
