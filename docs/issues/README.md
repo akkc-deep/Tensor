@@ -18,3 +18,4 @@
 | ISSUE-001 | Controller 方法入口参数不够聚合 | Download 方案已确认，待正式设计 | [详情](problems/ISSUE-001-method-input-aggregation.md) · [方案](proposals/ISSUE-001-download-request-aggregation.md) |
 | ISSUE-002 | Controller 承担过多业务逻辑 | 分层方案已确认，待实施计划 | [详情](problems/ISSUE-002-controller-business-logic-layering.md) · [方案](proposals/ISSUE-002-controller-service-layering.md) |
 | ISSUE-003 | 数据库交互逻辑较复杂 | 数据库层重构设计已确认，待文档复核 | [详情](problems/ISSUE-003-database-access-complexity.md) · [方案](proposals/ISSUE-003-spring-jdbc-complexity-reduction.md) |
+| ISSUE-004 | 前端 UI 不美观，缺乏科技感 | 最终设计已确认，待实施计划 | [详情](problems/ISSUE-004-ui-visual-redesign.md) · [最终方案](proposals/ISSUE-004-ui-visual-concepts.md) · [HTML 预览](proposals/ISSUE-004-ui-visual-concepts.html) |
