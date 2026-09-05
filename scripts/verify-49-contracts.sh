@@ -13,6 +13,27 @@ maven_failure() {
   return "$1"
 }
 
+docker_inventory() {
+  case "$1" in
+    before|after) ;;
+    *) return 1 ;;
+  esac
+  if docker ps -aq --no-trunc >"${2}.unsorted"; then
+    chmod 600 "${2}.unsorted" || return 1
+  else
+    inventory_exit=$?
+    printf 'M14-T04 failed: docker-inventory-%s\n' "$1" >&2
+    return "$inventory_exit"
+  fi
+  if sort "${2}.unsorted" >"$2"; then
+    chmod 600 "$2" || return 1
+  else
+    inventory_exit=$?
+    printf 'M14-T04 failed: docker-inventory-%s\n' "$1" >&2
+    return "$inventory_exit"
+  fi
+}
+
 script_dir=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd -P) || fail script-directory
 repository=$(CDPATH= cd -- "$script_dir/.." && pwd -P) || fail repository-root
 manifest="$repository/docs/data-template/manifest.json"
@@ -67,6 +88,16 @@ maven_failure_probe=$?
 set -e
 [ "$maven_failure_probe" -eq 37 ] || fail maven-exit-probe
 [ "$(cat "$owned_root/maven-failure-probe.log")" = 'M14-T04 failed: maven-contracts' ] || fail maven-diagnostic-probe
+for inventory_stage in before after; do
+  set +e
+  (docker() { return 37; }; docker_inventory "$inventory_stage" "$owned_root/docker-$inventory_stage-probe.txt") \
+    2>"$owned_root/docker-$inventory_stage-probe.log"
+  inventory_probe=$?
+  set -e
+  [ "$inventory_probe" -eq 37 ] || fail "docker-inventory-$inventory_stage-probe"
+  [ "$(cat "$owned_root/docker-$inventory_stage-probe.log")" = "M14-T04 failed: docker-inventory-$inventory_stage" ] \
+    || fail "docker-inventory-$inventory_stage-diagnostic-probe"
+done
 
 cat >"$helper" <<'PY'
 import hashlib
@@ -608,8 +639,7 @@ PY
 
 docker_before="$owned_root/docker-before.txt"
 docker_after="$owned_root/docker-after.txt"
-docker ps -aq --no-trunc | sort >"$docker_before" || fail docker-inventory-before
-chmod 600 "$docker_before"
+docker_inventory before "$docker_before" || exit $?
 
 set +e
 python3 "$helper" maven "$snapshot" "$maven_repository" "$maven_log" "$maven_status"
@@ -627,13 +657,12 @@ python3 "$helper" containers "$maven_log" "$docker_before" "$owned_containers" "
 
 docker_deadline=$(( $(date +%s) + 30 ))
 while :; do
-  docker ps -aq --no-trunc | sort >"$docker_after" || fail docker-inventory-after
+  docker_inventory after "$docker_after" || exit $?
   remaining_containers=$(comm -12 "$owned_containers" "$docker_after")
   [ -z "$remaining_containers" ] && break
   [ "$(date +%s)" -ge "$docker_deadline" ] && break
   sleep 1
 done
-chmod 600 "$docker_after"
 if [ -n "$remaining_containers" ]; then
   printf '%s\n' "$remaining_containers" >"$owned_root/docker-leftovers.txt"
   chmod 600 "$owned_root/docker-leftovers.txt"

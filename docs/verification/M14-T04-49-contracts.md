@@ -17,19 +17,19 @@
 | shell 语法 | `sh -n scripts/verify-49-contracts.sh` | exit 0 |
 | Node 语法 | `cd control-plane && node --check e2e/tushare-metadata.spec.js` | exit 0 |
 | Playwright 发现 | `cd control-plane && npx playwright test e2e/tushare-metadata.spec.js --list` | exit 0；1 文件、49 tests |
-| Maven/报告/归档总门禁 | `scripts/verify-49-contracts.sh` | exit 0；2026-09-05T18:01:03.008432Z～18:01:36.701110Z |
+| Maven/报告/归档总门禁 | `scripts/verify-49-contracts.sh` | exit 0；2026-09-05T18:32:22.639323Z～18:32:54.525438Z |
 | 页面 49 配对矩阵 | `cd control-plane && npx playwright test e2e/tushare-metadata.spec.js` | Run7 exit 0；49 passed、0 failed/skipped/retry，4.5m |
 | 格式与范围 | `git diff --check` 及精确三文件检查 | 提交前新鲜复核 exit 0；实施文件精确为三项 |
 
-最终 shell 私有白名单 JSON 位于 `/var/folders/s5/h3vynqy544lc7vwtz0zjy39m0000gn/T/tensor-m14-t04.LoZPeZff/verification.json`，SHA-256 为 `dc6eb12e85fe89e260dd46c524a81bc55d8b132c51af7332be648564a7d16896`。本轮基线为 `f96c7b1f2df80c94b67cad09a4a4fa20453a7571`，Maven exit 0；内嵌合成门禁完成 11 个规定反例，容器身份另完成正常双 ID、无关 ID、缺少预期对、预先存在 ID、Maven 非零时部分 ID 和零 ID 检查，并证明非零原始退出码及已生成报告计数会保留。独立同函数探针还证明 Maven 37 在固定安全诊断后仍返回 37。Testcontainers 私有日志中提取的本轮 Ryuk/MySQL 两个完整 ID 均不在前置 inventory，结束 inventory 与其交集为 0，未处理控制器或其他会话容器。
+最终 shell 私有白名单 JSON 位于 `/var/folders/s5/h3vynqy544lc7vwtz0zjy39m0000gn/T/tensor-m14-t04.BRRlZI0U/verification.json`，SHA-256 为 `06c9698df9bb457691c786a19aa4e9096c29d771ff291eb59b0749740c91c4a2`。本轮基线为 `1a2362434c1243dec418cc6e338361831b5d6f9b`，Maven exit 0；内嵌合成门禁完成 11 个规定反例，容器身份另完成正常双 ID、无关 ID、缺少预期对、预先存在 ID、Maven 非零时部分 ID 和零 ID 检查，并证明非零原始退出码及已生成报告计数会保留。独立同函数探针还证明 Maven 37 在固定安全诊断后仍返回 37。Docker inventory 的 before/after 正式路径均先独立检查 `docker ps` 写入 0600 原始文件成功，再排序到 0600 inventory；两个调用点各以同一函数模拟 Docker exit 37，分别只输出固定安全诊断并返回 37。Testcontainers 私有日志中提取的本轮 Ryuk/MySQL 两个完整 ID 均不在前置 inventory，结束 inventory 与其交集为 0，结束 Docker inventory 为空。
 
 | 本轮报告 | tests | failures/errors/skipped | SHA-256 |
 |---|---:|---:|---|
-| `TushareMetadataContractTest` | 50 | 0/0/0 | `d1db46e339b2f5a56e80711cc73b13054e0bf118f964b6683007bbcaa42cff8c` |
-| `FlywaySchemaContractIT` | 52 | 0/0/0 | `fc1f5d1f93684ba7b27b17a81733171fb2c2eed019d0ce2904dbbc3f948735ce` |
-| `PackagedJarContractTest` | 4 | 0/0/0 | `0532c6f6b0bc6abc02a7c1ed884aaaac74e04cba439ca43335a5f339fbc9d230` |
+| `TushareMetadataContractTest` | 50 | 0/0/0 | `907712bf192d5516eefd317669a976f8ef8f7496daddd94503876b129fce4d2a` |
+| `FlywaySchemaContractIT` | 52 | 0/0/0 | `f84a3b05a3678fe3c37ad6b0c5b28e9593e97c05e75e3c45c12528ec0ee92314` |
+| `PackagedJarContractTest` | 4 | 0/0/0 | `28ff7ba7a878cf38a71565aeb2024fdf4b093b5edae39c98ff88577dfb7268d3` |
 
-Failsafe summary 为 completed 4、errors/failures/skipped 0，SHA-256 `b147141cd8c7e33d2920f5e57398d17dc840856cf8e18be8066e8362d20e4383`。新生产 JAR SHA-256 为 `e6c7266df6c1253401b97602d46df4319085954522db314bcae3e662fb3ad182`；源目录 49 份 YAML 与嵌套 `tensor-plugin-tushare` JAR 中 49 份同名资源逐文件字节哈希一致，没有其他位置副本。成功的 M04 结果级合同表示 49 张生产表；测试 fixture 另增 1 张，合计 50 张业务表、1007 列和 50 个主键。前端回归由同一 Maven 生命周期执行，实际为 20 files / 120 tests passed，5.79s。
+Failsafe summary 为 completed 4、errors/failures/skipped 0，SHA-256 `b147141cd8c7e33d2920f5e57398d17dc840856cf8e18be8066e8362d20e4383`。新生产 JAR SHA-256 为 `2487993be08fb17462c7ddfec528d0a6aa91b6a31c9fe41d86c79560bc9f90b7`；源目录 49 份 YAML 与嵌套 `tensor-plugin-tushare` JAR 中 49 份同名资源逐文件字节哈希一致，没有其他位置副本。成功的 M04 结果级合同表示 49 张生产表；测试 fixture 另增 1 张，合计 50 张业务表、1007 列和 50 个主键。前端回归由同一 Maven 生命周期执行，实际为 20 files / 120 tests passed，5.12s。
 
 最终 Run7 页面证据 JSON 位于 `/var/folders/s5/h3vynqy544lc7vwtz0zjy39m0000gn/T/tensor-m14-t04-ds9oSf/metadata-evidence.json`，SHA-256 `c76855246a74445d8b097b232ad3bbdece9ee446c0521d0b7350f3806150c783`；2026-09-05T18:01:21.664Z～18:05:49.534Z 实际 49 passed，0 failed/skipped/retry，49/49 API、49/49 dataset、43 必填拦截、6 无参数、下载 POST 0、records GET 0、上游调用 0。每项由页面产生 5 个 metadata GET，共 245 个 HTTP 200：data-sources 98、apis 49、dataset summaries 49、49 个逐项 definition。七组实际分布为 11/7/6/6/9/3/7；filters 实际五组为 `[]` 3、`[ts_code]` 8、`[trade_date]` 3、`[ts_code,trade_date]` 16、`[ts_code,ann_date]` 19。页面不提交合法下载，不执行数据查询，因此本任务不构成 49 个真实 Tushare 下载；真实上游验收属于 M14-T05。
 
@@ -67,4 +67,4 @@ Run7 使用 Node.js v24.15.0、Java 21、Playwright 1.62.1、Chromium 151.0.7922
 
 ## 实施文件哈希时点
 
-最终 shell 门禁运行时记录的脚本 SHA-256 为 `33d0e04d2616ad3fdbfc5a9912300137347b9a4baab4bc8f6e14d9321ff05117`；最终 Run7 使用的 spec SHA-256 为 `113e63235b34d97d9e98a012ff479d7971085bd6de838b9c06d62a42982bc722`，运行前后相同。验证文档自身持续补录实际结果，因此不使用运行中自哈希作为最终内容身份；提交对象由 Git commit 固定。
+最终 shell 门禁运行时记录的脚本 SHA-256 为 `a3a53f0695fbcd661d615c04343ac8d90493859c5604493c480952c8979a5ce3`；最终 Run7 使用的 spec SHA-256 为 `113e63235b34d97d9e98a012ff479d7971085bd6de838b9c06d62a42982bc722`，运行前后相同。验证文档自身持续补录实际结果，因此不使用运行中自哈希作为最终内容身份；提交对象由 Git commit 固定。
