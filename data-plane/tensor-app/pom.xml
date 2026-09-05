@@ -200,6 +200,7 @@
                 <configuration>
                     <excludes>
                         <exclude>**/PackagedJarContractTest.java</exclude>
+                        <exclude>**/AcceptancePackagedJarContractTest.java</exclude>
                     </excludes>
                 </configuration>
             </plugin>
@@ -222,4 +223,93 @@
             </plugin>
         </plugins>
     </build>
+
+    <profiles>
+        <profile>
+            <id>acceptance</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-antrun-plugin</artifactId>
+                        <version>3.1.0</version>
+                        <executions>
+                            <execution>
+                                <id>package-acceptance</id>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>run</goal>
+                                </goals>
+                                <configuration>
+                                    <target>
+                                        <mkdir dir="${project.build.directory}/acceptance"/>
+                                        <delete file="${project.build.directory}/acceptance/${project.build.finalName}-acceptance.jar"
+                                                failonerror="true"/>
+                                        <delete file="${project.build.directory}/acceptance/${project.build.finalName}-acceptance.jar.tmp"
+                                                failonerror="true"/>
+
+                                        <available file="${project.build.directory}/${project.build.finalName}.jar"
+                                                   type="file" property="acceptance.production.jar.present"/>
+                                        <available file="${project.basedir}/../tensor-plugin-fixture/target/tensor-plugin-fixture-${project.version}.jar"
+                                                   type="file" property="acceptance.fixture.jar.present"/>
+                                        <available file="${project.basedir}/src/test/resources/db/migration/V6__create_fixture_tables.sql"
+                                                   type="file" property="acceptance.v6.present"/>
+                                        <fail unless="acceptance.production.jar.present"
+                                              message="Missing production application JAR"/>
+                                        <fail unless="acceptance.fixture.jar.present"
+                                              message="Missing fixture plugin JAR"/>
+                                        <fail unless="acceptance.v6.present"
+                                              message="Missing V6 fixture migration"/>
+
+                                        <jar destfile="${project.build.directory}/acceptance/${project.build.finalName}-acceptance.jar.tmp"
+                                             compress="false" duplicate="fail" update="false">
+                                            <zipfileset src="${project.build.directory}/${project.build.finalName}.jar"
+                                                        excludes="META-INF/MANIFEST.MF,BOOT-INF/classpath.idx,BOOT-INF/layers.idx"/>
+                                            <zipfileset dir="${project.basedir}/../tensor-plugin-fixture/target"
+                                                        includes="tensor-plugin-fixture-${project.version}.jar"
+                                                        prefix="BOOT-INF/lib"/>
+                                            <zipfileset dir="${project.basedir}/src/test/resources/db/migration"
+                                                        includes="V6__create_fixture_tables.sql"
+                                                        prefix="BOOT-INF/classes/db/migration"/>
+                                            <manifest>
+                                                <attribute name="Manifest-Version" value="1.0"/>
+                                                <attribute name="Main-Class"
+                                                           value="org.springframework.boot.loader.launch.JarLauncher"/>
+                                                <attribute name="Start-Class"
+                                                           value="com.akkc.tensor.TensorApplication"/>
+                                                <attribute name="Spring-Boot-Version" value="${spring-boot.version}"/>
+                                                <attribute name="Spring-Boot-Classes" value="BOOT-INF/classes/"/>
+                                                <attribute name="Spring-Boot-Lib" value="BOOT-INF/lib/"/>
+                                                <attribute name="Tensor-Artifact-Purpose" value="acceptance"/>
+                                            </manifest>
+                                        </jar>
+                                        <move file="${project.build.directory}/acceptance/${project.build.finalName}-acceptance.jar.tmp"
+                                              tofile="${project.build.directory}/acceptance/${project.build.finalName}-acceptance.jar"
+                                              failonerror="true"/>
+                                    </target>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <artifactId>maven-failsafe-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>acceptance-jar-contract</id>
+                                <goals>
+                                    <goal>integration-test</goal>
+                                    <goal>verify</goal>
+                                </goals>
+                                <configuration>
+                                    <includes>
+                                        <include>**/AcceptancePackagedJarContractTest.java</include>
+                                    </includes>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 </project>
