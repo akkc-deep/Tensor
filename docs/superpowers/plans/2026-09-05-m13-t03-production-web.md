@@ -14,7 +14,7 @@
 
 - Modify/create exactly the three files named by M13-T03: one YAML modification and two Java additions.
 - Keep `WebSecurityHeadersConfiguration`, all controllers, POMs, frontend files, business modules, migrations, runbooks, and proxy configuration unchanged.
-- Production CORS is off when `${TENSOR_DEV_CORS_ALLOWED_ORIGIN:}` resolves to empty or blank; a configured value is one exact non-wildcard origin and applies only to `/api/v1/**`.
+- Production CORS is off when `${TENSOR_DEV_CORS_ALLOWED_ORIGIN:}` resolves to empty or blank; a configured value is one exact non-wildcard origin and applies only to `/api/v1/**`. Comma-containing or trailing-slash values must also leave CORS off because Spring would otherwise split or normalize them.
 - Allow only `GET`, `POST`, and preflight `OPTIONS`; allow request headers `Content-Type` and `X-Request-Id`; expose `X-Request-Id`; set `allowCredentials(false)`.
 - Forward only GET/HEAD extensionless UI paths whose first segment is not exactly `api`, `actuator`, or `assets`; keep reserved, file-like, and non-GET/HEAD paths out of SPA fallback.
 - Preserve existing cache rules: `/` and `/index.html` are `no-store`, UI fallbacks are `no-cache`, `/api/**` and Actuator are `no-store`, and `/assets/**` are `public, max-age=31536000, immutable`.
@@ -74,6 +74,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import jakarta.servlet.Filter;
 import java.util.Locale;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.junit.jupiter.api.Test;
@@ -81,12 +82,11 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.boot.env.YamlPropertySourceLoader;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
-import org.springframework.context.annotation.Configuration;
+import org.springframework.core.env.MapPropertySource;
 import org.springframework.core.env.PropertySource;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockServletContext;
-import org.springframework.test.context.support.TestPropertySourceUtils;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
@@ -289,8 +289,19 @@ class ProductionWebConfigurationTest {
         AnnotationConfigWebApplicationContext context =
                 new AnnotationConfigWebApplicationContext();
         context.setServletContext(new MockServletContext());
-        TestPropertySourceUtils.addInlinedPropertiesToEnvironment(
-                context, "tensor.web.dev-allowed-origin=" + origin);
+        context.getEnvironment().getPropertySources().addFirst(new MapPropertySource(
+                "test-origin", Map.of("tensor.web.dev-allowed-origin", origin)));
+        @RestController
+        class ApiProbeController {
+            @RequestMapping(
+                    path = "/api/v1/probe",
+                    method = {RequestMethod.GET, RequestMethod.POST})
+            ResponseEntity<Void> probe() {
+                return ResponseEntity.noContent()
+                        .header("X-Request-Id", "cors-test-request")
+                        .build();
+            }
+        }
         context.register(
                 TestMvcConfiguration.class,
                 SpaWebConfiguration.class,
@@ -350,24 +361,11 @@ class ProductionWebConfigurationTest {
                 .isEqualTo("same-origin");
     }
 
-    @Configuration(proxyBeanMethods = false)
     @EnableWebMvc
     static class TestMvcConfiguration implements WebMvcConfigurer {
         @Override
         public void addResourceHandlers(ResourceHandlerRegistry registry) {
             registry.addResourceHandler("/**").addResourceLocations("classpath:/static/");
-        }
-    }
-
-    @RestController
-    static class ApiProbeController {
-        @RequestMapping(
-                path = "/api/v1/probe",
-                method = {RequestMethod.GET, RequestMethod.POST})
-        ResponseEntity<Void> probe() {
-            return ResponseEntity.noContent()
-                    .header("X-Request-Id", "cors-test-request")
-                    .build();
         }
     }
 
@@ -432,7 +430,9 @@ public final class SpaWebConfiguration implements WebMvcConfigurer {
 
     @Override
     public void addCorsMappings(CorsRegistry registry) {
-        if (devAllowedOrigin.isBlank()) {
+        if (devAllowedOrigin.isBlank()
+                || devAllowedOrigin.contains(",")
+                || devAllowedOrigin.endsWith("/")) {
             return;
         }
         registry.addMapping("/api/v1/**")
@@ -464,7 +464,7 @@ public final class SpaWebConfiguration implements WebMvcConfigurer {
 }
 ```
 
-Keep the constructor package-private so the same-package contract can verify wildcard rejection without adding a public configuration API. Do not trim or normalize `devAllowedOrigin`; blank values disable CORS and nonblank values must match the browser `Origin` exactly.
+Keep the constructor package-private so the same-package contract can verify wildcard rejection without adding a public configuration API. Do not trim or normalize `devAllowedOrigin`; blank values disable CORS and nonblank values must match the browser `Origin` exactly. Extend the same test file with malformed-origin regressions for comma-separated values, wildcard lists, a trailing slash and `*/`; these values must leave CORS disabled. Inject raw values through a `MapPropertySource` so whitespace is not removed by the fixture. Before adding the two malformed-value guards, prove these regressions fail against Spring's list splitting and trailing-slash normalization.
 
 - [ ] **Step 5: Add the exact environment and graceful shutdown values**
 

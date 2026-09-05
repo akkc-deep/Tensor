@@ -51,7 +51,7 @@ tensor:
     dev-allowed-origin: ${TENSOR_DEV_CORS_ALLOWED_ORIGIN:}
 ```
 
-`TENSOR_DEV_CORS_ALLOWED_ORIGIN` 缺失、空字符串或纯空白时表示完全不注册 CORS。非空值作为一个未修剪、未规范化的精确 origin 交给 Spring MVC `allowedOrigins`；不使用 `allowedOriginPatterns`。值 `*` 必须在配置构造时拒绝，防止环境误配把“单一精确 origin”扩大为任意来源。其他不能与浏览器 `Origin` 精确相等的错误值自然不匹配，保持 fail-closed。
+`TENSOR_DEV_CORS_ALLOWED_ORIGIN` 缺失、空字符串或纯空白时表示完全不注册 CORS。非空值作为一个未修剪、未规范化的精确 origin 交给 Spring MVC `allowedOrigins`；不使用 `allowedOriginPatterns`。值 `*` 必须在配置构造时拒绝，防止环境误配把“单一精确 origin”扩大为任意来源。Spring Framework 6.2.19 会拆分逗号列表并去除末尾 `/`，因此包含逗号或以 `/` 结尾的配置值也必须直接不注册 CORS，避免错误值被解释为多个 origin 或 wildcard。其余不能与浏览器 `Origin` 匹配的错误值不获得允许响应，保持 fail-closed。
 
 `server.shutdown=graceful` 让 Spring Boot 停止接受新请求并等待在途请求完成。`spring.lifecycle.timeout-per-shutdown-phase=70s` 是每个停机阶段的上限，不是整个 JVM 的绝对总时限；其中 Web Server 优雅停机阶段拥有 70 秒，覆盖 `PersistenceService` 新事务的 60 秒 timeout 并保留 10 秒余量。
 
@@ -84,7 +84,7 @@ Spring MVC 的具体 Controller handler 继续优先于 SPA controller；`/api/v
 
 ### 开发 CORS
 
-`SpaWebConfiguration.addCorsMappings` 只有在 origin 非 blank 时才调用 `registry.addMapping("/api/v1/**")`，并固定：
+`SpaWebConfiguration.addCorsMappings` 只有在 origin 非 blank、不含逗号且不以 `/` 结尾时才调用 `registry.addMapping("/api/v1/**")`，并固定：
 
 - `allowedOrigins(devAllowedOrigin)`：恰好一个精确值；
 - `allowedMethods("GET", "POST", "OPTIONS")`；
@@ -131,6 +131,8 @@ Spring MVC 的具体 Controller handler 继续优先于 SPA controller；`/api/v
 4. 从真实 FilterRegistrationBean 取出安全 header filter 加到 MockMvc；
 5. 每次测试结束关闭 context，避免 handler、property 或 filter 状态泄漏。
 
+测试辅助 MVC 配置只保留 `@EnableWebMvc`，不声明可被应用扫描的 `@Configuration`；probe controller 定义在 fixture 工厂方法内并显式注册。二者不得被其他完整 Boot 测试自动发现，尤其不能让非 Web 启动测试意外启用 MVC。
+
 测试从生成后的 classpath `static/index.html` 中解析一个被入口实际引用的哈希 JS 或 CSS 文件名，禁止硬编码 Vite hash、读取 `control-plane/dist` 或回退源文件。
 
 场景至少覆盖：
@@ -144,6 +146,7 @@ Spring MVC 的具体 Controller handler 继续优先于 SPA controller；`/api/v
 7. 合法 origin 对 `/api/v1/**` 的 GET、POST 和对应 OPTIONS 预检成功，origin 精确回显，允许两个请求头并暴露 `X-Request-Id`，`Access-Control-Allow-Credentials` 缺席；
 8. 同一 origin 对 UI、asset、Actuator 不获得允许 header；错误 origin、DELETE、`Authorization` 预检被拒绝且无允许 origin；
 9. 配置 `*` 时创建 `SpaWebConfiguration` 失败，证明环境变量不能开启 wildcard。
+10. 逗号列表、含 wildcard 的列表、末尾 `/` 和 `*/` 均不注册 CORS；真实请求仍由原 API 处理且无允许 header，预检不成功。测试直接注入原始属性值，避免测试属性解析修剪空白而掩盖边界。
 
 ### 严格 RED
 
