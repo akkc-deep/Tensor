@@ -91,7 +91,7 @@
 | 70 | M13-T05 | 独立 acceptance JAR 打包及启停验收 | `COMPLETED` | M13-T04, M08-T02, M04-T06 | docs/task-designs/M13-T05-design.md | docs/task-handoffs/M13-T05-handoff.md |
 | 71 | M14-T01 | fixture 页面端到端主闭环 | `COMPLETED` | M13-T04, M13-T05 | docs/task-designs/M14-T01-design.md | docs/task-handoffs/M14-T01-handoff.md |
 | 72 | M14-T02 | 下载失败、空结果、幂等和回滚矩阵 | `COMPLETED` | M14-T01 | docs/task-designs/M14-T02-design.md | docs/task-handoffs/M14-T02-handoff.md |
-| 73 | M14-T03 | 查询、分页、宽表、竞态和无障碍 E2E | `IN_PROGRESS` | M14-T01 | docs/task-designs/M14-T03-design.md | docs/task-handoffs/M14-T03-handoff.md |
+| 73 | M14-T03 | 查询、分页、宽表、竞态和无障碍 E2E | `COMPLETED` | M14-T01 | docs/task-designs/M14-T03-design.md | docs/task-handoffs/M14-T03-handoff.md |
 | 74 | M14-T04 | 49 数据集自动契约与页面回归驱动 | `NOT_STARTED` | M03-T09, M04-T06, M14-T01 | None | None |
 | 75 | M14-T05 | 真实 Tushare 49 接口受控页面验收 | `NOT_STARTED` | M14-T04 | None | None |
 | 76 | M14-T06 | `daily` 与 `balancesheet` 性能验证 | `NOT_STARTED` | M14-T03, M14-T05 | None | None |
@@ -1032,6 +1032,8 @@
 - **State evidence (readiness):** 2026-09-05：M14-T02由 `db6e853` 实现及 `41feb92`/`f60f35d` 完成审查修正、`71d9618` 记录COMPLETED之后，按预定义Order选中后继73/M14-T03，观测NOT_STARTED、Design/Handoff为None。使用任务契约设计技能完成 `docs/task-designs/M14-T03-design.md`，独立就绪审查要求补齐公告日期单边查询，与既定两类日期验收一致；已补充122行/1行精确输入、分页和清空对端规则，并明确每阶段单次15秒只读CLI batch及最终150+15+15秒清理预算，定点复审Ready for implementation: Yes，无未解决发现。`e8501c2` 提交最终200行设计并仅回填Design document，随后完整读取。冻结两个新实施文件、11串行Chromium用例、五现有数据集/7页面下载/7本机stub调用、daily126行、balance152+3列、两类日期/动态筛选/20-50-100分页/重置/真实ann_date更新归一最后页、原页面请求延迟放行竞态与键盘闭环；不读后端生产实现或改产品/配置/JAR，不伪造响应或API/SQL种数。唯一直接依赖M14-T01的产物、决策、理由、约束、用途和3/3等既有可用性证据逐项写入交接，前驱M14-T02不新增为依赖。已核实无现成双日期定义、STRING空串转null而TEXT保留的公开兼容事实，无输入冲突；控制器检查设计结构/引用、11标题、模板字段数及确定性行/分页/AND算术通过。先写完整 `docs/task-handoffs/M14-T03-handoff.md`，验证模板、依赖和首动作、目标实施文件未创建，再链接并执行真实 `NOT_STARTED -> READY`。首个实施动作是按完成设计写完整11项测试并准备另一新空schema；本次未实施/运行后继，不把设计预期当验收结果。
 
 - **State evidence (start):** 2026-09-05：用户明确要求按权威任务看板执行当前任务，先读取设计和交接；已完整读取 M14-T03 设计、交接及任务卡，确认两个实施文件未存在且无重叠修改。以此启动证据执行 `READY -> IN_PROGRESS`，保留原交接作为入口上下文。按用户授权在 main 工作，采用既定子代理实施和独立审查流程，仅实施当前任务；实际验收通过后记录完成并按 Order 准备后继。
+
+- **State evidence (completion):** 2026-09-06：完整重读当前200行设计及入口交接，确认IN_PROGRESS，按实际结果执行 `IN_PROGRESS -> COMPLETED` 并保留原交接。实施提交 `0681e5e`、`6b2b587`、`564e56a` 精确只新增 `control-plane/e2e/dataset-query.spec.js` 和 `docs/verification/M14-T03-dataset-query.md`。最终spec SHA-256 `dbec488cba6a69bf852061855a9fa87182d4097883362c1940b228ba240fdfbd`；Run16于2026-09-05T15:35:38.728Z～15:36:27.987Z在另一新空schema实际11/11通过、49.6s、exit0、0失败/跳过/重试。原样验收JAR SHA-256保持 `a69874afa6ce783d4ef4e16a678ddb0ff457f2948b68f509a8e4a2c00440bcac`；7页面下载/7本机上游调用、47浏览器业务请求（唯一精确登记中断无响应/无服务端事件）、46真实完成事件（7下载+39查询）。五数据集动态筛选、两类日期闭区间/单边/AND、20/50/100完整行分页、真实更新后的末页归一化、152+3宽表/固定列/精度/空TEXT-null-零、迟到真实响应隔离、reset/网络恢复/纯键盘闭环均有页面与请求证据。15张PNG的实际路径和哈希与最终JSON逐项一致，控制器已逐张人工查看，自动生成manuallyReviewed=false如实保留。最终JSON SHA-256 `8e3f75669136d26e13b64862fa435f6364344bdb90d558d13dbc30119da11924`，路径及逐项证据见已提交验证文档。测试内与控制器独立只读复核均为6成功迁移、50业务表、daily126/company1/index1/balance1/disclosure123，公告日分布1/122。前端回归于Run11后2026-09-05 21:33:01 +08执行20文件/120通过、5.05s，此后仅E2E/证据变动；语法/恰11发现/格式/范围/安全扫描通过。任务审查四项与整体审查两项全部关闭；最终6b2b587..564e56a定点复审Ready to complete: Yes，无新Critical/Important或越界。无条件上游包络检查、全资源HTTP/requestfailed监视、精确一次abort豁免、门闩期限/真实结算及双异常保留均有同helper合成探针；放宽豁免的突变按预期失败。自有JVM/stub清理均true；本任务MySQL容器及匿名卷正常停止并删除，临时凭证文件确认全无，安全本地证据保留。未改生产、配置、依赖、既有E2E或JAR，未API/SQL种数，未发现产品缺陷。启动看板提交b5834b8独立于实施审查范围，整体会话审查仍以ee9ed83为base；该判断若需调整只影响审查记录。用户其他暂存内容及原target目录保留，不纳入当前提交。
 
 ### `M14-T04`
 
