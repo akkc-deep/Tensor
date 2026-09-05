@@ -41,6 +41,7 @@ let application
 let applicationLogPath
 let mysqlConfig
 let stub
+let upstreamToken
 let fixtureBaseline
 let dailyBaseline
 let triggerOwned = false
@@ -64,13 +65,118 @@ const evidence = {
 function processEnvironment(stubUrl, token) {
   const env = Object.fromEntries(
     Object.entries(process.env).filter(
-      ([name]) => !/^(TENSOR_|SPRING_|SERVER_|M14_)/.test(name),
+      ([name]) => !/^(TENSOR_|SPRING_|SERVER_|M14_|MYSQL_)/.test(name),
     ),
   )
   for (const name of DB_VARIABLES) env[name] = process.env[name]
   env.TENSOR_TUSHARE_TOKEN = token
   env.TENSOR_TUSHARE_BASE_URL = stubUrl
   return env
+}
+
+function safeCheck(passed, name) {
+  if (!passed) throw new Error(`Safe check failed: ${name}`)
+}
+
+function assertExactKeys(value, expected, name) {
+  safeCheck(
+    value !== null && typeof value === 'object' && !Array.isArray(value),
+    `${name} is an object`,
+  )
+  safeCheck(
+    JSON.stringify(Object.keys(value).sort()) === JSON.stringify([...expected].sort()),
+    `${name} fields are exact`,
+  )
+}
+
+function forbiddenPublicValues() {
+  return [
+    upstreamToken,
+    process.env.TENSOR_DB_PASSWORD,
+    mysqlConfig?.cliPassword,
+    process.env.TENSOR_DB_USERNAME,
+    process.env.TENSOR_DB_URL,
+    mysqlConfig?.host,
+    mysqlConfig?.schema,
+  ].filter((value) => typeof value === 'string' && value.length > 0)
+}
+
+function assertPublicSurface(text, name) {
+  safeCheck(typeof text === 'string', `${name} is text`)
+  safeCheck(
+    !/M14_T02_(?:UPSTREAM_RAW|FAULT_SQL)_CANARY|jdbc:mysql|CREATE\s+TRIGGER|SIGNAL\s+SQLSTATE/i.test(
+      text,
+    ),
+    `${name} excludes private markers`,
+  )
+  safeCheck(
+    forbiddenPublicValues().every((value) => !text.includes(value)),
+    `${name} excludes connection values`,
+  )
+}
+
+function assertPrivateLogSafety(text) {
+  safeCheck(
+    [
+      upstreamToken,
+      process.env.TENSOR_DB_PASSWORD,
+      mysqlConfig?.cliPassword,
+    ]
+      .filter((value) => typeof value === 'string' && value.length > 0)
+      .every((value) => !text.includes(value)),
+    'private log excludes credentials',
+  )
+  safeCheck(
+    !/M14_T02_(?:UPSTREAM_RAW|FAULT_SQL)_CANARY|CREATE\s+TRIGGER|SIGNAL\s+SQLSTATE/i.test(
+      text,
+    ),
+    'private log excludes raw payload and SQL',
+  )
+}
+
+async function readPublicJson(response, name) {
+  let text
+  try {
+    text = await response.text()
+  } catch {
+    throw new Error(`Safe check failed: ${name} body readable`)
+  }
+  assertPublicSurface(text, name)
+  try {
+    return JSON.parse(text)
+  } catch {
+    throw new Error(`Safe check failed: ${name} is JSON`)
+  }
+}
+
+async function assertPageSafety(page, name) {
+  let text
+  try {
+    text = await page.locator('body').innerText()
+  } catch {
+    throw new Error(`Safe check failed: ${name} visible text readable`)
+  }
+  assertPublicSurface(text, `${name} visible text`)
+}
+
+async function runWithCleanup(action, cleanup, message) {
+  let primaryError
+  let cleanupError
+  try {
+    await action()
+  } catch (error) {
+    primaryError = error
+  }
+  try {
+    await cleanup()
+  } catch (error) {
+    cleanupError = error
+  }
+  if (primaryError && cleanupError) {
+    throw new AggregateError([primaryError, cleanupError], message)
+  }
+  if (primaryError) throw primaryError
+  if (cleanupError) throw cleanupError
 }
 
 function canConnectToPort() {
@@ -96,69 +202,84 @@ async function requireFreePort() {
 async function parseMysqlInputs() {
   const defaultsPath = process.env.M14_MYSQL_DEFAULTS_FILE ?? ''
   const schema = process.env.M14_DB_SCHEMA ?? ''
-  expect(path.isAbsolute(defaultsPath), 'M14_MYSQL_DEFAULTS_FILE must be absolute').toBe(true)
-  expect(schema, 'M14_DB_SCHEMA must identify the isolated schema').toMatch(
-    /^tensor_m14_t02_[a-f0-9]+$/,
-  )
+  safeCheck(path.isAbsolute(defaultsPath), 'MySQL defaults path is absolute')
+  safeCheck(/^tensor_m14_t02_[a-f0-9]+$/.test(schema), 'schema is isolated')
 
   const file = await lstat(defaultsPath)
-  expect(file.isFile(), 'MySQL defaults must be a regular file').toBe(true)
-  expect(file.isSymbolicLink(), 'MySQL defaults must not be a symlink').toBe(false)
-  expect(file.mode & 0o777, 'MySQL defaults permissions must be 0600').toBe(0o600)
+  safeCheck(file.isFile(), 'MySQL defaults is a regular file')
+  safeCheck(!file.isSymbolicLink(), 'MySQL defaults is not a symlink')
+  safeCheck((file.mode & 0o777) === 0o600, 'MySQL defaults permissions are 0600')
   if (typeof process.getuid === 'function') {
-    expect(file.uid, 'MySQL defaults must be owned by the current user').toBe(
-      process.getuid(),
-    )
+    safeCheck(file.uid === process.getuid(), 'MySQL defaults owner is current user')
   }
 
   const bytes = await readFile(defaultsPath)
-  expect(bytes.subarray(0, 3).equals(Buffer.from([0xef, 0xbb, 0xbf]))).toBe(false)
-  const text = new TextDecoder('utf-8', { fatal: true }).decode(bytes)
-  expect(text).not.toMatch(/\r(?!\n)/)
-  const normalized = text.endsWith('\n') ? text.slice(0, -1) : text
-  expect(normalized).not.toMatch(/\n$/)
+  safeCheck(
+    !bytes.subarray(0, 3).equals(Buffer.from([0xef, 0xbb, 0xbf])),
+    'MySQL defaults excludes BOM',
+  )
+  let text
+  try {
+    text = new TextDecoder('utf-8', { fatal: true }).decode(bytes)
+  } catch {
+    throw new Error('Safe check failed: MySQL defaults is UTF-8')
+  }
+  safeCheck(!/\r(?!\n)/.test(text), 'MySQL defaults line endings are valid')
+  const normalized = text.replace(/(?:\r\n|\n)$/, '')
+  safeCheck(!/\n$/.test(normalized), 'MySQL defaults has at most one terminal newline')
   const lines = normalized.split(/\r?\n/)
-  expect(lines).toHaveLength(6)
-  expect(lines[0]).toBe('[client]')
+  safeCheck(lines.length === 6, 'MySQL defaults has six lines')
+  safeCheck(lines[0] === '[client]', 'MySQL defaults client group is exact')
 
   const values = new Map()
   for (const line of lines.slice(1)) {
-    expect(line).toMatch(/^[a-z]+=.*$/)
+    safeCheck(/^[a-z]+=.*$/.test(line), 'MySQL defaults entry syntax is valid')
     const separator = line.indexOf('=')
     const key = line.slice(0, separator)
     const value = line.slice(separator + 1)
-    expect(['host', 'port', 'user', 'password', 'protocol']).toContain(key)
-    expect(values.has(key), `duplicate MySQL defaults key: ${key}`).toBe(false)
+    safeCheck(
+      ['host', 'port', 'user', 'password', 'protocol'].includes(key),
+      'MySQL defaults key is allowed',
+    )
+    safeCheck(!values.has(key), 'MySQL defaults keys are unique')
     values.set(key, value)
   }
-  expect([...values.keys()].sort()).toEqual([
-    'host',
-    'password',
-    'port',
-    'protocol',
-    'user',
-  ])
-  expect(values.get('host')).toMatch(/^[A-Za-z0-9.-]+$/)
-  expect(values.get('port')).toMatch(/^\d+$/)
+  safeCheck(
+    JSON.stringify([...values.keys()].sort()) ===
+      JSON.stringify(['host', 'password', 'port', 'protocol', 'user']),
+    'MySQL defaults keys are complete',
+  )
+  safeCheck(/^[A-Za-z0-9.-]+$/.test(values.get('host')), 'MySQL host is valid')
+  safeCheck(/^\d+$/.test(values.get('port')), 'MySQL port is numeric')
   const port = Number(values.get('port'))
-  expect(port).toBeGreaterThanOrEqual(1)
-  expect(port).toBeLessThanOrEqual(65_535)
-  expect(values.get('protocol')).toBe('TCP')
+  safeCheck(port >= 1 && port <= 65_535, 'MySQL port is in range')
+  safeCheck(values.get('protocol') === 'TCP', 'MySQL protocol is TCP')
   for (const key of ['user', 'password']) {
-    expect(values.get(key)).toMatch(/^[\x21-\x7e]+$/)
-    expect(values.get(key)).not.toMatch(/[\s'"\\#;]/)
+    const value = values.get(key)
+    safeCheck(
+      /^[\x21-\x7e]+$/.test(value) && !/[\s'"\\#;]/.test(value),
+      `MySQL ${key} is safe for defaults syntax`,
+    )
   }
 
   const jdbc = process.env.TENSOR_DB_URL ?? ''
-  expect(jdbc.startsWith('jdbc:mysql://'), 'TENSOR_DB_URL must be a MySQL JDBC URL').toBe(true)
-  const parsed = new URL(jdbc.slice(5))
-  expect(parsed.username).toBe('')
-  expect(parsed.password).toBe('')
-  expect(parsed.hostname).toBe(values.get('host'))
-  expect(Number(parsed.port || '3306')).toBe(port)
-  expect(parsed.pathname).toBe(`/${schema}`)
+  safeCheck(jdbc.startsWith('jdbc:mysql://'), 'JDBC URL uses MySQL')
+  let parsed
+  try {
+    parsed = new URL(jdbc.slice(5))
+  } catch {
+    throw new Error('Safe check failed: JDBC URL is valid')
+  }
+  safeCheck(parsed.username === '', 'JDBC URL excludes username')
+  safeCheck(parsed.password === '', 'JDBC URL excludes password')
+  safeCheck(parsed.hostname === values.get('host'), 'JDBC and CLI hosts match')
+  safeCheck(Number(parsed.port || '3306') === port, 'JDBC and CLI ports match')
+  safeCheck(parsed.pathname === `/${schema}`, 'JDBC and CLI schemas match')
   for (const name of parsed.searchParams.keys()) {
-    expect(name).not.toMatch(/^(?:user|username|password|token)$/i)
+    safeCheck(
+      !/^(?:user|username|password|token)$/i.test(name),
+      'JDBC URL excludes credential parameters',
+    )
   }
 
   return {
@@ -431,6 +552,7 @@ function createUpstreamStub(token) {
 
 async function startStub() {
   const token = `m14-fake-${randomBytes(24).toString('hex')}`
+  upstreamToken = token
   const current = createUpstreamStub(token)
   await new Promise((resolve, reject) => {
     current.server.once('error', reject)
@@ -466,10 +588,14 @@ async function waitForHealth(current) {
       const response = await fetch(`${BASE_URL}/actuator/health`, {
         signal: AbortSignal.timeout(2_000),
       })
-      if (response.status === 200 && (await response.json())?.status === 'UP') return
+      const body = await readPublicJson(response, 'health response')
+      if (response.status === 200 && body?.status === 'UP') return
       lastFailure = `last health status was ${response.status}`
     } catch (error) {
-      lastFailure = error instanceof Error ? error.message : String(error)
+      if (error instanceof Error && error.message.startsWith('Safe check failed:')) {
+        throw error
+      }
+      lastFailure = 'health request failed'
     }
     await delay(250)
   }
@@ -551,41 +677,54 @@ function monitorPage(page) {
   const failures = []
   const writes = []
   const allowedErrors = []
-  page.on('pageerror', (error) => failures.push(`pageerror: ${error.message}`))
+  const responseScans = []
+  page.on('pageerror', () => failures.push('page error'))
   page.on('request', (request) => {
     const url = new URL(request.url())
-    if (url.origin !== BASE_URL) failures.push(`external request: ${url.origin}`)
+    if (url.origin !== BASE_URL) failures.push('external request')
     if (!['GET', 'HEAD', 'OPTIONS'].includes(request.method())) {
       writes.push(`${request.method()} ${url.pathname}`)
       if (request.method() === 'POST' && url.pathname === '/api/v1/downloads') {
         downloadPostCount += 1
       } else {
-        failures.push(`unexpected write: ${request.method()} ${url.pathname}`)
+        failures.push('unexpected write')
       }
     }
   })
   page.on('requestfailed', (request) => {
     const url = new URL(request.url())
     if (url.pathname.startsWith('/api/v1/')) {
-      failures.push(`failed business request: ${url.pathname}`)
+      failures.push('failed business request')
     }
   })
   page.on('response', (response) => {
     const url = new URL(response.url())
+    if (url.pathname.startsWith('/api/v1/')) {
+      responseScans.push(
+        response
+          .text()
+          .then((body) => assertPublicSurface(body, 'API response'))
+          .catch(() => {
+            failures.push('API response safety scan')
+          }),
+      )
+    }
     if (url.pathname.startsWith('/api/v1/') && response.status() >= 400) {
       const index = allowedErrors.findIndex(
         ({ path: allowedPath, status }) =>
           allowedPath === url.pathname && status === response.status(),
       )
       if (index >= 0) allowedErrors.splice(index, 1)
-      else failures.push(`business HTTP ${response.status()}: ${url.pathname}`)
+      else failures.push('unexpected business HTTP error')
     }
   })
   return {
     allowError(status, pathname = '/api/v1/downloads') {
       allowedErrors.push({ status, path: pathname })
     },
-    assertClean(expectedWrites) {
+    async assertClean(expectedWrites) {
+      await Promise.all(responseScans)
+      await assertPageSafety(page, 'test boundary')
       expect(writes).toEqual(expectedWrites)
       expect(allowedErrors).toEqual([])
       expect(failures).toEqual([])
@@ -596,6 +735,7 @@ function monitorPage(page) {
 async function openRoute(page, route, heading) {
   const response = await page.goto(route)
   expect(response?.status()).toBe(200)
+  await assertPageSafety(page, 'route')
   await expect(page.getByRole('heading', { level: 1, name: heading })).toBeVisible()
 }
 
@@ -675,10 +815,11 @@ async function submitDownload(
   const responsePromise = page.waitForResponse(downloadResponse, { timeout })
   await page.getByRole('button', { name: '开始下载', exact: true }).click()
   const response = await responsePromise
+  const body = await readPublicJson(response, 'download response')
   expect(response.status()).toBe(status)
   expect(await response.request().postDataJSON()).toEqual(requestBody)
-  const body = await response.json()
   const requestId = rememberRequest(response, body)
+  await assertPageSafety(page, 'download result')
   if (success) {
     expect(body).toEqual({ requestId, ...success })
     const panel = page.getByRole('status')
@@ -774,12 +915,29 @@ async function queryDataset(page, { plugin, api, option, code, navigate = false 
   )
   await page.getByRole('button', { name: '查询', exact: true }).click()
   const response = await responsePromise
+  const body = await readPublicJson(response, 'query response')
   expect(response.status()).toBe(200)
   const url = new URL(response.url())
   expect(url.searchParams.get('page') ?? '1').toBe('1')
   expect(url.searchParams.get('pageSize') ?? '50').toBe('50')
   if (code) expect(url.searchParams.get('tsCode')).toBe(code)
-  const body = await response.json()
+  assertExactKeys(
+    body,
+    [
+      'apiName',
+      'columns',
+      'items',
+      'page',
+      'pageSize',
+      'pluginId',
+      'requestId',
+      'totalElements',
+      'totalPages',
+    ],
+    'query response',
+  )
+  safeCheck(body.pluginId === plugin, 'query response plugin matches route')
+  safeCheck(body.apiName === api, 'query response API matches route')
   const requestId = rememberRequest(response, body)
   queryCount += 1
   expectedEvents.push({
@@ -819,6 +977,7 @@ function shanghaiTimestamp(value) {
 }
 
 async function assertSingleRow(page, body, expectedColumns, expectedRow) {
+  await assertPageSafety(page, 'query result')
   expect(body).toMatchObject({
     page: 1,
     pageSize: 50,
@@ -947,7 +1106,7 @@ function parseCompletedEvent(line) {
     }
     const [, key, value] = match
     if (Object.hasOwn(fields, key)) {
-      throw new Error(`Completion event repeats field ${key}`)
+      throw new Error('Completion event repeats a field')
     }
     fields[key] = value
     cursor = match.index + match[0].length
@@ -964,6 +1123,7 @@ async function readCompletedEvent(expected) {
     .poll(
       async () => {
         const log = await readFile(applicationLogPath, 'utf8')
+        assertPrivateLogSafety(log)
         matches = log
           .split(/\r?\n/)
           .filter(
@@ -979,6 +1139,7 @@ async function readCompletedEvent(expected) {
     )
     .toBe(1)
   const line = matches[0]
+  assertPublicSurface(line, 'completion event')
   const allowed =
     expected.operation === 'download'
       ? new Set([
@@ -1011,14 +1172,17 @@ async function readCompletedEvent(expected) {
           'errorCode',
         ])
   const actual = parseCompletedEvent(line)
-  expect(Object.keys(actual).sort()).toEqual([...allowed].sort())
+  safeCheck(
+    JSON.stringify(Object.keys(actual).sort()) === JSON.stringify([...allowed].sort()),
+    'completion event fields are exact',
+  )
   for (const [key, value] of Object.entries(expected)) {
-    expect(actual[key], `${expected.requestId} ${key}`).toBe(String(value))
+    safeCheck(actual[key] === String(value), `completion event ${key} matches`)
   }
-  expect(actual).not.toHaveProperty('message')
-  expect(actual).not.toHaveProperty('cause')
-  expect(actual).not.toHaveProperty('stack')
-  expect(actual).not.toHaveProperty('throwable')
+  safeCheck(!Object.hasOwn(actual, 'message'), 'completion event excludes message')
+  safeCheck(!Object.hasOwn(actual, 'cause'), 'completion event excludes cause')
+  safeCheck(!Object.hasOwn(actual, 'stack'), 'completion event excludes stack')
+  safeCheck(!Object.hasOwn(actual, 'throwable'), 'completion event excludes throwable')
   evidence.events.push(
     Object.fromEntries([...allowed].map((key) => [key, actual[key]])),
   )
@@ -1028,31 +1192,26 @@ async function verifyEventsAndSafety() {
   evidence.events = []
   for (const expected of expectedEvents) await readCompletedEvent(expected)
   const log = await readFile(applicationLogPath, 'utf8')
+  assertPrivateLogSafety(log)
   const completed = log
     .split(/\r?\n/)
     .filter((line) => line.includes('tensor.operation.completed'))
-  expect(completed).toHaveLength(expectedEvents.length)
-  for (const value of [
-    stub.token,
-    process.env.TENSOR_DB_PASSWORD,
-    mysqlConfig.cliPassword,
-    UPSTREAM_CANARY,
-    SQL_CANARY,
-  ]) {
-    expect(log.includes(value), 'private application log failed secret/raw scan').toBe(false)
-  }
-  expect(log).not.toMatch(/CREATE\s+TRIGGER|SIGNAL\s+SQLSTATE/i)
+  safeCheck(
+    completed.length === expectedEvents.length,
+    'private log completion event count matches',
+  )
 }
 
 async function recordScreenshot(locator, testInfo, name) {
   const screenshotPath = testInfo.outputPath(name)
-  const text = await locator.innerText()
-  expect(text).not.toMatch(
-    /M14_T02_(?:UPSTREAM_RAW|FAULT_SQL)_CANARY|jdbc:mysql|CREATE\s+TRIGGER|SIGNAL\s+SQLSTATE/i,
-  )
-  for (const value of [stub.token, process.env.TENSOR_DB_PASSWORD, mysqlConfig.cliPassword]) {
-    expect(text.includes(value)).toBe(false)
+  await assertPageSafety(locator.page(), 'screenshot page')
+  let text
+  try {
+    text = await locator.innerText()
+  } catch {
+    throw new Error('Safe check failed: screenshot text readable')
   }
+  assertPublicSurface(text, 'screenshot')
   await locator.screenshot({ path: screenshotPath })
   evidence.screenshots.push({ name, path: screenshotPath })
 }
@@ -1072,8 +1231,13 @@ test.describe('download outcome matrix', () => {
     evidence.startedAt = new Date().toISOString()
     expect(path.isAbsolute(process.env.ACCEPTANCE_JAR ?? '')).toBe(true)
     expect((await stat(process.env.ACCEPTANCE_JAR)).isFile()).toBe(true)
-    for (const name of DB_VARIABLES) expect(process.env[name]?.length).toBeGreaterThan(0)
-    expect(process.env.PLAYWRIGHT_BASE_URL ?? BASE_URL).toBe(BASE_URL)
+    for (const name of DB_VARIABLES) {
+      safeCheck((process.env[name]?.length ?? 0) > 0, `${name} is present`)
+    }
+    safeCheck(
+      (process.env.PLAYWRIGHT_BASE_URL ?? BASE_URL) === BASE_URL,
+      'Playwright base URL is isolated',
+    )
     mysqlConfig = await parseMysqlInputs()
     await requireFreePort()
     await verifyEmptySchema()
@@ -1145,15 +1309,7 @@ test.describe('download outcome matrix', () => {
     const evidencePath = path.join(path.dirname(applicationLogPath), 'evidence.json')
     try {
       const shared = JSON.stringify(evidence, null, 2)
-      expect(shared).not.toMatch(
-        /M14_T02_(?:UPSTREAM_RAW|FAULT_SQL)_CANARY|jdbc:mysql|CREATE\s+TRIGGER|SIGNAL\s+SQLSTATE/i,
-      )
-      for (const value of [
-        process.env.TENSOR_DB_PASSWORD,
-        mysqlConfig.cliPassword,
-      ]) {
-        expect(shared.includes(value)).toBe(false)
-      }
+      assertPublicSurface(shared, 'shared evidence')
       await writeFile(evidencePath, `${shared}\n`, {
         encoding: 'utf8',
         flag: 'wx',
@@ -1189,7 +1345,7 @@ test.describe('download outcome matrix', () => {
     await assertNoExtraFeatures(page)
     expect(downloadPostCount).toBe(posts)
     expect([...stub.counts.values()].reduce((sum, value) => sum + value, 0)).toBe(calls)
-    monitor.assertClean([])
+    await monitor.assertClean([])
   })
 
   test('blocksReversedDateRange', async ({ page }) => {
@@ -1218,7 +1374,7 @@ test.describe('download outcome matrix', () => {
     await assertNoExtraFeatures(page)
     expect(downloadPostCount).toBe(posts)
     expect([...stub.counts.values()].reduce((sum, value) => sum + value, 0)).toBe(calls)
-    monitor.assertClean([])
+    await monitor.assertClean([])
   })
 
   test('upsertsDuplicateFixtureSuccess', async ({ page }, testInfo) => {
@@ -1298,7 +1454,7 @@ test.describe('download outcome matrix', () => {
       testInfo,
       'fixture-upsert-row.png',
     )
-    monitor.assertClean(['POST /api/v1/downloads', 'POST /api/v1/downloads'])
+    await monitor.assertClean(['POST /api/v1/downloads', 'POST /api/v1/downloads'])
   })
 
   test('keepsRowsOnFixtureEmpty', async ({ page }) => {
@@ -1325,7 +1481,7 @@ test.describe('download outcome matrix', () => {
       },
     })
     await assertFixtureUnchanged(page)
-    monitor.assertClean(['POST /api/v1/downloads'])
+    await monitor.assertClean(['POST /api/v1/downloads'])
   })
 
   test('showsFixtureSourceFailure', async ({ page }) => {
@@ -1350,7 +1506,7 @@ test.describe('download outcome matrix', () => {
       },
     })
     await assertFixtureUnchanged(page)
-    monitor.assertClean(['POST /api/v1/downloads'])
+    await monitor.assertClean(['POST /api/v1/downloads'])
   })
 
   test('rejectsFixtureTypeFailure', async ({ page }) => {
@@ -1374,48 +1530,56 @@ test.describe('download outcome matrix', () => {
         failureStage: 'adapter',
       },
     })
-    expect(JSON.stringify(body)).not.toMatch(/not-a-decimal|field=|row=/)
+    safeCheck(
+      !/not-a-decimal|field=|row=/.test(JSON.stringify(body)),
+      'adapter response excludes raw field details',
+    )
     await assertFixtureUnchanged(page)
-    monitor.assertClean(['POST /api/v1/downloads'])
+    await monitor.assertClean(['POST /api/v1/downloads'])
   })
 
   test('rollsBackFixturePersistenceFailure', async ({ page }, testInfo) => {
     const monitor = monitorPage(page)
     await createFailureTrigger()
-    try {
-      await assertFixtureUnchanged(page)
-      await openRoute(page, '/downloads', '数据下载')
-      await chooseFixtureDownload(page)
-      await selectOption(page, /场景/, 'PERSISTENCE_FAILURE')
-      monitor.allowError(500)
-      const { body } = await submitDownload(page, {
-        title: 'rollsBackFixturePersistenceFailure',
-        requestBody: {
-          pluginId: 'fixture',
-          apiName: 'fixture_daily',
-          params: { scenario: 'PERSISTENCE_FAILURE' },
-        },
-        status: 500,
-        error: {
-          code: 'PERSISTENCE_FAILED',
-          message: 'Persistence failed',
-          retryable: true,
-          failureStage: 'persistence',
-        },
-      })
-      expect(JSON.stringify(body)).not.toMatch(
-        /PERSISTENCE_FAILURE|M14_T02_FAULT_SQL_CANARY|SQLSTATE|UPDATE/i,
-      )
-      await assertFixtureUnchanged(page)
-      await recordScreenshot(
-        page.getByRole('row').filter({ hasText: '000001.SZ' }),
-        testInfo,
-        'fixture-rollback-row.png',
-      )
-    } finally {
-      await dropFailureTrigger()
-    }
-    monitor.assertClean(['POST /api/v1/downloads'])
+    await runWithCleanup(
+      async () => {
+        await assertFixtureUnchanged(page)
+        await openRoute(page, '/downloads', '数据下载')
+        await chooseFixtureDownload(page)
+        await selectOption(page, /场景/, 'PERSISTENCE_FAILURE')
+        monitor.allowError(500)
+        const { body } = await submitDownload(page, {
+          title: 'rollsBackFixturePersistenceFailure',
+          requestBody: {
+            pluginId: 'fixture',
+            apiName: 'fixture_daily',
+            params: { scenario: 'PERSISTENCE_FAILURE' },
+          },
+          status: 500,
+          error: {
+            code: 'PERSISTENCE_FAILED',
+            message: 'Persistence failed',
+            retryable: true,
+            failureStage: 'persistence',
+          },
+        })
+        safeCheck(
+          !/PERSISTENCE_FAILURE|M14_T02_FAULT_SQL_CANARY|SQLSTATE|UPDATE/i.test(
+            JSON.stringify(body),
+          ),
+          'persistence response excludes SQL details',
+        )
+        await assertFixtureUnchanged(page)
+        await recordScreenshot(
+          page.getByRole('row').filter({ hasText: '000001.SZ' }),
+          testInfo,
+          'fixture-rollback-row.png',
+        )
+      },
+      dropFailureTrigger,
+      'Persistence assertion and trigger cleanup failed',
+    )
+    await monitor.assertClean(['POST /api/v1/downloads'])
   })
 
   test('downloadsDailyFromLocalUpstream', async ({ page }, testInfo) => {
@@ -1462,7 +1626,7 @@ test.describe('download outcome matrix', () => {
     evidence.dailyRow = dailyBaseline
     const row = await assertDailyBody(page, body, dailyBaseline)
     await recordScreenshot(row, testInfo, 'daily-success-row.png')
-    monitor.assertClean(['POST /api/v1/downloads'])
+    await monitor.assertClean(['POST /api/v1/downloads'])
   })
 
   for (const scenario of [
@@ -1550,14 +1714,15 @@ test.describe('download outcome matrix', () => {
         await assertNoExtraFeatures(page)
       }
       const response = await responsePromise
+      const body = await readPublicJson(response, 'download response')
       expect(response.status()).toBe(scenario.status)
       expect(await response.request().postDataJSON()).toEqual({
         pluginId: 'tushare_pro',
         apiName: 'daily',
         params: { trade_date: '20260807' },
       })
-      const body = await response.json()
       const requestId = rememberRequest(response, body)
+      await assertPageSafety(page, 'download result')
       expect(body).toEqual({
         requestId,
         code: scenario.code,
@@ -1609,7 +1774,7 @@ test.describe('download outcome matrix', () => {
       }
       await assertDailyUnchanged(page)
       await assertNoExtraFeatures(page)
-      monitor.assertClean(['POST /api/v1/downloads'])
+      await monitor.assertClean(['POST /api/v1/downloads'])
     })
   }
 })
