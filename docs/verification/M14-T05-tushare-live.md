@@ -1,0 +1,262 @@
+# M14-T05 真实 Tushare 页面验收证据
+
+本轮由用户于 2026-09-06 要求按权威看板执行 M14-T05。已完整读取[任务设计](../task-designs/M14-T05-design.md)、[入口交接](../task-handoffs/M14-T05-handoff.md)和任务卡。会话基线 `dcc7c9aaf4efc01c45681945094f6bb31aa6d7ca`，启动状态提交 `2dd3bd0`。本文如实区分本地验证与尚未执行的真实验收。
+
+## 运行条件与输入
+
+- 当前仅检查规定环境变量是否非空：`TENSOR_TUSHARE_TOKEN`、`M14_T05_CALL_INTERVAL_MS` 和三个 `TENSOR_DB_*` 均未配置，没有读取或输出凭证值。
+- 已请求运行者确认账户覆盖全部49接口、分钟/小时限制、至少58次剩余额度及合规的最小毫秒间隔；尚未收到这些事实，不能猜测速率或发送真实请求探测权限。
+- Node.js 24.15.0（从本机已有 nvm 安装使用）、Java 21.0.11、Python 3.11.5、Playwright 1.62.1；没有安装或修改依赖。
+- manifest SHA-256 `37a317f6a2bc3e5113be5f127976d16d8349414c6476c7f6a194b084a5b0f7c2`；49唯一接口、58组参数、37个ok/12个empty，与设计一致。只读取manifest，没有读取模板data。
+- 原验收JAR存在且SHA-256为 `a69874afa6ce783d4ef4e16a678ddb0ff457f2948b68f509a8e4a2c00440bcac`。本轮没有构建、替换或运行该JAR。
+
+## 实施与静态检查
+
+`739e128`（`test(release): verify live Tushare interfaces`）只新增 `control-plane/e2e/tushare-live.spec.js`，模式100644。该时点SHA-256为 `d3aafc7b3aa14311bc691fdb37ac105473598cd06c4d1d7a58949d3bd13238a5`。实现包含49项无条件注册、58样例串行页面流程、独立fixture准备、页面/请求/计数/来源时间核对、环境及日志隔离和正常停机；后续审查修订已闭环（见下文）；真实验收仍未执行。
+
+| 检查 | 实际命令 | 结果 |
+|---|---|---|
+| Node24语法 | `cd control-plane && node --check e2e/tushare-live.spec.js` | exit0 |
+| 用例发现 | `cd control-plane && npx playwright test e2e/tushare-live.spec.js --list` | exit0；49 Chromium tests / 1 file |
+| 同函数纯本地反例 | `node /tmp/m14-t05-pure-probe.mjs`，使用Node24 | exit0；`M14-T05 pure counterexample probes: PASS` |
+| CLI终检函数 | `python3 .superpowers/sdd/M14-integration-release/probe-terminal-scan.py` | exit0；10项通过 |
+| Chromium合成失败产物 | `python3 .superpowers/sdd/M14-integration-release/probe-playwright-terminal.py` | 外层exit0；故意失败的npx1与最终1均保留 |
+| 正式spec缺环境拒绝 | `python3 .superpowers/sdd/M14-integration-release/probe-missing-environment.py` | 外层exit0；npx1、最终1，1 failed / 48 did not run；未执行任何业务用例 |
+| 文档内可复跑代码 | 提取2个shell片段执行`sh -n`，2个Python片段执行`ast.parse` | 均通过；内嵌终检与已测试代码逐字节一致，49个未运行API行完整 |
+
+纯本地反例直接使用正式函数的VM前缀，覆盖manifest错误hash/缺项/多项/重复API/未知status/非法params、多样例ok允许部分EMPTY但全空拒绝、empty拒绝SUCCESS、历史row_count不参与当次计数、不同键写入少于上游行数合法、重复requestId/额外POST/缺登记查询/pending请求拒绝、插入累计不符/来源错误、跨chunk秘密与items包络键拒绝。没有在正式spec引入环境开关或skip入口。
+
+缺环境拒绝轮使用全新自有0700目录 `/private/tmp/tensor-m14-t05._v16zhkp`，隐藏捕获CLI输出后运行同一终检。首个固定前置失败为 `live token supplied`；没有向Java注入Token、启动JVM或建立业务连接。CLI也记录了尚未初始化的输入/日志及证据清理检查失败；原失败全部保留。终检scanPassed/cleanupPassed均true、全部自动产物删除、8080空闲，spec哈希前后相同。该轮的1失败/48未运行是前置拒绝结果，不是执行49接口后的产品结论。
+
+## 本地验证
+
+终检代码先用临时探针检查缺失实现，实际exit1（`terminal_scanner_not_implemented`）；实现后，同一 `finalize` 函数的10项探针exit0：安全成功、保留原exit37、秘密原文、JSON转义秘密、晚生成秘密、成功轮异常上下文、目录符号链接不跟随、意外文件、FIFO不读取、泄漏时仍保留exit37。探针均使用临时合成输入，清理自有目录。
+
+当前Playwright的真实合成页面失败探针实际为：npx exit1、终检exit1、外层探针exit0；page/context均已关闭、afterAll已完成，仍枚举到1个自动 `error-context.md` 和1个路径附件。在CLI/全部worker退出后另写合成秘密文件，终检命中并删除；全部Playwright自动产物被删除，原失败码未被扫描成功覆盖。页面仅含合成秘密和合成行，没有启动应用/数据库或调用Tushare。
+
+探针首次被macOS沙箱的Chromium bootstrap限制阻止，窄范围工具提权后浏览器可正常运行。随后定位到 `testInfo.attach({body})` 在此版本保留内存附件、不创建路径附件，探针改为真实path附件后完成上述验证；这是临时探针修正，不是产品缺陷。两次失败探针遗留的自有目录也已扫描清理。
+
+本地探针源码与安全结果保留于忽略目录 `.superpowers/sdd/M14-integration-release/`，不作为新增产品helper或额外live用例提交。终检的可复跑代码完整嵌入下文。
+
+## 独立审查与修订
+
+对 `739e128` 的独立审查提出4项Important和1项Minor：缺少先于外层Playwright超时的内部工作/共享清理期限；日志扫描在换行处分段丢失秘密重叠；失败轮用已通过/已投影数代替实际执行/POST计数；ApiError.code未验证公开枚举；前置失败重复终结引起额外清理报错。控制器使用冻结版本、合成秘密和内存sink独立复现换行缺口，结果为拒绝false/完整合成秘密持久化到内存true，没有真实凭证或磁盘泄漏。修订 `d378ad2` 增加内部绝对期限和共享清理预算、跨换行/UTF-8字节重叠、独立实际请求与用例计数、16项公开错误码/fieldErrors校验，以及可重复终结的阶段检查。扩展同函数反例、语法、49项发现和diff检查均exit0。复审发现新引入的半行日志提前关联问题，随后由 `a9bf981` 定点修正为仅暴露完整换行行。第二次定点复审确认Addressed、无新问题，结论为 `Approved for local readiness`；原4项Important、1项Minor及新1项Important全部闭环，没有未解决的本地审查问题。终检代码与证据真实性未发现其他问题。
+
+控制器在该修订上重新执行缺环境CLI，私有目录 `/private/tmp/tensor-m14-t05.xij2s9th`，spec SHA-256 `99780152e656ec3e1e5464c9eb8da97a2daf1c8e850bd7a12e37b73c754d2380` 前后一致。原始/最终退出码均1，仍为1 failed / 48 did not run，但只剩固定 `live token supplied` 前置失败，没有额外清理或证据写入错误。安全计数准确为attempted/failed/completed均0、unexecuted49；观察到的四类业务请求计数均0，应用日志0字节，cleanup三项true、8080空闲、自动产物无残留。这里的0仅为该前置拒绝轮观察到的请求数，不代填真实数据行、耗时或上游结果。
+
+
+最终spec提交为 `a9bf981`，SHA-256 `f7f3c315913bc19b8e2d59ab7ca07e82e4d3bdcd58d7ed86ea0545fbbb47fb90`。该版语法、扩展同函数反例、49项Chromium发现和 `git diff --check` 均exit0。新增日志分块反例证明首块0匹配、第二块恰1条完整事件，已完整但暂缓落盘的事件仍能关联。`d378ad2` 的缺环境CLI证明前置拒绝和幂等清理；最后一次窄修改只改变待写日志的完整行暴露，未重复运行不受影响的缺环境/Chromium产物门禁，也没有真实矩阵结果。
+
+最终只读核对：spec工作区内容与提交对象一致；manifest/原JAR哈希仍为上述固定值；实施提交区间只增加指定spec，第二指定文件为本证据文档。2个内嵌shell片段、2个Python片段语法通过，终检与已测试函数字节相同，49个未运行API行完整。实际环境仍未配置Token、调用间隔和三个DB变量，账户确认仍未提供；记录为M14-T05外部环境阻塞，不宣称任务验收完成。
+
+## 真实矩阵实际状态
+
+本轮真实49接口均未执行；58次真实页面POST、98次真实dataset查询及fixture的2POST/3查询均未启动。未创建验收schema、JVM或上游替身，没有数据库行、请求ID、耗时、表计数或页面匹配结果可供验收，不能用0或前序任务的历史结果代填未测量值。以下仅列manifest身份和本轮未执行状态。
+
+| API | 设计接口级预期 | 样例数 | 本轮实际 |
+|---|---|---:|---|
+| `stock_basic` | ok | 3 | 未运行 |
+| `stock_company` | ok | 3 | 未运行 |
+| `hs_const` | ok | 2 | 未运行 |
+| `income` | empty | 1 | 未运行 |
+| `balancesheet` | empty | 1 | 未运行 |
+| `cashflow` | empty | 1 | 未运行 |
+| `fina_indicator` | empty | 1 | 未运行 |
+| `fina_audit` | empty | 1 | 未运行 |
+| `fina_mainbz` | ok | 1 | 未运行 |
+| `stk_rewards` | ok | 1 | 未运行 |
+| `stk_holdernumber` | ok | 1 | 未运行 |
+| `broker_recommend` | ok | 1 | 未运行 |
+| `trade_cal` | ok | 3 | 未运行 |
+| `margin` | ok | 3 | 未运行 |
+| `daily` | ok | 1 | 未运行 |
+| `weekly` | ok | 1 | 未运行 |
+| `monthly` | empty | 1 | 未运行 |
+| `adj_factor` | ok | 1 | 未运行 |
+| `suspend_d` | ok | 1 | 未运行 |
+| `daily_basic` | ok | 1 | 未运行 |
+| `moneyflow` | ok | 1 | 未运行 |
+| `stk_limit` | ok | 1 | 未运行 |
+| `moneyflow_hsgt` | ok | 1 | 未运行 |
+| `hsgt_top10` | ok | 1 | 未运行 |
+| `hk_hold` | ok | 1 | 未运行 |
+| `top_list` | ok | 1 | 未运行 |
+| `top_inst` | ok | 1 | 未运行 |
+| `margin_detail` | ok | 1 | 未运行 |
+| `block_trade` | ok | 1 | 未运行 |
+| `slb_len` | empty | 1 | 未运行 |
+| `slb_sec` | empty | 1 | 未运行 |
+| `slb_sec_detail` | empty | 1 | 未运行 |
+| `forecast` | ok | 1 | 未运行 |
+| `express` | ok | 1 | 未运行 |
+| `dividend` | empty | 1 | 未运行 |
+| `disclosure_date` | ok | 1 | 未运行 |
+| `repurchase` | ok | 1 | 未运行 |
+| `share_float` | ok | 1 | 未运行 |
+| `stk_holdertrade` | ok | 1 | 未运行 |
+| `top10_holders` | empty | 1 | 未运行 |
+| `top10_floatholders` | empty | 1 | 未运行 |
+| `new_share` | ok | 1 | 未运行 |
+| `namechange` | ok | 1 | 未运行 |
+| `stk_managers` | ok | 1 | 未运行 |
+| `pledge_stat` | ok | 1 | 未运行 |
+| `pledge_detail` | ok | 1 | 未运行 |
+| `index_classify` | ok | 1 | 未运行 |
+| `index_member` | ok | 1 | 未运行 |
+| `index_member_all` | ok | 1 | 未运行 |
+
+## 运行与CLI退出后终检命令
+
+下列为恢复执行命令，**本轮未用于真实矩阵**。运行者先完成设计规定的账户确认、新空MySQL8.4.6 schema/最小权限账号、独立只读初始和结束表计数，以及私密环境注入；Token只能通过 `TENSOR_TUSHARE_TOKEN`，不写文件或聊天。采用原验收JAR绝对路径、明确的 `M14_T05_CALL_INTERVAL_MS` 和Node24。首次失败停止，不自动重试、不换日期或参数。
+
+spec仅写 `run/application.log` 和 `run/safe-results.json`。终检在npx和所有worker完全退出后运行；目录不跟随符号链接，异常文件/对象直接失败，泄漏文件删除，全部Playwright产物删除。成功轮存在上下文/附件视为失败；`.last-run.json`只作为会删除的正常运行索引。保留的白名单日志/JSON均在本机私有目录，不能发布原日志。
+
+```sh
+cd control-plane
+set +x
+umask 077
+M14_T05_ARTIFACT_DIR=$(mktemp -d "${TMPDIR:-/tmp}/tensor-m14-t05.XXXXXXXX") || exit 1
+export M14_T05_ARTIFACT_DIR
+tensor_m14_t05_exit=0
+npx playwright test e2e/tushare-live.spec.js --workers=1 \
+  --output "$M14_T05_ARTIFACT_DIR/playwright" \
+  >"$M14_T05_ARTIFACT_DIR/runner.log" 2>&1 || tensor_m14_t05_exit=$?
+python3 - "$tensor_m14_t05_exit" <<'PY'
+import json
+import os
+from pathlib import Path
+import re
+import stat
+import sys
+
+
+def finalize(root, original_exit, secrets):
+    root = Path(root)
+    info = root.lstat()
+    if (not root.is_absolute() or not re.fullmatch(r'tensor-m14-t05\.[A-Za-z0-9_-]+', root.name)
+            or not stat.S_ISDIR(info.st_mode) or info.st_uid != os.getuid()
+            or stat.S_IMODE(info.st_mode) != 0o700):
+        raise ValueError('artifact_root_rejected')
+    needles = set()
+    for secret in filter(None, secrets):
+        needles.add(secret.encode())
+        for ascii_only in [True, False]:
+            needles.add(json.dumps(secret, ensure_ascii=ascii_only)[1:-1].encode())
+    result = {'npxExitCode': original_exit, 'filesScanned': 0, 'deletedArtifacts': 0,
+              'scanPassed': True, 'cleanupPassed': True}
+    allowed_files = {'runner.log', 'post-cli-summary.json',
+                     'run/application.log', 'run/safe-results.json'}
+
+    def remove(path):
+        try:
+            path.unlink()
+            result['deletedArtifacts'] += 1
+        except OSError:
+            result['cleanupPassed'] = False
+
+    def walk(directory):
+        try:
+            entries = list(directory.iterdir())
+        except OSError:
+            result['scanPassed'] = result['cleanupPassed'] = False
+            return
+        for path in entries:
+            relative = path.relative_to(root).as_posix()
+            automatic = relative.startswith('playwright/')
+            try:
+                entry = path.lstat()
+                if stat.S_ISDIR(entry.st_mode):
+                    unexpected_dir = relative not in {'run', 'playwright'} and not automatic
+                    if unexpected_dir:
+                        result['scanPassed'] = False
+                    walk(path)
+                    if relative == 'playwright' or automatic or unexpected_dir:
+                        try:
+                            path.rmdir()
+                        except OSError:
+                            result['cleanupPassed'] = False
+                    continue
+                if not stat.S_ISREG(entry.st_mode) or entry.st_nlink != 1:
+                    result['scanPassed'] = False
+                    remove(path)  # unlink an unexpected link/object itself; never follow it
+                    continue
+                result['filesScanned'] += 1
+                flags = os.O_RDONLY | os.O_NOFOLLOW
+                descriptor = os.open(path, flags)
+                with os.fdopen(descriptor, 'rb') as source:
+                    opened = os.fstat(source.fileno())
+                    if (opened.st_dev, opened.st_ino) != (entry.st_dev, entry.st_ino):
+                        raise ValueError('artifact_identity_changed')
+                    overlap = max(map(len, needles), default=1) - 1
+                    tail = b''
+                    leaked = False
+                    while True:
+                        chunk = source.read(1024 * 1024)
+                        if not chunk:
+                            break
+                        data = tail + chunk
+                        if any(value in data for value in needles):
+                            leaked = True
+                        tail = data[-overlap:] if overlap else b''
+                unexpected = relative not in allowed_files and not automatic
+                # Playwright's run bookkeeping is deleted, but is not a context/attachment.
+                success_context = automatic and relative != 'playwright/.last-run.json' and original_exit == 0
+                if leaked or unexpected or success_context:
+                    result['scanPassed'] = False
+                if leaked or unexpected or automatic:
+                    remove(path)
+            except (OSError, ValueError):
+                result['scanPassed'] = False
+                remove(path)
+
+    walk(root)
+    summary = root/'post-cli-summary.json'
+    try:
+        if summary.exists() or summary.is_symlink():
+            summary.unlink()
+        descriptor = os.open(summary, os.O_WRONLY | os.O_CREAT | os.O_EXCL | os.O_NOFOLLOW, 0o600)
+        with os.fdopen(descriptor, 'w') as output:
+            json.dump(result, output, sort_keys=True)
+            output.write('\n')
+    except OSError:
+        result['cleanupPassed'] = False
+    code = original_exit or (0 if result['scanPassed'] and result['cleanupPassed'] else 1)
+    return code, result
+
+
+if __name__ == '__main__':
+    original = 1
+    try:
+        original = int(sys.argv[1])
+        if not 0 <= original <= 255:
+            raise ValueError('exit_code_rejected')
+        secrets = [os.environ.get(name, '') for name in
+                   ['TENSOR_TUSHARE_TOKEN', 'TENSOR_DB_PASSWORD', 'TENSOR_DB_USERNAME', 'TENSOR_DB_URL']]
+        code, summary = finalize(os.environ['M14_T05_ARTIFACT_DIR'], original, secrets)
+        print(json.dumps(summary, sort_keys=True))
+    except Exception:
+        code = original or 1
+        print('M14_T05_TERMINAL_SCAN_FAILED')
+    sys.exit(code)
+PY
+```
+
+待真实证据补录后，在仓库根用同一环境秘密集合检查这个精确文档；任何命中只输出固定标志，不输出值，保留失败并清除泄漏内容：
+
+```sh
+python3 - <<'PY'
+import json, os
+from pathlib import Path
+body = Path('docs/verification/M14-T05-tushare-live.md').read_bytes()
+values = [os.environ.get(k, '') for k in
+          ['TENSOR_TUSHARE_TOKEN', 'TENSOR_DB_PASSWORD', 'TENSOR_DB_USERNAME', 'TENSOR_DB_URL']]
+needles = {v.encode() for v in values if v}
+for v in filter(None, values):
+    needles.update(json.dumps(v, ensure_ascii=a)[1:-1].encode() for a in [True, False])
+if any(v in body for v in needles):
+    raise SystemExit('M14_T05_EVIDENCE_SECRET_SCAN_FAILED')
+print('M14_T05_EVIDENCE_SECRET_SCAN_PASSED')
+PY
+```
+
+恢复后须独立验证新空库、6迁移/50业务表、49生产表末行数与页面总数一致、fixture1行，核对全部请求完成事件，正常SIGTERM停机并清理本轮精确自有资源。只有完整49通过、零失败/未执行/重试和全部扫描/清理门禁通过，才可按看板完成M14-T05并准备M14-T06。
