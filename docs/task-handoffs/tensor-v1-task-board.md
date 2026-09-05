@@ -92,7 +92,7 @@
 | 71 | M14-T01 | fixture 页面端到端主闭环 | `COMPLETED` | M13-T04, M13-T05 | docs/task-designs/M14-T01-design.md | docs/task-handoffs/M14-T01-handoff.md |
 | 72 | M14-T02 | 下载失败、空结果、幂等和回滚矩阵 | `COMPLETED` | M14-T01 | docs/task-designs/M14-T02-design.md | docs/task-handoffs/M14-T02-handoff.md |
 | 73 | M14-T03 | 查询、分页、宽表、竞态和无障碍 E2E | `COMPLETED` | M14-T01 | docs/task-designs/M14-T03-design.md | docs/task-handoffs/M14-T03-handoff.md |
-| 74 | M14-T04 | 49 数据集自动契约与页面回归驱动 | `IN_PROGRESS` | M03-T09, M04-T06, M14-T01 | docs/task-designs/M14-T04-design.md | docs/task-handoffs/M14-T04-handoff.md |
+| 74 | M14-T04 | 49 数据集自动契约与页面回归驱动 | `COMPLETED` | M03-T09, M04-T06, M14-T01 | docs/task-designs/M14-T04-design.md | docs/task-handoffs/M14-T04-handoff.md |
 | 75 | M14-T05 | 真实 Tushare 49 接口受控页面验收 | `NOT_STARTED` | M14-T04 | None | None |
 | 76 | M14-T06 | `daily` 与 `balancesheet` 性能验证 | `NOT_STARTED` | M14-T03, M14-T05 | None | None |
 | 77 | M14-T07 | Token、SQL、依赖、网络和运行安全验证 | `NOT_STARTED` | M14-T02, M14-T03, M14-T04, M14-T05 | None | None |
@@ -1046,6 +1046,9 @@
 - **State evidence (readiness):** 2026-09-06：M14-T03完成记录 `139c2c0` 已先独立提交，再按预定义Order选中74/M14-T04，观测NOT_STARTED、Design/Handoff为None。使用任务契约设计技能完成 `docs/task-designs/M14-T04-design.md`，独立审查两项Important已修正：显式 `TENSOR_TUSHARE_BASE_URL` 回环哨兵地址及正确XML `testsuite@name`/`testcase@classname`、允许成功空failureMessage；定点复审两项Addressed、无新Critical/Important，Ready for implementation: Yes。`8526b97` 提交217行详细设计并仅回填Design document，链接后完整读取。设计冻结三个新实施文件、Git HEAD新临时快照运行原Maven契约50+52+4及120前端回归、manifest/源YAML/生产表/打包YAML49全集、原验收JAR49个接口/数据集配对用例、43必填/6无参数/5组filters、零业务写入/records/真实上游、13截图和私有日志/清理规则。独立PRD与manifest表核对49API/851字段、七组11/7/6/6/9/3/7、五组filters无重复覆盖49、结构/引用/格式通过；保留M11-T01项目所有者已批准七组分类、range→date_range及49生产+1fixture的兼容决定。三个直接依赖M03-T09、M04-T06、M14-T01的产物/决策/理由/约束/用途及既有50/52/3项等可用性证据逐项写入交接，未新增顺序前驱为依赖，无输入冲突。先写完整 `docs/task-handoffs/M14-T04-handoff.md` 并通过模板/3依赖/首动作核对，再链接并执行真实 `NOT_STARTED -> READY`。三个目标实施文件仍未创建，新脚本/49项E2E未运行；首动作从已完成设计开始实施，不补设计、不把预期作为实际结果。工作区用户无关暂存及target资源不纳入本次提交。
 
 - **State evidence (start):** 2026-09-06：用户明确要求按权威任务看板执行当前任务、先读取设计与交接；已完整读取 M14-T04 设计、交接、任务卡与全局约束，确认 READY 且三个实施目标不存在、无重叠修改。以本次请求为启动证据执行 `READY -> IN_PROGRESS`，保留原交接。按仓库授权直接在 main 工作，使用子代理实施及独立审查流程；构建使用新临时 HEAD 快照，保留用户已有暂存与 target 产物，仅实施本任务并在验收后准备后继。
+
+
+- **State evidence (completion):** 2026-09-06：完整重读所链接设计后，以实施 `f96c7b1`、审查修订 `1a23624` 和最终修订 `616d54d` 的实际结果执行 `IN_PROGRESS -> COMPLETED`。精确新增设计规定三个文件，模式100755/100644/100644；无生产、依赖、既有测试、manifest/模板或原验收JAR改动。`scripts/verify-49-contracts.sh` 在新HEAD归档快照真实exit0，最终BRRlZI0U证据SHA `06c9698df9bb457691c786a19aa4e9096c29d771ff291eb59b0749740c91c4a2`；主控独立解析本轮XML身份/哈希/计数，M03 50、M04 52、生产JAR 4全通过且0失败/错误/跳过，前端20文件/120通过，源YAML/生产表/打包YAML49/49/49，fixture附加1表单列，11项报告/归档拒绝探针及双Docker盘点失败探针通过。测试脚本SHA `a3a53f0695fbcd661d615c04343ac8d90493859c5604493c480952c8979a5ce3` 与提交内容一致。原JAR页面Run7实际49 passed、0失败/跳过/重试（4.5m），API/dataset各49、43必填拦截、6无参数、七分类/五组filters完整；245 metadata GET均200，下载POST/records GET/上游调用均0。spec SHA `113e63235b34d97d9e98a012ff479d7971085bd6de838b9c06d62a42982bc722` 前后未变，Run7安全证据SHA `c76855246a74445d8b097b232ad3bbdece9ee446c0521d0b7350f3806150c783`。独立只读库启动后/结束后均6迁移、50业务表、49生产表逐表0行；13截图哈希一致且与已逐张人工接受的Run5图像字节相同。JVM/哨兵/私有日志扫描、自有容器/卷/凭证清理通过，原验收JAR SHA保持 `a69874afa6ce783d4ef4e16a678ddb0ff457f2948b68f509a8e4a2c00440bcac`。任务审查5项修复全部Addressed；整体验收发现的Docker管道失败掩盖已改为独立检查并实跑，唯一最终定点复审全部Addressed、Critical/Important/Minor均0、Ready to complete: Yes。语法、Git范围/模式/格式通过，用户并行ISSUE-004与target资源未纳入提交。完整实际证据见 `docs/verification/M14-T04-49-contracts.md`；本结果仅证明元数据/页面合同，不宣称真实49下载或发布准入完成。保留入口交接为历史上下文。
 
 ### `M14-T05`
 
