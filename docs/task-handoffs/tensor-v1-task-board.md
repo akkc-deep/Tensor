@@ -88,7 +88,7 @@
 | 67 | M13-T02 | 单个可执行 JAR 打包和内容检查 | `COMPLETED` | M09-T06, M13-T01 | docs/task-designs/M13-T02-design.md | docs/task-handoffs/M13-T02-handoff.md |
 | 68 | M13-T03 | 生产配置、CORS、SPA fallback 和优雅停机 | `COMPLETED` | M09-T06, M13-T02 | docs/task-designs/M13-T03-design.md | docs/task-handoffs/M13-T03-handoff.md |
 | 69 | M13-T04 | 全新环境运行说明和启动 smoke test | `COMPLETED` | M13-T03 | docs/task-designs/M13-T04-design.md | docs/task-handoffs/M13-T04-handoff.md |
-| 70 | M13-T05 | 独立 acceptance JAR 打包及启停验收 | `NOT_STARTED` | M13-T04, M08-T02, M04-T06 | docs/task-designs/M13-T05-design.md | None |
+| 70 | M13-T05 | 独立 acceptance JAR 打包及启停验收 | `READY` | M13-T04, M08-T02, M04-T06 | docs/task-designs/M13-T05-design.md | docs/task-handoffs/M13-T05-handoff.md |
 | 71 | M14-T01 | fixture 页面端到端主闭环 | `NOT_STARTED` | M13-T04, M13-T05 | None | None |
 | 72 | M14-T02 | 下载失败、空结果、幂等和回滚矩阵 | `NOT_STARTED` | M14-T01 | None | None |
 | 73 | M14-T03 | 查询、分页、宽表、竞态和无障碍 E2E | `NOT_STARTED` | M14-T01 | None | None |
@@ -983,6 +983,7 @@
 - **Sources:** `docs/superpowers/plans/tensor-modules/M13-packaging-runbook.md` 的 `Task M13-T05`；M13-T04 生产分发与运行说明；M08-T02 fixture 公开产物；M04-T06 测试 V6。
 - **First action:** 完整读取本任务设计和交接后，先创建验收归档测试及最小测试绑定，取得验收 JAR 缺失的可归因 RED。
 - **State evidence (registration):** 2026-09-05：M13-T04 已由 `bb26660` 记录完成；准备 M14-T01 时核对到生产 JAR 按合同排除 fixture/V6，而现有五模块没有验收 JAR 打包入口。用户对“是否先设计一个独立的验收打包任务”回复“同意”，批准登记本增补任务 M13-T05，Order 70；原 M14-T01～T08 顺延为 71～78，任务ID及相对顺序不变，M14-T01 增加对本产物的直接依赖。该批准是设计与衔接授权，不是实现已开始或验收已通过的证据；初始状态 `NOT_STARTED`，待设计完成和交接链接后再准备。
+- **State evidence (readiness):** 2026-09-05：依据上述设计与衔接授权，在已完成的 M13-T04 之后准备 Order 70 的 M13-T05。提交 `ab5ce88` 已完成并回填 `docs/task-designs/M13-T05-design.md`；链接后完整读取七节设计，冻结精确三文件范围、显式 AntRun 3.1.0 装配、原生产合同/fixture test scope、归档三测、严格 RED、四次构建门禁及四种真实启动状态，无待定实施选择。独立只读设计审查核对 Maven 3.9.15 profile 合并后的 Boot→AntRun 顺序、两个 Failsafe 3.5.6 execution 及汇总行为、扫描/适配器接缝和归档边界，结论 `Ready for implementation: Yes`，无 Critical/Important/Minor；未执行新构建或运行验收。三个直接输入分别以 M13-T04 的 `59acec3`/`bb26660`、120/368/4 构建、107 项 smoke 与真实首跑/重启，M08-T02 的 `885313d`/`54c2b30`、历史 272/272 与 fixture 12 项，M04-T06 的 `e78bd98`、真实 MySQL schema 52/52 提供已记录可用性证据；生产排除、双条件目录暴露和 V6 test-resource/独立 schema 约束互补，无未解决冲突。`docs/task-handoffs/M13-T05-handoff.md` 已按 next-task 模板写入并先链接，逐项记录三个直接输入的 artifact/decision/rationale/constraint/usage/readiness evidence、同一设计路径、读取顺序及先写完整归档测试和最小绑定取得缺验收 JAR RED 的首个实施动作。交接结构、引用和目标文件不存在检查通过，因此执行真实 `NOT_STARTED -> READY`；本次仅完成设计与后继准备，M13-T05 实现及新增构建/运行验收尚未开始。
 
 ### `M14-T01`
 
