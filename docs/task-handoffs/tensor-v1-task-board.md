@@ -93,7 +93,7 @@
 | 72 | M14-T02 | 下载失败、空结果、幂等和回滚矩阵 | `COMPLETED` | M14-T01 | docs/task-designs/M14-T02-design.md | docs/task-handoffs/M14-T02-handoff.md |
 | 73 | M14-T03 | 查询、分页、宽表、竞态和无障碍 E2E | `COMPLETED` | M14-T01 | docs/task-designs/M14-T03-design.md | docs/task-handoffs/M14-T03-handoff.md |
 | 74 | M14-T04 | 49 数据集自动契约与页面回归驱动 | `COMPLETED` | M03-T09, M04-T06, M14-T01 | docs/task-designs/M14-T04-design.md | docs/task-handoffs/M14-T04-handoff.md |
-| 75 | M14-T05 | 真实 Tushare 49 接口受控页面验收 | `IN_PROGRESS` | M14-T04 | docs/task-designs/M14-T05-design.md | docs/task-handoffs/M14-T05-handoff.md |
+| 75 | M14-T05 | 真实 Tushare 49 接口受控页面验收 | `BLOCKED` | M14-T04 | docs/task-designs/M14-T05-design.md | docs/task-handoffs/M14-T05-handoff.md |
 | 76 | M14-T06 | `daily` 与 `balancesheet` 性能验证 | `NOT_STARTED` | M14-T03, M14-T05 | None | None |
 | 77 | M14-T07 | Token、SQL、依赖、网络和运行安全验证 | `NOT_STARTED` | M14-T02, M14-T03, M14-T04, M14-T05 | None | None |
 | 78 | M14-T08 | 全新环境 AC-001～018 与发布证据包 | `NOT_STARTED` | M14-T01, M14-T02, M14-T03, M14-T04, M14-T05, M14-T06, M14-T07 | None | None |
@@ -1091,6 +1091,8 @@
 
 
 - **State evidence (decimal-repaired phase restart):** 解阻与明确修复包接入已独立提交 8084e30。消费已更新的 M14-T05 设计与同一 pause 交接，依据用户持续执行当前任务并“继续修复”的授权，观测 READY 后单独执行 READY→IN_PROGRESS。正式环境为 6gn542ah，新包与 spec/config 四 hash 已封存；本次启动器供用户已有 TENSOR_TUSHARE_TOKEN 的终端直接执行，不再要求配置 Token 或启动旧等待脚本。真实新轮尚未运行，状态表示恢复验收工作，不表示 stock_company 或完整 40 项已通过；按实际结果再次 BLOCKED 或阶段成功 PAUSED，原 49 目标不宣称完成。
+
+- **State evidence (live announcement-date failure):** 用户已运行6gn542ah；实际证据241813c先提交且全文SHA699132b0e4373d9d74300f6b5b64b22a0b9c593601dd54b66feca428d9136afd与真实秘密扫描标记一致。58秒、npx1/最终1，9通过/1失败/30未运行；stock_company三原样例插入2457/3083/754、页面与独立DB6294，ISSUE-005关闭。新stk_holdernumber首样例ADAPTER_TYPE_INVALID，adapter阶段，requestId841ad417-262b-4f40-a6ae-4154c536aac2，37ms，失败计数unavailable、具体字段/值未留存。真实POST14/records19，fixture2/3通过，38完成事件逐ID唯一；6迁移50表初始0，最终stock_basic5895/company6294/fina_mainbz150/stk_rewards1428/fixture1，其余45表0，扫描与所有自有资源清理通过。完整设计已读取、先更新pause交接，观测IN_PROGRESS后执行IN_PROGRESS→BLOCKED。独立ISSUE-006按持续修复授权定位历史ann_date日期时间兼容，不修改真实证据/参数/范围、不自动复跑；2000档和原49均未完成，不准备后继。
 
 ### `M14-T06`
 
