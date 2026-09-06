@@ -367,7 +367,7 @@ onMounted(loadSources)
 
 @media (max-width: 680px) {
   .dataset-setup {
-    padding-bottom: 18px;
+    padding: 18px;
   }
 }
 </style>
