@@ -133,6 +133,8 @@
 
 ### Task M14-T06: Daily 与 balancesheet 性能验证（4.0h）
 
+**Current execution instruction:** 用户明确暂缓M14-T05剩余9项并登记ISSUE-008，先推进本任务。消费已完成的页面合同和冻结包，不以原49全量完成为性能测试启动前提；本任务结果不关闭ISSUE-008或替代真实接口/最终发布验收。
+
 **Files:**
 - Create: `scripts/performance/verify-query-p95.sh`
 - Create: `control-plane/e2e/loading-feedback.spec.js`
