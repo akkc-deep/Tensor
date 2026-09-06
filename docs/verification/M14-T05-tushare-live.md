@@ -22,6 +22,22 @@ Java21、8080空闲、原验收JAR/manifest/spec冻结哈希重新检查通过�
 
 用户执行终端启动器后的只读复核：安全就绪文件`tokenPresent=true`、初始0表，登记PID对应的启动器仍存活；本轮容器所有权、MySQL8.4.6、当前0表、8080空闲和三个冻结哈希均通过。没有读取进程环境或Token值。账户输入/完整就绪/启动门禁/运行开始文件仍均不存在；当前仅Token传递已解决，账户权限/额度/频率确认仍缺失，未启动JVM或任何业务用例。
 
+## 2000积分档位的公开权限核对（未调用数据接口）
+
+用户后续说明账户为“2000+积分”。本次只访问Tushare官网公开文档，不携带Token、不调用任何数据API，也不读取账户页面。读取[积分权限总览](https://tushare.pro/document/1?doc_id=108)、[积分频次表](https://tushare.pro/document/1?doc_id=290)及manifest49接口的文档地址：45页实际包含对应API说明，4个原文档地址返回“404, 文档不存在！”正文；这不是对API可用性或账户授权的实际测量。
+
+| 当前任务中的具体问题 | 官方页面的实际说明 | 对恢复的影响 |
+|---|---|---|
+| `top_inst` | [接口页](https://tushare.pro/document/2?doc_id=107)明确至少5000积分；权限总览仍写2000 | 存在官方页面不一致，不能以2000档推断有权限，也不能将权限缺失记为已实测 |
+| `broker_recommend` | [接口页](https://tushare.pro/document/2?doc_id=267)明确达到6000积分；频次总表把券商月度金股列在10000档特色数据中 | 2000档不能证明覆盖，且不能承诺6000就满足全部当前规则；需确认实际授权 |
+| `share_float` | [接口页](https://tushare.pro/document/2?doc_id=160)写120积分；权限总览写3000 | 记录冲突，不能把任一页面当成账户授权证明 |
+| `hs_const`、`moneyflow_hsgt`、`hk_hold`、`index_member` | 原文档地址[104](https://tushare.pro/document/2?doc_id=104)、[47](https://tushare.pro/document/2?doc_id=47)、[188](https://tushare.pro/document/2?doc_id=188)、[182](https://tushare.pro/document/2?doc_id=182)均返回文档不存在正文 | 当前公开页面不能确认这些旧接口的权限或可用性；不替换为新API、不改manifest |
+| `hsgt_top10`、`namechange` | [48](https://tushare.pro/document/2?doc_id=48)与[100](https://tushare.pro/document/2?doc_id=100)页面有对应API说明，正文未明示最低积分 | 不把缺少限制文字解释为无限制授权 |
+
+官网明确积分是分级门槛，并不随调用消耗。频次表对2000以上档写每分钟200次、每天100000次/个API；本轮58次是49API参数样例的页面提交数，不是需要扣除58积分。账户本日实际使用量未读取；总表没有给出普通积分接口的独立每小时上限，不能自行补造。具体接口限制优先核对，例如[stock_basic](https://tushare.pro/document/2?doc_id=25)仅每分钟50次。因此即便多数普通接口可按公开限制安排较低频率，也不能据此生成“全部49权限已确认”的运行输入。
+
+当前明确待确认的是这些具体权限/文档差异及账户实际限制，而不是再次设置Token。已向用户具体询问top_inst、broker_recommend是否已有访问权限；没有把回答“2000+积分”扩大为全49权限、剩余额度和间隔均已确认。未写`confirmed-inputs.json`或启动门禁，看板保持BLOCKED、真实矩阵仍未开始。公开页面快照和逐API摘录仅暂存在本机临时文档目录，未作为任务新增分发文件提交。
+
 ## 实施与静态检查
 
 `739e128`（`test(release): verify live Tushare interfaces`）只新增 `control-plane/e2e/tushare-live.spec.js`，模式100644。该时点SHA-256为 `d3aafc7b3aa14311bc691fdb37ac105473598cd06c4d1d7a58949d3bd13238a5`。实现包含49项无条件注册、58样例串行页面流程、独立fixture准备、页面/请求/计数/来源时间核对、环境及日志隔离和正常停机；后续审查修订已闭环（见下文）；真实验收仍未执行。

@@ -31,6 +31,8 @@ pause
 
 恢复进展：用户执行上述启动命令后，控制器独立读取0600 `terminal-ready.json`，实际观测`tokenPresent=true`、`initialTables=0`，并用该文件登记PID只读确认仍是预期启动器进程；未读取进程环境或Token值。独占容器身份、MySQL8.4.6、当前0表、8080空闲与JAR/manifest/spec冻结哈希再次通过。`confirmed-inputs.json`、`inputs-ready.json`、`start-approved.json`及`run-started.json`均不存在，故没有启动实跑。Token传递问题已解决，当前只等待账户49接口权限、至少58次额度以及已核实的频率/间隔信息，收到后消费现有等待进程，不要求用户重新输入Token或重跑启动命令。
 
+积分条件补充：用户自报“2000+积分”后，已核对Tushare官方频次总表及49API文档地址（45有效说明、4文档不存在正文）。具体缺口是top_inst接口页要求5000、broker_recommend接口页要求6000；两者分别与总览2000、特色数据总表10000存在差异，share_float也有120/3000差异。hs_const/moneyflow_hsgt/hk_hold/index_member四个旧文档不可用，hsgt_top10/namechange正文未明示最低积分。完整来源和限制见实际证据文档“2000积分档位的公开权限核对”。普通2000档总表为每分钟200次、每日100000次/个API，stock_basic另限50次/分钟；积分不按调用扣除，没有“需要58积分余额”的要求。仅查公开文档，不携Token或探测API，账户实际授权/用量仍未知。已向用户具体询问top_inst与broker_recommend权限；不能把2000+自动填成全49授权或改为部分通过，也不能仅凭积分升级建议承诺全矩阵可用。
+
 ## Changed Files
 
 - `control-plane/e2e/tushare-live.spec.js`：唯一测试实施文件，最终提交 `a9bf981`，模式100644，SHA-256 `f7f3c315913bc19b8e2d59ab7ca07e82e4d3bdcd58d7ed86ea0545fbbb47fb90`。
@@ -80,7 +82,7 @@ pause
 
 ## Blocker
 
-- **Reason:** Token已通过用户终端启动器实际确认非空，等待进程及专用空库有效；剩余阻塞为合法间隔及49接口权限、分钟/小时频率、至少58次剩余额度尚未确认。不得凭Token存在推断账户条件，保持BLOCKED。
+- **Reason:** Token已通过用户终端启动器确认非空；用户自报2000+积分。公开接口页中top_inst要求5000、broker_recommend要求6000，且有总表冲突、四个旧文档不可用等未决项（见上文）。尚无这些接口实际授权及全49频率/额度确认，不能把2000+推定为满足全矩阵；不生成启动输入，保持BLOCKED。等待进程/空库有一小时生命周期，恢复时需复查。
 - **Resolution condition:** 运行者确认账户权限/频率/额度并提供1～3600000范围内合法毫秒间隔，真实Token仅经规定环境私密注入且非空；本轮独立新schema/最小权限账号和三个DB环境已准备，独立只读确认初始0表，Java21、原JAR哈希和8080检查通过。这些实际证据需写回看板，不能以等待、credentialConfigured或静态用例发现推断已解决。
 
 ## Risks

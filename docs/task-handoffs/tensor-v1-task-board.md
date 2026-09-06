@@ -1068,6 +1068,8 @@
 
 - **State evidence (terminal ready, still BLOCKED):** 用户执行私有启动器后，独立只读确认安全ready文件Token存在、登记进程仍为预期等待启动器，专用MySQL8.4.6仍0表且所有权正确、8080空闲、JAR/manifest/spec冻结哈希通过；未读取Token值或进程环境。Token传递阻塞已解决；账户49接口权限、至少58次额度和已核实频率/间隔仍未确认，四个输入/启动标志尚不存在，因此保持BLOCKED，不启动真实调用，也不要求重新设置Token。
 
+- **State evidence (public permission audit, still BLOCKED):** 用户自报2000+积分后，仅读Tushare官方公开文档核对49API（45有效说明、4原地址文档不存在）。top_inst接口页明确5000、broker_recommend明确6000，均不能由2000档证明覆盖；两项与官方总表以及share_float存在积分说明差异，四个旧API文档缺失也不能当作已授权或已停用。积分不按调用扣除；2000档总表200次/分钟、100000次/日/每API，stock_basic另限50次/分钟，账户实际用量与未公开限制未知。来源和具体待确认事项已记录实际证据与pause交接；已具体询问两个高积分API是否有访问权限，未携Token访问官网、未发业务请求、未设置全49确认/启动信号、不降低验收范围，状态保持BLOCKED。
+
 ### `M14-T06`
 
 - **Goal:** 交付“`daily` 与 `balancesheet` 性能验证”。
