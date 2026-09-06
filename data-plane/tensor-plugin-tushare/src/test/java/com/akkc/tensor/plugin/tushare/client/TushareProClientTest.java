@@ -28,6 +28,7 @@ import java.io.OutputStream;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.math.BigDecimal;
 import java.net.SocketTimeoutException;
 import java.net.URI;
 import java.net.UnknownHostException;
@@ -171,6 +172,22 @@ class TushareProClientTest {
             assertTrue(hasExactSafeRequestBody(request.getBody()),
                     "request body contains only the ordered protocol fields and the method-local credential");
         }
+    }
+
+    @Test
+    void preservesJsonDecimalPrecisionBeforeAdaptation() {
+        stub(HttpStatus.OK.value(), """
+                {"code":0,"msg":null,"data":{"fields":["ts_code","trade_date","open","high","low","close","pre_close","change","pct_chg","vol","amount"],"items":[["SYNTHETIC.SZ","20260807",0.1,12345.123456789012345678,1e-18,1.2300,2,null,0,3,4]]}}
+                """);
+
+        List<Object> row = client(1_024 * 1_024)
+                .execute(dailyDefinition(), Map.of("trade_date", "20260807")).data().getFirst();
+
+        assertThat(row.subList(2, 6)).containsExactly(
+                new BigDecimal("0.1"), new BigDecimal("12345.123456789012345678"),
+                new BigDecimal("1e-18"), new BigDecimal("1.2300"));
+        assertThat(row.get(6)).isEqualTo(2);
+        assertThat(row.get(7)).isNull();
     }
 
     @Test

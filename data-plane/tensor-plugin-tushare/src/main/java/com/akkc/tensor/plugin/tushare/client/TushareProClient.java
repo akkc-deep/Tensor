@@ -23,6 +23,7 @@ public final class TushareProClient {
     private static final ObjectMapper JSON = JsonMapper.builder(JsonFactory.builder()
             .enable(StreamReadFeature.STRICT_DUPLICATE_DETECTION).build())
             .enable(DeserializationFeature.FAIL_ON_TRAILING_TOKENS)
+            .enable(DeserializationFeature.USE_BIG_DECIMAL_FOR_FLOATS)
             .disable(MapperFeature.ALLOW_COERCION_OF_SCALARS)
             .build();
 

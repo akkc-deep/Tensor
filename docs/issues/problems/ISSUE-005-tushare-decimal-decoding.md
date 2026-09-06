@@ -1,0 +1,42 @@
+# ISSUE-005：Tushare 小数解析导致适配失败
+
+## 当前阶段
+
+本地修复、关联回归、独立复审、修复包构建与启动验证完成，待真实复验。用户在 M14-T05 真实 `stock_company` 失败后要求“继续修复”，授权本独立问题的定位、最小修复和验证。以下结果可用于恢复验收，但不代表真实验收通过。
+
+## 已知事实
+
+- [当前交接](../../task-handoffs/M14-T05-handoff.md)：真实请求返回 `ADAPTER_TYPE_INVALID`，失败阶段为 adapter；具体字段和值未保留。不能把下述本地诊断当作该次请求的字段证据。
+- `TushareProClient` 的私有 JSON mapper 未启用 `USE_BIG_DECIMAL_FOR_FLOATS`，无类型的 `items` 小数会解析为 `Double`。
+- [M05-T04 设计](../../task-designs/M05-T04-design.md) 明确要求客户端保留小数为 `BigDecimal`，转换器拒绝 `Float/Double`，禁止从已丢失精度的二进制浮点恢复。
+- 仅在内存检查仓库历史 `stock_company` 模板类型：6294 行的 `reg_capital` 都是 JSON 小数；`employees` 为整数或 null。未输出或另存业务值，也不以历史行数判断真实验收。
+
+## 处理与关闭条件
+
+按[设计与计划](../proposals/ISSUE-005-tushare-decimal-decoding.md)执行。需证明合成回归先失败后通过、相关安全/转换测试通过，构建独立修复产物且保留原产物。真实 `stock_company` 与完整 2000 档矩阵须使用用户已有 Token 终端及全新空库另跑；在此之前只记录本地修复通过，不将上次真实失败改判通过，ISSUE 保留待真实复验状态。
+
+## 2026-09-06 本地验证结果
+
+- RED：客户端合成精度测试 1 失败，发现小数被解析为 Double 且损失十进制精度；单独 app 合成链路测试 1 错误，安全异常定位为 `api=stock_company, row=0, field=reg_capital`。这只是合成复现位置。首次受限环境无法绑定 WireMock 端口的启动失败不计 RED，开放本地测试端口后才取得上述结果。
+- GREEN：唯一生产改动启用 `USE_BIG_DECIMAL_FOR_FLOATS`。下列命令 exit 0，8 类共 85 测试通过、0 失败/错误/跳过。保留严格 LONG/DECIMAL、原响应校验、错误映射与非重试行为；异常处理测试产生其预期的错误日志。
+
+```sh
+mvn -o -f data-plane/pom.xml -pl tensor-app -am \
+  '-Dtest=TushareProClientTest,TushareRestClientFactoryTest,TushareErrorClassifierTest,TushareProPluginTest,ValueConverterTest,GenericDatasetAdapterTest,TushareDecimalAdaptationTest,GlobalExceptionHandlerTest' \
+  -Dsurefire.failIfNoSpecifiedTests=false -Dskip.installnodenpm=true -Dskip.npm=true test
+```
+
+- 独立只读复审：`review_decimal_fix` 对代码、测试、设计及证据边界无 Critical / Important / Minor 发现，可继续产物验证。
+- 构建快照 `/private/tmp/tensor-issue-005-build.kibqgbn5`：基线 `13f3cbf` 加本次三份 Java 变更；全部模块从源码重编译，前端静态文件从原验收包逐字节复用，未运行或修改工作区前端依赖。既有 acceptance profile 构建，命令如下 exit 0。合成适配测试 1 通过；两类打包合同共 7 个唯一测试通过（既有两个 failsafe execution 各执行一次，即 14 次执行），未把它计作 14 个不同测试。
+
+```sh
+# 上述独立快照根目录
+mvn -o -f data-plane/pom.xml -Pacceptance \
+  -Dtest=TushareDecimalAdaptationTest -Dsurefire.failIfNoSpecifiedTests=false \
+  '-Dit.test=PackagedJarContractTest,AcceptancePackagedJarContractTest' \
+  -Dfailsafe.failIfNoSpecifiedTests=false -Dskip.installnodenpm=true -Dskip.npm=true verify
+```
+
+- 新验收包：`/private/tmp/tensor-issue-005-build.kibqgbn5/data-plane/tensor-app/target/acceptance/tensor-app-1.0-SNAPSHOT-acceptance.jar`，SHA-256 `7f794f3494109c27f134c04846e486bda3fe18beec3a88246b58fbcea719cef9`。与原包展开比较无条目增删；四个内部 Tensor JAR 因重建归档字节不同，但展开后仅 `TushareProClient.class` 改变，其余内容相同。原验收包 SHA 仍为 `a69874afa6ce783d4ef4e16a678ddb0ff457f2948b68f509a8e4a2c00440bcac`。
+- 新包启动实测：独立诊断控制目录 `/private/tmp/tensor-m14-t05-control.j0uo9psx`，合成 Token 仅经环境注入，只访问 health；exit 0、health ready、6 成功迁移、50 业务表全空、无秘密/包络扫描触发。JVM 停止、CLI 后扫描与清理通过，容器/匿名卷及私密 DB 文件已删除。该环境已用完，不供真实复跑。
+- 接入只替换 live spec 的固定 JAR hash，并在 M14-T05 设计中明确修复包路径及历史规则覆盖关系。40/48/80、fixture 2/3、9 项排除、manifest 和完整安全流程保持原样。旧真实证据文档内容和已扫描 SHA 未改写。
