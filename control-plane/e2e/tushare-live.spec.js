@@ -20,7 +20,7 @@ import { setTimeout as delay } from 'node:timers/promises'
 const execFileAsync = promisify(execFile)
 const BASE_URL = 'http://127.0.0.1:8080'
 const MANIFEST_SHA = '37a317f6a2bc3e5113be5f127976d16d8349414c6476c7f6a194b084a5b0f7c2'
-const JAR_SHA = 'f2fc35c933e69da5e85690fbabb13d691178538cd6ffb3b94284dfc95b10db89'
+const JAR_SHA = '81adba0dd6500f4aa43b4fa06b18c2c8e7b7454d9e6d4d6c734772cdaef1d002'
 const DOWNLOAD_KEYS = [
   'requestId', 'outcome', 'pluginId', 'apiName', 'sourceRowCount', 'insertedRows',
   'updatedRows', 'message',
@@ -240,8 +240,15 @@ export function selectLiveInterfaces(interfaces) {
   const emptyCount = selected.filter(({ status }) => status === 'empty').length
   safeCheck(sampleCount === 48, 'live scope sample count')
   safeCheck(okCount === 28 && emptyCount === 12, 'live scope status counts')
+  const acceptanceInterfaces = selected.map((entry) => ({
+    ...entry, acceptanceStatus: entry.api_name === 'dividend' ? 'ok' : entry.status,
+  }))
+  const acceptanceOkCount = acceptanceInterfaces.filter(({ acceptanceStatus }) => acceptanceStatus === 'ok').length
+  safeCheck(acceptanceOkCount === 29, 'live scope acceptance status counts')
   return {
-    interfaces: selected,
+    interfaces: acceptanceInterfaces,
+    acceptanceOkCount,
+    acceptanceEmptyCount: acceptanceInterfaces.length - acceptanceOkCount,
     excludedInterfaces: EXCLUDED_INTERFACES.map((entry) => ({ ...entry })),
     sampleCount,
     okCount,
@@ -317,7 +324,7 @@ export function validateBusinessRow(row, columns, pluginId, apiName, startedAt, 
 }
 
 export function validateFinalDataset({
-  manifestStatus,
+  acceptanceStatus,
   insertedRows,
   body,
   definition,
@@ -328,7 +335,7 @@ export function validateFinalDataset({
   safeCheck(body.totalElements === insertedRows, 'final total equals inserted rows')
   const columns = [...definition.columns.map(({ name }) => name), ...SOURCE_COLUMNS]
   safeCheck(JSON.stringify(body.columns) === JSON.stringify(columns), 'final columns')
-  if (manifestStatus === 'empty') {
+  if (acceptanceStatus === 'empty') {
     safeCheck(body.totalElements === 0 && body.items.length === 0, 'empty interface has no rows')
     return
   }
@@ -596,14 +603,20 @@ const ledger = new RequestLedger()
 const expectedEvents = new Map()
 const correlatedEvents = new Map()
 const evidence = {
-  version: 1,
-  task: 'M14-T05',
+  version: 2,
+  task: 'M14-T09',
+  sourceTask: 'M14-T05',
   scope: {
     id: 'points-2000',
     manifestCases: manifest.interfaces.length,
     manifestSamples: manifestSampleCount,
     selectedCases: INTERFACES.length,
     selectedSamples: liveScope.sampleCount,
+    manifestStatuses: { ok: liveScope.okCount, empty: liveScope.emptyCount },
+    acceptanceStatuses: { ok: liveScope.acceptanceOkCount, empty: liveScope.acceptanceEmptyCount },
+    interfaceStatuses: INTERFACES.map(({ api_name, status, acceptanceStatus }) => ({
+      apiName: api_name, manifestStatus: status, acceptanceStatus,
+    })),
     excludedInterfaces: liveScope.excludedInterfaces,
   },
   startedAt: undefined,
@@ -1451,20 +1464,20 @@ async function runLiveInterface(browser, entry) {
         lastDownloadAt = result.finishedAt
         results.push(result.body)
       }
-      validateInterfaceOutcomes(entry.status, results)
+      validateInterfaceOutcomes(entry.acceptanceStatus, results)
 
       const finalDefinition = await openDataset(page, monitor, 'tushare_pro', contract, true)
       const finalBody = await queryDataset(page, monitor, 'tushare_pro', contract, finalDefinition)
       const insertedRows = results.reduce((sum, result) => sum + result.insertedRows, 0)
       validateFinalDataset({
-        manifestStatus: entry.status,
+        acceptanceStatus: entry.acceptanceStatus,
         insertedRows,
         body: finalBody,
         definition: finalDefinition,
         startedAt: firstDownloadAt,
         finishedAt: lastDownloadAt,
       })
-      if (entry.status === 'ok') await assertVisibleRow(page, finalDefinition, finalBody.items[0])
+      if (entry.acceptanceStatus === 'ok') await assertVisibleRow(page, finalDefinition, finalBody.items[0])
       else {
         await expect(page.getByText('未找到符合条件的数据')).toBeVisible()
         safeCheck(await page.getByRole('row').count() <= 1, 'empty interface has no placeholder row')
@@ -1540,7 +1553,7 @@ async function writeSafeEvidence() {
   }
   await chmod(target, 0o600)
   evidenceWritten = true
-  console.info(`M14-T05 safe results: ${target}`)
+  console.info(`M14-T09 safe results: ${target}`)
 }
 
 async function cleanupAfterSetupFailure(error) {
@@ -1563,7 +1576,7 @@ function registerTests() {
     launchOptions: { env: publicEnvironment() },
   })
 
-  test.describe('M14-T05 live Tushare acceptance', () => {
+  test.describe('M14-T09 live Tushare acceptance', () => {
     test.describe.configure({ mode: 'serial', retries: 0 })
 
     test.beforeAll(async ({ browser }, testInfo) => {
@@ -1627,7 +1640,7 @@ function registerTests() {
       if (artifactInitialized) {
         try { await writeSafeEvidence() } catch { failures.push(new Error('Safe check failed: evidence write')) }
       }
-      if (failures.length) throw new AggregateError(failures, 'Safe M14-T05 cleanup failure')
+      if (failures.length) throw new AggregateError(failures, 'Safe M14-T09 cleanup failure')
     })
 
     for (const entry of INTERFACES) {
