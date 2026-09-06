@@ -15,9 +15,19 @@ pause
 
 2026-09-06，用户要求按权威看板执行当前任务，先读取设计和交接；`2dd3bd0` 已记录启动。本轮完成两指定文件的本地实施：spec经 `739e128`、`d378ad2`、`a9bf981` 提交，实际证据经 `90de684` 提交。测试无条件注册49个串行接口用例、遍历58组manifest样例；独立fixture准备、页面流程、结果/来源/计数校验、限速、环境隔离、日志扫描、期限与清理均已实现。初审4Important/1Minor及修订中新1Important全部经两次定点复审关闭，最终结论 `Approved for local readiness`。
 
-真实验收未执行，任务结果仍为部分完成：当前规定Token、调用间隔和三个DB变量均未配置，账户49接口权限、分钟/小时限制与至少58次额度尚未取得运行者确认。未启动JVM、创建验收schema或调用真实上游；49接口、58真实POST、98真实查询以及本轮fixture2POST/3查询均待验收，独立表计数、真实来源/时间/行匹配和真实运行清理均未测量。
+首次阻塞时真实验收未执行，任务结果为部分完成：当时规定Token、调用间隔和三个DB变量均未配置，账户49接口权限、分钟/小时限制与至少58次额度尚未取得运行者确认。未启动JVM、创建验收schema或调用真实上游；49接口、58真实POST、98真实查询以及本轮fixture2POST/3查询均待验收，独立表计数、真实来源/时间/行匹配和真实运行清理均未测量。
 
 原next-task交接的已提交入口快照保留于 `26b4d5a` 的同路径；本文件现在按当前任务的阻塞事实替换它，权威状态仍只以看板为准。M14-T06未进入本轮实施或后继准备。
+
+## Resume Preparation (2026-09-06)
+
+用户后续报告 Token 已设置。当前工具子进程仍未继承 `TENSOR_TUSHARE_TOKEN` / `M14_T05_CALL_INTERVAL_MS`；只检查是否非空，不显示值。原生终端工具以安全限制拒绝访问 `com.apple.Terminal`，未尝试绕过。账户49接口权限、分钟/小时限制与至少58次额度仍没有确认，不能启动真实调用。
+
+已使用本地缓存的 MySQL8.4.6 创建本轮独占、仅回环监听的专用容器和新schema。独立CLI实际验证初始0表、utf8mb4/utf8mb4_0900_as_cs及应用账号恰CREATE/INSERT/SELECT/UPDATE；通过本轮MySQL握手连接的IPv4映射地址确认真实来源host，没有使用`%`。准备中两次来源地址识别失败的自有容器与匿名卷均已正常停止、精确删除。最终容器保留等待恢复，尚未启动JVM、迁移、fixture或真实矩阵。Java21、8080空闲及原JAR/manifest/spec哈希均重新核对通过。
+
+本机0700控制目录为 `/private/tmp/tensor-m14-t05-control.c0f2ywas`；`database-preflight.json`只有安全检查结果，`database-private.json`为0600临时DB连接材料，禁止显示或提交，Token不在任何文件中。0600临时 `launch.py` 由用户在已配置Token的同一终端运行：`python3 /private/tmp/tensor-m14-t05-control.c0f2ywas/launch.py`。它只从规定环境继承Token，先写安全`terminal-ready.json`并等待，不会立即运行真实用例。启动器已通过语法、缺Token先于DB访问拒绝、私有模式与看板门禁检查；复用终检函数与已测试版本AST一致，但启动器完整真实流程尚未运行，不能据此声称已解阻。
+
+下一控制器先检查该进程仍在等待及安全ready文件；取得运行者非秘密账户/额度/频率确认后，以0600 `confirmed-inputs.json`提供`all49PermissionsConfirmed`、`quotaAtLeast58Confirmed`、`frequencyLimitsConfirmed`均为true和已核实的整数`callIntervalMs`。这些值不得自行推断。等待启动器写`inputs-ready.json`，再复查独占空库、冻结输入、Java/端口并写实际解阻证据，分别提交BLOCKED→READY、READY→IN_PROGRESS。随后才以0600 `start-approved.json`提供`task: M14-T05`、最终`specSha256`和相同`callIntervalMs`；启动器还会检查权威表格确为IN_PROGRESS。等待最多一小时或用户取消后会清理自有DB资源；必须检查文件和进程实际状态，过期不能复用。真实结束时仍需控制器核对CLI终检、独立迁移/表计数与页面对照、清理和失败归因，不能由启动器结束提示自动完成任务。
 
 ## Changed Files
 
@@ -44,7 +54,7 @@ pause
 ## Remaining Work
 
 1. 取得规定私密Token输入，以及运行者关于49接口权限、分钟/小时频率和至少58次额度的非秘密确认；提供符合这些限制的 `M14_T05_CALL_INTERVAL_MS`。
-2. 按设计/runbook新建专用空MySQL8.4.6 schema与最小权限账号，完成独立只读空库证据，私密注入三个DB值和原 `ACCEPTANCE_JAR`；核对Java21/原JAR哈希/8080。
+2. 使用上述本轮专用空库，恢复前复查所有权、独立0表及最小权限；若临时资源已清理或状态改变则新建。通过终端启动器私密注入三个DB值和原 `ACCEPTANCE_JAR`，核对Java21/原JAR哈希/8080。
 3. 在新0700专用产物目录，从原JAR页面完整执行不变的49接口/58样例串行矩阵、98真实dataset查询及独立fixture2POST/3查询；失败保留，不自动重试或替换参数。
 4. npx和所有worker退出后执行证据文档中的完整终检，保留原失败码；独立核对6迁移/50业务表、49生产表行数与页面总数、fixture1行，正常停机和精确自有资源/凭证清理。
 5. 补录实际请求/结果/耗时、页面/库表对照和扫描证据；只有完整验收成立才能完成M14-T05，再按看板Order准备M14-T06设计与交接。
@@ -68,7 +78,7 @@ pause
 
 ## Blocker
 
-- **Reason:** 本地未配置 `TENSOR_TUSHARE_TOKEN`、`M14_T05_CALL_INTERVAL_MS` 和三个 `TENSOR_DB_*`，尚无运行者对49接口权限、分钟/小时频率、至少58次剩余额度的确认；新空验收数据库未准备。真实执行条件缺失，不能运行或完成49项真实验收。
+- **Reason:** 用户报告Token已设置，但当前工具环境未继承，终端启动器尚未由用户运行；合法间隔及49接口权限、分钟/小时频率、至少58次剩余额度仍未确认。专用空库和最小权限账号已实际准备（见Resume Preparation），等待通过用户终端私密注入。剩余真实执行条件缺失，保持BLOCKED。
 - **Resolution condition:** 运行者确认账户权限/频率/额度并提供1～3600000范围内合法毫秒间隔，真实Token仅经规定环境私密注入且非空；本轮独立新schema/最小权限账号和三个DB环境已准备，独立只读确认初始0表，Java21、原JAR哈希和8080检查通过。这些实际证据需写回看板，不能以等待、credentialConfigured或静态用例发现推断已解决。
 
 ## Risks

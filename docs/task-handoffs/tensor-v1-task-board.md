@@ -1064,6 +1064,8 @@
 
 - **State evidence (block):** 2026-09-06：完整重读所链接M14-T05设计后，依据真实前置失败和已写好的 `docs/task-handoffs/M14-T05-handoff.md` pause交接执行 `IN_PROGRESS -> BLOCKED`。本轮两指定实施文件已提交：spec `739e128`、审查修订 `d378ad2`/`a9bf981`，证据 `90de684`；最终spec SHA `f7f3c315913bc19b8e2d59ab7ca07e82e4d3bdcd58d7ed86ea0545fbbb47fb90`。语法/同函数扩展反例/49项Chromium发现/diff检查均exit0；终检10探针及Playwright1.62.1合成失败产物实跑通过，CLI退出后晚到秘密被删除、原失败码保留。任务审查4Important/1Minor及修订中新1Important全部经两次定点复审Addressed、无新问题，结论Approved for local readiness。两次正式spec缺环境拒绝均npx1/终检1、1failed/48didnotrun；d378ad2最新轮仅live token supplied失败，attempted0/failed0/completed0/unexecuted49、四类实际业务请求观察数0、0字节app日志、清理通过、8080空闲，未启动JVM/数据库/上游。Token、调用间隔及三个DB变量实际仍未配置，运行者尚未确认49接口权限、分钟/小时频率和至少58次额度；此为当前外部阻塞，不以静态49发现或历史证据代替真实验收。解阻需规定私密环境与账户/额度/合法间隔确认、新空schema最小权限及独立0表证据、Java21/原JAR/端口检查，再记录BLOCKED->READY和单独启动。完整真实49/58/98矩阵、本轮fixture2POST/3查询、独立库表/页面匹配及真实运行扫描清理全部未验证。原JAR/manifest哈希不变、生产/依赖/旧测试未改，用户ISSUE-004和target产物未纳入本任务提交；当前任务未完成，不准备后继。
 
+- **State evidence (resume preparation, still BLOCKED):** 2026-09-06：用户报告Token已设置，工具子进程仍仅观察到规定Token/间隔不存在；终端工具安全限制拒绝访问，未绕过或读取秘密。已实际准备本轮独占MySQL8.4.6回环空库，独立CLI初始0表、字符集/排序规则、恰CREATE/INSERT/SELECT/UPDATE权限和实际来源host核对通过；两次失败准备的自有容器/卷已正常清理，最终环境保留等待恢复。Java21/8080及原JAR/manifest/spec哈希重新检查通过。用户同终端运行的私有临时启动器先等待账户确认和控制器状态转换；语法/缺Token拒绝/权限模式/看板门禁与复用终检函数一致性检查通过，真实启动器流程未运行。49接口权限、分钟/小时频率、至少58次额度及合法间隔仍未确认，实际终端Token可用性未观察，故不执行解阻转换、不启动JVM或真实矩阵。当前pause交接已补充本机临时环境、等待门禁和精确清理入口；实际证据仍明确区分空库准备与未运行验收。
+
 ### `M14-T06`
 
 - **Goal:** 交付“`daily` 与 `balancesheet` 性能验证”。
