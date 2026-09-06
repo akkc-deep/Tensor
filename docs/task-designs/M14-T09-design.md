@@ -1,6 +1,6 @@
 # M14-T09 分红修复与2000档剩余验收——任务设计
 
-权威看板：`docs/task-handoffs/tensor-v1-task-board.md`，Order76。用户2026-09-06明确要求新增一个任务并把剩余工作移交。直接输入为M14-T04的既有契约结果和M14-T05已经形成的实现、真实证据及诊断；不要求未完成的原49目标先完成。
+权威看板：`docs/task-handoffs/tensor-v1/tensor-v1-task-board.md`，Order76。用户2026-09-06明确要求新增一个任务并把剩余工作移交。直接输入为M14-T04的既有契约结果和M14-T05已经形成的实现、真实证据及诊断；不要求未完成的原49目标先完成。
 
 **D-01已确认（2026-09-06）：** 用户对明确提出的四字段指纹/V7迁移/全40复验方案回复“同意”。采用 `FINGERPRINT: [ts_code, end_date, ann_date, div_proc]`，保留各实施阶段，允许元数据规定的空进度，同阶段跨批更新，迁移保留现有业务与来源时间；仅dividend当前验收预期改为ok。以下候选分支均已由此裁决选定，设计达到实施就绪。状态按看板依次执行NOT_STARTED→READY和READY→IN_PROGRESS，用户当前任务执行请求及本次确认构成启动授权。
 
@@ -104,7 +104,7 @@ D-02轮当时尚未执行6项：new_share、stk_managers、pledge_stat、pledge_
 
 ## Files
 
-- 本任务控制文档：`docs/task-designs/M14-T09-design.md`、`docs/task-handoffs/M14-T09-handoff.md`、权威看板及M14模块任务卡。
+- 本任务控制文档：`docs/task-designs/M14-T09-design.md`、`docs/task-handoffs/tensor-v1/M14-T09-handoff.md`、权威看板及M14模块任务卡。
 - 沿用生产/测试修改范围：`docs/issues/proposals/ISSUE-007-dividend-business-key.md` 的“精确实施范围”；D-01已确认，本轮启用。
 - 复用并修改 `control-plane/e2e/tushare-live.spec.js`：批准后的dividend预期、新包冻结hash及执行任务归属；保留既有生命周期和凭证保护。
 - 新建 `docs/verification/M14-T09-tushare-live.md`：本任务修复/验证索引和新真实轮安全证据，扫描通过后提交。

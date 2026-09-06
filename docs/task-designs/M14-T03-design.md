@@ -1,6 +1,6 @@
 # M14-T03 查询、分页、宽表、竞态和无障碍 E2E——任务设计
 
-任务编号：`M14-T03`。权威来源：[任务看板](../task-handoffs/tensor-v1-task-board.md) Order 73 与 [任务卡](../superpowers/plans/tensor-modules/M14-integration-release.md#task-m14-t03-查询分页宽表与无障碍40h)。直接依赖只有 M14-T01。本设计在 M14-T02 完成记录 `71d9618` 之后编制；不启动本任务实施。
+任务编号：`M14-T03`。权威来源：[任务看板](../task-handoffs/tensor-v1/tensor-v1-task-board.md) Order 73 与 [任务卡](../superpowers/plans/tensor-modules/M14-integration-release.md#task-m14-t03-查询分页宽表与无障碍40h)。直接依赖只有 M14-T01。本设计在 M14-T02 完成记录 `71d9618` 之后编制；不启动本任务实施。
 
 ## Goal
 

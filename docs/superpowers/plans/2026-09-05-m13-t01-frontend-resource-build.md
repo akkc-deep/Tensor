@@ -10,7 +10,7 @@
 
 ## Global Constraints
 
-- Work only on board task `M13-T01` from `docs/task-handoffs/tensor-v1-task-board.md` and follow `docs/task-designs/M13-T01-design.md`.
+- Work only on board task `M13-T01` from `docs/task-handoffs/tensor-v1/tensor-v1-task-board.md` and follow `docs/task-designs/M13-T01-design.md`.
 - Modify only `data-plane/tensor-app/pom.xml` and create only `data-plane/tensor-app/src/test/java/com/akkc/tensor/build/FrontendResourceBuildTest.java`.
 - Use frontend-maven-plugin 1.15.4 with Node v24.15.0 and npm 11.12.1 installed under `${project.build.directory}/frontend`; never fall back to system Node/npm.
 - Run `npm ci`, all frontend unit tests, Vite build, and resource copy in that order during `generate-resources`; any failed step stops the lifecycle.

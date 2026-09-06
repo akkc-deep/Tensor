@@ -6,7 +6,7 @@
 
 ## 已知事实
 
-- [当前交接](../../task-handoffs/M14-T05-handoff.md)：真实请求返回 `ADAPTER_TYPE_INVALID`，失败阶段为 adapter；具体字段和值未保留。不能把下述本地诊断当作该次请求的字段证据。
+- [当前交接](../../task-handoffs/tensor-v1/M14-T05-handoff.md)：真实请求返回 `ADAPTER_TYPE_INVALID`，失败阶段为 adapter；具体字段和值未保留。不能把下述本地诊断当作该次请求的字段证据。
 - `TushareProClient` 的私有 JSON mapper 未启用 `USE_BIG_DECIMAL_FOR_FLOATS`，无类型的 `items` 小数会解析为 `Double`。
 - [M05-T04 设计](../../task-designs/M05-T04-design.md) 明确要求客户端保留小数为 `BigDecimal`，转换器拒绝 `Float/Double`，禁止从已丢失精度的二进制浮点恢复。
 - 仅在内存检查仓库历史 `stock_company` 模板类型：6294 行的 `reg_capital` 都是 JSON 小数；`employees` 为整数或 null。未输出或另存业务值，也不以历史行数判断真实验收。

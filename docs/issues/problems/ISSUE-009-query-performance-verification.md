@@ -27,7 +27,7 @@
 
 ## 来源
 
-- [权威看板](../../task-handoffs/tensor-v1-task-board.md)：M14-T06 的用户跳过决定与状态依据。
+- [权威看板](../../task-handoffs/tensor-v1/tensor-v1-task-board.md)：M14-T06 的用户跳过决定与状态依据。
 - [M14 任务卡](../../superpowers/plans/tensor-modules/M14-integration-release.md)：Task M14-T06 的文件、测量流程和门槛。
 - [PRD](../../design/Tensor_多源证券数据平台_PRD_v1.0.md)：10.1 性能。
 - [TRD](../../design/Tensor_多源证券数据平台_TRD_v1.0.md)：18 性能与容量。

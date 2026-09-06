@@ -1,6 +1,6 @@
 # M14-T02 下载失败、空结果、幂等和回滚矩阵——任务设计
 
-任务编号：`M14-T02`。权威来源：[任务看板](../task-handoffs/tensor-v1-task-board.md) Order 72 与 [任务卡](../superpowers/plans/tensor-modules/M14-integration-release.md#task-m14-t02-下载失败幂等和回滚矩阵40h)。直接依赖只有已完成的 M14-T01。
+任务编号：`M14-T02`。权威来源：[任务看板](../task-handoffs/tensor-v1/tensor-v1-task-board.md) Order 72 与 [任务卡](../superpowers/plans/tensor-modules/M14-integration-release.md#task-m14-t02-下载失败幂等和回滚矩阵40h)。直接依赖只有已完成的 M14-T01。
 
 ## Goal
 

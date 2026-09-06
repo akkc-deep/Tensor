@@ -146,7 +146,7 @@ git diff --check
 
 | 依赖或来源 | 用途 | 稳定约束或前置条件 |
 |---|---|---|
-| `docs/task-handoffs/tensor-v1-task-board.md` 的 M02-T02 行与详情 | 确定任务 ID、目标、范围、直接依赖、状态和设计回填位置 | 权威看板是任务身份、顺序和状态的唯一来源；M02-T02 只直接依赖 M02-T01 |
+| `docs/task-handoffs/tensor-v1/tensor-v1-task-board.md` 的 M02-T02 行与详情 | 确定任务 ID、目标、范围、直接依赖、状态和设计回填位置 | 权威看板是任务身份、顺序和状态的唯一来源；M02-T02 只直接依赖 M02-T01 |
 | M02-T01 提交 `4078dad6f2becb2cbcd4239c5aa5bace21fed5a5` | 提供已校验 `PluginId`、`ApiName` 与 `DatasetKey` | 提交精确六文件，聚焦/模块测试与 verify 均通过；本任务不修改这些值对象 |
 | `docs/superpowers/plans/tensor-modules/M02-plugin-api.md` 的 Global Constraints、Task M02-T02 与 Module Gate | 冻结六个生产文件、测试文件、PluginDescriptor 组件、集合/重复名/readiness 门禁、命令和提交消息 | Plugin API 不依赖 Spring、数据库、HTTP、具体插件或 Vue；不提前创建 M02-T03～T05 类型 |
 | `docs/contracts/dataset-definition.schema.json` 与 `docs/task-designs/M00-T02-designs.md` | 冻结参数字段、标识符正则、六个参数类型、四个查询模式和条件字段 | Java 描述符保持同一局部形状；跨参数引用与顺序留给 M03/M05 |

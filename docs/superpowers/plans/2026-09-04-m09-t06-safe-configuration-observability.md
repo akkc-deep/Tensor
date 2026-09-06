@@ -55,8 +55,8 @@ Read in this exact order:
 ```text
 docs/task-designs/M09-T06-design.md
 docs/superpowers/plans/2026-09-04-m09-t06-safe-configuration-observability.md
-docs/task-handoffs/M09-T06-handoff.md
-docs/task-handoffs/tensor-v1-task-board.md (M09-T06 row and detail)
+docs/task-handoffs/tensor-v1/M09-T06-handoff.md
+docs/task-handoffs/tensor-v1/tensor-v1-task-board.md (M09-T06 row and detail)
 docs/superpowers/plans/tensor-modules/M09-app-api.md (Global Constraints, Task M09-T06, Module Gate)
 docs/design/Tensor_多源证券数据平台_TRD_v1.0.md (6, 7.2, 14-17, Appendix B)
 docs/design/Tensor_多源证券数据平台_PRD_v1.0.md (3.3, 7.5, 9, 10.3, 10.6, 12.1)

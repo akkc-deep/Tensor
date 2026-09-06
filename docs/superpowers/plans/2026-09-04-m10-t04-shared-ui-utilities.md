@@ -51,7 +51,7 @@ Run from the repository root:
 git status --short
 git branch --show-current
 sed -n '1,260p' docs/task-designs/M10-T04-design.md
-sed -n '1,220p' docs/task-handoffs/M10-T04-handoff.md
+sed -n '1,220p' docs/task-handoffs/tensor-v1/M10-T04-handoff.md
 export PATH="/Users/qiangzhiwei/.nvm/versions/node/v24.15.0/bin:$PATH"
 cd control-plane
 node --version
@@ -637,7 +637,7 @@ Run from the repository root:
 git status --short
 git log -3 --oneline
 sed -n '48,74p' docs/task-designs/M10-T04-design.md
-sed -n '1,180p' docs/task-handoffs/M10-T04-handoff.md
+sed -n '1,180p' docs/task-handoffs/tensor-v1/M10-T04-handoff.md
 export PATH="/Users/qiangzhiwei/.nvm/versions/node/v24.15.0/bin:$PATH"
 cd control-plane
 node --version

@@ -9,7 +9,7 @@
 
 消除 task board 与静态任务索引之间重复维护任务身份、顺序和依赖的风险。完成后：
 
-- `docs/task-handoffs/tensor-v1-task-board.md` 是任务身份、顺序、定义、依赖、状态、设计和交接的唯一权威来源；
+- `docs/task-handoffs/tensor-v1/tensor-v1-task-board.md` 是任务身份、顺序、定义、依赖、状态、设计和交接的唯一权威来源；
 - `docs/superpowers/plans/tensor-modules/` 继续保存每个任务的详细实施卡；
 - 总路线图改为指向权威 task board；
 - 已删除索引不再被任何活跃入口或任务 `Sources` 引用。
@@ -22,7 +22,7 @@
 
 修改：
 
-- `docs/task-handoffs/tensor-v1-task-board.md`：在 Workflow 明确唯一权威职责，并从 77 个任务详情的 `Sources` 中移除静态索引，仅保留对应模块任务卡；不改变任务表、状态、依赖、设计、交接、验收或状态证据。
+- `docs/task-handoffs/tensor-v1/tensor-v1-task-board.md`：在 Workflow 明确唯一权威职责，并从 77 个任务详情的 `Sources` 中移除静态索引，仅保留对应模块任务卡；不改变任务表、状态、依赖、设计、交接、验收或状态证据。
 - `docs/superpowers/plans/2026-08-25-tensor-implementation-roadmap.md`：第 5 节改为链接权威 task board；工时汇总和模块计划链接保持不变。
 - `docs/superpowers/specs/2026-08-26-task-handoff-retirement-design.md`：顶部添加历史取代说明，不改写当时的方案、事实或验证记录。
 - `docs/superpowers/plans/2026-08-26-task-handoff-retirement.md`：顶部添加历史取代说明，不重写当时实施步骤。
@@ -38,7 +38,7 @@
 
 活跃读取顺序固定为：
 
-1. 从 `docs/task-handoffs/tensor-v1-task-board.md` 获取当前任务身份、顺序、定义、依赖、状态、设计和交接路径；
+1. 从 `docs/task-handoffs/tensor-v1/tensor-v1-task-board.md` 获取当前任务身份、顺序、定义、依赖、状态、设计和交接路径；
 2. 完整读取看板链接的任务设计与交接；
 3. 读取任务详情 `Sources` 中唯一的模块任务卡，并按卡内来源继续核验。
 

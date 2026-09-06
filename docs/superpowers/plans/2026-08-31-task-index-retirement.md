@@ -12,7 +12,7 @@
 
 ## Global Constraints
 
-- `docs/task-handoffs/tensor-v1-task-board.md` 是任务身份、顺序、定义、依赖、状态、设计和交接的唯一权威来源。
+- `docs/task-handoffs/tensor-v1/tensor-v1-task-board.md` 是任务身份、顺序、定义、依赖、状态、设计和交接的唯一权威来源。
 - 只删除 `docs/planning/task-index.md`；不创建替代静态索引。
 - 实施提交相对其父提交的路径范围必须恰为一个删除和四个修改。
 - 不改变任务状态、顺序、依赖、设计路径、交接路径、验收或状态证据。
@@ -27,7 +27,7 @@
 **Files:**
 
 - Delete: `docs/planning/task-index.md`
-- Modify: `docs/task-handoffs/tensor-v1-task-board.md`
+- Modify: `docs/task-handoffs/tensor-v1/tensor-v1-task-board.md`
 
 **Interfaces:**
 
@@ -39,11 +39,11 @@
 Run:
 
 ```bash
-test "$(git show HEAD:docs/task-handoffs/tensor-v1-task-board.md | rg -c '^\| [0-9]+ \| M[0-9]{2}-T[0-9]{2} \|')" -eq 77
-test "$(git show HEAD:docs/task-handoffs/tensor-v1-task-board.md | rg '^\| [0-9]+ \| M[0-9]{2}-T[0-9]{2} \|' | shasum -a 256 | awk '{print $1}')" = 7002cd2a97b41bf18d102104e7b80e4b870d1f41728a4abf518a28166578bf49
-test "$(rg -c '^- \*\*Sources:\*\* 1\.' docs/task-handoffs/tensor-v1-task-board.md)" -eq 77
-test "$(rg -c '；2\. `docs/planning/task-index\.md`' docs/task-handoffs/tensor-v1-task-board.md)" -eq 77
-rg '^\| 12 \| M02-T05 \|.*\| `NOT_STARTED` \|.*\| None \|$' docs/task-handoffs/tensor-v1-task-board.md
+test "$(git show HEAD:docs/task-handoffs/tensor-v1/tensor-v1-task-board.md | rg -c '^\| [0-9]+ \| M[0-9]{2}-T[0-9]{2} \|')" -eq 77
+test "$(git show HEAD:docs/task-handoffs/tensor-v1/tensor-v1-task-board.md | rg '^\| [0-9]+ \| M[0-9]{2}-T[0-9]{2} \|' | shasum -a 256 | awk '{print $1}')" = 7002cd2a97b41bf18d102104e7b80e4b870d1f41728a4abf518a28166578bf49
+test "$(rg -c '^- \*\*Sources:\*\* 1\.' docs/task-handoffs/tensor-v1/tensor-v1-task-board.md)" -eq 77
+test "$(rg -c '；2\. `docs/planning/task-index\.md`' docs/task-handoffs/tensor-v1/tensor-v1-task-board.md)" -eq 77
+rg '^\| 12 \| M02-T05 \|.*\| `NOT_STARTED` \|.*\| None \|$' docs/task-handoffs/tensor-v1/tensor-v1-task-board.md
 ```
 
 Expected: all commands exit `0`; both counts are `77`, the hash equals the fixed baseline, and M02-T05 is `NOT_STARTED` with Handoff `None`.
@@ -79,14 +79,14 @@ Run:
 
 ```bash
 test ! -e docs/planning/task-index.md
-test "$(rg -c '^\| [0-9]+ \| M[0-9]{2}-T[0-9]{2} \|' docs/task-handoffs/tensor-v1-task-board.md)" -eq 77
-test "$(rg '^\| [0-9]+ \| M[0-9]{2}-T[0-9]{2} \|' docs/task-handoffs/tensor-v1-task-board.md | shasum -a 256 | awk '{print $1}')" = 7002cd2a97b41bf18d102104e7b80e4b870d1f41728a4abf518a28166578bf49
-test "$(rg -c '^### `M[0-9]{2}-T[0-9]{2}`$' docs/task-handoffs/tensor-v1-task-board.md)" -eq 77
-test "$(rg -c '^- \*\*Sources:\*\* `docs/superpowers/plans/tensor-modules/M[0-9]{2}-[^`]+\.md` 的 `Task M[0-9]{2}-T[0-9]{2}` 任务卡。$' docs/task-handoffs/tensor-v1-task-board.md)" -eq 77
-test "$(rg -c 'docs/planning/task-index\.md' docs/task-handoffs/tensor-v1-task-board.md)" -eq 1
-rg '^- \*\*State evidence:\*\* .*docs/planning/task-index\.md' docs/task-handoffs/tensor-v1-task-board.md
-rg '^- \*\*Authority:\*\* This board is the sole authoritative source' docs/task-handoffs/tensor-v1-task-board.md
-rg '^\| 12 \| M02-T05 \|.*\| `NOT_STARTED` \|.*\| None \|$' docs/task-handoffs/tensor-v1-task-board.md
+test "$(rg -c '^\| [0-9]+ \| M[0-9]{2}-T[0-9]{2} \|' docs/task-handoffs/tensor-v1/tensor-v1-task-board.md)" -eq 77
+test "$(rg '^\| [0-9]+ \| M[0-9]{2}-T[0-9]{2} \|' docs/task-handoffs/tensor-v1/tensor-v1-task-board.md | shasum -a 256 | awk '{print $1}')" = 7002cd2a97b41bf18d102104e7b80e4b870d1f41728a4abf518a28166578bf49
+test "$(rg -c '^### `M[0-9]{2}-T[0-9]{2}`$' docs/task-handoffs/tensor-v1/tensor-v1-task-board.md)" -eq 77
+test "$(rg -c '^- \*\*Sources:\*\* `docs/superpowers/plans/tensor-modules/M[0-9]{2}-[^`]+\.md` 的 `Task M[0-9]{2}-T[0-9]{2}` 任务卡。$' docs/task-handoffs/tensor-v1/tensor-v1-task-board.md)" -eq 77
+test "$(rg -c 'docs/planning/task-index\.md' docs/task-handoffs/tensor-v1/tensor-v1-task-board.md)" -eq 1
+rg '^- \*\*State evidence:\*\* .*docs/planning/task-index\.md' docs/task-handoffs/tensor-v1/tensor-v1-task-board.md
+rg '^- \*\*Authority:\*\* This board is the sole authoritative source' docs/task-handoffs/tensor-v1/tensor-v1-task-board.md
+rg '^\| 12 \| M02-T05 \|.*\| `NOT_STARTED` \|.*\| None \|$' docs/task-handoffs/tensor-v1/tensor-v1-task-board.md
 ```
 
 Expected: all commands exit `0`; the one remaining old-path mention is existing State evidence, not an active source; M02-T05 remains unchanged.
@@ -96,7 +96,7 @@ Expected: all commands exit `0`; the one remaining old-path mention is existing 
 Run:
 
 ```bash
-rg '^- \*\*Sources:\*\* `([^`]+)` 的 `Task M[0-9]{2}-T[0-9]{2}` 任务卡。$' --replace '$1' docs/task-handoffs/tensor-v1-task-board.md | sort -u | while IFS= read -r source_path; do test -f "$source_path" || exit 1; done
+rg '^- \*\*Sources:\*\* `([^`]+)` 的 `Task M[0-9]{2}-T[0-9]{2}` 任务卡。$' --replace '$1' docs/task-handoffs/tensor-v1/tensor-v1-task-board.md | sort -u | while IFS= read -r source_path; do test -f "$source_path" || exit 1; done
 ```
 
 Expected: command exits `0` with no missing path.
@@ -111,7 +111,7 @@ Expected: command exits `0` with no missing path.
 
 **Interfaces:**
 
-- Consumes: Task 1 中成为唯一权威任务索引的 `docs/task-handoffs/tensor-v1-task-board.md`。
+- Consumes: Task 1 中成为唯一权威任务索引的 `docs/task-handoffs/tensor-v1/tensor-v1-task-board.md`。
 - Produces: 指向 task board 的路线图入口，以及明确不再约束当前工作流的两份历史记录。
 
 - [ ] **Step 1: 更新路线图第 5 节**
@@ -119,7 +119,7 @@ Expected: command exits `0` with no missing path.
 Replace only the paragraph under `## 5. 任务索引` with:
 
 ```markdown
-M00–M14 的 77 个任务统一维护在 [`docs/task-handoffs/tensor-v1-task-board.md`](../../task-handoffs/tensor-v1-task-board.md)。该看板是任务身份、顺序、定义、依赖、状态、设计和交接的唯一权威来源；AI 工时、模块交付物和实施细节继续由本路线图及其链接的 15 个模块任务计划提供。
+M00–M14 的 77 个任务统一维护在 [`docs/task-handoffs/tensor-v1/tensor-v1-task-board.md`](../../task-handoffs/tensor-v1/tensor-v1-task-board.md)。该看板是任务身份、顺序、定义、依赖、状态、设计和交接的唯一权威来源；AI 工时、模块交付物和实施细节继续由本路线图及其链接的 15 个模块任务计划提供。
 ```
 
 Do not change the effort summary or module-plan links elsewhere in the roadmap.
@@ -129,7 +129,7 @@ Do not change the effort summary or module-plan links elsewhere in the roadmap.
 Immediately after each document title, insert:
 
 ```markdown
-> **历史记录（已被取代，2026-08-31）：** 本文关于保留 `docs/planning/task-index.md` 的决定已被项目所有者正式取代；正文仅用于说明 2026-08-26 的迁移，不再定义当前任务工作流。当前唯一权威任务索引为 [`docs/task-handoffs/tensor-v1-task-board.md`](../../task-handoffs/tensor-v1-task-board.md)。
+> **历史记录（已被取代，2026-08-31）：** 本文关于保留 `docs/planning/task-index.md` 的决定已被项目所有者正式取代；正文仅用于说明 2026-08-26 的迁移，不再定义当前任务工作流。当前唯一权威任务索引为 [`docs/task-handoffs/tensor-v1/tensor-v1-task-board.md`](../../task-handoffs/tensor-v1/tensor-v1-task-board.md)。
 ```
 
 Do not modify any later historical body text.
@@ -142,7 +142,7 @@ Run:
 rg -n -A2 '^## 5\. 任务索引$' docs/superpowers/plans/2026-08-25-tensor-implementation-roadmap.md
 test "$(rg -c '^> \*\*历史记录（已被取代，2026-08-31）：\*\*' docs/superpowers/specs/2026-08-26-task-handoff-retirement-design.md)" -eq 1
 test "$(rg -c '^> \*\*历史记录（已被取代，2026-08-31）：\*\*' docs/superpowers/plans/2026-08-26-task-handoff-retirement.md)" -eq 1
-test "$(rg -l 'docs/planning/task-index\.md' docs --glob '*.md' | sort | tr '\n' ' ')" = "docs/superpowers/plans/2026-08-26-task-handoff-retirement.md docs/superpowers/plans/2026-08-31-task-index-retirement.md docs/superpowers/specs/2026-08-26-task-handoff-retirement-design.md docs/superpowers/specs/2026-08-31-task-index-retirement-design.md docs/task-handoffs/tensor-v1-task-board.md "
+test "$(rg -l 'docs/planning/task-index\.md' docs --glob '*.md' | sort | tr '\n' ' ')" = "docs/superpowers/plans/2026-08-26-task-handoff-retirement.md docs/superpowers/plans/2026-08-31-task-index-retirement.md docs/superpowers/specs/2026-08-26-task-handoff-retirement-design.md docs/superpowers/specs/2026-08-31-task-index-retirement-design.md docs/task-handoffs/tensor-v1/tensor-v1-task-board.md "
 ```
 
 Expected: the roadmap points to the task board; both banners occur exactly once; old-path references remain only in this retirement design/plan, bannered historical documents, and existing board State evidence.
@@ -163,7 +163,7 @@ Expected: the roadmap points to the task board; both banners occur exactly once;
 Run:
 
 ```bash
-git diff -- docs/task-handoffs/tensor-v1-task-board.md docs/superpowers/plans/2026-08-25-tensor-implementation-roadmap.md docs/superpowers/specs/2026-08-26-task-handoff-retirement-design.md docs/superpowers/plans/2026-08-26-task-handoff-retirement.md docs/planning/task-index.md
+git diff -- docs/task-handoffs/tensor-v1/tensor-v1-task-board.md docs/superpowers/plans/2026-08-25-tensor-implementation-roadmap.md docs/superpowers/specs/2026-08-26-task-handoff-retirement-design.md docs/superpowers/plans/2026-08-26-task-handoff-retirement.md docs/planning/task-index.md
 git diff --name-status
 ```
 
@@ -187,7 +187,7 @@ Expected: every command exits `0` and the diff scope is exactly one deletion plu
 Run:
 
 ```bash
-git add docs/task-handoffs/tensor-v1-task-board.md docs/superpowers/plans/2026-08-25-tensor-implementation-roadmap.md docs/superpowers/specs/2026-08-26-task-handoff-retirement-design.md docs/superpowers/plans/2026-08-26-task-handoff-retirement.md docs/planning/task-index.md
+git add docs/task-handoffs/tensor-v1/tensor-v1-task-board.md docs/superpowers/plans/2026-08-25-tensor-implementation-roadmap.md docs/superpowers/specs/2026-08-26-task-handoff-retirement-design.md docs/superpowers/plans/2026-08-26-task-handoff-retirement.md docs/planning/task-index.md
 git diff --cached --check
 git diff --cached --name-status
 git commit -m "docs: retire duplicate task index"
@@ -202,7 +202,7 @@ Run:
 ```bash
 git status --short
 git show --stat --oneline --summary HEAD
-git show HEAD:docs/task-handoffs/tensor-v1-task-board.md | rg '^\| 12 \| M02-T05 \|.*\| `NOT_STARTED` \|.*\| None \|$'
+git show HEAD:docs/task-handoffs/tensor-v1/tensor-v1-task-board.md | rg '^\| 12 \| M02-T05 \|.*\| `NOT_STARTED` \|.*\| None \|$'
 ```
 
 Expected: worktree is clean, the commit summary contains only the five intended paths, and committed M02-T05 remains `NOT_STARTED` with Handoff `None`.

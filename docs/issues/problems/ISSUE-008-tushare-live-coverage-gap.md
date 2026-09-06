@@ -32,6 +32,6 @@ M14-T05 保留 `BLOCKED`，不因登记 issue 改判完成。登记时用户要�
 
 ## 来源
 
-- [权威看板](../../task-handoffs/tensor-v1-task-board.md)：M14-T05、M14-T09、M14-T06。
-- [M14-T05 设计](../../task-designs/M14-T05-design.md)及[阻塞交接](../../task-handoffs/M14-T05-handoff.md)：原参数、安全流程及历史排除依据。
+- [权威看板](../../task-handoffs/tensor-v1/tensor-v1-task-board.md)：M14-T05、M14-T09、M14-T06。
+- [M14-T05 设计](../../task-designs/M14-T05-design.md)及[阻塞交接](../../task-handoffs/tensor-v1/M14-T05-handoff.md)：原参数、安全流程及历史排除依据。
 - [M14-T09 设计](../../task-designs/M14-T09-design.md)：已完成修复、冻结验收包及完整 40 项结果。

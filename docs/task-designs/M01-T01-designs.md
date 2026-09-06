@@ -97,7 +97,7 @@ git diff --check
 
 | 依赖 | 用途 | 稳定约束或前置条件 |
 |---|---|---|
-| `docs/task-handoffs/tensor-v1-task-board.md` 的 M01-T01 行与详情 | 确定任务身份、顺序、状态、直接依赖、范围和验收边界 | 看板是任务状态和设计/交接引用的唯一权威；只有 M00-T04 完成并完成本设计与交接后才可准备为 `READY` |
+| `docs/task-handoffs/tensor-v1/tensor-v1-task-board.md` 的 M01-T01 行与详情 | 确定任务身份、顺序、状态、直接依赖、范围和验收边界 | 看板是任务状态和设计/交接引用的唯一权威；只有 M00-T04 完成并完成本设计与交接后才可准备为 `READY` |
 | `docs/superpowers/plans/tensor-modules/M01-backend-foundation.md` 的 Task M01-T01 | 确定六个 POM 路径、五模块顺序、父子坐标、RED/GREEN 与提交门禁 | 本任务只建骨架；Java/Boot/测试依赖和架构门禁不提前混入 |
 | `docs/design/Tensor_多源证券数据平台_TRD_v1.0.md` 3.3 | 确定五模块职责、目录、依赖方向和包根 | 只在本任务中实现目录/坐标骨架；依赖边和 ArchUnit 验证由后续任务实现 |
 | `data-plane/pom.xml` 的实施前基线 | 确定现有父坐标和缺失的 packaging/modules | 仅修改此 POM；`data-plane/src/main/java/com/akkc/Main.java` 保持不变并延后到 M09 处理 |

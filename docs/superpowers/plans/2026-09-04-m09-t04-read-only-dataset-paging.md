@@ -43,8 +43,8 @@ Read, in order:
 
 ```text
 docs/task-designs/M09-T04-design.md
-docs/task-handoffs/M09-T04-handoff.md
-docs/task-handoffs/tensor-v1-task-board.md (M09-T04 row and detail)
+docs/task-handoffs/tensor-v1/M09-T04-handoff.md
+docs/task-handoffs/tensor-v1/tensor-v1-task-board.md (M09-T04 row and detail)
 docs/superpowers/plans/tensor-modules/M09-app-api.md (Global Constraints, Task M09-T04, Module Gate)
 docs/contracts/openapi-v1.yaml (/api/v1/data-sources/{pluginId}/datasets/{apiName}/records and PageResponse)
 docs/task-designs/M05-T02-design.md

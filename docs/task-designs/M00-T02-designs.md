@@ -133,8 +133,8 @@ python3 -c 'from pathlib import Path; import json, yaml; t=json.loads(Path("docs
 
 | 依赖 | 用途 | 稳定约束或前置条件 |
 |---|---|---|
-| `docs/task-handoffs/tensor-v1-task-board.md` 的 M00-T02 行与详情 | 确定任务 ID、目标、范围、状态和设计回填位置 | 权威看板为任务身份与状态的唯一来源 |
-| `docs/task-handoffs/M00-T02-handoff.md` | 获取直接依赖、阻塞原因、恢复顺序和首个动作 | 用户批准的字段结构满足其解阻条件 |
+| `docs/task-handoffs/tensor-v1/tensor-v1-task-board.md` 的 M00-T02 行与详情 | 确定任务 ID、目标、范围、状态和设计回填位置 | 权威看板为任务身份与状态的唯一来源 |
+| `docs/task-handoffs/tensor-v1/M00-T02-handoff.md` | 获取直接依赖、阻塞原因、恢复顺序和首个动作 | 用户批准的字段结构满足其解阻条件 |
 | `docs/superpowers/plans/tensor-modules/M00-contracts.md` 的 M00-T02 任务卡 | 获取目标文件、十个根字段、正则、枚举、示例和命令门禁 | 任务卡边界禁止读取或修改 Java/Vue |
 | `docs/traceability/tensor-v1-requirements.md` 的 12 个直接输入行 | 确认插件/API/展示元数据、参数、适配、表/列/键、筛选及扩展性语义 | `Evidence` 只表示后续证据责任，不代表验收已经通过 |
 | TRD 5.1、5.3、8.1、8.2 | 获取标识符、参数描述符、元数据内容和 `daily` 基准形状 | 跨字段引用与运行时加载校验留给 M03/M05，不在本任务实现 |

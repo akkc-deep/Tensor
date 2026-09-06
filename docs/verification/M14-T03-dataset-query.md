@@ -1,6 +1,6 @@
 # M14-T03 查询、分页、宽表、竞态和无障碍验收证据
 
-- 任务：[M14-T03](../task-handoffs/tensor-v1-task-board.md)。
+- 任务：[M14-T03](../task-handoffs/tensor-v1/tensor-v1-task-board.md)。
 - 设计：[M14-T03-design.md](../task-designs/M14-T03-design.md)。
 - 测试：[dataset-query.spec.js](../../control-plane/e2e/dataset-query.spec.js)。
 

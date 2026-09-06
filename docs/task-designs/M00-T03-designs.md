@@ -144,7 +144,7 @@ python3 -c 'from pathlib import Path; import re, yaml; text=Path("docs/contracts
 
 | 依赖 | 用途 | 稳定约束或前置条件 |
 |---|---|---|
-| `docs/task-handoffs/tensor-v1-task-board.md` 的 M00-T03 行与详情 | 确定任务 ID、目标、范围、依赖和设计回填位置 | 权威看板是任务身份、顺序和状态的唯一来源；设计回填不改变其他单元格 |
+| `docs/task-handoffs/tensor-v1/tensor-v1-task-board.md` 的 M00-T03 行与详情 | 确定任务 ID、目标、范围、依赖和设计回填位置 | 权威看板是任务身份、顺序和状态的唯一来源；设计回填不改变其他单元格 |
 | `docs/superpowers/plans/tensor-modules/M00-contracts.md` 的 M00-T03 任务卡 | 获取两个目标文件、六条路径、九个 schema、错误码闭集和 shell 门禁 | 边界禁止读取或修改 Java/Vue 实现，且只在 Git 可用时提交 |
 | `docs/traceability/tensor-v1-requirements.md` 中映射到 PRD 5～9 的下载、适配、持久化与查看需求 | 核对元数据、动态参数、下载结果、查询、分页和失败语义 | `Evidence` 只表示后续证据责任，不代表当前验收结果 |
 | `docs/contracts/dataset-definition.schema.json` 与 `docs/task-designs/M00-T02-designs.md` | 复用标识符正则、参数/列字段、枚举、筛选顺序和固定列语义 | REST 投影不得改变 M00-T02 的字段含义；筛选对象只补充页面所需 operator/controlType |

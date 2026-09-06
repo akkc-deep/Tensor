@@ -1,6 +1,6 @@
 # M14-T02 下载结果矩阵验收证据
 
-- 任务：[M14-T02](../task-handoffs/tensor-v1-task-board.md)。
+- 任务：[M14-T02](../task-handoffs/tensor-v1/tensor-v1-task-board.md)。
 - 设计：[M14-T02-design.md](../task-designs/M14-T02-design.md)。
 - 测试：[download-outcomes.spec.js](../../control-plane/e2e/download-outcomes.spec.js)。
 - 最终运行：2026-09-05 10:25:44Z～10:28:23Z；Playwright 退出 0，`15 passed (2.7m)`，0 failed / skipped / retry。

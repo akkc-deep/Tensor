@@ -117,7 +117,7 @@
 
 **Authority:** 用户2026-09-06要求新增任务；权威看板Order76，初始登记NOT_STARTED；本轮D-01已确认，当前状态以看板为准。原M14-T06/T07/T08的ID和依赖不变，Order顺延。
 
-**Design:** `docs/task-designs/M14-T09-design.md`；**Handoff:** `docs/task-handoffs/M14-T09-handoff.md`（pause；原transfer保留于Git，前驱未完成）。**Dependencies:** M14-T04、M14-T05；后者仅提供已完成的实现/证据输入，不要求其原49目标先完成。
+**Design:** `docs/task-designs/M14-T09-design.md`；**Handoff:** `docs/task-handoffs/tensor-v1/M14-T09-handoff.md`（pause；原transfer保留于Git，前驱未完成）。**Dependencies:** M14-T04、M14-T05；后者仅提供已完成的实现/证据输入，不要求其原49目标先完成。
 
 **Goal / scope:** 接手dividend保存规则确认及必要修复、本地适配/迁移/幂等/schema/打包/复审/health验证、新冻结包和完整40接口复验/新证据归档。2026-09-06用户已明确确认四字段指纹/V7方案，按其生产文件边界实施；此次批准与此前任务创建分别记录。
 

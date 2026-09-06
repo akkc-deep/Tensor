@@ -41,8 +41,8 @@ Read in this exact order:
 ```text
 docs/task-designs/M09-T05-design.md
 docs/superpowers/plans/2026-09-04-m09-t05-global-exception-mapping.md
-docs/task-handoffs/M09-T05-handoff.md
-docs/task-handoffs/tensor-v1-task-board.md (M09-T05 row and detail)
+docs/task-handoffs/tensor-v1/M09-T05-handoff.md
+docs/task-handoffs/tensor-v1/tensor-v1-task-board.md (M09-T05 row and detail)
 docs/superpowers/plans/tensor-modules/M09-app-api.md (Global Constraints, Task M09-T05, Module Gate)
 docs/contracts/error-codes.md
 docs/contracts/openapi-v1.yaml (all error responses, ApiError, FieldError)

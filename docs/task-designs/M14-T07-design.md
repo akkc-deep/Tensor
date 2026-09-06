@@ -1,6 +1,6 @@
 # M14-T07 Token、SQL、依赖、网络和运行安全验证——任务设计
 
-任务编号：`M14-T07`。权威来源：[任务看板](../task-handoffs/tensor-v1-task-board.md) Order 78 与[任务卡](../superpowers/plans/tensor-modules/M14-integration-release.md#task-m14-t07-安全与运行控制验证30h)。本设计供实施前确认；任务状态和批准证据仅记录在看板。
+任务编号：`M14-T07`。权威来源：[任务看板](../task-handoffs/tensor-v1/tensor-v1-task-board.md) Order 78 与[任务卡](../superpowers/plans/tensor-modules/M14-integration-release.md#task-m14-t07-安全与运行控制验证30h)。本设计供实施前确认；任务状态和批准证据仅记录在看板。
 
 ## Goal
 

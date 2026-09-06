@@ -45,8 +45,8 @@ Read, in order:
 
 ```text
 docs/task-designs/M09-T03-design.md
-docs/task-handoffs/M09-T03-handoff.md
-docs/task-handoffs/tensor-v1-task-board.md (M09-T03 row and detail)
+docs/task-handoffs/tensor-v1/M09-T03-handoff.md
+docs/task-handoffs/tensor-v1/tensor-v1-task-board.md (M09-T03 row and detail)
 docs/superpowers/plans/tensor-modules/M09-app-api.md (Global Constraints, Task M09-T03, Module Gate)
 docs/contracts/openapi-v1.yaml (/api/v1/downloads, DownloadRequest, DownloadResponse)
 docs/task-designs/M05-T01-design.md

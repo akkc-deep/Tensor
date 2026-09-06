@@ -1,6 +1,6 @@
 # M14-T01 fixture 页面主闭环验收证据
 
-- 任务：[权威看板 M14-T01](../task-handoffs/tensor-v1-task-board.md)。
+- 任务：[权威看板 M14-T01](../task-handoffs/tensor-v1/tensor-v1-task-board.md)。
 - 设计：[M14-T01-design.md](../task-designs/M14-T01-design.md)。
 - 测试：[fixture-flow.spec.js](../../control-plane/e2e/fixture-flow.spec.js)。
 - 日期：2026-09-05；最终测试代码的负向对照、正向 3/3、前端 120/120 与静态范围门禁通过。

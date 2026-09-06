@@ -2,7 +2,7 @@
 
 任务编号：`M14-T01`
 
-权威任务：[任务看板](../task-handoffs/tensor-v1-task-board.md) 的 `M14-T01`（Order 71）。
+权威任务：[任务看板](../task-handoffs/tensor-v1/tensor-v1-task-board.md) 的 `M14-T01`（Order 71）。
 
 对应任务：[M14-T01](../superpowers/plans/tensor-modules/M14-integration-release.md#task-m14-t01-fixture-页面主闭环40h)。
 

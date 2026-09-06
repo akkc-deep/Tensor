@@ -1,6 +1,6 @@
 # M14-T04 49 数据集自动契约与页面回归驱动——任务设计
 
-任务编号：`M14-T04`。权威来源：[任务看板](../task-handoffs/tensor-v1-task-board.md) Order 74 与 [任务卡](../superpowers/plans/tensor-modules/M14-integration-release.md#task-m14-t04-49-数据集自动契约与页面驱动40h)。直接依赖只有 M03-T09、M04-T06、M14-T01。本设计在 M14-T03 完成记录 `139c2c0` 之后编制；不启动本任务实施。
+任务编号：`M14-T04`。权威来源：[任务看板](../task-handoffs/tensor-v1/tensor-v1-task-board.md) Order 74 与 [任务卡](../superpowers/plans/tensor-modules/M14-integration-release.md#task-m14-t04-49-数据集自动契约与页面驱动40h)。直接依赖只有 M03-T09、M04-T06、M14-T01。本设计在 M14-T03 完成记录 `139c2c0` 之后编制；不启动本任务实施。
 
 ## Goal
 

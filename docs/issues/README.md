@@ -18,7 +18,7 @@
 | ISSUE-001 | Controller 方法入口参数不够聚合 | 新增 | Download 方案已确认，待正式设计 | [详情](problems/ISSUE-001-method-input-aggregation.md) · [方案](proposals/ISSUE-001-download-request-aggregation.md) |
 | ISSUE-002 | Controller 承担过多业务逻辑 | 新增 | 分层方案已确认，待实施计划 | [详情](problems/ISSUE-002-controller-business-logic-layering.md) · [方案](proposals/ISSUE-002-controller-service-layering.md) |
 | ISSUE-003 | 数据库交互逻辑较复杂 | 新增 | 数据库层重构设计已确认，待文档复核 | [详情](problems/ISSUE-003-database-access-complexity.md) · [方案](proposals/ISSUE-003-spring-jdbc-complexity-reduction.md) |
-| ISSUE-004 | 前端 UI 不美观，缺乏科技感 | 新增 | 最终设计已确认，待实施计划 | [详情](problems/ISSUE-004-ui-visual-redesign.md) · [最终方案](proposals/ISSUE-004-ui-visual-concepts.md) · [HTML 预览](proposals/ISSUE-004-ui-visual-concepts.html) |
+| ISSUE-004 | 前端 UI 不美观，缺乏科技感 | 新增 | 技术方案及六项拆分已形成，日期沿用现有接口，未实施 | [详情](problems/ISSUE-004-ui-visual-redesign.md) · [最终方案](proposals/ISSUE-004-ui-visual-concepts.md) · [技术设计](../task-designs/ISSUE-004-design.md) · [任务看板](../task-handoffs/ISSUE-004/ISSUE-004-task-board.md) · [HTML 预览](proposals/ISSUE-004-ui-visual-concepts.html) |
 | ISSUE-005 | Tushare 小数解析导致适配失败 | 已解决 | 已解决，stock_company 真实三样例通过 | [详情](problems/ISSUE-005-tushare-decimal-decoding.md) · [设计与计划](proposals/ISSUE-005-tushare-decimal-decoding.md) |
 | ISSUE-006 | 股东户数公告日期混入日期时间格式 | 已解决 | 已解决，真实150行适配/入库/查看通过 | [详情与设计](problems/ISSUE-006-holdernumber-announcement-date.md) |
 | ISSUE-007 | dividend 业务键未区分实施进度 | 已关闭 | 已关闭：修复及真实分红38行闭环通过（M14-T09） | [诊断详情](problems/ISSUE-007-dividend-adapter-diagnosis.md) · [修复设计](proposals/ISSUE-007-dividend-business-key.md) |

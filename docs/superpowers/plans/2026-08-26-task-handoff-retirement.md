@@ -1,6 +1,6 @@
 # Tensor Task Handoff Retirement Implementation Plan
 
-> **历史记录（已被取代，2026-08-31）：** 本文关于保留 `docs/planning/task-index.md` 的决定已被项目所有者正式取代；正文仅用于说明 2026-08-26 的迁移，不再定义当前任务工作流。当前唯一权威任务索引为 [`docs/task-handoffs/tensor-v1-task-board.md`](../../task-handoffs/tensor-v1-task-board.md)。
+> **历史记录（已被取代，2026-08-31）：** 本文关于保留 `docs/planning/task-index.md` 的决定已被项目所有者正式取代；正文仅用于说明 2026-08-26 的迁移，不再定义当前任务工作流。当前唯一权威任务索引为 [`docs/task-handoffs/tensor-v1/tensor-v1-task-board.md`](../../task-handoffs/tensor-v1/tensor-v1-task-board.md)。
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 

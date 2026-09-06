@@ -156,7 +156,7 @@ rg -ni 'current status|actor authority|event history|handoff path|archive action
 
 | 依赖 | 用途 | 稳定约束或前置条件 |
 |---|---|---|
-| `docs/task-handoffs/tensor-v1-task-board.md` 的 M00-T04 行与详情 | 确定任务 ID、目标、范围、依赖、状态和设计回填位置 | 权威看板是任务身份、顺序和状态的唯一来源；设计回填只修改 M00-T04 的设计引用 |
+| `docs/task-handoffs/tensor-v1/tensor-v1-task-board.md` 的 M00-T04 行与详情 | 确定任务 ID、目标、范围、依赖、状态和设计回填位置 | 权威看板是任务身份、顺序和状态的唯一来源；设计回填只修改 M00-T04 的设计引用 |
 | `docs/superpowers/plans/tensor-modules/M00-contracts.md` 的 M00-T04 任务卡 | 获取两个目标文件、模板职责、字段和任务卡门禁 | 只创建 Markdown 模板，不读取或修改生产实现 |
 | `docs/task-designs/README.md` | 冻结项目设计文件名、五个二级标题和设计就绪门禁 | 每个任务只有一份设计，任务卡与设计双向链接，设计不记录执行状态或实际结果 |
 | `docs/traceability/tensor-v1-requirements.md` | 为验收证据模板提供稳定 requirement/acceptance 标识语义 | `Evidence` 只表示后续证据责任，不代表验收已经执行或通过 |
