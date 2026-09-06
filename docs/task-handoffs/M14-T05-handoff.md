@@ -8,88 +8,63 @@ pause
 
 - **Task board:** `docs/task-handoffs/tensor-v1-task-board.md`
 - **Task ID:** `M14-T05`
-- **Transition:** `IN_PROGRESS -> BLOCKED`
-- **Design document:** `docs/task-designs/M14-T05-design.md`，本轮开始和写交接前已完整读取，未修改。
+- **Transition:** `IN_PROGRESS -> BLOCKED`（原暂停快照；恢复状态以看板为准）
+- **Design document:** `docs/task-designs/M14-T05-design.md`
 
 ## Current State
 
-2026-09-06，用户要求按权威看板执行当前任务，先读取设计和交接；`2dd3bd0` 已记录启动。本轮完成两指定文件的本地实施：spec经 `739e128`、`d378ad2`、`a9bf981` 提交，实际证据经 `90de684` 提交。测试无条件注册49个串行接口用例、遍历58组manifest样例；独立fixture准备、页面流程、结果/来源/计数校验、限速、环境隔离、日志扫描、期限与清理均已实现。初审4Important/1Minor及修订中新1Important全部经两次定点复审关闭，最终结论 `Approved for local readiness`。
+原49接口spec的本地实现、反例与独立审查已完成（最终a9bf981），真实矩阵尚未运行。用户随后说明账户2000+积分，并明确要求“先把这两个排除，验证可以满足2000档积分的即可”。本次修订已将当前阶段冻结为40接口/48原样例/80查询、28ok/12empty，明确排除top_inst/broker_recommend及7项权限待确认接口；原manifest49/58及分发JAR、生产代码均保持不变。
 
-首次阻塞时真实验收未执行，任务结果为部分完成：当时规定Token、调用间隔和三个DB变量均未配置，账户49接口权限、分钟/小时限制与至少58次额度尚未取得运行者确认。未启动JVM、创建验收schema或调用真实上游；49接口、58真实POST、98真实查询以及本轮fixture2POST/3查询均待验收，独立表计数、真实来源/时间/行匹配和真实运行清理均未测量。
+旧终端启动器已因Ctrl+C退出，安全结果报告ownedContainerRemoved=true；私有DB连接材料已清理，没有JVM或真实业务请求。旧terminal-ready文件不可复用。当前spec还需要按新设计修订、检查和审查，新的Token执行进程/空库也尚未准备。
 
-原next-task交接的已提交入口快照保留于 `26b4d5a` 的同路径；本文件现在按当前任务的阻塞事实替换它，权威状态仍只以看板为准。M14-T06未进入本轮实施或后继准备。
-
-## Resume Preparation (2026-09-06)
-
-用户后续报告 Token 已设置。当前工具子进程仍未继承 `TENSOR_TUSHARE_TOKEN` / `M14_T05_CALL_INTERVAL_MS`；只检查是否非空，不显示值。原生终端工具以安全限制拒绝访问 `com.apple.Terminal`，未尝试绕过。账户49接口权限、分钟/小时限制与至少58次额度仍没有确认，不能启动真实调用。
-
-已使用本地缓存的 MySQL8.4.6 创建本轮独占、仅回环监听的专用容器和新schema。独立CLI实际验证初始0表、utf8mb4/utf8mb4_0900_as_cs及应用账号恰CREATE/INSERT/SELECT/UPDATE；通过本轮MySQL握手连接的IPv4映射地址确认真实来源host，没有使用`%`。准备中两次来源地址识别失败的自有容器与匿名卷均已正常停止、精确删除。最终容器保留等待恢复，尚未启动JVM、迁移、fixture或真实矩阵。Java21、8080空闲及原JAR/manifest/spec哈希均重新核对通过。
-
-本机0700控制目录为 `/private/tmp/tensor-m14-t05-control.c0f2ywas`；`database-preflight.json`只有安全检查结果，`database-private.json`为0600临时DB连接材料，禁止显示或提交，Token不在任何文件中。0600临时 `launch.py` 由用户在已配置Token的同一终端运行：`python3 /private/tmp/tensor-m14-t05-control.c0f2ywas/launch.py`。它只从规定环境继承Token，先写安全`terminal-ready.json`并等待，不会立即运行真实用例。启动器已通过语法、缺Token先于DB访问拒绝、私有模式与看板门禁检查；复用终检函数与已测试版本AST一致，但启动器完整真实流程尚未运行，不能据此声称已解阻。
-
-下一控制器先检查该进程仍在等待及安全ready文件；取得运行者非秘密账户/额度/频率确认后，以0600 `confirmed-inputs.json`提供`all49PermissionsConfirmed`、`quotaAtLeast58Confirmed`、`frequencyLimitsConfirmed`均为true和已核实的整数`callIntervalMs`。这些值不得自行推断。等待启动器写`inputs-ready.json`，再复查独占空库、冻结输入、Java/端口并写实际解阻证据，分别提交BLOCKED→READY、READY→IN_PROGRESS。随后才以0600 `start-approved.json`提供`task: M14-T05`、最终`specSha256`和相同`callIntervalMs`；启动器还会检查权威表格确为IN_PROGRESS。等待最多一小时或用户取消后会清理自有DB资源；必须检查文件和进程实际状态，过期不能复用。真实结束时仍需控制器核对CLI终检、独立迁移/表计数与页面对照、清理和失败归因，不能由启动器结束提示自动完成任务。
-
-恢复进展：用户执行上述启动命令后，控制器独立读取0600 `terminal-ready.json`，实际观测`tokenPresent=true`、`initialTables=0`，并用该文件登记PID只读确认仍是预期启动器进程；未读取进程环境或Token值。独占容器身份、MySQL8.4.6、当前0表、8080空闲与JAR/manifest/spec冻结哈希再次通过。`confirmed-inputs.json`、`inputs-ready.json`、`start-approved.json`及`run-started.json`均不存在，故没有启动实跑。Token传递问题已解决，当前只等待账户49接口权限、至少58次额度以及已核实的频率/间隔信息，收到后消费现有等待进程，不要求用户重新输入Token或重跑启动命令。
-
-积分条件补充：用户自报“2000+积分”后，已核对Tushare官方频次总表及49API文档地址（45有效说明、4文档不存在正文）。具体缺口是top_inst接口页要求5000、broker_recommend接口页要求6000；两者分别与总览2000、特色数据总表10000存在差异，share_float也有120/3000差异。hs_const/moneyflow_hsgt/hk_hold/index_member四个旧文档不可用，hsgt_top10/namechange正文未明示最低积分。完整来源和限制见实际证据文档“2000积分档位的公开权限核对”。普通2000档总表为每分钟200次、每日100000次/个API，stock_basic另限50次/分钟；积分不按调用扣除，没有“需要58积分余额”的要求。仅查公开文档，不携Token或探测API，账户实际授权/用量仍未知。已向用户具体询问top_inst与broker_recommend权限；不能把2000+自动填成全49授权或改为部分通过，也不能仅凭积分升级建议承诺全矩阵可用。
-
-最新临时环境状态：后续安全结果`launcher-failed.json`记录`KeyboardInterrupt`、`ownedContainerRemoved=true`；`database-private.json`已不存在，`run-started.json`/`run-finished.json`均不存在。这表明等待启动器已因Ctrl+C退出并报告精确清理成功，没有开始真实运行。旧`terminal-ready.json`只是历史记录，不能当作仍有活动Token进程。不要要求用户重跑旧控制目录中的启动器；真正恢复前需新建独占空库及控制目录，并在账户条件具体解决后再安排一次直接进入验收的终端启动。用户原终端的Token是否仍存在仅由后续环境存在性检查确认，不读取其值。
+用户新请求使原“必须先确认全49权限”的阻塞条件不再适用于当前子集实施；修订设计以公开积分规则选出40项并采用2秒间隔，实际账户权限/额度差异由正式页面验收结果保留，不能先探测、假定授权或失败后删项。恢复本地实施以该明确范围变更和已核对的固定集合为依据，真实运行前仍必须检查本轮Token/DB/JAR/Java/端口。
 
 ## Changed Files
 
-- `control-plane/e2e/tushare-live.spec.js`：唯一测试实施文件，最终提交 `a9bf981`，模式100644，SHA-256 `f7f3c315913bc19b8e2d59ab7ca07e82e4d3bdcd58d7ed86ea0545fbbb47fb90`。
-- `docs/verification/M14-T05-tushare-live.md`：实际本地验证、两次缺环境CLI拒绝、49项未运行状态和可复跑内嵌终检命令，提交 `90de684`，模式100644。
-- `docs/task-handoffs/tensor-v1-task-board.md`：当前任务启动证据与本次阻塞证据；保持既有Design/Handoff引用。
-- `docs/task-handoffs/M14-T05-handoff.md`：本pause交接。
-
-未改生产、配置、依赖、旧测试、模板/manifest或原验收JAR；用户既有ISSUE-004内容和target产物未纳入本任务提交。临时探针和安全本地结果不作为分发产物或新永久helper提交。
+- `control-plane/e2e/tushare-live.spec.js`：原49项实现已提交且审查通过；40项修订待实施。
+- `docs/verification/M14-T05-tushare-live.md`：原本地证据、公开权限差异及旧等待进程清理；新40项本地/真实结果待追加。
+- `docs/task-designs/M14-T05-design.md`：用户新授权的40项范围、排除原因、2秒节流、计数及执行合同。
+- `docs/superpowers/plans/tensor-modules/M14-integration-release.md`：仅更新M14-T05当前阶段，保留原全49目标的未覆盖事实。
+- 本交接和权威看板：记录范围修订与独立的恢复/启动转换。
 
 ## Verification
 
-以下是本轮已经实际运行并在 `docs/verification/M14-T05-tushare-live.md` 记录的结果，写交接时未重新执行这些命令：
+以下为已有已记录结果，不将历史本地检查当作新版本或真实验收：
 
-- Node24：`cd control-plane && node --check e2e/tushare-live.spec.js`，最终版exit0。
-- `cd control-plane && npx playwright test e2e/tushare-live.spec.js --list`，最终版exit0，49 Chromium tests / 1 file；这是发现数，不是通过数。
-- `node /tmp/m14-t05-pure-probe.mjs`，Node24下最终exit0、`M14-T05 pure counterexample probes: PASS`。同函数VM反例覆盖设计规定manifest/结果/计数/请求边界，并覆盖审查中的期限、跨换行/UTF-8扫描、半行日志关联和公开错误码。
-- `python3 .superpowers/sdd/M14-integration-release/probe-terminal-scan.py`，exit0，10项终检函数反例通过。
-- `python3 .superpowers/sdd/M14-integration-release/probe-playwright-terminal.py`，外层exit0。Playwright1.62.1合成秘密/合成行的故意失败：page/context关闭、afterAll完成后仍生成1个error-context和1个附件；CLI退出后晚生成秘密被命中，自动产物全部删除，原npx1仍为最终1。
-- `python3 .superpowers/sdd/M14-integration-release/probe-missing-environment.py`，两次外层exit0、真实npx1/最终1、1 failed / 48 did not run。修订 `d378ad2` 的最新轮只保留 `live token supplied`，无重复清理错误；attempted/failed/completed均0、unexecuted49，四类业务请求观察计数均0，0字节应用日志、清理标记true、8080空闲、自动产物无残留。它只验证前置拒绝，没有启动业务用例。
-- `git diff --check`、2个文档shell片段语法、2个Python片段语法、内嵌终检与已测函数字节一致、49未运行API行、spec提交对象一致与文件范围均通过。
-- manifest SHA-256仍为 `37a317f6a2bc3e5113be5f127976d16d8349414c6476c7f6a194b084a5b0f7c2`；原验收JAR仍为 `a69874afa6ce783d4ef4e16a678ddb0ff457f2948b68f509a8e4a2c00440bcac`。本轮没有真实秘密可用于声称真实凭证扫描通过。
+- 原spec a9bf981 Node24语法、49项发现、同函数VM反例均通过；最终SHA为`f7f3c315913bc19b8e2d59ab7ca07e82e4d3bdcd58d7ed86ea0545fbbb47fb90`。
+- 原终检10反例、Chromium合成失败产物清理通过；d378ad2缺环境轮npx1/最终1，仅Token前置失败、无JVM或业务调用；独立审查问题均闭环。
+- 官方文档审计49地址，45含对应API说明、4文档不存在；2000档规则及已知冲突已写实际证据。
+- 旧启动器曾确认Token存在/新库0表，随后KeyboardInterrupt并报告精确清理成功；它不再是活动运行环境。
+- 新集合已从原manifest机械核对为40/48/28ok/12empty；新spec、真实矩阵和新终端启动器尚未验证。
 
 ## Remaining Work
 
-1. 取得规定私密Token输入，以及运行者关于49接口权限、分钟/小时频率和至少58次额度的非秘密确认；提供符合这些限制的 `M14_T05_CALL_INTERVAL_MS`。
-2. 使用上述本轮专用空库，恢复前复查所有权、独立0表及最小权限；若临时资源已清理或状态改变则新建。通过终端启动器私密注入三个DB值和原 `ACCEPTANCE_JAR`，核对Java21/原JAR哈希/8080。
-3. 在新0700专用产物目录，从原JAR页面完整执行不变的49接口/58样例串行矩阵、98真实dataset查询及独立fixture2POST/3查询；失败保留，不自动重试或替换参数。
-4. npx和所有worker退出后执行证据文档中的完整终检，保留原失败码；独立核对6迁移/50业务表、49生产表行数与页面总数、fixture1行，正常停机和精确自有资源/凭证清理。
-5. 补录实际请求/结果/耗时、页面/库表对照和扫描证据；只有完整验收成立才能完成M14-T05，再按看板Order准备M14-T06设计与交接。
+1. 按修订设计实现固定范围选择、安全排除证据与40/48/80成功计数，运行范围RED/GREEN、Node24语法/40项发现、既有同函数探针和缺环境摘要检查，并完成独立审查。
+2. 准备本轮独占空MySQL8.4.6和最小权限账号、新私有启动器及独立表计数；本地准备全部完成后，用户在保有Token的终端启动一次直接验收。
+3. 运行40接口、48原样例、80查询及独立fixture2POST/3查询；按CLI退出后终检、6迁移/50表/40页面计数匹配/9表0行和清理合同记录实际结果。
+4. 成功只报告本轮2000档子集完成并将原任务PAUSED；真实失败则BLOCKED。不将原49目标标为完成或自动准备后继。
 
 ## Resume Task
 
-恢复 `M14-T05`：“真实 Tushare 49 接口受控页面验收”。目标是从原验收JAR的页面执行49接口合法样例，验证真实非空结果的适配/入库/查看及合法空结果无占位行。继续消费既有完整设计、已审查spec和当前实际证据，不另造任务或降低标准。
+恢复M14-T05的2000积分档子集页面验收阶段。原全49目标仍有9项不覆盖，用户未来要求后再处理。
 
 ## Start Here
 
-按顺序读取：
+1. 完整读取权威看板链接的 `docs/task-designs/M14-T05-design.md`。
+2. 本交接、权威看板M14-T05详情与任务卡当前阶段。
+3. `docs/verification/M14-T05-tushare-live.md`、已审查spec及原manifest（不读模板data）。
+4. 原JAR公开页面合同和验收runbook；既有本地探针见本任务忽略工作目录。
 
-1. `docs/task-designs/M14-T05-design.md`，完整读取。
-2. 本交接及 `docs/task-handoffs/tensor-v1-task-board.md` 的M14-T05行/详情。
-3. `docs/verification/M14-T05-tushare-live.md` 与 `control-plane/e2e/tushare-live.spec.js`。
-4. `docs/superpowers/plans/tensor-modules/M14-integration-release.md` 的Global Constraints和Task M14-T05。
-5. M14-T04设计、实际证据、公开spec及 `docs/data-template/manifest.json`（只读manifest，不读模板data）；继续保留七组分类、43必填/6无参数与五组filters。
-6. `docs/contracts/openapi-v1.yaml`、`docs/runbook/acceptance.md`、`docs/runbook/configuration.md`、PRD5.6/5.7/12.2、TRD7.1～7.4/10.4，以及M14-T02设计/公开spec/实际证据的fixture SUCCESS/EMPTY合同。
-
-首个动作是解决外部阻塞：核对运行者给出的非秘密账户/额度/间隔确认与规定环境变量的存在性，再准备新的空数据库和独立前置证据。不得打印Token/DB值，也不得用真实请求试探权限。满足下节可观察条件后记录 `BLOCKED -> READY` 的解阻证据，再按授权执行单独的 `READY -> IN_PROGRESS`；原任务与样例保持不变。
+首个动作：核对用户明确的子集授权与40/48/28/12集合，按修订设计记录BLOCKED→READY，再按同一请求单独记录READY→IN_PROGRESS，开始本地范围修订。不得把这些实施就绪转换写成Token/DB已准备或真实验收已通过。
 
 ## Blocker
 
-- **Reason:** Token曾通过用户终端启动器确认非空，但该等待进程已因Ctrl+C退出并清理临时空库；用户自报2000+积分。公开接口页中top_inst要求5000、broker_recommend要求6000，且有总表冲突、四个旧文档不可用等未决项（见上文）。尚无这些接口实际授权及全49频率/额度确认，不能把2000+推定为满足全矩阵；不生成启动输入，保持BLOCKED。旧等待进程/空库已失效，权限问题解决后重新准备。
-- **Resolution condition:** 运行者确认账户权限/频率/额度并提供1～3600000范围内合法毫秒间隔，真实Token仅经规定环境私密注入且非空；本轮独立新schema/最小权限账号和三个DB环境已准备，独立只读确认初始0表，Java21、原JAR哈希和8080检查通过。这些实际证据需写回看板，不能以等待、credentialConfigured或静态用例发现推断已解决。
+- **Reason:** 原全49权限阻塞已由用户范围修订替代；旧运行环境已清理，新阶段尚未实施/启动。
+- **Resolution condition:** 明确用户子集授权、原manifest上固定40/48/28/12范围及修订设计/任务卡已核对，即可恢复本地实施；实际运行环境必须在正式CLI前单独检查，缺失或失败如实记录，不伪造旧ready证据。
 
 ## Risks
 
-- 历史样例状态可能漂移；权限、限流、上游故障或样例不符都必须保留失败，不改manifest/日期或伪装EMPTY。
-- 本地检查只证明测试实现和拒绝/清理边界，不能替代真实49通过或本轮fixture结果。
-- 半行日志与秘密重叠等已修复边界需要保持；修改spec后按设计重跑受影响本地探针和新的完整真实轮，重新核对额度。
-- Playwright可在hook结束后生成失败上下文；必须在CLI/worker完全退出后扫描删除自动产物，不发布原日志/响应/真实行，不保存截图或trace。
+- 公开规则不能保证账户现时权限或未耗尽用量；实际错误停止该轮并保留失败，不自动更改范围或参数。
+- 原日期与ok/empty状态可能漂移，不改manifest、生产文件、旧测试或分发JAR。
+- 40项成功也不代表原49、PRD全覆盖或发布准入通过。
+- 用户Token只从规定环境进入执行进程，终检必须在CLI/全部worker退出后运行；不发布原行/日志、截图或trace。

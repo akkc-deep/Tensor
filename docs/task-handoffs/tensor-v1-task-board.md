@@ -93,7 +93,7 @@
 | 72 | M14-T02 | 下载失败、空结果、幂等和回滚矩阵 | `COMPLETED` | M14-T01 | docs/task-designs/M14-T02-design.md | docs/task-handoffs/M14-T02-handoff.md |
 | 73 | M14-T03 | 查询、分页、宽表、竞态和无障碍 E2E | `COMPLETED` | M14-T01 | docs/task-designs/M14-T03-design.md | docs/task-handoffs/M14-T03-handoff.md |
 | 74 | M14-T04 | 49 数据集自动契约与页面回归驱动 | `COMPLETED` | M03-T09, M04-T06, M14-T01 | docs/task-designs/M14-T04-design.md | docs/task-handoffs/M14-T04-handoff.md |
-| 75 | M14-T05 | 真实 Tushare 49 接口受控页面验收 | `BLOCKED` | M14-T04 | docs/task-designs/M14-T05-design.md | docs/task-handoffs/M14-T05-handoff.md |
+| 75 | M14-T05 | 真实 Tushare 49 接口受控页面验收 | `READY` | M14-T04 | docs/task-designs/M14-T05-design.md | docs/task-handoffs/M14-T05-handoff.md |
 | 76 | M14-T06 | `daily` 与 `balancesheet` 性能验证 | `NOT_STARTED` | M14-T03, M14-T05 | None | None |
 | 77 | M14-T07 | Token、SQL、依赖、网络和运行安全验证 | `NOT_STARTED` | M14-T02, M14-T03, M14-T04, M14-T05 | None | None |
 | 78 | M14-T08 | 全新环境 AC-001～018 与发布证据包 | `NOT_STARTED` | M14-T01, M14-T02, M14-T03, M14-T04, M14-T05, M14-T06, M14-T07 | None | None |
@@ -1071,6 +1071,8 @@
 - **State evidence (public permission audit, still BLOCKED):** 用户自报2000+积分后，仅读Tushare官方公开文档核对49API（45有效说明、4原地址文档不存在）。top_inst接口页明确5000、broker_recommend明确6000，均不能由2000档证明覆盖；两项与官方总表以及share_float存在积分说明差异，四个旧API文档缺失也不能当作已授权或已停用。积分不按调用扣除；2000档总表200次/分钟、100000次/日/每API，stock_basic另限50次/分钟，账户实际用量与未公开限制未知。来源和具体待确认事项已记录实际证据与pause交接；已具体询问两个高积分API是否有访问权限，未携Token访问官网、未发业务请求、未设置全49确认/启动信号、不降低验收范围，状态保持BLOCKED。
 
 - **State evidence (waiting process ended, still BLOCKED):** 安全结果随后记录等待启动器收到KeyboardInterrupt、ownedContainerRemoved=true；私有DB连接文件已删除，实际运行开始/结束标志不存在。旧终端ready标志失效，未开始JVM或真实矩阵。后续先解决已列明的账户权限条件，再准备新独占环境及终端启动，不让用户重复启动已清理的旧控制目录。
+
+- **State evidence (scope revision and unblock):** 用户明确要求“先把这两个排除，验证可以满足2000档积分的即可”。已完整读取并修订同一设计/任务卡，将当前阶段冻结为公开规则明确符合2000档的40接口/48原样例/80查询、28ok/12empty；两项高积分和七项权限待确认均显式范围排除，不计skip或通过。原49/58 manifest、JAR、生产表/元数据合同保持不变，完整49目标仍未完成。用户新范围取代原必须先确认全49权限的阻塞，机械集合核对与可实施设计构成本次BLOCKED→READY证据，仅恢复本地实施；旧Token进程/空库已清理，未声称新运行环境或实际授权已验证。新轮采用2秒间隔、一次用户终端直接启动、正式页面错误如实失败；全40成功后仅记录子集完成并PAUSED，不自动推进后继。
 
 ### `M14-T06`
 

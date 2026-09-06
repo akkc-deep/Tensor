@@ -1,16 +1,16 @@
-# M14-T05 真实 Tushare 49 接口受控页面验收——任务设计
+# M14-T05 真实 Tushare 2000积分档子集页面验收——任务设计
 
-任务编号：`M14-T05`。权威来源：[任务看板](../task-handoffs/tensor-v1-task-board.md) Order 75 与 [任务卡](../superpowers/plans/tensor-modules/M14-integration-release.md#task-m14-t05-真实-tushare-49-接口页面验收40h)。唯一直接依赖 M14-T04，完成记录 `80a9491`。本设计只准备后继，不启动真实调用或实施。
+任务编号：`M14-T05`。权威来源：[任务看板](../task-handoffs/tensor-v1-task-board.md) Order 75 与 [任务卡](../superpowers/plans/tensor-modules/M14-integration-release.md#task-m14-t05-真实-tushare-49-接口页面验收40h)。唯一直接依赖 M14-T04，完成记录 `80a9491`。2026-09-06用户明确要求“先把这两个排除，验证可以满足2000档积分的即可”，本修订是该请求的执行合同；保留原49接口全量目标的未覆盖事实。
 
 ## Goal
 
-从原样验收 JAR 页面执行 manifest 全部49个接口的合法样例，验证真实上游反馈、非空结果的适配/入库/页面查看，以及合法空结果无占位行。消费 M14-T04 已通过的元数据/表/归档合同，补上其明确未执行的真实下载。对应 PRD 12.2、AC-004/005；不把账户无权限、样例变化或环境失败写成通过。
+从原样验收 JAR 页面执行公开文档明确支持2000积分档的40个接口、48组原manifest合法样例，验证真实上游反馈、非空结果的适配/入库/页面查看，以及合法空结果无占位行。消费 M14-T04 已通过的元数据/表/归档合同，补上其明确未执行的真实下载。对应 PRD 12.2、AC-004/005；不把账户无权限、样例变化或环境失败写成通过。
 
 ## Scope
 
-只新增 `control-plane/e2e/tushare-live.spec.js` 与 `docs/verification/M14-T05-tushare-live.md`。spec 自含最小 Node 标准库辅助、49个串行用例、JAR 生命周期、页面流程、限速和安全证据。fixture 非空适配与空结果补测为同文件独立准备阶段，不增加49项真实接口计数。
+仅修改本任务既有 `control-plane/e2e/tushare-live.spec.js` 与 `docs/verification/M14-T05-tushare-live.md`；设计/任务卡/看板/交接另行记录授权范围。spec 自含最小 Node 标准库辅助、40个串行用例、JAR 生命周期、页面流程、限速和安全证据。fixture 非空适配与空结果补测为同文件独立准备阶段，不增加40项真实接口计数。
 
-不读取 M00～M13 后端生产实现，不修改 Java/Vue/YAML/SQL、POM、package/lock、Playwright全局配置、manifest/模板、既有测试或分发 JAR。不构建、不运行工作区 clean，不复制模板 data、不使用 API/SQL 种数、不截获或替换上游/页面响应。所有下载与records请求来自页面；直接HTTP只允许自有JVM的health。不覆盖性能、故障注入全矩阵或发布准入，不新增永久helper/依赖/产品入口。
+不读取 M00～M13 后端生产实现，不修改 Java/Vue/YAML/SQL、POM、package/lock、Playwright全局配置、manifest/模板、其他既有测试或分发 JAR。不构建、不运行工作区 clean，不复制模板 data、不使用 API/SQL 种数、不截获或替换上游/页面响应。所有下载与records请求来自页面；直接HTTP只允许自有JVM的health。不覆盖性能、故障注入全矩阵或发布准入，不新增永久helper/依赖/产品入口。
 
 ## Approach
 
@@ -19,22 +19,28 @@
 - M14-T04：[设计](M14-T04-design.md)、[实际证据](../verification/M14-T04-49-contracts.md)、`scripts/verify-49-contracts.sh`、`control-plane/e2e/tushare-metadata.spec.js`。最终实施 `616d54d`，shell50/52/4、前端120、资源49/49/49，Run7 API/dataset各49/49、零业务调用、13截图及清理通过。保留七组分类、`range -> date_range`、43必填/6无参数和五组filters；不 import 会注册测试的旧spec，不重复其全量元数据断言。
 - 公开补充合同：`docs/contracts/openapi-v1.yaml`、PRD 5.6/5.7与12.2、TRD 7.1～7.4与10.4的计数语义、`docs/runbook/acceptance.md`、`docs/runbook/configuration.md`。原验收 JAR 路径 `data-plane/tensor-app/target/acceptance/tensor-app-1.0-SNAPSHOT-acceptance.jar`，SHA-256 `a69874afa6ce783d4ef4e16a678ddb0ff457f2948b68f509a8e4a2c00440bcac`，运行前后不变；不使用T04新建生产JAR。
 - 任务卡显式要求的fixture补测消费 `docs/task-designs/M14-T02-design.md`、`docs/verification/M14-T02-download-outcomes.md` 和 `control-plane/e2e/download-outcomes.spec.js` 的既有SUCCESS/EMPTY页面合同。既有15/15矩阵证明通用适配与回滚路径；本轮单独重做SUCCESS/EMPTY页面闭环，不声称fixture替代12个空接口各自的非空真实数据。T02是任务卡指定的补充合同，不修改看板唯一直接依赖。
-- 实跑前由运行者确认受控回环环境、当前账户覆盖49接口的权限/积分、允许的分钟/小时频率及剩余调用额度足够本轮58次。只记录不含账户身份的检查结论及限制；`credentialConfigured=true`只证明本地配置存在，不能证明真实授权。不得为检查权限先用curl/SDK探测真实上游。
-- Token只由运行者通过 `TENSOR_TUSHARE_TOKEN` 隐藏环境注入；不从聊天、文件、源码、浏览器存储或其他变量读取，不打印或记录其值/哈希。缺失为空时安全失败，不skip。设计阶段不需要读取Token；当前账户授权与配额尚未实测，是执行前置条件。
-- 测试专用非秘密环境输入 `M14_T05_CALL_INTERVAL_MS` 必填，为1～3600000的整数，表示前一真实下载响应完成到下一次点击之间的最小毫秒间隔；运行者依据已核实的最严格账户限制给值，无默认速率。它只控制测试调度，不注入JVM或增加产品配置。未确认权限/额度/间隔则可完成静态实施，但不能启动真实矩阵。
+- 用户已经说明当前账户“2000+积分”，并授权本轮只验证该档可用接口。公开权限审计见 `docs/verification/M14-T05-tushare-live.md`：普通档200次/分钟、每日100000次/个API，stock_basic单独50次/分钟。采用40个文档明确最低积分不超过2000的固定集合；不再要求账户覆盖被排除的高积分/未确认接口，也不把公开规则当作实际授权或剩余额度证明。原本“全49权限/58次剩余额度全部先确认”的阻塞条件不适用于本轮缩减请求。账户现时权限、用量或上游差异由正式页面结果如实验证，遇错误失败并停止，不先用curl/SDK探测，不自动重试。
+- Token只能由用户通过 `TENSOR_TUSHARE_TOKEN` 环境输入；不从聊天、文件、源码、浏览器存储、其他变量或其他进程环境读取，不打印/记录值或哈希。此前私有启动器已因Ctrl+C退出且清理DB，旧ready文件不可复用。新一轮启动前全部本地准备完成，再由用户在已有Token的终端执行一次可直接开始的命令；不设置等待聊天确认的长循环。
+- 本轮启动器明确注入 `M14_T05_CALL_INTERVAL_MS=2000`，表示上一真实下载响应完成到下一次点击间隔至少2秒（整体不超过30次/分钟，低于已知最严50次/分钟）；spec仍要求整数环境输入，范围调整为2000～3600000。它仅控制测试调度，不进入JVM。频率或额度失败保留实际错误，不能靠提高积分、放宽限制或换日期偷偷重跑。
 
-### 唯一49用例与样例规则
+### 原49项manifest与固定40项执行集合
 
-读取 `docs/data-template/manifest.json`，核对SHA-256 `37a317f6a2bc3e5113be5f127976d16d8349414c6476c7f6a194b084a5b0f7c2`、顶层 `interfaces` 恰49个唯一合法api_name、filename精确 `<api>.json`、status仅ok/empty、params为非空对象数组且值全为字符串。沿manifest原序注册 `liveTushare:<api_name>`，每个API一个测试；用例内按params原序逐项填写并提交，各样例恰一次，无自动重试、分页追加或失败后替换日期/参数。
+先使用既有 `validateManifest` 完整校验未修改的manifest及SHA-256 `37a317f6a2bc3e5113be5f127976d16d8349414c6476c7f6a194b084a5b0f7c2`：49唯一api、58组字符串params、37ok/12empty、filename/参数顺序等原合同不变。只读manifest，不读模板data。
 
-| 样例组 | 固定解释 |
+固定排除表必须显式写在spec中，使用安全枚举原因；没有运行时任意include/exclude环境、CLI grep或动态失败后删项：
+
+| apiName | 原因 |
 |---|---|
-| 多样例5接口 | stock_basic依次L/P/D；stock_company依次SSE/SZSE/BSE；hs_const依次SH/SZ；trade_cal与margin分别依次SSE/SZSE/BSE，其他参数保持对应对象原值。合计14次POST。 |
-| 其余44接口 | 每项恰一个params对象，合计44次POST；六个无参数对象为 `{}`，仍从页面点击一次。 |
-| `ok` 37接口 | 所有样例均合法完成，每个接口至少一个SUCCESS，合计sourceRowCount大于0；多样例接口的其他样例允许合法EMPTY。manifest没有逐样例status，不能把接口级ok强加给每个枚举样例。 |
-| `empty` 12接口 | income、balancesheet、cashflow、fina_indicator、fina_audit、monthly、slb_len、slb_sec、slb_sec_detail、dividend、top10_holders、top10_floatholders；每项的唯一样例应为EMPTY、三计数全0，结束查询仍0行。 |
+| top_inst、broker_recommend | `higher_points`：用户指定排除；接口页分别要求5000/6000，且总表有差异 |
+| share_float | `permission_unverified`：接口页120与总表3000矛盾 |
+| hs_const、moneyflow_hsgt、hk_hold、index_member | `permission_unverified`：原官方文档返回文档不存在 |
+| hsgt_top10、namechange | `permission_unverified`：当前说明没有明确最低积分 |
 
-完整成功轮为49接口用例、58次真实下载POST，另有2次本地fixture POST。manifest的row_count是历史样例信息，不等于本次真实计数，不用于等值断言或报告实际结果。日期20260807、月份202608与股票代码等只使用所读params值，不读取49份模板data。样例状态漂移应保留失败及实际结果，不修改manifest、试探其他日期或降低验收条件。
+纯函数 `selectLiveInterfaces` 在完整manifest校验之后，断言固定9个排除名均存在且唯一，其余按manifest原序保留。断言恰40接口、48样例、28ok/12empty；同时暴露固定安全的排除名/原因，供证据记录。40个精确API为：stock_basic、stock_company、income、balancesheet、cashflow、fina_indicator、fina_audit、fina_mainbz、stk_rewards、stk_holdernumber、trade_cal、margin、daily、weekly、monthly、adj_factor、suspend_d、daily_basic、moneyflow、stk_limit、top_list、margin_detail、block_trade、slb_len、slb_sec、slb_sec_detail、forecast、express、dividend、disclosure_date、repurchase、stk_holdertrade、top10_holders、top10_floatholders、new_share、stk_managers、pledge_stat、pledge_detail、index_classify、index_member_all。
+
+沿这个集合注册40个 `liveTushare:<api_name>`，每API一个串行用例，用例内按原params顺序各提交一次。stock_basic、stock_company、trade_cal、margin各3样例（12次），其余36接口各1样例（36次）；共48次真实下载POST。被排除9项不注册测试、不计为skip/通过/失败，在安全证据中独立列为本轮不覆盖；不把注册40误称执行40。
+
+28个ok接口要求所有样例合法完成，且每API至少一个SUCCESS、合计sourceRowCount>0；多样例其余请求可合法EMPTY，不强加逐样例status。12个empty仍为income、balancesheet、cashflow、fina_indicator、fina_audit、monthly、slb_len、slb_sec、slb_sec_detail、dividend、top10_holders、top10_floatholders，各唯一样例EMPTY、三计数0、末查询0行。manifest的历史row_count不与本轮计数等值比较。所有日期20260807/202608与证券代码保持原样，不换参数、不伪装EMPTY。
 
 ### 隔离与生命周期
 
@@ -50,11 +56,11 @@ java -jar "$ACCEPTANCE_JAR" \
 
 health每次2秒、总90秒等HTTP200/UP。beforeAll显式600秒：前置检查最多30秒、health90秒、fixture页面阶段120秒，失败后的完整清理另留330秒，合计至多570秒。Chromium1440×1000；serial、retries=0（覆盖CI默认重试），只接受单worker；trace/video/自动截图全部off。每个真实POST等待响应135秒，保留产品120秒上游/130秒前端超时；单case timeout为 `240000 + params.length * (150000 + intervalMs)`（额外窗口覆盖页面准备及失败排空/关闭），不以Playwright默认30秒截断真实调用。各case新页面，不分享表单状态；只分享自有JVM、调度时钟与安全累计计数。
 
-beforeAll失败同样独立清理已创建资源。afterAll显式330秒：未结请求/响应扫描最多135秒，超时记录固定网络排空失败并继续清理；随后正常SIGTERM自有JVM并最多150秒等待close与8080释放，余45秒用于关闭自有page/context及扫描/写安全摘要。各清理阶段独立执行，排空失败不能阻止停机；不得日常SIGKILL。主失败与清理失败以AggregateError保留，完整49计数断言只在运行无主失败时判定成功，失败轮仍保留实际已执行/未执行计数。串行失败后剩余用例未运行不得充当通过。
+beforeAll失败同样独立清理已创建资源。afterAll显式330秒：未结请求/响应扫描最多135秒，超时记录固定网络排空失败并继续清理；随后正常SIGTERM自有JVM并最多150秒等待close与8080释放，余45秒用于关闭自有page/context及扫描/写安全摘要。各清理阶段独立执行，排空失败不能阻止停机；不得日常SIGKILL。主失败与清理失败以AggregateError保留，完整40计数断言只在运行无主失败时判定成功，失败轮仍保留实际已执行/未执行计数。串行失败后剩余用例未运行不得充当通过。
 
 ### 独立fixture补测
 
-beforeAll创建并最终关闭自己拥有的浏览器context/page，用真实页面单独完成以下流程；不进入49个live标题或58次真实调用计数，不启动本机上游替身，不需要故障DDL。
+beforeAll创建并最终关闭自己拥有的浏览器context/page，用真实页面单独完成以下流程；不进入40个live标题或48次真实调用计数，不启动本机上游替身，不需要故障DDL。
 
 1. `/datasets` 选择Fixture/fixture_daily，无筛选点击查询，初始totalElements=0。
 2. `/downloads` 选择Fixture/fixture_daily及SUCCESS，页面POST200/SUCCESS，三计数1/1/0，结果panel显示对应计数。经导航进入数据查看，证券代码000001.SZ查询恰一行：ts_code=000001.SZ、trade_date=2026-08-07、amount=`11.230000000000000000`、note=null、source_plugin=fixture、source_api=fixture_daily、ingested_at为本轮有效instant；对应七列页面文本与M14-T02合同一致，null显示`--`，时间独立按Asia/Shanghai格式化。
@@ -65,10 +71,10 @@ beforeAll创建并最终关闭自己拥有的浏览器context/page，用真实�
 ### 每个真实接口的页面流程
 
 1. 动作前安装T04修订后的request/requestfinished/requestfailed/response/pageerror监视和待完成promise排空边界。打开 `/datasets`，level1“数据查看”，combobox exact“数据源”选Tushare Pro，“数据集”以精确api名边界选当前项。页面metadata GET必须200且身份相符；声明的filters和列以T04已验证合同为输入，不使用后端实现。所有filters保持空，确认“设置筛选条件后查询”且尚无records自动请求；点击“查询”，当前API初查totalElements=0、items=[]。
-2. 通过导航link“数据下载”，选择Tushare Pro和当前“数据接口”，确认当前api身份。params按照描述符声明顺序填；ENUM使用真实combobox/option，DATE/DATE_RANGE_MEMBER把compact值转为YYYY-MM-DD、MONTH转YYYY-MM，输入Tab提交后Escape关闭浮层；TS_CODE照样例填写。六个无参数接口不造控件。参数label与type沿M14-T04公开参数表；不读组件props，不写DOM/CSS。
+2. 通过导航link“数据下载”，选择Tushare Pro和当前“数据接口”，确认当前api身份。params按照描述符声明顺序填；ENUM使用真实combobox/option，DATE/DATE_RANGE_MEMBER把compact值转为YYYY-MM-DD、MONTH转YYYY-MM，输入Tab提交后Escape关闭浮层；TS_CODE照样例填写。本轮五个无参数接口不造控件。参数label与type沿M14-T04公开参数表；不读组件props，不写DOM/CSS。
 3. 限速器在每次真实POST前检查与上一真实POST完成时钟的间隔，条件等待至满足输入间隔；无并发，无catch重试。先注册当前唯一POST的监听再点击“开始下载”。监听实际请求必须恰 `{pluginId:'tushare_pro',apiName,params:当前manifest对象}`，不携Token/其他键，日期/月提交值保持compact。结果完整结束、页面控件恢复后才能进入下一样例。
 4. HTTP200时DownloadResponse精确八键：requestId/outcome/pluginId/apiName/sourceRowCount/insertedRows/updatedRows/message；头X-Request-Id与body非空requestId相同、全轮唯一，身份一致。三计数均为非负安全整数。SUCCESS的sourceRowCount>0，且 `0 < insertedRows + updatedRows <= sourceRowCount`；不能要求与sourceRowCount总相等，TRD10.4按不同业务键计写入数。EMPTY三计数全0。页面role=status显示正确heading、SUCCESS的term/definition三计数，EMPTY的固定文字和无三计数列表；不能只验证HTTP。每个样例结果均真实记录。
-5. 完成当前API全部样例后，经“数据查看”导航选择同名dataset，无筛选点击查询（每API恰初查/末查2次，共98个真实dataset records GET）。PageResponse精确九键、头体requestId一致且唯一、page1/pageSize50、totalPages与totalElements相符；columns为definition业务列原序加source_plugin/source_api/ingested_at。初始空表且本轮无其他写入，所以末查totalElements必须等于本API所有成功响应insertedRows之和；允许后续样例更新已有键，不要求total等于上游行数之和。
+5. 完成当前API全部样例后，经“数据查看”导航选择同名dataset，无筛选点击查询（每API恰初查/末查2次，共80个真实dataset records GET）。PageResponse精确九键、头体requestId一致且唯一、page1/pageSize50、totalPages与totalElements相符；columns为definition业务列原序加source_plugin/source_api/ingested_at。初始空表且本轮无其他写入，所以末查totalElements必须等于本API所有成功响应insertedRows之和；允许后续样例更新已有键，不要求total等于上游行数之和。
 6. ok接口至少一个SUCCESS、末查totalElements>0且items非空，取第一页第一个业务row核对完整columns键集合、每值string/null、来源恒tushare_pro/当前api、ingested_at落在本case首次下载前至末次下载后时钟区间。此空表前置+唯一页面写入+插入计数+来源时间证明记录来自本轮当前接口。逐列核对该row的页面文本：定义label表头；业务null=`--`、其余保持响应字符串，ingested_at独立Intl/Asia/Shanghai格式化；滚动使末端来源列实际可见，不保存该真实行或截图。empty接口末查items=[]/total0，显示“未找到符合条件的数据”，无占位行。
 7. 每个用例结束前排空所有网络扫描，关闭自己拥有的page后再次排空并检查最终失败，才写通过标记。不得仅在response事件登记promise而漏掉未响应请求，不忽略page.close导致的requestfailed。
 
@@ -76,7 +82,7 @@ beforeAll创建并最终关闭自己拥有的浏览器context/page，用真实�
 
 任何真实下载非200都不能计为SUCCESS或EMPTY。对已登记的当前POST先安全读取ApiError（精确五键、头体requestId、公开code/message/retryable/fieldErrors），核对页面“下载失败”与安全摘要、不出现成功空结果，随后使case失败；不点击“使用原参数重试”。SOURCE_AUTH_FAILED/SOURCE_PERMISSION_DENIED为账户环境阻塞；SOURCE_RATE_LIMITED为频率/额度阻塞；SOURCE_NETWORK_ERROR/SOURCE_TIMEOUT/SOURCE_UNAVAILABLE为环境/上游故障，保留证据再定位。PARAM_*、DATASET_MISCONFIGURED、ADAPTER_*、PERSISTENCE_FAILED、QUERY_FAILED等保留真实产品/配置失败供独立任务处理，不在本任务改生产文件或自行发明任务ID。
 
-浏览器对 `/api/v1/**` 只允许metadata GET、指定API/fixture的records GET和已登记的下载POST；此外允许原JAR的 `/`、`/downloads`、`/datasets` 页面文档与 `/assets/**`、`/favicon.ico`、`/vite.svg` 的正常同源GET，这些资源也必须通过HTTP/网络错误检查，不静默忽略404；任何其他写入、额外POST、非同源请求、pageerror、requestfailed或非当前POST错误HTTP均失败。服务端真实上游由JVM通过HTTPS访问固定域名，不能用浏览器route/mock、代理或伪造成功响应替换它。58是页面提交数；没有出站捕获时不得把它描述为独立测量的上游调用数。通过真实配置、页面响应和实际完成事件关联证明所执行路径。
+浏览器对 `/api/v1/**` 只允许metadata GET、指定API/fixture的records GET和已登记的下载POST；此外允许原JAR的 `/`、`/downloads`、`/datasets` 页面文档与 `/assets/**`、`/favicon.ico`、`/vite.svg` 的正常同源GET，这些资源也必须通过HTTP/网络错误检查，不静默忽略404；任何其他写入、额外POST、非同源请求、pageerror、requestfailed或非当前POST错误HTTP均失败。服务端真实上游由JVM通过HTTPS访问固定域名，不能用浏览器route/mock、代理或伪造成功响应替换它。48是页面提交数；没有出站捕获时不得把它描述为独立测量的上游调用数。通过真实配置、页面响应和实际完成事件关联证明所执行路径。
 
 新建0700临时运行目录，进程日志最多按0600私有文件保留；不tee原日志。所有响应/请求/可见页面在断言或证据写入前扫描真实Token、DB密码/账号/JDBC值及敏感键。失败诊断用固定安全检查名/公开错误码，不将matcher实际响应、行值、环境或底层异常正文交给reporter。业务响应只在内存中校验，不写完整JSON。禁止trace/video/自动截图、完整上游响应和浏览器存储快照；本任务不创建手动截图，以免保存真实行。所有body断言使用固定安全错误，try/catch/finally在抛出给Playwright之前排空并关闭自有page，beforeAll同样关闭自有context；禁止attach或保存可访问性快照。各阶段有自己的有界超时，先于外层hook/test预算失败，使页面关闭发生在Playwright失败产物生成之前。清理错误也转为固定安全错误后与主失败一起保留，不能重新抛出携原响应或行值的matcher错误。
 
@@ -86,31 +92,32 @@ JVM日志流在写文件前检查上述秘密字面值及其JSON转义形式，�
 
 **CLI退出后的固定终检算法：** 运行者保存真实npx退出码，然后用Python标准库递归读取这个精确自有目录（不跟随symlink，异常对象直接失败），扫描Token/DB秘密及JSON转义字面值；命中任何文件则删除该文件并使终检失败，仅输出固定泄漏标志。无论npx是否成功，随后删除本轮playwright子目录内全部自动产物（包括error-context.md、附件、可访问性快照及.last-run.json），不保留可能包含真实行的失败上下文；本任务没有允许保留的Playwright附件。任何自动上下文/附件在成功轮出现均视为异常产物并使终检失败。run子目录只允许spec约定的已扫描应用日志与安全JSON，根目录只允许runner.log和终检安全摘要；意外文件删除并失败。不得通过脱敏把失败轮改判通过。终检摘要只记录npx原退出码、文件数、已删除产物数和扫描/清理布尔值，最终退出码优先保留非零npx码，否则扫描或删除失败返回1，否则0。只发布扫描通过后的白名单计数/路径，不打印runner.log全文。待提交证据文档生成后再以同一秘密集合扫描该精确文档，全部门禁通过才允许完成。
 
-纯本地验证必须使用当前Playwright1.62.1，在临时目录生成合成秘密/合成行的故意失败页面探针：验证安全异常和page/context关闭、CLI退出后枚举自动失败上下文/附件，以及最终扫描删除；另模拟afterAll之后生成的文件，证明不会漏扫。探针不用真实Token、不请求上游、不增加live测试或永久文件；只断言安全布尔值和原失败码被保留，不打印合成内容。
+纯本地验证必须使用当前Playwright1.62.1，在临时目录生成合成秘密/合成行的故意失败页面探针：验证安全异常和page/context关闭、CLI退出后枚举自动失败上下文/附件，以及最终扫描删除；另模拟afterAll之后生成的文件，证明不会漏扫。探针不用真实Token、不请求上游、不增加live测试或永久文件；只断言安全布尔值和原失败码被保留，不打印合成内容。该合成Chromium终检探针上一版本已实际通过；本次不改其安全流程，不重复执行，除非修订或审查发现相关新问题。
 
 每个下载/查询requestId在最终日志中必须恰一个既有 `tensor.operation.completed`，其plugin/api与实际响应一致，日志outcome按SUCCESS→success、EMPTY→empty、成功query（含0行）→success、ApiError→failure映射，成功计数或查询计数一致，durationMs非负；只在内存检查原日志，不发布paramSummary、filter值或其他原文。按请求ID核对完成事件并排空后再正常停机复查总数。没有测到的值不填0。
 
-安全JSON逐请求只保存 `apiName`（fixture为fixture_daily）、`outcome`（成功/空或固定公开错误码）、实际计数、`requestId`、`durationMs`；阶段分别放fixture/download/query数组。运行级元信息只保留版本、Git/spec/JAR/manifest哈希、时间、命令、实际完成/未执行数、清理/扫描结论和非秘密调用间隔，不包含Token哈希、账户/schema/host、params值、业务行或完整响应。测试stdout只打印固定阶段、实际简洁计数与安全文件路径。文档记录49个API的实际结果及58个请求的安全投影；失败轮列明未运行项，不能把发现49项当完成49项。
+安全JSON逐请求只保存 `apiName`（fixture为fixture_daily）、`outcome`（成功/空或固定公开错误码）、实际计数、`requestId`、`durationMs`；阶段分别放fixture/download/query数组。运行级元信息只保留版本、Git/spec/JAR/manifest哈希、时间、命令、实际完成/未执行数、清理/扫描结论和非秘密调用间隔，不包含Token哈希、账户/schema/host、params值、业务行或完整响应。测试stdout只打印固定阶段、实际简洁计数与安全文件路径。安全JSON新增scope对象：id固定points-2000、manifestCases=49、manifestSamples=58、selectedCases=40、selectedSamples=48、excludedInterfaces为9项apiName/reason。totals.manifestSamples保持58并新增selectedSamples=48；其他运行/请求计数只覆盖当前40项。文档记录40个API与48请求的实际安全投影，另列9项范围排除；失败轮按40项列实际完成/失败/未运行，不得与排除项混淆。
 
-运行者末尾独立只读确认6迁移/50业务表，49生产表各自实际行数与页面末查total一致、fixture1行；只保存API/计数，不保存连接信息或行。正常停机后按精确名称/所有权标签清理本轮schema/账号或专用容器及匿名卷与临时凭证，不触碰其他会话资源。原JAR及manifest哈希不变。修复凭证/权限后保留同一测试与样例，在全新空schema手动重跑完整矩阵；未知外部条件不能由等待或自动重试当作已解决。
+运行者末尾独立只读确认6迁移/50业务表，40个已选生产表各自实际行数与页面末查total一致、9个排除API物理表仍0行、fixture1行；只保存API/计数，不保存连接信息或行。正常停机后按精确名称/所有权标签清理本轮schema/账号或专用容器及匿名卷与临时凭证，不触碰其他会话资源。原JAR及manifest哈希不变。修复凭证/权限后保留同一测试与样例，在全新空schema手动重跑完整矩阵；未知外部条件不能由等待或自动重试当作已解决。
 
 ## Files
 
-- Create `control-plane/e2e/tushare-live.spec.js`，100644：上述49用例和同文件公开生命周期、独立fixture补测、全58样例、限速、安全和结果校验。
-- Create `docs/verification/M14-T05-tushare-live.md`，100644：实施时实际版本、输入检查、命令/退出码、49接口/58请求逐项安全结果、fixture补测、页面行匹配/独立表计数的结论、请求关联、扫描、清理及失败归因。
+- Modify `control-plane/e2e/tushare-live.spec.js`，100644：上述40用例、固定范围选择和同文件公开生命周期、独立fixture补测、48样例、限速、安全和结果校验。
+- Modify `docs/verification/M14-T05-tushare-live.md`，100644：实施时实际版本、输入检查、命令/退出码、40接口/48请求逐项安全结果和9项排除原因、fixture补测、页面行匹配/独立表计数的结论、请求关联、扫描、清理及失败归因。
 
 仅精确两实施路径加入Git，提交 `test(release): verify live Tushare interfaces`；设计/交接/看板独立提交。不提交Token、临时日志/JSON/数据库、生成target/图片或用户并行ISSUE-004文件。
 
 ## Tests
 
-先写完整用例及同函数纯本地反例，不用故意损坏Token向真实服务制造RED。标准库临时探针验证：manifest错误hash/少项/多项/未知status/非法params被拒绝；多样例ok允许单次EMPTY但全空不能通过；历史row_count不参与本次计数；不同键计数允许小于sourceRowCount；重复requestId/额外POST/缺末查/行来源错误/插入合计不符/跨chunk秘密/pending请求越界均失败。探针调用正式函数、不mock产品HTTP，不新增永久测试文件或live用例；在受限临时目录运行并删除含合成哨兵的产物。
+先为本次范围修订增加同函数纯本地RED反例，再修改spec：从冻结49/58选择精确40/48/28ok/12empty、9项排除身份/原因，缺少固定排除名/异常集合拒绝、完整manifest校验仍拒绝错误hash/49缺项，未选API不注册、缺环境摘要registered40/unexecuted40且manifestSamples58/selectedSamples48，最终完整运行计数不再硬编码49/58/98。保留既有同函数纯本地反例，不用故意损坏Token向真实服务制造RED。标准库临时探针验证：manifest错误hash/少项/多项/未知status/非法params被拒绝；多样例ok允许单次EMPTY但全空不能通过；历史row_count不参与本次计数；不同键计数允许小于sourceRowCount；重复requestId/额外POST/缺末查/行来源错误/插入合计不符/跨chunk秘密/pending请求越界均失败。探针调用正式函数、不mock产品HTTP，不新增永久测试文件或live用例；在受限临时目录运行并删除含合成哨兵的产物。
 
 ```sh
 # 仓库根；不启动JVM、不访问真实服务
 node --check control-plane/e2e/tushare-live.spec.js
 cd control-plane
 npx playwright test e2e/tushare-live.spec.js --list
-# 完成账户/间隔确认、新空schema与私有环境注入后；专用shell关闭跟踪
+# 按本轮授权范围准备新空schema与私有Token/DB环境；专用shell关闭跟踪
+export M14_T05_CALL_INTERVAL_MS=2000
 set +x
 umask 077
 M14_T05_ARTIFACT_DIR=$(mktemp -d "${TMPDIR:-/tmp}/tensor-m14-t05.XXXXXXXX") || exit 1
@@ -123,23 +130,22 @@ npx playwright test e2e/tushare-live.spec.js --workers=1 \
 # 不能直接cat runner.log，不能以终检成功覆盖非零tensor_m14_t05_exit
 ```
 
-语法/发现exit0、恰49个Chromium标题，纯探针不需要真实Token。完整实跑预期exit0、49 passed、0 failed/skipped/retry；37个ok/12个empty接口符合各自规则，58次真实下载POST与98次dataset查询，fixture另2POST/3查询；所有成功计数/来源记录/EMPTY无行/日志请求关联成立，CLI退出后的终检也为0且无自动上下文/附件残留。T04已运行前端120项且本任务不改产品/前端源码，不重复全套unit/Maven或旧15项故障矩阵；修订spec后用新空schema重跑受影响本地探针及完整live矩阵，任何重跑都需仍满足账户配额。
+语法/发现exit0、恰40个Chromium标题，纯探针不需要真实Token。本轮完整实跑预期exit0、40 passed、0 failed/skipped/retry；28个ok/12个empty接口符合各自规则，48次真实下载POST与80次dataset查询，fixture另2POST/3查询；所有成功计数/来源记录/EMPTY无行/日志请求关联成立，CLI退出后的终检也为0且无自动上下文/附件残留。T04已运行前端120项且本任务不改产品/前端源码，不重复全套unit/Maven或旧15项故障矩阵；修订spec后用新空schema重跑受影响本地探针及完整live矩阵，任何重跑都需仍满足账户配额。
 
 提交前 `git diff --check`；核对实施base到HEAD仅两指定实施文件，测试哈希与实际证据一致、文件模式正确、原JAR/manifest不变、敏感扫描与所有清理完成。缺Token/账户额度/DB/JAR/Java/端口/网络时保留前置失败，不能以静态检查、T04假Token结果、部分矩阵或历史M14-T02结果代替本轮实跑。
 
 ## Acceptance
 
-- 原JAR真实页面完成49接口全部合法样例共58次串行提交，无自动重试、无额外上游探测，Token仅通过规定环境进入JVM。
-- 37个ok接口各至少一次非空成功，页面三计数与本次结果一致；独立空库前置、页面同数据集查询、插入累计/来源字段/本轮时间和可见记录共同证明适配入库查看。12个empty均合法0/0/0且对应表与页面0行。
-- fixture SUCCESS/EMPTY补测在本轮单独从页面完成非空适配/写入/查看及空结果行不变，不混入49真实接口计数或宣称覆盖12个接口的非空上游。
-- 所有鉴权、权限、限流、网络、样例漂移及产品失败真实记录；只有完整49通过、无跳过/重试、请求/清理/扫描门禁通过才能完成任务。未解决环境问题按原工作流写pause交接和BLOCKED，不降低验收标准。
+- 原JAR真实页面完成本轮40接口全部合法样例共48次串行提交，无自动重试、无额外上游探测，Token仅通过规定环境进入JVM。
+- 28个ok接口各至少一次非空成功，页面三计数与本次结果一致；独立空库前置、页面同数据集查询、插入累计/来源字段/本轮时间和可见记录共同证明适配入库查看。12个empty均合法0/0/0且对应表与页面0行。
+- fixture SUCCESS/EMPTY补测在本轮单独从页面完成非空适配/写入/查看及空结果行不变，不混入40真实接口计数或宣称覆盖12个接口的非空上游。
+- 所有鉴权、权限、限流、网络、样例漂移及产品失败真实记录；只有本轮40通过、无跳过/重试、请求/清理/扫描门禁通过，才能报告2000档子集验收完成。原49目标尚有9接口不覆盖，因此M14-T05只记录本轮阶段结果并以pause交接进入PAUSED，不将全量任务标COMPLETED、不自动准备后继。真实运行错误则记录失败并进入BLOCKED；用户以后要求覆盖余项再另行恢复原任务。
 - 精确两文件提交，最终证据仅保留允许的安全元信息/投影；没有秘密、真实行、完整上游响应、trace或截图泄漏，无生产/配置/旧测试改动，原分发物不变。
 
 ## Risks
 
-- 当前Token、接口权限、账户频率/额度尚未验证；运行者必须在真实矩阵前提供私有Token与非秘密间隔/权限额度确认。它们是外部执行条件，不是设计阶段已通过的事实。
-- 历史20260807/202608样例可能因数据补录、权限或服务变化与ok/empty不同；保留实际失败，不能自动改参数或把当前非空与历史empty差异解释为通过。
-- manifest含58个样例、49个接口和接口级status；采用全部样例、接口内汇总判定，避免遗漏枚举样例或虚构逐样例状态。账户额度须覆盖58次及每次手动完整复跑。
-- 通用fixture闭环只提供任务卡指定的补充适配证据；空接口的真实非空覆盖、性能与最终发布判断不能由本任务夸大结论。
-- 上游原始行数可能含重复业务键，写入计数按不同键计算；准确比较插入累计与空库末查total，不对sourceRowCount硬套相等。
-- 所有旧会话环境已清理；下一工作者需新建隔离运行环境，不能复用旧凭证或进程。用户并行文件和原target必须保持各自所有权边界。
+- 本轮选择依据用户给出的积分档位和已读公开文档，不是假定上游已授权。实际鉴权、权限、限流和网络错误均使所选用例失败；未知个人用量不由公开日上限代填。
+- 两项高积分与七项权限待确认构成本轮固定排除；它们不是成功、EMPTY或测试skip，不可据本轮结果声称PRD全49或最终发布准入通过。
+- 历史日期/状态可能漂移；保留失败，不修改manifest、模板、分发物或生产代码。fixture证明通用闭环，不代表12个空接口已取得非空上游数据。
+- 独立迁移后空表观察必须捕获真实6迁移/50业务表且全空，末尾再核对40页面计数、9空表和fixture1行；未测量不能填0。
+- 新私有终端启动器直接进入已批准的执行流程，提供固定安全阶段/耗时心跳；不要求用户先启动一小时等待脚本。它是本机一次性操作材料，不新增永久helper。前置失败不启动真实请求，CLI结束后必做终检并正常清理自有JVM/DB/卷/临时连接材料。

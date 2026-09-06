@@ -97,15 +97,19 @@
 - Create: `control-plane/e2e/tushare-live.spec.js`
 - Create: `docs/verification/M14-T05-tushare-live.md`
 
-**Interfaces:** Uses manifest sample parameters and a credential supplied only through `TENSOR_TUSHARE_TOKEN`; every call originates from the page.
+**Current authorized phase (2026-09-06):** 用户要求排除top_inst与broker_recommend，只验证2000积分档可满足的接口。按修订设计执行固定40接口/48原样例/80页面查询、28ok/12empty；另7项权限文档未确认的接口暂不覆盖。原49项manifest、JAR、生产表与元数据合同保持不变，9项范围排除必须逐项记录，不能计作通过或skip。该阶段成功后记录子集完成并暂停原任务，不宣称49全量验收或发布准入完成。
 
-- [ ] Confirm task design; verify controlled environment, API permissions, rate limits and redaction controls before using the live Token.
-- [ ] Generate test cases at runtime from public manifest names/parameters without serializing the Token; page-select each API and submit its legal sample.
-- [ ] For sample status `ok`, assert nonzero source count then query the same dataset through the page and verify a matching record; for `empty`, assert legal zero result and separately run fixture adaptation coverage already proven by M14-T02.
-- [ ] Capture auth/permission failures as environment blockers, not product success; after credentials/permissions are corrected rerun the same unchanged task.
-- [ ] Run `npx playwright test e2e/tushare-live.spec.js --workers=1`; expect 49 completed cases with no automatic retry.
-- [ ] Search Playwright artifacts, app logs and evidence for the actual Token and remove any artifact containing it; evidence records only API, outcome, counts, request ID and duration.
-- [ ] Commit test/evidence metadata without credentials as `test(release): verify live Tushare interfaces` when Git exists.
+**Interfaces:** Uses unchanged manifest parameters and a credential supplied only through `TENSOR_TUSHARE_TOKEN`; every business call originates from the page. Frozen scope/eligibility and controller-selected minimum interval are defined in `docs/task-designs/M14-T05-design.md`.
+
+- [ ] Consume the revised design and user's narrowed scope; preserve the original public manifest validation (49 APIs/58 samples), then select the exact 40 APIs/48 samples and publish all 9 exclusions with fixed safe reasons.
+- [ ] Add same-function scope/counterexample checks before implementation; preserve existing safety, result/count validation and lifecycle behavior. Register only the selected 40 cases, no runtime skip or arbitrary selection flag.
+- [ ] Preserve the per-API ok/empty rules and all unchanged sample values; redo fixture SUCCESS/EMPTY independently (2 POST/3 queries).
+- [ ] Use one worker, zero retries and `M14_T05_CALL_INTERVAL_MS=2000`; record actual auth/permission/quota/network/product failures without additional upstream probes or altered parameters.
+- [ ] Verify Node24 syntax, 40-case discovery, focused pure probes and missing-environment summary (registered40/unexecuted40, manifestSamples58/selectedSamples48); do not repeat unrelated Maven/unit/old synthetic Chromium gates.
+- [ ] Prepare a new MySQL8.4.6 schema/least-privilege account and original JAR. Finish local prerequisites before asking the user to launch once in their Token-configured terminal; no long confirmation-wait loop.
+- [ ] Run `npx playwright test e2e/tushare-live.spec.js --workers=1`; successful phase requires 40 completed cases/48 live POSTs/80 live queries, plus separate fixture checks, unchanged 6 migrations/50 business tables, selected40 row counts matching pages and excluded9 tables still empty.
+- [ ] Run the unchanged post-CLI scanner after all workers exit, preserve failure codes, scan evidence and clean exact owned resources. Commit only the spec/evidence implementation files; control documents are separate commits.
+- [ ] Report the phase's actual results and exclusions; full49 acceptance remains incomplete. On success pause M14-T05 with a valid handoff; on real failure record BLOCKED. Do not automatically prepare the successor.
 
 ### Task M14-T06: Daily 与 balancesheet 性能验证（4.0h）
 
