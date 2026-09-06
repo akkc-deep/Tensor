@@ -9,6 +9,7 @@
 - **Authority:** 本看板只管理 ISSUE-004 的子任务。`docs/task-handoffs/tensor-v1/tensor-v1-task-board.md` 已明确排除后续另行规划的缺陷修复，本次不改变其任务身份、顺序、依赖和状态。
 - **Project design:** `docs/task-designs/ISSUE-004-design.md`。
 - **Implementation plan:** `docs/superpowers/plans/2026-09-07-issue-004-ui-redesign.md`。
+- **Completion evidence:** 2026-09-07，六项COMPLETED；170项单测、构建、60项浏览器验收、独立规格/质量及视觉复审和最终项目审查通过。ISSUE已解决，证据见 `docs/verification/ISSUE-004-ui-redesign.md`。
 
 ## Workflow
 
