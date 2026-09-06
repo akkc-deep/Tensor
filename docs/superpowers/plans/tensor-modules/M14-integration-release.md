@@ -152,6 +152,8 @@
 
 ### Task M14-T07: 安全与运行控制验证（3.0h）
 
+**Design:** `docs/task-designs/M14-T07-design.md`（详细方案供实施前确认；本次回填不启动任务）。
+
 **Files:**
 - Create: `scripts/security/verify-release.sh`
 - Create: `docs/verification/M14-T07-security.md`
