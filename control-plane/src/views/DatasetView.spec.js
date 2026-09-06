@@ -205,6 +205,7 @@ describe('DatasetView', () => {
 
     expect(wrapper.findAll('h1')).toHaveLength(1)
     expect(wrapper.get('h1').text()).toBe('数据查看')
+    expect(wrapper.text()).toContain('筛选、浏览与核验，找到你需要的市场数据。')
     expect(api.listDataSources).toHaveBeenCalledTimes(1)
     expect(wrapper.getComponent(AsyncStatePanel).props()).toMatchObject({
       state: 'LOADING',

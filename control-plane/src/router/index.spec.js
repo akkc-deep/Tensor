@@ -3,11 +3,12 @@ import { createMemoryHistory } from 'vue-router'
 import { createAppRouter } from './index.js'
 
 describe('app router', () => {
-  it('registers the named business routes', () => {
+  it('registers the named workspace routes', () => {
     const router = createAppRouter(createMemoryHistory())
 
     expect(router.resolve({ name: 'downloads' }).path).toBe('/downloads')
     expect(router.resolve({ name: 'datasets' }).path).toBe('/datasets')
+    expect(router.resolve({ name: 'settings' }).path).toBe('/settings')
   })
 
   it('redirects the root route to downloads', async () => {

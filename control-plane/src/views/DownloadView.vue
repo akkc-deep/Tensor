@@ -1,7 +1,10 @@
 <script setup>
 import { computed, onMounted, ref } from 'vue'
 
+defineOptions({ name: 'DownloadView' })
+
 import AsyncStatePanel from '../components/common/AsyncStatePanel.vue'
+import PageHeading from '../components/common/PageHeading.vue'
 import ApiDescription from '../components/download/ApiDescription.vue'
 import ApiSelect from '../components/download/ApiSelect.vue'
 import DataSourceSelect from '../components/download/DataSourceSelect.vue'
@@ -54,7 +57,11 @@ onMounted(load)
 
 <template>
   <section class="page" aria-labelledby="downloads-title">
-    <h1 id="downloads-title">数据下载</h1>
+    <PageHeading
+      id="downloads-title"
+      title="数据下载"
+      description="选择数据接口，把市场数据接入你的研究。"
+    />
 
     <DataSourceSelect
       :model-value="selectedPluginId"

@@ -160,6 +160,7 @@ describe('DownloadView', () => {
 
     expect(wrapper.findAll('h1')).toHaveLength(1)
     expect(wrapper.get('h1').text()).toBe('数据下载')
+    expect(wrapper.text()).toContain('选择数据接口，把市场数据接入你的研究。')
     expect(api.listDataSources).toHaveBeenCalledTimes(1)
     expect(wrapper.getComponent(AsyncStatePanel).props()).toMatchObject({
       state: 'LOADING',

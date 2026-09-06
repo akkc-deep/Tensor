@@ -1,9 +1,12 @@
 <script setup>
 import { computed, onMounted, ref, shallowRef } from 'vue'
 
+defineOptions({ name: 'DatasetView' })
+
 import { listDataSources } from '../api/dataSources.js'
 import { getDataset, listDatasets } from '../api/datasets.js'
 import AsyncStatePanel from '../components/common/AsyncStatePanel.vue'
+import PageHeading from '../components/common/PageHeading.vue'
 import DataSourceSelect from '../components/download/DataSourceSelect.vue'
 import DatasetPagination from '../components/dataset/DatasetPagination.vue'
 import DatasetSelect from '../components/dataset/DatasetSelect.vue'
@@ -185,7 +188,11 @@ onMounted(loadSources)
 
 <template>
   <section class="page" aria-labelledby="datasets-title">
-    <h1 id="datasets-title">数据查看</h1>
+    <PageHeading
+      id="datasets-title"
+      title="数据查看"
+      description="筛选、浏览与核验，找到你需要的市场数据。"
+    />
 
     <DataSourceSelect
       :model-value="selectedPluginId"

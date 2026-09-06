@@ -112,9 +112,9 @@ describe('App', () => {
 
     try {
       await flushPromises()
-      expect(wrapper.findAll('header')).toHaveLength(1)
-      expect(wrapper.findAll('nav[aria-label="主导航"]')).toHaveLength(1)
-      expect(wrapper.findAll('main')).toHaveLength(1)
+      expect(wrapper.findAll('aside.app-nav')).toHaveLength(1)
+      expect(wrapper.findAll('nav[aria-label="工作区导航"]')).toHaveLength(1)
+      expect(wrapper.findAll('main#workspace')).toHaveLength(1)
       expect(wrapper.findAll('h1')).toHaveLength(1)
       expect(wrapper.get('h1').text()).toBe('数据下载')
       expect(wrapper.getComponent(DownloadAction).props('disabled')).toBe(true)

@@ -9,6 +9,11 @@ const routes = [
   { path: '/downloads', name: 'downloads', component: DownloadView },
   { path: '/datasets', name: 'datasets', component: DatasetView },
   {
+    path: '/settings',
+    name: 'settings',
+    component: () => import('../views/SettingsView.vue'),
+  },
+  {
     path: '/:pathMatch(.*)*',
     name: 'not-found',
     component: NotFoundView,
