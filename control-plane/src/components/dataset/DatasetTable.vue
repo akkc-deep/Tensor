@@ -1,5 +1,5 @@
 <script setup>
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 
 import { decimalSign, formatCell } from '../../utils/format.js'
 
@@ -10,6 +10,7 @@ const props = defineProps({
   pluginId: { type: String, default: '' },
   apiName: { type: String, default: '' },
 })
+const tableRegion = ref(null)
 
 const sourceColumns = [
   { name: 'source_plugin', label: 'source_plugin', logicalType: 'STRING' },
@@ -76,6 +77,10 @@ function displayValue(value, column) {
     : formatted
 }
 
+function hasTooltip(value, column) {
+  return column.longText === true && String(value ?? '').length > 30
+}
+
 function valueClasses(value, column) {
   const direction = marketDirection(value, column)
   return {
@@ -102,10 +107,16 @@ function cellStyle({ column }) {
 function headerCellStyle({ column }) {
   return stickyStyle(column, 'var(--tensor-raised)')
 }
+
+function scrollHorizontally(offset) {
+  const scroller = tableRegion.value?.querySelector('.el-scrollbar__wrap')
+  if (scroller) scroller.scrollLeft += offset
+}
 </script>
 
 <template>
   <div
+    ref="tableRegion"
     v-loading="loading"
     class="dataset-table"
     :aria-busy="loading"
@@ -113,6 +124,8 @@ function headerCellStyle({ column }) {
     tabindex="0"
     aria-label="数据表格，可横向滚动"
     style="max-width: 100%; overflow-x: auto"
+    @keydown.left.prevent="scrollHorizontally(-140)"
+    @keydown.right.prevent="scrollHorizontally(140)"
   >
     <el-table
       :data="items"
@@ -126,7 +139,7 @@ function headerCellStyle({ column }) {
         :label="mappedLabel(column)"
         :align="isNumeric(column) ? 'right' : undefined"
         :min-width="minWidth(column)"
-        show-overflow-tooltip
+        :show-overflow-tooltip="column.longText !== true"
       >
         <template #header>
           <span>{{ mappedLabel(column) }}</span>
@@ -136,7 +149,19 @@ function headerCellStyle({ column }) {
           >{{ column.name }}</code>
         </template>
         <template #default="{ row }">
+          <el-tooltip
+            v-if="hasTooltip(row[column.name], column)"
+            :content="String(row[column.name])"
+            placement="top"
+            :show-after="0"
+          >
+            <span
+              class="dataset-table__value"
+              :class="valueClasses(row[column.name], column)"
+            >{{ displayValue(row[column.name], column) }}</span>
+          </el-tooltip>
           <span
+            v-else
             class="dataset-table__value"
             :class="valueClasses(row[column.name], column)"
           >{{ displayValue(row[column.name], column) }}</span>

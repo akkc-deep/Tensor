@@ -91,9 +91,4 @@ const emit = defineEmits(['retry'])
   color: var(--tensor-accent);
 }
 
-@media (max-width: 420px) {
-  .download-result__counts {
-    grid-template-columns: 1fr;
-  }
-}
 </style>

@@ -74,6 +74,10 @@ describe('DatasetTable', () => {
       expect(allColumns.every((current) => current.props('type') === 'default')).toBe(true)
       expect(getComputedStyle(wrapper.get('.dataset-table').element).overflowX).toBe('auto')
       expect(getComputedStyle(wrapper.get('.dataset-table').element).maxWidth).toBe('100%')
+      const scroller = wrapper.get('.el-scrollbar__wrap').element
+      scroller.scrollLeft = 0
+      await wrapper.get('.dataset-table').trigger('keydown', { key: 'ArrowRight' })
+      expect(scroller.scrollLeft).toBe(140)
     } finally {
       wrapper.unmount()
     }
@@ -283,7 +287,7 @@ describe('DatasetTable', () => {
   })
 
   it('uses approved widths and shows overflowing formatted values in a plain-text tooltip', async () => {
-    const rawValue = '<strong>完整的长文本值</strong>'
+    const rawValue = '<strong>完整的长文本值必须保持纯文本并完整出现在提示中</strong>'
     const columns = [column('ts_code'), column('notes', '备注', 'TEXT', { longText: true })]
     const items = [{
       ts_code: '000001.SZ',
@@ -300,26 +304,15 @@ describe('DatasetTable', () => {
     try {
       await flushPromises()
       const allColumns = renderedColumns(wrapper)
-      expect(allColumns.every((current) => current.props('showOverflowTooltip') === true)).toBe(true)
+      expect(allColumns.map((current) => current.props('showOverflowTooltip'))).toEqual([
+        true, false, true, true, true,
+      ])
       expect(allColumns.map((current) => current.props('minWidth'))).toEqual([140, 240, 140, 140, 180])
 
       const longTextCell = wrapper.findAll('.el-table__body tbody tr')[0].findAll('td')[1]
-      const content = longTextCell.get('.cell').element
-      Object.defineProperty(content, 'scrollWidth', { configurable: true, value: 400 })
-      content.getBoundingClientRect = () => ({
-        width: 100, height: 24, top: 0, right: 100, bottom: 24, left: 0, x: 0, y: 0,
-        toJSON() {},
-      })
-      const rangeSpy = vi.spyOn(document, 'createRange').mockReturnValue({
-        setStart() {},
-        setEnd() {},
-        getBoundingClientRect: () => ({ width: 400, height: 24 }),
-      })
-
-      await longTextCell.trigger('mouseenter')
+      await longTextCell.get('.dataset-table__value').trigger('mouseenter')
       await flushPromises()
 
-      expect(rangeSpy).toHaveBeenCalledOnce()
       await vi.waitFor(() => {
         expect(document.body.querySelector('.el-popper')).not.toBeNull()
       })
@@ -331,12 +324,20 @@ describe('DatasetTable', () => {
       const ingestionCell = wrapper.findAll('.el-table__body tbody tr')[0].findAll('td')[4]
       const ingestionContent = ingestionCell.get('.cell').element
       Object.defineProperty(ingestionContent, 'scrollWidth', { configurable: true, value: 400 })
-      ingestionContent.getBoundingClientRect = content.getBoundingClientRect
+      ingestionContent.getBoundingClientRect = () => ({
+        width: 100, height: 24, top: 0, right: 100, bottom: 24, left: 0, x: 0, y: 0,
+        toJSON() {},
+      })
+      const rangeSpy = vi.spyOn(document, 'createRange').mockReturnValue({
+        setStart() {},
+        setEnd() {},
+        getBoundingClientRect: () => ({ width: 400, height: 24 }),
+      })
       await ingestionCell.trigger('mouseenter')
       await vi.waitFor(() => {
         expect(document.body.querySelector('.el-popper')?.textContent).toBe('2026-08-25 10:30:15')
       })
-      expect(rangeSpy).toHaveBeenCalledTimes(2)
+      expect(rangeSpy).toHaveBeenCalledOnce()
     } finally {
       wrapper.unmount()
     }
