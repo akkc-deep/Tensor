@@ -24,3 +24,9 @@
 | ISSUE-007 | dividend 业务键未区分实施进度 | 已关闭 | 已关闭：修复及真实分红38行闭环通过（M14-T09） | [诊断详情](problems/ISSUE-007-dividend-adapter-diagnosis.md) · [修复设计](proposals/ISSUE-007-dividend-business-key.md) |
 | ISSUE-008 | 真实 Tushare 验收尚缺 9 个接口 | 新增 | 用户要求暂缓；M14-T05 保留阻塞 | [详情](problems/ISSUE-008-tushare-live-coverage-gap.md) |
 | ISSUE-009 | daily 与 balancesheet 性能尚未验证 | 新增 | 待后续处理；M14-T06 按用户要求跳过并标记完成，未实测 | [详情](problems/ISSUE-009-query-performance-verification.md) |
+| ISSUE-010 | 根 health 公开组件与分组结构 | 新增 | M14-T07 实测失败，待修复设计 | [详情](problems/ISSUE-010-health-component-exposure.md) |
+| ISSUE-011 | 数据集非只读方法返回 500 | 新增 | 12 项方法反例失败，待修复设计 | [详情](problems/ISSUE-011-dataset-method-status.md) |
+| ISSUE-012 | 查询接口未拒绝任意字段参数 | 新增 | 6 类额外参数返回 200，待修复设计 | [详情](problems/ISSUE-012-query-extra-parameters.md) |
+| ISSUE-013 | 参数校验失败的查询缺少完成事件 | 新增 | 4 个 S07 请求缺少事件，待修复设计 | [详情](problems/ISSUE-013-query-completion-events.md) |
+| ISSUE-014 | 安全 Maven 门禁未完成 | 新增 | 依赖传输失败，待恢复并重跑 | [详情](problems/ISSUE-014-security-maven-verification.md) |
+| ISSUE-015 | 后端漏洞扫描未形成有效报告 | 新增 | 漏洞数据更新失败，风险评估未完成 | [详情](problems/ISSUE-015-backend-dependency-audit.md) |
