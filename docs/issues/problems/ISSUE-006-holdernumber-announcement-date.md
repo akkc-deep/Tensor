@@ -2,7 +2,7 @@
 
 ## 当前阶段与授权
 
-定位完成，按用户持续执行和“继续修复”的授权实施独立适配修复。M14-T05 先记录本轮真实失败并 BLOCKED，待本地修复与明确产物接入后恢复。
+限定源字段兼容修复、回归、独立复审、构建与启动验证完成，待真实复验。按用户持续执行和“继续修复”的授权实施独立适配修复。M14-T05 已记录本轮真实失败并 BLOCKED，修复与明确产物接入成立后恢复。
 
 ## 已知事实
 
@@ -24,3 +24,32 @@
 2. 最小实现后 GREEN，运行受影响客户端、安全校验与通用日期/适配测试，不发真实上游请求；独立代码复审。
 3. 独立源码快照构建新验收包，既有打包合同通过，原包和 ISSUE-005 包保留；比较展开内容并固定新路径/hash。记录 M14-T05 输入修订，准备新空库和一次性启动器再交用户已有 Token 终端复跑。
 4. 新轮仍完整 40/48/80、fixture 2/3、固定 9 项排除。只有真实 stk_holdernumber 通过才关闭此问题；完整子集通过才 PAUSED，否则记录新的 BLOCKED。不以本地或历史样本代替真实结果。
+
+## 2026-09-06 本地验证
+
+- RED：`TushareAnnouncementDateAdaptationTest` 在未修复代码上 8 项中 7 通过、1 error；合法带时分秒样例于合成 `row=1, field=ann_date` 被拒绝，Maven exit 1。其他非法日期时间反例按原规则拒绝。
+- GREEN：仅在 `TushareResponseValidator` 增加固定 API/列规范化；9 类相关测试共 94 通过、0 失败/错误/跳过、exit 0。命令如下，全部合成响应，无真实上游访问。
+
+```sh
+mvn -o -f data-plane/pom.xml -pl tensor-app -am \
+  '-Dtest=TushareProClientTest,TushareRestClientFactoryTest,TushareErrorClassifierTest,TushareProPluginTest,ValueConverterTest,GenericDatasetAdapterTest,TushareDecimalAdaptationTest,TushareAnnouncementDateAdaptationTest,GlobalExceptionHandlerTest' \
+  -Dsurefire.failIfNoSpecifiedTests=false -Dskip.installnodenpm=true -Dskip.npm=true test
+```
+
+- 独立代码复审无 Critical/Important；1 Minor 指出其他 API 测试应使用同名 `ann_date`。已改为 `stk_rewards` 的真实元数据/完整7字段合成响应，防止误删 API 限定。加强后的客户端12项、日期适配8项和小数适配1项随下述快照构建重新通过。生产代码未因该测试调整而改变。
+- 快照 `/private/tmp/tensor-issue-006-build.2rctzavi` 基于 `adbd2fe` 加本次三份 Java 变更，全部模块从源码编译，静态前端逐字节复用原包。下述命令 exit 0，21 项相关测试与既有 7 唯一打包合同通过（两个 failsafe executions 各执行7项）。未运行工作区 clean，未改已有包或依赖。
+
+```sh
+# 独立快照根目录
+mvn -o -f data-plane/pom.xml -Pacceptance \
+  '-Dtest=TushareProClientTest,TushareDecimalAdaptationTest,TushareAnnouncementDateAdaptationTest' \
+  -Dsurefire.failIfNoSpecifiedTests=false \
+  '-Dit.test=PackagedJarContractTest,AcceptancePackagedJarContractTest' \
+  -Dfailsafe.failIfNoSpecifiedTests=false -Dskip.installnodenpm=true -Dskip.npm=true verify
+```
+
+- 新包路径：`/private/tmp/tensor-issue-006-build.2rctzavi/data-plane/tensor-app/target/acceptance/tensor-app-1.0-SNAPSHOT-acceptance.jar`，SHA `f2fc35c933e69da5e85690fbabb13d691178538cd6ffb3b94284dfc95b10db89`。与 ISSUE-005 包展开均364文件、无增删，仅 `TushareResponseValidator.class` 内容改变；其他类/资源/数据库迁移保持一致。原 `a698...` 和 ISSUE-005 `7f794...` 两包保留。
+- 历史样本整批验证：临时 Java 探针从两包分别解出依赖，执行各自真实 validator 与通用 adapter；仅在内存读取仓库已有149行，不生成数据副本、不打印值。旧包在 `row=12, ann_date` 确切复现拒绝，新包149行全部适配成功，来源行对象保持原值；无上游请求，精确探针目录已删除。这仍不代表新真实轮已通过。
+- Live spec 接入只更新固定 JAR hash，设计记录新包优先于历史引用；语法与40项发现通过，40/48/80及9项排除不变。真实证据 `241813c` 全文 SHA 仍为 `699132b0e4373d9d74300f6b5b64b22a0b9c593601dd54b66feca428d9136afd`，未改写。
+- 定点复审确认上述 Minor 已关闭，无新增问题；独立实算包 hash 和364文件比较与设计/spec一致。
+- 新包合成 Token、仅 health 诊断（控制目录 `0xdt5neo`）：exit 0、health就绪、6成功迁移/50业务表全空；无秘密/包络扫描触发，JVM停止、终检扫描及清理通过，自有DB容器/卷/私密材料已删除。此目录已用完，不能供真实验收复用。

@@ -191,6 +191,22 @@ class TushareProClientTest {
     }
 
     @Test
+    void leavesAnnouncementDatesOfOtherApisUnchanged() {
+        stub(HttpStatus.OK.value(), """
+                {"code":0,"msg":null,"data":{"fields":["ts_code","ann_date","end_date","name","title","reward","hold_vol"],"items":[["SYNTHETIC.SZ","2026-09-02 15:04:05","20260630","Synthetic person",null,1,2]]}}
+                """);
+        DatasetDefinition definition = new DatasetDefinitionLoader()
+                .loadAll(new PathMatchingResourcePatternResolver(), "classpath*:datasets/tushare_pro/*.yaml")
+                .stream().filter(item -> item.datasetKey().apiName().value().equals("stk_rewards"))
+                .findFirst().orElseThrow();
+
+        DownloadEnvelope envelope = client(1_024 * 1_024)
+                .execute(definition, Map.of("ts_code", "SYNTHETIC.SZ"));
+
+        assertThat(envelope.data().getFirst().get(1)).isEqualTo("2026-09-02 15:04:05");
+    }
+
+    @Test
     void returnsSuccessfulEnvelopeForLegalEmptyItems() {
         stub(HttpStatus.OK.value(), EMPTY_JSON);
 
