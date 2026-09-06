@@ -46,6 +46,28 @@ const FIXTURE_OPTION = /^Fixture 日线\s*fixture_daily$/
 const MAX_LOG_LINE = 1024 * 1024
 const ENV_ALLOWLIST = ['PATH', 'HOME', 'JAVA_HOME', 'TMPDIR', 'LANG', 'LC_ALL']
 const DB_ENV = ['TENSOR_DB_URL', 'TENSOR_DB_USERNAME', 'TENSOR_DB_PASSWORD']
+const SELECTED_API_NAMES = [
+  'stock_basic', 'stock_company', 'income', 'balancesheet', 'cashflow',
+  'fina_indicator', 'fina_audit', 'fina_mainbz', 'stk_rewards',
+  'stk_holdernumber', 'trade_cal', 'margin', 'daily', 'weekly', 'monthly',
+  'adj_factor', 'suspend_d', 'daily_basic', 'moneyflow', 'stk_limit',
+  'top_list', 'margin_detail', 'block_trade', 'slb_len', 'slb_sec',
+  'slb_sec_detail', 'forecast', 'express', 'dividend', 'disclosure_date',
+  'repurchase', 'stk_holdertrade', 'top10_holders', 'top10_floatholders',
+  'new_share', 'stk_managers', 'pledge_stat', 'pledge_detail',
+  'index_classify', 'index_member_all',
+]
+const EXCLUDED_INTERFACES = [
+  { apiName: 'top_inst', reason: 'higher_points' },
+  { apiName: 'broker_recommend', reason: 'higher_points' },
+  { apiName: 'share_float', reason: 'permission_unverified' },
+  { apiName: 'hs_const', reason: 'permission_unverified' },
+  { apiName: 'moneyflow_hsgt', reason: 'permission_unverified' },
+  { apiName: 'hk_hold', reason: 'permission_unverified' },
+  { apiName: 'index_member', reason: 'permission_unverified' },
+  { apiName: 'hsgt_top10', reason: 'permission_unverified' },
+  { apiName: 'namechange', reason: 'permission_unverified' },
+]
 
 const PARAMETERS = {
   list_status: { label: '上市状态', type: 'ENUM' },
@@ -194,6 +216,37 @@ export function validateManifest(bytes, expectedHash = MANIFEST_SHA) {
   safeCheck(sampleCount === 58, 'manifest sample count')
   safeCheck(okCount === 37, 'manifest status counts')
   return { manifest, sampleCount, okCount, emptyCount: 49 - okCount }
+}
+
+export function selectLiveInterfaces(interfaces) {
+  safeCheck(Array.isArray(interfaces) && interfaces.length === 49, 'live scope input count')
+  const names = interfaces.map((entry) => entry?.api_name)
+  safeCheck(names.every((name) => typeof name === 'string'), 'live scope API names')
+  safeCheck(new Set(names).size === names.length, 'live scope unique API names')
+  const excludedNames = new Set(EXCLUDED_INTERFACES.map(({ apiName }) => apiName))
+  safeCheck(excludedNames.size === 9, 'live scope exclusion count')
+  safeCheck([...excludedNames].every((name) => names.includes(name)), 'live scope exclusions present')
+  const selected = interfaces.filter(({ api_name: apiName }) => !excludedNames.has(apiName))
+  safeCheck(
+    JSON.stringify(selected.map(({ api_name: apiName }) => apiName)) ===
+      JSON.stringify(SELECTED_API_NAMES),
+    'live scope selected API order',
+  )
+  const sampleCount = selected.reduce((sum, entry) => {
+    safeCheck(Array.isArray(entry.params), 'live scope params')
+    return sum + entry.params.length
+  }, 0)
+  const okCount = selected.filter(({ status }) => status === 'ok').length
+  const emptyCount = selected.filter(({ status }) => status === 'empty').length
+  safeCheck(sampleCount === 48, 'live scope sample count')
+  safeCheck(okCount === 28 && emptyCount === 12, 'live scope status counts')
+  return {
+    interfaces: selected,
+    excludedInterfaces: EXCLUDED_INTERFACES.map((entry) => ({ ...entry })),
+    sampleCount,
+    okCount,
+    emptyCount,
+  }
 }
 
 export function validateDownloadSuccess(body, pluginId, apiName) {
@@ -519,8 +572,9 @@ export class RunCounters {
 
 const manifestPath = new URL('../../docs/data-template/manifest.json', import.meta.url)
 const manifestBytes = readFileSync(manifestPath)
-const { manifest, sampleCount } = validateManifest(manifestBytes)
-const INTERFACES = manifest.interfaces.map((entry) => ({ ...entry, contract: CONTRACTS.get(entry.api_name) }))
+const { manifest, sampleCount: manifestSampleCount } = validateManifest(manifestBytes)
+const liveScope = selectLiveInterfaces(manifest.interfaces)
+const INTERFACES = liveScope.interfaces.map((entry) => ({ ...entry, contract: CONTRACTS.get(entry.api_name) }))
 
 let application
 let logSink
@@ -544,6 +598,14 @@ const correlatedEvents = new Map()
 const evidence = {
   version: 1,
   task: 'M14-T05',
+  scope: {
+    id: 'points-2000',
+    manifestCases: manifest.interfaces.length,
+    manifestSamples: manifestSampleCount,
+    selectedCases: INTERFACES.length,
+    selectedSamples: liveScope.sampleCount,
+    excludedInterfaces: liveScope.excludedInterfaces,
+  },
   startedAt: undefined,
   finishedAt: undefined,
   inputs: { manifestSha256: MANIFEST_SHA, jarSha256: JAR_SHA },
@@ -669,7 +731,7 @@ async function validatePreconditions(testInfo) {
 
   safeCheck(/^\d+$/.test(process.env.M14_T05_CALL_INTERVAL_MS ?? ''), 'call interval integer')
   intervalMs = Number(process.env.M14_T05_CALL_INTERVAL_MS)
-  safeCheck(Number.isSafeInteger(intervalMs) && intervalMs >= 1 && intervalMs <= 3_600_000, 'call interval range')
+  safeCheck(Number.isSafeInteger(intervalMs) && intervalMs >= 2_000 && intervalMs <= 3_600_000, 'call interval range')
 
   safeCheck(path.isAbsolute(process.env.ACCEPTANCE_JAR ?? ''), 'acceptance JAR absolute path')
   const jarState = await lstat(process.env.ACCEPTANCE_JAR)
@@ -1446,7 +1508,8 @@ async function writeSafeEvidence() {
     failedCases: counters.failedCases,
     completedCases: counters.completedCases,
     unexecutedCases: counters.unexecutedCases,
-    manifestSamples: sampleCount,
+    manifestSamples: manifestSampleCount,
+    selectedSamples: liveScope.sampleCount,
     liveDownloadPostsObserved: counters.liveDownloadPosts,
     fixtureDownloadPostsObserved: counters.fixtureDownloadPosts,
     liveRecordsGetsObserved: counters.liveRecordsGets,
@@ -1536,14 +1599,14 @@ function registerTests() {
       if (!setupFailed && runCounters.completed.size === INTERFACES.length) {
         try {
           safeCheck(fixturePassed, 'fixture preparation completed')
-          safeCheck(evidence.downloads.length === 58, '58 live downloads completed')
-          safeCheck(evidence.queries.length === 98, '98 live queries completed')
+          safeCheck(evidence.downloads.length === liveScope.sampleCount, 'selected live downloads completed')
+          safeCheck(evidence.queries.length === INTERFACES.length * 2, 'selected live queries completed')
           safeCheck(evidence.fixture.length === 5, '2 fixture downloads and 3 fixture queries completed')
-          safeCheck(runCounters.traffic.liveDownloadPosts === 58, '58 live download POSTs observed')
+          safeCheck(runCounters.traffic.liveDownloadPosts === liveScope.sampleCount, 'selected live download POSTs observed')
           safeCheck(runCounters.traffic.fixtureDownloadPosts === 2, '2 fixture download POSTs observed')
-          safeCheck(runCounters.traffic.liveRecordsGets === 98, '98 live records GETs observed')
+          safeCheck(runCounters.traffic.liveRecordsGets === INTERFACES.length * 2, 'selected live records GETs observed')
           safeCheck(runCounters.traffic.fixtureRecordsGets === 3, '3 fixture records GETs observed')
-          safeCheck(runCounters.attempted.size === 49 && runCounters.failed.size === 0, '49 live cases attempted without failure')
+          safeCheck(runCounters.attempted.size === INTERFACES.length && runCounters.failed.size === 0, 'selected live cases attempted without failure')
         } catch { failures.push(new Error('Safe check failed: complete matrix totals')) }
       }
       let immutableInputs = false
