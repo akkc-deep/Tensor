@@ -3,6 +3,7 @@ import { computed, ref } from 'vue'
 
 import FieldError from '../components/common/FieldError.vue'
 import PageHeading from '../components/common/PageHeading.vue'
+import WorkbenchPanel from '../components/common/WorkbenchPanel.vue'
 import { useTheme } from '../composables/useTheme.js'
 
 const theme = useTheme()
@@ -44,11 +45,12 @@ function handleReset() {
       description="调整工作台外观，让每一次操作都更合心意。"
     />
 
-    <section class="settings-panel" aria-labelledby="appearance-title">
-      <header class="panel-heading">
-        <h2 id="appearance-title">外观与主题</h2>
-        <span>当前浏览器</span>
-      </header>
+    <WorkbenchPanel
+      class="settings-panel"
+      heading-id="appearance-title"
+      title="外观与主题"
+      meta="当前浏览器"
+    >
       <form class="settings-form" novalidate @submit.prevent="apply(draft)">
         <p class="settings-form__help">
           选择喜欢的主题色，整个工作台会同步更新。偏好自动保存在当前浏览器。
@@ -88,6 +90,6 @@ function handleReset() {
           <p>恢复默认背景、文字与钴蓝主色。</p>
         </div>
       </form>
-    </section>
+    </WorkbenchPanel>
   </section>
 </template>

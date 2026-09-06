@@ -16,14 +16,14 @@ const emit = defineEmits(['retry'])
 </script>
 
 <template>
-  <section
+  <AsyncStatePanel
     v-if="state === 'SUCCESS'"
     class="download-result"
-    role="status"
-    aria-live="polite"
+    state="SUCCESS"
+    title="下载成功"
+    message="本次数据已完成写入。"
   >
-    <h2>下载成功</h2>
-    <dl>
+    <dl class="download-result__counts">
       <div>
         <dt>上游返回数</dt>
         <dd>{{ result.sourceRowCount }}</dd>
@@ -37,7 +37,7 @@ const emit = defineEmits(['retry'])
         <dd>{{ result.updatedRows }}</dd>
       </div>
     </dl>
-  </section>
+  </AsyncStatePanel>
 
   <AsyncStatePanel
     v-else-if="state === 'EMPTY'"
@@ -51,16 +51,49 @@ const emit = defineEmits(['retry'])
     state="FAILURE"
     title="下载失败"
     :message="error.message"
-  >
-    <template v-if="error.requestId || canRetry" #actions>
-      <p v-if="error.requestId">请求 ID：{{ error.requestId }}</p>
-      <el-button
-        v-if="canRetry"
-        native-type="button"
-        @click="emit('retry')"
-      >
-        使用原参数重试
-      </el-button>
-    </template>
-  </AsyncStatePanel>
+    :request-id="error.requestId"
+    :retry-label="canRetry ? '使用原参数重试' : ''"
+    @retry="emit('retry')"
+  />
 </template>
+
+<style scoped>
+.download-result__counts {
+  display: grid;
+  width: 100%;
+  grid-template-columns: 1.25fr 1fr 1fr;
+  gap: 14px;
+  margin: 25px 0 0;
+  padding-top: 24px;
+  border-top: 1px solid var(--tensor-line);
+}
+
+.download-result__counts div {
+  min-width: 0;
+}
+
+.download-result__counts dt {
+  color: var(--tensor-muted);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.download-result__counts dd {
+  margin: 9px 0 0;
+  font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', monospace;
+  font-size: clamp(19px, 2vw, 28px);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.04em;
+  overflow-wrap: anywhere;
+}
+
+.download-result__counts > div:first-child dd {
+  color: var(--tensor-accent);
+}
+
+@media (max-width: 420px) {
+  .download-result__counts {
+    grid-template-columns: 1fr;
+  }
+}
+</style>

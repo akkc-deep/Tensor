@@ -19,6 +19,7 @@ vi.mock('../api/downloads.js', () => ({
 
 import { ClientError } from '../api/errors.js'
 import AsyncStatePanel from '../components/common/AsyncStatePanel.vue'
+import WorkbenchPanel from '../components/common/WorkbenchPanel.vue'
 import ApiDescription from '../components/download/ApiDescription.vue'
 import ApiSelect from '../components/download/ApiSelect.vue'
 import DataSourceSelect from '../components/download/DataSourceSelect.vue'
@@ -224,6 +225,13 @@ describe('DownloadView', () => {
     expect(wrapper.getComponent(AsyncStatePanel).props('title')).toBe(
       '请选择数据接口',
     )
+    const panels = wrapper.findAllComponents(WorkbenchPanel)
+    expect(panels).toHaveLength(2)
+    expect(panels.map((panel) => panel.props('title'))).toEqual([
+      '下载配置',
+      '本次下载结果',
+    ])
+    expect(panels[0].props('meta')).toBe('fixture')
   })
 
   it('renders the selected API in order and blocks an invalid form submission', async () => {
@@ -297,9 +305,12 @@ describe('DownloadView', () => {
       wrapper.getComponent(DownloadAction).get('button').attributes('aria-busy'),
     ).toBe('true')
     expect(wrapper.getComponent(DownloadAction).text()).toBe('开始下载')
-    expect(wrapper.findComponent(AsyncStatePanel).exists()).toBe(false)
+    const status = wrapper.get('[role="status"]')
+    expect(status.attributes('aria-live')).toBe('polite')
+    expect(status.text()).toContain('正在下载')
+    expect(status.text()).toContain('请求已提交，请稍候。')
     expect(wrapper.findComponent(DownloadResult).exists()).toBe(false)
-    expect(wrapper.text()).not.toMatch(/下载中|适配中|入库中|进度|百分比/)
+    expect(wrapper.text()).not.toMatch(/适配中|入库中|进度|百分比/)
 
     pending.resolve(completed)
     await flushPromises()
@@ -378,6 +389,25 @@ describe('DownloadView', () => {
     expect(wrapper.text()).not.toMatch(
       /上游返回数|插入数|更新数|下载失败|使用原参数重试|占位记录/,
     )
+  })
+
+  it('submits an API with no request parameters as an empty object', async () => {
+    api.downloadDataset.mockResolvedValueOnce(response({ apiName: 'calendar' }))
+    const wrapper = await mountReady({
+      apis: [descriptor({ apiName: 'calendar', parameters: [] })],
+    })
+    await selectApi(wrapper, 'calendar')
+
+    expect(wrapper.findComponent(DynamicParameterForm).exists()).toBe(false)
+    expect(wrapper.text()).toContain('此接口无需填写请求参数。')
+    await clickDownload(wrapper)
+
+    expect(api.downloadDataset).toHaveBeenCalledOnce()
+    expect(api.downloadDataset).toHaveBeenCalledWith({
+      pluginId: 'fixture',
+      apiName: 'calendar',
+      params: {},
+    })
   })
 
   it('shows a safe download failure and retries its frozen parameters', async () => {

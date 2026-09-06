@@ -234,20 +234,10 @@ onMounted(loadSources)
       state="FAILURE"
       title="数据查看配置加载失败"
       :message="metadataError.message"
-    >
-      <template v-if="metadataError.requestId || metadataCanRetry" #actions>
-        <p v-if="metadataError.requestId">
-          请求 ID：{{ metadataError.requestId }}
-        </p>
-        <el-button
-          v-if="metadataCanRetry"
-          native-type="button"
-          @click="retryMetadata()"
-        >
-          重新加载
-        </el-button>
-      </template>
-    </AsyncStatePanel>
+      :request-id="metadataError.requestId"
+      :retry-label="metadataCanRetry ? '重新加载' : ''"
+      @retry="retryMetadata()"
+    />
     <AsyncStatePanel
       v-else-if="!selectedPluginId"
       state="INITIAL"
@@ -277,18 +267,10 @@ onMounted(loadSources)
       state="FAILURE"
       title="查询失败"
       :message="queryError.message"
-    >
-      <template v-if="queryError.requestId || canRetry" #actions>
-        <p v-if="queryError.requestId">请求 ID：{{ queryError.requestId }}</p>
-        <el-button
-          v-if="canRetry"
-          native-type="button"
-          @click="retry()"
-        >
-          重新查询
-        </el-button>
-      </template>
-    </AsyncStatePanel>
+      :request-id="queryError.requestId"
+      :retry-label="canRetry ? '重新查询' : ''"
+      @retry="retry()"
+    />
     <template v-else-if="queryState === 'EMPTY'">
       <AsyncStatePanel
         state="EMPTY"

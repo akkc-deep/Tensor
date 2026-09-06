@@ -268,7 +268,9 @@ describe('AppLayout', () => {
       expect(skip.text()).toBe('跳转到工作区')
       expect(wrapper.get('main#workspace').attributes('tabindex')).toBe('-1')
       expect(wrapper.get('main h1').text()).toBe('数据下载')
-      expect(wrapper.get('main h2').text()).toBe('请选择数据接口')
+      expect(
+        wrapper.findAll('main h2').map((heading) => heading.text()),
+      ).toEqual(['下载配置', '本次下载结果', '请选择数据接口'])
       expect(wrapper.find('input[type="color"]').exists()).toBe(false)
       expect(wrapper.getComponent(DownloadAction).props('disabled')).toBe(
         true,

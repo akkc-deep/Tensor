@@ -40,6 +40,48 @@ describe('AsyncStatePanel', () => {
     expect(panel.attributes('aria-live')).toBe('polite')
   })
 
+  it('announces SUCCESS politely and renders business content', () => {
+    const wrapper = mountPanel('SUCCESS', {
+      slots: { default: () => h('dl', [h('dd', '12')]) },
+    })
+    const panel = wrapper.get('section')
+
+    expect(panel.attributes('role')).toBe('status')
+    expect(panel.attributes('aria-live')).toBe('polite')
+    expect(wrapper.get('dl').text()).toBe('12')
+  })
+
+  it('renders request ID and emits an explicitly authorized retry', async () => {
+    const wrapper = mount(AsyncStatePanel, {
+      props: {
+        state: 'FAILURE',
+        title: '失败',
+        message: '<strong>安全文本</strong>',
+        requestId: 'request-1',
+        retryLabel: '重新加载',
+      },
+    })
+
+    expect(wrapper.text()).toContain('请求 ID：request-1')
+    expect(wrapper.find('strong').exists()).toBe(false)
+    await wrapper.get('button').trigger('click')
+    expect(wrapper.emitted('retry')).toEqual([[]])
+  })
+
+  it('omits retry when the caller supplies no retry label', () => {
+    const wrapper = mountPanel('FAILURE', {
+      props: {
+        state: 'FAILURE',
+        title: '失败',
+        message: '不可重试',
+        requestId: 'request-2',
+      },
+    })
+
+    expect(wrapper.text()).toContain('请求 ID：request-2')
+    expect(wrapper.find('button').exists()).toBe(false)
+  })
+
   it('uses alert semantics for FAILURE and renders caller actions', () => {
     const wrapper = mountPanel('FAILURE', {
       slots: {

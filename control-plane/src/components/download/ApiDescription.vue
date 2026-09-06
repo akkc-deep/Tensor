@@ -47,28 +47,45 @@ function queryModeLabel(queryMode) {
 
 <style scoped>
 .api-description {
-  padding: 16px;
-  border: 1px solid var(--el-border-color-light, #e4e7ed);
-  border-radius: 8px;
+  min-width: 0;
+  margin: 22px 0 28px;
 }
 
 .api-description h2 {
-  margin: 0 0 12px;
-  font-size: 18px;
+  margin: 0 0 14px;
+  font-size: 13px;
+  font-weight: 600;
 }
 
 .api-description dl {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   margin: 0;
-  gap: 16px;
+  gap: 14px 18px;
 }
 
 .api-description dt {
-  color: var(--el-text-color-secondary, #909399);
+  color: var(--tensor-muted);
+  font-size: 12px;
+  line-height: 1.5;
 }
 
 .api-description dd {
   margin: 4px 0 0;
+  color: var(--tensor-text);
+  font-size: 13px;
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+
+.api-description code {
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 680px) {
+  .api-description dl {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }
 </style>

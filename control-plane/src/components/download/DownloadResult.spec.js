@@ -125,6 +125,8 @@ describe('DownloadResult', () => {
       state: 'FAILURE',
       title: '下载失败',
       message: '<strong>请稍后重试</strong>',
+      requestId: 'request-unsafe',
+      retryLabel: '使用原参数重试',
     })
     expect(wrapper.get('[role="alert"]').attributes('aria-live')).toBeUndefined()
     expect(wrapper.text()).toContain('请求 ID：request-unsafe')
