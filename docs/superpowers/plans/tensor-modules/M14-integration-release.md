@@ -133,7 +133,7 @@
 
 ### Task M14-T06: Daily 与 balancesheet 性能验证（4.0h）
 
-**Current execution instruction:** 用户明确暂缓M14-T05剩余9项并登记ISSUE-008，先推进本任务。消费已完成的页面合同和冻结包，不以原49全量完成为性能测试启动前提；本任务结果不关闭ISSUE-008或替代真实接口/最终发布验收。
+**Current disposition:** 用户明确要求本任务先跳过、登记issue并直接标记完成。看板据此将M14-T06标为COMPLETED（任务管理收尾）；性能尚未实施或实测，以下原清单仍未执行，由 `docs/issues/problems/ISSUE-009-query-performance-verification.md` 跟踪。未确认的数据规模不作为合同；本次不关闭ISSUE-008/009、不视为性能或发布门禁通过。
 
 **Files:**
 - Create: `scripts/performance/verify-query-p95.sh`

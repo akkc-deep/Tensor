@@ -15,7 +15,8 @@
 - **Successor preparation:** Complete and link the selected successor's design document before writing its `next-task` handoff or making it `READY`; a successor-design failure never changes the completed predecessor.
 - **Explicit unfinished-work transfer (2026-09-06):** 用户要求新增任务承接剩余工作。当前续接入口为 Order76/M14-T09；2026-09-06用户明确确认D-01，后续状态见该任务行与状态证据；M14-T05保留BLOCKED及原49目标未完成事实。此次使用明确标记为`transfer`的交接，记录未完成工作的责任转移，不是要求前驱COMPLETED的普通`next-task`交接，不触发READY/启动/完成或自动准备M14-T06。
 - **Allowed transitions:** `NOT_STARTED -> READY`, `READY -> IN_PROGRESS`, `IN_PROGRESS -> PAUSED`, `PAUSED -> IN_PROGRESS`, `READY -> BLOCKED`, `IN_PROGRESS -> BLOCKED`, `BLOCKED -> READY`, `IN_PROGRESS -> COMPLETED`.
-- **Current execution instruction:** 用户明确要求“M14-05的先不解决了，放在issue里面，然后继续进行M14-06”。原49目标的9项缺口登记为 `docs/issues/problems/ISSUE-008-tushare-live-coverage-gap.md`，M14-T05保持BLOCKED，M14-T09保持COMPLETED；当前入口改为Order77/M14-T06。M14-T06可消费M14-T05/M14-T09已建立的可用证据，不以原49全量完成为其启动前提；原任务ID/Order/依赖及最终发布门禁保持，设计就绪后再依次READY、IN_PROGRESS。
+- **Previous execution instruction:** 用户此前要求暂缓M14-T05并先推进M14-T06；原49目标的9项缺口登记ISSUE-008，M14-T05保持BLOCKED，M14-T09保持COMPLETED。M14-T06当时进入设计准备，尚未启动。
+- **Current disposition / explicit exception:** 用户随后明确要求性能测试“先跳过吧，可以记录一个issue，直接标记完成”。仅本次M14-T06按该指示直接从NOT_STARTED标为COMPLETED，表示跳过收尾；未创建设计/测试或执行实测，不补造READY/IN_PROGRESS及验收通过证据。原性能要求转入 `docs/issues/problems/ISSUE-009-query-performance-verification.md`，仍未解决，项目性能/发布门禁保持。下一个预定义任务为Order78/M14-T07，尚未准备或启动；本次不生成普通验收完成的后继交接。
 
 ## Tasks
 
@@ -97,7 +98,7 @@
 | 74 | M14-T04 | 49 数据集自动契约与页面回归驱动 | `COMPLETED` | M03-T09, M04-T06, M14-T01 | docs/task-designs/M14-T04-design.md | docs/task-handoffs/M14-T04-handoff.md |
 | 75 | M14-T05 | 真实 Tushare 49 接口受控页面验收 | `BLOCKED` | M14-T04 | docs/task-designs/M14-T05-design.md | docs/task-handoffs/M14-T05-handoff.md |
 | 76 | M14-T09 | 分红修复与2000档剩余验收 | `COMPLETED` | M14-T04, M14-T05 | docs/task-designs/M14-T09-design.md | docs/task-handoffs/M14-T09-handoff.md |
-| 77 | M14-T06 | `daily` 与 `balancesheet` 性能验证 | `NOT_STARTED` | M14-T03, M14-T05 | None | None |
+| 77 | M14-T06 | `daily` 与 `balancesheet` 性能验证 | `COMPLETED` | M14-T03, M14-T05 | None | None |
 | 78 | M14-T07 | Token、SQL、依赖、网络和运行安全验证 | `NOT_STARTED` | M14-T02, M14-T03, M14-T04, M14-T05 | None | None |
 | 79 | M14-T08 | 全新环境 AC-001～018 与发布证据包 | `NOT_STARTED` | M14-T01, M14-T02, M14-T03, M14-T04, M14-T05, M14-T06, M14-T07 | None | None |
 
@@ -1060,7 +1061,7 @@
 - **Acceptance:** “真实 Tushare 49 接口受控页面验收”已按该任务卡指定的位置和行为形成；任务卡列出的全部测试、验证命令和检查得到其注明的预期结果；没有混入排除范围。
 - **Dependencies:** M14-T04.
 - **Sources:** `docs/superpowers/plans/tensor-modules/M14-integration-release.md` 的 `Task M14-T05` 任务卡。
-- **First action:** 用户已暂缓本任务，剩余9接口登记ISSUE-008；不启动真实调用。当前执行入口为Order77/M14-T06。M14-T09的完整40项已完成，原49目标仍未完成。
+- **First action:** 用户已暂缓本任务，剩余9接口登记ISSUE-008；不启动真实调用。后续执行入口以Workflow最新安排为准。M14-T09的完整40项已完成，原49目标仍未完成。
 - **State evidence (deferred to issue):** 用户明确要求“M14-05的先不解决了，放在issue里面，然后继续进行M14-06”。已完整读取本任务设计与pause交接，以最终40项可用证据和原9项排除依据登记 `docs/issues/problems/ISSUE-008-tushare-live-coverage-gap.md`，更新同一交接和设计的当前入口。本任务保持BLOCKED，无状态转换或真实请求；M14-T06按明确执行安排推进，原49及发布门禁不改判通过。
 - **State evidence (readiness):** 2026-09-06：M14-T04完成记录 `80a9491` 已先独立提交，再按预定义Order选中75/M14-T05，观测NOT_STARTED、Design/Handoff为None。使用任务契约设计技能完成145行 `docs/task-designs/M14-T05-design.md`，就绪审查3Important/1Minor经定点修正全部Addressed、无新Critical/Important/Minor，Ready for implementation: Yes；修正精确DownloadResponse八键、600/330秒分阶段钩子预算、CLI完全退出后的独占产物扫描/删除与页面静态资源允许列表。`9b3d263` 提交设计并仅回填Design document，链接后完整读取。设计冻结两实施文件、原验收JAR、manifest49接口/58样例、37ok/12empty接口级判定、98次真实dataset查询、独立fixture2POST/3查询、真实Token环境/账户权限频率额度前置确认、单worker/零重试、新空schema、按不同业务键的计数和页面记录/来源/时间核对、安全与正常清理。结构/引用/manifest数量哈希、两实施文件缺席、依赖决定及约束一致性均已核对；唯一任务依赖仍M14-T04，M14-T02公开fixture合同仅作为任务卡指定补充来源。先按完整模板写 `docs/task-handoffs/M14-T05-handoff.md`，列清直接输入的产物/决定/理由/约束/用途/既有可用性证据，链接后执行真实 `NOT_STARTED -> READY`。本轮只设计/交接，live spec及实际证据尚未创建，本地安全探针、账户权限/额度/Token和真实上游矩阵未验证；首动作直接实施完成设计，不补设计、不将预期写成实跑通过。用户并行ISSUE-004及target资源未纳入提交。
 
@@ -1154,11 +1155,12 @@
 
 - **Goal:** 交付“`daily` 与 `balancesheet` 性能验证”。
 - **Scope:** 包含该交付物及其直接测试与验证；不包含其他预定义任务的交付物，也不扩展 `docs/superpowers/plans/tensor-modules/M14-integration-release.md` 中该任务卡明确的文件、主要语言、接口和排除边界。
-- **Acceptance:** “`daily` 与 `balancesheet` 性能验证”已按该任务卡指定的位置和行为形成；任务卡列出的全部测试、验证命令和检查得到其注明的预期结果；没有混入排除范围。
+- **Acceptance:** 原性能验收要求保留在任务卡及ISSUE-009，尚未验证。本次COMPLETED仅依据用户明确的跳过并标记完成指示，表示任务管理收尾，不表示性能目标通过。
 - **Dependencies:** M14-T03, M14-T05.
 - **Sources:** `docs/superpowers/plans/tensor-modules/M14-integration-release.md` 的 `Task M14-T06` 任务卡。
-- **First action:** 读取 `docs/superpowers/plans/tensor-modules/M14-integration-release.md` 的 `Task M14-T06` 任务卡，并确认其 `Context boundary`、输入和目标文件均可定位。
+- **First action:** 本轮已按用户要求跳过并收尾，无实施动作。后续性能验证从 `docs/issues/problems/ISSUE-009-query-performance-verification.md` 的设计与关闭条件进入。
 - **State evidence (entry selected):** 用户明确暂缓M14-T05并要求先进行M14-T06；9项未覆盖已登记ISSUE-008。本任务当前NOT_STARTED，正在消费M14-T03页面/合成上游合同、M14-T05历史输入和M14-T09已验证冻结包，准备精确性能设计。M14-T05的完成状态不作为本次启动门禁，但未覆盖事实与发布要求保留；本记录不是READY或启动转换。
+- **State evidence (user-directed closure):** 用户明确要求“那也先跳过吧，可以记录一个issue，直接标记完成”。观测本任务NOT_STARTED、Design/Handoff均None后，依该用户指示的单次例外直接标记COMPLETED，未伪造中间状态。已登记ISSUE-009并链接原性能合同；数据规模建议未获确认，设计、脚本、页面测试和性能报告均未创建，性能实测次数为0。本次只完成文档登记与看板收尾；ISSUE-009保持未解决，原性能/发布门禁未通过，其他任务状态与依赖不变。
 
 ### `M14-T07`
 

@@ -22,4 +22,5 @@
 | ISSUE-005 | Tushare 小数解析导致适配失败 | 已解决，stock_company 真实三样例通过 | [详情](problems/ISSUE-005-tushare-decimal-decoding.md) · [设计与计划](proposals/ISSUE-005-tushare-decimal-decoding.md) |
 | ISSUE-006 | 股东户数公告日期混入日期时间格式 | 已解决，真实150行适配/入库/查看通过 | [详情与设计](problems/ISSUE-006-holdernumber-announcement-date.md) |
 | ISSUE-007 | dividend 业务键未区分实施进度 | 已关闭：修复及真实分红38行闭环通过（M14-T09） | [诊断详情](problems/ISSUE-007-dividend-adapter-diagnosis.md) · [修复设计](proposals/ISSUE-007-dividend-business-key.md) |
-| ISSUE-008 | 真实 Tushare 验收尚缺 9 个接口 | 用户要求暂缓；保留 M14-T05 阻塞，先推进 M14-T06 | [详情](problems/ISSUE-008-tushare-live-coverage-gap.md) |
+| ISSUE-008 | 真实 Tushare 验收尚缺 9 个接口 | 用户要求暂缓；M14-T05 保留阻塞 | [详情](problems/ISSUE-008-tushare-live-coverage-gap.md) |
+| ISSUE-009 | daily 与 balancesheet 性能尚未验证 | 待后续处理；M14-T06 按用户要求跳过并标记完成，未实测 | [详情](problems/ISSUE-009-query-performance-verification.md) |
