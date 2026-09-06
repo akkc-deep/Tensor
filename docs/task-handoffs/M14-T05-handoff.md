@@ -19,6 +19,8 @@ pause
 
 新正式控制目录 `/private/tmp/tensor-m14-t05-control.6gn542ah` 已准备全新独占 MySQL8.4.6 空库、最小权限、实际来源 host 与回环绑定。直接启动命令是 `python3 /private/tmp/tensor-m14-t05-control.6gn542ah/launch.py`，只能由用户在已有 `TENSOR_TUSHARE_TOKEN` 的终端执行一次；不重新设置 Token、不复用历史启动器。启动器仍固定 40/48/2000ms、15 秒状态提示、单次运行、终检扫描及精确清理，仅固定 JAR 路径改变。真实新轮尚未开始；看板只在修复/接入检查全部成立后按 BLOCKED→READY、单独 READY→IN_PROGRESS 恢复，不将本地验证计为真实通过。
 
+恢复状态：修复接入和 BLOCKED→READY 已独立提交 `8084e30`；现按持续执行授权完成单独 READY→IN_PROGRESS。真实新轮尚未执行，首动作是用户在已有 Token 的终端运行顶部的新命令。
+
 以下是上次真实运行的历史结果，保持原义：
 
 用户已执行修复后的kybrot1f一次性启动器。本轮约26秒，npx1/最终1；启动日志检查通过，fixture SUCCESS/EMPTY的2POST/3查询闭环通过。首个真实接口stock_basic完成3组原样例，结果依次SUCCESS(5556插入)、EMPTY(0)、SUCCESS(339插入)，合计5895行；页面末查、行显示/来源/时间、日志关联与独立DB末态5895匹配。

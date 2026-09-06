@@ -93,7 +93,7 @@
 | 72 | M14-T02 | 下载失败、空结果、幂等和回滚矩阵 | `COMPLETED` | M14-T01 | docs/task-designs/M14-T02-design.md | docs/task-handoffs/M14-T02-handoff.md |
 | 73 | M14-T03 | 查询、分页、宽表、竞态和无障碍 E2E | `COMPLETED` | M14-T01 | docs/task-designs/M14-T03-design.md | docs/task-handoffs/M14-T03-handoff.md |
 | 74 | M14-T04 | 49 数据集自动契约与页面回归驱动 | `COMPLETED` | M03-T09, M04-T06, M14-T01 | docs/task-designs/M14-T04-design.md | docs/task-handoffs/M14-T04-handoff.md |
-| 75 | M14-T05 | 真实 Tushare 49 接口受控页面验收 | `READY` | M14-T04 | docs/task-designs/M14-T05-design.md | docs/task-handoffs/M14-T05-handoff.md |
+| 75 | M14-T05 | 真实 Tushare 49 接口受控页面验收 | `IN_PROGRESS` | M14-T04 | docs/task-designs/M14-T05-design.md | docs/task-handoffs/M14-T05-handoff.md |
 | 76 | M14-T06 | `daily` 与 `balancesheet` 性能验证 | `NOT_STARTED` | M14-T03, M14-T05 | None | None |
 | 77 | M14-T07 | Token、SQL、依赖、网络和运行安全验证 | `NOT_STARTED` | M14-T02, M14-T03, M14-T04, M14-T05 | None | None |
 | 78 | M14-T08 | 全新环境 AC-001～018 与发布证据包 | `NOT_STARTED` | M14-T01, M14-T02, M14-T03, M14-T04, M14-T05, M14-T06, M14-T07 | None | None |
@@ -1088,6 +1088,9 @@
 
 
 - **State evidence (decimal repair unblock):** 2026-09-06：用户明确“继续修复”授权独立 ISSUE-005，修复 e8f37c2 仅补上游 JSON 小数直接 BigDecimal，未放宽严格转换器。客户端精度与合成 stock_company/reg_capital 链路均先 RED 后 GREEN；相关 85 测试通过，代码与接入两轮独立复审无发现。新修复验收包 SHA 7f794f3494109c27f134c04846e486bda3fe18beec3a88246b58fbcea719cef9，独立源码快照构建及 7 唯一打包合同测试通过，364 展开文件仅客户端类改变。新包合成 Token/health-only 实测 6 迁移/50 表全空，扫描停机及专用 DB/卷清理通过；设计已明确唯一新包接入，原包/manifest/真实历史证据不变。当前 spec 0ab8f12d96fe622a257bdb08fc0f0882c4fc0d94758900af2dc6e2ab45b457a2 语法/40 发现通过，实际前置门禁拒绝旧包。已先更新同一 pause 交接，正式 6gn542ah 新空 MySQL 环境、一次性启动器与四项 hash/40-48-9 范围复审通过，观测 BLOCKED 后据以上修复与接入证据执行 BLOCKED→READY。此转换恢复复验，不把合成失败字段认作真实历史字段，不把本地验证计为真实矩阵通过，不准备后继。
+
+
+- **State evidence (decimal-repaired phase restart):** 解阻与明确修复包接入已独立提交 8084e30。消费已更新的 M14-T05 设计与同一 pause 交接，依据用户持续执行当前任务并“继续修复”的授权，观测 READY 后单独执行 READY→IN_PROGRESS。正式环境为 6gn542ah，新包与 spec/config 四 hash 已封存；本次启动器供用户已有 TENSOR_TUSHARE_TOKEN 的终端直接执行，不再要求配置 Token 或启动旧等待脚本。真实新轮尚未运行，状态表示恢复验收工作，不表示 stock_company 或完整 40 项已通过；按实际结果再次 BLOCKED 或阶段成功 PAUSED，原 49 目标不宣称完成。
 
 ### `M14-T06`
 
