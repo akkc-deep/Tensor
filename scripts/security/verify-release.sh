@@ -51,6 +51,7 @@ def patterns(secrets):
         raw = secret.encode()
         result.update((raw, json.dumps(secret)[1:-1].encode(),
                        urllib.parse.quote(secret, safe='').encode(),
+                       urllib.parse.quote_plus(secret, safe='').encode(),
                        base64.b64encode(raw), base64.urlsafe_b64encode(raw),
                        ''.join('\\u%04x' % ord(c) for c in secret).encode(),
                        ''.join('%%%02X' % c for c in raw).encode(),
@@ -132,6 +133,15 @@ def method_verdict(status):
 def path_verdict(status):
     require(status in (400, 404), 'identifier-not-rejected')
 
+def normalize_headers(entries):
+    headers = {}
+    critical = set(HEADERS) | {'cache-control','access-control-allow-origin','access-control-allow-credentials','x-request-id','content-type','location'}
+    for name,value in entries:
+        name = name.lower()
+        require(name not in headers or name not in critical,'ambiguous-response-header')
+        headers[name] = value
+    return headers
+
 def header_verdict(headers, path):
     require(all(headers.get(key) == value for key, value in HEADERS.items()), 'security-header-mismatch')
     require('access-control-allow-origin' not in headers and 'access-control-allow-credentials' not in headers, 'cors-permission-exposed')
@@ -146,6 +156,29 @@ def actuator_verdict(status, body, health):
             raise GateError('health-json-invalid') from None
     else:
         require(status == 404 and not re.search(br'<(?:!doctype|html|script|body)\b', body, re.I), 'actuator-exposed')
+
+def completion_verdict(line):
+    marker = 'tensor.operation.completed'
+    require(marker in line,'completion-marker-missing')
+    text = line.split(marker,1)[1].strip()
+    fields, cursor = {}, 0
+    for match in re.finditer(r'([A-Za-z]+)=(\[[^\]]*\]|\S+)',text):
+        require(not text[cursor:match.start()].strip() and match[1] not in fields,'completion-fields-invalid')
+        fields[match[1]] = match[2]
+        cursor = match.end()
+    require(not text[cursor:].strip(),'completion-trailing-content')
+    operation = fields.get('operation')
+    require(operation in ('download','query'),'completion-operation-invalid')
+    common = {'requestId','operation','pluginId','apiName','durationMs','outcome','failureStage','errorCode'}
+    counts = {'sourceRowCount','insertedRows','updatedRows'} if operation == 'download' else {'page','pageSize','resultCount','totalElements'}
+    summary = 'paramSummary' if operation == 'download' else 'filterNames'
+    require(set(fields) == common | counts | {summary},'completion-fields-not-exact')
+    require(bool(re.fullmatch('[A-Za-z0-9-]{1,100}',fields['requestId'])) and fields['pluginId'] == 'tushare_pro' and fields['apiName'] == 'stock_company','completion-identity-invalid')
+    allowed_summary = ('[exchange]',) if operation == 'download' else ('[]','[ts_code]')
+    require(fields[summary] in allowed_summary,'completion-summary-discloses-values')
+    require(fields['durationMs'].isdigit() and all(re.fullmatch(r'(?:[0-9]+|unavailable)',fields[key]) for key in counts),'completion-counters-invalid')
+    require(fields['outcome'] in ('success','failure','empty') and fields['failureStage'] in ('none','parameter','registration','source','adapter','persistence','query') and re.fullmatch(r'(?:none|[A-Z][A-Z0-9_]*)',fields['errorCode']),'completion-outcome-invalid')
+    return fields
 
 def npm_verdict(report, exit_code):
     require(isinstance(report, dict) and not report.get('error') and report.get('auditReportVersion') == 2, 'npm-report-invalid')
@@ -334,7 +367,11 @@ class Runtime:
         os.environ.clear()
         self.home = directory / 'home'
         self.home.mkdir(mode=0o700)
-        self.env = {'PATH':str(Path(self.node).parent) + ':' + self.inputs['PATH'], 'HOME':str(self.home), 'LANG':'C.UTF-8', 'LC_ALL':'C.UTF-8', 'TMPDIR':str(directory), 'JAVA_HOME':self.inputs['JAVA_HOME'], 'MAVEN_OPTS':'-Duser.home=' + str(self.home), 'MAVEN_USER_HOME':str(self.home / '.m2'), 'NPM_CONFIG_USERCONFIG':'/dev/null', 'NPM_CONFIG_GLOBALCONFIG':'/dev/null', 'PLAYWRIGHT_BROWSERS_PATH':str(self.real_home / 'Library/Caches/ms-playwright')}
+        for name in ('npm-user.config','npm-global.config'):
+            config = self.home/name
+            config.write_bytes(b'')
+            config.chmod(0o600)
+        self.env = {'PATH':str(Path(self.node).parent) + ':' + self.inputs['PATH'], 'HOME':str(self.home), 'LANG':'C.UTF-8', 'LC_ALL':'C.UTF-8', 'TMPDIR':str(directory), 'JAVA_HOME':self.inputs['JAVA_HOME'], 'MAVEN_OPTS':'-Duser.home=' + str(self.home), 'MAVEN_USER_HOME':str(self.home / '.m2'), 'NPM_CONFIG_USERCONFIG':str(self.home/'npm-user.config'), 'NPM_CONFIG_GLOBALCONFIG':str(self.home/'npm-global.config'), 'PLAYWRIGHT_BROWSERS_PATH':str(self.real_home / 'Library/Caches/ms-playwright')}
         self.report = {'task':'M14-T07', 'startedAt':now(), 'checks':{name:{'status':'not-run','exitCode':None} for name in REQUIRED}, 'probes':{}, 'commands':[], 'environment':{}, 'scanCoverage':{}, 'cleanup':False}
         self.secrets, self.secret_patterns = [], ()
         self.private_inputs, self.container, self.jvm, self.stub, self.browser = [], None, None, None, None
@@ -380,11 +417,12 @@ class Runtime:
             check['finishedAt'] = now()
             print('security gate: ' + label + ' ' + check['status'], flush=True)
 
-    def scan(self, data, category, public=False):
+    def scan(self, data, category, public=False, submitted=()):
         try:
             scan_bytes(data, self.secret_patterns)
             if public:
                 require(all(value.encode() not in data for value in FORBIDDEN), 'unsafe-public-detail')
+                require(not any(value in data for value in patterns(submitted)), 'submitted-value-reflected')
         except GateError:
             self.fatal = True
             raise
@@ -688,7 +726,7 @@ class Runtime:
         self.stub_thread = threading.Thread(target=self.stub.serve_forever, daemon=True)
         self.stub_thread.start()
 
-    def http(self, path, *, method='GET', headers=None, body=None, observe=True):
+    def http(self, path, *, method='GET', headers=None, body=None, observe=True, submitted=()):
         require(not self.fatal, 'dynamic-stopped')
         require(path.startswith('/') and not path.startswith('//'), 'http-target-invalid')
         connection = http.client.HTTPConnection('127.0.0.1',8080,timeout=5)
@@ -709,14 +747,15 @@ class Runtime:
             response = connection.getresponse()
             data = response.read(32 * 1024 * 1024 + 1)
             require(len(data) <= 32 * 1024 * 1024 and time.monotonic() - started <= 15, 'http-budget-exceeded')
-            status, response_headers = response.status, {key.lower():value for key,value in response.getheaders()}
+            status, header_entries = response.status, response.getheaders()
         except (OSError, http.client.HTTPException):
             raise GateError('http-request-failed') from None
         finally:
             if deadline:
                 deadline.cancel()
             connection.close()
-        self.scan(json.dumps(response_headers).encode() + b'\n' + data, 'http', public=True)
+        self.scan(json.dumps(header_entries).encode() + b'\n' + data, 'http', public=True,submitted=submitted)
+        response_headers = normalize_headers(header_entries)
         if observe:
             self.observe_headers(response_headers, urllib.parse.urlsplit(path).path, status)
         return status, response_headers, data
@@ -793,11 +832,11 @@ class Runtime:
         require(request_id not in self.request_ids, 'request-id-duplicate')
         self.request_ids[request_id] = operation
 
-    def probe(self, identifier, path, verdict, *, method='GET', payload=None, headers=None, remember=False, unchanged=None):
+    def probe(self, identifier, path, verdict, *, method='GET', payload=None, headers=None, remember=False, unchanged=None, submitted=()):
         outcome = self.report['probes'][identifier]
         outcome.update(status='fail', method=method)
         try:
-            status, response_headers, data = self.http(path, method=method, body=payload, headers=headers)
+            status, response_headers, data = self.http(path, method=method, body=payload, headers=headers,submitted=submitted)
             outcome['httpStatus'] = status
             try:
                 body = json.loads(data)
@@ -891,8 +930,8 @@ class Runtime:
                             require(category in ('dom','console','request','http','pageerror'), 'browser-category-invalid')
                             self.scan(value.get('data','').encode(), 'browser_' + category, public=category != 'request')
                         elif kind == 'http':
-                            self.scan(json.dumps(value.get('headers',{})).encode() + value.get('body','').encode(), 'browser_http', public=True)
-                            self.observe_headers(value['headers'], value['path'], value['status'])
+                            self.scan(json.dumps(value.get('headerEntries',[])).encode() + value.get('body','').encode(), 'browser_http', public=True)
+                            self.observe_headers(normalize_headers(value['headerEntries']), value['path'], value['status'])
                         elif kind == 'requestId':
                             request_id = value.get('requestId')
                             require(isinstance(request_id,str) and re.fullmatch('[A-Za-z0-9-]{1,100}',request_id) and value.get('operation') in ('download','query') and request_id not in self.request_ids, 'browser-request-id-invalid')
@@ -948,14 +987,15 @@ class Runtime:
         for key,value in [('table','other_table'),('column','introduction'),('columns','*'),('sort','ts_code DESC'),('orderBy','ts_code'),('sql','SELECT 1')]:
             if self.fatal:
                 break
-            self.probe('S06.' + key,self.records_path + '?' + urllib.parse.urlencode({key:value}),lambda s,b,d: query_verdict(s,b),remember=True,unchanged=self.baseline)
+            self.probe('S06.' + key,self.records_path + '?' + urllib.parse.urlencode({key:value}),lambda s,b,d: query_verdict(s,b),remember=True,unchanged=self.baseline,submitted=(value,) if key in ('sql','sort') else ())
         self.gate('S06', lambda:self.group_verdict('S06'))
         for key,value in [('tsCode',"x' OR 1=1 --"),('page','1 OR 1=1'),('pageSize','101'),('tradeDateFrom','2026-08-07')]:
             if self.fatal:
                 break
-            self.probe('S07.' + key,self.records_path + '?' + urllib.parse.urlencode({key:value}),lambda s,b,d: query_verdict(s,b),remember=True,unchanged=self.baseline)
+            self.probe('S07.' + key,self.records_path + '?' + urllib.parse.urlencode({key:value}),lambda s,b,d: query_verdict(s,b),remember=True,unchanged=self.baseline,submitted=(value,))
         if not self.fatal:
-            self.probe('S07.apiName',self.dataset_path + '/' + urllib.parse.quote("stock_company' OR 1=1 --",safe='') + '/records',lambda s,b,d: path_verdict(s),unchanged=self.baseline)
+            identifier_payload = "stock_company' OR 1=1 --"
+            self.probe('S07.apiName',self.dataset_path + '/' + urllib.parse.quote(identifier_payload,safe='') + '/records',lambda s,b,d: path_verdict(s),unchanged=self.baseline,submitted=(identifier_payload,))
         def final_row(status, body, data):
             require(status == 200 and isinstance(body,dict) and body.get('totalElements') == 1 and len(body.get('items',[])) == 1 and all(body['items'][0].get(field) == {'ts_code':'000001.SZ','exchange':'SZSE','introduction':HTML}.get(field) for field in self.fields), 'final-row-invalid')
         if not self.fatal:
@@ -1004,10 +1044,12 @@ class Runtime:
         self.scan(data, 'application_log')
         require(all(value.encode() not in data for value in FORBIDDEN[:8]), 'unsafe-log-detail')
         lines = data.decode(errors='strict').splitlines()
-        events = [line for line in lines if 'tensor.operation.completed' in line]
+        disclosure = re.compile(r'''\b(?:SELECT\b[^\r\n]*\bFROM|INSERT\s+INTO|DELETE\s+FROM|UPDATE\b[^\r\n]*\bSET|(?:CREATE|ALTER|DROP)\s+TABLE)\b|\b(?:params|parameters|requestBody|sql|tsCode|exchange)["']?\s*[:=]''',re.I)
+        require(not any(disclosure.search(line) for line in lines),'ordinary-log-query-disclosure')
+        events = [completion_verdict(line) for line in lines if 'tensor.operation.completed' in line]
         counts = []
         for request_id,operation in self.request_ids.items():
-            matches = [line for line in events if 'requestId=' + request_id in line and 'operation=' + operation in line]
+            matches = [event for event in events if event['requestId'] == request_id and event['operation'] == operation]
             counts.append({'requestId':request_id,'operation':operation,'completionEvents':len(matches)})
         details = {'requests':counts,'completionEvents':len(events)}
         if not counts or not all(row['completionEvents'] == 1 for row in counts) or len(events) != len(counts):
@@ -1198,7 +1240,91 @@ class Runtime:
 
     def stub_verdict(self):
         require(self.stub_count == 2 and self.stub_failures == 0,'stub-call-contract-failed')
-        return {'calls':self.stub_count,'unexpectedCalls':self.stub_failures,'realUpstreamCalls':0}
+        return {'observedStubCalls':self.stub_count,'unexpectedStubCalls':self.stub_failures,'configuredUpstream':'loopback-stub','jvmExternalUpstreamCalls':'not-measured'}
+
+def review_cases(directory, check, selected=None):
+    if selected in (None, 'headers', 'reflection'):
+        from unittest.mock import patch
+        def response_case(entries, body=b'{}', status=200, **options):
+            runtime = Runtime.__new__(Runtime)
+            runtime.fatal, runtime.http_count, runtime.header_failures = False, 0, []
+            runtime.secret_patterns = patterns(['M14_T07_TOKEN_review_canary'])
+            runtime.report = {'scanCoverage':{}}
+            class Socket:
+                def settimeout(self, value):
+                    pass
+                def shutdown(self, value):
+                    pass
+            class Connection:
+                def __init__(self, *args, **kwargs):
+                    self.sock = Socket()
+                def connect(self):
+                    pass
+                def request(self, *args, **kwargs):
+                    pass
+                def close(self):
+                    pass
+                def getresponse(self):
+                    class Response:
+                        def read(self, limit):
+                            return body
+                        def getheaders(self):
+                            return entries
+                    response = Response()
+                    response.status = status
+                    return response
+            with patch('http.client.HTTPConnection',Connection):
+                return runtime.http('/api/v1/probe',**options)
+        clean_headers = list({**HEADERS,'cache-control':'no-store'}.items())
+    if selected in (None, 'headers'):
+        check('headers-all-occurrences-clean',lambda:response_case(clean_headers))
+        check('headers-earlier-canary',lambda:response_case(clean_headers + [('X-Debug','M14_T07_TOKEN_review_canary'),('X-Debug','safe')]),True)
+        check('headers-ambiguous-security-duplicate',lambda:response_case(clean_headers + [('X-Frame-Options','SAMEORIGIN'),('X-Frame-Options','DENY')]),True)
+    if selected in (None, 'reflection'):
+        payload = "stock_company' OR 1=1 --"
+        def reflected(data):
+            status,_,_ = response_case(clean_headers,data,404,submitted=(payload,))
+            path_verdict(status)
+        check('identifier-reflection-clean',lambda:reflected(b'{}'))
+        for number, encoded in enumerate(patterns([payload])):
+            check('identifier-reflection-' + str(number),lambda data=encoded:reflected(b'prefix ' + data),True)
+        check('identifier-reflection-form-url',lambda:reflected(urllib.parse.quote_plus(payload,safe='').encode()),True)
+    if selected in (None, 'logs'):
+        request_id = '11111111-1111-1111-1111-111111111111'
+        common = 'tensor.operation.completed requestId=' + request_id + ' operation='
+        query = common + 'query pluginId=tushare_pro apiName=stock_company filterNames=[ts_code] page=1 pageSize=50 resultCount=1 totalElements=1 durationMs=2 outcome=success failureStage=none errorCode=none'
+        download = common + 'download pluginId=tushare_pro apiName=stock_company paramSummary=[exchange] sourceRowCount=1 insertedRows=1 updatedRows=0 durationMs=2 outcome=success failureStage=none errorCode=none'
+        def log_case(text, operation='query'):
+            runtime = Runtime.__new__(Runtime)
+            runtime.fatal, runtime.secret_patterns = False, ()
+            runtime.report = {'scanCoverage':{}}
+            runtime.request_ids = {request_id:operation}
+            runtime.jvm_log = directory/'review-application.log'
+            runtime.jvm_log.write_text(text + '\n')
+            return runtime.scan_logs()
+        check('completion-query-clean',lambda:log_case(query))
+        check('completion-download-clean',lambda:log_case(download,'download'))
+        check('completion-full-params',lambda:log_case(query + ' params={tsCode=000001.SZ}'),True)
+        check('completion-full-sql',lambda:log_case(query + ' sql=SELECT introduction FROM tushare_pro__stock_company'),True)
+        check('ordinary-log-full-sql',lambda:log_case('SELECT introduction FROM tushare_pro__stock_company\n' + query),True)
+        check('completion-filter-value',lambda:log_case(query.replace('[ts_code]','[ts_code=000001.SZ]')),True)
+        check('completion-download-value',lambda:log_case(download.replace('[exchange]','[exchange=SZSE]'),'download'),True)
+        check('completion-duplicate-field',lambda:log_case(query + ' page=1'),True)
+    if selected in (None, 'npm'):
+        inherited = dict(os.environ)
+        try:
+            os.environ.clear()
+            os.environ.update({key:inherited[key] for key in ('PATH','HOME','JAVA_HOME') if key in inherited})
+            private = directory/'npm-preflight'
+            private.mkdir(mode=0o700)
+            runtime = Runtime(private)
+        finally:
+            os.environ.clear(); os.environ.update(inherited)
+        npm = shutil.which('npm',path=runtime.env['PATH'])
+        def npm_check():
+            code, output = runtime.run('npm-config-self-test',[npm,'--version'],timeout=15)
+            require(code == 0 and re.fullmatch(br'11\.[0-9]+\.[0-9]+\s*',output),'npm-config-preflight-failed')
+        check('npm-config-preflight',npm_check)
 
 def self_test(directory):
     token = 'M14_T07_TOKEN_self_test_+"/='
@@ -1308,6 +1434,7 @@ def self_test(directory):
     expected_fields = ['field_' + str(n) for n in range(18)]
     template.write_text(json.dumps({'data':[['synthetic skipped value']],'fields':expected_fields}))
     check('template-streamed-fields',lambda:require(top_fields(template) == expected_fields,'template-test-failed'))
+    review_cases(directory,check)
     node = subprocess.run([node_tool(), str(directory / 'browser.mjs')],
                           input=json.dumps({'mode':'self-test', 'root':str(Path.cwd()), 'html':HTML}).encode(),
                           stdout=subprocess.PIPE, stderr=subprocess.PIPE,
@@ -1426,10 +1553,10 @@ if (config.mode === 'preflight') {
       const action = async () => {
         const url = new URL(response.url())
         if (url.pathname.startsWith('/assets/') && /\.(js|css)$/.test(url.pathname)) assets.add(url.pathname)
-        const headers = await response.allHeaders()
+        const headerEntries = (await response.headersArray()).map(({ name, value }) => [name, value])
         let body = ''
         if (![204, 304].includes(response.status())) body = await response.text()
-        await send('http', { category:'browser-http', path:url.pathname, status:response.status(), headers, body })
+        await send('http', { category:'browser-http', path:url.pathname, status:response.status(), headerEntries, body })
       }
       queue(action())
     })
