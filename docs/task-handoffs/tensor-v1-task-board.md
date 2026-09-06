@@ -1070,6 +1070,8 @@
 
 - **State evidence (public permission audit, still BLOCKED):** 用户自报2000+积分后，仅读Tushare官方公开文档核对49API（45有效说明、4原地址文档不存在）。top_inst接口页明确5000、broker_recommend明确6000，均不能由2000档证明覆盖；两项与官方总表以及share_float存在积分说明差异，四个旧API文档缺失也不能当作已授权或已停用。积分不按调用扣除；2000档总表200次/分钟、100000次/日/每API，stock_basic另限50次/分钟，账户实际用量与未公开限制未知。来源和具体待确认事项已记录实际证据与pause交接；已具体询问两个高积分API是否有访问权限，未携Token访问官网、未发业务请求、未设置全49确认/启动信号、不降低验收范围，状态保持BLOCKED。
 
+- **State evidence (waiting process ended, still BLOCKED):** 安全结果随后记录等待启动器收到KeyboardInterrupt、ownedContainerRemoved=true；私有DB连接文件已删除，实际运行开始/结束标志不存在。旧终端ready标志失效，未开始JVM或真实矩阵。后续先解决已列明的账户权限条件，再准备新独占环境及终端启动，不让用户重复启动已清理的旧控制目录。
+
 ### `M14-T06`
 
 - **Goal:** 交付“`daily` 与 `balancesheet` 性能验证”。

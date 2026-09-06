@@ -38,6 +38,8 @@ Java21、8080空闲、原验收JAR/manifest/spec冻结哈希重新检查通过�
 
 当前明确待确认的是这些具体权限/文档差异及账户实际限制，而不是再次设置Token。已向用户具体询问top_inst、broker_recommend是否已有访问权限；没有把回答“2000+积分”扩大为全49权限、剩余额度和间隔均已确认。未写`confirmed-inputs.json`或启动门禁，看板保持BLOCKED、真实矩阵仍未开始。公开页面快照和逐API摘录仅暂存在本机临时文档目录，未作为任务新增分发文件提交。
 
+等待进程结束后的安全结果记录为`KeyboardInterrupt`、`ownedContainerRemoved=true`，私有DB连接文件已删除，运行开始/结束标志均不存在；这是启动器报告的正常中断清理结果，没有JVM、业务调用或真实验收结果。旧Token-ready文件已成为历史证据，不可用于未来解阻。追加文档复核确认49条公开API审计、45有效API说明及内嵌已测终检函数AST一致；临时DB连接材料已随清理删除，未在此次追加后重新进行凭证字面扫描，不声称真实Token扫描通过。
+
 ## 实施与静态检查
 
 `739e128`（`test(release): verify live Tushare interfaces`）只新增 `control-plane/e2e/tushare-live.spec.js`，模式100644。该时点SHA-256为 `d3aafc7b3aa14311bc691fdb37ac105473598cd06c4d1d7a58949d3bd13238a5`。实现包含49项无条件注册、58样例串行页面流程、独立fixture准备、页面/请求/计数/来源时间核对、环境及日志隔离和正常停机；后续审查修订已闭环（见下文）；真实验收仍未执行。
