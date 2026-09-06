@@ -241,10 +241,10 @@ export function selectLiveInterfaces(interfaces) {
   safeCheck(sampleCount === 48, 'live scope sample count')
   safeCheck(okCount === 28 && emptyCount === 12, 'live scope status counts')
   const acceptanceInterfaces = selected.map((entry) => ({
-    ...entry, acceptanceStatus: ['dividend', 'top10_holders'].includes(entry.api_name) ? 'ok' : entry.status,
+    ...entry, acceptanceStatus: ['dividend', 'top10_holders', 'top10_floatholders'].includes(entry.api_name) ? 'ok' : entry.status,
   }))
   const acceptanceOkCount = acceptanceInterfaces.filter(({ acceptanceStatus }) => acceptanceStatus === 'ok').length
-  safeCheck(acceptanceOkCount === 30, 'live scope acceptance status counts')
+  safeCheck(acceptanceOkCount === 31, 'live scope acceptance status counts')
   return {
     interfaces: acceptanceInterfaces,
     acceptanceOkCount,
