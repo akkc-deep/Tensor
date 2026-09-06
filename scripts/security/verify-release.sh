@@ -43,6 +43,13 @@ def require(value, label):
     if not value:
         raise GateError(label)
 
+def docker_absence_verdict(exit_code, output, kind, identifier):
+    prefix,suffix = {
+        'container':(rb'(?i:error: no such object: |error response from daemon: no such container: )',b''),
+        'volume':(rb'(?i:error response from daemon: get )',rb'(?i:: no such volume)'),
+    }[kind]
+    require(exit_code == 1 and re.fullmatch(prefix + re.escape(identifier.encode()) + suffix,output.strip()),'cleanup-' + kind + '-absence-unconfirmed')
+
 def patterns(secrets):
     result = set()
     for secret in secrets:
@@ -1183,11 +1190,11 @@ class Runtime:
                 volumes = [m['Name'] for m in mounts if m.get('Type') == 'volume']
                 require(all(re.fullmatch('[A-Za-z0-9_.-]+',volume) for volume in volumes),'cleanup-volume-id-invalid')
                 self.success('cleanup-container-remove',[self.docker,'rm','--force','--volumes',self.container])
-                code,_ = self.run('cleanup-container-absent',[self.docker,'inspect','--format','{{.Id}}',self.container])
-                require(code != 0,'cleanup-container-still-present')
+                code,output = self.run('cleanup-container-absent',[self.docker,'inspect','--format','{{.Id}}',self.container])
+                docker_absence_verdict(code,output,'container',self.container)
                 for volume in volumes:
-                    code,_ = self.run('cleanup-volume-absent',[self.docker,'volume','inspect','--format','{{.Name}}',volume])
-                    require(code != 0,'cleanup-volume-still-present')
+                    code,output = self.run('cleanup-volume-absent',[self.docker,'volume','inspect','--format','{{.Name}}',volume])
+                    docker_absence_verdict(code,output,'volume',volume)
                 details['volumesRemoved'] = len(volumes)
             except Exception:
                 details['container'] = False; details['volumes'] = False
@@ -1319,6 +1326,47 @@ class Runtime:
         return {'observedStubCalls':self.stub_count,'unexpectedStubCalls':self.stub_failures,'configuredUpstream':'loopback-stub','jvmExternalUpstreamCalls':'not-measured'}
 
 def review_cases(directory, check, selected=None):
+    if selected in (None,'cleanup-inspect'):
+        container, volume = 'a'*64, 'm14-t07-owned-volume'
+        absent = {'container':('error: no such object: ' + container + '\n').encode(),
+                  'volume':('Error response from daemon: get ' + volume + ': no such volume\n').encode()}
+        def inspect_case(kind=None,code=1,output=None):
+            runtime = Runtime.__new__(Runtime)
+            runtime.browser_cleanup, runtime.port_owned, runtime.fatal = True, False, False
+            runtime.running = runtime.browser = runtime.jvm = runtime.stub = None
+            runtime.private_inputs, runtime.report, runtime.secret_patterns = [], {'scanCoverage':{}}, ()
+            runtime.container, runtime.owner, runtime.docker = container, 'synthetic-owner', 'docker'
+            commands = {
+                'cleanup-container-owner':(['docker','inspect','--format','{{index .Config.Labels "org.tensor.m14-t07.owner"}}',container],0,b'synthetic-owner\n'),
+                'cleanup-volume-inventory':(['docker','inspect','--format','{{json .Mounts}}',container],0,json.dumps([{'Type':'volume','Name':volume}]).encode()),
+                'cleanup-container-remove':(['docker','rm','--force','--volumes',container],0,container.encode()),
+                'cleanup-container-absent':(['docker','inspect','--format','{{.Id}}',container],1,absent['container']),
+                'cleanup-volume-absent':(['docker','volume','inspect','--format','{{.Name}}',volume],1,absent['volume']),
+            }
+            def run(label,args):
+                expected,status,data = commands[label]
+                require(args == expected,'cleanup-inspection-test-command')
+                if label == 'cleanup-' + str(kind) + '-absent':
+                    status,data = code,output
+                runtime.scan(data,'subprocess_output')
+                return status,data
+            runtime.run = run
+            return runtime.cleanup()
+        check('cleanup-explicit-container-and-volume-absence',inspect_case)
+        check('cleanup-explicit-container-daemon-absence',lambda:inspect_case('container',1,('Error response from daemon: No such container: ' + container).encode()))
+        check('cleanup-explicit-container-legacy-absence',lambda:inspect_case('container',1,('Error: No such object: ' + container).encode()))
+        for kind,identifier in (('container',container),('volume',volume)):
+            cases = [('daemon',1,b'Cannot connect to the Docker daemon at unix:///synthetic/docker.sock. Is the docker daemon running?'),
+                     ('transport',1,b'error during connect: synthetic I/O error'),
+                     ('authorization',1,b'Error response from daemon: authorization denied'),
+                     ('unknown',1,b'Error: inspection unavailable'),('empty',1,b''),
+                     ('present',0,identifier.encode()),('success-absence',0,absent[kind]),
+                     ('wrong-exit',2,absent[kind]),
+                     ('wrong-id',1,absent[kind].replace(identifier.encode(),b'other-owned-id')),
+                     ('wrong-id-case',1,absent[kind].replace(identifier.encode(),identifier.upper().encode())),
+                     ('mixed-error',1,absent[kind] + b'Cannot connect to the Docker daemon')]
+            for label,code,output in cases:
+                check('cleanup-' + kind + '-inspect-' + label,lambda k=kind,c=code,o=output:inspect_case(k,c,o),True)
     if selected in (None,'cleanup'):
         def cleanup_case(kind):
             with socket.socket() as server:
