@@ -95,7 +95,7 @@
 | 73 | M14-T03 | 查询、分页、宽表、竞态和无障碍 E2E | `COMPLETED` | M14-T01 | docs/task-designs/M14-T03-design.md | docs/task-handoffs/M14-T03-handoff.md |
 | 74 | M14-T04 | 49 数据集自动契约与页面回归驱动 | `COMPLETED` | M03-T09, M04-T06, M14-T01 | docs/task-designs/M14-T04-design.md | docs/task-handoffs/M14-T04-handoff.md |
 | 75 | M14-T05 | 真实 Tushare 49 接口受控页面验收 | `BLOCKED` | M14-T04 | docs/task-designs/M14-T05-design.md | docs/task-handoffs/M14-T05-handoff.md |
-| 76 | M14-T09 | 分红修复与2000档剩余验收 | `BLOCKED` | M14-T04, M14-T05 | docs/task-designs/M14-T09-design.md | docs/task-handoffs/M14-T09-handoff.md |
+| 76 | M14-T09 | 分红修复与2000档剩余验收 | `READY` | M14-T04, M14-T05 | docs/task-designs/M14-T09-design.md | docs/task-handoffs/M14-T09-handoff.md |
 | 77 | M14-T06 | `daily` 与 `balancesheet` 性能验证 | `NOT_STARTED` | M14-T03, M14-T05 | None | None |
 | 78 | M14-T07 | Token、SQL、依赖、网络和运行安全验证 | `NOT_STARTED` | M14-T02, M14-T03, M14-T04, M14-T05 | None | None |
 | 79 | M14-T08 | 全新环境 AC-001～018 与发布证据包 | `NOT_STARTED` | M14-T01, M14-T02, M14-T03, M14-T04, M14-T05, M14-T06, M14-T07 | None | None |
@@ -1115,7 +1115,7 @@
 - **Acceptance:** 已确认规则得到实现与回归/迁移/打包/复审验证；新包完整40项和fixture实际通过，计数/页面/独立DB及扫描清理全部符合修订合同。仅设计或诊断成功不算完成，原49未覆盖事实保留，不自动准备M14-T06。
 - **Dependencies:** M14-T04, M14-T05。M14-T05仅提供已完成且可用的实现/安全证据/诊断输入，不以其原49目标COMPLETED为本任务登记或后续执行的前提；本任务也不反向成为M14-T05的依赖，避免环。
 - **Sources:** docs/issues/problems/ISSUE-007-dividend-adapter-diagnosis.md；docs/issues/proposals/ISSUE-007-dividend-business-key.md；docs/task-designs/M14-T05-design.md；docs/verification/M14-T05-tushare-live.md；docs/verification/M14-T04-49-contracts.md。
-- **First action:** 读取当前设计与pause交接，确认D-02仅top10_holders当前预期修订；完成离线反例/新材料接入后按状态机恢复完整40项。不重复已通过分红修复或设置Token。
+- **First action:** 读取当前设计与pause交接，实施已确认D-02仅top10_holders当前预期修订；完成离线反例/新材料接入后按状态机恢复完整40项。不重复已通过分红修复或设置Token。
 - **State evidence:** 2026-09-06依用户明确的新增与移交请求初始登记为NOT_STARTED，没有执行状态转换或启动。输入e9fedfa已记录28通过/1失败/11未运行，以及1.56秒单次诊断的38源行/进度与金额冲突；四字段指纹方案仍待确认。设计与transfer文件已按序写入并精确回填链接；D-01随剩余工作明确移交，实施就绪门禁尚未满足，状态保持NOT_STARTED，不能标READY或声称前驱已完成。
 
 - **Transfer verification:** 本轮9份文档经机械核对与独立只读复审通过，无Critical/Important/Minor。任务数79、Order连续唯一、既有ID/状态/依赖不变、依赖无环、新链接有效；原真实证据SHA保持d4e7bf67b6a2b144662a987dec9aa812a8e39543c5134ed7cab8a12a4dbe34b5。只完成任务登记与移交，不是D-01批准、实施就绪或真实复验。
@@ -1127,6 +1127,10 @@
 - **State evidence (local repair verified):** 修复963ea17按已批准四字段指纹/V7实现，合成RED后76回归、73真实MySQL集成、7唯一打包合同通过；独立修复/接入复审全部发现关闭。新包81adba0dd6500f4aa43b4fa06b18c2c8e7b7454d9e6d4d6c734772cdaef1d002，递归展开仅适配器/元数据改变并新增V7，前端依赖不变；合成health核对7迁移50全空及扫描清理通过，提交HEAD的49总门禁metadata50/schema52/package4、50表1008列通过。新正式nuy4jdhx空库已准备；保持IN_PROGRESS，真实新轮尚未执行，不宣称40通过。
 
 - **State evidence (live expectation drift):** 已按授权自行执行nuy4jdhx，真实安全证据先提交471dfb0；整篇SHA9d5c283b31f586ee7a3b4fdbda84321fbf3c7e4f55274f9d69955d86353af170与扫描标记复核一致。149秒、npx/最终exit1，32通过/1失败/7未运行。dividend SUCCESS38/38/0、页面末查与独立DB38，ISSUE-007关闭；top10_holders SUCCESS320/320/0但历史/当前EMPTY，empty interface stays empty失败，末查未执行。真实POST41/records65、fixture2/3，111完成事件逐ID唯一；初始7迁移50全空，已完成32项页面/独立DB匹配、9排除表0；全40匹配false保留。扫描/worker及JVM/自有DB卷与私密材料清理通过，8080空闲。D-02仅top10_holders当前ok修订待确认，不改spec或自动复跑。完整设计已读，先写同路径pause交接，观测IN_PROGRESS后执行IN_PROGRESS→BLOCKED；原49目标未完成，不准备后继。
+
+- **State evidence (D-02 confirmed):** 2026-09-06用户了解top10_holders实际SUCCESS320与EMPTY断言冲突后，对明确的单接口当前预期调整及完整40项复验回复“同意”。完整读取当前设计与pause交接，批准已写入设计；先完成限定离线RED/GREEN与新私有运行材料复审，仍保持BLOCKED，尚未执行状态转换或真实新轮。历史证据、原参数及冻结包不变。
+
+- **State evidence (D-02 ready):** 单接口预期修改与新证据入口已提交d6e462f；当前specSHA20499ebe50010f07edcbfc6502ed13fe84aac06f557700f92f8cde7fd9757f94。同函数RED→GREEN、语法/发现40及18项启动材料合成检查通过。独立spec/接入审查PASS，唯一旧hash标注Minor已更正并定向复核关闭；历史证据和冻结JAR/manifest未变。新私有控制yx5keenc的MySQL8.4.6/初始0表/回环/来源host/字符集/六项最小权限均有实测证据，运行6hash及私有权限匹配且目录未使用。完整重读设计和pause交接，依据明确D-02批准与以上解阻证据，观测BLOCKED后执行BLOCKED→READY，保留交接入口；尚未执行真实新轮。
 
 ### `M14-T06`
 

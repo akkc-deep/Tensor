@@ -4,7 +4,7 @@
 
 **D-01已确认（2026-09-06）：** 用户对明确提出的四字段指纹/V7迁移/全40复验方案回复“同意”。采用 `FINGERPRINT: [ts_code, end_date, ann_date, div_proc]`，保留各实施阶段，允许元数据规定的空进度，同阶段跨批更新，迁移保留现有业务与来源时间；仅dividend当前验收预期改为ok。以下候选分支均已由此裁决选定，设计达到实施就绪。状态按看板依次执行NOT_STARTED→READY和READY→IN_PROGRESS，用户当前任务执行请求及本次确认构成启动授权。
 
-**当前阶段（nuy4jdhx已执行）：** 修复963ea17、本地全部门禁及真实dividend38行闭环通过；新轮32通过/1失败/7未运行。失败为top10_holders返回SUCCESS320而既定当前预期为EMPTY，已按合同停止。下述D-02待确认；它不撤回D-01批准，也不授权自动改预期或复跑。
+**当前阶段（nuy4jdhx已执行）：** 修复963ea17、本地全部门禁及真实dividend38行闭环通过；新轮32通过/1失败/7未运行。失败为top10_holders返回SUCCESS320而既定当前预期为EMPTY，已按合同停止。用户随后已明确同意D-02：仅top10_holders当前预期改为非空成功，并完整复验40项。正在完成离线检查和新环境接入；既有失败证据保留。
 
 ## Goal
 
@@ -52,17 +52,19 @@ D-01已由本次“同意”确认：执行现有四字段指纹方案。既有�
 
 执行归属改为M14-T09：新控制器只检查M14-T09的当前IN_PROGRESS与批准后设计/包/manifest/spec固定hash，不能因M14-T05仍BLOCKED而等待旧任务启动；结果明确记录当前执行任务M14-T09和历史来源M14-T05。新真实证据写入 `docs/verification/M14-T09-tushare-live.md`，先以真实秘密集合扫描该精确新文件再提交，不追加或覆盖旧已扫描证据。
 
-按确认方案，精确限定dividend的当前预期为ok，历史manifestStatus=empty仍保留；当前分类29ok/11empty，与历史28ok/12empty分列记录。其他接口期望不变，38不是未来固定行数。新增包及迁移/最小权限由本任务明确接入，沿用2秒间隔、单worker、零重试。除此之外原技术验收合同不变。
+D-01轮精确限定dividend的当前预期为ok，历史manifestStatus=empty仍保留；该轮当前分类29ok/11empty，与历史28ok/12empty分列记录。该轮其他接口期望不变，38不是未来固定行数；后续D-02批准的单接口修订见下节。新增包及迁移/最小权限由本任务明确接入，沿用2秒间隔、单worker、零重试。除此之外原技术验收合同不变。
 
 所有本地修复/检查/材料先完成，再由工具通过当前已实际继承的TENSOR_TUSHARE_TOKEN环境执行一次新命令。2026-09-06用户明确授权自行运行命令，工具仅检查变量非空，已确认可用；本地测试子进程净化环境且不继承真实Token。不重复设置Token，不进入长等待确认循环，不复用1gpnb4ru或shhiyk_p。真实错误按实际完成/失败/未运行计数记录，失败停止并使本任务BLOCKED。
 
-### D-02. top10_holders当前验收预期（待确认）
+### D-02. top10_holders当前验收预期（已确认）
+
+**批准证据（2026-09-06）：** 用户在获知top10_holders实际下载/入库320条、EMPTY断言失败和32/1/7结果后，对“仅调整该接口当前预期为成功且有数据、保留原参数和历史结果、再完整跑40项”的具体方案回复“同意”。本次确认覆盖D-02；既有命令/Token授权持续有效。
 
 nuy4jdhx真实证据已独立提交471dfb0，全文SHA `9d5c283b31f586ee7a3b4fdbda84321fbf3c7e4f55274f9d69955d86353af170`：top10_holders原样例返回SUCCESS，source/insert/update为320/320/0，requestId `01e1ba67-d26a-4e6d-918f-b42c70cb6e91`，164ms；独立DB320。因manifestStatus与当前acceptanceStatus均empty，同函数检查 `empty interface stays empty` 失败，末次页面查询尚未执行，不能将该用例改判通过。其前32项（含dividend38、disclosure_date10、repurchase27、stk_holdertrade44）完整通过；余7项未执行。
 
-待确认的具体修订：只将top10_holders的当前acceptanceStatus改为ok，保留manifestStatus=empty及原manifest/模板/参数。本轮已批准dividend覆盖保持；其余38个接口期望不变。历史分类仍28ok/12empty，修订后的当前分类为30ok/10empty。320仅是本轮测量值，后续要求SUCCESS且sourceRowCount>0，页面、来源时间和独立DB全部按原合同核对，不要求固定320行。未运行的top10_floatholders不能据名称相似提前覆盖。
+已确认的具体修订：只将top10_holders的当前acceptanceStatus改为ok，保留manifestStatus=empty及原manifest/模板/参数。本轮已批准dividend覆盖保持；其余38个接口期望不变。历史分类仍28ok/12empty，修订后的当前分类为30ok/10empty。320仅是本轮测量值，后续要求SUCCESS且sourceRowCount>0，页面、来源时间和独立DB全部按原合同核对，不要求固定320行。未运行的top10_floatholders不能据名称相似提前覆盖。
 
-修订仅触及现有spec固定覆盖和分类断言、当前设计/看板/交接及新的独立证据文件；不改生产代码、新包、业务键、schema或数据库参数。确认后先用同一selector/outcome/finalDataset函数做合成RED/GREEN：恰dividend与top10_holders覆盖、其余empty仍拒绝SUCCESS、固定40/48/9及历史/当前分类分别正确，原manifest及参数不变；语法和发现仍为40。原新包81ad...保持冻结，不为验收预期改动重建二进制。
+修订仅触及现有spec固定覆盖和分类断言、当前设计/看板/交接及新的独立证据文件；不改生产代码、新包、业务键、schema或数据库参数。本轮先用同一selector/outcome/finalDataset函数做合成RED/GREEN：恰dividend与top10_holders覆盖、其余empty仍拒绝SUCCESS、固定40/48/9及历史/当前分类分别正确，原manifest及参数不变；语法和发现仍为40。原新包81ad...保持冻结，不为验收预期改动重建二进制。
 
 本篇已扫描真实证据禁止改写。下一轮新证据采用 `docs/verification/M14-T09-tushare-live-rerun-01.md`，写入此前证据及包的精确链接，再用下一轮真实秘密集合扫描该新文件。以新私有控制目录、新空库及更新后的设计/spec/证据/启动器hash接入，完成独立接入复审后，才按明确解阻证据BLOCKED→READY，再单独READY→IN_PROGRESS；已有当前任务执行授权继续有效，不重复请求Token或同一已确认方案。
 
@@ -116,7 +118,7 @@ npx playwright test e2e/tushare-live.spec.js --list
 ## Risks
 
 - **D-01已解决：** 四字段指纹/V7修复及本地门禁、真实dividend38行页面闭环已通过。
-- **D-02待确认：** top10_holders实际SUCCESS320与历史EMPTY预期不符，当前只允许dividend覆盖，不能自动修改其他接口预期。
+- **D-02已确认：** 当前允许dividend与top10_holders覆盖为ok；其余38项期望不变。离线就绪不代表完整真实40项已通过。
 - 实际诊断只定位首个进度冲突，不能据此证明全部38行或尚未执行11接口已通过。
 - 旧schema/旧包兼容、MySQL多DDL非整体事务及nullable指纹语义必须由批准后的方案和真实本地IT覆盖。
 - 临时包和安全结果可能失效或被清理；先验证存在性/固定hash。材料缺失应按已提交源码与合同重建新产物，不绕过hash、不要求重复旧诊断。

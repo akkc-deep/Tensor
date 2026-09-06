@@ -15,7 +15,7 @@ pause
 
 D-01已获用户明确“同意”，修复963ea17完成：分红四字段指纹、可空身份兼容、保留数据的V7迁移。本地回归、迁移/幂等/schema、打包、独立复审、合成health和49总合同均通过。真实nuy4jdhx轮149秒，32 passed / 1 failed / 7 did not run；dividend SUCCESS38/38/0、页面末查38与独立DB38一致，ISSUE-007已修复验证。
 
-当前阻塞为top10_holders的验收预期漂移：原样例实际SUCCESS320/320/0，独立DB320，但历史及当前预期仍EMPTY，触发 `Safe check failed: empty interface stays empty`；未执行该接口末查，不能计为完整通过。D-02已写具体单接口修订，尚未确认或改spec；不自动复跑。
+当前阻塞为top10_holders的验收预期漂移：原样例实际SUCCESS320/320/0，独立DB320，但历史及当前预期仍EMPTY，触发 `Safe check failed: empty interface stays empty`；未执行该接口末查，不能计为完整通过。用户已确认D-02单接口修订和全40复验；当前正在完成限定离线检查与新材料接入，尚未据此声明解阻或真实复验通过。
 
 原transfer快照保留于提交9142127，本文件按相同权威路径更新为当前pause入口。M14-T05仍BLOCKED，原49中的9项仍不覆盖，不自动准备M14-T06。
 
@@ -40,7 +40,7 @@ D-01已获用户明确“同意”，修复963ea17完成：分红四字段指纹
 
 ## Remaining Work
 
-1. 确认设计D-02：仅top10_holders当前预期改ok，保留历史empty/原参数；其他未批准接口不变。确认后完成限定合成反例与新材料复审接入。
+1. 实施已确认D-02：仅top10_holders当前预期改ok，保留历史empty/原参数；其他未批准接口不变。完成限定合成反例与新材料复审接入。
 2. 新空环境完整复验40项及fixture，证据写新 `docs/verification/M14-T09-tushare-live-rerun-01.md`，不得覆盖已扫描本轮证据或拼接32项结果。
 3. 本轮未运行7项：top10_floatholders、new_share、stk_managers、pledge_stat、pledge_detail、index_classify、index_member_all。它们没有当前成功或非空结论。
 
@@ -54,15 +54,15 @@ M14-T09：分红修复与2000档剩余验收。修复及真实dividend验证已�
 2. 本pause交接及 `docs/verification/M14-T09-tushare-live.md`（471dfb0，固定SHA见上）。
 3. `docs/issues/proposals/ISSUE-007-dividend-business-key.md`、M14-T05设计的安全/范围合同及本地49门禁结果。
 
-首动作：取得D-02单接口预期修订的明确确认并写入设计；据此执行限定离线检查和新材料接入，建立解阻证据后才BLOCKED→READY，再单独启动。Token已在工具环境可用且用户授权自行运行，无需重复设置。
+首动作：按已确认并写入设计的D-02执行限定离线检查和新材料接入，建立解阻证据后才BLOCKED→READY，再单独启动。Token已在工具环境可用且用户授权自行运行，无需重复设置。
 
-可复用新冻结包：`/private/tmp/tensor-m14-t09-green.MZ4kMkN9/data-plane/tensor-app/target/acceptance/tensor-app-1.0-SNAPSHOT-acceptance.jar`，SHA `81adba0dd6500f4aa43b4fa06b18c2c8e7b7454d9e6d4d6c734772cdaef1d002`。当前specSHA `e3d6ada1324df1deb140c264a2b7f3f8fae8f1a1d864ca02d2240ce4bfd7f1cc`，manifestSHA `37a317f6a2bc3e5113be5f127976d16d8349414c6476c7f6a194b084a5b0f7c2`。新轮必须更新spec/设计/新证据/启动器hash，不能复用旧配置。
+可复用新冻结包：`/private/tmp/tensor-m14-t09-green.MZ4kMkN9/data-plane/tensor-app/target/acceptance/tensor-app-1.0-SNAPSHOT-acceptance.jar`，SHA `81adba0dd6500f4aa43b4fa06b18c2c8e7b7454d9e6d4d6c734772cdaef1d002`。D-02当前specSHA `20499ebe50010f07edcbfc6502ed13fe84aac06f557700f92f8cde7fd9757f94`，manifestSHA `37a317f6a2bc3e5113be5f127976d16d8349414c6476c7f6a194b084a5b0f7c2`。新轮必须更新spec/设计/新证据/启动器hash，不能复用旧配置。
 
 已用正式目录nuy4jdhx及health目录kcznkmbm不可复用。安全标记保留在nuy4jdhx/run-finished.json；私有运行产物根 `/private/tmp/tensor-m14-t05.fby6mhxj` 仅4个已扫描允许文件。可复用无秘密工作材料在 `/private/tmp/tensor-m14-t09-work.uxwc5bc6`，实际启动必须生成新的独占目录/空库/配置。
 
 ## Blocker
 
-- **Reason:** top10_holders原样例当前返回SUCCESS320而合同仍要求EMPTY；本次批准仅覆盖dividend，完整40项验收未通过。
+- **Reason:** top10_holders原样例当前返回SUCCESS320而合同仍要求EMPTY；此前D-01仅覆盖dividend；D-02现已批准，限定修改与离线复审尚待完成，完整40项验收未通过。
 - **Resolution condition:** D-02明确确认并完成精确单接口预期修改、离线反例及新冻结执行材料复审；保留本轮真实失败与原manifest/参数。此条件恢复复验，不预先声明40通过。
 
 ## Risks
