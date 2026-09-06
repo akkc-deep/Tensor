@@ -553,3 +553,325 @@ PY
 修复后spec SHA-256为72b9763941e7ed82fbf1b207a79ee515d3d7343c9831ce2604f8ec9abd7ee973；原JAR/manifest冻结哈希不变。新正式运行环境为 `/private/tmp/tensor-m14-t05-control.kybrot1f`，再次独立核对MySQL8.4.6/0表、最小权限/实际来源host、Java21、8080空闲及文件哈希/权限通过。launch.py与先前已审查的直接启动器逐字节一致，SHA仍为1423f0ebfa6cd48a6e818b6eccf13f593b23e39ce68b0dd9722663c5ea5fb263；新run-config将固定本次最终证据和输入哈希。旧j9045eey及两次诊断环境均已使用并清理，不可复用。
 
 本次GREEN只证明启动阻塞已修复，不证明任何真实Tushare接口、账户权限或fixture页面结果。固定40/48/80与fixture2/3仍待用户已有Token的终端执行正式新命令，结束后由同一Token环境完成整篇证据扫描和实际报告追加；真实错误仍保留，不自动重试。
+
+## 2000档实际运行 2026-09-06T05:45:06.940813+00:00
+
+以下为本次启动器在CLI退出、终检和清理后记录的实际结果；空值表示未测量，原全49目标仍不完整。
+
+```json
+{
+  "controllerFailure": null,
+  "databaseAfterMigration": {
+    "businessTables": 50,
+    "counts": {
+      "adj_factor": 0,
+      "balancesheet": 0,
+      "block_trade": 0,
+      "broker_recommend": 0,
+      "cashflow": 0,
+      "daily": 0,
+      "daily_basic": 0,
+      "disclosure_date": 0,
+      "dividend": 0,
+      "express": 0,
+      "fina_audit": 0,
+      "fina_indicator": 0,
+      "fina_mainbz": 0,
+      "fixture_daily": 0,
+      "forecast": 0,
+      "hk_hold": 0,
+      "hs_const": 0,
+      "hsgt_top10": 0,
+      "income": 0,
+      "index_classify": 0,
+      "index_member": 0,
+      "index_member_all": 0,
+      "margin": 0,
+      "margin_detail": 0,
+      "moneyflow": 0,
+      "moneyflow_hsgt": 0,
+      "monthly": 0,
+      "namechange": 0,
+      "new_share": 0,
+      "pledge_detail": 0,
+      "pledge_stat": 0,
+      "repurchase": 0,
+      "share_float": 0,
+      "slb_len": 0,
+      "slb_sec": 0,
+      "slb_sec_detail": 0,
+      "stk_holdernumber": 0,
+      "stk_holdertrade": 0,
+      "stk_limit": 0,
+      "stk_managers": 0,
+      "stk_rewards": 0,
+      "stock_basic": 0,
+      "stock_company": 0,
+      "suspend_d": 0,
+      "top10_floatholders": 0,
+      "top10_holders": 0,
+      "top_inst": 0,
+      "top_list": 0,
+      "trade_cal": 0,
+      "weekly": 0
+    },
+    "successfulMigrations": 6
+  },
+  "databaseFinal": {
+    "businessTables": 50,
+    "counts": {
+      "adj_factor": 0,
+      "balancesheet": 0,
+      "block_trade": 0,
+      "broker_recommend": 0,
+      "cashflow": 0,
+      "daily": 0,
+      "daily_basic": 0,
+      "disclosure_date": 0,
+      "dividend": 0,
+      "express": 0,
+      "fina_audit": 0,
+      "fina_indicator": 0,
+      "fina_mainbz": 0,
+      "fixture_daily": 1,
+      "forecast": 0,
+      "hk_hold": 0,
+      "hs_const": 0,
+      "hsgt_top10": 0,
+      "income": 0,
+      "index_classify": 0,
+      "index_member": 0,
+      "index_member_all": 0,
+      "margin": 0,
+      "margin_detail": 0,
+      "moneyflow": 0,
+      "moneyflow_hsgt": 0,
+      "monthly": 0,
+      "namechange": 0,
+      "new_share": 0,
+      "pledge_detail": 0,
+      "pledge_stat": 0,
+      "repurchase": 0,
+      "share_float": 0,
+      "slb_len": 0,
+      "slb_sec": 0,
+      "slb_sec_detail": 0,
+      "stk_holdernumber": 0,
+      "stk_holdertrade": 0,
+      "stk_limit": 0,
+      "stk_managers": 0,
+      "stk_rewards": 0,
+      "stock_basic": 5895,
+      "stock_company": 0,
+      "suspend_d": 0,
+      "top10_floatholders": 0,
+      "top10_holders": 0,
+      "top_inst": 0,
+      "top_list": 0,
+      "trade_cal": 0,
+      "weekly": 0
+    },
+    "successfulMigrations": 6
+  },
+  "elapsedSeconds": 26,
+  "finalExitCode": 1,
+  "npxExitCode": 1,
+  "ownedContainerRemoved": true,
+  "ownedWorkersExited": true,
+  "postCliScan": {
+    "cleanupPassed": true,
+    "deletedArtifacts": 2,
+    "filesScanned": 5,
+    "npxExitCode": 1,
+    "scanPassed": true
+  },
+  "scopeId": "points-2000",
+  "selectedPageCountsAndExcludedEmptyMatched": false,
+  "specResults": {
+    "cleanup": {
+      "immutableInputs": true,
+      "jvmStopped": true,
+      "logScanned": true,
+      "networkDrained": true
+    },
+    "command": "npx playwright test e2e/tushare-live.spec.js --workers=1",
+    "downloads": [
+      {
+        "apiName": "stock_basic",
+        "durationMs": 2835,
+        "insertedRows": 5556,
+        "outcome": "SUCCESS",
+        "requestId": "899b3fa0-5857-45c1-96cd-fb2b57ace3ea",
+        "sourceRowCount": 5556,
+        "updatedRows": 0
+      },
+      {
+        "apiName": "stock_basic",
+        "durationMs": 30,
+        "insertedRows": 0,
+        "outcome": "EMPTY",
+        "requestId": "c119af65-4893-4603-b544-5d572f3f87ab",
+        "sourceRowCount": 0,
+        "updatedRows": 0
+      },
+      {
+        "apiName": "stock_basic",
+        "durationMs": 197,
+        "insertedRows": 339,
+        "outcome": "SUCCESS",
+        "requestId": "d3fc1bd2-2e8e-4c3c-9289-abfa7d861fed",
+        "sourceRowCount": 339,
+        "updatedRows": 0
+      },
+      {
+        "apiName": "stock_company",
+        "durationMs": 304,
+        "outcome": "ADAPTER_TYPE_INVALID",
+        "requestId": "e82ccf95-6182-4d73-9b98-10ae2bd7e13b"
+      }
+    ],
+    "finishedAt": "2026-09-06T05:45:05.843Z",
+    "fixture": [
+      {
+        "apiName": "fixture_daily",
+        "durationMs": 5,
+        "outcome": "SUCCESS",
+        "requestId": "532608e5-08c9-4815-9b8d-f1090e07726b",
+        "resultCount": 0,
+        "totalElements": 0
+      },
+      {
+        "apiName": "fixture_daily",
+        "durationMs": 21,
+        "insertedRows": 1,
+        "outcome": "SUCCESS",
+        "requestId": "e121d3d9-7fdb-4e20-ba67-002ec40b494d",
+        "sourceRowCount": 1,
+        "updatedRows": 0
+      },
+      {
+        "apiName": "fixture_daily",
+        "durationMs": 5,
+        "outcome": "SUCCESS",
+        "requestId": "c83beddb-c9b6-46fe-9e36-48c165a8083d",
+        "resultCount": 1,
+        "totalElements": 1
+      },
+      {
+        "apiName": "fixture_daily",
+        "durationMs": 0,
+        "insertedRows": 0,
+        "outcome": "EMPTY",
+        "requestId": "c5ee58d2-a318-47b9-9eb6-b520db289ac6",
+        "sourceRowCount": 0,
+        "updatedRows": 0
+      },
+      {
+        "apiName": "fixture_daily",
+        "durationMs": 6,
+        "outcome": "SUCCESS",
+        "requestId": "0ac2b503-5e59-4d88-a66f-6b2a57f54d76",
+        "resultCount": 1,
+        "totalElements": 1
+      }
+    ],
+    "inputs": {
+      "gitCommit": "4b46ec174b041f67715007aafdfdf39d6ff158bd",
+      "jarSha256": "a69874afa6ce783d4ef4e16a678ddb0ff457f2948b68f509a8e4a2c00440bcac",
+      "manifestSha256": "37a317f6a2bc3e5113be5f127976d16d8349414c6476c7f6a194b084a5b0f7c2",
+      "specSha256": "72b9763941e7ed82fbf1b207a79ee515d3d7343c9831ce2604f8ec9abd7ee973"
+    },
+    "queries": [
+      {
+        "apiName": "stock_basic",
+        "durationMs": 3,
+        "outcome": "SUCCESS",
+        "requestId": "871b2648-e1b5-463a-b1d8-09e54af67ac8",
+        "resultCount": 0,
+        "totalElements": 0
+      },
+      {
+        "apiName": "stock_basic",
+        "durationMs": 6,
+        "outcome": "SUCCESS",
+        "requestId": "d302fcfc-8445-45f7-bde9-cea454563c34",
+        "resultCount": 50,
+        "totalElements": 5895
+      },
+      {
+        "apiName": "stock_company",
+        "durationMs": 2,
+        "outcome": "SUCCESS",
+        "requestId": "eaa7fdc8-2a33-481c-8f07-37b47eed3f21",
+        "resultCount": 0,
+        "totalElements": 0
+      }
+    ],
+    "scope": {
+      "excludedInterfaces": [
+        {
+          "apiName": "top_inst",
+          "reason": "higher_points"
+        },
+        {
+          "apiName": "broker_recommend",
+          "reason": "higher_points"
+        },
+        {
+          "apiName": "share_float",
+          "reason": "permission_unverified"
+        },
+        {
+          "apiName": "hs_const",
+          "reason": "permission_unverified"
+        },
+        {
+          "apiName": "moneyflow_hsgt",
+          "reason": "permission_unverified"
+        },
+        {
+          "apiName": "hk_hold",
+          "reason": "permission_unverified"
+        },
+        {
+          "apiName": "index_member",
+          "reason": "permission_unverified"
+        },
+        {
+          "apiName": "hsgt_top10",
+          "reason": "permission_unverified"
+        },
+        {
+          "apiName": "namechange",
+          "reason": "permission_unverified"
+        }
+      ],
+      "id": "points-2000",
+      "manifestCases": 49,
+      "manifestSamples": 58,
+      "selectedCases": 40,
+      "selectedSamples": 48
+    },
+    "startedAt": "2026-09-06T05:44:41.708Z",
+    "task": "M14-T05",
+    "totals": {
+      "attemptedCases": 2,
+      "callIntervalMs": 2000,
+      "completedCases": 1,
+      "failedCases": 1,
+      "fixtureDownloadPostsObserved": 2,
+      "fixtureRecordsGetsObserved": 3,
+      "liveDownloadPostsObserved": 4,
+      "liveDownloadResultsRecorded": 4,
+      "liveQueryResultsRecorded": 3,
+      "liveRecordsGetsObserved": 3,
+      "manifestSamples": 58,
+      "registeredCases": 40,
+      "selectedSamples": 48,
+      "unexecutedCases": 38
+    },
+    "version": 1
+  },
+  "task": "M14-T05"
+}
+```
