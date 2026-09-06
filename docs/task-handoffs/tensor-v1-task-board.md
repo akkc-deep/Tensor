@@ -95,7 +95,7 @@
 | 73 | M14-T03 | 查询、分页、宽表、竞态和无障碍 E2E | `COMPLETED` | M14-T01 | docs/task-designs/M14-T03-design.md | docs/task-handoffs/M14-T03-handoff.md |
 | 74 | M14-T04 | 49 数据集自动契约与页面回归驱动 | `COMPLETED` | M03-T09, M04-T06, M14-T01 | docs/task-designs/M14-T04-design.md | docs/task-handoffs/M14-T04-handoff.md |
 | 75 | M14-T05 | 真实 Tushare 49 接口受控页面验收 | `BLOCKED` | M14-T04 | docs/task-designs/M14-T05-design.md | docs/task-handoffs/M14-T05-handoff.md |
-| 76 | M14-T09 | 分红修复与2000档剩余验收 | `READY` | M14-T04, M14-T05 | docs/task-designs/M14-T09-design.md | docs/task-handoffs/M14-T09-handoff.md |
+| 76 | M14-T09 | 分红修复与2000档剩余验收 | `IN_PROGRESS` | M14-T04, M14-T05 | docs/task-designs/M14-T09-design.md | docs/task-handoffs/M14-T09-handoff.md |
 | 77 | M14-T06 | `daily` 与 `balancesheet` 性能验证 | `NOT_STARTED` | M14-T03, M14-T05 | None | None |
 | 78 | M14-T07 | Token、SQL、依赖、网络和运行安全验证 | `NOT_STARTED` | M14-T02, M14-T03, M14-T04, M14-T05 | None | None |
 | 79 | M14-T08 | 全新环境 AC-001～018 与发布证据包 | `NOT_STARTED` | M14-T01, M14-T02, M14-T03, M14-T04, M14-T05, M14-T06, M14-T07 | None | None |
@@ -1121,6 +1121,8 @@
 - **Transfer verification:** 本轮9份文档经机械核对与独立只读复审通过，无Critical/Important/Minor。任务数79、Order连续唯一、既有ID/状态/依赖不变、依赖无环、新链接有效；原真实证据SHA保持d4e7bf67b6a2b144662a987dec9aa812a8e39543c5134ed7cab8a12a4dbe34b5。只完成任务登记与移交，不是D-01批准、实施就绪或真实复验。
 
 - **State evidence (D-01 confirmed):** 2026-09-06用户对具体四字段指纹/V7保留数据/同阶段更新/全40复验方案回复“同意”；已完整读取本任务设计及transfer交接，核对基线JAR/spec/manifest/旧证据/诊断SHA一致。设计已记录批准规则与当前工具Token可用事实，消除D-01未决项；观测NOT_STARTED后执行NOT_STARTED→READY。当前仍未实施或真实复验，原M14-T05 BLOCKED事实不变。
+
+- **State evidence (start):** D-01批准与READY已提交c72a823。消费完整批准设计和原transfer交接，依据用户执行当前任务与“同意”的授权，观测READY后单独执行READY→IN_PROGRESS。开始合成RED、最小修复及本地验证；该转换不代表真实全40已通过。
 
 ### `M14-T06`
 
