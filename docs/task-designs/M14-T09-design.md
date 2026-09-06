@@ -4,7 +4,7 @@
 
 **D-01已确认（2026-09-06）：** 用户对明确提出的四字段指纹/V7迁移/全40复验方案回复“同意”。采用 `FINGERPRINT: [ts_code, end_date, ann_date, div_proc]`，保留各实施阶段，允许元数据规定的空进度，同阶段跨批更新，迁移保留现有业务与来源时间；仅dividend当前验收预期改为ok。以下候选分支均已由此裁决选定，设计达到实施就绪。状态按看板依次执行NOT_STARTED→READY和READY→IN_PROGRESS，用户当前任务执行请求及本次确认构成启动授权。
 
-**当前阶段（D-02/yx5keenc已执行）：** D-01分红修复仍通过，D-02的top10_holders已完成SUCCESS320/320/0、页面末查320和独立DB320闭环。最新完整范围实跑150秒，33通过/1失败/6未运行；top10_floatholders实际SUCCESS280而当前仍要求EMPTY，按合同停止，末次页面查询未执行。证据6ae877f已先独立提交，扫描与自有资源清理通过。用户随后明确同意D-03单接口当前预期修订及完整40项复验；本轮执行限定离线检查和新环境接入，历史失败保留。
+**最终结果（D-03/9mkzsd_0）：** 已确认的分红修复及D-02/D-03验收预期修订完成。最新独立新轮173秒，40 passed、0 failed、0 skipped/retried、0未运行；48真实下载/80页面查询、fixture2/3、133请求逐ID完成事件、全40页面与独立DB及扫描/清理全部通过。真实证据先独立提交14e038e，整篇SHA `5dd888c38608b058b15c89d9f3a29ce82ab1aeddd4e197eaa7ee66cafd6bf770`。M14-T09达到完成条件；原M14-T05的49目标仍有9项未覆盖，不自动准备后继。下述各轮失败及决策为真实历史，未改判或拼接。
 
 ## Goal
 
@@ -84,7 +84,17 @@ yx5keenc真实证据为 `docs/verification/M14-T09-tushare-live-rerun-01.md`（6
 
 只使用新私有控制目录、新空库和更新后的设计/spec/新证据/启动器hash，旧yx5keenc已使用且清理，不得复用。确认及离线/复审门禁齐备后才BLOCKED→READY，再单独READY→IN_PROGRESS；用户既有命令和环境Token授权持续有效，无需重复配置。完整复验仍40接口/48样例/80查询与fixture2/3、9排除、单worker/零重试/至少2秒间隔，失败停止；不只跑剩余7项、不拼接本轮33通过。
 
-本轮尚未执行6项：new_share、stk_managers、pledge_stat、pledge_detail、index_classify、index_member_all；无当前结果，不提前修改其预期。只有全40新轮与所有计数、扫描清理门禁通过才完成M14-T09；原49目标未完成和9项不覆盖继续保留，不自动准备后继。
+D-02轮当时尚未执行6项：new_share、stk_managers、pledge_stat、pledge_detail、index_classify、index_member_all；该历史轮无结果，故D-03未提前修改其预期；最终新轮结果见下节。只有全40新轮与所有计数、扫描清理门禁通过才完成M14-T09；原49目标未完成和9项不覆盖继续保留，不自动准备后继。
+
+### D-03最终验证结果
+
+本轮新证据为 `docs/verification/M14-T09-tushare-live-rerun-02.md`（14e038e），启动Git07ec797，命令 `python3 /private/tmp/tensor-m14-t09-control.9mkzsd_0/launch.py`。173秒，npx/最终exit0，完整40/40，失败/未运行均0；当前31ok/9empty与原历史28ok/12empty分别验证，原manifest/全部样例参数保持。
+
+同轮dividend38、top10_holders320、top10_floatholders280均SUCCESS且页面末查/独立DB一致；先前未运行六项全部通过：new_share1、stk_managers3999（源4000）、pledge_stat3000、pledge_detail1493（源1500）、index_classify359、index_member_all3000。写入数小于源行数符合按不同业务键计数的去重合同，不要求二者相等；真实行仅在页面流程内存中校验，未写入证据或日志。
+
+48次真实POST与80次records查询、fixture2POST/3查询全部完成。133个请求ID唯一且逐ID恰一个完成事件；独立初始7迁移/50业务表全0，末次全40页面计数与独立DB一致，九排除表均0、fixture1行。spec四项清理、worker/JVM退出、CLI终检和证据秘密扫描全部通过；扫描4文件并删除1自动产物，自有容器/匿名卷/私密DB状态已清理，8080空闲。
+
+此前修复回归76/76、MySQL集成73/73、7唯一打包合同、49总门禁与独立代码/接入复审证据仍由冻结包及原证据提供。D-03两处验收修改经同函数RED/GREEN、语法/发现40及18项启动检查通过；定向独立审查无剩余发现。保留全部已扫描历史证据，不复用9mkzsd_0及任何已执行控制目录。当前任务无剩余实现或验收工作。
 
 ### D. 收尾与原任务关系
 
@@ -135,8 +145,8 @@ npx playwright test e2e/tushare-live.spec.js --list
 
 - **D-01已解决：** 四字段指纹/V7修复及本地门禁、真实dividend38行页面闭环已通过。
 - **D-02已验证：** top10_holders下载/入库/页面末查与独立DB320一致，完整通过；该结论不覆盖下一接口。
-- **D-03已确认：** 当前允许dividend/top10_holders/top10_floatholders三项覆盖，其他37项期望不变；离线检查不代表全40真实验收通过。
-- 实际诊断只定位首个进度冲突，不能据此证明全部38行或尚未执行11接口已通过。
+- **D-03已验证：** top10_floatholders280完整通过，三项已批准覆盖及其他37项在同一新轮全部符合当前预期。
+- 历史单次诊断只证明首个冲突；最终通过结论来自本轮完整40项页面验收，不来自旧诊断或部分结果。
 - 旧schema/旧包兼容、MySQL多DDL非整体事务及nullable指纹语义必须由批准后的方案和真实本地IT覆盖。
 - 临时包和安全结果可能失效或被清理；先验证存在性/固定hash。材料缺失应按已提交源码与合同重建新产物，不绕过hash、不要求重复旧诊断。
 - 真实权限、频率、网络及上游数据仍可能变化，按原参数失败停止并保留证据；不把有限积分阶段当作完整49验收。
