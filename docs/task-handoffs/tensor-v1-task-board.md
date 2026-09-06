@@ -93,7 +93,7 @@
 | 72 | M14-T02 | 下载失败、空结果、幂等和回滚矩阵 | `COMPLETED` | M14-T01 | docs/task-designs/M14-T02-design.md | docs/task-handoffs/M14-T02-handoff.md |
 | 73 | M14-T03 | 查询、分页、宽表、竞态和无障碍 E2E | `COMPLETED` | M14-T01 | docs/task-designs/M14-T03-design.md | docs/task-handoffs/M14-T03-handoff.md |
 | 74 | M14-T04 | 49 数据集自动契约与页面回归驱动 | `COMPLETED` | M03-T09, M04-T06, M14-T01 | docs/task-designs/M14-T04-design.md | docs/task-handoffs/M14-T04-handoff.md |
-| 75 | M14-T05 | 真实 Tushare 49 接口受控页面验收 | `READY` | M14-T04 | docs/task-designs/M14-T05-design.md | docs/task-handoffs/M14-T05-handoff.md |
+| 75 | M14-T05 | 真实 Tushare 49 接口受控页面验收 | `IN_PROGRESS` | M14-T04 | docs/task-designs/M14-T05-design.md | docs/task-handoffs/M14-T05-handoff.md |
 | 76 | M14-T06 | `daily` 与 `balancesheet` 性能验证 | `NOT_STARTED` | M14-T03, M14-T05 | None | None |
 | 77 | M14-T07 | Token、SQL、依赖、网络和运行安全验证 | `NOT_STARTED` | M14-T02, M14-T03, M14-T04, M14-T05 | None | None |
 | 78 | M14-T08 | 全新环境 AC-001～018 与发布证据包 | `NOT_STARTED` | M14-T01, M14-T02, M14-T03, M14-T04, M14-T05, M14-T06, M14-T07 | None | None |
@@ -1081,6 +1081,8 @@
 - **State evidence (2000-point actual startup failure):** 用户报告已运行后，核对j9045eey安全标记和整篇证据SHA，真实报告已先单独提交da56d38。npx1/最终1、约8秒，首个固定错误application log safety；beforeAll失败形成1failed/39didnotrun，实际attempted0/completed0/unexecuted40，真实/fixture的POST和records观察数均0。Token存在性通过，JAR已经启动并独立测得6成功迁移/50业务表全0，末态仍全部0；没有实际接口权限/积分失败结果。spec日志门禁false，但CLI后终检扫描/删除通过、自动产物删除2，全部自有worker/JVM退出、容器/匿名卷/DB私密材料清理，控制器8080空闲、保留文件白名单/模式和文档SHA一致性检查通过。触发字节被保护逻辑丢弃且类别统一折叠，不能将某个凭证或第三方日志猜测写成根因。完整重读设计后，先写本次pause交接再执行IN_PROGRESS→BLOCKED，保留真实失败、不自动重跑；先安全定位并处理启动日志问题，再以新空环境恢复40/48/80及fixture。当前2000档和原49验收均未完成，不准备后继。
 
 - **State evidence (startup repair unblock):** 用户要求由执行者处理后，按修订设计用原JAR/合成Token环境/health-only/新空库诊断，RED复现Flyway/JDBC日志命中秘密检查；修复b8cc305仅在JVM固定LOGGING_LEVEL_ORG_FLYWAYDB=WARN，保留WARN/ERROR、业务日志、原argv与全部扫描。相同探针在另一个新空schema上GREEN：Node0/health就绪/无扫描触发、6成功迁移/50表全空，正常停机、终检及精确DB/卷清理通过；环境RED/GREEN、原纯反例/语法/diff通过，独立审查Approved/Ready且无发现。原真实失败da56d38保持原文，不代表40项已测。当前新正式kybrot1f专用空库及Java21/8080/文件哈希/权限已核对，旧环境已使用不可复用。先更新pause入口和修订设计，再以明确修复/检查/审查证据执行BLOCKED→READY；真实执行仍待后续单独启动转换和已有Token终端命令，不自动准备后继。
+
+- **State evidence (repaired phase restart):** 启动修复、原JAR本地RED/GREEN及独立审查已记录，证据10b44fc与解阻b988f03已分别提交。按用户持续执行当前任务并要求由执行者处理的授权，消费更新后的完整设计与pause入口，单独执行READY→IN_PROGRESS；新kybrot1f正式空环境准备完成，直接启动器代码不变，封存当前spec/证据/JAR/manifest哈希后交用户已有Token终端一次执行。此状态表示恢复实际验收工作，不表示40接口或fixture已通过。
 
 ### `M14-T06`
 
