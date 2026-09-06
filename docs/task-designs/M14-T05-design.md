@@ -2,6 +2,12 @@
 
 任务编号：`M14-T05`。权威来源：[任务看板](../task-handoffs/tensor-v1-task-board.md) Order 75 与 [任务卡](../superpowers/plans/tensor-modules/M14-integration-release.md#task-m14-t05-真实-tushare-49-接口页面验收40h)。唯一直接依赖 M14-T04，完成记录 `80a9491`。2026-09-06用户明确要求“先把这两个排除，验证可以满足2000档积分的即可”，本修订是该请求的执行合同；保留原49接口全量目标的未覆盖事实。
 
+## 剩余工作移交（2026-09-06）
+
+用户明确要求新增任务承接剩余工作。现由 **M14-T09（Order76）** 负责dividend业务裁决与修复、本地验证/新包接入、完整2000档复验及新证据。入口为 [M14-T09设计](M14-T09-design.md) 和 [transfer交接](../task-handoffs/M14-T09-handoff.md)。本文件以下内容保留为此前执行的技术合同与历史版本记录，不再据其“下一轮”文字重复启动旧控制目录。
+
+M14-T05保留BLOCKED、已测28通过/1失败/11未运行和原49未完成事实；新增任务不等于批准四字段指纹键，也不把部分验收改写为通过。M14-T09继承安全/参数/固定范围合同，并在明确裁决及新包验证后按其设计接入。此次仅移交，不启动修复或真实调用。
+
 ## Goal
 
 2026-09-06 当前修复输入更新：6gn542ah 已真实完成 stock_company 三样例/6294 行，ISSUE-005 关闭；全轮 9 通过、stk_holdernumber 失败、30 未运行，证据 `241813c` 保留。[ISSUE-006](../issues/problems/ISSUE-006-holdernumber-announcement-date.md) 独立限定兼容 `stk_holdernumber.ann_date` 的严格合法本地日期时间，以 DATE 合同映射其日历日期，不改通用转换器/元数据/SQL/样例。下一轮唯一冻结 JAR 为 `/private/tmp/tensor-issue-006-build.2rctzavi/data-plane/tensor-app/target/acceptance/tensor-app-1.0-SNAPSHOT-acceptance.jar`，SHA `f2fc35c933e69da5e85690fbabb13d691178538cd6ffb3b94284dfc95b10db89`，替代下文 ISSUE-005 阶段包引用；其余原输入规则继续适用。原包与 ISSUE-005 包均保留，不通过环境允许任意包。

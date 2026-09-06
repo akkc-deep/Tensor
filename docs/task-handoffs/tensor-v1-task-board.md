@@ -4,8 +4,8 @@
 
 - **Project ID:** `tensor-v1`.
 - **Goal:** 按契约优先的模块化单体路线图交付 Tensor v1：完成 49 个 Tushare Pro 数据集的下载、适配、单事务 Upsert、只读查询、Vue 控制面、单 JAR 打包及发布验证。
-- **Scope:** 包含 M00–M14 的 77 个原预定义任务及 2026-09-05 批准增补的 M13-T05 验收打包任务（共 78 项）；排除路线图明确范围外的热加载、外部插件 JAR、任务队列、登录权限、导出、插件市场，以及后续发现后另行规划的缺陷修复任务。
-- **Completion condition:** 78 个已登记任务全部为 `COMPLETED`，其任务验收和模块门禁全部通过，并满足路线图中 49/49 数据集契约、AC-001～018、性能、安全、单 JAR 和全新环境页面闭环条件。
+- **Scope:** 包含 M00–M14 的 77 个原预定义任务及 2026-09-05 批准增补的 M13-T05 验收打包任务及 2026-09-06 用户要求增补的 M14-T09 剩余工作承接任务（共 79 项）；排除路线图明确范围外的热加载、外部插件 JAR、任务队列、登录权限、导出、插件市场，以及除 M14-T09 明确承接的 ISSUE-007 外、后续发现后另行规划的缺陷修复任务。
+- **Completion condition:** 79 个已登记任务全部为 `COMPLETED`，其任务验收和模块门禁全部通过，并满足路线图中 49/49 数据集契约、AC-001～018、性能、安全、单 JAR 和全新环境页面闭环条件。
 
 ## Workflow
 
@@ -13,6 +13,7 @@
 - **Execution:** Serial execution is owned by the user; the board does not enforce cross-task exclusion.
 - **Next-task selection:** Choose the non-completed task with the smallest greater `Order` after the current task completes.
 - **Successor preparation:** Complete and link the selected successor's design document before writing its `next-task` handoff or making it `READY`; a successor-design failure never changes the completed predecessor.
+- **Explicit unfinished-work transfer (2026-09-06):** 用户要求新增任务承接剩余工作。当前续接入口为 Order76/M14-T09，先处理其未决设计，尚未启动实施；M14-T05保留BLOCKED及原49目标未完成事实。此次使用明确标记为`transfer`的交接，记录未完成工作的责任转移，不是要求前驱COMPLETED的普通`next-task`交接，不触发READY/启动/完成或自动准备M14-T06。
 - **Allowed transitions:** `NOT_STARTED -> READY`, `READY -> IN_PROGRESS`, `IN_PROGRESS -> PAUSED`, `PAUSED -> IN_PROGRESS`, `READY -> BLOCKED`, `IN_PROGRESS -> BLOCKED`, `BLOCKED -> READY`, `IN_PROGRESS -> COMPLETED`.
 
 ## Tasks
@@ -94,9 +95,10 @@
 | 73 | M14-T03 | 查询、分页、宽表、竞态和无障碍 E2E | `COMPLETED` | M14-T01 | docs/task-designs/M14-T03-design.md | docs/task-handoffs/M14-T03-handoff.md |
 | 74 | M14-T04 | 49 数据集自动契约与页面回归驱动 | `COMPLETED` | M03-T09, M04-T06, M14-T01 | docs/task-designs/M14-T04-design.md | docs/task-handoffs/M14-T04-handoff.md |
 | 75 | M14-T05 | 真实 Tushare 49 接口受控页面验收 | `BLOCKED` | M14-T04 | docs/task-designs/M14-T05-design.md | docs/task-handoffs/M14-T05-handoff.md |
-| 76 | M14-T06 | `daily` 与 `balancesheet` 性能验证 | `NOT_STARTED` | M14-T03, M14-T05 | None | None |
-| 77 | M14-T07 | Token、SQL、依赖、网络和运行安全验证 | `NOT_STARTED` | M14-T02, M14-T03, M14-T04, M14-T05 | None | None |
-| 78 | M14-T08 | 全新环境 AC-001～018 与发布证据包 | `NOT_STARTED` | M14-T01, M14-T02, M14-T03, M14-T04, M14-T05, M14-T06, M14-T07 | None | None |
+| 76 | M14-T09 | 分红修复与2000档剩余验收 | `NOT_STARTED` | M14-T04, M14-T05 | docs/task-designs/M14-T09-design.md | docs/task-handoffs/M14-T09-handoff.md |
+| 77 | M14-T06 | `daily` 与 `balancesheet` 性能验证 | `NOT_STARTED` | M14-T03, M14-T05 | None | None |
+| 78 | M14-T07 | Token、SQL、依赖、网络和运行安全验证 | `NOT_STARTED` | M14-T02, M14-T03, M14-T04, M14-T05 | None | None |
+| 79 | M14-T08 | 全新环境 AC-001～018 与发布证据包 | `NOT_STARTED` | M14-T01, M14-T02, M14-T03, M14-T04, M14-T05, M14-T06, M14-T07 | None | None |
 
 ## Task Details
 
@@ -1057,7 +1059,7 @@
 - **Acceptance:** “真实 Tushare 49 接口受控页面验收”已按该任务卡指定的位置和行为形成；任务卡列出的全部测试、验证命令和检查得到其注明的预期结果；没有混入排除范围。
 - **Dependencies:** M14-T04.
 - **Sources:** `docs/superpowers/plans/tensor-modules/M14-integration-release.md` 的 `Task M14-T05` 任务卡。
-- **First action:** 消费ISSUE-007已实际完成的安全诊断和四字段指纹键修复设计；确认所需业务键/迁移与dividend验收预期修订后，从合成RED开始实施。不重复已用诊断或全矩阵，不把诊断当页面通过。
+- **First action:** 当前2000档剩余工作已按用户要求交由Order76/M14-T09承接，后续从该任务设计与transfer交接进入；本任务保留历史实际28通过/1失败/11未运行及原49目标未完成事实，不重复旧诊断或原样复跑。
 - **State evidence (readiness):** 2026-09-06：M14-T04完成记录 `80a9491` 已先独立提交，再按预定义Order选中75/M14-T05，观测NOT_STARTED、Design/Handoff为None。使用任务契约设计技能完成145行 `docs/task-designs/M14-T05-design.md`，就绪审查3Important/1Minor经定点修正全部Addressed、无新Critical/Important/Minor，Ready for implementation: Yes；修正精确DownloadResponse八键、600/330秒分阶段钩子预算、CLI完全退出后的独占产物扫描/删除与页面静态资源允许列表。`9b3d263` 提交设计并仅回填Design document，链接后完整读取。设计冻结两实施文件、原验收JAR、manifest49接口/58样例、37ok/12empty接口级判定、98次真实dataset查询、独立fixture2POST/3查询、真实Token环境/账户权限频率额度前置确认、单worker/零重试、新空schema、按不同业务键的计数和页面记录/来源/时间核对、安全与正常清理。结构/引用/manifest数量哈希、两实施文件缺席、依赖决定及约束一致性均已核对；唯一任务依赖仍M14-T04，M14-T02公开fixture合同仅作为任务卡指定补充来源。先按完整模板写 `docs/task-handoffs/M14-T05-handoff.md`，列清直接输入的产物/决定/理由/约束/用途/既有可用性证据，链接后执行真实 `NOT_STARTED -> READY`。本轮只设计/交接，live spec及实际证据尚未创建，本地安全探针、账户权限/额度/Token和真实上游矩阵未验证；首动作直接实施完成设计，不补设计、不将预期写成实跑通过。用户并行ISSUE-004及target资源未纳入提交。
 
 - **State evidence (start):** 2026-09-06：用户明确要求按权威任务看板执行当前任务、先读取设计和交接。已完整读取 M14-T05 所链接设计与交接，核对任务卡、全局约束和 READY 来源状态，两实施目标不存在且无重叠修改；以本次请求执行 `READY -> IN_PROGRESS`，保留入口交接。按仓库授权直接在 main 实施，使用既定子代理实施与独立审查流程。本地仅检查环境变量存在性，Token、调用间隔和三个DB变量均未配置；已请求运行者提供账户权限/频率/额度的非秘密确认，先完成设计允许的静态实施与本地探针，真实矩阵不得在前置条件缺失时启动。用户已有ISSUE-004暂存和target产物保持原状。
@@ -1103,6 +1105,20 @@
 - **State evidence (dividend diagnostic ready, still BLOCKED):** ISSUE-007单次诊断已完成，Java6合成投影及Python11保护测试通过，独立安全复审无Critical/Important，唯一Minor清理预算已修并定点关闭。58文件/54嵌套JAR来源/hash/权限/Java21和原manifest固定参数preflight通过；最终启动器SHA a58ac7549486ba0cb1e0c04690279835dc023cd3493b9e655d80dc0bb114cb90。控制目录shhiyk_p尚未使用，无真实请求，命令及安全结果入口已写ISSUE-007与pause交接；只由已有Token终端发dividend原参数一次，150秒执行预算+共用10秒清理，不重跑40项。该准备不解除真实失败，保持BLOCKED，实际根因与修复尚未建立。
 
 - **State evidence (dividend root cause, still BLOCKED):** 用户已运行shhiyk_p单次原参数诊断，1.56秒，原f2fc包/manifest身份通过，clientExecuteCalls1/sourceRowCount38，ADAPTER_TYPE_INVALID/conflicting_key，首冲突rowIndex21，差异字段div_proc/cash_div/cash_div_tax；适配计数未建立，扫描与Java退出true，无数据库/重试/真实行落盘。安全结果SHA1b1ee18c0fb667517312957eed85620e9fecc2d1c4e91597413932e0586e2d46及私有保留白名单已核对；新诊断位置/计数不补写旧页面失败。官方公开说明确认div_proc为实施进度；旧三字段键未覆盖进度，历史EMPTY预期也与当前非空不同。已形成docs/issues/proposals/ISSUE-007-dividend-business-key.md：四字段FINGERPRINT、按元数据允许空指纹身份、新V7保留现有行、仅dividend当前ok覆盖及完整验证/接入边界。该记录身份和迁移设计待确认，生产/元数据/SQL/spec尚未实施；交接已刷新，保持BLOCKED，不准备后继，不要求用户重复诊断。
+
+- **State evidence (unfinished work transferred):** 2026-09-06用户明确要求“增加一个新的任务，把剩余的工作交接给下一个任务”。据此新增M14-T09并插入Order76，原M14-T06/T07/T08仅Order顺延，原任务ID/状态/依赖保持不变。M14-T09承接分红保存规则确认、ISSUE-007修复及本地验证/新包接入、完整40项复验和新证据；M14-T05不因移交改判COMPLETED，也不把此次任务登记当作批准四字段指纹键方案。当前续接入口改为M14-T09，原49未覆盖事实保留。
+
+### `M14-T09`
+
+- **Goal:** 承接M14-T05剩余工作，完成分红冲突处理及2000档40接口页面验收闭环。
+- **Scope:** 确认已记录的dividend保存规则/修复方案；按确认后的边界修复、验证迁移/适配/幂等/新包，并复跑40接口/48原样例/80查询及fixture2POST/3查询，归档安全结果。原9项排除、其他性能/安全/发布任务不在本任务范围。
+- **Acceptance:** 已确认规则得到实现与回归/迁移/打包/复审验证；新包完整40项和fixture实际通过，计数/页面/独立DB及扫描清理全部符合修订合同。仅设计或诊断成功不算完成，原49未覆盖事实保留，不自动准备M14-T06。
+- **Dependencies:** M14-T04, M14-T05。M14-T05仅提供已完成且可用的实现/安全证据/诊断输入，不以其原49目标COMPLETED为本任务登记或后续执行的前提；本任务也不反向成为M14-T05的依赖，避免环。
+- **Sources:** docs/issues/problems/ISSUE-007-dividend-adapter-diagnosis.md；docs/issues/proposals/ISSUE-007-dividend-business-key.md；docs/task-designs/M14-T05-design.md；docs/verification/M14-T05-tushare-live.md；docs/verification/M14-T04-49-contracts.md。
+- **First action:** 读取本任务设计与transfer交接，核对“保留各实施阶段记录”及对应业务键/迁移/验收修订是否已有明确确认；没有确认时先完成这一既存业务裁决，不重复诊断、不实施未确认业务键，不重新设置Token。
+- **State evidence:** 2026-09-06依用户明确的新增与移交请求初始登记为NOT_STARTED，没有执行状态转换或启动。输入e9fedfa已记录28通过/1失败/11未运行，以及1.56秒单次诊断的38源行/进度与金额冲突；四字段指纹方案仍待确认。设计与transfer文件已按序写入并精确回填链接；D-01随剩余工作明确移交，实施就绪门禁尚未满足，状态保持NOT_STARTED，不能标READY或声称前驱已完成。
+
+- **Transfer verification:** 本轮9份文档经机械核对与独立只读复审通过，无Critical/Important/Minor。任务数79、Order连续唯一、既有ID/状态/依赖不变、依赖无环、新链接有效；原真实证据SHA保持d4e7bf67b6a2b144662a987dec9aa812a8e39543c5134ed7cab8a12a4dbe34b5。只完成任务登记与移交，不是D-01批准、实施就绪或真实复验。
 
 ### `M14-T06`
 

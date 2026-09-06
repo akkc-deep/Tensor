@@ -13,6 +13,8 @@ pause
 
 ## Current State
 
+2026-09-06用户已要求将剩余工作移交新任务。当前续接入口为 **Order76/M14-T09**，见 `docs/task-designs/M14-T09-design.md` 与 `docs/task-handoffs/M14-T09-handoff.md`。本任务保留BLOCKED和以下历史结果，不因移交改判完成；后续不在本任务重复发起诊断或完整复跑。尚未确认的分红规则一并转交。
+
 用户已执行1gpnb4ru一次性启动器，139秒结束，实际28 passed / 1 failed / 11 did not run；当前阻塞是dividend的ADAPTER_TYPE_INVALID。stock_company和stk_holdernumber真实通过，ISSUE-005与ISSUE-006均已关闭。40项验收及原49目标尚未完成，不准备后继。
 
 本轮证据已先独立提交 `e3013b1`。整篇真实Token扫描SHA `d4e7bf67b6a2b144662a987dec9aa812a8e39543c5134ed7cab8a12a4dbe34b5`，控制器复核一致、旧前缀未变。1gpnb4ru已使用并完成清理，不能再次运行。
@@ -43,27 +45,25 @@ pause
 
 ## Remaining Work
 
-1. 确认ISSUE-007已写具体修复设计：按ts_code/end_date/ann_date/div_proc区分身份，保留nullable进度与同阶段跨次更新，以新增V7保留现有行；同步仅dividend的当前非空验收预期。旧诊断已消费，无需再次运行。
-2. 确认后按设计实施最小修复、合成RED/GREEN、迁移/回归/独立复审和新冻结包接入。原manifest与历史真实失败保持不变。
-3. 解除条件成立后才BLOCKED→READY并单独恢复M14-T05。最终全40与全部安全/清理门禁通过仅报告2000档阶段完成并PAUSED；若真实失败再次BLOCKED。原49未覆盖事实保留，不准备后继。
+1. 剩余三项已归属M14-T09：确认并修复dividend保存规则；本地适配/迁移/幂等/新包验证；完整40项复验与安全归档。具体边界与未决D-01见新任务设计和transfer交接。
+2. M14-T05仅保留原49目标及历史证据，等待新任务结果回写；原9项未覆盖不因移交消失。不得复制执行或把新任务登记当作原任务完成。
 
 ## Resume Task
 
-解除dividend真实适配失败，再恢复M14-T05的2000档页面验收。
+原M14-T05的49接口目标保留；当前2000档剩余执行交由M14-T09。此次不恢复M14-T05、不自动准备性能/安全/发布任务。
 
 ## Start Here
 
-1. 权威看板Order75及完整 `docs/task-designs/M14-T05-design.md`。
-2. 本交接与已扫描实际证据 `docs/verification/M14-T05-tushare-live.md`（提交e3013b1）。
-3. `docs/issues/problems/ISSUE-007-dividend-adapter-diagnosis.md` 与修复设计 `docs/issues/proposals/ISSUE-007-dividend-business-key.md`。
-4. 本轮安全标记 `/private/tmp/tensor-m14-t05-control.1gpnb4ru/run-finished.json`，终检产物根 `/private/tmp/tensor-m14-t05.91e69mlz`。不输出日志全文或真实行。
+1. 权威看板Order76/M14-T09及完整 `docs/task-designs/M14-T09-design.md`。
+2. `docs/task-handoffs/M14-T09-handoff.md`，其中已有直接输入、精确hash、已用控制目录和未决设计说明。
+3. 本交接与旧 `docs/task-designs/M14-T05-design.md`、实际证据 `docs/verification/M14-T05-tushare-live.md` 仅作历史和技术输入。
 
-首动作：消费已定位的ISSUE-007根因与待确认设计；尚未确认时交付具体方案，用户确认后直接实施设计中的合成RED，不再要求Token设置或原诊断重跑。
+首动作：从M14-T09的D-01确认入口接续，不再重复本任务旧诊断/启动命令，不重新设置Token。
 
 ## Blocker
 
 - **Reason:** 1gpnb4ru实测dividend在adapter阶段返回ADAPTER_TYPE_INVALID，28通过/1失败/11未运行；历史页面失败字段/值未保存；独立诊断已定位进度冲突，所需业务键/迁移与验收设计尚未确认或实施。
-- **Resolution condition:** ISSUE-007根因已确认，需落实四字段指纹键设计并建立修复的回归/独立复审、新冻结包合同/启动验证及验收设计接入；仅诊断成功或本地适配通过不足以宣称真实验收通过。
+- **Resolution condition:** 由M14-T09完成既存业务裁决、所确认修复的回归/迁移/复审、新包及真实40项验收，并提供明确结果回写；本任务不预设四字段方案已获确认。原49中的9项未覆盖仍须保留，不直接将BLOCKED改为PAUSED或COMPLETED。
 
 ## Risks
 

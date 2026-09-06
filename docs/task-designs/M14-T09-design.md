@@ -1,0 +1,106 @@
+# M14-T09 分红修复与2000档剩余验收——任务设计
+
+权威看板：`docs/task-handoffs/tensor-v1-task-board.md`，Order76。用户2026-09-06明确要求新增一个任务并把剩余工作移交。直接输入为M14-T04的既有契约结果和M14-T05已经形成的实现、真实证据及诊断；不要求未完成的原49目标先完成。
+
+当前为**承接设计，尚未实施就绪**：D-01“是否保留各实施阶段记录及采用所提业务键/迁移方案”仍待确认。新增任务不等于批准该方案。本任务登记NOT_STARTED，待裁决写入本设计并消除实质未决项后才可NOT_STARTED→READY；开始实施是后续单独READY→IN_PROGRESS，不由此次移交自动启动。
+
+## Goal
+
+接手三项剩余工作：确定并修复dividend的记录区分规则；完成适配、数据库迁移、幂等、打包和启动的本地验证；以新冻结包完成2000档40接口的完整页面复验及安全证据归档。此前的28项通过是旧包/旧轮结果，不能与新轮拼接成40项通过。
+
+本任务只承接当前2000档阶段，原49接口中9项排除的未覆盖事实仍保留。M14-T05的历史结果不改写、不因移交标为COMPLETED；未来的性能、安全及发布任务也不在本任务范围。
+
+## Scope
+
+- 先消费既有诊断和待确认的 [ISSUE-007修复设计](../issues/proposals/ISSUE-007-dividend-business-key.md)，完成D-01业务裁决，再按裁决后的明确文件边界实施。
+- 已提出的方案是保留不同实施进度，使用ts_code/end_date/ann_date/div_proc的四字段指纹身份，并保留同阶段跨批更新。它仍是候选设计，不能将“增加新任务”当作采用方案的证据。
+- 修复阶段与页面验收阶段分别实施、验证、提交。修复仅服务本次已确认问题及必要兼容接入；不在验收失败后静默删接口、换参数或扩大生产修改范围。
+- 完整复验仍为40接口/48原参数样例/80个页面records查询，fixture另计2POST/3查询；所有旧排除项、Token边界、失败停止和清理门禁继承M14-T05设计。
+- 不修改原manifest/历史模板/已扫描M14-T05证据，不复用已使用控制目录，不读取用户其他进程环境或终端秘密，不保存真实响应、业务行或截图。
+
+## Approach
+
+### 输入与当前事实
+
+1. M14-T05正式轮1gpnb4ru：139秒，28 passed / 1 failed / 11 did not run，真实POST37/records57，fixture2/3通过，99请求各恰一个完成事件；安全扫描、独立DB核对及自有环境清理通过。完整证据提交e3013b1，SHA `d4e7bf67b6a2b144662a987dec9aa812a8e39543c5134ed7cab8a12a4dbe34b5`。
+2. stock_company6294行与stk_holdernumber150行已真实通过，ISSUE-005/006关闭，不重新定位这两个已修复问题。
+3. shhiyk_p仅dividend原参数诊断：1.56秒、客户端执行1次、sourceRowCount38；ADAPTER_TYPE_INVALID/conflicting_key，rowIndex21，差异字段div_proc/cash_div/cash_div_tax，适配计数未建立。扫描及Java退出通过，无DB、重试或真实行保存。该请求与先前页面失败分开记录。
+4. 尚未运行11项：disclosure_date、repurchase、stk_holdertrade、top10_holders、top10_floatholders、new_share、stk_managers、pledge_stat、pledge_detail、index_classify、index_member_all。最终复验包含它们、失败的dividend及此前28项，仍共40项。
+5. 当前基线验收包：`/private/tmp/tensor-issue-006-build.2rctzavi/data-plane/tensor-app/target/acceptance/tensor-app-1.0-SNAPSHOT-acceptance.jar`，SHA `f2fc35c933e69da5e85690fbabb13d691178538cd6ffb3b94284dfc95b10db89`。spec SHA `a81df4da7f92c6164062fa29a19902505dd5643c7c948a9aaa021f987220eee5`；manifest SHA `37a317f6a2bc3e5113be5f127976d16d8349414c6476c7f6a194b084a5b0f7c2`。
+
+### A. 完成既存设计裁决
+
+首动作是核对D-01是否已有用户确认。当前没有：用户只问过加入进度的原因，随后要求新增任务移交。先说明保留各阶段与仅保存最终方案的业务区别，取得对具体方案的确认并写入本设计；不让执行者自行猜测。
+
+若确认现有四字段指纹方案，完整采用ISSUE-007修复设计的元数据、可空指纹、V7回填、停写和原子主键切换、索引/权限、回退边界及验证要求。若用户选择仅最终方案，必须先明确选取/撤销/缺少最终阶段等规则并修订设计；现有候选方案不能直接执行。此分支只记录当前未决条件，不预先发明另一实现。
+
+### B. 确认后实施修复与本地验证
+
+遵循合成RED→最小修改→GREEN及独立复审。候选四字段方案的生产变更为dividend.yaml、GenericDatasetAdapter.java和新增V7迁移；详细路径、编码、精确数据量合同及关联测试/运行说明范围以ISSUE-007修复设计为准。任何已发布迁移和旧包均保留。
+
+若采用候选方案：生产V1～V5/V7共6次迁移，acceptance含V6共7次；49/50业务表，1001/1008物理列；851业务字段、46 COMPOSITE/3 FINGERPRINT、41二级索引。必须验证现存业务行及来源时间不变、Java与SQL指纹等价、不同进度并存、同阶段更新、完全重复去重及真正同身份冲突继续失败。旧包不兼容新schema，具体停写/迁移/恢复步骤不得省略。
+
+新包在独立源码快照构建并冻结实际SHA，复用原静态前端，完成生产/acceptance归档合同、独立复审与仅health合成Token检查。只使用自有合成库做旧库升级/新建验证，不自动迁移任何外部现有数据库。
+
+### C. 新任务接管既有页面验收
+
+完整读取并继承 [M14-T05设计](M14-T05-design.md) 的40接口集合、所有原参数、页面流程、计数/来源/时间核对、一次性启动、限速、日志扫描、CLI后终检及独立DB清理算法。既有 `control-plane/e2e/tushare-live.spec.js` 继续复用，不复制第二套验收。技术环境名和临时schema前缀M14_T05可保留，以减少无关改动。
+
+执行归属改为M14-T09：新控制器只检查M14-T09的当前IN_PROGRESS与批准后设计/包/manifest/spec固定hash，不能因M14-T05仍BLOCKED而等待旧任务启动；结果明确记录当前执行任务M14-T09和历史来源M14-T05。新真实证据写入 `docs/verification/M14-T09-tushare-live.md`，先以真实秘密集合扫描该精确新文件再提交，不追加或覆盖旧已扫描证据。
+
+如果候选方案获确认，精确限定dividend的当前预期为ok，历史manifestStatus=empty仍保留；当前分类29ok/11empty，与历史28ok/12empty分列记录。其他接口期望不变，38不是未来固定行数。新增包及迁移/最小权限由本任务明确接入，沿用2秒间隔、单worker、零重试。除此之外原技术验收合同不变。
+
+所有本地修复/检查/材料先完成，再由用户已有TENSOR_TUSHARE_TOKEN终端执行一次新命令。工具不继承其终端Token；不重复设置Token，不进入长等待确认循环，不复用1gpnb4ru或shhiyk_p。真实错误按实际完成/失败/未运行计数记录，失败停止并使本任务BLOCKED。
+
+### D. 收尾与原任务关系
+
+本任务只有全40和fixture、独立DB、请求事件、安全扫描/清理全部通过，且修复回归/迁移/包门禁齐备，才可IN_PROGRESS→COMPLETED。同步把本轮2000档结果及新证据链接回M14-T05交接，继续保留其原49目标未完成事实；原任务状态如需同步，仅按当时明确证据和看板允许转换处理，不直接BLOCKED→PAUSED/COMPLETED。
+
+不将新任务完成视作原49完成，不自动准备或启动M14-T06。9项排除需用户另行要求覆盖；该未覆盖范围不会因本次任务转移消失。
+
+## Files
+
+- 本任务控制文档：`docs/task-designs/M14-T09-design.md`、`docs/task-handoffs/M14-T09-handoff.md`、权威看板及M14模块任务卡。
+- 沿用生产/测试修改范围：`docs/issues/proposals/ISSUE-007-dividend-business-key.md` 的“精确实施范围”；仅在D-01确认后启用，不在移交时改生产。
+- 复用并修改 `control-plane/e2e/tushare-live.spec.js`：批准后的dividend预期、新包冻结hash及执行任务归属；保留既有生命周期和凭证保护。
+- 新建 `docs/verification/M14-T09-tushare-live.md`：本任务修复/验证索引和新真实轮安全证据，扫描通过后提交。
+- 更新ISSUE-007问题/方案记录和M14-T05交接中的归属与结果链接。原M14-T05证据只读；不提交临时脚本、真实数据、日志、数据库或五个已有target目录。
+
+## Tests
+
+任务移交不运行生产测试或真实接口。下列是D-01确认、设计达到实施就绪后必须执行的验证；具体命令和实际报告不能相互替代。
+
+在独立源码快照 `data-plane`、Java21下执行ISSUE-007方案“实施时的精确本地检查入口”的三条Maven命令：合成适配及元数据回归、显式-Dtest选择的迁移/schema/fixture/服务IT、acceptance verify打包合同。核对每个命名类实际执行且零失败/错误/跳过。真实Token不进入这些进程。
+
+包含本次修复且已提交、受保护输入干净的main Git检出根执行：
+
+```sh
+sh scripts/verify-49-contracts.sh
+node --check control-plane/e2e/tushare-live.spec.js
+```
+
+契约脚本自行从HEAD隔离构建；不能在没有.git的普通源码快照执行。它须输出与批准后的新schema一致的数量；旧历史报告不改写。Node语法exit0，新增预期/归属覆盖的同函数反例通过，原安全反例只在受影响时重跑。
+
+在control-plane验证发现：
+
+```sh
+npx playwright test e2e/tushare-live.spec.js --list
+```
+
+须恰40个Chromium用例。正式命令仍为 `npx playwright test e2e/tushare-live.spec.js --workers=1 --output <本轮独占目录>/playwright`，由新私有启动器安全捕获输出、执行CLI后终检及文档扫描，不能直接在未准备好的环境手动运行。完整成功为40 passed、无失败/skip/retry、48真实POST/80真实查询以及独立fixture2/3，所有计数和门禁均来自该新轮。
+
+## Acceptance
+
+- D-01明确确认并记录；采用的实现与所确认规则相符，未把候选方案默认为批准。
+- 适配/旧库迁移/幂等/schema/打包/独立复审与合成health验证均有真实通过证据，新包独立冻结且旧包保留。
+- 新轮完整40项、fixture、页面计数与可见行、独立DB、逐requestId完成事件及安全/清理全部通过；此前28项与本轮不拼接计数。
+- 新证据在真实Token所在进程完成精确扫描后提交；无真实行/完整响应/秘密/截图入库，所有自有运行资源已清理。
+- 已记录9项不覆盖及原49未完成，并完成当前任务交接/状态更新；不自动推进其他预定义任务。
+
+## Risks
+
+- **D-01未决：** 是否保留各实施阶段及采用四字段指纹/V7/对应验收修订。当前设计不是实施就绪状态，任务保持NOT_STARTED；此条件随未完成工作一起移交。
+- 实际诊断只定位首个进度冲突，不能据此证明全部38行或尚未执行11接口已通过。
+- 旧schema/旧包兼容、MySQL多DDL非整体事务及nullable指纹语义必须由批准后的方案和真实本地IT覆盖。
+- 临时包和安全结果可能失效或被清理；先验证存在性/固定hash。材料缺失应按已提交源码与合同重建新产物，不绕过hash、不要求重复旧诊断。
+- 真实权限、频率、网络及上游数据仍可能变化，按原参数失败停止并保留证据；不把有限积分阶段当作完整49验收。

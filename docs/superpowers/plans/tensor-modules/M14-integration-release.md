@@ -4,7 +4,7 @@
 
 **Goal:** 在所有模块独立通过后，以页面黑盒测试完成 fixture、真实 Tushare 49 接口、性能、安全、全新环境和发布准入验证。
 
-**Architecture:** 本模块只编写/执行 Playwright、shell 验证和证据文档，不直接修改 M00–M13 生产实现。发现缺陷时建立单语言缺陷修复任务；修复完成后重跑精确失败用例和整个任务矩阵。
+**Architecture:** 原预定义集成任务只编写/执行 Playwright、shell 验证和证据文档，不直接修改 M00–M13 生产实现。用户2026-09-06明确新增M14-T09承接剩余工作，允许其按确认后的ISSUE-007设计分阶段完成必要修复和验收接入；此例外不扩展其他集成任务。其他缺陷仍独立定位并按明确设计处理。
 
 **Tech Stack:** Playwright、shell、curl、jq、MySQL 8.4 client、Maven、npm、Actuator/Micrometer。
 
@@ -15,7 +15,7 @@
 - M00–M13 模块门禁全部通过后才可进入本模块。
 - 所有用户验收从已打包 JAR 的页面入口完成；除故障准备和验证证据外，不用直接 API/SQL 替代页面操作。
 - 集成任务不得顺手修改 Java、YAML、SQL 或 Vue 生产文件。
-- 发现缺陷时建立独立的单语言修复任务，并在其任务设计中明确根因、文件边界、失败测试和回归范围。
+- 发现缺陷时建立独立修复任务，并在其任务设计中明确根因、文件边界、失败测试和回归范围。M14-T09按用户此次要求合并承接ISSUE-007修复和剩余验收，修复与验收仍分阶段验证/提交；未决业务规则不因任务创建而获批准。
 - 真实 Token、数据库密码和完整上游响应不得写入测试截图、trace、日志或证据包。
 
 ## Project Inputs
@@ -93,6 +93,8 @@
 
 ### Task M14-T05: 真实 Tushare 49 接口页面验收（4.0h）
 
+**Transfer (2026-09-06):** 用户要求新增任务移交剩余工作；当前实际28通过/1失败/11未运行及诊断保留，后续执行入口为Order76/M14-T09。以下既有任务卡是历史技术输入，不代表原49已完成，不复用已用启动器。
+
 **Files:**
 - Create: `control-plane/e2e/tushare-live.spec.js`
 - Create: `docs/verification/M14-T05-tushare-live.md`
@@ -110,6 +112,22 @@
 - [ ] Run `npx playwright test e2e/tushare-live.spec.js --workers=1`; successful phase requires 40 completed cases/48 live POSTs/80 live queries, plus separate fixture checks, unchanged 6 migrations/50 business tables, selected40 row counts matching pages and excluded9 tables still empty.
 - [ ] Run the unchanged post-CLI scanner after all workers exit, preserve failure codes, scan evidence and clean exact owned resources. Commit only the spec/evidence implementation files; control documents are separate commits.
 - [ ] Report the phase's actual results and exclusions; full49 acceptance remains incomplete. On success pause M14-T05 with a valid handoff; on real failure record BLOCKED. Do not automatically prepare the successor.
+
+### Task M14-T09: 分红修复与2000档剩余验收（新增承接任务）
+
+**Authority:** 用户2026-09-06要求新增任务；权威看板Order76，当前NOT_STARTED。原M14-T06/T07/T08的ID和依赖不变，Order顺延。
+
+**Design:** `docs/task-designs/M14-T09-design.md`；**Handoff:** `docs/task-handoffs/M14-T09-handoff.md`（transfer，前驱未完成）。**Dependencies:** M14-T04、M14-T05；后者仅提供已完成的实现/证据输入，不要求其原49目标先完成。
+
+**Goal / scope:** 接手dividend保存规则确认及必要修复、本地适配/迁移/幂等/schema/打包/复审/health验证、新冻结包和完整40接口复验/新证据归档。仅四字段指纹候选方案获明确确认后才实施其生产文件边界；当前任务创建不表示批准该规则。
+
+**Files:** 以新任务设计及ISSUE-007设计中的精确范围为准；复用 `control-plane/e2e/tushare-live.spec.js`，新结果写 `docs/verification/M14-T09-tushare-live.md`；原M14-T05已扫描证据不改写。
+
+- [ ] 完成D-01，写入具体保存规则/业务键及迁移/验收预期裁决，设计就绪后再READY和单独启动。
+- [ ] 按确认后的设计完成合成RED/GREEN、迁移/幂等/schema/打包检查与独立复审，新包独立冻结并仅health验证。
+- [ ] 接管当前任务归属与新证据路径，保留原manifest/参数、40/48/80与fixture2/3、9项排除、单worker/零重试/安全扫描清理。
+- [ ] 本地准备完成后交已有Token终端一次新命令，完整复跑40项；此前28项与新轮不拼接计数。
+- [ ] 全部门禁与新轮通过才完成M14-T09并回写原任务阶段结果；失败则BLOCKED。保留原49未完成，不自动准备M14-T06。
 
 ### Task M14-T06: Daily 与 balancesheet 性能验证（4.0h）
 
