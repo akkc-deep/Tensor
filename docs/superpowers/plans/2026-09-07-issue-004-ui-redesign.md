@@ -158,7 +158,7 @@ expect(formatCell('12345678901234567890.123456789012345678', {
 
 **Interfaces:** 使用构建后的真实 Vue 页面；Playwright route stub 仅实现 `src/api` 现有 DTO 和路径。新配置不收集旧的 JVM / 真实 Tushare spec。
 
-- [ ] 建立独立配置，复用已有 Chromium 和本地 preview：
+- [x] 建立独立配置，复用已有 Chromium 和本地 preview：
 
 ```js
 import { defineConfig, devices } from '@playwright/test'
@@ -175,14 +175,14 @@ export default defineConfig({
 })
 ```
 
-- [ ] 在新 spec 中构造全部 49 接口身份及参数 / 筛选矩阵；来源见总体设计的 Tests，明确 manifest 本身不包含完整参数元数据。构造响应时依据 `src/api/downloads.js`、`datasets.js`、`errors.js` 的真实字段，设置匹配的 `X-Request-Id`；未声明的 API 请求直接使测试失败。
-- [ ] 覆盖三页往返、主题取色 / HEX / 存储 / 重置、延迟响应、单日期与原生起止参数的一次提交 / 原参数重试、查询 / 重置 / 翻页；独立上下文检查设置新开为零 API。加入 DECIMAL 高精度字符串、LONG 大整数、空值、长文本和 152+3 列响应。
-- [ ] 一批检查 1440、1024、768、390、360 宽度；断言 `document.documentElement.scrollWidth <= innerWidth`，表格可内部滚动且固定列正确。对默认、`#b52c63`、`#ffff00`、`#000000` 检查主操作、背景、按钮白字及弹层样式，切主题前后同状态的布局矩形相等。
-- [ ] 捕获三页桌面 / 窄屏截图，检查信息层次、真实计数、文字截断、错误、日期弹层和键盘焦点，并与已确认 HTML 对照。一次集中修正，最多再做一次针对性确认。
-- [ ] 在 `control-plane` 运行 `npm test`、`npm run build`、`npx playwright test --config=playwright.ui.config.js --project=chromium --workers=1 --retries=0`；记录退出码、用例数、截图位置和局限。新增截图只保存可重现的合成数据。
-- [ ] 将可分享截图保存至 `docs/verification/ISSUE-004-ui-redesign/`，与验收文档一起加入 Git；不把 node_modules 缓存或测试临时输出加入仓库。
-- [ ] 汇总 T01–T05 的复用检查，在验收文档列出共享组件 / 逻辑、实际调用位置和相关回归结果；检查同职责重复代码已替换、抽象接口简单，公共组件不是建好后无人使用。
-- [ ] 对照 ISSUE 关闭条件逐项记录证据；全部通过后按看板流程完成本任务，再更新 ISSUE 为已解决。未通过项不能以 120 项历史基线或 HTML 预览检查代替。
+- [x] 在新 spec 中构造全部 49 接口身份及参数 / 筛选矩阵；来源见总体设计的 Tests，明确 manifest 本身不包含完整参数元数据。构造响应时依据 `src/api/downloads.js`、`datasets.js`、`errors.js` 的真实字段，设置匹配的 `X-Request-Id`；未声明的 API 请求直接使测试失败。
+- [x] 覆盖三页往返、主题取色 / HEX / 存储 / 重置、延迟响应、单日期与原生起止参数的一次提交 / 原参数重试、查询 / 重置 / 翻页；独立上下文检查设置新开为零 API。加入 DECIMAL 高精度字符串、LONG 大整数、空值、长文本和 152+3 列响应。
+- [x] 一批检查 1440、1024、768、390、360 宽度；断言 `document.documentElement.scrollWidth <= innerWidth`，表格可内部滚动且固定列正确。对默认、`#b52c63`、`#ffff00`、`#000000` 检查主操作、背景、按钮白字及弹层样式，切主题前后同状态的布局矩形相等。
+- [x] 捕获三页桌面 / 窄屏截图，检查信息层次、真实计数、文字截断、错误、日期弹层和键盘焦点，并与已确认 HTML 对照。一次集中修正，最多再做一次针对性确认。
+- [x] 在 `control-plane` 运行 `npm test`、`npm run build`、`npx playwright test --config=playwright.ui.config.js --project=chromium --workers=1 --retries=0`；记录退出码、用例数、截图位置和局限。新增截图只保存可重现的合成数据。
+- [x] 将可分享截图保存至 `docs/verification/ISSUE-004-ui-redesign/`，与验收文档一起加入 Git；不把 node_modules 缓存或测试临时输出加入仓库。
+- [x] 汇总 T01–T05 的复用检查，在验收文档列出共享组件 / 逻辑、实际调用位置和相关回归结果；检查同职责重复代码已替换、抽象接口简单，公共组件不是建好后无人使用。
+- [x] 对照 ISSUE 关闭条件逐项记录证据；全部通过后按看板流程完成本任务，再更新 ISSUE 为已解决。未通过项不能以 120 项历史基线或 HTML 预览检查代替。
 
 **Acceptance:** 六项任务的结果级条件全部满足；新正式页面的单测、构建、API 请求断言、49 项 UI 元数据覆盖、跨页和响应式 / 视觉验收通过并可追踪；组件与逻辑的实际复用及调用处回归有记录。
 

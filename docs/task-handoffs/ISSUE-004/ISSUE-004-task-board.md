@@ -12,11 +12,11 @@
 
 ## Workflow
 
-- **Execution:** 串行执行由用户掌握；创建本看板不启动实施。首项按初始化规则为 READY，其余为 NOT_STARTED。
+- **Execution:** 按依赖和 Order 串行执行；用户已于2026-09-07要求执行 ISSUE-004。初始化时首项为 READY，其余为 NOT_STARTED；当前状态以 Tasks 表为准。
 - **Next-task selection:** 当前任务完成后，选择 Order 更大的未完成任务中 Order 最小的一项。
 - **Successor preparation:** 先完成并链接后继的专属设计，再创建 next-task 交接和准备 READY；后继设计失败不改变前项已完成事实。
 - **Allowed transitions:** `NOT_STARTED -> READY`、`READY -> IN_PROGRESS`、`IN_PROGRESS -> PAUSED`、`PAUSED -> IN_PROGRESS`、`READY -> BLOCKED`、`IN_PROGRESS -> BLOCKED`、`BLOCKED -> READY`、`IN_PROGRESS -> COMPLETED`。
-- **Design references:** 当前总体技术设计和六项实施步骤是共享来源；子任务尚未创建独立设计，所以 Design document 如实为 None。创建专属设计后必须回填对应行，不能将总设计冒充六份已完成的专属设计。
+- **Design references:** 总体技术设计和实施计划是共享来源；六项专属设计均已在各项启动前完成、读取并链接。T02–T06的交接在直接前项完成后按流程创建，详见各行与执行证据。
 - **Date decision:** 2026-09-07 用户明确沿用现有日期能力：单日期保持单日期，原生起止保持起止。移除前端区间执行策略及相关待确认项，T03 收敛为控件呈现与原参数契约保留；任务 ID、Order 和状态不变。
 - **Reuse rule:** 2026-09-07 用户补充：优先复用现有组件，多次出现且职责相同的 UI 必须抽取为可复用组件，共用逻辑集中实现，各调用处统一接入，抽象保持简单。每项实现任务检查重复代码并记录实际复用位置，T06 汇总验证；具体共享文件写入专属设计，不改变现有业务流程和日期契约。
 
@@ -29,7 +29,7 @@
 | 3 | ISSUE-004-T03 | 日期控件与原参数契约 | COMPLETED | ISSUE-004-T02 | docs/task-designs/ISSUE-004-T03-design.md | docs/task-handoffs/ISSUE-004/ISSUE-004-T03-handoff.md |
 | 4 | ISSUE-004-T04 | 下载工作台布局与反馈 | COMPLETED | ISSUE-004-T02, ISSUE-004-T03 | docs/task-designs/ISSUE-004-T04-design.md | docs/task-handoffs/ISSUE-004/ISSUE-004-T04-handoff.md |
 | 5 | ISSUE-004-T05 | 查看工作台与精确表格展示 | COMPLETED | ISSUE-004-T02, ISSUE-004-T04 | docs/task-designs/ISSUE-004-T05-design.md | docs/task-handoffs/ISSUE-004/ISSUE-004-T05-handoff.md |
-| 6 | ISSUE-004-T06 | 正式前端回归与视觉验收 | IN_PROGRESS | ISSUE-004-T04, ISSUE-004-T05 | docs/task-designs/ISSUE-004-T06-design.md | docs/task-handoffs/ISSUE-004/ISSUE-004-T06-handoff.md |
+| 6 | ISSUE-004-T06 | 正式前端回归与视觉验收 | COMPLETED | ISSUE-004-T04, ISSUE-004-T05 | docs/task-designs/ISSUE-004-T06-design.md | docs/task-handoffs/ISSUE-004/ISSUE-004-T06-handoff.md |
 
 ## Task Details
 
@@ -123,6 +123,8 @@
 - **Execution evidence:** 2026-09-07 NOT_STARTED -> READY；前项已完成，后继专属设计已完整读取并链接，直接依赖已验证，next-task 交接已写入。
 
 - **Execution evidence:** 2026-09-07 READY -> IN_PROGRESS；用户已明确要求执行 ISSUE-004 全部任务；已完整读取本任务设计和链接交接，按既定顺序启动。
+
+- **Execution evidence:** 2026-09-07 IN_PROGRESS -> COMPLETED；daa7b64、83530b0；独立UI入口仅发现60项，49接口/851业务字段/155列精确表格、原参数一次请求、缓存/在途响应/重试、五视口三页四主题、存储降级零API、真实弹层与纯键盘链全部通过。最终24文件/170单测、构建、60/60浏览器（2.0分钟）、diff检查退出0。修正表格键盘滚动、长文本tooltip和移动三列计数；独立视觉复审ship。代码审查五项组合断言缺口补齐后独立规格/质量复审通过。复用、命令、49项映射、8张截图与范围局限记录于docs/verification/ISSUE-004-ui-redesign.md。无后继任务，不创建新交接。
 
 ## Risks
 
