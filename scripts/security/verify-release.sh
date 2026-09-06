@@ -134,6 +134,23 @@ def scan_file(path, secret_patterns):
         raise GateError('scan-file-unreadable') from None
     return 0
 
+def scan_artifact_file(path, owned, secret_patterns):
+    if not path.is_symlink():
+        scan_file(path,secret_patterns)
+        return path
+    modules = owned/'snapshot/control-plane/node_modules'
+    try:
+        require(path.parent == modules/'.bin' and path.lstat().st_uid == os.getuid(),'artifact-link-unexpected')
+        link = os.readlink(path)
+        scan_bytes(str(path.relative_to(owned)).encode() + b'\n' + os.fsencode(link),secret_patterns)
+        require(not os.path.isabs(link),'artifact-link-escape')
+        target = path.resolve(strict=True)
+        require(target.is_relative_to(modules.resolve(strict=True)) and target.stat().st_uid == os.getuid(),'artifact-link-escape')
+        scan_file(target,secret_patterns)
+        return target
+    except (OSError,RuntimeError):
+        raise GateError('artifact-link-invalid') from None
+
 def scan_zip(data, secret_patterns, visit=None, depth=0):
     require(depth < 12, 'zip-recursion-limit')
     count = 0
@@ -189,6 +206,19 @@ def actuator_verdict(status, body, health):
             raise GateError('health-json-invalid') from None
     else:
         require(status == 404 and not re.search(br'<(?:!doctype|html|script|body)\b', body, re.I), 'actuator-exposed')
+
+def health_structure(body):
+    body = body if isinstance(body,dict) else {}
+    return {'componentsPresent':'components' in body,'detailsPresent':'details' in body,'groupsPresent':'groups' in body,'extraFieldCount':len(set(body)-{'status'}),'statusUp':body.get('status') == 'UP'}
+
+def scanner_diagnostics(output, exit_code, report_present):
+    categories = []
+    for label,pattern in [('nvd-invalid-api-key',br'Invalid API Key'),('nvd-http-failure',br'(?:NVD|nvd\.nist)[^\n]*(?:HTTP[^\n]*[45][0-9]{2})'),('cisa-http-403',br'cisa[^\n]*\b403\b'),('vulnerability-data-missing',br'NoDataException')]:
+        if re.search(pattern,output,re.I):
+            categories.append(label)
+    if not report_present:
+        categories.append('report-missing')
+    return {'scannerExitCode':exit_code,'reportPresent':report_present,'failureCategories':categories}
 
 def completion_verdict(line):
     marker = 'tensor.operation.completed'
@@ -638,14 +668,20 @@ class Runtime:
         output.mkdir(mode=0o700); cache.mkdir(mode=0o700)
         args = [self.mvn,'-B','-ntp','-f','data-plane/pom.xml','-Dmaven.repo.local=' + str(self.maven_repo),'org.owasp:dependency-check-maven:13.0.0:aggregate','-DfailBuildOnCVSS=7','-DfailOnError=true','-DautoUpdate=true','-DskipTestScope=false','-DskipProvidedScope=false','-DskipRuntimeScope=false','-Dformat=JSON','-Dodc.outputDirectory=' + str(output),'-DdataDirectory=' + str(cache),'-DnvdApiKeyEnvironmentVariable=M14_SECURITY_NVD_API_KEY','-DscanDirectory=' + str(self.packaged_libraries)]
         extra = {'M14_SECURITY_NVD_API_KEY':self.inputs['M14_SECURITY_NVD_API_KEY']} if self.inputs['M14_SECURITY_NVD_API_KEY'] else {}
-        code, _ = self.run('backend-dependency-audit', args, cwd=self.snapshot, extra=extra, timeout=7200, gate='backend_audit')
+        code, scanned_output = self.run('backend-dependency-audit', args, cwd=self.snapshot, extra=extra, timeout=7200, gate='backend_audit')
         report_path = output/'dependency-check-report.json'
+        diagnostics = scanner_diagnostics(scanned_output,code,report_path.exists())
+        if not report_path.exists():
+            raise GateError('dependency-scanner-failed' if code else 'dependency-report-missing',diagnostics)
         scan_file(report_path, self.secret_patterns)
         try:
             report = json.loads(report_path.read_bytes())
         except (OSError, ValueError):
-            raise GateError('dependency-report-invalid') from None
-        return dependency_verdict(report, code, self.inventory, self.modules)
+            raise GateError('dependency-report-invalid',diagnostics) from None
+        try:
+            return dependency_verdict(report, code, self.inventory, self.modules)
+        except GateError as error:
+            raise GateError(str(error),{**(error.details or {}),'scanner':diagnostics}) from None
 
     def frontend_audit(self):
         code, output = self.run('frontend-dependency-audit', [self.npm,'audit','--package-lock-only','--audit-level=high','--json'], cwd=self.snapshot/'control-plane', timeout=600, gate='frontend_audit')
@@ -875,6 +911,8 @@ class Runtime:
                 body = json.loads(data)
             except ValueError:
                 body = None
+            if identifier in ('S01.health','S01.liveness','S01.readiness'):
+                outcome['healthStructure'] = health_structure(body)
             if isinstance(body, dict):
                 if body.get('code') in ('PARAM_INVALID','SOURCE_AUTH_FAILED','INTERNAL_ERROR','DATASET_NOT_FOUND','PLUGIN_NOT_FOUND'):
                     outcome['code'] = body['code']
@@ -1075,7 +1113,7 @@ class Runtime:
         scan_file(self.jvm_log,self.secret_patterns)
         data = self.jvm_log.read_bytes()
         self.scan(data, 'application_log')
-        require(all(value.encode() not in data for value in FORBIDDEN[:8]), 'unsafe-log-detail')
+        require(all(value.encode() not in data for value in FORBIDDEN[:8] if value != 'jdbc:mysql:'), 'unsafe-log-detail')
         lines = data.decode(errors='strict').splitlines()
         disclosure = re.compile(r'''\b(?:SELECT\b[^\r\n]*\bFROM|INSERT\s+INTO|DELETE\s+FROM|UPDATE\b[^\r\n]*\bSET|(?:CREATE|ALTER|DROP)\s+TABLE)\b|\b(?:params|parameters|requestBody|sql|tsCode|exchange)["']?\s*[:=]''',re.I)
         require(not any(disclosure.search(line) for line in lines),'ordinary-log-query-disclosure')
@@ -1173,7 +1211,7 @@ class Runtime:
     def scan_artifacts(self):
         for path in self.known_artifacts:
             scan_file(path,self.secret_patterns)
-        count = 0
+        count, resolved_links = 0, 0
         def unreadable(error):
             raise GateError('artifact-directory-unreadable')
         for parent, directories, files in os.walk(self.directory,onerror=unreadable,followlinks=False):
@@ -1185,13 +1223,14 @@ class Runtime:
                 if path in self.private_inputs:
                     require(not path.exists(),'private-input-not-deleted')
                     continue
-                scan_file(path,self.secret_patterns)
-                if path.suffix.lower() in ('.jar','.zip'):
-                    scan_zip(path.read_bytes(),self.secret_patterns)
+                target = scan_artifact_file(path,self.directory,self.secret_patterns)
+                resolved_links += int(path.is_symlink())
+                if target.suffix.lower() in ('.jar','.zip'):
+                    scan_zip(target.read_bytes(),self.secret_patterns)
                 count += 1
         require(count > 0,'artifact-scan-empty')
         self.report['scanCoverage']['artifact_files'] = count
-        return {'files':count,'hits':0}
+        return {'files':count,'resolvedExecutableLinks':resolved_links,'hits':0}
 
     def identity_final(self):
         require(hasattr(self,'jar'),'jar-identity-not-established')
@@ -1276,6 +1315,59 @@ class Runtime:
         return {'observedStubCalls':self.stub_count,'unexpectedStubCalls':self.stub_failures,'configuredUpstream':'loopback-stub','jvmExternalUpstreamCalls':'not-measured'}
 
 def review_cases(directory, check, selected=None):
+    if selected in (None,'artifacts'):
+        def artifact_case(kind):
+            owned = directory/('artifact-' + kind)
+            binaries = owned/'snapshot/control-plane/node_modules/.bin'
+            binaries.mkdir(parents=True)
+            target = binaries.parent/'package/tool.js'
+            target.parent.mkdir(); target.write_bytes(b'safe executable')
+            link = binaries/'tool'
+            if kind == 'escape':
+                target = directory/'outside.js'; target.write_bytes(b'safe'); link.symlink_to(os.path.relpath(target,link.parent))
+            elif kind == 'unexpected':
+                (owned/'unexpected-link').symlink_to(target)
+            else:
+                link.symlink_to('../package/tool.js')
+            if kind == 'missing': target.unlink()
+            if kind == 'unreadable': target.chmod(0)
+            if kind == 'secret': target.write_bytes(b'M14_T07_TOKEN_artifact_probe')
+            runtime = Runtime.__new__(Runtime)
+            runtime.directory, runtime.known_artifacts, runtime.private_inputs = owned,set(),[]
+            runtime.secret_patterns = patterns(['M14_T07_TOKEN_artifact_probe'])
+            runtime.report = {'scanCoverage':{}}
+            try:
+                return runtime.scan_artifacts()
+            finally:
+                if target.exists(): target.chmod(0o600)
+        check('artifact-owned-npm-link',lambda:artifact_case('clean'))
+        for kind in ('escape','unexpected','missing','unreadable','secret'):
+            check('artifact-link-' + kind,lambda k=kind:artifact_case(k),True)
+    if selected in (None,'health-evidence'):
+        def health_case(body,expected_status,expected):
+            runtime = Runtime.__new__(Runtime)
+            runtime.report = {'probes':{'S01.health':{'status':'not-run'}}}
+            runtime.http = lambda *args,**kwargs:(200,{},json.dumps(body).encode())
+            runtime.probe('S01.health','/actuator/health',lambda s,b,d:actuator_verdict(s,d,True))
+            outcome = runtime.report['probes']['S01.health']
+            require(outcome['status'] == expected_status and outcome.get('healthStructure') == expected,'health-evidence-test-failed')
+            require('private-detail' not in json.dumps(outcome),'health-evidence-unsafe')
+        check('health-failure-safe-structure',lambda:health_case({'status':'UP','components':{'private-detail':'private-detail'},'details':{},'groups':['private-detail']},'fail',{'componentsPresent':True,'detailsPresent':True,'groupsPresent':True,'extraFieldCount':3,'statusUp':True}))
+        check('health-status-only-structure',lambda:health_case({'status':'UP'},'pass',{'componentsPresent':False,'detailsPresent':False,'groupsPresent':False,'extraFieldCount':0,'statusUp':True}))
+    if selected in (None,'scanner-evidence'):
+        def scanner_case():
+            owned=directory/'scanner-evidence'; owned.mkdir()
+            runtime=Runtime.__new__(Runtime)
+            runtime.directory, runtime.snapshot, runtime.maven_repo, runtime.packaged_libraries = owned,owned,owned,owned
+            runtime.mvn='mvn'; runtime.inputs={'M14_SECURITY_NVD_API_KEY':''}; runtime.secret_patterns=()
+            runtime.run=lambda *args,**kwargs:(1,b'NVD: Invalid API Key (length=0)\nCISA https://www.cisa.gov/kev HTTP 403\nNoDataException: private-detail\n')
+            try:
+                runtime.backend_audit()
+            except GateError as error:
+                require(str(error)=='dependency-scanner-failed' and error.details=={'scannerExitCode':1,'reportPresent':False,'failureCategories':['nvd-invalid-api-key','cisa-http-403','vulnerability-data-missing','report-missing']},'scanner-evidence-test-failed')
+                return
+            raise GateError('scanner-failure-accepted')
+        check('scanner-safe-failure-evidence',scanner_case)
     if selected in (None, 'headers', 'reflection', 'short-reflection'):
         from unittest.mock import patch
         def response_case(entries, body=b'{}', status=200, **options):
@@ -1352,7 +1444,7 @@ def review_cases(directory, check, selected=None):
         download = common + 'download pluginId=tushare_pro apiName=stock_company paramSummary=[exchange] sourceRowCount=1 insertedRows=1 updatedRows=0 durationMs=2 outcome=success failureStage=none errorCode=none'
         def log_case(text, operation='query'):
             runtime = Runtime.__new__(Runtime)
-            runtime.fatal, runtime.secret_patterns = False, ()
+            runtime.fatal, runtime.secret_patterns = False, patterns(['M14_T07_TOKEN_log_probe'])
             runtime.report = {'scanCoverage':{}}
             runtime.request_ids = {request_id:operation}
             runtime.jvm_log = directory/'review-application.log'
@@ -1366,6 +1458,14 @@ def review_cases(directory, check, selected=None):
         check('completion-filter-value',lambda:log_case(query.replace('[ts_code]','[ts_code=000001.SZ]')),True)
         check('completion-download-value',lambda:log_case(download.replace('[exchange]','[exchange=SZSE]'),'download'),True)
         check('completion-duplicate-field',lambda:log_case(query + ' page=1'),True)
+        jdbc = 'INFO FlywayExecutor Database: jdbc:mysql://127.0.0.1:3306/synthetic (MySQL 8.4)\n'
+        check('ordinary-log-jdbc-metadata',lambda:log_case(jdbc + query))
+        check('ordinary-log-jdbc-secret',lambda:log_case(jdbc + 'M14_T07_TOKEN_log_probe\n' + query),True)
+        def public_jdbc():
+            runtime=Runtime.__new__(Runtime)
+            runtime.secret_patterns=(); runtime.report={'scanCoverage':{}}
+            runtime.scan(jdbc.encode(),'http',public=True)
+        check('public-jdbc-still-rejected',public_jdbc,True)
     if selected in (None, 'npm'):
         inherited = dict(os.environ)
         try:
@@ -1656,7 +1756,10 @@ if (config.mode === 'preflight') {
     const cell = page.getByRole('cell').filter({ hasText:config.html })
     await expect(cell).toHaveCount(1)
     await domVerdict(cell, config.html)
-    await cell.hover()
+    await page.mouse.move(8,8)
+    await cell.scrollIntoViewIfNeeded()
+    await page.evaluate(() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve))))
+    await cell.getByText(config.html,{exact:true}).hover()
     const tooltip = page.getByRole('tooltip').filter({ hasText:config.html })
     await expect(tooltip).toBeVisible()
     await domVerdict(tooltip, config.html)
