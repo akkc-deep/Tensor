@@ -314,3 +314,223 @@ PY
 ```
 
 当前阶段运行后须独立验证新空库、6迁移/50业务表、40生产表末行数与页面总数一致、9个排除表仍空、fixture1行，核对全部请求完成事件，正常停机并清理本轮精确自有资源。全40通过、零失败/未执行/重试和全部扫描/清理门禁通过后，仅记录2000档阶段完成并将原任务PAUSED；原49目标未完成，不准备后继。真实失败则记录证据并BLOCKED。
+
+## 2000档实际运行 2026-09-06T04:43:22.473702+00:00
+
+以下为本次启动器在CLI退出、终检和清理后记录的实际结果；空值表示未测量，原全49目标仍不完整。
+
+```json
+{
+  "controllerFailure": null,
+  "databaseAfterMigration": {
+    "businessTables": 50,
+    "counts": {
+      "adj_factor": 0,
+      "balancesheet": 0,
+      "block_trade": 0,
+      "broker_recommend": 0,
+      "cashflow": 0,
+      "daily": 0,
+      "daily_basic": 0,
+      "disclosure_date": 0,
+      "dividend": 0,
+      "express": 0,
+      "fina_audit": 0,
+      "fina_indicator": 0,
+      "fina_mainbz": 0,
+      "fixture_daily": 0,
+      "forecast": 0,
+      "hk_hold": 0,
+      "hs_const": 0,
+      "hsgt_top10": 0,
+      "income": 0,
+      "index_classify": 0,
+      "index_member": 0,
+      "index_member_all": 0,
+      "margin": 0,
+      "margin_detail": 0,
+      "moneyflow": 0,
+      "moneyflow_hsgt": 0,
+      "monthly": 0,
+      "namechange": 0,
+      "new_share": 0,
+      "pledge_detail": 0,
+      "pledge_stat": 0,
+      "repurchase": 0,
+      "share_float": 0,
+      "slb_len": 0,
+      "slb_sec": 0,
+      "slb_sec_detail": 0,
+      "stk_holdernumber": 0,
+      "stk_holdertrade": 0,
+      "stk_limit": 0,
+      "stk_managers": 0,
+      "stk_rewards": 0,
+      "stock_basic": 0,
+      "stock_company": 0,
+      "suspend_d": 0,
+      "top10_floatholders": 0,
+      "top10_holders": 0,
+      "top_inst": 0,
+      "top_list": 0,
+      "trade_cal": 0,
+      "weekly": 0
+    },
+    "successfulMigrations": 6
+  },
+  "databaseFinal": {
+    "businessTables": 50,
+    "counts": {
+      "adj_factor": 0,
+      "balancesheet": 0,
+      "block_trade": 0,
+      "broker_recommend": 0,
+      "cashflow": 0,
+      "daily": 0,
+      "daily_basic": 0,
+      "disclosure_date": 0,
+      "dividend": 0,
+      "express": 0,
+      "fina_audit": 0,
+      "fina_indicator": 0,
+      "fina_mainbz": 0,
+      "fixture_daily": 0,
+      "forecast": 0,
+      "hk_hold": 0,
+      "hs_const": 0,
+      "hsgt_top10": 0,
+      "income": 0,
+      "index_classify": 0,
+      "index_member": 0,
+      "index_member_all": 0,
+      "margin": 0,
+      "margin_detail": 0,
+      "moneyflow": 0,
+      "moneyflow_hsgt": 0,
+      "monthly": 0,
+      "namechange": 0,
+      "new_share": 0,
+      "pledge_detail": 0,
+      "pledge_stat": 0,
+      "repurchase": 0,
+      "share_float": 0,
+      "slb_len": 0,
+      "slb_sec": 0,
+      "slb_sec_detail": 0,
+      "stk_holdernumber": 0,
+      "stk_holdertrade": 0,
+      "stk_limit": 0,
+      "stk_managers": 0,
+      "stk_rewards": 0,
+      "stock_basic": 0,
+      "stock_company": 0,
+      "suspend_d": 0,
+      "top10_floatholders": 0,
+      "top10_holders": 0,
+      "top_inst": 0,
+      "top_list": 0,
+      "trade_cal": 0,
+      "weekly": 0
+    },
+    "successfulMigrations": 6
+  },
+  "elapsedSeconds": 8,
+  "finalExitCode": 1,
+  "npxExitCode": 1,
+  "ownedContainerRemoved": true,
+  "ownedWorkersExited": true,
+  "postCliScan": {
+    "cleanupPassed": true,
+    "deletedArtifacts": 2,
+    "filesScanned": 5,
+    "npxExitCode": 1,
+    "scanPassed": true
+  },
+  "scopeId": "points-2000",
+  "selectedPageCountsAndExcludedEmptyMatched": false,
+  "specResults": {
+    "cleanup": {
+      "immutableInputs": true,
+      "jvmStopped": true,
+      "logScanned": false,
+      "networkDrained": true
+    },
+    "command": "npx playwright test e2e/tushare-live.spec.js --workers=1",
+    "downloads": [],
+    "finishedAt": "2026-09-06T04:43:20.146Z",
+    "fixture": [],
+    "inputs": {
+      "gitCommit": "c10c67bf2a0d6dc4f90b1d40442ef68d355f0c92",
+      "jarSha256": "a69874afa6ce783d4ef4e16a678ddb0ff457f2948b68f509a8e4a2c00440bcac",
+      "manifestSha256": "37a317f6a2bc3e5113be5f127976d16d8349414c6476c7f6a194b084a5b0f7c2",
+      "specSha256": "6e31e4d9e567feebdb3f22ee421b43d00202cc56832d0accfeab1dbe87f61ac3"
+    },
+    "queries": [],
+    "scope": {
+      "excludedInterfaces": [
+        {
+          "apiName": "top_inst",
+          "reason": "higher_points"
+        },
+        {
+          "apiName": "broker_recommend",
+          "reason": "higher_points"
+        },
+        {
+          "apiName": "share_float",
+          "reason": "permission_unverified"
+        },
+        {
+          "apiName": "hs_const",
+          "reason": "permission_unverified"
+        },
+        {
+          "apiName": "moneyflow_hsgt",
+          "reason": "permission_unverified"
+        },
+        {
+          "apiName": "hk_hold",
+          "reason": "permission_unverified"
+        },
+        {
+          "apiName": "index_member",
+          "reason": "permission_unverified"
+        },
+        {
+          "apiName": "hsgt_top10",
+          "reason": "permission_unverified"
+        },
+        {
+          "apiName": "namechange",
+          "reason": "permission_unverified"
+        }
+      ],
+      "id": "points-2000",
+      "manifestCases": 49,
+      "manifestSamples": 58,
+      "selectedCases": 40,
+      "selectedSamples": 48
+    },
+    "startedAt": "2026-09-06T04:43:15.276Z",
+    "task": "M14-T05",
+    "totals": {
+      "attemptedCases": 0,
+      "callIntervalMs": 2000,
+      "completedCases": 0,
+      "failedCases": 0,
+      "fixtureDownloadPostsObserved": 0,
+      "fixtureRecordsGetsObserved": 0,
+      "liveDownloadPostsObserved": 0,
+      "liveDownloadResultsRecorded": 0,
+      "liveQueryResultsRecorded": 0,
+      "liveRecordsGetsObserved": 0,
+      "manifestSamples": 58,
+      "registeredCases": 40,
+      "selectedSamples": 48,
+      "unexecutedCases": 40
+    },
+    "version": 1
+  },
+  "task": "M14-T05"
+}
+```
