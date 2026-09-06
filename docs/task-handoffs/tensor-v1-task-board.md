@@ -93,7 +93,7 @@
 | 72 | M14-T02 | 下载失败、空结果、幂等和回滚矩阵 | `COMPLETED` | M14-T01 | docs/task-designs/M14-T02-design.md | docs/task-handoffs/M14-T02-handoff.md |
 | 73 | M14-T03 | 查询、分页、宽表、竞态和无障碍 E2E | `COMPLETED` | M14-T01 | docs/task-designs/M14-T03-design.md | docs/task-handoffs/M14-T03-handoff.md |
 | 74 | M14-T04 | 49 数据集自动契约与页面回归驱动 | `COMPLETED` | M03-T09, M04-T06, M14-T01 | docs/task-designs/M14-T04-design.md | docs/task-handoffs/M14-T04-handoff.md |
-| 75 | M14-T05 | 真实 Tushare 49 接口受控页面验收 | `IN_PROGRESS` | M14-T04 | docs/task-designs/M14-T05-design.md | docs/task-handoffs/M14-T05-handoff.md |
+| 75 | M14-T05 | 真实 Tushare 49 接口受控页面验收 | `BLOCKED` | M14-T04 | docs/task-designs/M14-T05-design.md | docs/task-handoffs/M14-T05-handoff.md |
 | 76 | M14-T06 | `daily` 与 `balancesheet` 性能验证 | `NOT_STARTED` | M14-T03, M14-T05 | None | None |
 | 77 | M14-T07 | Token、SQL、依赖、网络和运行安全验证 | `NOT_STARTED` | M14-T02, M14-T03, M14-T04, M14-T05 | None | None |
 | 78 | M14-T08 | 全新环境 AC-001～018 与发布证据包 | `NOT_STARTED` | M14-T01, M14-T02, M14-T03, M14-T04, M14-T05, M14-T06, M14-T07 | None | None |
@@ -1057,7 +1057,7 @@
 - **Acceptance:** “真实 Tushare 49 接口受控页面验收”已按该任务卡指定的位置和行为形成；任务卡列出的全部测试、验证命令和检查得到其注明的预期结果；没有混入排除范围。
 - **Dependencies:** M14-T04.
 - **Sources:** `docs/superpowers/plans/tensor-modules/M14-integration-release.md` 的 `Task M14-T05` 任务卡。
-- **First action:** 启动日志修复和原JAR本地GREEN已完成；按当前交接从新控制目录kybrot1f读取安全标记，封存配置并单独启动转换后，由用户已有Token终端运行一条直接命令，执行固定40项真实验收。
+- **First action:** 消费14dd921真实失败证据与当前pause交接，将stock_company的ADAPTER_TYPE_INVALID/adapter阶段/请求ID及原样例身份交由独立适配修复工作定位；先明确修复范围与分发物接入，当前验收任务不改生产、原JAR或失败样例，不原样重跑已清理的启动器。
 - **State evidence (readiness):** 2026-09-06：M14-T04完成记录 `80a9491` 已先独立提交，再按预定义Order选中75/M14-T05，观测NOT_STARTED、Design/Handoff为None。使用任务契约设计技能完成145行 `docs/task-designs/M14-T05-design.md`，就绪审查3Important/1Minor经定点修正全部Addressed、无新Critical/Important/Minor，Ready for implementation: Yes；修正精确DownloadResponse八键、600/330秒分阶段钩子预算、CLI完全退出后的独占产物扫描/删除与页面静态资源允许列表。`9b3d263` 提交设计并仅回填Design document，链接后完整读取。设计冻结两实施文件、原验收JAR、manifest49接口/58样例、37ok/12empty接口级判定、98次真实dataset查询、独立fixture2POST/3查询、真实Token环境/账户权限频率额度前置确认、单worker/零重试、新空schema、按不同业务键的计数和页面记录/来源/时间核对、安全与正常清理。结构/引用/manifest数量哈希、两实施文件缺席、依赖决定及约束一致性均已核对；唯一任务依赖仍M14-T04，M14-T02公开fixture合同仅作为任务卡指定补充来源。先按完整模板写 `docs/task-handoffs/M14-T05-handoff.md`，列清直接输入的产物/决定/理由/约束/用途/既有可用性证据，链接后执行真实 `NOT_STARTED -> READY`。本轮只设计/交接，live spec及实际证据尚未创建，本地安全探针、账户权限/额度/Token和真实上游矩阵未验证；首动作直接实施完成设计，不补设计、不将预期写成实跑通过。用户并行ISSUE-004及target资源未纳入提交。
 
 - **State evidence (start):** 2026-09-06：用户明确要求按权威任务看板执行当前任务、先读取设计和交接。已完整读取 M14-T05 所链接设计与交接，核对任务卡、全局约束和 READY 来源状态，两实施目标不存在且无重叠修改；以本次请求执行 `READY -> IN_PROGRESS`，保留入口交接。按仓库授权直接在 main 实施，使用既定子代理实施与独立审查流程。本地仅检查环境变量存在性，Token、调用间隔和三个DB变量均未配置；已请求运行者提供账户权限/频率/额度的非秘密确认，先完成设计允许的静态实施与本地探针，真实矩阵不得在前置条件缺失时启动。用户已有ISSUE-004暂存和target产物保持原状。
@@ -1083,6 +1083,8 @@
 - **State evidence (startup repair unblock):** 用户要求由执行者处理后，按修订设计用原JAR/合成Token环境/health-only/新空库诊断，RED复现Flyway/JDBC日志命中秘密检查；修复b8cc305仅在JVM固定LOGGING_LEVEL_ORG_FLYWAYDB=WARN，保留WARN/ERROR、业务日志、原argv与全部扫描。相同探针在另一个新空schema上GREEN：Node0/health就绪/无扫描触发、6成功迁移/50表全空，正常停机、终检及精确DB/卷清理通过；环境RED/GREEN、原纯反例/语法/diff通过，独立审查Approved/Ready且无发现。原真实失败da56d38保持原文，不代表40项已测。当前新正式kybrot1f专用空库及Java21/8080/文件哈希/权限已核对，旧环境已使用不可复用。先更新pause入口和修订设计，再以明确修复/检查/审查证据执行BLOCKED→READY；真实执行仍待后续单独启动转换和已有Token终端命令，不自动准备后继。
 
 - **State evidence (repaired phase restart):** 启动修复、原JAR本地RED/GREEN及独立审查已记录，证据10b44fc与解阻b988f03已分别提交。按用户持续执行当前任务并要求由执行者处理的授权，消费更新后的完整设计与pause入口，单独执行READY→IN_PROGRESS；新kybrot1f正式空环境准备完成，直接启动器代码不变，封存当前spec/证据/JAR/manifest哈希后交用户已有Token终端一次执行。此状态表示恢复实际验收工作，不表示40接口或fixture已通过。
+
+- **State evidence (live stock_company adapter failure):** 用户报告已运行kybrot1f后，核对最新安全报告与真实秘密扫描文档SHA一致，实际证据先独立提交14dd921。运行26秒、npx1/最终1；已修复启动日志门禁通过，fixture2POST/3查询闭环通过。stock_basic3原样例SUCCESS5556/EMPTY0/SUCCESS339，完成1case，页面/来源时间/插入计数与独立DB5895匹配；stock_company首样例ADAPTER_TYPE_INVALID，唯一完成事件failureStage=adapter、duration304ms、请求IDe82ccf95-6182-4d73-9b98-10ae2bd7e13b，失败计数unavailable，具体字段/值未保留。实际attempted2/completed1/failed1/unexecuted38，真实POST4/查询3；12个业务完成事件逐ID唯一，未重试或继续剩余项。初始6迁移/50表全0，末态stock_basic5895/fixture1/其余48表0；spec四项清理、worker退出、CLI终检/自动产物删除2、精确DB/卷/私密材料清理和文档哈希复核均通过。完整读取设计后，按ADAPTER_*产品失败留给独立修复的边界先写pause交接再执行IN_PROGRESS→BLOCKED；保留部分真实通过和失败，原40/49均未完成，不准备后继，不改生产/JAR/样例或自行发明任务ID。
 
 ### `M14-T06`
 

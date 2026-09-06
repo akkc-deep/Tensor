@@ -13,55 +13,100 @@ pause
 
 ## Current State
 
-原真实运行约8秒在application log safety失败，40个真实接口和fixture均未开始；失败安全报告da56d38保持原文，不把后续本地成功覆盖为真实通过。
+用户已执行修复后的kybrot1f一次性启动器。本轮约26秒，npx1/最终1；启动日志检查通过，fixture SUCCESS/EMPTY的2POST/3查询闭环通过。首个真实接口stock_basic完成3组原样例，结果依次SUCCESS(5556插入)、EMPTY(0)、SUCCESS(339插入)，合计5895行；页面末查、行显示/来源/时间、日志关联与独立DB末态5895匹配。
 
-用户要求由执行者处理启动问题后，已用原JAR、新空MySQL8.4.6和合成Token的health-only探针复现：Flyway/JDBC标记与secret scan命中，health未就绪。根因是Flyway INFO启动日志输出JDBC连接位置，与当前写前日志合同冲突。
+第二个接口stock_company在首组样例返回公开错误ADAPTER_TYPE_INVALID，页面显示失败且唯一完成事件为failureStage=adapter。失败请求ID为e82ccf95-6182-4d73-9b98-10ae2bd7e13b，durationMs=304；失败的上游/插入/更新计数是unavailable，不能填0。具体不兼容字段或值没有保存，不能据错误码猜测原因。
 
-修复b8cc305仅在spec的JVM环境固定LOGGING_LEVEL_ORG_FLYWAYDB=WARN，未改生产/JAR/argv、扫描、业务日志或40项范围。相同探针在另一新空schema上GREEN：health就绪、无扫描触发、6成功迁移/50表全空，正常停机、终检和精确数据库/卷清理均通过；独立定点审查Approved/Ready。
+本轮实际2项尝试、1通过、1失败、38未运行，真实下载POST4、records查询3；不是完整40项验收。stock_company失败后没有自动重试、删除接口、更换参数或继续其他项。原9项范围排除仍独立于这40项状态。
 
-本地阻塞解除证据已具备，恢复状态以权威看板为准。新正式控制目录为 `/private/tmp/tensor-m14-t05-control.kybrot1f`，已独立核对MySQL8.4.6/0表、最小权限/来源host、Java21/8080/冻结文件和私有模式。直接launch.py与先前已审查版本字节相同；新run-config将固定最终内容。真实40/48/80和fixture2/3尚待用户已有Token终端启动，工具进程不能继承或读取该终端Token。
+初始独立观察6成功迁移/50业务表全空；末态stock_basic5895、fixture_daily1、其余48表均0。stock_company表0仅说明失败后无写入，不是合法EMPTY。spec网络排空/JVM停止/日志扫描/不可变输入检查均true；全部worker退出、CLI后扫描/自动产物删除、整篇证据秘密扫描和精确DB/卷/私密连接材料清理通过，控制器另确认8080空闲。
 
 ## Changed Files
 
-- `control-plane/e2e/tushare-live.spec.js`：b8cc305，唯一新增JVM Flyway日志级别；新SHA为72b9763941e7ed82fbf1b207a79ee515d3d7343c9831ce2604f8ec9abd7ee973。
-- `docs/task-designs/M14-T05-design.md`：明确固定JVM日志配置、health-only合成凭证本地诊断及RED/GREEN边界。
-- `docs/verification/M14-T05-tushare-live.md`：追加真实失败后的诊断/修复/审查/新环境事实，保留先前失败JSON原文。追加后的整篇真实Token扫描须由下一次用户终端运行完成，不复用旧整篇SHA。
-- 本交接/权威看板：根据已完成的阻塞修复记录恢复与直接运行入口；生产、其他测试、manifest、原JAR及用户target未改。
+- `docs/verification/M14-T05-tushare-live.md`：本轮启动器追加实际安全报告，已独立提交14dd921；文档SHA为dc0c0329c2d5a4c60837c2d7bc5e927ec2419ceb0edfc32079c3c8cf167c5018，与run-finished的真实秘密扫描记录一致，控制器未改内容。
+- 本交接和权威看板：记录实际部分通过、适配失败与IN_PROGRESS→BLOCKED。
+- 本次没有修改spec、生产代码、配置、其他测试、manifest、原JAR或用户target目录。
 
 ## Verification
 
-- 原真实失败：npx1/最终1，1failed/39didnotrun、attempted0/unexecuted40、业务观察数0；6迁移/50表全0，终检和资源清理通过。证据提交da56d38保存此前整篇真实秘密扫描证明。
-- 同函数环境探针`node /tmp/m14-t05-flyway-env-probe.mjs`（Node24）先RED缺少WARN，修复后GREEN：固定WARN覆盖外部TRACE，外部全局/业务日志覆盖不继承，浏览器/helpers无日志配置或DB/Token。
-- Node24语法、该环境探针、既有`/tmp/m14-t05-pure-probe.mjs`和diff检查均通过；扫描反例仍有效，未重复无关全套测试。
-- 原JAR诊断命令为`python3 /private/tmp/m14-t05-startup-diagnostic.py <本轮控制目录>`。gsu6eluc为RED（外层0/Node1，secret/Flyway/JDBCtrue，healthfalse）；dwbbqgr3为GREEN（外层0/Node0，healthtrue，无扫描触发）。两轮均6成功迁移/50表全0、JVM停止、终检及精确DB/卷清理通过；只用合成Token，无页面业务调用。
-- 独立定点审查Spec通过、Quality Approved、Launch Ready，无Critical/Important/Minor；它不代表真实矩阵通过。
-- kybrot1f新正式库仍0表，权限/来源host/版本/Java21/8080/冻结文件/私有模式复核通过，当前未执行。
+- 实际用户命令：`python3 /private/tmp/tensor-m14-t05-control.kybrot1f/launch.py`，内部使用指定spec、1worker、0retries、2000ms间隔。运行Git4b46ec1；spec SHA为72b9763941e7ed82fbf1b207a79ee515d3d7343c9831ce2604f8ec9abd7ee973。
+- 实际退出码1/1、26秒；runner1passed/1failed/38didnotrun与安全计数completed1/failed1/unexecuted38一致；fixture5项检查独立计数。
+- stock_basic的3POST/2查询、fixture2POST/3查询以及stock_company的1POST/1初查共12个业务完成事件。控制器按已记录requestId独立核对日志中均恰一次；失败事件为adapter/ADAPTER_TYPE_INVALID且失败计数均unavailable，不输出原日志或参数摘要。
+- stock_basic插入5556+339=5895，与页面totalElements及独立DB相同；fixture末态1，9排除表和其余未完成接口表均0。全40页面匹配门禁false是正确结果，不能由部分匹配改为true。
+- CLI后终检scanPassed/cleanupPassed均true，扫描5文件、删除2自动产物。控制器确认仅4个允许保留文件且均0600、根目录0700、无playwright目录，私有DB连接文件已删除；run-finished记录ownedContainerRemoved和evidenceSecretScanPassed均true，文档哈希及计数一致性复核通过。
+
+| 本轮40项API | 实际case状态 |
+|---|---|
+| `stock_basic` | 通过 |
+| `stock_company` | 失败：ADAPTER_TYPE_INVALID |
+| `income` | 未运行 |
+| `balancesheet` | 未运行 |
+| `cashflow` | 未运行 |
+| `fina_indicator` | 未运行 |
+| `fina_audit` | 未运行 |
+| `fina_mainbz` | 未运行 |
+| `stk_rewards` | 未运行 |
+| `stk_holdernumber` | 未运行 |
+| `trade_cal` | 未运行 |
+| `margin` | 未运行 |
+| `daily` | 未运行 |
+| `weekly` | 未运行 |
+| `monthly` | 未运行 |
+| `adj_factor` | 未运行 |
+| `suspend_d` | 未运行 |
+| `daily_basic` | 未运行 |
+| `moneyflow` | 未运行 |
+| `stk_limit` | 未运行 |
+| `top_list` | 未运行 |
+| `margin_detail` | 未运行 |
+| `block_trade` | 未运行 |
+| `slb_len` | 未运行 |
+| `slb_sec` | 未运行 |
+| `slb_sec_detail` | 未运行 |
+| `forecast` | 未运行 |
+| `express` | 未运行 |
+| `dividend` | 未运行 |
+| `disclosure_date` | 未运行 |
+| `repurchase` | 未运行 |
+| `stk_holdertrade` | 未运行 |
+| `top10_holders` | 未运行 |
+| `top10_floatholders` | 未运行 |
+| `new_share` | 未运行 |
+| `stk_managers` | 未运行 |
+| `pledge_stat` | 未运行 |
+| `pledge_detail` | 未运行 |
+| `index_classify` | 未运行 |
+| `index_member_all` | 未运行 |
+
+本轮范围排除（不计通过、失败或skip）：top_inst、broker_recommend（higher_points）；share_float、hs_const、moneyflow_hsgt、hk_hold、index_member、hsgt_top10、namechange（permission_unverified）。
 
 ## Remaining Work
 
-1. 完成新run-config封存和恢复状态独立记录后，由用户在保有Token的同一终端执行 `python3 /private/tmp/tensor-m14-t05-control.kybrot1f/launch.py`。直接开始并每15秒提示进度，不再等待聊天确认文件。
-2. 读取新run-started/run-finished安全标记；实际完成后验证报告、文档SHA、40/48/80与fixture2/3、迁移全空与末态页面计数匹配、终检和清理。禁止输出Token、私有连接JSON、原日志或真实行。
-3. 全40及全部门禁通过后只记录2000档阶段完成并PAUSED；真实失败则如实BLOCKED，不自动重跑。原49目标仍不完整，不准备后继。
+1. 将stock_company的真实适配失败交由独立产品/配置修复工作定位具体字段和转换规则，并补充针对性验证；当前没有足够安全证据认定哪个字段或哪类值出错。
+2. 明确修复产物与当前冻结验收JAR/设计输入的接入关系，不暗改原JAR、参数、状态或排除集合。当前M14-T05设计明确ADAPTER_*失败留给独立任务，不在该验收任务改生产代码或自行发明任务ID。
+3. 修复与接入条件明确后，按独立状态转换恢复，在新的空MySQL8.4.6环境和用户真实Token终端完整复跑40/48/80与fixture2/3，保留本轮失败历史。
+4. 全40及所有门禁通过仅报告2000档阶段完成并PAUSED；失败则BLOCKED。原49目标未完成，不准备后继。
 
 ## Resume Task
 
-M14-T05的2000积分档子集页面验收；启动日志阻塞已通过本地原JAR复现、修复与复核。
+恢复M14-T05的2000积分档真实页面验收，首先解除stock_company数据适配失败。
 
 ## Start Here
 
-1. 权威看板Order75和完整 `docs/task-designs/M14-T05-design.md`。
-2. 本交接及 `docs/verification/M14-T05-tushare-live.md` 末尾启动修复段落；保留旧真实失败与本地诊断的区别。
-3. 新控制目录 `/private/tmp/tensor-m14-t05-control.kybrot1f` 的安全标记与已审查直接启动器。旧j9045eey、gsu6eluc、dwbbqgr3均已使用并清理，不能复用。
+1. 权威看板Order75与完整 `docs/task-designs/M14-T05-design.md`，特别是“错误、凭证与证据”对ADAPTER_*失败的范围约束。
+2. 本交接、14dd921中的最新实际安全报告及 `docs/contracts/openapi-v1.yaml` 的公开错误合同。
+3. 本轮安全标记 `/private/tmp/tensor-m14-t05-control.kybrot1f/run-finished.json`；已终检私有产物根 `/private/tmp/tensor-m14-t05.d0n8o20x`。禁止输出日志全文、真实业务行、Token或私有连接材料。
 
-首个动作：检查新run-finished是否存在；存在则消费实际安全报告并核对记录的文档SHA；只有run-started则观察安全进度；尚未开始则在run-config和看板IN_PROGRESS封存后交用户上述一条命令。实现和本地复现均已完成，不重新派发或重复旧套件。
+首个动作：以已封存的stock_company错误码、adapter阶段、请求ID、原manifest样例和当前分发物身份形成独立适配修复的输入，先确定修复任务及允许检查/修改的范围，再定位字段/转换规则。当前任务不自动读取M00～M13生产实现、不另发上游探测或复用已清理的kybrot1f启动器。无需再次处理已通过的启动日志问题。
 
 ## Blocker
 
-- **Reason:** 原Flyway启动日志触发已由b8cc305及独立新库GREEN解决；本节保留原pause入口的阻塞历史，当前状态以看板为准。真实执行仍需用户已有Token的终端环境。
-- **Resolution condition:** 同一原JAR启动RED→GREEN、既有扫描反例、环境隔离检查与独立审查已通过，构成BLOCKED→READY依据；再以用户持续执行授权单独READY→IN_PROGRESS。新真实运行失败不能由本地GREEN代填通过。
+- **Reason:** stock_company真实页面下载在adapter阶段返回ADAPTER_TYPE_INVALID，导致串行验收1失败、38未运行；属于已观察的产品/数据适配失败，而非启动日志阻塞。
+- **Resolution condition:** 独立适配修复定位并解决已观察问题，针对性检查通过，修复产物/冻结JAR及设计输入关系明确后，记录BLOCKED→READY及单独READY→IN_PROGRESS，再用新空环境完整复跑。当前公开错误信息没有具体字段/值，不能用猜测、等待或原样重跑当作解决。
 
 ## Risks
 
-- Token已成功传入启动器，仅证明存在，不证明真实接口授权；本轮没有业务请求，不能归因于2000档积分不足或Token无效。
-- 不关闭日志秘密检查、不保存命中内容、不以终检通过抹去启动检查失败。需要修改生产或既定运行合同的修复必须先按任务边界处理，不能暗改原JAR或测试条件。
-- 原49目标仍有9项本轮范围排除，40项和fixture目前全部未执行。
+- Token已实际用于stock_basic成功调用；本轮错误不是鉴权/权限/限流错误码，但不能据此推断其余接口均获授权。
+- 1个真实接口通过不等于40项或原49目标通过；38项未运行和9项范围排除必须区分。
+- 失败响应计数unavailable与DB观察0行不同，不将失败写成EMPTY，也不改变原样例绕过错误。
+- 原JAR保持冻结；需要修改后端或重建分发物的工作超出当前验收任务，须按独立修复边界接入。
