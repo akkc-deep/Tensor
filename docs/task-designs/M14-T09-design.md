@@ -4,7 +4,7 @@
 
 **D-01已确认（2026-09-06）：** 用户对明确提出的四字段指纹/V7迁移/全40复验方案回复“同意”。采用 `FINGERPRINT: [ts_code, end_date, ann_date, div_proc]`，保留各实施阶段，允许元数据规定的空进度，同阶段跨批更新，迁移保留现有业务与来源时间；仅dividend当前验收预期改为ok。以下候选分支均已由此裁决选定，设计达到实施就绪。状态按看板依次执行NOT_STARTED→READY和READY→IN_PROGRESS，用户当前任务执行请求及本次确认构成启动授权。
 
-**当前阶段（nuy4jdhx已执行）：** 修复963ea17、本地全部门禁及真实dividend38行闭环通过；新轮32通过/1失败/7未运行。失败为top10_holders返回SUCCESS320而既定当前预期为EMPTY，已按合同停止。用户随后已明确同意D-02：仅top10_holders当前预期改为非空成功，并完整复验40项。正在完成离线检查和新环境接入；既有失败证据保留。
+**当前阶段（D-02/yx5keenc已执行）：** D-01分红修复仍通过，D-02的top10_holders已完成SUCCESS320/320/0、页面末查320和独立DB320闭环。最新完整范围实跑150秒，33通过/1失败/6未运行；top10_floatholders实际SUCCESS280而当前仍要求EMPTY，按合同停止，末次页面查询未执行。证据6ae877f已先独立提交，扫描与自有资源清理通过。下述D-03为具体待确认修订；当前spec仍只有D-01/D-02两项覆盖，不自动复跑。
 
 ## Goal
 
@@ -70,6 +70,20 @@ nuy4jdhx真实证据已独立提交471dfb0，全文SHA `9d5c283b31f586ee7a3b4fdb
 
 下一轮仍完整40接口/48原样例/80查询与fixture2/3，不只跑剩余8项、不拼接本轮32通过；任一真实错误继续失败停止。只有完整新轮及全部计数、扫描清理门禁通过才能完成M14-T09，原9项不覆盖及M14-T05原49未完成继续保留。
 
+### D-03. top10_floatholders当前验收预期（待确认）
+
+yx5keenc真实证据为 `docs/verification/M14-T09-tushare-live-rerun-01.md`（6ae877f），整篇SHA `6f91d9cbe0f4469a1278ede8de65b56f5841b292141202b88e97f2238948f695`。top10_floatholders原样例返回SUCCESS，source/insert/update为280/280/0，requestId `7dda164d-82b7-435f-a866-55f83d0a90f4`，165ms；独立DB280。当前与历史均empty，触发 `Safe check failed: empty interface stays empty`，只执行页面初查0，末查未执行，因此保留失败。本轮33通过/1失败/6未运行，真实POST42/records67，fixture2/3，114个请求逐ID恰一个完成事件。
+
+待确认修订仅增加top10_floatholders当前acceptanceStatus=ok；保留已批准的dividend与top10_holders覆盖，其他37项期望不变。原manifest、历史empty、模板和全部原参数保持；历史仍28ok/12empty，新的当前分类31ok/9empty。280只是本轮观测值，后续要求SUCCESS且sourceRowCount>0、页面末态/来源时间/独立DB一致，不要求固定280条。
+
+确认后仅修改现有 `control-plane/e2e/tushare-live.spec.js` 的固定覆盖和分类断言及必要控制文档，新结果写独立 `docs/verification/M14-T09-tushare-live-rerun-02.md`；不改生产代码、二进制、schema、业务键或DB参数，不覆盖已扫描的三份历史证据。仍沿用冻结验收JAR81adba...，不重建。
+
+先运行同一selector/outcome/finalDataset合成RED/GREEN：准确三项覆盖、其他状态不变、其余empty仍拒绝SUCCESS、覆盖项拒绝全EMPTY和空末态，历史/当前分类及固定40/48/9、原manifest/参数均正确。使用净化子进程执行 `node --check control-plane/e2e/tushare-live.spec.js` 与control-plane下 `npx playwright test e2e/tushare-live.spec.js --list`，必须exit0且恰40；沿用已验证安全流程，运行新证据路径受影响的启动检查并独立审查新接入材料。
+
+只使用新私有控制目录、新空库和更新后的设计/spec/新证据/启动器hash，旧yx5keenc已使用且清理，不得复用。确认及离线/复审门禁齐备后才BLOCKED→READY，再单独READY→IN_PROGRESS；用户既有命令和环境Token授权持续有效，无需重复配置。完整复验仍40接口/48样例/80查询与fixture2/3、9排除、单worker/零重试/至少2秒间隔，失败停止；不只跑剩余7项、不拼接本轮33通过。
+
+本轮尚未执行6项：new_share、stk_managers、pledge_stat、pledge_detail、index_classify、index_member_all；无当前结果，不提前修改其预期。只有全40新轮与所有计数、扫描清理门禁通过才完成M14-T09；原49目标未完成和9项不覆盖继续保留，不自动准备后继。
+
 ### D. 收尾与原任务关系
 
 本任务只有全40和fixture、独立DB、请求事件、安全扫描/清理全部通过，且修复回归/迁移/包门禁齐备，才可IN_PROGRESS→COMPLETED。同步把本轮2000档结果及新证据链接回M14-T05交接，继续保留其原49目标未完成事实；原任务状态如需同步，仅按当时明确证据和看板允许转换处理，不直接BLOCKED→PAUSED/COMPLETED。
@@ -118,7 +132,8 @@ npx playwright test e2e/tushare-live.spec.js --list
 ## Risks
 
 - **D-01已解决：** 四字段指纹/V7修复及本地门禁、真实dividend38行页面闭环已通过。
-- **D-02已确认：** 当前允许dividend与top10_holders覆盖为ok；其余38项期望不变。离线就绪不代表完整真实40项已通过。
+- **D-02已验证：** top10_holders下载/入库/页面末查与独立DB320一致，完整通过；该结论不覆盖下一接口。
+- **D-03待确认：** top10_floatholders已成功下载/入库280，但EMPTY断言失败、末查未执行；当前只允许前两项覆盖。
 - 实际诊断只定位首个进度冲突，不能据此证明全部38行或尚未执行11接口已通过。
 - 旧schema/旧包兼容、MySQL多DDL非整体事务及nullable指纹语义必须由批准后的方案和真实本地IT覆盖。
 - 临时包和安全结果可能失效或被清理；先验证存在性/固定hash。材料缺失应按已提交源码与合同重建新产物，不绕过hash、不要求重复旧诊断。

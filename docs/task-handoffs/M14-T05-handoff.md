@@ -13,7 +13,7 @@ pause
 
 ## Current State
 
-**M14-T09结果回写（2026-09-06）：** D-01已由用户明确确认，修复963ea17和本地门禁均通过；新包真实dividend38条完成入库/页面/独立DB闭环，ISSUE-007关闭。本轮完整复验实际32通过/1失败/7未运行，新失败为top10_holders实际SUCCESS320与历史EMPTY预期不符，见M14-T09设计D-02及当前pause交接。新证据 `docs/verification/M14-T09-tushare-live.md`（471dfb0，SHA9d5c283b31f586ee7a3b4fdbda84321fbf3c7e4f55274f9d69955d86353af170）；扫描/停机/清理通过。当前M14-T09 BLOCKED等待单接口预期确认。本任务仍BLOCKED，原49未完成，以下28/1/11与原SHA作为历史保留，不重复旧执行。
+**M14-T09最新结果回写（2026-09-06）：** D-01分红修复及D-02单接口预期修订均已验证：最新yx5keenc轮dividend38与top10_holders320均完成下载/入库/页面末查/独立DB闭环。150秒，33通过/1失败/6未运行；top10_floatholders实际SUCCESS280与当前EMPTY预期冲突，末查未执行。新证据 `docs/verification/M14-T09-tushare-live-rerun-01.md`（6ae877f，SHA6f91d9cbe0f4469a1278ede8de65b56f5841b292141202b88e97f2238948f695），扫描/停机/自有资源清理通过。M14-T09按其D-03具体方案等待单接口预期确认；本任务保持BLOCKED和原49未完成事实。上一轮32/1/7证据471dfb0与以下原任务28/1/11及SHA全部保留，不拼接或改写。
 
 
 2026-09-06用户已要求将剩余工作移交新任务。当前续接入口为 **Order76/M14-T09**，见 `docs/task-designs/M14-T09-design.md` 与 `docs/task-handoffs/M14-T09-handoff.md`。本任务保留BLOCKED和以下历史结果，不因移交改判完成；后续不在本任务重复发起诊断或完整复跑。尚未确认的分红规则一并转交。
@@ -48,7 +48,7 @@ pause
 
 ## Remaining Work
 
-1. 剩余三项已归属M14-T09：确认并修复dividend保存规则；本地适配/迁移/幂等/新包验证；完整40项复验与安全归档。具体边界与未决D-01见新任务设计和transfer交接。
+1. 原剩余工作已归属M14-T09；分红修复、本地门禁和top10_holders闭环已通过。当前剩余为D-03及完整40项复验与安全归档，具体边界见该任务当前设计和pause交接。
 2. M14-T05仅保留原49目标及历史证据，等待新任务结果回写；原9项未覆盖不因移交消失。不得复制执行或把新任务登记当作原任务完成。
 
 ## Resume Task
@@ -61,7 +61,7 @@ pause
 2. `docs/task-handoffs/M14-T09-handoff.md`，其中已有直接输入、精确hash、已用控制目录和未决设计说明。
 3. 本交接与旧 `docs/task-designs/M14-T05-design.md`、实际证据 `docs/verification/M14-T05-tushare-live.md` 仅作历史和技术输入。
 
-首动作：从M14-T09的D-01确认入口接续，不再重复本任务旧诊断/启动命令，不重新设置Token。
+首动作：从M14-T09当前设计D-03及pause交接入口接续，不再重复本任务旧诊断/启动命令，不重新设置Token。
 
 ## Blocker
 
