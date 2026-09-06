@@ -93,7 +93,7 @@
 | 72 | M14-T02 | 下载失败、空结果、幂等和回滚矩阵 | `COMPLETED` | M14-T01 | docs/task-designs/M14-T02-design.md | docs/task-handoffs/M14-T02-handoff.md |
 | 73 | M14-T03 | 查询、分页、宽表、竞态和无障碍 E2E | `COMPLETED` | M14-T01 | docs/task-designs/M14-T03-design.md | docs/task-handoffs/M14-T03-handoff.md |
 | 74 | M14-T04 | 49 数据集自动契约与页面回归驱动 | `COMPLETED` | M03-T09, M04-T06, M14-T01 | docs/task-designs/M14-T04-design.md | docs/task-handoffs/M14-T04-handoff.md |
-| 75 | M14-T05 | 真实 Tushare 49 接口受控页面验收 | `IN_PROGRESS` | M14-T04 | docs/task-designs/M14-T05-design.md | docs/task-handoffs/M14-T05-handoff.md |
+| 75 | M14-T05 | 真实 Tushare 49 接口受控页面验收 | `BLOCKED` | M14-T04 | docs/task-designs/M14-T05-design.md | docs/task-handoffs/M14-T05-handoff.md |
 | 76 | M14-T06 | `daily` 与 `balancesheet` 性能验证 | `NOT_STARTED` | M14-T03, M14-T05 | None | None |
 | 77 | M14-T07 | Token、SQL、依赖、网络和运行安全验证 | `NOT_STARTED` | M14-T02, M14-T03, M14-T04, M14-T05 | None | None |
 | 78 | M14-T08 | 全新环境 AC-001～018 与发布证据包 | `NOT_STARTED` | M14-T01, M14-T02, M14-T03, M14-T04, M14-T05, M14-T06, M14-T07 | None | None |
@@ -1057,7 +1057,7 @@
 - **Acceptance:** “真实 Tushare 49 接口受控页面验收”已按该任务卡指定的位置和行为形成；任务卡列出的全部测试、验证命令和检查得到其注明的预期结果；没有混入排除范围。
 - **Dependencies:** M14-T04.
 - **Sources:** `docs/superpowers/plans/tensor-modules/M14-integration-release.md` 的 `Task M14-T05` 任务卡。
-- **First action:** 消费14dd921真实失败证据与当前pause交接，将stock_company的ADAPTER_TYPE_INVALID/adapter阶段/请求ID及原样例身份交由独立适配修复工作定位；先明确修复范围与分发物接入，当前验收任务不改生产、原JAR或失败样例，不原样重跑已清理的启动器。
+- **First action:** 消费1gpnb4ru的28通过/1dividend适配失败/11未运行证据与当前pause交接；沿ISSUE-007完成原参数单次安全诊断以确定字段/类别，再建立独立修复与新包接入。不复跑已使用启动器，不猜测生产改动。
 - **State evidence (readiness):** 2026-09-06：M14-T04完成记录 `80a9491` 已先独立提交，再按预定义Order选中75/M14-T05，观测NOT_STARTED、Design/Handoff为None。使用任务契约设计技能完成145行 `docs/task-designs/M14-T05-design.md`，就绪审查3Important/1Minor经定点修正全部Addressed、无新Critical/Important/Minor，Ready for implementation: Yes；修正精确DownloadResponse八键、600/330秒分阶段钩子预算、CLI完全退出后的独占产物扫描/删除与页面静态资源允许列表。`9b3d263` 提交设计并仅回填Design document，链接后完整读取。设计冻结两实施文件、原验收JAR、manifest49接口/58样例、37ok/12empty接口级判定、98次真实dataset查询、独立fixture2POST/3查询、真实Token环境/账户权限频率额度前置确认、单worker/零重试、新空schema、按不同业务键的计数和页面记录/来源/时间核对、安全与正常清理。结构/引用/manifest数量哈希、两实施文件缺席、依赖决定及约束一致性均已核对；唯一任务依赖仍M14-T04，M14-T02公开fixture合同仅作为任务卡指定补充来源。先按完整模板写 `docs/task-handoffs/M14-T05-handoff.md`，列清直接输入的产物/决定/理由/约束/用途/既有可用性证据，链接后执行真实 `NOT_STARTED -> READY`。本轮只设计/交接，live spec及实际证据尚未创建，本地安全探针、账户权限/额度/Token和真实上游矩阵未验证；首动作直接实施完成设计，不补设计、不将预期写成实跑通过。用户并行ISSUE-004及target资源未纳入提交。
 
 - **State evidence (start):** 2026-09-06：用户明确要求按权威任务看板执行当前任务、先读取设计和交接。已完整读取 M14-T05 所链接设计与交接，核对任务卡、全局约束和 READY 来源状态，两实施目标不存在且无重叠修改；以本次请求执行 `READY -> IN_PROGRESS`，保留入口交接。按仓库授权直接在 main 实施，使用既定子代理实施与独立审查流程。本地仅检查环境变量存在性，Token、调用间隔和三个DB变量均未配置；已请求运行者提供账户权限/频率/额度的非秘密确认，先完成设计允许的静态实施与本地探针，真实矩阵不得在前置条件缺失时启动。用户已有ISSUE-004暂存和target产物保持原状。
@@ -1097,6 +1097,10 @@
 - **State evidence (announcement-date repair unblock):** 独立ISSUE-006修复c38dbac仅在Tushare源边界规范化stk_holdernumber.ann_date的严格合法日期时间，不改通用转换器/元数据/SQL。合成RED后94相关测试GREEN；复审1Minor已补强同名字段隔离并定点关闭，无剩余发现。旧包历史149行在row12/ann_date拒绝，新包149行全部适配且源对象不变，无上游请求。新包f2fc35c933e69da5e85690fbabb13d691178538cd6ffb3b94284dfc95b10db89，独立源码快照构建，7唯一打包合同通过，较ISSUE005包364展开文件仅validator类变化；新包0xdt5neo仅health诊断6迁移50表全空、扫描停机/DB卷清理通过。设计明确新包优先于历史包引用，speca81df4da7f92c6164062fa29a19902505dd5643c7c948a9aaa021f987220eee5语法/40发现通过，原包/manifest/真实证据699132...未改。新正式1gpnb4ru空库/最小权限准备完成，启动器仅换固定包路径，四hash/40-48-9/模式/未使用均独立复审通过。已先更新pause交接，读取设计并观测BLOCKED后依上述修复和接入证据执行BLOCKED→READY；真实新轮未执行，历史9/1/30保留，不准备后继。
 
 - **State evidence (announcement-date repaired restart):** 修复产物接入与解阻已独立提交73e4885。消费完整更新设计与同一pause交接，按用户持续执行/继续修复授权，观测READY后单独执行READY→IN_PROGRESS。新正式环境为1gpnb4ru，命令使用已封存f2fc...修复包和原40/48/9范围；用户只需在已有TENSOR_TUSHARE_TOKEN终端执行一次。该转换恢复验收工作，新一轮尚未执行，不能把本地149历史行通过当真实通过；按实际结果BLOCKED或阶段成功PAUSED，不推进原49后继。
+
+- **State evidence (live dividend failure):** 用户已运行1gpnb4ru，实际安全证据e3013b1先独立提交，整篇SHA d4e7bf67b6a2b144662a987dec9aa812a8e39543c5134ed7cab8a12a4dbe34b5与真实Token扫描标记及控制器复核一致。139秒、最终exit1，28通过/1失败/11未运行；stock_company6294继续通过，stk_holdernumber来源/插入/页面与DB均150，121ms、requestId ba63f8ea-1043-4891-b2ee-fd577a371752，ISSUE-006真实验证关闭。新dividend唯一原样例ADAPTER_TYPE_INVALID、adapter阶段、320ms、requestId 4c5a2c20-e8e9-426d-a0b0-a758f881779f，失败计数unavailable、字段/值未保留。真实POST37/records57、fixture2/3，99完成事件逐ID唯一；初始6迁移50表全0，末态DB已独立核对，扫描/worker与JVM停机/DB卷与私密材料清理通过，8080空闲。完整设计已读取并先刷新同一路径pause交接，观测IN_PROGRESS后执行IN_PROGRESS→BLOCKED。独立ISSUE-007按持续修复授权准备仅dividend原参数一次内存诊断；历史模板0行、根因未知，诊断不计为页面验收，不修改参数/范围或猜测生产修复。2000档与原49目标均未完成，不准备后继。
+
+- **State evidence (dividend diagnostic ready, still BLOCKED):** ISSUE-007单次诊断已完成，Java6合成投影及Python11保护测试通过，独立安全复审无Critical/Important，唯一Minor清理预算已修并定点关闭。58文件/54嵌套JAR来源/hash/权限/Java21和原manifest固定参数preflight通过；最终启动器SHA a58ac7549486ba0cb1e0c04690279835dc023cd3493b9e655d80dc0bb114cb90。控制目录shhiyk_p尚未使用，无真实请求，命令及安全结果入口已写ISSUE-007与pause交接；只由已有Token终端发dividend原参数一次，150秒执行预算+共用10秒清理，不重跑40项。该准备不解除真实失败，保持BLOCKED，实际根因与修复尚未建立。
 
 ### `M14-T06`
 
