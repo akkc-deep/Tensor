@@ -20,6 +20,8 @@ Java21、8080空闲、原验收JAR/manifest/spec冻结哈希重新检查通过�
 
 本次准备新增的可观察事实仅为独占空库与终端恢复路径；权威状态仍BLOCKED，49接口/58真实POST/98查询与fixture均未运行。后续操作和临时资源所有权入口见[当前交接](../task-handoffs/M14-T05-handoff.md#resume-preparation-2026-09-06)。
 
+用户执行终端启动器后的只读复核：安全就绪文件`tokenPresent=true`、初始0表，登记PID对应的启动器仍存活；本轮容器所有权、MySQL8.4.6、当前0表、8080空闲和三个冻结哈希均通过。没有读取进程环境或Token值。账户输入/完整就绪/启动门禁/运行开始文件仍均不存在；当前仅Token传递已解决，账户权限/额度/频率确认仍缺失，未启动JVM或任何业务用例。
+
 ## 实施与静态检查
 
 `739e128`（`test(release): verify live Tushare interfaces`）只新增 `control-plane/e2e/tushare-live.spec.js`，模式100644。该时点SHA-256为 `d3aafc7b3aa14311bc691fdb37ac105473598cd06c4d1d7a58949d3bd13238a5`。实现包含49项无条件注册、58样例串行页面流程、独立fixture准备、页面/请求/计数/来源时间核对、环境及日志隔离和正常停机；后续审查修订已闭环（见下文）；真实验收仍未执行。

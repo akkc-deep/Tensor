@@ -29,6 +29,8 @@ pause
 
 下一控制器先检查该进程仍在等待及安全ready文件；取得运行者非秘密账户/额度/频率确认后，以0600 `confirmed-inputs.json`提供`all49PermissionsConfirmed`、`quotaAtLeast58Confirmed`、`frequencyLimitsConfirmed`均为true和已核实的整数`callIntervalMs`。这些值不得自行推断。等待启动器写`inputs-ready.json`，再复查独占空库、冻结输入、Java/端口并写实际解阻证据，分别提交BLOCKED→READY、READY→IN_PROGRESS。随后才以0600 `start-approved.json`提供`task: M14-T05`、最终`specSha256`和相同`callIntervalMs`；启动器还会检查权威表格确为IN_PROGRESS。等待最多一小时或用户取消后会清理自有DB资源；必须检查文件和进程实际状态，过期不能复用。真实结束时仍需控制器核对CLI终检、独立迁移/表计数与页面对照、清理和失败归因，不能由启动器结束提示自动完成任务。
 
+恢复进展：用户执行上述启动命令后，控制器独立读取0600 `terminal-ready.json`，实际观测`tokenPresent=true`、`initialTables=0`，并用该文件登记PID只读确认仍是预期启动器进程；未读取进程环境或Token值。独占容器身份、MySQL8.4.6、当前0表、8080空闲与JAR/manifest/spec冻结哈希再次通过。`confirmed-inputs.json`、`inputs-ready.json`、`start-approved.json`及`run-started.json`均不存在，故没有启动实跑。Token传递问题已解决，当前只等待账户49接口权限、至少58次额度以及已核实的频率/间隔信息，收到后消费现有等待进程，不要求用户重新输入Token或重跑启动命令。
+
 ## Changed Files
 
 - `control-plane/e2e/tushare-live.spec.js`：唯一测试实施文件，最终提交 `a9bf981`，模式100644，SHA-256 `f7f3c315913bc19b8e2d59ab7ca07e82e4d3bdcd58d7ed86ea0545fbbb47fb90`。
@@ -78,7 +80,7 @@ pause
 
 ## Blocker
 
-- **Reason:** 用户报告Token已设置，但当前工具环境未继承，终端启动器尚未由用户运行；合法间隔及49接口权限、分钟/小时频率、至少58次剩余额度仍未确认。专用空库和最小权限账号已实际准备（见Resume Preparation），等待通过用户终端私密注入。剩余真实执行条件缺失，保持BLOCKED。
+- **Reason:** Token已通过用户终端启动器实际确认非空，等待进程及专用空库有效；剩余阻塞为合法间隔及49接口权限、分钟/小时频率、至少58次剩余额度尚未确认。不得凭Token存在推断账户条件，保持BLOCKED。
 - **Resolution condition:** 运行者确认账户权限/频率/额度并提供1～3600000范围内合法毫秒间隔，真实Token仅经规定环境私密注入且非空；本轮独立新schema/最小权限账号和三个DB环境已准备，独立只读确认初始0表，Java21、原JAR哈希和8080检查通过。这些实际证据需写回看板，不能以等待、credentialConfigured或静态用例发现推断已解决。
 
 ## Risks
