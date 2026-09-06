@@ -13,36 +13,33 @@ pause
 
 ## Current State
 
-原49接口spec的本地实现、反例与独立审查已完成（最终a9bf981），真实矩阵尚未运行。用户随后说明账户2000+积分，并明确要求“先把这两个排除，验证可以满足2000档积分的即可”。本次修订已将当前阶段冻结为40接口/48原样例/80查询、28ok/12empty，明确排除top_inst/broker_recommend及7项权限待确认接口；原manifest49/58及分发JAR、生产代码均保持不变。
+当前权威看板为IN_PROGRESS。用户授权的2000档阶段已完成本地修订：提交83ce0f4，固定40接口/48原样例/80查询、28ok/12empty；top_inst/broker_recommend及7项权限待确认接口明确排除，原49/58 manifest与原JAR不变。范围探针、既有反例、语法/40项发现、缺环境失败摘要和独立任务审查通过。
 
-旧终端启动器已因Ctrl+C退出，安全结果报告ownedContainerRemoved=true；私有DB连接材料已清理，没有JVM或真实业务请求。旧terminal-ready文件不可复用。当前spec还需要按新设计修订、检查和审查，新的Token执行进程/空库也尚未准备。
+新独占MySQL8.4.6已准备，最近独立检查仍为0表，字符集/最小权限/实际来源host通过；Java21/8080空闲及冻结哈希通过。一次性直接启动器已修正并通过10项合成控制流程检查，整体独立审查Approved for local launch readiness。真实JVM、40项页面矩阵、迁移后及末态DB观察均尚未运行。
 
-用户新请求使原“必须先确认全49权限”的阻塞条件不再适用于当前子集实施；修订设计以公开积分规则选出40项并采用2秒间隔，实际账户权限/额度差异由正式页面验收结果保留，不能先探测、假定授权或失败后删项。恢复本地实施以该明确范围变更和已核对的固定集合为依据，真实运行前仍必须检查本轮Token/DB/JAR/Java/端口。
+本轮控制目录为 `/private/tmp/tensor-m14-t05-control.j9045eey`。`launch.py` 是已审查一次性操作材料，`run-config.json` 固定审查内容与40/9集合；DB连接材料只存0600私有文件，禁止输出/提交。Token只能从用户已有终端的TENSOR_TUSHARE_TOKEN环境进入；工具进程不能继承该环境，禁止读取其他进程或绕过先前Terminal访问限制。旧c0f2ywas目录及ready文件不可复用。
 
 ## Changed Files
 
-- `control-plane/e2e/tushare-live.spec.js`：原49项实现已提交且审查通过；40项修订待实施。
-- `docs/verification/M14-T05-tushare-live.md`：原本地证据、公开权限差异及旧等待进程清理；新40项本地/真实结果待追加。
-- `docs/task-designs/M14-T05-design.md`：用户新授权的40项范围、排除原因、2秒节流、计数及执行合同。
-- `docs/superpowers/plans/tensor-modules/M14-integration-release.md`：仅更新M14-T05当前阶段，保留原全49目标的未覆盖事实。
-- 本交接和权威看板：记录范围修订与独立的恢复/启动转换。
+- `control-plane/e2e/tushare-live.spec.js`：2000档40项修订83ce0f4，SHA为`6e31e4d9e567feebdb3f22ee421b43d00202cc56832d0accfeab1dbe87f61ac3`。
+- `docs/verification/M14-T05-tushare-live.md`：新增当前范围、本地检查/独立审查/新DB与启动器准备事实；保留原49历史未执行记录。
+- 同一任务设计/任务卡已由d573bed修订；看板由96f9604单独记录本轮IN_PROGRESS。
+- 本交接和看板补充当前执行入口；没有生产文件、依赖、manifest或JAR改动。
 
 ## Verification
 
-以下为已有已记录结果，不将历史本地检查当作新版本或真实验收：
-
-- 原spec a9bf981 Node24语法、49项发现、同函数VM反例均通过；最终SHA为`f7f3c315913bc19b8e2d59ab7ca07e82e4d3bdcd58d7ed86ea0545fbbb47fb90`。
-- 原终检10反例、Chromium合成失败产物清理通过；d378ad2缺环境轮npx1/最终1，仅Token前置失败、无JVM或业务调用；独立审查问题均闭环。
-- 官方文档审计49地址，45含对应API说明、4文档不存在；2000档规则及已知冲突已写实际证据。
-- 旧启动器曾确认Token存在/新库0表，随后KeyboardInterrupt并报告精确清理成功；它不再是活动运行环境。
-- 新集合已从原manifest机械核对为40/48/28ok/12empty；新spec、真实矩阵和新终端启动器尚未验证。
+- 当前spec语法/范围RED→GREEN/既有同函数反例/40项发现/diff检查通过；独立任务审查Spec通过、Quality Approved，无发现。
+- 缺环境轮外层exit0，npx1/最终1保留，1failed/39didnotrun；registered40/unexecuted40、manifest58/selected48/排除9、业务POST0、扫描/清理通过。它不证明真实接口可用。
+- 一次性启动器10项合成探针通过：成功与原exit37、坏JSON、启动失败、泄漏/自动上下文、worker未退出、终检异常、缺Token先拒绝；整体审查Approved for local launch readiness。
+- 本轮独立MySQL8.4.6/0表、权限/来源host及Java21/8080/冻结哈希检查通过，安全记录位于控制目录的database-preflight.json和current-preflight.json。
+- 当前证据内shell/Python语法通过，固定终检函数与已提交版本字节相同；真实Token扫描、40/48/80、fixture2/3、迁移及末态匹配尚未验证。
 
 ## Remaining Work
 
-1. 按修订设计实现固定范围选择、安全排除证据与40/48/80成功计数，运行范围RED/GREEN、Node24语法/40项发现、既有同函数探针和缺环境摘要检查，并完成独立审查。
-2. 准备本轮独占空MySQL8.4.6和最小权限账号、新私有启动器及独立表计数；本地准备全部完成后，用户在保有Token的终端启动一次直接验收。
-3. 运行40接口、48原样例、80查询及独立fixture2POST/3查询；按CLI退出后终检、6迁移/50表/40页面计数匹配/9表0行和清理合同记录实际结果。
-4. 成功只报告本轮2000档子集完成并将原任务PAUSED；真实失败则BLOCKED。不将原49目标标为完成或自动准备后继。
+1. 用户在之前设置Token的同一终端执行 `python3 /private/tmp/tensor-m14-t05-control.j9045eey/launch.py`。它直接开始已授权验收，每15秒提示运行状态，不再等待确认文件；不需要再次粘贴Token。
+2. 读取本轮安全run-started/run-finished标记，等待CLI和全部自有工作进程退出、终检及精确DB清理。禁止直接输出runner.log、application.log或私有连接JSON。
+3. 验证启动器追加的安全报告与run-finished记录的文档SHA一致，独立核对40/48/80和fixture2/3、6迁移/50表/40页面计数匹配/9表0行、所有扫描及清理。追加报告在持有Token环境中完成整篇秘密扫描；控制器之后不要改已扫描证据内容而失去该哈希证明。
+4. 全部通过只记录本轮阶段完成并写pause交接后IN_PROGRESS→PAUSED；真实失败则记录实际失败、写pause交接后BLOCKED。原全49未完成，不准备后继。
 
 ## Resume Task
 
@@ -50,17 +47,14 @@ pause
 
 ## Start Here
 
-1. 完整读取权威看板链接的 `docs/task-designs/M14-T05-design.md`。
-2. 本交接、权威看板M14-T05详情与任务卡当前阶段。
-3. `docs/verification/M14-T05-tushare-live.md`、已审查spec及原manifest（不读模板data）。
-4. 原JAR公开页面合同和验收runbook；既有本地探针见本任务忽略工作目录。
+先完整读取权威看板链接的 `docs/task-designs/M14-T05-design.md`、本交接及当前证据的“当前2000积分档阶段”。实现已完成，不重新派发或重复旧本地套件。
 
-首个动作：核对用户明确的子集授权与40/48/28/12集合，按修订设计记录BLOCKED→READY，再按同一请求单独记录READY→IN_PROGRESS，开始本地范围修订。不得把这些实施就绪转换写成Token/DB已准备或真实验收已通过。
+首个动作：只读检查 `/private/tmp/tensor-m14-t05-control.j9045eey/run-finished.json` 是否存在。存在则消费安全报告、核对文档哈希和清理后更新状态；仅有run-started则继续观察安全标记；尚未开始则交用户执行上述新命令。没有run-config时先完成控制器封存，不能运行旧启动器。
 
 ## Blocker
 
-- **Reason:** 原全49权限阻塞已由用户范围修订替代；旧运行环境已清理，新阶段尚未实施/启动。
-- **Resolution condition:** 明确用户子集授权、原manifest上固定40/48/28/12范围及修订设计/任务卡已核对，即可恢复本地实施；实际运行环境必须在正式CLI前单独检查，缺失或失败如实记录，不伪造旧ready证据。
+- **Reason:** 原全49权限阻塞已由用户缩减范围解决；当前真实执行尚待用户在保有Token的终端启动一次。看板状态仍IN_PROGRESS，不把这一说明当作新BLOCKED转换。
+- **Resolution condition:** 新启动器直接消费该终端环境，固定审查哈希/新空库/端口检查通过后运行；任何实际页面或环境失败保留证据，不改范围、样例或自动重试。
 
 ## Risks
 

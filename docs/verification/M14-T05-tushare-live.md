@@ -2,7 +2,31 @@
 
 本轮由用户于 2026-09-06 要求按权威看板执行 M14-T05。已完整读取[任务设计](../task-designs/M14-T05-design.md)、[入口交接](../task-handoffs/M14-T05-handoff.md)和任务卡。会话基线 `dcc7c9aaf4efc01c45681945094f6bb31aa6d7ca`，启动状态提交 `2dd3bd0`。本文如实区分本地验证与尚未执行的真实验收。
 
-## 运行条件与输入
+## 当前2000积分档阶段（2026-09-06，真实验收待启动）
+
+用户明确要求“先把这两个排除，验证可以满足2000档积分的即可”。当前设计和看板已按独立提交 `d573bed`、`96f9604` 恢复至IN_PROGRESS：本轮固定40接口/48原样例/28ok/12empty/80次records查询，fixture另2POST/3查询。`top_inst`、`broker_recommend` 为higher_points；`share_float`、`hs_const`、`moneyflow_hsgt`、`hk_hold`、`index_member`、`hsgt_top10`、`namechange` 为permission_unverified。本轮9项范围排除不计skip或通过，原49接口目标仍未完成。
+
+本节取代下文历史阶段要求先确认全49权限的恢复条件。已知公开频率决定本轮固定输入 `M14_T05_CALL_INTERVAL_MS=2000`；账户现时权限、额度和上游差异由正式页面结果如实验证，不先发送额外探测、不自动重试或更换原样例。下文49项未运行矩阵及旧启动器记录保留为历史事实；不把它们当作当前运行结果。
+
+修订提交 `83ce0f4efb4772c205f5d03ddfb256f8d83750e7` 仅修改既有spec（72增/9删），SHA-256 `6e31e4d9e567feebdb3f22ee421b43d00202cc56832d0accfeab1dbe87f61ac3`。完整manifest校验仍为49/58/37ok/12empty，随后纯函数固定选择本轮集合；注册、成功门禁和安全证据均使用40/48/80，显式记录9项原因。
+
+| 当前修订的实际本地检查 | 结果 |
+|---|---|
+| 同函数范围RED/GREEN：`node /tmp/m14-t05-points2000-red-probe.mjs`，使用Node24 | 实施前exit1、缺少选择函数；实施后exit0，精确集合/顺序/排除原因及缺项、重复、错序、样例数、状态反例通过 |
+| Node24语法、既有`/tmp/m14-t05-pure-probe.mjs`、用例发现、diff检查 | 均exit0；恰40项Chromium标题且没有排除名 |
+| `/usr/bin/python3 /tmp/m14-t05-points2000-missing-env.py` | 外层exit0，实际npx1/最终1保留；1 failed/39 did not run，安全摘要registered40/unexecuted40/manifest58/selected48/排除9；业务POST0、扫描/清理通过 |
+| 独立任务审查 `96f9604..83ce0f4` | Spec通过、Quality Approved，无Critical/Important/Minor；仅批准本地实现，不证明真实验收 |
+| `python3 /private/tmp/m14-t05-direct-launcher-probe.py` | exit0，10个合成场景：成功、原exit37、损坏JSON（exit0/37）、Popen失败、秘密命中、成功轮意外上下文、工作进程未退出、终检异常、缺Token先于私有输入拒绝；清理/终检顺序与原失败码保留通过 |
+
+新一次性直接启动器位于 `/private/tmp/tensor-m14-t05-control.j9045eey/launch.py`，使用同文档已测终检函数；不再等待聊天确认文件。所有准备完成后才交用户在已有Token的终端执行，立即开始CLI并打印15秒耗时心跳；异常结果解析不能阻止独立DB清理，创建产物后启动失败仍终检，CLI与自有工作进程退出后才扫描。合成探针只验证控制流程，没有真实Token、JVM、数据库或业务调用。
+
+本轮已实际准备独占回环MySQL8.4.6空schema，独立CLI验证初始0表、utf8mb4/utf8mb4_0900_as_cs、恰CREATE/INSERT/SELECT/UPDATE权限、实际来源host且非%。私有连接材料仅0600保存于0700控制目录，不含Token、不提交。最新只读复核确认容器所有权、MySQL8.4.6/0表、Java21、8080空闲、脚本权限/语法及冻结spec/JAR/manifest哈希；首次受沙箱Docker访问限制，窄范围提权核对通过。迁移后6/50/全空、真实页面和终态行数仍未测量。
+
+整体独立审查覆盖修订spec、当前证据、一次性启动器及合成探针，结论为Approved for local launch readiness，无Critical/Important启动问题；真实40/48验收仍待执行。当前启动器SHA-256为 `1423f0ebfa6cd48a6e818b6eccf13f593b23e39ce68b0dd9722663c5ea5fb263`；文档shell/Python语法和终检函数与已提交版本逐字节一致检查通过。运行配置将固定当前spec/证据/JAR/manifest哈希和精确40/9集合，阻止审查后内容变化时启动。
+
+当前工具不继承用户终端环境，未读取其他进程Token；因此用户仍需在保有Token的终端执行一次新命令。启动器会在CLI/工作进程结束后终检、独立核对表计数、精确清理自有数据库/卷/连接材料，再在该Token环境下扫描整个候选证据并追加安全报告。只有真实40全部通过及所有门禁通过才能报告当前阶段完成，原任务随后PAUSED；真实失败进入BLOCKED。当前尚未开始实际验收，也未声明真实凭证终检通过。
+
+## 运行条件与输入（原49阶段历史）
 
 - 首次本地实施时仅检查规定环境变量是否非空：`TENSOR_TUSHARE_TOKEN`、`M14_T05_CALL_INTERVAL_MS` 和三个 `TENSOR_DB_*` 均未配置，没有读取或输出凭证值。
 - 已请求运行者确认账户覆盖全部49接口、分钟/小时限制、至少58次剩余额度及合规的最小毫秒间隔；尚未收到这些事实，不能猜测速率或发送真实请求探测权限。
@@ -137,7 +161,7 @@ Java21、8080空闲、原验收JAR/manifest/spec冻结哈希重新检查通过�
 
 ## 运行与CLI退出后终检命令
 
-下列为恢复执行命令，**本轮未用于真实矩阵**。运行者先完成设计规定的账户确认、新空MySQL8.4.6 schema/最小权限账号、独立只读初始和结束表计数，以及私密环境注入；Token只能通过 `TENSOR_TUSHARE_TOKEN`，不写文件或聊天。采用原验收JAR绝对路径、明确的 `M14_T05_CALL_INTERVAL_MS` 和Node24。首次失败停止，不自动重试、不换日期或参数。
+下列为基础执行及固定终检代码，**尚未用于真实矩阵**。当前阶段由上述直接启动器编排，运行者先完成修订设计规定的新空MySQL8.4.6 schema/最小权限账号、独立只读初始和结束表计数，以及私密环境注入；Token只能通过 `TENSOR_TUSHARE_TOKEN`，不写文件或聊天。采用原验收JAR绝对路径、明确的 `M14_T05_CALL_INTERVAL_MS` 和Node24。首次失败停止，不自动重试、不换日期或参数。
 
 spec仅写 `run/application.log` 和 `run/safe-results.json`。终检在npx和所有worker完全退出后运行；目录不跟随符号链接，异常文件/对象直接失败，泄漏文件删除，全部Playwright产物删除。成功轮存在上下文/附件视为失败；`.last-run.json`只作为会删除的正常运行索引。保留的白名单日志/JSON均在本机私有目录，不能发布原日志。
 
@@ -289,4 +313,4 @@ print('M14_T05_EVIDENCE_SECRET_SCAN_PASSED')
 PY
 ```
 
-恢复后须独立验证新空库、6迁移/50业务表、49生产表末行数与页面总数一致、fixture1行，核对全部请求完成事件，正常SIGTERM停机并清理本轮精确自有资源。只有完整49通过、零失败/未执行/重试和全部扫描/清理门禁通过，才可按看板完成M14-T05并准备M14-T06。
+当前阶段运行后须独立验证新空库、6迁移/50业务表、40生产表末行数与页面总数一致、9个排除表仍空、fixture1行，核对全部请求完成事件，正常停机并清理本轮精确自有资源。全40通过、零失败/未执行/重试和全部扫描/清理门禁通过后，仅记录2000档阶段完成并将原任务PAUSED；原49目标未完成，不准备后继。真实失败则记录证据并BLOCKED。

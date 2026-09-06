@@ -1076,6 +1076,8 @@
 
 - **State evidence (2000-point phase start):** 修订设计/范围与BLOCKED→READY已独立提交d573bed。按用户当前明确执行请求，在完整读取新设计与pause入口后执行单独READY→IN_PROGRESS，开始固定40接口范围修订、针对性验证和独立审查，并准备直接运行的新私有环境；不把本地启动转换当作真实40项已执行。
 
+- **State evidence (2000-point local readiness):** 修订83ce0f4已完成并独立任务审查Approved；当前40项语法/范围反例/原同函数探针/发现/缺环境摘要检查通过，真实矩阵尚未运行。新MySQL8.4.6专用空库、最小权限/实际来源host、Java21/8080/冻结哈希已核对；一次性直接启动器10项合成失败/清理探针及整体审查Approved for local launch readiness。当前pause入口更新为新控制目录j9045eey及用户已有Token终端的一条直接执行命令，不复用旧等待脚本。仍IN_PROGRESS，未声明真实40项、迁移/末态DB匹配或真实Token终检通过；后续仅按实际结果PAUSED或BLOCKED，不推进后继。
+
 ### `M14-T06`
 
 - **Goal:** 交付“`daily` 与 `balancesheet` 性能验证”。
