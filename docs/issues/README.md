@@ -21,4 +21,4 @@
 | ISSUE-004 | 前端 UI 不美观，缺乏科技感 | 最终设计已确认，待实施计划 | [详情](problems/ISSUE-004-ui-visual-redesign.md) · [最终方案](proposals/ISSUE-004-ui-visual-concepts.md) · [HTML 预览](proposals/ISSUE-004-ui-visual-concepts.html) |
 | ISSUE-005 | Tushare 小数解析导致适配失败 | 已解决，stock_company 真实三样例通过 | [详情](problems/ISSUE-005-tushare-decimal-decoding.md) · [设计与计划](proposals/ISSUE-005-tushare-decimal-decoding.md) |
 | ISSUE-006 | 股东户数公告日期混入日期时间格式 | 已解决，真实150行适配/入库/查看通过 | [详情与设计](problems/ISSUE-006-holdernumber-announcement-date.md) |
-| ISSUE-007 | dividend 真实适配失败且缺少字段诊断 | 单次安全诊断已就绪，待原参数执行 | [详情与诊断设计](problems/ISSUE-007-dividend-adapter-diagnosis.md) |
+| ISSUE-007 | dividend 业务键未区分实施进度 | 根因已定位，业务键/迁移修复设计待确认 | [诊断详情](problems/ISSUE-007-dividend-adapter-diagnosis.md) · [修复设计](proposals/ISSUE-007-dividend-business-key.md) |

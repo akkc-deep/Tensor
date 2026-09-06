@@ -1057,7 +1057,7 @@
 - **Acceptance:** “真实 Tushare 49 接口受控页面验收”已按该任务卡指定的位置和行为形成；任务卡列出的全部测试、验证命令和检查得到其注明的预期结果；没有混入排除范围。
 - **Dependencies:** M14-T04.
 - **Sources:** `docs/superpowers/plans/tensor-modules/M14-integration-release.md` 的 `Task M14-T05` 任务卡。
-- **First action:** 消费1gpnb4ru的28通过/1dividend适配失败/11未运行证据与当前pause交接；沿ISSUE-007完成原参数单次安全诊断以确定字段/类别，再建立独立修复与新包接入。不复跑已使用启动器，不猜测生产改动。
+- **First action:** 消费ISSUE-007已实际完成的安全诊断和四字段指纹键修复设计；确认所需业务键/迁移与dividend验收预期修订后，从合成RED开始实施。不重复已用诊断或全矩阵，不把诊断当页面通过。
 - **State evidence (readiness):** 2026-09-06：M14-T04完成记录 `80a9491` 已先独立提交，再按预定义Order选中75/M14-T05，观测NOT_STARTED、Design/Handoff为None。使用任务契约设计技能完成145行 `docs/task-designs/M14-T05-design.md`，就绪审查3Important/1Minor经定点修正全部Addressed、无新Critical/Important/Minor，Ready for implementation: Yes；修正精确DownloadResponse八键、600/330秒分阶段钩子预算、CLI完全退出后的独占产物扫描/删除与页面静态资源允许列表。`9b3d263` 提交设计并仅回填Design document，链接后完整读取。设计冻结两实施文件、原验收JAR、manifest49接口/58样例、37ok/12empty接口级判定、98次真实dataset查询、独立fixture2POST/3查询、真实Token环境/账户权限频率额度前置确认、单worker/零重试、新空schema、按不同业务键的计数和页面记录/来源/时间核对、安全与正常清理。结构/引用/manifest数量哈希、两实施文件缺席、依赖决定及约束一致性均已核对；唯一任务依赖仍M14-T04，M14-T02公开fixture合同仅作为任务卡指定补充来源。先按完整模板写 `docs/task-handoffs/M14-T05-handoff.md`，列清直接输入的产物/决定/理由/约束/用途/既有可用性证据，链接后执行真实 `NOT_STARTED -> READY`。本轮只设计/交接，live spec及实际证据尚未创建，本地安全探针、账户权限/额度/Token和真实上游矩阵未验证；首动作直接实施完成设计，不补设计、不将预期写成实跑通过。用户并行ISSUE-004及target资源未纳入提交。
 
 - **State evidence (start):** 2026-09-06：用户明确要求按权威任务看板执行当前任务、先读取设计和交接。已完整读取 M14-T05 所链接设计与交接，核对任务卡、全局约束和 READY 来源状态，两实施目标不存在且无重叠修改；以本次请求执行 `READY -> IN_PROGRESS`，保留入口交接。按仓库授权直接在 main 实施，使用既定子代理实施与独立审查流程。本地仅检查环境变量存在性，Token、调用间隔和三个DB变量均未配置；已请求运行者提供账户权限/频率/额度的非秘密确认，先完成设计允许的静态实施与本地探针，真实矩阵不得在前置条件缺失时启动。用户已有ISSUE-004暂存和target产物保持原状。
@@ -1101,6 +1101,8 @@
 - **State evidence (live dividend failure):** 用户已运行1gpnb4ru，实际安全证据e3013b1先独立提交，整篇SHA d4e7bf67b6a2b144662a987dec9aa812a8e39543c5134ed7cab8a12a4dbe34b5与真实Token扫描标记及控制器复核一致。139秒、最终exit1，28通过/1失败/11未运行；stock_company6294继续通过，stk_holdernumber来源/插入/页面与DB均150，121ms、requestId ba63f8ea-1043-4891-b2ee-fd577a371752，ISSUE-006真实验证关闭。新dividend唯一原样例ADAPTER_TYPE_INVALID、adapter阶段、320ms、requestId 4c5a2c20-e8e9-426d-a0b0-a758f881779f，失败计数unavailable、字段/值未保留。真实POST37/records57、fixture2/3，99完成事件逐ID唯一；初始6迁移50表全0，末态DB已独立核对，扫描/worker与JVM停机/DB卷与私密材料清理通过，8080空闲。完整设计已读取并先刷新同一路径pause交接，观测IN_PROGRESS后执行IN_PROGRESS→BLOCKED。独立ISSUE-007按持续修复授权准备仅dividend原参数一次内存诊断；历史模板0行、根因未知，诊断不计为页面验收，不修改参数/范围或猜测生产修复。2000档与原49目标均未完成，不准备后继。
 
 - **State evidence (dividend diagnostic ready, still BLOCKED):** ISSUE-007单次诊断已完成，Java6合成投影及Python11保护测试通过，独立安全复审无Critical/Important，唯一Minor清理预算已修并定点关闭。58文件/54嵌套JAR来源/hash/权限/Java21和原manifest固定参数preflight通过；最终启动器SHA a58ac7549486ba0cb1e0c04690279835dc023cd3493b9e655d80dc0bb114cb90。控制目录shhiyk_p尚未使用，无真实请求，命令及安全结果入口已写ISSUE-007与pause交接；只由已有Token终端发dividend原参数一次，150秒执行预算+共用10秒清理，不重跑40项。该准备不解除真实失败，保持BLOCKED，实际根因与修复尚未建立。
+
+- **State evidence (dividend root cause, still BLOCKED):** 用户已运行shhiyk_p单次原参数诊断，1.56秒，原f2fc包/manifest身份通过，clientExecuteCalls1/sourceRowCount38，ADAPTER_TYPE_INVALID/conflicting_key，首冲突rowIndex21，差异字段div_proc/cash_div/cash_div_tax；适配计数未建立，扫描与Java退出true，无数据库/重试/真实行落盘。安全结果SHA1b1ee18c0fb667517312957eed85620e9fecc2d1c4e91597413932e0586e2d46及私有保留白名单已核对；新诊断位置/计数不补写旧页面失败。官方公开说明确认div_proc为实施进度；旧三字段键未覆盖进度，历史EMPTY预期也与当前非空不同。已形成docs/issues/proposals/ISSUE-007-dividend-business-key.md：四字段FINGERPRINT、按元数据允许空指纹身份、新V7保留现有行、仅dividend当前ok覆盖及完整验证/接入边界。该记录身份和迁移设计待确认，生产/元数据/SQL/spec尚未实施；交接已刷新，保持BLOCKED，不准备后继，不要求用户重复诊断。
 
 ### `M14-T06`
 

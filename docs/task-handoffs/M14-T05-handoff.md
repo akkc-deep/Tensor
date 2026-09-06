@@ -17,13 +17,14 @@ pause
 
 本轮证据已先独立提交 `e3013b1`。整篇真实Token扫描SHA `d4e7bf67b6a2b144662a987dec9aa812a8e39543c5134ed7cab8a12a4dbe34b5`，控制器复核一致、旧前缀未变。1gpnb4ru已使用并完成清理，不能再次运行。
 
-独立ISSUE-007已完成只针对dividend的原参数单次诊断材料。保留日志没有失败字段/值，历史模板0行，尚无足够证据选择产品修复。Java内存投影6个合成用例与Python启动保护11项离线检查已通过，独立复审唯一Minor清理预算已关闭，最终封存/preflight通过；诊断待用户已有Token终端执行，根因仍未确定。该诊断不启动数据库或完整验收，不计为页面通过，不改变冻结参数/范围。
+独立ISSUE-007原参数单次诊断已实际完成：1.56秒、1次客户端执行、38源行，first conflicting_key rowIndex21，差异字段div_proc/cash_div/cash_div_tax，适配计数未建立；秘密扫描与Java退出通过，无数据库或重试。根因已定位为旧三字段业务键未区分实施进度。四字段指纹键、保留现有行的V7迁移及仅dividend的历史EMPTY预期修订已写具体设计，待确认后实施；生产/元数据/数据库/spec尚未更改。诊断不计为页面通过，不将新位置/数量回填为历史失败字段/计数。
 
 ## Changed Files
 
 - `docs/verification/M14-T05-tushare-live.md`：真实28/1/11安全报告，已提交e3013b1，保持已扫描全文不变。
 - `docs/issues/problems/ISSUE-006-holdernumber-announcement-date.md` 与 `docs/issues/README.md`：记录stk_holdernumber真实150行通过并关闭ISSUE-006。
-- `docs/issues/problems/ISSUE-007-dividend-adapter-diagnosis.md`：登记新失败、已知与未知证据及单次诊断边界。
+- `docs/issues/problems/ISSUE-007-dividend-adapter-diagnosis.md`：登记单次真实诊断、根因和安全结果身份。
+- `docs/issues/proposals/ISSUE-007-dividend-business-key.md`：待确认的四字段指纹键、V7迁移、回归和验收修订设计。
 - 本交接和权威看板：记录新真实阻塞及解除条件。
 
 ## Verification
@@ -42,8 +43,8 @@ pause
 
 ## Remaining Work
 
-1. 用户在已有Token终端执行 `python3 /private/tmp/tensor-issue-007-diagnostic.shhiyk_p/diagnose.py`，仅dividend原参数一次；消费白名单结果定位真实失败类别/字段。不要重复完整40项或任何已使用启动器。
-2. 依据实际根因完成独立最小修复、回归/复审和冻结新包接入；若出现历史EMPTY与当前非空差异，明确处理预期漂移，保留原manifest和真实失败。
+1. 确认ISSUE-007已写具体修复设计：按ts_code/end_date/ann_date/div_proc区分身份，保留nullable进度与同阶段跨次更新，以新增V7保留现有行；同步仅dividend的当前非空验收预期。旧诊断已消费，无需再次运行。
+2. 确认后按设计实施最小修复、合成RED/GREEN、迁移/回归/独立复审和新冻结包接入。原manifest与历史真实失败保持不变。
 3. 解除条件成立后才BLOCKED→READY并单独恢复M14-T05。最终全40与全部安全/清理门禁通过仅报告2000档阶段完成并PAUSED；若真实失败再次BLOCKED。原49未覆盖事实保留，不准备后继。
 
 ## Resume Task
@@ -54,18 +55,18 @@ pause
 
 1. 权威看板Order75及完整 `docs/task-designs/M14-T05-design.md`。
 2. 本交接与已扫描实际证据 `docs/verification/M14-T05-tushare-live.md`（提交e3013b1）。
-3. `docs/issues/problems/ISSUE-007-dividend-adapter-diagnosis.md`。
+3. `docs/issues/problems/ISSUE-007-dividend-adapter-diagnosis.md` 与修复设计 `docs/issues/proposals/ISSUE-007-dividend-business-key.md`。
 4. 本轮安全标记 `/private/tmp/tensor-m14-t05-control.1gpnb4ru/run-finished.json`，终检产物根 `/private/tmp/tensor-m14-t05.91e69mlz`。不输出日志全文或真实行。
 
-首动作：检查ISSUE-007控制目录safe-result.json；尚未运行时交付上方单条命令，已有安全结果时直接消费结果，不复跑旧命令；确认根因前不猜测生产修复。无需重新配置Token。
+首动作：消费已定位的ISSUE-007根因与待确认设计；尚未确认时交付具体方案，用户确认后直接实施设计中的合成RED，不再要求Token设置或原诊断重跑。
 
 ## Blocker
 
-- **Reason:** 1gpnb4ru实测dividend在adapter阶段返回ADAPTER_TYPE_INVALID，28通过/1失败/11未运行；真实错误字段/值未保存，历史模板0行，根因未确定。
-- **Resolution condition:** ISSUE-007以安全证据确认根因，并建立最小修复的回归/独立复审、新冻结包合同/启动验证及设计接入；仅诊断成功或本地适配通过不足以宣称真实验收通过。
+- **Reason:** 1gpnb4ru实测dividend在adapter阶段返回ADAPTER_TYPE_INVALID，28通过/1失败/11未运行；历史页面失败字段/值未保存；独立诊断已定位进度冲突，所需业务键/迁移与验收设计尚未确认或实施。
+- **Resolution condition:** ISSUE-007根因已确认，需落实四字段指纹键设计并建立修复的回归/独立复审、新冻结包合同/启动验证及验收设计接入；仅诊断成功或本地适配通过不足以宣称真实验收通过。
 
 ## Risks
 
 - 不能将诊断的新请求位置/数量冒充1gpnb4ru历史失败字段/计数，也不能将adapter错误改判EMPTY。
-- 上游非空可能与历史EMPTY预期不同，需明确记录和处理，不自行修改manifest、删接口或放宽所有类型。
+- 诊断已证实当前非空与历史EMPTY预期不同；拟仅在验收层显式覆盖dividend，不修改manifest或删除接口。
 - 原包、ISSUE-005与ISSUE-006包均保留，不暗换输入；所有真实响应仅在诊断内存处理。

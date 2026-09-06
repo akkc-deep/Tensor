@@ -1,8 +1,8 @@
-# ISSUE-007：dividend 真实适配失败且缺少字段诊断
+# ISSUE-007：dividend 的业务键未区分实施进度
 
 ## 当前阶段与授权
 
-按用户持续执行/继续修复的授权开展独立产品诊断。根因尚未确定，不猜测修复、不修改生产代码/类型/业务键。M14-T05 保持 BLOCKED；诊断不计为页面验收或成功重试。
+根因已通过用户实际执行的原参数单次诊断定位：旧三字段业务键没有区分实施进度，不同进度和金额的记录发生冲突。已形成 [四字段指纹业务键修复设计](../proposals/ISSUE-007-dividend-business-key.md)，待确认该记录身份及迁移/验收变更。当前未修改生产代码、元数据、业务键或数据库；M14-T05保持BLOCKED，诊断不计为页面验收或成功重试。
 
 ## 真实证据
 
@@ -26,9 +26,9 @@ Java仅对固定 `dividend` 执行冻结manifest中唯一原参数一次，使�
 
 取得真实字段/格式证据后再定最小修复和回归。若实际数据出现非空，同时单独处理冻结历史EMPTY预期与当前上游结果的差异，保留原manifest/参数和历史事实；不得直接把适配错误转成EMPTY、删除dividend或放宽所有日期。修复验证及新产物接入成立前不恢复M14-T05、不准备全矩阵重跑。
 
-## 单次诊断交付
+## 单次诊断交付（已执行，不可复用）
 
-诊断材料已就绪，尚未真实执行。用户在已有 `TENSOR_TUSHARE_TOKEN` 的终端仅执行一次：
+以下是用户已实际执行的命令，仅作历史记录，不再次运行：
 
 ```sh
 python3 /private/tmp/tensor-issue-007-diagnostic.shhiyk_p/diagnose.py
@@ -40,4 +40,25 @@ python3 /private/tmp/tensor-issue-007-diagnostic.shhiyk_p/diagnose.py
 
 离线Java命令使用该目录classes及54个固定lib构成classpath执行 `DividendDiagnostic --self-test`，6项投影用例通过；`python3 /private/tmp/tensor-issue-007-diagnostic.shhiyk_p/test_launch.py` 的11项测试通过，覆盖白名单和结构拒绝、错误/成功/空投影、重复报告拒绝、Token与JSON转义拒绝、独占单次门禁、真实自有进程超时退出、篡改拒绝，以及持续不退出时主/补救清理总等待仅5+5秒。没有真实请求。独立安全复审无Critical/Important，唯一Minor（极端清理可能多等5秒）已修复并定点关闭，无剩余发现。
 
-执行后只消费此控制目录的 `safe-result.json`，先核对diagnosticOnly、固定API/包/manifest身份、单次调用数、secretScanPassed与javaExited，再读取固定白名单投影。`used.json` 是一次性使用标记，不删除或绕过它重试。真实响应、源行、适配行与原始stdout/stderr不落盘。M14-T05保持BLOCKED，下一步由真实诊断证据决定最小修复。
+控制器已消费此控制目录的 `safe-result.json`，先核对diagnosticOnly、固定API/包/manifest身份、单次调用数、secretScanPassed与javaExited，再读取固定白名单投影。`used.json` 是一次性使用标记，不删除或绕过它重试。真实响应、源行、适配行与原始stdout/stderr不落盘。M14-T05保持BLOCKED，下一步按已定位事实确认四字段指纹键设计，再实施和复验。
+
+## 单次真实诊断结果
+
+用户报告“已运行”后，读取且验证固定身份/字段白名单的 safe-result.json：启动UTC 2026-09-06T08:48:17.647630+00:00，用时1.56秒，launcherOutcome=report_ready。Java成功输出诊断报告仅表示诊断完成，接口仍ADAPTER_TYPE_INVALID。
+
+| 安全字段 | 实测值 |
+|---|---|
+| sourceRowCount | 38 |
+| adaptedRowCount | 未建立，null |
+| failureKind | conflicting_key |
+| rowIndex | 21，从0开始 |
+| conflictingFields | div_proc、cash_div、cash_div_tax |
+| clientExecuteCalls | 1 |
+| secretScanPassed / javaExited | true / true |
+| databaseCreated / automaticRetry | false / false |
+
+固定JAR/manifest身份与上一节封存值一致，safe-result.json SHA `1b1ee18c0fb667517312957eed85620e9fecc2d1c4e91597413932e0586e2d46`；used.json SHA `9f824eb82f4480be4812b1b0a0868dc062b684a0b9c59c1d4445982b80d245e3`。控制器核对0600权限和精确保留文件集合通过；除封存材料和两份安全JSON外没有原始输出/响应文件。旧启动器已使用，禁止删除标志后重试。
+
+这是新请求的38行来源计数及首个冲突位置，不是1gpnb4ru历史页面失败的字段/计数。原38行不保存，本次也没有适配/入库/页面成功结论。先前完成的2000档实际结果仍28通过/1失败/11未运行。
+
+官方公开文档 https://tushare.pro/document/2?doc_id=103 已在无Token的只读请求中核对，div_proc为“实施进度”、ann_date为“公告日(预案，决案)”。该证据支持在旧三字段后增加进度区分身份；如何处理同进度跨次更新、nullable进度、现有行迁移和历史EMPTY漂移已具体写入修复设计，待确认后实施。
