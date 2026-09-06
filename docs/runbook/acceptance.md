@@ -34,13 +34,13 @@ SELECT VERSION();
 CREATE DATABASE tensor_acceptance
   CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_as_cs;
 CREATE USER '<DB_USER>'@'<APP_HOST>' IDENTIFIED BY '<DB_PASSWORD>';
-GRANT CREATE, SELECT, INSERT, UPDATE ON tensor_acceptance.*
+GRANT CREATE, SELECT, INSERT, UPDATE, ALTER, INDEX ON tensor_acceptance.*
   TO '<DB_USER>'@'<APP_HOST>';
 SHOW GRANTS FOR '<DB_USER>'@'<APP_HOST>';
 SHOW CREATE DATABASE tensor_acceptance;
 ```
 
-首次使用空 schema，不能复用生产 `tensor`。`<APP_HOST>` 对应 MySQL 实际看到的应用来源，包括容器网关/NAT 后的地址；不要默认使用 `%`。应用只用这个 schema 级账号，不用管理员账号启动。V1～V6 所需的建表及业务权限仍为 CREATE、SELECT、INSERT、UPDATE。
+首次使用空 schema，不能复用生产 `tensor`。`<APP_HOST>` 对应 MySQL 实际看到的应用来源，包括容器网关/NAT 后的地址；不要默认使用 `%`。应用只用这个 schema 级账号，不用管理员账号启动。当前 V1～V7 的建表、回填和业务权限为 CREATE、SELECT、INSERT、UPDATE、ALTER、INDEX，范围仅此 schema；不授予 DROP、DELETE 或全局权限。
 
 ## 3. 分发与环境注入
 
@@ -90,7 +90,7 @@ java -jar tensor-app-1.0-SNAPSHOT-acceptance.jar \
   --server.address=127.0.0.1 --server.port=8080
 ```
 
-必须两个运行条件同时满足才注册 fixture。验收包内 V6 对 Flyway 始终可见，首次启动自动执行 V1～V6，建立 49 张 Tushare 表和一张 `fixture__fixture_daily`，另有 history 表；即使禁用 fixture，V6 仍可能执行。
+必须两个运行条件同时满足才注册 fixture。验收包内 V6 对 Flyway 始终可见，首次启动自动执行 V1～V7 共七次迁移，建立 49 张 Tushare 表和一张 `fixture__fixture_daily`，另有 history 表；即使禁用 fixture，V6 仍可能执行。
 
 等待根 `/actuator/health` 达到 HTTP 200、`status=UP`，再从新终端进入同一目录运行：
 
@@ -121,7 +121,7 @@ SELECT COUNT(*) AS business_tables FROM information_schema.tables
 SHOW COLUMNS FROM tensor_acceptance.fixture__fixture_daily;
 ```
 
-应恰有版本 1～6 的六条成功记录、50 张业务表及 fixture 七列。保留脱敏版本、命令、HTTP 状态和计数证据；不要分享完整日志、响应、环境或真实凭证。
+应恰有版本 1～7 的七条成功记录、50 张业务表（1008 物理列、41 个二级索引）及 fixture 七列。保留脱敏版本、命令、HTTP 状态和计数证据；不要分享完整日志、响应、环境或真实凭证。
 
 ## 5. 正常停止与开关重启
 
@@ -137,7 +137,7 @@ java -jar tensor-app-1.0-SNAPSHOT-acceptance.jar \
   --server.address=127.0.0.1 --server.port=8080
 ```
 
-重做 health、四项 smoke、两页刷新及数据源 GET：fixture 应完全缺席，只有与首次完全一致的 Tushare 摘要。再查 history 和表数，应仍为六项成功迁移、50 张业务表；已建 fixture 表保留，开关不撤销迁移。
+重做 health、四项 smoke、两页刷新及数据源 GET：fixture 应完全缺席，只有与首次完全一致的 Tushare 摘要。再查 history 和表数，应仍为七项成功迁移、50 张业务表；已建 fixture 表保留，开关不撤销迁移。
 
 正常停止后，另验证缺少 acceptance profile 的状态：
 
@@ -157,7 +157,9 @@ java -jar tensor-app-1.0-SNAPSHOT.jar \
   --server.address=127.0.0.1 --server.port=8080
 ```
 
-应仍只有 Tushare、V1～V5 五条成功记录、49 张业务表，无 fixture 表；health、原 smoke 和页面刷新通过。绝不能把生产包连接已执行 V6 的验收库，也不删表、删 history 或运行 Flyway clean 来“回退”。
+应仍只有 Tushare、V1～V5、V7 六条成功记录、49 张业务表，无 fixture 表；health、原 smoke 和页面刷新通过。绝不能把生产包连接已执行 V6 的验收库，也不删表、删 history 或运行 Flyway clean 来“回退”。
+
+已有验收库升级 V7 时遵循[停写与回退规则](first-run.md#v7-分红身份升级)：先停止全部写入者并验证备份，迁移/schema/health 通过后恢复；旧验收包不兼容新主键，不允许只回退 JAR。V7 属于生产基线，验收包仍仅额外增加 fixture 和 V6。
 
 ## 6. 运行边界
 

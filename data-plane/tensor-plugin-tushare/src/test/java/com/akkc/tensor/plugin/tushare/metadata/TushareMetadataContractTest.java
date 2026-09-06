@@ -356,7 +356,8 @@ class TushareMetadataContractTest {
         addBusinessKey(expected, "forecast", BusinessKeyMode.COMPOSITE,
                 "ts_code", "end_date", "ann_date", "type");
         addBusinessKey(expected, "disclosure_date", BusinessKeyMode.COMPOSITE, "ts_code", "end_date");
-        addBusinessKey(expected, "dividend", BusinessKeyMode.COMPOSITE, "ts_code", "end_date", "ann_date");
+        addBusinessKey(expected, "dividend", BusinessKeyMode.FINGERPRINT,
+                "ts_code", "end_date", "ann_date", "div_proc");
         addBusinessKey(expected, "repurchase", BusinessKeyMode.COMPOSITE, "ts_code", "ann_date", "proc");
         addBusinessKey(expected, "share_float", BusinessKeyMode.COMPOSITE,
                 "ts_code", "float_date", "holder_name", "share_type");

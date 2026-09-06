@@ -478,6 +478,8 @@ CREATE TABLE tushare_pro__daily (
 
 ### 9.4 首期 49 个业务键
 
+2026-09-06 M14-T09/ISSUE-007 已批准后续修订：dividend 当前采用 `FINGERPRINT [ts_code, end_date, ann_date, div_proc]`，保留不同实施进度，合法空进度使用显式空标记，同阶段跨批更新；通过新增 V7 保留现有行并切换唯一约束。当前 46 个 COMPOSITE、3 个 FINGERPRINT；详细迁移及回退规则见 [ISSUE-007](../issues/proposals/ISSUE-007-dividend-business-key.md)。下表保留 v1.0 历史三字段键，不作为当前 dividend 的执行规则。
+
 下表是 v1.0 固定业务键基线。`COMPOSITE` 直接建立复合主键；`FINGERPRINT` 对指定身份字段进行长度前缀化、UTF-8、固定字段顺序和显式空值标记的规范化序列化，再用 SHA-256 生成 `business_key CHAR(64)` 主键。该摘要只用于数据库幂等，不涉及 Git 或仓库能力。
 
 | 分类 | API | 键模式 | 业务键字段/身份字段 |

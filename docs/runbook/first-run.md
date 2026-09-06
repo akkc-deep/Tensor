@@ -48,14 +48,14 @@ SELECT VERSION();
 CREATE DATABASE IF NOT EXISTS tensor
   CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_as_cs;
 CREATE USER '<DB_USER>'@'<APP_HOST>' IDENTIFIED BY '<DB_PASSWORD>';
-GRANT CREATE, SELECT, INSERT, UPDATE ON tensor.* TO '<DB_USER>'@'<APP_HOST>';
+GRANT CREATE, SELECT, INSERT, UPDATE, ALTER, INDEX ON tensor.* TO '<DB_USER>'@'<APP_HOST>';
 SHOW GRANTS FOR '<DB_USER>'@'<APP_HOST>';
 SHOW CREATE DATABASE tensor;
 ```
 
 确认 schema 的字符集和排序规则正确，授权范围为 `tensor.*`。`IF NOT EXISTS` 不会修正已有 schema 的属性；首次运行应使用符合上述要求的空 schema。MySQL 显示的 `USAGE ON *.*` 不授予实际全局操作权限。
 
-当前 V1–V5 migration 只使用 `CREATE TABLE` 和会话 `SET time_zone`，业务读写使用 SELECT、INSERT、UPDATE，所以上述应用账号权限同时支持建表与运行。无需授予全局权限、账号管理或 `GRANT OPTION`。未来版本引入其他 DDL 时，按该版本发布说明单独评估所需权限。完成后退出管理员会话。
+当前生产迁移为 V1～V5、V7，共六次。V7 回填分红指纹并切换主键，除 CREATE、SELECT、INSERT、UPDATE 外还需该 schema 上的 ALTER、INDEX；不授予 DROP、DELETE、全局权限、账号管理或 GRANT OPTION。完成后退出管理员会话。
 
 ## 3. 注入环境
 
@@ -96,7 +96,7 @@ trap 会在失败、正常 shell 退出或信号中断时恢复终端状态；�
 java -jar tensor-app-1.0-SNAPSHOT.jar --server.address=127.0.0.1 --server.port=8080
 ```
 
-这两个 Boot 参数是非秘密运行参数，首跑只绑定回环地址。观察启动结果：Flyway 自动执行 V1–V5，建立 49 张业务表，另有一张 `flyway_schema_history`；应用随后自动检查数据集元数据和表结构。不要手工执行 migration，不启用 fixture 或 acceptance profile，不执行测试 V6，也不另起前端进程。
+这两个 Boot 参数是非秘密运行参数，首跑只绑定回环地址。观察启动结果：Flyway 自动执行 V1～V5、V7 共六次迁移，建立 49 张业务表（851 业务列、1001 物理列、41 个二级索引），另有一张 `flyway_schema_history`；应用随后自动检查数据集元数据和表结构。不要手工执行 migration，不启用 fixture 或 acceptance profile，不执行测试 V6，也不另起前端进程。
 
 组织已有网关可承担 TLS 和访问控制；本地首跑不要求网关。公开访问前应按组织部署入口要求配置访问边界。
 
@@ -150,6 +150,16 @@ fi
 远程数据库应使用实际主机和部署要求的 TLS 参数。备份账号按 MySQL 工具及数据库对象所需权限另行配置，不能把应用账号当作备份管理员；不要在并发 DDL 期间把事务快照视为一致性保证。备份包含敏感业务数据，应按组织要求限制访问和保管，禁止提交 Git。在独立环境验证恢复成功后，才把备份作为可用恢复依据；本任务不执行业务数据库恢复。
 
 Flyway 只允许前向迁移，不运行 `clean`、不删除 history、不执行逆向或破坏性 DDL。只有确认上一应用版本兼容**当前 schema**时才能回退应用。删除或缩窄字段必须分阶段发布，先兼容、再清理；误写恢复依赖经过恢复验证的备份。
+
+### V7 分红身份升级
+
+升级已有 V5 生产库或 V6 验收库前，停止旧应用和所有其他写入者，完成并验证备份；在迁移、schema 校验和 health 全部通过前保持停写。不要让旧包与新包并行写入。
+
+V7 在分红表新增 `business_key`，按股票代码、报告期、公告日、实施进度回填指纹，保留业务行及来源/入库时间；最后一条 ALTER 原子切换主键并补充 ts_code 索引。不同进度分别保存，同进度跨次下载更新，允许合法空进度。V1～V5 历史迁移不改写。
+
+MySQL 多条 DDL 不构成整体事务。最终 ALTER 失败时旧主键保留，但新增可空列和回填可能已完成；记录实际阶段，保持停写，不自动重试、Flyway repair、清库或删 history。
+
+旧包不生成 business_key，不能直接运行在 V7 schema 上。回退必须在停写状态恢复经过验证的备份及配套旧 schema/旧包，不能只替换 JAR。当前任务只在自有合成库验证迁移，不自动升级外部现有库。
 
 ## 8. 故障定位
 

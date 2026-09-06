@@ -718,7 +718,7 @@ result = {
         "packagedYaml": 49,
         "fixtureAdditionalTables": 1,
         "tableEvidence": "successful FlywaySchemaContractIT result-level assertions",
-        "fixtureTotals": {"businessTables": 50, "totalColumns": 1007, "primaryKeys": 50},
+        "fixtureTotals": {"businessTables": 50, "totalColumns": 1008, "primaryKeys": 50},
     },
     "syntheticRejections": 11,
 }

@@ -21,6 +21,6 @@ columns:
   - { name: pay_date, label: pay_date, logicalType: DATE, nullable: true, displayOrder: 11 }
   - { name: div_listdate, label: div_listdate, logicalType: DATE, nullable: true, displayOrder: 12 }
   - { name: imp_ann_date, label: imp_ann_date, logicalType: DATE, nullable: true, displayOrder: 13 }
-businessKey: { mode: COMPOSITE, fields: [ts_code, end_date, ann_date] }
+businessKey: { mode: FINGERPRINT, fields: [ts_code, end_date, ann_date, div_proc] }
 filters: [ts_code, ann_date]
 fixedColumn: ts_code

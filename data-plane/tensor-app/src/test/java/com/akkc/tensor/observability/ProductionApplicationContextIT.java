@@ -168,7 +168,7 @@ class ProductionApplicationContextIT {
                 .containsKey("securityHeadersFilter");
 
         Flyway flyway = context.getBean(Flyway.class);
-        assertThat(flyway.info().applied()).hasSize(6);
+        assertThat(flyway.info().applied()).hasSize(7);
         List<?> definitions = context.getBean("tushareDatasetDefinitions", List.class);
         List<?> adapters = context.getBean("tensorDatasetAdapters", List.class);
         assertThat(definitions).hasSize(49).allSatisfy(

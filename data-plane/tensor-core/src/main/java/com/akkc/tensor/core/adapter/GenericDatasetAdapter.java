@@ -76,7 +76,8 @@ public final class GenericDatasetAdapter implements DatasetAdapter {
             ConversionContext context = new ConversionContext(envelope.apiName(), rowIndex);
             for (ColumnDefinition column : definition.columns()) {
                 Object converted = valueConverter.convert(sourceRow.get(fieldIndexes.get(column.name())), column, context);
-                if (converted == null && (!column.nullable() || keyFields.contains(column.name()))) {
+                if (converted == null && (!column.nullable()
+                        || (!fingerprint && keyFields.contains(column.name())))) {
                     throw missing("Missing adapter value: api=" + envelope.apiName().value() + ", row=" + rowIndex
                             + ", field=" + column.name());
                 }

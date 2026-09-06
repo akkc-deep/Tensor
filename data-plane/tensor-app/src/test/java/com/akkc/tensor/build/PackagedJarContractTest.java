@@ -37,7 +37,8 @@ class PackagedJarContractTest {
             "BOOT-INF/classes/db/migration/V2__create_market_and_trading_tables.sql",
             "BOOT-INF/classes/db/migration/V3__create_connect_and_slb_tables.sql",
             "BOOT-INF/classes/db/migration/V4__create_financial_tables.sql",
-            "BOOT-INF/classes/db/migration/V5__create_corporate_and_governance_tables.sql");
+            "BOOT-INF/classes/db/migration/V5__create_corporate_and_governance_tables.sql",
+            "BOOT-INF/classes/db/migration/V7__version_dividend_business_key.sql");
     private static final List<String> TENSOR_MODULE_JARS = List.of(
             "BOOT-INF/lib/tensor-plugin-api-1.0-SNAPSHOT.jar",
             "BOOT-INF/lib/tensor-core-1.0-SNAPSHOT.jar",

@@ -63,10 +63,10 @@ class FlywaySchemaContractIT {
         assertThat(definitions.stream().map(value -> value.datasetKey().apiName().value())).doesNotHaveDuplicates();
         assertThat(definitions.stream().map(value -> value.tableName().value())).doesNotHaveDuplicates();
         assertThat(definitions.stream().mapToInt(value -> value.columns().size()).sum()).isEqualTo(851);
-        assertThat(definitions.stream().filter(value -> value.businessKey().mode() == BusinessKeyMode.COMPOSITE)).hasSize(47);
+        assertThat(definitions.stream().filter(value -> value.businessKey().mode() == BusinessKeyMode.COMPOSITE)).hasSize(46);
         assertThat(definitions.stream().filter(value -> value.businessKey().mode() == BusinessKeyMode.FINGERPRINT)
                 .map(value -> value.datasetKey().apiName().value()))
-                .containsExactly("pledge_detail", "stk_managers");
+                .containsExactly("dividend", "pledge_detail", "stk_managers");
 
         MYSQL.start();
         Flyway flyway = Flyway.configure()
@@ -75,7 +75,7 @@ class FlywaySchemaContractIT {
                 .load();
         MigrateResult firstMigration = flyway.migrate();
         firstMigrationsExecuted = firstMigration.migrationsExecuted;
-        assertThat(firstMigrationsExecuted).as("first Flyway migration count").isEqualTo(6);
+        assertThat(firstMigrationsExecuted).as("first Flyway migration count").isEqualTo(7);
         ValidateResult validation = flyway.validateWithResult();
         validationSuccessful = validation.validationSuccessful;
         assertThat(validationSuccessful).as(validation.getAllErrorMessages()).isTrue();
@@ -105,24 +105,24 @@ class FlywaySchemaContractIT {
     @Test
     void migratesAndValidatesRepeatablyOnMySql846() {
         assertThat(mysqlVersion).startsWith("8.4.6");
-        assertThat(firstMigrationsExecuted).isEqualTo(6);
+        assertThat(firstMigrationsExecuted).isEqualTo(7);
         assertThat(validationSuccessful).isTrue();
         assertThat(repeatMigrationsExecuted).isZero();
         assertThat(snapshot.tables()).hasSize(50);
-        assertThat(snapshot.columns().values().stream().mapToInt(List::size).sum()).isEqualTo(1007);
+        assertThat(snapshot.columns().values().stream().mapToInt(List::size).sum()).isEqualTo(1008);
         assertThat(snapshot.indexes().values().stream().flatMap(value -> value.values().stream())
                 .filter(value -> value.name().equals("PRIMARY"))).hasSize(50);
         assertThat(snapshot.indexes().values().stream().flatMap(value -> value.values().stream())
-                .filter(value -> !value.name().equals("PRIMARY"))).hasSize(40);
+                .filter(value -> !value.name().equals("PRIMARY"))).hasSize(41);
 
         Set<String> productionTables = definitions.stream().map(value -> value.tableName().value())
                 .collect(java.util.stream.Collectors.toSet());
         assertThat(snapshot.tables().keySet()).containsAll(productionTables).contains(FIXTURE_TABLE);
         assertThat(productionTables).hasSize(49);
-        assertThat(productionTables.stream().mapToInt(table -> snapshot.columns().get(table).size()).sum()).isEqualTo(1000);
+        assertThat(productionTables.stream().mapToInt(table -> snapshot.columns().get(table).size()).sum()).isEqualTo(1001);
         assertThat(productionTables.stream().map(table -> snapshot.indexes().get(table).get("PRIMARY"))).hasSize(49);
         assertThat(productionTables.stream().flatMap(table -> snapshot.indexes().get(table).values().stream())
-                .filter(value -> !value.name().equals("PRIMARY"))).hasSize(40);
+                .filter(value -> !value.name().equals("PRIMARY"))).hasSize(41);
     }
 
     @Test
@@ -142,7 +142,8 @@ class FlywaySchemaContractIT {
                 "V2__create_market_and_trading_tables.sql",
                 "V3__create_connect_and_slb_tables.sql",
                 "V4__create_financial_tables.sql",
-                "V5__create_corporate_and_governance_tables.sql");
+                "V5__create_corporate_and_governance_tables.sql",
+                "V7__version_dividend_business_key.sql");
     }
 
     private static void assertProductionSchema(DatasetDefinition definition) {

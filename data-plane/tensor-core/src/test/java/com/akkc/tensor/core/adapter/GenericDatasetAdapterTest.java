@@ -1,6 +1,7 @@
 package com.akkc.tensor.core.adapter;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatNullPointerException;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
@@ -29,6 +30,7 @@ import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 import org.junit.jupiter.api.Test;
 
 class GenericDatasetAdapterTest {
@@ -142,6 +144,37 @@ class GenericDatasetAdapterTest {
                 "Missing adapter value: api=nullable_key, row=0, field=id");
         AdaptedBatch valid = adapter.adapt(envelope(definitionValue, names(definitionValue), List.of(List.of("code", "20240229", "7", "1.2", "  "))), INGESTED_AT);
         assertThat(valid.rows().getFirst().get("note")).isEqualTo("  ");
+    }
+
+    @Test
+    void allowsNullOnlyForNullableFingerprintKeyFields() {
+        DatasetDefinition nullableFingerprint = definition("nullable_fingerprint", BusinessKeyMode.FINGERPRINT,
+                List.of(column("id", LogicalType.STRING, true, 8, null, null)), List.of("id"));
+        AtomicReference<AdaptedBatch> captured = new AtomicReference<>();
+
+        assertThatCode(() -> captured.set(adapter(nullableFingerprint).adapt(
+                        envelope(nullableFingerprint, names(nullableFingerprint),
+                                List.of(Arrays.asList((Object) null))), INGESTED_AT)))
+                .doesNotThrowAnyException();
+
+        AdaptedBatch batch = captured.get();
+        assertThat(batch.rows()).singleElement().satisfies(row -> {
+            assertThat(row.get("id")).isNull();
+            assertThat(row.get("business_key"))
+                    .isEqualTo("6e340b9cffb37a989ca544e6bb780a2c78901d3fb33738768511a30617afa01d");
+        });
+    }
+
+    @Test
+    void rejectsNullForRequiredFingerprintKeyFields() {
+        DatasetDefinition requiredFingerprint = definition("required_fingerprint", BusinessKeyMode.FINGERPRINT,
+                List.of(column("id", LogicalType.STRING, false, 8, null, null)), List.of("id"));
+
+        assertMissing(
+                () -> adapter(requiredFingerprint).adapt(
+                        envelope(requiredFingerprint, names(requiredFingerprint),
+                                List.of(Arrays.asList((Object) null))), INGESTED_AT),
+                "Missing adapter value: api=required_fingerprint, row=0, field=id");
     }
 
     @Test
