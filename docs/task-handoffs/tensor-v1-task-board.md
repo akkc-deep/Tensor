@@ -93,7 +93,7 @@
 | 72 | M14-T02 | 下载失败、空结果、幂等和回滚矩阵 | `COMPLETED` | M14-T01 | docs/task-designs/M14-T02-design.md | docs/task-handoffs/M14-T02-handoff.md |
 | 73 | M14-T03 | 查询、分页、宽表、竞态和无障碍 E2E | `COMPLETED` | M14-T01 | docs/task-designs/M14-T03-design.md | docs/task-handoffs/M14-T03-handoff.md |
 | 74 | M14-T04 | 49 数据集自动契约与页面回归驱动 | `COMPLETED` | M03-T09, M04-T06, M14-T01 | docs/task-designs/M14-T04-design.md | docs/task-handoffs/M14-T04-handoff.md |
-| 75 | M14-T05 | 真实 Tushare 49 接口受控页面验收 | `READY` | M14-T04 | docs/task-designs/M14-T05-design.md | docs/task-handoffs/M14-T05-handoff.md |
+| 75 | M14-T05 | 真实 Tushare 49 接口受控页面验收 | `IN_PROGRESS` | M14-T04 | docs/task-designs/M14-T05-design.md | docs/task-handoffs/M14-T05-handoff.md |
 | 76 | M14-T06 | `daily` 与 `balancesheet` 性能验证 | `NOT_STARTED` | M14-T03, M14-T05 | None | None |
 | 77 | M14-T07 | Token、SQL、依赖、网络和运行安全验证 | `NOT_STARTED` | M14-T02, M14-T03, M14-T04, M14-T05 | None | None |
 | 78 | M14-T08 | 全新环境 AC-001～018 与发布证据包 | `NOT_STARTED` | M14-T01, M14-T02, M14-T03, M14-T04, M14-T05, M14-T06, M14-T07 | None | None |
@@ -1095,6 +1095,8 @@
 - **State evidence (live announcement-date failure):** 用户已运行6gn542ah；实际证据241813c先提交且全文SHA699132b0e4373d9d74300f6b5b64b22a0b9c593601dd54b66feca428d9136afd与真实秘密扫描标记一致。58秒、npx1/最终1，9通过/1失败/30未运行；stock_company三原样例插入2457/3083/754、页面与独立DB6294，ISSUE-005关闭。新stk_holdernumber首样例ADAPTER_TYPE_INVALID，adapter阶段，requestId841ad417-262b-4f40-a6ae-4154c536aac2，37ms，失败计数unavailable、具体字段/值未留存。真实POST14/records19，fixture2/3通过，38完成事件逐ID唯一；6迁移50表初始0，最终stock_basic5895/company6294/fina_mainbz150/stk_rewards1428/fixture1，其余45表0，扫描与所有自有资源清理通过。完整设计已读取、先更新pause交接，观测IN_PROGRESS后执行IN_PROGRESS→BLOCKED。独立ISSUE-006按持续修复授权定位历史ann_date日期时间兼容，不修改真实证据/参数/范围、不自动复跑；2000档和原49均未完成，不准备后继。
 
 - **State evidence (announcement-date repair unblock):** 独立ISSUE-006修复c38dbac仅在Tushare源边界规范化stk_holdernumber.ann_date的严格合法日期时间，不改通用转换器/元数据/SQL。合成RED后94相关测试GREEN；复审1Minor已补强同名字段隔离并定点关闭，无剩余发现。旧包历史149行在row12/ann_date拒绝，新包149行全部适配且源对象不变，无上游请求。新包f2fc35c933e69da5e85690fbabb13d691178538cd6ffb3b94284dfc95b10db89，独立源码快照构建，7唯一打包合同通过，较ISSUE005包364展开文件仅validator类变化；新包0xdt5neo仅health诊断6迁移50表全空、扫描停机/DB卷清理通过。设计明确新包优先于历史包引用，speca81df4da7f92c6164062fa29a19902505dd5643c7c948a9aaa021f987220eee5语法/40发现通过，原包/manifest/真实证据699132...未改。新正式1gpnb4ru空库/最小权限准备完成，启动器仅换固定包路径，四hash/40-48-9/模式/未使用均独立复审通过。已先更新pause交接，读取设计并观测BLOCKED后依上述修复和接入证据执行BLOCKED→READY；真实新轮未执行，历史9/1/30保留，不准备后继。
+
+- **State evidence (announcement-date repaired restart):** 修复产物接入与解阻已独立提交73e4885。消费完整更新设计与同一pause交接，按用户持续执行/继续修复授权，观测READY后单独执行READY→IN_PROGRESS。新正式环境为1gpnb4ru，命令使用已封存f2fc...修复包和原40/48/9范围；用户只需在已有TENSOR_TUSHARE_TOKEN终端执行一次。该转换恢复验收工作，新一轮尚未执行，不能把本地149历史行通过当真实通过；按实际结果BLOCKED或阶段成功PAUSED，不推进原49后继。
 
 ### `M14-T06`
 

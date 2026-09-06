@@ -13,6 +13,8 @@ pause
 
 ## Current State
 
+当前恢复状态：修复包接入和BLOCKED→READY已独立提交 `73e4885`；现按持续执行授权单独记录READY→IN_PROGRESS。用户尚未运行1gpnb4ru，新轮实际结果待验证。
+
 恢复准备更新：ISSUE-006 已修复并提交 `c38dbac`。限定 `stk_holdernumber.ann_date` 的合法日期时间规范化，94项相关回归通过；复审1项Minor测试边界已补强并通过定点复审，无剩余发现。真实历史样本仅内存校验：旧包在ann_date拒绝，新包149行全部适配且源行未改。新包构建/7唯一打包合同与仅health启动验证通过，6迁移/50表全空，诊断环境0xdt5neo已清理。
 
 下一轮唯一JAR：`/private/tmp/tensor-issue-006-build.2rctzavi/data-plane/tensor-app/target/acceptance/tensor-app-1.0-SNAPSHOT-acceptance.jar`，SHA `f2fc35c933e69da5e85690fbabb13d691178538cd6ffb3b94284dfc95b10db89`。与ISSUE-005包展开仅validator类变化，旧两包均保留。spec SHA `a81df4da7f92c6164062fa29a19902505dd5643c7c948a9aaa021f987220eee5`，语法/40发现通过；设计已明确新包接入。
