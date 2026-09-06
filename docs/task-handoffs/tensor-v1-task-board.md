@@ -17,7 +17,7 @@
 - **Allowed transitions:** `NOT_STARTED -> READY`, `READY -> IN_PROGRESS`, `IN_PROGRESS -> PAUSED`, `PAUSED -> IN_PROGRESS`, `READY -> BLOCKED`, `IN_PROGRESS -> BLOCKED`, `BLOCKED -> READY`, `IN_PROGRESS -> COMPLETED`.
 - **Previous execution instruction:** 用户此前要求暂缓M14-T05并先推进M14-T06；原49目标的9项缺口登记ISSUE-008，M14-T05保持BLOCKED，M14-T09保持COMPLETED。M14-T06当时进入设计准备，尚未启动。
 - **Previous disposition / explicit exception:** 用户随后明确要求性能测试“先跳过吧，可以记录一个issue，直接标记完成”。仅本次M14-T06按该指示直接从NOT_STARTED标为COMPLETED，表示跳过收尾；未创建设计/测试或执行实测，不补造READY/IN_PROGRESS及验收通过证据。原性能要求转入 `docs/issues/problems/ISSUE-009-query-performance-verification.md`，仍未解决，项目性能/发布门禁保持。当时下一个预定义任务为Order78/M14-T07，尚未准备或启动，未生成普通验收完成的后继交接。
-- **Current execution:** M14-T07 已按用户批准设计完成本轮安全验证，最终正式结果18通过/6失败/0未执行、退出1，证据67b1be6。四项产品合同缺口及Maven/后端扫描失败登记ISSUE-010～015；先写暂停交接后执行IN_PROGRESS→BLOCKED。检查器终审F1已修正并专项复审通过，原始失败证据保留。当前入口为M14-T07的阻塞交接；M14-T08保持NOT_STARTED，原真实49及性能缺口保留。
+- **Current execution / explicit exception:** 用户明确要求“先标记完成吧，后续我单独处理这些问题”。仅本次M14-T07按该指示直接从BLOCKED标为COMPLETED，表示任务收尾；ISSUE-010～015全部保留未解决，由用户后续单独处理。正式结果仍为18通过/6失败/0未执行、退出1，证据67b1be6未改写，安全验收未通过。原暂停交接保留为历史证据；M14-T08保持NOT_STARTED，原真实49及性能缺口保留。
 
 ## Tasks
 
@@ -100,7 +100,7 @@
 | 75 | M14-T05 | 真实 Tushare 49 接口受控页面验收 | `BLOCKED` | M14-T04 | docs/task-designs/M14-T05-design.md | docs/task-handoffs/M14-T05-handoff.md |
 | 76 | M14-T09 | 分红修复与2000档剩余验收 | `COMPLETED` | M14-T04, M14-T05 | docs/task-designs/M14-T09-design.md | docs/task-handoffs/M14-T09-handoff.md |
 | 77 | M14-T06 | `daily` 与 `balancesheet` 性能验证 | `COMPLETED` | M14-T03, M14-T05 | None | None |
-| 78 | M14-T07 | Token、SQL、依赖、网络和运行安全验证 | `BLOCKED` | M14-T02, M14-T03, M14-T04, M14-T05 | docs/task-designs/M14-T07-design.md | docs/task-handoffs/M14-T07-handoff.md |
+| 78 | M14-T07 | Token、SQL、依赖、网络和运行安全验证 | `COMPLETED` | M14-T02, M14-T03, M14-T04, M14-T05 | docs/task-designs/M14-T07-design.md | docs/task-handoffs/M14-T07-handoff.md |
 | 79 | M14-T08 | 全新环境 AC-001～018 与发布证据包 | `NOT_STARTED` | M14-T01, M14-T02, M14-T03, M14-T04, M14-T05, M14-T06, M14-T07 | None | None |
 
 ## Task Details
@@ -1176,6 +1176,8 @@
 - **State evidence (start):** 设计批准、READY与实施计划已提交0d1d9b9。完整设计及Handoff=None已消费，依据用户执行当前任务及“确认设计”的明确授权，观测READY后单独执行READY→IN_PROGRESS。开始脚本反例、自检与运行材料准备，正式安全验证尚未执行；不预先声明门禁通过。
 
 - **State evidence (blocked, 2026-09-07):** 已完整读取批准设计，观测IN_PROGRESS/Handoff=None；实际安全运行741376b在2026-09-06T16:07:48～16:15:20Z退出1，18pass/6fail/0not-run。证据已独立提交67b1be6，SHA为5ff4a5d5005f1ee3ab558867e1cb3e8adb38f3a6bc7d06ae4fc60a6d927cd83b。S01组件/分组公开、S05十二项500、S06六项200、四个S07查询无完成事件，以及Maven依赖传输/后端漏洞扫描未完成，分别登记ISSUE-010～015。页面闭环、S07/S08、前端审计、凭证扫描及清理通过；历史81项Maven通过不替代本轮失败。终审检查器F1由0faf9dd修正，25项针对性检查/309项离线自检及专项复审通过；仅重验原有删除响应语义，未冒充新的全流程结果。先完成docs/task-handoffs/M14-T07-handoff.md，再执行IN_PROGRESS→BLOCKED并链接该交接。解除条件见六个issue及交接；本任务不标完成，不准备M14-T08。
+
+- **State evidence (owner-directed completion, 2026-09-07):** 用户已获知六项问题及功能影响后，明确要求“先标记完成吧，后续我单独处理这些问题”。已完整读取既有设计及暂停交接，观测BLOCKED；按本次明确例外直接记录BLOCKED→COMPLETED，不补造解除阻塞、READY/IN_PROGRESS或验收通过证据。此完成仅表示按用户决定收尾，原设计安全验收仍未满足；ISSUE-010～015保持未解决并交由用户后续单独处理，正式报告18pass/6fail/0not-run、退出1及SHA保持不变。保留原交接为历史快照，本次未重跑验证或修复问题，未准备或启动M14-T08。
 
 ### `M14-T08`
 
