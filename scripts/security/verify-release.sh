@@ -75,6 +75,7 @@ HTML = '<img src=x onerror="window.__m14_t07_xss=1"><script>window.__m14_t07_xss
 FORBIDDEN = ('M14_T07_UPSTREAM_DETAIL', "x' OR 1=1 --", '1 OR 1=1', 'SELECT 1',
              'jdbc:mysql:', 'java.sql.', 'SQLException', 'org.springframework.',
              '/Users/', '/private/tmp/', 'BOOT-INF/classes')
+PRIVATE_LOG_FORBIDDEN = ('M14_T07_UPSTREAM_DETAIL', "x' OR 1=1 --", '1 OR 1=1', 'SELECT 1')
 
 # These decision functions are shared by the offline counterexamples and runtime.
 def scan_bytes(data, secret_patterns):
@@ -345,7 +346,7 @@ def final_verdict(report):
 def render_report(report, secret_patterns, directory):
     data = json.dumps(report, ensure_ascii=False, indent=2).encode()
     scan_bytes(data, secret_patterns)
-    lines = ['# M14-T07 security verification', '', 'This document is generated from this run; failed and not-run checks prevent acceptance.', '', '```json', data.decode(), '```', '', 'Local loopback controls were measured only where marked pass. Remote HTTPS, an internal network or identity proxy, database TLS, a proxy response budget of at least 130 seconds, and a shutdown window covering all phases remain deployment requirements. M14-T08 release readiness is a separate decision.', '']
+    lines = ['# M14-T07 security verification', '', 'This document is generated from this run; failed and not-run checks prevent acceptance.', '', 'Invocation: `sh scripts/security/verify-release.sh`. `M14_SECURITY_JAR` selects the frozen input whose SHA-256 is recorded in `identities`; `PATH` and `JAVA_HOME` select the reported tool versions.', '', '```json', data.decode(), '```', '', 'Local loopback controls were measured only where marked pass. Remote HTTPS, an internal network or identity proxy, database TLS, a proxy response budget of at least 130 seconds, and a shutdown window covering all phases remain deployment requirements. M14-T08 release readiness is a separate decision.', '']
     markdown = '\n'.join(lines).encode()
     scan_bytes(markdown, secret_patterns)
     for name, content in [('outcome.json', data), ('evidence.md', markdown)]:
@@ -585,6 +586,7 @@ class Runtime:
             require(not any('/src/' in name or name.endswith(('pom.xml','package.json','package-lock.json')) for name in unknown), 'production-inputs-untracked')
         with socket.socket() as listener:
             try:
+                listener.setsockopt(socket.SOL_SOCKET,socket.SO_REUSEADDR,1)
                 listener.bind(('127.0.0.1',8080))
             except OSError:
                 raise GateError('port-8080-occupied') from None
@@ -841,6 +843,7 @@ class Runtime:
         # Recheck immediately before launch; never terminate an unrelated port owner.
         with socket.socket() as listener:
             try:
+                listener.setsockopt(socket.SOL_SOCKET,socket.SO_REUSEADDR,1)
                 listener.bind(('127.0.0.1',8080))
             except OSError:
                 raise GateError('port-8080-occupied-before-launch') from None
@@ -1113,7 +1116,7 @@ class Runtime:
         scan_file(self.jvm_log,self.secret_patterns)
         data = self.jvm_log.read_bytes()
         self.scan(data, 'application_log')
-        require(all(value.encode() not in data for value in FORBIDDEN[:8] if value != 'jdbc:mysql:'), 'unsafe-log-detail')
+        require(all(value.encode() not in data for value in PRIVATE_LOG_FORBIDDEN), 'unsafe-log-detail')
         lines = data.decode(errors='strict').splitlines()
         disclosure = re.compile(r'''\b(?:SELECT\b[^\r\n]*\bFROM|INSERT\s+INTO|DELETE\s+FROM|UPDATE\b[^\r\n]*\bSET|(?:CREATE|ALTER|DROP)\s+TABLE)\b|\b(?:params|parameters|requestBody|sql|tsCode|exchange)["']?\s*[:=]''',re.I)
         require(not any(disclosure.search(line) for line in lines),'ordinary-log-query-disclosure')
@@ -1200,6 +1203,7 @@ class Runtime:
         if self.port_owned:
             try:
                 with socket.socket() as listener:
+                    listener.setsockopt(socket.SOL_SOCKET,socket.SO_REUSEADDR,1)
                     listener.bind(('127.0.0.1',8080))
             except OSError:
                 details['port8080'] = False
@@ -1315,6 +1319,39 @@ class Runtime:
         return {'observedStubCalls':self.stub_count,'unexpectedStubCalls':self.stub_failures,'configuredUpstream':'loopback-stub','jvmExternalUpstreamCalls':'not-measured'}
 
 def review_cases(directory, check, selected=None):
+    if selected in (None,'cleanup'):
+        def cleanup_case(kind):
+            with socket.socket() as server:
+                server.setsockopt(socket.SOL_SOCKET,socket.SO_REUSEADDR,1)
+                server.bind(('127.0.0.1',0)); server.listen(1)
+                port = server.getsockname()[1]
+                if kind == 'time-wait':
+                    with socket.socket() as client:
+                        client.settimeout(5); client.connect(('127.0.0.1',port))
+                        with server.accept()[0] as connection:
+                            connection.settimeout(5); connection.shutdown(socket.SHUT_WR)
+                            require(client.recv(1) == b'','cleanup-test-server-eof')
+                            client.shutdown(socket.SHUT_WR)
+                            require(connection.recv(1) == b'','cleanup-test-client-eof')
+                if kind != 'active':
+                    server.close()
+                runtime = Runtime.__new__(Runtime)
+                runtime.browser_cleanup, runtime.port_owned = True, True
+                runtime.running = runtime.browser = runtime.jvm = runtime.stub = runtime.container = None
+                runtime.private_inputs, runtime.report = [], {}
+                original = socket.socket
+                class LocalSocket(original):
+                    def bind(self,address):
+                        require(address == ('127.0.0.1',8080),'cleanup-test-address')
+                        return super().bind(('127.0.0.1',port))
+                try:
+                    socket.socket = LocalSocket
+                    return runtime.cleanup()
+                finally:
+                    socket.socket = original
+        check('cleanup-active-listener',lambda:cleanup_case('active'),True)
+        check('cleanup-clean-close',lambda:cleanup_case('clean'))
+        check('cleanup-time-wait',lambda:cleanup_case('time-wait'))
     if selected in (None,'artifacts'):
         def artifact_case(kind):
             owned = directory/('artifact-' + kind)
@@ -1461,11 +1498,19 @@ def review_cases(directory, check, selected=None):
         jdbc = 'INFO FlywayExecutor Database: jdbc:mysql://127.0.0.1:3306/synthetic (MySQL 8.4)\n'
         check('ordinary-log-jdbc-metadata',lambda:log_case(jdbc + query))
         check('ordinary-log-jdbc-secret',lambda:log_case(jdbc + 'M14_T07_TOKEN_log_probe\n' + query),True)
-        def public_jdbc():
+        stack = 'java.sql.SQLException: unavailable\n\tat org.springframework.synthetic.Service.read(Service.java:1)\n'
+        check('ordinary-log-stack-metadata',lambda:log_case(stack + query))
+        for number,encoded in enumerate(patterns(['M14_T07_TOKEN_log_probe'])):
+            check('ordinary-log-stack-secret-' + str(number),lambda value=encoded:log_case(stack + '\tat synthetic.Frame ' + value.decode() + '\n' + query),True)
+        for number,value in enumerate(('M14_T07_UPSTREAM_DETAIL',"x' OR 1=1 --",'1 OR 1=1','SELECT 1','SELECT introduction FROM synthetic','params={tsCode=000001.SZ}')):
+            check('ordinary-log-stack-disclosure-' + str(number),lambda text=value:log_case(stack + '\tat synthetic.Frame ' + text + '\n' + query),True)
+        def public_log(value=jdbc):
             runtime=Runtime.__new__(Runtime)
             runtime.secret_patterns=(); runtime.report={'scanCoverage':{}}
-            runtime.scan(jdbc.encode(),'http',public=True)
-        check('public-jdbc-still-rejected',public_jdbc,True)
+            runtime.scan(value.encode(),'http',public=True)
+        check('public-jdbc-still-rejected',public_log,True)
+        for marker in ('java.sql.','SQLException','org.springframework.'):
+            check('public-class-still-rejected-' + marker,lambda value=marker:public_log(value),True)
     if selected in (None, 'npm'):
         inherited = dict(os.environ)
         try:
