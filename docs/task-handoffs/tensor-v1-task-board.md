@@ -95,7 +95,7 @@
 | 73 | M14-T03 | 查询、分页、宽表、竞态和无障碍 E2E | `COMPLETED` | M14-T01 | docs/task-designs/M14-T03-design.md | docs/task-handoffs/M14-T03-handoff.md |
 | 74 | M14-T04 | 49 数据集自动契约与页面回归驱动 | `COMPLETED` | M03-T09, M04-T06, M14-T01 | docs/task-designs/M14-T04-design.md | docs/task-handoffs/M14-T04-handoff.md |
 | 75 | M14-T05 | 真实 Tushare 49 接口受控页面验收 | `BLOCKED` | M14-T04 | docs/task-designs/M14-T05-design.md | docs/task-handoffs/M14-T05-handoff.md |
-| 76 | M14-T09 | 分红修复与2000档剩余验收 | `READY` | M14-T04, M14-T05 | docs/task-designs/M14-T09-design.md | docs/task-handoffs/M14-T09-handoff.md |
+| 76 | M14-T09 | 分红修复与2000档剩余验收 | `IN_PROGRESS` | M14-T04, M14-T05 | docs/task-designs/M14-T09-design.md | docs/task-handoffs/M14-T09-handoff.md |
 | 77 | M14-T06 | `daily` 与 `balancesheet` 性能验证 | `NOT_STARTED` | M14-T03, M14-T05 | None | None |
 | 78 | M14-T07 | Token、SQL、依赖、网络和运行安全验证 | `NOT_STARTED` | M14-T02, M14-T03, M14-T04, M14-T05 | None | None |
 | 79 | M14-T08 | 全新环境 AC-001～018 与发布证据包 | `NOT_STARTED` | M14-T01, M14-T02, M14-T03, M14-T04, M14-T05, M14-T06, M14-T07 | None | None |
@@ -1131,6 +1131,8 @@
 - **State evidence (D-02 confirmed):** 2026-09-06用户了解top10_holders实际SUCCESS320与EMPTY断言冲突后，对明确的单接口当前预期调整及完整40项复验回复“同意”。完整读取当前设计与pause交接，批准已写入设计；先完成限定离线RED/GREEN与新私有运行材料复审，仍保持BLOCKED，尚未执行状态转换或真实新轮。历史证据、原参数及冻结包不变。
 
 - **State evidence (D-02 ready):** 单接口预期修改与新证据入口已提交d6e462f；当前specSHA20499ebe50010f07edcbfc6502ed13fe84aac06f557700f92f8cde7fd9757f94。同函数RED→GREEN、语法/发现40及18项启动材料合成检查通过。独立spec/接入审查PASS，唯一旧hash标注Minor已更正并定向复核关闭；历史证据和冻结JAR/manifest未变。新私有控制yx5keenc的MySQL8.4.6/初始0表/回环/来源host/字符集/六项最小权限均有实测证据，运行6hash及私有权限匹配且目录未使用。完整重读设计和pause交接，依据明确D-02批准与以上解阻证据，观测BLOCKED后执行BLOCKED→READY，保留交接入口；尚未执行真实新轮。
+
+- **State evidence (D-02 restart):** 批准/就绪与BLOCKED→READY已独立提交cf64556。消费完整且hash匹配的批准设计与同路径pause交接，按用户持续执行当前任务及明确D-02“同意”的授权，观测READY后单独执行READY→IN_PROGRESS。正式入口为新控制yx5keenc，完整40/48/80及fixture2/3；失败停止、原参数/九排除与冻结包不变。本转换表示开始复验，不预先声明全40或top10_holders页面末查通过。
 
 ### `M14-T06`
 
