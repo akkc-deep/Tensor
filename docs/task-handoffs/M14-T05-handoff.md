@@ -13,51 +13,52 @@ pause
 
 ## Current State
 
-用户已在保有Token的终端执行本轮一次性启动器。实际运行约8秒，npx与最终退出码均1；Token存在性门禁通过，原JAR已经启动，独立观察到6项成功迁移和50张业务表全空。首个实际固定失败为 `application log safety`，发生在启动准备阶段；报告同时保留 `JVM cleanup`、`final log correlation` 固定错误。40个真实接口均未开始，fixture也未开始，不是40项执行后的权限或产品结论。
+原真实运行约8秒在application log safety失败，40个真实接口和fixture均未开始；失败安全报告da56d38保持原文，不把后续本地成功覆盖为真实通过。
 
-spec仍为已审查的83ce0f4，固定40接口/48样例/80查询、28ok/12empty；原manifest49/58和9项显式排除不变。真实结果证据已单独提交 `da56d38`，不得用此前本地审查通过覆盖此次实际失败。
+用户要求由执行者处理启动问题后，已用原JAR、新空MySQL8.4.6和合成Token的health-only探针复现：Flyway/JDBC标记与secret scan命中，health未就绪。根因是Flyway INFO启动日志输出JDBC连接位置，与当前写前日志合同冲突。
 
-启动器确认CLI/全部自有工作进程已退出、JVM已停止、自有数据库容器及匿名卷已清理、私有DB连接文件已删除；控制器另外确认8080空闲。末态50张业务表仍全0，包括fixture。CLI退出后扫描与自动产物删除通过，证据整篇真实秘密扫描通过且控制器核对SHA一致。spec的 `logScanned=false` 表示启动日志门禁失败；终检通过不撤销它。
+修复b8cc305仅在spec的JVM环境固定LOGGING_LEVEL_ORG_FLYWAYDB=WARN，未改生产/JAR/argv、扫描、业务日志或40项范围。相同探针在另一新空schema上GREEN：health就绪、无扫描触发、6成功迁移/50表全空，正常停机、终检和精确数据库/卷清理均通过；独立定点审查Approved/Ready。
+
+本地阻塞解除证据已具备，恢复状态以权威看板为准。新正式控制目录为 `/private/tmp/tensor-m14-t05-control.kybrot1f`，已独立核对MySQL8.4.6/0表、最小权限/来源host、Java21/8080/冻结文件和私有模式。直接launch.py与先前已审查版本字节相同；新run-config将固定最终内容。真实40/48/80和fixture2/3尚待用户已有Token终端启动，工具进程不能继承或读取该终端Token。
 
 ## Changed Files
 
-- `docs/verification/M14-T05-tushare-live.md`：启动器追加本次实际安全JSON；提交da56d38。文件SHA-256为 `814bae86e823c0f639e5c376056401c08fb778479f4ad33ee17e4e15a0f629cf`，控制器未改已扫描内容。
-- 本交接与权威看板：依据实际启动失败记录IN_PROGRESS→BLOCKED。
-- 本次没有修改spec、生产/配置/旧测试、manifest、原JAR或用户target目录。
+- `control-plane/e2e/tushare-live.spec.js`：b8cc305，唯一新增JVM Flyway日志级别；新SHA为72b9763941e7ed82fbf1b207a79ee515d3d7343c9831ce2604f8ec9abd7ee973。
+- `docs/task-designs/M14-T05-design.md`：明确固定JVM日志配置、health-only合成凭证本地诊断及RED/GREEN边界。
+- `docs/verification/M14-T05-tushare-live.md`：追加真实失败后的诊断/修复/审查/新环境事实，保留先前失败JSON原文。追加后的整篇真实Token扫描须由下一次用户终端运行完成，不复用旧整篇SHA。
+- 本交接/权威看板：根据已完成的阻塞修复记录恢复与直接运行入口；生产、其他测试、manifest、原JAR及用户target未改。
 
 ## Verification
 
-- 实际命令：`python3 /private/tmp/tensor-m14-t05-control.j9045eey/launch.py`；内部为指定Playwright spec、1 worker、0 retries、2000ms间隔。运行Git为c10c67b，spec SHA为 `6e31e4d9e567feebdb3f22ee421b43d00202cc56832d0accfeab1dbe87f61ac3`。
-- 实际npx1/最终1，约8秒；runner为1 failed/39 did not run，因beforeAll失败。安全计数registered40、attempted0、failedCases0、completed0、unexecuted40；真实和fixture的POST/records观察数均0。
-- 独立迁移观察6成功/50业务表/全部0；末态50表也全部0。没有页面末查结果，不能把DB全0当作接口合法EMPTY或通过。
-- spec清理投影：networkDrained=true、jvmStopped=true、immutableInputs=true、logScanned=false。
-- CLI后终检：scanPassed=true、cleanupPassed=true、扫描5文件、删除2自动产物，保留原退出码1。控制器确认仅4个允许文件、均0600，根目录0700，无playwright目录，私有DB连接文件不存在。
-- run-finished：ownedContainerRemoved=true、evidenceSecretScanPassed=true；文档SHA核对及实际JSON计数一致性检查通过。没有读取Token值、私有连接正文到工具输出或原日志全文。
+- 原真实失败：npx1/最终1，1failed/39didnotrun、attempted0/unexecuted40、业务观察数0；6迁移/50表全0，终检和资源清理通过。证据提交da56d38保存此前整篇真实秘密扫描证明。
+- 同函数环境探针`node /tmp/m14-t05-flyway-env-probe.mjs`（Node24）先RED缺少WARN，修复后GREEN：固定WARN覆盖外部TRACE，外部全局/业务日志覆盖不继承，浏览器/helpers无日志配置或DB/Token。
+- Node24语法、该环境探针、既有`/tmp/m14-t05-pure-probe.mjs`和diff检查均通过；扫描反例仍有效，未重复无关全套测试。
+- 原JAR诊断命令为`python3 /private/tmp/m14-t05-startup-diagnostic.py <本轮控制目录>`。gsu6eluc为RED（外层0/Node1，secret/Flyway/JDBCtrue，healthfalse）；dwbbqgr3为GREEN（外层0/Node0，healthtrue，无扫描触发）。两轮均6成功迁移/50表全0、JVM停止、终检及精确DB/卷清理通过；只用合成Token，无页面业务调用。
+- 独立定点审查Spec通过、Quality Approved、Launch Ready，无Critical/Important/Minor；它不代表真实矩阵通过。
+- kybrot1f新正式库仍0表，权限/来源host/版本/Java21/8080/冻结文件/私有模式复核通过，当前未执行。
 
 ## Remaining Work
 
-1. 先定位启动日志安全门禁的具体触发类别，在不输出命中内容、不放宽扫描和不修改生产文件的边界内处理；当前只确定失败阶段，不能声称根因已经修复。
-2. 修订如有，执行受影响本地反例及独立审查。真实复跑必须重新准备全新空MySQL8.4.6、最小权限/来源host和一次性启动配置；旧j9045eey已执行并清理，不可复用。
-3. 运行固定40/48/80与fixture2POST/3查询，核对迁移初始全空、末态40页面计数匹配/9排除表0/fixture1、请求关联、终检及精确清理。
-4. 全部通过只记录2000档阶段完成并PAUSED；真实失败仍BLOCKED。原49目标不完整，不准备后继。
+1. 完成新run-config封存和恢复状态独立记录后，由用户在保有Token的同一终端执行 `python3 /private/tmp/tensor-m14-t05-control.kybrot1f/launch.py`。直接开始并每15秒提示进度，不再等待聊天确认文件。
+2. 读取新run-started/run-finished安全标记；实际完成后验证报告、文档SHA、40/48/80与fixture2/3、迁移全空与末态页面计数匹配、终检和清理。禁止输出Token、私有连接JSON、原日志或真实行。
+3. 全40及全部门禁通过后只记录2000档阶段完成并PAUSED；真实失败则如实BLOCKED，不自动重跑。原49目标仍不完整，不准备后继。
 
 ## Resume Task
 
-M14-T05的2000积分档子集页面验收；首先解除本次应用启动日志安全检查阻塞。
+M14-T05的2000积分档子集页面验收；启动日志阻塞已通过本地原JAR复现、修复与复核。
 
 ## Start Here
 
-1. 权威看板Order75及其链接的完整 `docs/task-designs/M14-T05-design.md`。
-2. 本交接与 `docs/verification/M14-T05-tushare-live.md` 末尾“2000档实际运行”安全报告。
-3. `control-plane/e2e/tushare-live.spec.js` 的SafeLogSink、forbiddenValues、startApplication及启动/清理流程。
-4. 安全控制标记 `/private/tmp/tensor-m14-t05-control.j9045eey/run-finished.json`；已终检私有产物根 `/private/tmp/tensor-m14-t05.fv1v1epy`。日志只能在本机内存中按固定检查名/布尔值投影，禁止输出全文。
+1. 权威看板Order75和完整 `docs/task-designs/M14-T05-design.md`。
+2. 本交接及 `docs/verification/M14-T05-tushare-live.md` 末尾启动修复段落；保留旧真实失败与本地诊断的区别。
+3. 新控制目录 `/private/tmp/tensor-m14-t05-control.kybrot1f` 的安全标记与已审查直接启动器。旧j9045eey、gsu6eluc、dwbbqgr3均已使用并清理，不能复用。
 
-首个动作：追踪SafeLogSink统一折叠为application log safety的触发路径，使用不包含原内容的固定诊断类别区分秘密/包络/长度/写入失败，并先做对应本地复现。现有实现会丢弃触发字节且没有记录类别，不能仅凭logScanned=false断言Token、DB值或某个库就是根因。只读核对第三方Flyway11.7.2包存在Database日志模板，是待验证线索；本轮没有捕获到该触发行，未读取M00～M13后端实现。
+首个动作：检查新run-finished是否存在；存在则消费实际安全报告并核对记录的文档SHA；只有run-started则观察安全进度；尚未开始则在run-config和看板IN_PROGRESS封存后交用户上述一条命令。实现和本地复现均已完成，不重新派发或重复旧套件。
 
 ## Blocker
 
-- **Reason:** 本次原JAR启动阶段实际触发application log safety，业务页面验收尚未开始；具体触发类别被当前统一错误折叠，尚未定位或修复。
-- **Resolution condition:** 该失败已在安全诊断/本地复现中定位并处理，所需修订及针对性检查、审查完成；恢复时保留原失败记录，独立记录BLOCKED→READY和READY→IN_PROGRESS，再以新空环境手动复跑。不能以重新设置Token、等待或原样重跑推断已解决。
+- **Reason:** 原Flyway启动日志触发已由b8cc305及独立新库GREEN解决；本节保留原pause入口的阻塞历史，当前状态以看板为准。真实执行仍需用户已有Token的终端环境。
+- **Resolution condition:** 同一原JAR启动RED→GREEN、既有扫描反例、环境隔离检查与独立审查已通过，构成BLOCKED→READY依据；再以用户持续执行授权单独READY→IN_PROGRESS。新真实运行失败不能由本地GREEN代填通过。
 
 ## Risks
 

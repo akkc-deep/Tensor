@@ -46,7 +46,7 @@
 
 每次完整运行或修订复跑由运行者创建专用全新空MySQL8.4.6 schema，名称 `^tensor_m14_t05_[a-f0-9]+$`，utf8mb4/utf8mb4_0900_as_cs，应用账号只有该schema的CREATE/SELECT/INSERT/UPDATE并使用真实来源host，不默认 `%`。只给测试三个 `TENSOR_DB_*`、`ACCEPTANCE_JAR`、标准Token环境变量、上述调度输入和测试产物目录 `M14_T05_ARTIFACT_DIR`；管理员凭证不交给spec或JVM。运行者以独立只读CLI采集初始0表、启动后6成功迁移/50业务表/49生产表及fixture全空的安全证据，不打印连接值或种数。
 
-spec检查Java21、原JAR普通绝对文件及哈希、三个DB变量非空、JDBC无嵌入凭证及凭证query、schema命名、8080空闲、PLAYWRIGHT_BASE_URL未设置或恰 `http://127.0.0.1:8080`。不复用未知进程。JVM环境先净化继承的TENSOR_/SPRING_/SERVER_/MYSQL_/M14_与JAVA_TOOL_OPTIONS/JDK_JAVA_OPTIONS/_JAVA_OPTIONS等注入变量，只回填三个DB值和真实Token；浏览器launchOptions.env与辅助子进程使用PATH、HOME、JAVA_HOME、TMPDIR、LANG/LC_ALL白名单，不继承DB/Token。JVM显式使用公开生产上游 `TENSOR_TUSHARE_BASE_URL=https://api.tushare.pro`，不保留T04哨兵或其他地址。spawn必须shell:false；argv只含：
+spec检查Java21、原JAR普通绝对文件及哈希、三个DB变量非空、JDBC无嵌入凭证及凭证query、schema命名、8080空闲、PLAYWRIGHT_BASE_URL未设置或恰 `http://127.0.0.1:8080`。不复用未知进程。JVM环境先净化继承的TENSOR_/SPRING_/SERVER_/MYSQL_/M14_与JAVA_TOOL_OPTIONS/JDK_JAVA_OPTIONS/_JAVA_OPTIONS等注入变量，只回填三个DB值和真实Token；浏览器launchOptions.env与辅助子进程使用PATH、HOME、JAVA_HOME、TMPDIR、LANG/LC_ALL白名单，不继承DB/Token。JVM显式使用公开生产上游 `TENSOR_TUSHARE_BASE_URL=https://api.tushare.pro`，不保留T04哨兵或其他地址。本次本地原JAR启动复现已确认Flyway信息日志携带JDBC地址触发写前扫描；作为本任务启动器配置修复，spec在JVM环境固定设置 `LOGGING_LEVEL_ORG_FLYWAYDB=WARN`，不继承外部日志级别输入。只抑制该第三方包的INFO/DEBUG启动日志，保留WARN/ERROR、全部业务完成事件和其他日志；不设置全局静默、不关闭或放宽扫描、不将日志脱敏改判通过。该固定非秘密输入不进入浏览器或其他辅助进程，不修改生产配置文件或原JAR。spawn必须shell:false；argv只含：
 
 ```sh
 java -jar "$ACCEPTANCE_JAR" \
@@ -108,6 +108,10 @@ JVM日志流在写文件前检查上述秘密字面值及其JSON转义形式，�
 仅精确两实施路径加入Git，提交 `test(release): verify live Tushare interfaces`；设计/交接/看板独立提交。不提交Token、临时日志/JSON/数据库、生成target/图片或用户并行ISSUE-004文件。
 
 ## Tests
+
+本次修复须先以同函数环境探针证明当前缺少固定Flyway日志级别（RED），再实现唯一JVM环境值；GREEN核对其固定为WARN、外部同名/全局日志环境不会继承，浏览器/辅助publicEnvironment不包含该设置且其他JVM输入仍限既定白名单。复用上述同一原JAR启动探针，在另一个全新空schema验证health就绪、写前扫描不失败、6迁移/50表仍全空和正常清理；用合成JDBC/秘密日志另证扫描仍拒绝命中。真实2000档矩阵保持待执行，不将本地启动GREEN写成正式验收通过。
+
+启动失败后的本地诊断不计真实验收：用户已要求由执行者处理启动问题。允许在自有临时目录从当前spec生成不注册live用例的临时探针，仅调用同一前置检查、原JAR启动/health和正常停机；专用新空MySQL8.4.6/权限/来源host及原JAR/manifest规则不变。此诊断由控制器生成明确的合成Token，仅通过该探针进程的TENSOR_TUSHARE_TOKEN环境进入JVM；不读取、替换或复用用户真实Token，不提交业务POST/records请求、不启动上游替身。仅在内存将日志扫描失败投影为固定类别（秘密、包络、长度、写入）及已知框架标识布尔值，命中原文不得落盘或输出；保持写前扫描/失败停止/终检清理。诊断结果只能证明本地启动行为，不能证明实际账户授权、真实接口结果或本轮fixture通过。任何正式live复跑仍必须用用户真实Token和全新空环境，先完成修订及本地检查再交用户一次执行命令。
 
 先为本次范围修订增加同函数纯本地RED反例，再修改spec：从冻结49/58选择精确40/48/28ok/12empty、9项排除身份/原因，缺少固定排除名/异常集合拒绝、完整manifest校验仍拒绝错误hash/49缺项，未选API不注册、缺环境摘要registered40/unexecuted40且manifestSamples58/selectedSamples48，最终完整运行计数不再硬编码49/58/98。保留既有同函数纯本地反例，不用故意损坏Token向真实服务制造RED。标准库临时探针验证：manifest错误hash/少项/多项/未知status/非法params被拒绝；多样例ok允许单次EMPTY但全空不能通过；历史row_count不参与本次计数；不同键计数允许小于sourceRowCount；重复requestId/额外POST/缺末查/行来源错误/插入合计不符/跨chunk秘密/pending请求越界均失败。探针调用正式函数、不mock产品HTTP，不新增永久测试文件或live用例；在受限临时目录运行并删除含合成哨兵的产物。
 
