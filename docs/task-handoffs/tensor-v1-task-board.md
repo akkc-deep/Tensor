@@ -1115,7 +1115,7 @@
 - **Acceptance:** 已确认规则得到实现与回归/迁移/打包/复审验证；新包完整40项和fixture实际通过，计数/页面/独立DB及扫描清理全部符合修订合同。仅设计或诊断成功不算完成，原49未覆盖事实保留，不自动准备M14-T06。
 - **Dependencies:** M14-T04, M14-T05。M14-T05仅提供已完成且可用的实现/安全证据/诊断输入，不以其原49目标COMPLETED为本任务登记或后续执行的前提；本任务也不反向成为M14-T05的依赖，避免环。
 - **Sources:** docs/issues/problems/ISSUE-007-dividend-adapter-diagnosis.md；docs/issues/proposals/ISSUE-007-dividend-business-key.md；docs/task-designs/M14-T05-design.md；docs/verification/M14-T05-tushare-live.md；docs/verification/M14-T04-49-contracts.md。
-- **First action:** 读取本任务设计与transfer交接，核对“保留各实施阶段记录”及对应业务键/迁移/验收修订是否已有明确确认；没有确认时先完成这一既存业务裁决，不重复诊断、不实施未确认业务键，不重新设置Token。
+- **First action:** 读取已批准的本任务设计与transfer交接；按四字段FINGERPRINT/V7方案从合成RED开始修复和本地验证，再以新冻结包完整复验40项。不重复旧诊断或设置Token。
 - **State evidence:** 2026-09-06依用户明确的新增与移交请求初始登记为NOT_STARTED，没有执行状态转换或启动。输入e9fedfa已记录28通过/1失败/11未运行，以及1.56秒单次诊断的38源行/进度与金额冲突；四字段指纹方案仍待确认。设计与transfer文件已按序写入并精确回填链接；D-01随剩余工作明确移交，实施就绪门禁尚未满足，状态保持NOT_STARTED，不能标READY或声称前驱已完成。
 
 - **Transfer verification:** 本轮9份文档经机械核对与独立只读复审通过，无Critical/Important/Minor。任务数79、Order连续唯一、既有ID/状态/依赖不变、依赖无环、新链接有效；原真实证据SHA保持d4e7bf67b6a2b144662a987dec9aa812a8e39543c5134ed7cab8a12a4dbe34b5。只完成任务登记与移交，不是D-01批准、实施就绪或真实复验。
@@ -1123,6 +1123,8 @@
 - **State evidence (D-01 confirmed):** 2026-09-06用户对具体四字段指纹/V7保留数据/同阶段更新/全40复验方案回复“同意”；已完整读取本任务设计及transfer交接，核对基线JAR/spec/manifest/旧证据/诊断SHA一致。设计已记录批准规则与当前工具Token可用事实，消除D-01未决项；观测NOT_STARTED后执行NOT_STARTED→READY。当前仍未实施或真实复验，原M14-T05 BLOCKED事实不变。
 
 - **State evidence (start):** D-01批准与READY已提交c72a823。消费完整批准设计和原transfer交接，依据用户执行当前任务与“同意”的授权，观测READY后单独执行READY→IN_PROGRESS。开始合成RED、最小修复及本地验证；该转换不代表真实全40已通过。
+
+- **State evidence (local repair verified):** 修复963ea17按已批准四字段指纹/V7实现，合成RED后76回归、73真实MySQL集成、7唯一打包合同通过；独立修复/接入复审全部发现关闭。新包81adba0dd6500f4aa43b4fa06b18c2c8e7b7454d9e6d4d6c734772cdaef1d002，递归展开仅适配器/元数据改变并新增V7，前端依赖不变；合成health核对7迁移50全空及扫描清理通过，提交HEAD的49总门禁metadata50/schema52/package4、50表1008列通过。新正式nuy4jdhx空库已准备；保持IN_PROGRESS，真实新轮尚未执行，不宣称40通过。
 
 ### `M14-T06`
 

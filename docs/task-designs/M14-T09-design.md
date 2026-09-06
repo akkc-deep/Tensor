@@ -12,7 +12,7 @@
 
 ## Scope
 
-- 先消费既有诊断和待确认的 [ISSUE-007修复设计](../issues/proposals/ISSUE-007-dividend-business-key.md)，完成D-01业务裁决，再按裁决后的明确文件边界实施。
+- 先消费既有诊断和已批准的 [ISSUE-007修复设计](../issues/proposals/ISSUE-007-dividend-business-key.md)，按D-01裁决后的明确文件边界实施。
 - 已提出的方案是保留不同实施进度，使用ts_code/end_date/ann_date/div_proc的四字段指纹身份，并保留同阶段跨批更新。本次明确确认是采用方案的证据；此前新增任务请求仍仅作移交证据。
 - 修复阶段与页面验收阶段分别实施、验证、提交。修复仅服务本次已确认问题及必要兼容接入；不在验收失败后静默删接口、换参数或扩大生产修改范围。
 - 完整复验仍为40接口/48原参数样例/80个页面records查询，fixture另计2POST/3查询；所有旧排除项、Token边界、失败停止和清理门禁继承M14-T05设计。
@@ -28,17 +28,19 @@
 4. 尚未运行11项：disclosure_date、repurchase、stk_holdertrade、top10_holders、top10_floatholders、new_share、stk_managers、pledge_stat、pledge_detail、index_classify、index_member_all。最终复验包含它们、失败的dividend及此前28项，仍共40项。
 5. 当前基线验收包：`/private/tmp/tensor-issue-006-build.2rctzavi/data-plane/tensor-app/target/acceptance/tensor-app-1.0-SNAPSHOT-acceptance.jar`，SHA `f2fc35c933e69da5e85690fbabb13d691178538cd6ffb3b94284dfc95b10db89`。spec SHA `a81df4da7f92c6164062fa29a19902505dd5643c7c948a9aaa021f987220eee5`；manifest SHA `37a317f6a2bc3e5113be5f127976d16d8349414c6476c7f6a194b084a5b0f7c2`。
 
-### A. 完成既存设计裁决
+### A. 已完成的设计裁决
 
 D-01已由本次“同意”确认：执行现有四字段指纹方案。既有单次诊断与原参数保持不变，不重复诊断。
 
-若确认现有四字段指纹方案，完整采用ISSUE-007修复设计的元数据、可空指纹、V7回填、停写和原子主键切换、索引/权限、回退边界及验证要求。若用户选择仅最终方案，必须先明确选取/撤销/缺少最终阶段等规则并修订设计；现有候选方案不能直接执行。此分支只记录当前未决条件，不预先发明另一实现。
+采用已确认的四字段指纹方案，完整执行ISSUE-007修复设计的元数据、可空指纹、V7回填、停写和原子主键切换、索引/权限、回退边界及验证要求。若用户选择仅最终方案，必须先明确选取/撤销/缺少最终阶段等规则并修订设计；现有候选方案不能直接执行。此分支只记录当前未决条件，不预先发明另一实现。
 
 ### B. 确认后实施修复与本地验证
 
 遵循合成RED→最小修改→GREEN及独立复审。候选四字段方案的生产变更为dividend.yaml、GenericDatasetAdapter.java和新增V7迁移；详细路径、编码、精确数据量合同及关联测试/运行说明范围以ISSUE-007修复设计为准。任何已发布迁移和旧包均保留。
 
-若采用候选方案：生产V1～V5/V7共6次迁移，acceptance含V6共7次；49/50业务表，1001/1008物理列；851业务字段、46 COMPOSITE/3 FINGERPRINT、41二级索引。必须验证现存业务行及来源时间不变、Java与SQL指纹等价、不同进度并存、同阶段更新、完全重复去重及真正同身份冲突继续失败。旧包不兼容新schema，具体停写/迁移/恢复步骤不得省略。
+已批准的精确合同：生产V1～V5/V7共6次迁移，acceptance含V6共7次；49/50业务表，1001/1008物理列；851业务字段、46 COMPOSITE/3 FINGERPRINT、41二级索引。必须验证现存业务行及来源时间不变、Java与SQL指纹等价、不同进度并存、同阶段更新、完全重复去重及真正同身份冲突继续失败。旧包不兼容新schema，具体停写/迁移/恢复步骤不得省略。
+
+本轮新包路径为 `/private/tmp/tensor-m14-t09-green.MZ4kMkN9/data-plane/tensor-app/target/acceptance/tensor-app-1.0-SNAPSHOT-acceptance.jar`，实际SHA `81adba0dd6500f4aa43b4fa06b18c2c8e7b7454d9e6d4d6c734772cdaef1d002`；基线包保持不变。全部嵌套JAR递归展开共18018文件，较旧18017仅GenericDatasetAdapter.class/dividend.yaml改变及新增V7，前端与依赖逐字节不变。独立复审、合成health及真实结果仍按后续实测门禁判定。
 
 新包在独立源码快照构建并冻结实际SHA，复用原静态前端，完成生产/acceptance归档合同、独立复审与仅health合成Token检查。只使用自有合成库做旧库升级/新建验证，不自动迁移任何外部现有数据库。
 
@@ -48,7 +50,7 @@ D-01已由本次“同意”确认：执行现有四字段指纹方案。既有�
 
 执行归属改为M14-T09：新控制器只检查M14-T09的当前IN_PROGRESS与批准后设计/包/manifest/spec固定hash，不能因M14-T05仍BLOCKED而等待旧任务启动；结果明确记录当前执行任务M14-T09和历史来源M14-T05。新真实证据写入 `docs/verification/M14-T09-tushare-live.md`，先以真实秘密集合扫描该精确新文件再提交，不追加或覆盖旧已扫描证据。
 
-如果候选方案获确认，精确限定dividend的当前预期为ok，历史manifestStatus=empty仍保留；当前分类29ok/11empty，与历史28ok/12empty分列记录。其他接口期望不变，38不是未来固定行数。新增包及迁移/最小权限由本任务明确接入，沿用2秒间隔、单worker、零重试。除此之外原技术验收合同不变。
+按确认方案，精确限定dividend的当前预期为ok，历史manifestStatus=empty仍保留；当前分类29ok/11empty，与历史28ok/12empty分列记录。其他接口期望不变，38不是未来固定行数。新增包及迁移/最小权限由本任务明确接入，沿用2秒间隔、单worker、零重试。除此之外原技术验收合同不变。
 
 所有本地修复/检查/材料先完成，再由工具通过当前已实际继承的TENSOR_TUSHARE_TOKEN环境执行一次新命令。2026-09-06用户明确授权自行运行命令，工具仅检查变量非空，已确认可用；本地测试子进程净化环境且不继承真实Token。不重复设置Token，不进入长等待确认循环，不复用1gpnb4ru或shhiyk_p。真实错误按实际完成/失败/未运行计数记录，失败停止并使本任务BLOCKED。
 
@@ -61,14 +63,14 @@ D-01已由本次“同意”确认：执行现有四字段指纹方案。既有�
 ## Files
 
 - 本任务控制文档：`docs/task-designs/M14-T09-design.md`、`docs/task-handoffs/M14-T09-handoff.md`、权威看板及M14模块任务卡。
-- 沿用生产/测试修改范围：`docs/issues/proposals/ISSUE-007-dividend-business-key.md` 的“精确实施范围”；仅在D-01确认后启用，不在移交时改生产。
+- 沿用生产/测试修改范围：`docs/issues/proposals/ISSUE-007-dividend-business-key.md` 的“精确实施范围”；D-01已确认，本轮启用。
 - 复用并修改 `control-plane/e2e/tushare-live.spec.js`：批准后的dividend预期、新包冻结hash及执行任务归属；保留既有生命周期和凭证保护。
 - 新建 `docs/verification/M14-T09-tushare-live.md`：本任务修复/验证索引和新真实轮安全证据，扫描通过后提交。
 - 更新ISSUE-007问题/方案记录和M14-T05交接中的归属与结果链接。原M14-T05证据只读；不提交临时脚本、真实数据、日志、数据库或五个已有target目录。
 
 ## Tests
 
-任务移交不运行生产测试或真实接口。下列是D-01确认、设计达到实施就绪后必须执行的验证；具体命令和实际报告不能相互替代。
+此前任务移交未运行生产测试或真实接口。D-01已确认，下列是本轮必须执行的验证；具体命令和实际报告不能相互替代。
 
 在独立源码快照 `data-plane`、Java21下执行ISSUE-007方案“实施时的精确本地检查入口”的三条Maven命令：合成适配及元数据回归、显式-Dtest选择的迁移/schema/fixture/服务IT、acceptance verify打包合同。核对每个命名类实际执行且零失败/错误/跳过。真实Token不进入这些进程。
 
