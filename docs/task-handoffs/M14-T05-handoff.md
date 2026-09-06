@@ -13,6 +13,9 @@ pause
 
 ## Current State
 
+**M14-T09结果回写（2026-09-06）：** D-01已由用户明确确认，修复963ea17和本地门禁均通过；新包真实dividend38条完成入库/页面/独立DB闭环，ISSUE-007关闭。本轮完整复验实际32通过/1失败/7未运行，新失败为top10_holders实际SUCCESS320与历史EMPTY预期不符，见M14-T09设计D-02及当前pause交接。新证据 `docs/verification/M14-T09-tushare-live.md`（471dfb0，SHA9d5c283b31f586ee7a3b4fdbda84321fbf3c7e4f55274f9d69955d86353af170）；扫描/停机/清理通过。当前M14-T09 BLOCKED等待单接口预期确认。本任务仍BLOCKED，原49未完成，以下28/1/11与原SHA作为历史保留，不重复旧执行。
+
+
 2026-09-06用户已要求将剩余工作移交新任务。当前续接入口为 **Order76/M14-T09**，见 `docs/task-designs/M14-T09-design.md` 与 `docs/task-handoffs/M14-T09-handoff.md`。本任务保留BLOCKED和以下历史结果，不因移交改判完成；后续不在本任务重复发起诊断或完整复跑。尚未确认的分红规则一并转交。
 
 用户已执行1gpnb4ru一次性启动器，139秒结束，实际28 passed / 1 failed / 11 did not run；当前阻塞是dividend的ADAPTER_TYPE_INVALID。stock_company和stk_holdernumber真实通过，ISSUE-005与ISSUE-006均已关闭。40项验收及原49目标尚未完成，不准备后继。

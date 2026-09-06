@@ -1,83 +1,72 @@
-# Task Transfer Handoff
+# Pause Handoff
 
 ## Handoff Type
 
-transfer
-
-用户明确要求把尚未完成的工作交给新任务。本文件是未完成工作的承接快照，不是以前驱COMPLETED为前提的普通next-task交接；没有声明任何任务已完成或已启动。
+pause
 
 ## Task Link
 
 - **Task board:** `docs/task-handoffs/tensor-v1-task-board.md`
-- **Source task:** `M14-T05`，Order75，当前BLOCKED，原49目标未完成。
-- **Receiving task:** `M14-T09`，新增Order76，当前NOT_STARTED。
-- **Design document:** `docs/task-designs/M14-T09-design.md`，D-01待确认，尚未实施就绪。
-- **State change:** 仅新增任务和转移当前剩余工作归属；没有启动、解阻或完成转换。原M14-T06/T07/T08只顺延Order，ID/状态/依赖不改。
+- **Task ID:** `M14-T09`
+- **Transition:** `IN_PROGRESS -> BLOCKED`
+- **Design document:** `docs/task-designs/M14-T09-design.md`
 
-## Next Task
+## Current State
 
-**M14-T09：分红修复与2000档剩余验收。** 接手以下三项：
+D-01已获用户明确“同意”，修复963ea17完成：分红四字段指纹、可空身份兼容、保留数据的V7迁移。本地回归、迁移/幂等/schema、打包、独立复审、合成health和49总合同均通过。真实nuy4jdhx轮149秒，32 passed / 1 failed / 7 did not run；dividend SUCCESS38/38/0、页面末查38与独立DB38一致，ISSUE-007已修复验证。
 
-1. 确认dividend记录保存规则，按确认后的方案修复业务键及必要数据库迁移。
-2. 完成适配、旧库升级/新库迁移、幂等、schema、打包、独立复审及合成health验证，冻结新验收包。
-3. 新包完整复跑40接口/48原样例/80查询及fixture2POST/3查询；记录新轮实际结果，扫描/清理后提交新证据。
+当前阻塞为top10_holders的验收预期漂移：原样例实际SUCCESS320/320/0，独立DB320，但历史及当前预期仍EMPTY，触发 `Safe check failed: empty interface stays empty`；未执行该接口末查，不能计为完整通过。D-02已写具体单接口修订，尚未确认或改spec；不自动复跑。
 
-完成要求是上述修复验证和新轮40项全部通过，不能把此前28项与新轮剩余项拼成通过；只有诊断或设计完成也不能关闭任务。原9项排除仍不覆盖，原49目标不宣称完成，不自动准备M14-T06。
+原transfer快照保留于提交9142127，本文件按相同权威路径更新为当前pause入口。M14-T05仍BLOCKED，原49中的9项仍不覆盖，不自动准备M14-T06。
 
-**未决D-01随任务移交：** 推荐保留各实施阶段并使用四字段指纹身份，但用户尚未确认。用户问过为何增加进度，随后要求新增任务移交；这两个请求不能当成采用方案的批准。新执行者先解决此已列明裁决，设计明确后再READY和单独启动，不直接修改业务键。
+## Changed Files
 
-## Dependencies
+- 修复提交963ea17：GenericDatasetAdapter.java、dividend.yaml、新V7、指定回归/迁移/打包测试、TRD当前决定、运行说明和49合同汇总1008。
+- `control-plane/e2e/tushare-live.spec.js`：M14-T09归属、仅dividend当前ok覆盖、新包固定hash及历史/当前分类；提交452efcc。
+- `docs/verification/M14-T09-tushare-live.md`：本地实测和本轮32/1/7安全证据，真实结果先独立提交471dfb0。
+- 当前设计、权威看板、M14任务卡及M14-T05交接：记录结果、D-02与后续入口。
+- ISSUE-007问题/方案与issues索引：记录真实dividend闭环关闭。原M14-T05已扫描证据未改。
 
-### M14-T05
+## Verification
 
-- **Artifact:** `docs/task-designs/M14-T05-design.md`、`control-plane/e2e/tushare-live.spec.js`、`docs/verification/M14-T05-tushare-live.md`、`docs/task-handoffs/M14-T05-handoff.md`。
-- **Decision:** 当前范围40接口/48原样例/80查询，fixture另2/3；9项排除、原manifest/参数、Token环境隔离、单worker、零重试、失败停止和安全清理全部继承。
-- **Rationale:** 现有spec已执行并给出真实部分结果，新任务应接续修复和完整复验，不能重复搭建另一套流程或重做已关闭问题。
-- **Constraint:** 输入是已完成且可用的实现/历史证据，不是M14-T05原49目标已完成。旧证据不改写；spec可以沿用原文件和M14_T05技术环境名，但新控制器任务门禁和新证据归属必须是M14-T09，不能等待原任务IN_PROGRESS。
-- **Usage:** 继承完整页面与安全合同，新包和批准后的dividend预期接入同一spec；新的真实证据写 `docs/verification/M14-T09-tushare-live.md` 并扫描该精确新文件。
-- **Readiness evidence:** 1gpnb4ru正式轮139秒、28通过/1失败/11未运行；fixture2/3、99请求各一个完成事件、独立DB/扫描/全部自有资源清理通过。证据提交e3013b1，全文SHA `d4e7bf67b6a2b144662a987dec9aa812a8e39543c5134ed7cab8a12a4dbe34b5`。这些证据可用但不证明新包或全40通过。
+- 设计第一/二条精确Maven选择器：76/76与73/73，0 failures/errors/skipped；MySQL8.4.6迁移IT5项，覆盖SQL/Java空值及UTF-8编码、现有数据/来源时间不变、最终ALTER失败旧主键保留、旧库升级后同阶段更新/不同阶段插入。
+- acceptance verify：生产4+验收3唯一合同通过；新包递归18018文件仅适配器/分红元数据改变及新增V7，前端/依赖相对旧包逐字节一致；独立复审无剩余发现。
+- `sh scripts/verify-49-contracts.sh`：提交963ea17的main隔离构建exit0，metadata50/schema52/package4、49/49资源、50业务表1008列；首次socket路径遗漏.sock导致Ryuk失败已按实记录，修正环境后完整重跑通过。
+- 合成health控制kcznkmbm：7迁移、50表全0、ready及扫描/停机/自有DB卷清理通过。
+- 实际命令：`python3 /private/tmp/tensor-m14-t09-control.nuy4jdhx/launch.py`，运行Git36f3e7f，npx与最终exit1，149秒。真实POST41/records65，fixturePOST2/records3通过；111个完成事件逐requestId各恰一次。
+- dividend requestId `c05dfddc-0ff5-4335-92d1-9b97c4d88722`、434ms；source38/insert38/update0，末查38及独立DB38。top10_holders requestId `01e1ba67-d26a-4e6d-918f-b42c70cb6e91`、164ms；source320/insert320/update0，数据库320；只完成初查0，末查未执行。
+- 初始7成功迁移/50业务表全0。已完成32项页面末态与独立DB逐项一致，9排除表均0；全40合计匹配标志为false，如实保留。spec清理四项、worker/JVM退出、CLI扫描/清理通过，扫描5文件、删除2自动产物；自有容器/卷/DB私密材料已清理，8080空闲。
+- 本轮证据SHA `9d5c283b31f586ee7a3b4fdbda84321fbf3c7e4f55274f9d69955d86353af170`，与真实秘密扫描标记及控制器复核一致。原M14-T05全文SHA仍 `d4e7bf67b6a2b144662a987dec9aa812a8e39543c5134ed7cab8a12a4dbe34b5`。
 
-### M14-T04
+## Remaining Work
 
-- **Artifact:** `docs/verification/M14-T04-49-contracts.md`、`scripts/verify-49-contracts.sh` 及生产/acceptance打包合同测试。
-- **Decision:** 保持49个元数据资源、851业务字段、公开查询/下载合同和打包完整性；schema变化须有版本化迁移及真实合同验证。
-- **Rationale:** 原任务已建立元数据/schema/归档基线，新键迁移必须明确修订受影响物理列/索引/迁移计数并重新验证，不能沿用旧计数证明新包。
-- **Constraint:** 原完成记录80a9491及其历史1007列证据保留。若四字段方案获确认，当前契约脚本/测试按新1008列等精确合同更新；脚本要求含已提交变更、受保护输入干净的main Git检出，并自行从HEAD创建快照。
-- **Usage:** 执行原合同门禁并结合新增迁移/业务测试，核对新包版本；不得以旧合同通过替代新增修复验证。
-- **Readiness evidence:** 已提交的50元数据/52schema/4打包检查与49/49资源合同及既有页面结果；实际命令/结果见该证据。新迁移及新包未验证。
+1. 确认设计D-02：仅top10_holders当前预期改ok，保留历史empty/原参数；其他未批准接口不变。确认后完成限定合成反例与新材料复审接入。
+2. 新空环境完整复验40项及fixture，证据写新 `docs/verification/M14-T09-tushare-live-rerun-01.md`，不得覆盖已扫描本轮证据或拼接32项结果。
+3. 本轮未运行7项：top10_floatholders、new_share、stk_managers、pledge_stat、pledge_detail、index_classify、index_member_all。它们没有当前成功或非空结论。
 
-### ISSUE-007 已完成诊断与候选修复设计
+## Resume Task
 
-- **Artifact:** `docs/issues/problems/ISSUE-007-dividend-adapter-diagnosis.md`、`docs/issues/proposals/ISSUE-007-dividend-business-key.md`，提交e9fedfa。
-- **Decision:** 真实冲突位于旧三字段业务键；不同记录的div_proc/cash_div/cash_div_tax不同。四字段FINGERPRINT、V7迁移和仅dividend预期修订为待确认方案，不是已经批准的实现。
-- **Rationale:** 实施进度可能区分应分别保留的记录；只保留最终方案则需另一组明确业务规则。当前证据不能代替业务裁决。
-- **Constraint:** 不保存真实38行、不猜测其他冲突、不得把新诊断rowIndex21或sourceRowCount38补成此前页面失败位置/计数；金额不按未经批准规则用于身份或择一。
-- **Usage:** 先完成D-01；确认候选方案后按已复审文件边界、SQL/Java编码、停写/原子主键切换、回归和包接入实施。不再运行旧单次诊断。
-- **Readiness evidence:** 原参数单次诊断1.56秒、clientExecuteCalls1、sourceRowCount38、conflicting_key，适配计数未建立，扫描/Java退出通过，无DB或重试。设计2Important经修订复审关闭，最后Minor命令前提已补；业务确认、代码、迁移、回归、新包及复验均未完成。
-
-以上输入在历史事实与安全约束上相容。D-01是已明确移交的未决需求，阻止实施就绪；本transfer不绕过该门禁，也不是一次正常next-task/READY交付。
+M14-T09：分红修复与2000档剩余验收。修复及真实dividend验证已完成，剩余是D-02和完整新轮验收；不恢复或重复旧诊断，不再修已关闭ISSUE-005/006/007。
 
 ## Start Here
 
-1. 完整读取 `docs/task-designs/M14-T09-design.md` 和权威看板Order76。
-2. 本交接、ISSUE-007诊断详情与候选修复设计。
-3. 完整M14-T05设计及已扫描真实证据，再按需要读取M14-T04合同来源。
+1. 权威看板Order76及完整 `docs/task-designs/M14-T09-design.md`，尤其D-02。
+2. 本pause交接及 `docs/verification/M14-T09-tushare-live.md`（471dfb0，固定SHA见上）。
+3. `docs/issues/proposals/ISSUE-007-dividend-business-key.md`、M14-T05设计的安全/范围合同及本地49门禁结果。
 
-**第一个动作：核对D-01是否已有后续明确确认。** 当前没有，先确认分红数据应保留各阶段还是仅最终方案；确认写入设计后才进入实施就绪。确认现有方案后直接从合成RED开始，不重复已完成诊断、ISSUE-005/006修复或Token设置。
+首动作：取得D-02单接口预期修订的明确确认并写入设计；据此执行限定离线检查和新材料接入，建立解阻证据后才BLOCKED→READY，再单独启动。Token已在工具环境可用且用户授权自行运行，无需重复设置。
 
-可用本机材料（先检查存在性和hash）：
+可复用新冻结包：`/private/tmp/tensor-m14-t09-green.MZ4kMkN9/data-plane/tensor-app/target/acceptance/tensor-app-1.0-SNAPSHOT-acceptance.jar`，SHA `81adba0dd6500f4aa43b4fa06b18c2c8e7b7454d9e6d4d6c734772cdaef1d002`。当前specSHA `e3d6ada1324df1deb140c264a2b7f3f8fae8f1a1d864ca02d2240ce4bfd7f1cc`，manifestSHA `37a317f6a2bc3e5113be5f127976d16d8349414c6476c7f6a194b084a5b0f7c2`。新轮必须更新spec/设计/新证据/启动器hash，不能复用旧配置。
 
-- 当前基线JAR：`/private/tmp/tensor-issue-006-build.2rctzavi/data-plane/tensor-app/target/acceptance/tensor-app-1.0-SNAPSHOT-acceptance.jar`，SHA `f2fc35c933e69da5e85690fbabb13d691178538cd6ffb3b94284dfc95b10db89`。
-- 原manifest SHA `37a317f6a2bc3e5113be5f127976d16d8349414c6476c7f6a194b084a5b0f7c2`；现有spec SHA `a81df4da7f92c6164062fa29a19902505dd5643c7c948a9aaa021f987220eee5`。
-- 诊断安全结果：`/private/tmp/tensor-issue-007-diagnostic.shhiyk_p/safe-result.json`，SHA `1b1ee18c0fb667517312957eed85620e9fecc2d1c4e91597413932e0586e2d46`。该目录已使用，禁止删除used标志或重复执行diagnose.py。
-- 1gpnb4ru正式环境已清理，其安全标记在 `/private/tmp/tensor-m14-t05-control.1gpnb4ru/run-finished.json`，允许保留产物根 `/private/tmp/tensor-m14-t05.91e69mlz`。不输出日志全文、真实行或私密材料。
+已用正式目录nuy4jdhx及health目录kcznkmbm不可复用。安全标记保留在nuy4jdhx/run-finished.json；私有运行产物根 `/private/tmp/tensor-m14-t05.fby6mhxj` 仅4个已扫描允许文件。可复用无秘密工作材料在 `/private/tmp/tensor-m14-t09-work.uxwc5bc6`，实际启动必须生成新的独占目录/空库/配置。
 
-目前28项通过，失败dividend，未运行11项为disclosure_date、repurchase、stk_holdertrade、top10_holders、top10_floatholders、new_share、stk_managers、pledge_stat、pledge_detail、index_classify、index_member_all。新包须完整40项复验。
+## Blocker
+
+- **Reason:** top10_holders原样例当前返回SUCCESS320而合同仍要求EMPTY；本次批准仅覆盖dividend，完整40项验收未通过。
+- **Resolution condition:** D-02明确确认并完成精确单接口预期修改、离线反例及新冻结执行材料复审；保留本轮真实失败与原manifest/参数。此条件恢复复验，不预先声明40通过。
 
 ## Risks
 
-- D-01未确认，不能因任务创建而直接实施四字段指纹键；该未决条件已转交，不在本轮强迫再次确认。
-- 所有旧启动器已使用，不应复用；临时材料缺失时按提交记录恢复可验证产物，不绕过hash。
-- 工具不会继承用户终端Token；本地工作先完成，再给已有Token终端一次新命令。禁止读取其他进程环境、把Token存文件或打印哈希。
-- 新真实结果可能继续暴露故障，必须失败停止；诊断、历史28项和当前非空源计数不能代替新轮验收。
-- 原49中9项仍不覆盖，后续性能/安全/发布任务没有因此获得就绪或启动授权。
+- 不能将top10_holders下载/入库成功当作尚未执行的末次页面查询通过，也不能因名称相似预改未执行的top10_floatholders。
+- 38与320是本轮数量，不是未来固定返回行数；上游内容可能继续变化，任一错误仍停止。
+- 不拼接历史28、本轮32或未来部分结果，不把9项排除记为skip/通过；原49未完成，不自动准备后继。
