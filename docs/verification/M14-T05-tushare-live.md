@@ -1415,3 +1415,1054 @@ PY
   "task": "M14-T05"
 }
 ```
+
+## 2000档实际运行 2026-09-06T07:40:04.159432+00:00
+
+以下为本次启动器在CLI退出、终检和清理后记录的实际结果；空值表示未测量，原全49目标仍不完整。
+
+```json
+{
+  "controllerFailure": null,
+  "databaseAfterMigration": {
+    "businessTables": 50,
+    "counts": {
+      "adj_factor": 0,
+      "balancesheet": 0,
+      "block_trade": 0,
+      "broker_recommend": 0,
+      "cashflow": 0,
+      "daily": 0,
+      "daily_basic": 0,
+      "disclosure_date": 0,
+      "dividend": 0,
+      "express": 0,
+      "fina_audit": 0,
+      "fina_indicator": 0,
+      "fina_mainbz": 0,
+      "fixture_daily": 0,
+      "forecast": 0,
+      "hk_hold": 0,
+      "hs_const": 0,
+      "hsgt_top10": 0,
+      "income": 0,
+      "index_classify": 0,
+      "index_member": 0,
+      "index_member_all": 0,
+      "margin": 0,
+      "margin_detail": 0,
+      "moneyflow": 0,
+      "moneyflow_hsgt": 0,
+      "monthly": 0,
+      "namechange": 0,
+      "new_share": 0,
+      "pledge_detail": 0,
+      "pledge_stat": 0,
+      "repurchase": 0,
+      "share_float": 0,
+      "slb_len": 0,
+      "slb_sec": 0,
+      "slb_sec_detail": 0,
+      "stk_holdernumber": 0,
+      "stk_holdertrade": 0,
+      "stk_limit": 0,
+      "stk_managers": 0,
+      "stk_rewards": 0,
+      "stock_basic": 0,
+      "stock_company": 0,
+      "suspend_d": 0,
+      "top10_floatholders": 0,
+      "top10_holders": 0,
+      "top_inst": 0,
+      "top_list": 0,
+      "trade_cal": 0,
+      "weekly": 0
+    },
+    "successfulMigrations": 6
+  },
+  "databaseFinal": {
+    "businessTables": 50,
+    "counts": {
+      "adj_factor": 5553,
+      "balancesheet": 0,
+      "block_trade": 139,
+      "broker_recommend": 0,
+      "cashflow": 0,
+      "daily": 5535,
+      "daily_basic": 5535,
+      "disclosure_date": 0,
+      "dividend": 0,
+      "express": 1,
+      "fina_audit": 0,
+      "fina_indicator": 0,
+      "fina_mainbz": 150,
+      "fixture_daily": 1,
+      "forecast": 3,
+      "hk_hold": 0,
+      "hs_const": 0,
+      "hsgt_top10": 0,
+      "income": 0,
+      "index_classify": 0,
+      "index_member": 0,
+      "index_member_all": 0,
+      "margin": 3,
+      "margin_detail": 4424,
+      "moneyflow": 5535,
+      "moneyflow_hsgt": 0,
+      "monthly": 0,
+      "namechange": 0,
+      "new_share": 0,
+      "pledge_detail": 0,
+      "pledge_stat": 0,
+      "repurchase": 0,
+      "share_float": 0,
+      "slb_len": 0,
+      "slb_sec": 0,
+      "slb_sec_detail": 0,
+      "stk_holdernumber": 150,
+      "stk_holdertrade": 0,
+      "stk_limit": 7733,
+      "stk_managers": 0,
+      "stk_rewards": 1428,
+      "stock_basic": 5895,
+      "stock_company": 6294,
+      "suspend_d": 5,
+      "top10_floatholders": 0,
+      "top10_holders": 0,
+      "top_inst": 0,
+      "top_list": 67,
+      "trade_cal": 2,
+      "weekly": 5613
+    },
+    "successfulMigrations": 6
+  },
+  "elapsedSeconds": 139,
+  "finalExitCode": 1,
+  "npxExitCode": 1,
+  "ownedContainerRemoved": true,
+  "ownedWorkersExited": true,
+  "postCliScan": {
+    "cleanupPassed": true,
+    "deletedArtifacts": 2,
+    "filesScanned": 5,
+    "npxExitCode": 1,
+    "scanPassed": true
+  },
+  "scopeId": "points-2000",
+  "selectedPageCountsAndExcludedEmptyMatched": false,
+  "specResults": {
+    "cleanup": {
+      "immutableInputs": true,
+      "jvmStopped": true,
+      "logScanned": true,
+      "networkDrained": true
+    },
+    "command": "npx playwright test e2e/tushare-live.spec.js --workers=1",
+    "downloads": [
+      {
+        "apiName": "stock_basic",
+        "durationMs": 2830,
+        "insertedRows": 5556,
+        "outcome": "SUCCESS",
+        "requestId": "33a04d34-4ddd-467b-89a6-42e64ae94fe7",
+        "sourceRowCount": 5556,
+        "updatedRows": 0
+      },
+      {
+        "apiName": "stock_basic",
+        "durationMs": 26,
+        "insertedRows": 0,
+        "outcome": "EMPTY",
+        "requestId": "4314fc06-fca6-482b-8a5c-66ba4eb680fb",
+        "sourceRowCount": 0,
+        "updatedRows": 0
+      },
+      {
+        "apiName": "stock_basic",
+        "durationMs": 216,
+        "insertedRows": 339,
+        "outcome": "SUCCESS",
+        "requestId": "d53485e3-36d8-49a4-a368-e1d02460f438",
+        "sourceRowCount": 339,
+        "updatedRows": 0
+      },
+      {
+        "apiName": "stock_company",
+        "durationMs": 1554,
+        "insertedRows": 2457,
+        "outcome": "SUCCESS",
+        "requestId": "a5c53b4c-10ad-4d7a-92bb-a8171bad0d36",
+        "sourceRowCount": 2457,
+        "updatedRows": 0
+      },
+      {
+        "apiName": "stock_company",
+        "durationMs": 1964,
+        "insertedRows": 3083,
+        "outcome": "SUCCESS",
+        "requestId": "6b14ca1b-a66c-4e2c-b5ab-9d92a246fc14",
+        "sourceRowCount": 3083,
+        "updatedRows": 0
+      },
+      {
+        "apiName": "stock_company",
+        "durationMs": 504,
+        "insertedRows": 754,
+        "outcome": "SUCCESS",
+        "requestId": "106868e7-499c-40d8-9351-8c2986b5fb22",
+        "sourceRowCount": 754,
+        "updatedRows": 0
+      },
+      {
+        "apiName": "income",
+        "durationMs": 25,
+        "insertedRows": 0,
+        "outcome": "EMPTY",
+        "requestId": "794d5e6c-fb6c-4270-985c-dca5dd327bcf",
+        "sourceRowCount": 0,
+        "updatedRows": 0
+      },
+      {
+        "apiName": "balancesheet",
+        "durationMs": 28,
+        "insertedRows": 0,
+        "outcome": "EMPTY",
+        "requestId": "036bf012-bfe7-40dc-a011-56032e2d45a1",
+        "sourceRowCount": 0,
+        "updatedRows": 0
+      },
+      {
+        "apiName": "cashflow",
+        "durationMs": 62,
+        "insertedRows": 0,
+        "outcome": "EMPTY",
+        "requestId": "a5e05be4-2b63-4979-a4fa-1f181667fb9b",
+        "sourceRowCount": 0,
+        "updatedRows": 0
+      },
+      {
+        "apiName": "fina_indicator",
+        "durationMs": 31,
+        "insertedRows": 0,
+        "outcome": "EMPTY",
+        "requestId": "55c6d6c7-9a56-45bc-9e57-d2d9c80845b7",
+        "sourceRowCount": 0,
+        "updatedRows": 0
+      },
+      {
+        "apiName": "fina_audit",
+        "durationMs": 20,
+        "insertedRows": 0,
+        "outcome": "EMPTY",
+        "requestId": "99a19772-088c-4e8d-9c63-9e83ddead308",
+        "sourceRowCount": 0,
+        "updatedRows": 0
+      },
+      {
+        "apiName": "fina_mainbz",
+        "durationMs": 116,
+        "insertedRows": 150,
+        "outcome": "SUCCESS",
+        "requestId": "daaadd4e-37ca-4e5a-9f58-93e626907181",
+        "sourceRowCount": 150,
+        "updatedRows": 0
+      },
+      {
+        "apiName": "stk_rewards",
+        "durationMs": 650,
+        "insertedRows": 1428,
+        "outcome": "SUCCESS",
+        "requestId": "0a74ed37-a164-42e2-a1c0-fd5bd1258840",
+        "sourceRowCount": 1428,
+        "updatedRows": 0
+      },
+      {
+        "apiName": "stk_holdernumber",
+        "durationMs": 121,
+        "insertedRows": 150,
+        "outcome": "SUCCESS",
+        "requestId": "ba63f8ea-1043-4891-b2ee-fd577a371752",
+        "sourceRowCount": 150,
+        "updatedRows": 0
+      },
+      {
+        "apiName": "trade_cal",
+        "durationMs": 30,
+        "insertedRows": 1,
+        "outcome": "SUCCESS",
+        "requestId": "ca1cae6e-9918-4757-a650-ea4d9e929697",
+        "sourceRowCount": 1,
+        "updatedRows": 0
+      },
+      {
+        "apiName": "trade_cal",
+        "durationMs": 73,
+        "insertedRows": 1,
+        "outcome": "SUCCESS",
+        "requestId": "706c0401-ce32-4507-b244-a6b40f14aec2",
+        "sourceRowCount": 1,
+        "updatedRows": 0
+      },
+      {
+        "apiName": "trade_cal",
+        "durationMs": 21,
+        "insertedRows": 0,
+        "outcome": "EMPTY",
+        "requestId": "7e760720-d6ec-4d35-8049-09c45d87f2c6",
+        "sourceRowCount": 0,
+        "updatedRows": 0
+      },
+      {
+        "apiName": "margin",
+        "durationMs": 61,
+        "insertedRows": 1,
+        "outcome": "SUCCESS",
+        "requestId": "63cc405f-9627-48b6-a54b-9e92105b8b02",
+        "sourceRowCount": 1,
+        "updatedRows": 0
+      },
+      {
+        "apiName": "margin",
+        "durationMs": 30,
+        "insertedRows": 1,
+        "outcome": "SUCCESS",
+        "requestId": "72fa631f-5cd0-4145-8adf-ccae863fb133",
+        "sourceRowCount": 1,
+        "updatedRows": 0
+      },
+      {
+        "apiName": "margin",
+        "durationMs": 33,
+        "insertedRows": 1,
+        "outcome": "SUCCESS",
+        "requestId": "fed0da73-da57-414b-a5bb-9e8b8d9709b5",
+        "sourceRowCount": 1,
+        "updatedRows": 0
+      },
+      {
+        "apiName": "daily",
+        "durationMs": 2378,
+        "insertedRows": 5535,
+        "outcome": "SUCCESS",
+        "requestId": "2ea7b23b-6576-4430-9367-97e3cad50dd1",
+        "sourceRowCount": 5535,
+        "updatedRows": 0
+      },
+      {
+        "apiName": "weekly",
+        "durationMs": 2371,
+        "insertedRows": 5613,
+        "outcome": "SUCCESS",
+        "requestId": "0c0af184-52c9-46db-9788-410dd1487f29",
+        "sourceRowCount": 5613,
+        "updatedRows": 0
+      },
+      {
+        "apiName": "monthly",
+        "durationMs": 24,
+        "insertedRows": 0,
+        "outcome": "EMPTY",
+        "requestId": "68c37d9f-06dc-43ec-9f9d-3465dfeaf67d",
+        "sourceRowCount": 0,
+        "updatedRows": 0
+      },
+      {
+        "apiName": "adj_factor",
+        "durationMs": 2033,
+        "insertedRows": 5553,
+        "outcome": "SUCCESS",
+        "requestId": "c76f6bb8-6f23-43e6-acc9-a0559cc5a0d8",
+        "sourceRowCount": 5553,
+        "updatedRows": 0
+      },
+      {
+        "apiName": "suspend_d",
+        "durationMs": 120,
+        "insertedRows": 5,
+        "outcome": "SUCCESS",
+        "requestId": "82dac8c8-cc6b-4b24-984a-7c7243ae681a",
+        "sourceRowCount": 5,
+        "updatedRows": 0
+      },
+      {
+        "apiName": "daily_basic",
+        "durationMs": 2483,
+        "insertedRows": 5535,
+        "outcome": "SUCCESS",
+        "requestId": "e10a1b56-51df-4081-a116-49a2bffe4f4e",
+        "sourceRowCount": 5535,
+        "updatedRows": 0
+      },
+      {
+        "apiName": "moneyflow",
+        "durationMs": 2539,
+        "insertedRows": 5535,
+        "outcome": "SUCCESS",
+        "requestId": "4d97f9c2-10c2-48fc-a5e2-90b94841fe26",
+        "sourceRowCount": 5535,
+        "updatedRows": 0
+      },
+      {
+        "apiName": "stk_limit",
+        "durationMs": 2817,
+        "insertedRows": 7733,
+        "outcome": "SUCCESS",
+        "requestId": "ebc15157-4697-4664-9861-c0b56c462ba8",
+        "sourceRowCount": 7733,
+        "updatedRows": 0
+      },
+      {
+        "apiName": "top_list",
+        "durationMs": 66,
+        "insertedRows": 67,
+        "outcome": "SUCCESS",
+        "requestId": "a3a93dac-b163-42e8-98fc-3e1361ac15ed",
+        "sourceRowCount": 67,
+        "updatedRows": 0
+      },
+      {
+        "apiName": "margin_detail",
+        "durationMs": 1750,
+        "insertedRows": 4424,
+        "outcome": "SUCCESS",
+        "requestId": "b0d420d8-6f68-4b0e-ba32-ccf136e892b1",
+        "sourceRowCount": 4424,
+        "updatedRows": 0
+      },
+      {
+        "apiName": "block_trade",
+        "durationMs": 100,
+        "insertedRows": 139,
+        "outcome": "SUCCESS",
+        "requestId": "c5779125-4519-495e-a764-7f5790975aa1",
+        "sourceRowCount": 159,
+        "updatedRows": 0
+      },
+      {
+        "apiName": "slb_len",
+        "durationMs": 92,
+        "insertedRows": 0,
+        "outcome": "EMPTY",
+        "requestId": "91144255-cce7-4dff-a3db-562b3f45bea1",
+        "sourceRowCount": 0,
+        "updatedRows": 0
+      },
+      {
+        "apiName": "slb_sec",
+        "durationMs": 22,
+        "insertedRows": 0,
+        "outcome": "EMPTY",
+        "requestId": "96aa3a6f-1ba3-4c05-a015-4d6ae42298cd",
+        "sourceRowCount": 0,
+        "updatedRows": 0
+      },
+      {
+        "apiName": "slb_sec_detail",
+        "durationMs": 29,
+        "insertedRows": 0,
+        "outcome": "EMPTY",
+        "requestId": "19d80928-6b33-478f-a716-9fc5f707a363",
+        "sourceRowCount": 0,
+        "updatedRows": 0
+      },
+      {
+        "apiName": "forecast",
+        "durationMs": 32,
+        "insertedRows": 3,
+        "outcome": "SUCCESS",
+        "requestId": "8989940d-1486-4e86-a572-8851e4a7388c",
+        "sourceRowCount": 3,
+        "updatedRows": 0
+      },
+      {
+        "apiName": "express",
+        "durationMs": 39,
+        "insertedRows": 1,
+        "outcome": "SUCCESS",
+        "requestId": "3c03977b-0e8c-483a-ba8c-2f60d7431b91",
+        "sourceRowCount": 1,
+        "updatedRows": 0
+      },
+      {
+        "apiName": "dividend",
+        "durationMs": 320,
+        "outcome": "ADAPTER_TYPE_INVALID",
+        "requestId": "4c5a2c20-e8e9-426d-a0b0-a758f881779f"
+      }
+    ],
+    "finishedAt": "2026-09-06T07:40:01.738Z",
+    "fixture": [
+      {
+        "apiName": "fixture_daily",
+        "durationMs": 5,
+        "outcome": "SUCCESS",
+        "requestId": "d311a586-9043-4474-9d1e-2d9ce8925453",
+        "resultCount": 0,
+        "totalElements": 0
+      },
+      {
+        "apiName": "fixture_daily",
+        "durationMs": 21,
+        "insertedRows": 1,
+        "outcome": "SUCCESS",
+        "requestId": "05cfba79-0c01-4545-a479-848f1ac94d38",
+        "sourceRowCount": 1,
+        "updatedRows": 0
+      },
+      {
+        "apiName": "fixture_daily",
+        "durationMs": 5,
+        "outcome": "SUCCESS",
+        "requestId": "9bd9c0cd-89f3-4bef-8de1-e229ae61712f",
+        "resultCount": 1,
+        "totalElements": 1
+      },
+      {
+        "apiName": "fixture_daily",
+        "durationMs": 0,
+        "insertedRows": 0,
+        "outcome": "EMPTY",
+        "requestId": "2cf3f187-c74e-44c5-bf26-9837702487f0",
+        "sourceRowCount": 0,
+        "updatedRows": 0
+      },
+      {
+        "apiName": "fixture_daily",
+        "durationMs": 4,
+        "outcome": "SUCCESS",
+        "requestId": "22735492-c862-46ac-9456-f9397eb16168",
+        "resultCount": 1,
+        "totalElements": 1
+      }
+    ],
+    "inputs": {
+      "gitCommit": "70422239d1d2b5dae40e15dd987bad6869f83b14",
+      "jarSha256": "f2fc35c933e69da5e85690fbabb13d691178538cd6ffb3b94284dfc95b10db89",
+      "manifestSha256": "37a317f6a2bc3e5113be5f127976d16d8349414c6476c7f6a194b084a5b0f7c2",
+      "specSha256": "a81df4da7f92c6164062fa29a19902505dd5643c7c948a9aaa021f987220eee5"
+    },
+    "queries": [
+      {
+        "apiName": "stock_basic",
+        "durationMs": 6,
+        "outcome": "SUCCESS",
+        "requestId": "fcf83138-a531-4167-9463-b8467206a437",
+        "resultCount": 0,
+        "totalElements": 0
+      },
+      {
+        "apiName": "stock_basic",
+        "durationMs": 7,
+        "outcome": "SUCCESS",
+        "requestId": "d97ed98a-2fb2-472b-95b8-514a901a1b25",
+        "resultCount": 50,
+        "totalElements": 5895
+      },
+      {
+        "apiName": "stock_company",
+        "durationMs": 2,
+        "outcome": "SUCCESS",
+        "requestId": "33c1e148-179e-464f-b8bd-e2ca228cd430",
+        "resultCount": 0,
+        "totalElements": 0
+      },
+      {
+        "apiName": "stock_company",
+        "durationMs": 10,
+        "outcome": "SUCCESS",
+        "requestId": "20831952-422e-4833-a949-7a52a4adce98",
+        "resultCount": 50,
+        "totalElements": 6294
+      },
+      {
+        "apiName": "income",
+        "durationMs": 4,
+        "outcome": "SUCCESS",
+        "requestId": "b5238dfb-bdc8-4ef2-87de-1793c8b94759",
+        "resultCount": 0,
+        "totalElements": 0
+      },
+      {
+        "apiName": "income",
+        "durationMs": 2,
+        "outcome": "SUCCESS",
+        "requestId": "34b19b3d-3793-4e18-9bd7-df72ac71f417",
+        "resultCount": 0,
+        "totalElements": 0
+      },
+      {
+        "apiName": "balancesheet",
+        "durationMs": 2,
+        "outcome": "SUCCESS",
+        "requestId": "ed6e900a-dc88-4f2a-b8c7-45601dc27d47",
+        "resultCount": 0,
+        "totalElements": 0
+      },
+      {
+        "apiName": "balancesheet",
+        "durationMs": 2,
+        "outcome": "SUCCESS",
+        "requestId": "b0ce801d-a9dc-46c0-976c-6c0d46cbc8f3",
+        "resultCount": 0,
+        "totalElements": 0
+      },
+      {
+        "apiName": "cashflow",
+        "durationMs": 2,
+        "outcome": "SUCCESS",
+        "requestId": "83fae9de-f7a8-4f36-95c5-8d5ecb096a7e",
+        "resultCount": 0,
+        "totalElements": 0
+      },
+      {
+        "apiName": "cashflow",
+        "durationMs": 2,
+        "outcome": "SUCCESS",
+        "requestId": "7c9ba78e-2f3e-47ed-9ed5-2a1ef864fc36",
+        "resultCount": 0,
+        "totalElements": 0
+      },
+      {
+        "apiName": "fina_indicator",
+        "durationMs": 3,
+        "outcome": "SUCCESS",
+        "requestId": "5d0669bb-f40a-42a3-8776-fa6cbef18711",
+        "resultCount": 0,
+        "totalElements": 0
+      },
+      {
+        "apiName": "fina_indicator",
+        "durationMs": 2,
+        "outcome": "SUCCESS",
+        "requestId": "9ed176eb-0bcd-4c85-aed1-933dfe9c3de4",
+        "resultCount": 0,
+        "totalElements": 0
+      },
+      {
+        "apiName": "fina_audit",
+        "durationMs": 2,
+        "outcome": "SUCCESS",
+        "requestId": "92bd49c4-1ecd-4056-aa4e-7a3ed504e075",
+        "resultCount": 0,
+        "totalElements": 0
+      },
+      {
+        "apiName": "fina_audit",
+        "durationMs": 2,
+        "outcome": "SUCCESS",
+        "requestId": "fa7d9c34-9e05-4901-8412-90c41fa89b4c",
+        "resultCount": 0,
+        "totalElements": 0
+      },
+      {
+        "apiName": "fina_mainbz",
+        "durationMs": 2,
+        "outcome": "SUCCESS",
+        "requestId": "a0f78ea2-b18e-49ec-bee8-18ff2e3ad1ce",
+        "resultCount": 0,
+        "totalElements": 0
+      },
+      {
+        "apiName": "fina_mainbz",
+        "durationMs": 5,
+        "outcome": "SUCCESS",
+        "requestId": "95c02bc1-15dd-4119-a459-c94afc5f1579",
+        "resultCount": 50,
+        "totalElements": 150
+      },
+      {
+        "apiName": "stk_rewards",
+        "durationMs": 2,
+        "outcome": "SUCCESS",
+        "requestId": "05a66696-51f9-4e56-97e6-b16ede1304c3",
+        "resultCount": 0,
+        "totalElements": 0
+      },
+      {
+        "apiName": "stk_rewards",
+        "durationMs": 4,
+        "outcome": "SUCCESS",
+        "requestId": "8fd31794-2518-49ce-81ab-4b8187a0e714",
+        "resultCount": 50,
+        "totalElements": 1428
+      },
+      {
+        "apiName": "stk_holdernumber",
+        "durationMs": 2,
+        "outcome": "SUCCESS",
+        "requestId": "d9a6b3fc-ba29-4f8b-a8c3-e6de1d8ddb64",
+        "resultCount": 0,
+        "totalElements": 0
+      },
+      {
+        "apiName": "stk_holdernumber",
+        "durationMs": 3,
+        "outcome": "SUCCESS",
+        "requestId": "5a134b9b-651b-4f03-8bc2-379b1d66d770",
+        "resultCount": 50,
+        "totalElements": 150
+      },
+      {
+        "apiName": "trade_cal",
+        "durationMs": 4,
+        "outcome": "SUCCESS",
+        "requestId": "47dfc8d5-211b-4d1c-af0c-52d4529860b2",
+        "resultCount": 0,
+        "totalElements": 0
+      },
+      {
+        "apiName": "trade_cal",
+        "durationMs": 5,
+        "outcome": "SUCCESS",
+        "requestId": "9aca8a11-6c94-4aee-89a6-e4c37a393b4b",
+        "resultCount": 2,
+        "totalElements": 2
+      },
+      {
+        "apiName": "margin",
+        "durationMs": 5,
+        "outcome": "SUCCESS",
+        "requestId": "7522bdd8-39e1-43af-86bd-37833651858c",
+        "resultCount": 0,
+        "totalElements": 0
+      },
+      {
+        "apiName": "margin",
+        "durationMs": 4,
+        "outcome": "SUCCESS",
+        "requestId": "c5f20240-10f7-4e47-811c-ccb113351475",
+        "resultCount": 3,
+        "totalElements": 3
+      },
+      {
+        "apiName": "daily",
+        "durationMs": 2,
+        "outcome": "SUCCESS",
+        "requestId": "02d187f5-717f-464c-bfe4-d7469d0944cb",
+        "resultCount": 0,
+        "totalElements": 0
+      },
+      {
+        "apiName": "daily",
+        "durationMs": 5,
+        "outcome": "SUCCESS",
+        "requestId": "339dd217-a85c-4480-9fe5-570d5f90b4f9",
+        "resultCount": 50,
+        "totalElements": 5535
+      },
+      {
+        "apiName": "weekly",
+        "durationMs": 3,
+        "outcome": "SUCCESS",
+        "requestId": "490c8cc7-d0d0-484c-9c93-057d19917ef9",
+        "resultCount": 0,
+        "totalElements": 0
+      },
+      {
+        "apiName": "weekly",
+        "durationMs": 4,
+        "outcome": "SUCCESS",
+        "requestId": "6659a162-3cac-4d82-85c8-8b08685196e0",
+        "resultCount": 50,
+        "totalElements": 5613
+      },
+      {
+        "apiName": "monthly",
+        "durationMs": 2,
+        "outcome": "SUCCESS",
+        "requestId": "529f61ee-e82c-486d-b032-bbec5fba4fe1",
+        "resultCount": 0,
+        "totalElements": 0
+      },
+      {
+        "apiName": "monthly",
+        "durationMs": 1,
+        "outcome": "SUCCESS",
+        "requestId": "333202e8-6fa2-46e9-af8e-305cf6753203",
+        "resultCount": 0,
+        "totalElements": 0
+      },
+      {
+        "apiName": "adj_factor",
+        "durationMs": 2,
+        "outcome": "SUCCESS",
+        "requestId": "ed765912-7921-4402-945b-41e68fc5a2e5",
+        "resultCount": 0,
+        "totalElements": 0
+      },
+      {
+        "apiName": "adj_factor",
+        "durationMs": 4,
+        "outcome": "SUCCESS",
+        "requestId": "5a0c93ee-059b-443e-8f44-3a6d2c84ce4d",
+        "resultCount": 50,
+        "totalElements": 5553
+      },
+      {
+        "apiName": "suspend_d",
+        "durationMs": 2,
+        "outcome": "SUCCESS",
+        "requestId": "5976405f-ede2-4579-9164-47324811897c",
+        "resultCount": 0,
+        "totalElements": 0
+      },
+      {
+        "apiName": "suspend_d",
+        "durationMs": 2,
+        "outcome": "SUCCESS",
+        "requestId": "ca50d1a2-2cc9-4412-9d4f-e74d2115115e",
+        "resultCount": 5,
+        "totalElements": 5
+      },
+      {
+        "apiName": "daily_basic",
+        "durationMs": 2,
+        "outcome": "SUCCESS",
+        "requestId": "38a31184-962b-4b41-8161-1fbca9cc88e6",
+        "resultCount": 0,
+        "totalElements": 0
+      },
+      {
+        "apiName": "daily_basic",
+        "durationMs": 4,
+        "outcome": "SUCCESS",
+        "requestId": "6a1e550a-9767-4629-ac61-3d7cd8b5ff0a",
+        "resultCount": 50,
+        "totalElements": 5535
+      },
+      {
+        "apiName": "moneyflow",
+        "durationMs": 2,
+        "outcome": "SUCCESS",
+        "requestId": "6a9f3608-86af-4759-a731-6fdaeb65bdc7",
+        "resultCount": 0,
+        "totalElements": 0
+      },
+      {
+        "apiName": "moneyflow",
+        "durationMs": 4,
+        "outcome": "SUCCESS",
+        "requestId": "ac6b7cd4-919c-4d92-bd05-1d54f2bf5567",
+        "resultCount": 50,
+        "totalElements": 5535
+      },
+      {
+        "apiName": "stk_limit",
+        "durationMs": 2,
+        "outcome": "SUCCESS",
+        "requestId": "9d55fe88-3e56-4bcf-a5b1-107a686feb1e",
+        "resultCount": 0,
+        "totalElements": 0
+      },
+      {
+        "apiName": "stk_limit",
+        "durationMs": 3,
+        "outcome": "SUCCESS",
+        "requestId": "f3f91d92-908f-4b9f-892f-354738d73e74",
+        "resultCount": 50,
+        "totalElements": 7733
+      },
+      {
+        "apiName": "top_list",
+        "durationMs": 2,
+        "outcome": "SUCCESS",
+        "requestId": "b312964e-7cee-42c3-b775-a3aa92a6262f",
+        "resultCount": 0,
+        "totalElements": 0
+      },
+      {
+        "apiName": "top_list",
+        "durationMs": 4,
+        "outcome": "SUCCESS",
+        "requestId": "183f983a-20a4-4f67-8393-9c654b9417be",
+        "resultCount": 50,
+        "totalElements": 67
+      },
+      {
+        "apiName": "margin_detail",
+        "durationMs": 2,
+        "outcome": "SUCCESS",
+        "requestId": "2c13af52-49da-4198-b254-a21a845bc854",
+        "resultCount": 0,
+        "totalElements": 0
+      },
+      {
+        "apiName": "margin_detail",
+        "durationMs": 4,
+        "outcome": "SUCCESS",
+        "requestId": "19de8f4d-4902-415c-91c8-5a1e80ddfa11",
+        "resultCount": 50,
+        "totalElements": 4424
+      },
+      {
+        "apiName": "block_trade",
+        "durationMs": 2,
+        "outcome": "SUCCESS",
+        "requestId": "e1a09330-0c31-4698-9db2-8f147dfef10a",
+        "resultCount": 0,
+        "totalElements": 0
+      },
+      {
+        "apiName": "block_trade",
+        "durationMs": 3,
+        "outcome": "SUCCESS",
+        "requestId": "acf8349a-4f57-4256-8a74-9a756540a5e5",
+        "resultCount": 50,
+        "totalElements": 139
+      },
+      {
+        "apiName": "slb_len",
+        "durationMs": 2,
+        "outcome": "SUCCESS",
+        "requestId": "c33f79f7-6929-4024-991c-2236526db8ec",
+        "resultCount": 0,
+        "totalElements": 0
+      },
+      {
+        "apiName": "slb_len",
+        "durationMs": 2,
+        "outcome": "SUCCESS",
+        "requestId": "c7b5bb24-41a2-4590-8dd9-aec6521da3ff",
+        "resultCount": 0,
+        "totalElements": 0
+      },
+      {
+        "apiName": "slb_sec",
+        "durationMs": 2,
+        "outcome": "SUCCESS",
+        "requestId": "3a583746-4b32-4264-9a94-3f4ea47948d2",
+        "resultCount": 0,
+        "totalElements": 0
+      },
+      {
+        "apiName": "slb_sec",
+        "durationMs": 3,
+        "outcome": "SUCCESS",
+        "requestId": "9fa77e00-f18a-42ab-bdf8-a0983df5df74",
+        "resultCount": 0,
+        "totalElements": 0
+      },
+      {
+        "apiName": "slb_sec_detail",
+        "durationMs": 2,
+        "outcome": "SUCCESS",
+        "requestId": "eb20feea-6375-4c26-a42d-397525c83649",
+        "resultCount": 0,
+        "totalElements": 0
+      },
+      {
+        "apiName": "slb_sec_detail",
+        "durationMs": 1,
+        "outcome": "SUCCESS",
+        "requestId": "6ab91471-86c8-4e1b-833c-5fe1c9a9d5db",
+        "resultCount": 0,
+        "totalElements": 0
+      },
+      {
+        "apiName": "forecast",
+        "durationMs": 2,
+        "outcome": "SUCCESS",
+        "requestId": "9f981fbb-8ed2-4465-8df4-1ea1b2c32e34",
+        "resultCount": 0,
+        "totalElements": 0
+      },
+      {
+        "apiName": "forecast",
+        "durationMs": 3,
+        "outcome": "SUCCESS",
+        "requestId": "c5679087-9535-46ed-92a5-25375f4c09b8",
+        "resultCount": 3,
+        "totalElements": 3
+      },
+      {
+        "apiName": "express",
+        "durationMs": 2,
+        "outcome": "SUCCESS",
+        "requestId": "16cc26f1-fb6f-439c-9921-3e8cc34269dc",
+        "resultCount": 0,
+        "totalElements": 0
+      },
+      {
+        "apiName": "express",
+        "durationMs": 3,
+        "outcome": "SUCCESS",
+        "requestId": "3b4e2dbe-005d-41ca-9f63-303a2102b11f",
+        "resultCount": 1,
+        "totalElements": 1
+      },
+      {
+        "apiName": "dividend",
+        "durationMs": 2,
+        "outcome": "SUCCESS",
+        "requestId": "6c866fc6-3673-4922-8c68-158e67c1d84d",
+        "resultCount": 0,
+        "totalElements": 0
+      }
+    ],
+    "scope": {
+      "excludedInterfaces": [
+        {
+          "apiName": "top_inst",
+          "reason": "higher_points"
+        },
+        {
+          "apiName": "broker_recommend",
+          "reason": "higher_points"
+        },
+        {
+          "apiName": "share_float",
+          "reason": "permission_unverified"
+        },
+        {
+          "apiName": "hs_const",
+          "reason": "permission_unverified"
+        },
+        {
+          "apiName": "moneyflow_hsgt",
+          "reason": "permission_unverified"
+        },
+        {
+          "apiName": "hk_hold",
+          "reason": "permission_unverified"
+        },
+        {
+          "apiName": "index_member",
+          "reason": "permission_unverified"
+        },
+        {
+          "apiName": "hsgt_top10",
+          "reason": "permission_unverified"
+        },
+        {
+          "apiName": "namechange",
+          "reason": "permission_unverified"
+        }
+      ],
+      "id": "points-2000",
+      "manifestCases": 49,
+      "manifestSamples": 58,
+      "selectedCases": 40,
+      "selectedSamples": 48
+    },
+    "startedAt": "2026-09-06T07:37:46.557Z",
+    "task": "M14-T05",
+    "totals": {
+      "attemptedCases": 29,
+      "callIntervalMs": 2000,
+      "completedCases": 28,
+      "failedCases": 1,
+      "fixtureDownloadPostsObserved": 2,
+      "fixtureRecordsGetsObserved": 3,
+      "liveDownloadPostsObserved": 37,
+      "liveDownloadResultsRecorded": 37,
+      "liveQueryResultsRecorded": 57,
+      "liveRecordsGetsObserved": 57,
+      "manifestSamples": 58,
+      "registeredCases": 40,
+      "selectedSamples": 48,
+      "unexecutedCases": 11
+    },
+    "version": 1
+  },
+  "task": "M14-T05"
+}
+```
