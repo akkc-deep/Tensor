@@ -13,7 +13,7 @@
 - **Execution:** Serial execution is owned by the user; the board does not enforce cross-task exclusion.
 - **Next-task selection:** Choose the non-completed task with the smallest greater `Order` after the current task completes.
 - **Successor preparation:** Complete and link the selected successor's design document before writing its `next-task` handoff or making it `READY`; a successor-design failure never changes the completed predecessor.
-- **Explicit unfinished-work transfer (2026-09-06):** 用户要求新增任务承接剩余工作。当前续接入口为 Order76/M14-T09，先处理其未决设计，尚未启动实施；M14-T05保留BLOCKED及原49目标未完成事实。此次使用明确标记为`transfer`的交接，记录未完成工作的责任转移，不是要求前驱COMPLETED的普通`next-task`交接，不触发READY/启动/完成或自动准备M14-T06。
+- **Explicit unfinished-work transfer (2026-09-06):** 用户要求新增任务承接剩余工作。当前续接入口为 Order76/M14-T09；2026-09-06用户明确确认D-01，后续状态见该任务行与状态证据；M14-T05保留BLOCKED及原49目标未完成事实。此次使用明确标记为`transfer`的交接，记录未完成工作的责任转移，不是要求前驱COMPLETED的普通`next-task`交接，不触发READY/启动/完成或自动准备M14-T06。
 - **Allowed transitions:** `NOT_STARTED -> READY`, `READY -> IN_PROGRESS`, `IN_PROGRESS -> PAUSED`, `PAUSED -> IN_PROGRESS`, `READY -> BLOCKED`, `IN_PROGRESS -> BLOCKED`, `BLOCKED -> READY`, `IN_PROGRESS -> COMPLETED`.
 
 ## Tasks
@@ -95,7 +95,7 @@
 | 73 | M14-T03 | 查询、分页、宽表、竞态和无障碍 E2E | `COMPLETED` | M14-T01 | docs/task-designs/M14-T03-design.md | docs/task-handoffs/M14-T03-handoff.md |
 | 74 | M14-T04 | 49 数据集自动契约与页面回归驱动 | `COMPLETED` | M03-T09, M04-T06, M14-T01 | docs/task-designs/M14-T04-design.md | docs/task-handoffs/M14-T04-handoff.md |
 | 75 | M14-T05 | 真实 Tushare 49 接口受控页面验收 | `BLOCKED` | M14-T04 | docs/task-designs/M14-T05-design.md | docs/task-handoffs/M14-T05-handoff.md |
-| 76 | M14-T09 | 分红修复与2000档剩余验收 | `NOT_STARTED` | M14-T04, M14-T05 | docs/task-designs/M14-T09-design.md | docs/task-handoffs/M14-T09-handoff.md |
+| 76 | M14-T09 | 分红修复与2000档剩余验收 | `READY` | M14-T04, M14-T05 | docs/task-designs/M14-T09-design.md | docs/task-handoffs/M14-T09-handoff.md |
 | 77 | M14-T06 | `daily` 与 `balancesheet` 性能验证 | `NOT_STARTED` | M14-T03, M14-T05 | None | None |
 | 78 | M14-T07 | Token、SQL、依赖、网络和运行安全验证 | `NOT_STARTED` | M14-T02, M14-T03, M14-T04, M14-T05 | None | None |
 | 79 | M14-T08 | 全新环境 AC-001～018 与发布证据包 | `NOT_STARTED` | M14-T01, M14-T02, M14-T03, M14-T04, M14-T05, M14-T06, M14-T07 | None | None |
@@ -1119,6 +1119,8 @@
 - **State evidence:** 2026-09-06依用户明确的新增与移交请求初始登记为NOT_STARTED，没有执行状态转换或启动。输入e9fedfa已记录28通过/1失败/11未运行，以及1.56秒单次诊断的38源行/进度与金额冲突；四字段指纹方案仍待确认。设计与transfer文件已按序写入并精确回填链接；D-01随剩余工作明确移交，实施就绪门禁尚未满足，状态保持NOT_STARTED，不能标READY或声称前驱已完成。
 
 - **Transfer verification:** 本轮9份文档经机械核对与独立只读复审通过，无Critical/Important/Minor。任务数79、Order连续唯一、既有ID/状态/依赖不变、依赖无环、新链接有效；原真实证据SHA保持d4e7bf67b6a2b144662a987dec9aa812a8e39543c5134ed7cab8a12a4dbe34b5。只完成任务登记与移交，不是D-01批准、实施就绪或真实复验。
+
+- **State evidence (D-01 confirmed):** 2026-09-06用户对具体四字段指纹/V7保留数据/同阶段更新/全40复验方案回复“同意”；已完整读取本任务设计及transfer交接，核对基线JAR/spec/manifest/旧证据/诊断SHA一致。设计已记录批准规则与当前工具Token可用事实，消除D-01未决项；观测NOT_STARTED后执行NOT_STARTED→READY。当前仍未实施或真实复验，原M14-T05 BLOCKED事实不变。
 
 ### `M14-T06`
 
