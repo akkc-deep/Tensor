@@ -40,3 +40,5 @@ mvn -o -f data-plane/pom.xml -Pacceptance \
 - 新验收包：`/private/tmp/tensor-issue-005-build.kibqgbn5/data-plane/tensor-app/target/acceptance/tensor-app-1.0-SNAPSHOT-acceptance.jar`，SHA-256 `7f794f3494109c27f134c04846e486bda3fe18beec3a88246b58fbcea719cef9`。与原包展开比较无条目增删；四个内部 Tensor JAR 因重建归档字节不同，但展开后仅 `TushareProClient.class` 改变，其余内容相同。原验收包 SHA 仍为 `a69874afa6ce783d4ef4e16a678ddb0ff457f2948b68f509a8e4a2c00440bcac`。
 - 新包启动实测：独立诊断控制目录 `/private/tmp/tensor-m14-t05-control.j0uo9psx`，合成 Token 仅经环境注入，只访问 health；exit 0、health ready、6 成功迁移、50 业务表全空、无秘密/包络扫描触发。JVM 停止、CLI 后扫描与清理通过，容器/匿名卷及私密 DB 文件已删除。该环境已用完，不供真实复跑。
 - 接入只替换 live spec 的固定 JAR hash，并在 M14-T05 设计中明确修复包路径及历史规则覆盖关系。40/48/80、fixture 2/3、9 项排除、manifest 和完整安全流程保持原样。旧真实证据文档内容和已扫描 SHA 未改写。
+- 接入复审无 Critical / Important / Minor：独立实算 spec/证据/JAR/manifest 四项 hash 与新控制目录 `6gn542ah` 的配置一致，新旧包展开均 364 个文件且仅客户端类不同，40/48/9 精确一致。启动器仅固定新 JAR 路径，目录 0700、脚本/配置 0600、未运行；完成状态迁移即可交用户一次启动。
+- 接入验证：spec 语法、40 个 Chromium 用例发现通过；合成环境调用实际 `validatePreconditions` 确认旧 JAR 被新固定 hash 门禁拒绝，未启动 JVM/上游，临时探针已删除。新 JAR 的正向门禁已由上述 health-only 诊断实际通过。

@@ -4,6 +4,10 @@
 
 ## Goal
 
+2026-09-06 产品修复接入：用户在真实 `stock_company` 失败后授权“继续修复”。独立 [ISSUE-005](../issues/proposals/ISSUE-005-tushare-decimal-decoding.md) 补齐原精度合同，相关 85 测试及独立复审通过。下一轮使用 `/private/tmp/tensor-issue-005-build.kibqgbn5/data-plane/tensor-app/target/acceptance/tensor-app-1.0-SNAPSHOT-acceptance.jar`，SHA-256 `7f794f3494109c27f134c04846e486bda3fe18beec3a88246b58fbcea719cef9`。此明确修订优先于下文历史“原 JAR”路径/hash引用：运行时将该修复包作为唯一冻结输入，仍严格校验 hash，不允许任意 JAR。原包保留且 hash 不变；真实历史失败记录不改写。
+
+修复包在独立源码快照以既有 acceptance profile 构建，复用原包全部静态前端资源；既有 production/acceptance 打包合同通过。归档展开后无增删，仅 `TushareProClient.class` 内容变化，其他类、依赖、49 份 YAML、6 份 SQL、页面和公开合同与原包逐字节一致。因此沿用 M14-T04 的既有合同证据。Java 修复/合成测试/构建只归属 ISSUE-005，不扩张 M14-T05 的页面验收实施范围；40/48/9、原 manifest、真实 Token 环境、安全门禁与失败停止规则均不变。
+
 从原样验收 JAR 页面执行公开文档明确支持2000积分档的40个接口、48组原manifest合法样例，验证真实上游反馈、非空结果的适配/入库/页面查看，以及合法空结果无占位行。消费 M14-T04 已通过的元数据/表/归档合同，补上其明确未执行的真实下载。对应 PRD 12.2、AC-004/005；不把账户无权限、样例变化或环境失败写成通过。
 
 ## Scope

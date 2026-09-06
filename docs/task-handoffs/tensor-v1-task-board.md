@@ -93,7 +93,7 @@
 | 72 | M14-T02 | 下载失败、空结果、幂等和回滚矩阵 | `COMPLETED` | M14-T01 | docs/task-designs/M14-T02-design.md | docs/task-handoffs/M14-T02-handoff.md |
 | 73 | M14-T03 | 查询、分页、宽表、竞态和无障碍 E2E | `COMPLETED` | M14-T01 | docs/task-designs/M14-T03-design.md | docs/task-handoffs/M14-T03-handoff.md |
 | 74 | M14-T04 | 49 数据集自动契约与页面回归驱动 | `COMPLETED` | M03-T09, M04-T06, M14-T01 | docs/task-designs/M14-T04-design.md | docs/task-handoffs/M14-T04-handoff.md |
-| 75 | M14-T05 | 真实 Tushare 49 接口受控页面验收 | `BLOCKED` | M14-T04 | docs/task-designs/M14-T05-design.md | docs/task-handoffs/M14-T05-handoff.md |
+| 75 | M14-T05 | 真实 Tushare 49 接口受控页面验收 | `READY` | M14-T04 | docs/task-designs/M14-T05-design.md | docs/task-handoffs/M14-T05-handoff.md |
 | 76 | M14-T06 | `daily` 与 `balancesheet` 性能验证 | `NOT_STARTED` | M14-T03, M14-T05 | None | None |
 | 77 | M14-T07 | Token、SQL、依赖、网络和运行安全验证 | `NOT_STARTED` | M14-T02, M14-T03, M14-T04, M14-T05 | None | None |
 | 78 | M14-T08 | 全新环境 AC-001～018 与发布证据包 | `NOT_STARTED` | M14-T01, M14-T02, M14-T03, M14-T04, M14-T05, M14-T06, M14-T07 | None | None |
@@ -1085,6 +1085,9 @@
 - **State evidence (repaired phase restart):** 启动修复、原JAR本地RED/GREEN及独立审查已记录，证据10b44fc与解阻b988f03已分别提交。按用户持续执行当前任务并要求由执行者处理的授权，消费更新后的完整设计与pause入口，单独执行READY→IN_PROGRESS；新kybrot1f正式空环境准备完成，直接启动器代码不变，封存当前spec/证据/JAR/manifest哈希后交用户已有Token终端一次执行。此状态表示恢复实际验收工作，不表示40接口或fixture已通过。
 
 - **State evidence (live stock_company adapter failure):** 用户报告已运行kybrot1f后，核对最新安全报告与真实秘密扫描文档SHA一致，实际证据先独立提交14dd921。运行26秒、npx1/最终1；已修复启动日志门禁通过，fixture2POST/3查询闭环通过。stock_basic3原样例SUCCESS5556/EMPTY0/SUCCESS339，完成1case，页面/来源时间/插入计数与独立DB5895匹配；stock_company首样例ADAPTER_TYPE_INVALID，唯一完成事件failureStage=adapter、duration304ms、请求IDe82ccf95-6182-4d73-9b98-10ae2bd7e13b，失败计数unavailable，具体字段/值未保留。实际attempted2/completed1/failed1/unexecuted38，真实POST4/查询3；12个业务完成事件逐ID唯一，未重试或继续剩余项。初始6迁移/50表全0，末态stock_basic5895/fixture1/其余48表0；spec四项清理、worker退出、CLI终检/自动产物删除2、精确DB/卷/私密材料清理和文档哈希复核均通过。完整读取设计后，按ADAPTER_*产品失败留给独立修复的边界先写pause交接再执行IN_PROGRESS→BLOCKED；保留部分真实通过和失败，原40/49均未完成，不准备后继，不改生产/JAR/样例或自行发明任务ID。
+
+
+- **State evidence (decimal repair unblock):** 2026-09-06：用户明确“继续修复”授权独立 ISSUE-005，修复 e8f37c2 仅补上游 JSON 小数直接 BigDecimal，未放宽严格转换器。客户端精度与合成 stock_company/reg_capital 链路均先 RED 后 GREEN；相关 85 测试通过，代码与接入两轮独立复审无发现。新修复验收包 SHA 7f794f3494109c27f134c04846e486bda3fe18beec3a88246b58fbcea719cef9，独立源码快照构建及 7 唯一打包合同测试通过，364 展开文件仅客户端类改变。新包合成 Token/health-only 实测 6 迁移/50 表全空，扫描停机及专用 DB/卷清理通过；设计已明确唯一新包接入，原包/manifest/真实历史证据不变。当前 spec 0ab8f12d96fe622a257bdb08fc0f0882c4fc0d94758900af2dc6e2ab45b457a2 语法/40 发现通过，实际前置门禁拒绝旧包。已先更新同一 pause 交接，正式 6gn542ah 新空 MySQL 环境、一次性启动器与四项 hash/40-48-9 范围复审通过，观测 BLOCKED 后据以上修复与接入证据执行 BLOCKED→READY。此转换恢复复验，不把合成失败字段认作真实历史字段，不把本地验证计为真实矩阵通过，不准备后继。
 
 ### `M14-T06`
 
