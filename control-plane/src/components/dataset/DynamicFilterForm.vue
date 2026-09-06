@@ -66,10 +66,16 @@ defineExpose({ validate, criteria, reset })
 <style scoped>
 .dynamic-filter-form {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   row-gap: 22px;
   column-gap: 18px;
   min-width: 0;
+}
+
+@media (max-width: 1000px) {
+  .dynamic-filter-form {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
 @media (max-width: 680px) {

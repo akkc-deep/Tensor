@@ -34,6 +34,13 @@ function parseInstant(value) {
   return Number.isNaN(instant.getTime()) ? null : instant
 }
 
+export function decimalSign(value) {
+  if (typeof value !== 'string' && typeof value !== 'number') return 0
+  const text = String(value)
+  if (!/^[+-]?\d+(?:\.\d+)?$/.test(text) || !/[1-9]/.test(text)) return 0
+  return text.startsWith('-') ? -1 : 1
+}
+
 export function formatIngestedAt(value, timeZone = DEFAULT_TIME_ZONE) {
   const instant = parseInstant(value)
   if (instant === null) return value

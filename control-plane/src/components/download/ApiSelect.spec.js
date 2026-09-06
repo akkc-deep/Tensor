@@ -107,6 +107,38 @@ describe('ApiSelect', () => {
     expect(apis).toEqual(snapshot)
   })
 
+  it('restores native combobox search results after Escape clears its input', async () => {
+    const wrapper = mount(ApiSelect, {
+      attachTo: document.body,
+      props: {
+        modelValue: '',
+        apis: [
+          descriptor('daily', '日线行情'),
+          descriptor('weekly', '周线行情'),
+        ],
+      },
+    })
+
+    try {
+      const combobox = wrapper.get('input[role="combobox"]')
+      await combobox.trigger('click')
+      await combobox.setValue('周线')
+      await flushPromises()
+      expect(wrapper.findAllComponents(ElOption).map((option) => option.props('value'))).toEqual([
+        'weekly',
+      ])
+
+      await combobox.trigger('keydown', { key: 'Escape' })
+      await flushPromises()
+      expect(combobox.element.value).toBe('')
+      expect(wrapper.findAllComponents(ElOption).map((option) => option.props('value'))).toEqual([
+        'daily', 'weekly',
+      ])
+    } finally {
+      wrapper.unmount()
+    }
+  })
+
   it('supports keyboard selection and locks interaction when disabled', async () => {
     const wrapper = mount(ApiSelect, {
       attachTo: document.body,

@@ -109,6 +109,7 @@ describe('DatasetTable', () => {
     ])
     expect(withTsHeaders[1].element.style.left).toBe('0px')
     expect(withTsHeaders[1].element.style.zIndex).toBe('calc(var(--el-table-index) + 1)')
+    expect(withTsHeaders[1].element.style.background).toBe('var(--tensor-raised)')
 
     const withTsCells = withTsCode.findAll('.el-table__body tbody tr')[0].findAll('td')
     expect(withTsCells.map((cell) => cell.get('.cell').text())).toEqual([
@@ -118,6 +119,7 @@ describe('DatasetTable', () => {
       '', 'sticky', '', '', '', '',
     ])
     expect(withTsCells[1].element.style.zIndex).toBe('calc(var(--el-table-index) + 1)')
+    expect(withTsCells[1].element.style.background).toBe('var(--tensor-surface)')
 
     const withoutTsHeaders = withoutTsCode.findAll('.el-table__header th')
     expect(withoutTsHeaders.map((header) => header.element.style.position)).toEqual([
@@ -170,6 +172,114 @@ describe('DatasetTable', () => {
       'daily',
       '2026-08-25 10:30:15',
     ])
+  })
+
+  it('right-aligns numeric cells and signs only non-zero market changes', async () => {
+    const columns = [
+      column('change', '涨跌额', 'DECIMAL'),
+      column('pct_chg', '涨跌幅', 'DECIMAL'),
+      column('position', '持仓数量', 'LONG'),
+      column('name', '名称'),
+    ]
+    const wrapper = mount(DatasetTable, {
+      props: {
+        columns,
+        items: [
+          {
+            change: '0.0100',
+            pct_chg: '-0.0100',
+            position: '-9223372036854775807',
+            name: '样本一',
+            source_plugin: 'tushare_pro',
+            source_api: 'daily',
+            ingested_at: '2026-09-05T00:00:00Z',
+          },
+          {
+            change: '-0.0000',
+            pct_chg: '+0.0000',
+            position: '9223372036854775807',
+            name: '样本二',
+            source_plugin: 'tushare_pro',
+            source_api: 'daily',
+            ingested_at: '2026-09-05T00:00:00Z',
+          },
+          {
+            change: '+1.2000',
+            pct_chg: '1e3',
+            position: '1',
+            name: '样本三',
+            source_plugin: 'tushare_pro',
+            source_api: 'daily',
+            ingested_at: '2026-09-05T00:00:00Z',
+          },
+        ],
+      },
+    })
+
+    await flushPromises()
+
+    expect(renderedColumns(wrapper).map((current) => current.props('align'))).toEqual([
+      'right', 'right', 'right', undefined, undefined, undefined, undefined,
+    ])
+    expect(firstRowTexts(wrapper)).toEqual([
+      '+0.0100', '-0.0100', '-9223372036854775807', '样本一',
+      'tushare_pro', 'daily', '2026-09-05 08:00:00',
+    ])
+    const values = wrapper.findAll('.dataset-table__value')
+    expect(values[0].classes()).toContain('dataset-table__change--up')
+    expect(values[1].classes()).toContain('dataset-table__change--down')
+    for (const index of [2, 7, 8, 9, 10, 15, 16]) {
+      expect(values[index].classes()).not.toContain('dataset-table__change--up')
+      expect(values[index].classes()).not.toContain('dataset-table__change--down')
+    }
+    expect(values[7].text()).toBe('-0.0000')
+    expect(values[8].text()).toBe('+0.0000')
+    expect(values[14].text()).toBe('+1.2000')
+    expect(values[14].classes()).toContain('dataset-table__change--up')
+    expect(values[15].text()).toBe('1e3')
+    expect([0, 1, 2, 7, 8, 9, 14, 15, 16].every((index) =>
+      values[index].classes().includes('dataset-table__number'),
+    )).toBe(true)
+  })
+
+  it('scopes daily and weekly labels to the tushare_pro table context', async () => {
+    const columns = [
+      column('ts_code', '代码元数据'),
+      column('close', '收盘元数据', 'DECIMAL'),
+      column('open', '开盘元数据', 'DECIMAL'),
+      column('pre_close', '前收元数据', 'DECIMAL'),
+      column('pct_chg', '涨跌幅元数据', 'DECIMAL'),
+    ]
+    const original = structuredClone(columns)
+    const daily = mount(DatasetTable, {
+      props: { columns, items: [], pluginId: 'tushare_pro', apiName: 'daily' },
+    })
+    const weekly = mount(DatasetTable, {
+      props: { columns, items: [], pluginId: 'tushare_pro', apiName: 'weekly' },
+    })
+    const other = mount(DatasetTable, {
+      props: { columns, items: [], pluginId: 'fixture', apiName: 'daily' },
+    })
+
+    await flushPromises()
+
+    expect(renderedColumns(daily).map((current) => current.props('label'))).toEqual([
+      '证券代码', '收盘价', '开盘价', '前收盘价', '涨跌幅（%）',
+      '来源插件', '来源接口', '入库时间',
+    ])
+    expect(renderedColumns(weekly).map((current) => current.props('label'))).toEqual([
+      '证券代码', '收盘价', '开盘价', '前收盘价', '涨跌幅（比率）',
+      '来源插件', '来源接口', '入库时间',
+    ])
+    expect(renderedColumns(other).map((current) => current.props('label'))).toEqual([
+      '代码元数据', '收盘元数据', '开盘元数据', '前收元数据', '涨跌幅元数据',
+      'source_plugin', 'source_api', 'ingested_at',
+    ])
+    expect(daily.findAll('.dataset-table__field-code').map((code) => code.text())).toEqual([
+      'ts_code', 'close', 'open', 'pre_close', 'pct_chg',
+      'source_plugin', 'source_api', 'ingested_at',
+    ])
+    expect(columns).toEqual(original)
   })
 
   it('uses approved widths and shows overflowing formatted values in a plain-text tooltip', async () => {
@@ -245,6 +355,11 @@ describe('DatasetTable', () => {
 
     try {
       expect(wrapper.get('.dataset-table').attributes('aria-busy')).toBe('false')
+      expect(wrapper.get('.dataset-table').attributes()).toMatchObject({
+        role: 'region',
+        tabindex: '0',
+        'aria-label': '数据表格，可横向滚动',
+      })
       expect(wrapper.find('.el-loading-mask').exists()).toBe(false)
 
       await wrapper.setProps({ loading: true })

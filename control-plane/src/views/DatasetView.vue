@@ -7,6 +7,7 @@ import { listDataSources } from '../api/dataSources.js'
 import { getDataset, listDatasets } from '../api/datasets.js'
 import AsyncStatePanel from '../components/common/AsyncStatePanel.vue'
 import PageHeading from '../components/common/PageHeading.vue'
+import WorkbenchPanel from '../components/common/WorkbenchPanel.vue'
 import DataSourceSelect from '../components/download/DataSourceSelect.vue'
 import DatasetPagination from '../components/dataset/DatasetPagination.vue'
 import DatasetSelect from '../components/dataset/DatasetSelect.vue'
@@ -194,121 +195,179 @@ onMounted(loadSources)
       description="筛选、浏览与核验，找到你需要的市场数据。"
     />
 
-    <DataSourceSelect
-      :model-value="selectedPluginId"
-      :sources="sources"
-      @update:model-value="selectSource"
-    />
-    <DatasetSelect
-      :model-value="selectedApiName"
-      :datasets="datasets"
-      :disabled="!selectedPluginId || datasets.length === 0"
-      @update:model-value="selectDataset"
-    />
-    <DynamicFilterForm
-      v-if="definition"
-      ref="filterForm"
-      :filters="definition.filters"
-      :disabled="queryLoading"
-    />
-    <div v-if="definition" class="dataset-view__actions">
-      <el-button
-        type="primary"
-        native-type="button"
-        :disabled="queryLoading"
-        @click="handleQuery"
+    <div class="dataset-workbench">
+      <WorkbenchPanel
+        heading-id="dataset-config-title"
+        title="查询配置"
+        :meta="selectedPluginId"
       >
-        查询
-      </el-button>
-      <el-button native-type="button" @click="handleReset">重置</el-button>
-    </div>
+        <div class="setup-body dataset-setup">
+          <div class="workbench-selects">
+            <DataSourceSelect
+              :model-value="selectedPluginId"
+              :sources="sources"
+              @update:model-value="selectSource"
+            />
+            <DatasetSelect
+              :model-value="selectedApiName"
+              :datasets="datasets"
+              :disabled="!selectedPluginId || datasets.length === 0"
+              @update:model-value="selectDataset"
+            />
+          </div>
+          <template v-if="definition">
+            <DynamicFilterForm
+              ref="filterForm"
+              :filters="definition.filters"
+              :disabled="queryLoading"
+            />
+            <p
+              v-if="definition.filters.length === 0"
+              class="dataset-filter-empty"
+            >
+              此数据集无需填写筛选条件。
+            </p>
+            <div class="dataset-view__actions">
+              <el-button
+                type="primary"
+                native-type="button"
+                :disabled="queryLoading"
+                @click="handleQuery"
+              >
+                查询
+              </el-button>
+              <el-button native-type="button" @click="handleReset">
+                重置
+              </el-button>
+            </div>
+          </template>
+        </div>
+      </WorkbenchPanel>
 
-    <AsyncStatePanel
-      v-if="metadataLoading"
-      state="LOADING"
-      :title="metadataTitle"
-      message="请稍候。"
-    />
-    <AsyncStatePanel
-      v-else-if="metadataError"
-      state="FAILURE"
-      title="数据查看配置加载失败"
-      :message="metadataError.message"
-      :request-id="metadataError.requestId"
-      :retry-label="metadataCanRetry ? '重新加载' : ''"
-      @retry="retryMetadata()"
-    />
-    <AsyncStatePanel
-      v-else-if="!selectedPluginId"
-      state="INITIAL"
-      title="请选择数据源"
-      message="选择数据源后加载可查询的数据集。"
-    />
-    <AsyncStatePanel
-      v-else-if="!selectedApiName || !definition"
-      state="INITIAL"
-      title="请选择数据集"
-      message="选择数据集后设置筛选条件。"
-    />
-    <AsyncStatePanel
-      v-else-if="queryState === 'UNQUERIED'"
-      state="INITIAL"
-      title="设置筛选条件后查询"
-      message="筛选条件可留空，结果将由服务端分页返回。"
-    />
-    <AsyncStatePanel
-      v-else-if="queryState === 'LOADING'"
-      state="LOADING"
-      title="正在查询数据"
-      message="请稍候。"
-    />
-    <AsyncStatePanel
-      v-else-if="queryState === 'FAILURE'"
-      state="FAILURE"
-      title="查询失败"
-      :message="queryError.message"
-      :request-id="queryError.requestId"
-      :retry-label="canRetry ? '重新查询' : ''"
-      @retry="retry()"
-    />
-    <template v-else-if="queryState === 'EMPTY'">
-      <AsyncStatePanel
-        state="EMPTY"
-        title="未找到符合条件的数据"
-        message="请修改筛选条件后重新查询。"
-      />
-      <DatasetPagination
-        :page="page"
-        :page-size="pageSize"
-        :total-elements="result.totalElements"
-        :total-pages="result.totalPages"
-        :disabled="queryLoading"
-        @update:page="changePage"
-        @update:page-size="changePageSize"
-      />
-    </template>
-    <template v-else-if="queryState === 'SUCCESS'">
-      <DatasetTable
-        :columns="definition.columns"
-        :items="result.items"
-        :loading="queryLoading"
-      />
-      <DatasetPagination
-        :page="page"
-        :page-size="pageSize"
-        :total-elements="result.totalElements"
-        :total-pages="result.totalPages"
-        :disabled="queryLoading"
-        @update:page="changePage"
-        @update:page-size="changePageSize"
-      />
-    </template>
+      <WorkbenchPanel
+        heading-id="dataset-result-title"
+        :title="definition ? definition.displayName : '查询结果'"
+        :meta="selectedApiName"
+      >
+        <div class="dataset-result-content" :aria-busy="queryLoading">
+          <AsyncStatePanel
+            v-if="metadataLoading"
+            state="LOADING"
+            :title="metadataTitle"
+            message="请稍候。"
+          />
+          <AsyncStatePanel
+            v-else-if="metadataError"
+            state="FAILURE"
+            title="数据查看配置加载失败"
+            :message="metadataError.message"
+            :request-id="metadataError.requestId"
+            :retry-label="metadataCanRetry ? '重新加载' : ''"
+            @retry="retryMetadata()"
+          />
+          <AsyncStatePanel
+            v-else-if="!selectedPluginId"
+            state="INITIAL"
+            title="请选择数据源"
+            message="选择数据源后加载可查询的数据集。"
+          />
+          <AsyncStatePanel
+            v-else-if="!selectedApiName || !definition"
+            state="INITIAL"
+            title="请选择数据集"
+            message="选择数据集后设置筛选条件。"
+          />
+          <AsyncStatePanel
+            v-else-if="queryState === 'UNQUERIED'"
+            state="INITIAL"
+            title="设置筛选条件后查询"
+            message="筛选条件可留空，结果将由服务端分页返回。"
+          />
+          <AsyncStatePanel
+            v-else-if="queryState === 'LOADING'"
+            state="LOADING"
+            title="正在查询数据"
+            message="请稍候。"
+          />
+          <AsyncStatePanel
+            v-else-if="queryState === 'FAILURE'"
+            state="FAILURE"
+            title="查询失败"
+            :message="queryError.message"
+            :request-id="queryError.requestId"
+            :retry-label="canRetry ? '重新查询' : ''"
+            @retry="retry()"
+          />
+          <AsyncStatePanel
+            v-else-if="queryState === 'EMPTY'"
+            state="EMPTY"
+            title="未找到符合条件的数据"
+            message="请修改筛选条件后重新查询。"
+          />
+          <DatasetTable
+            v-else-if="queryState === 'SUCCESS'"
+            :columns="definition.columns"
+            :items="result.items"
+            :loading="queryLoading"
+            :plugin-id="selectedPluginId"
+            :api-name="selectedApiName"
+          />
+        </div>
+        <DatasetPagination
+          v-if="result && ['EMPTY', 'SUCCESS'].includes(queryState)"
+          :page="page"
+          :page-size="pageSize"
+          :total-elements="result.totalElements"
+          :total-pages="result.totalPages"
+          :disabled="queryLoading"
+          @update:page="changePage"
+          @update:page-size="changePageSize"
+        />
+      </WorkbenchPanel>
+    </div>
   </section>
 </template>
 
 <style scoped>
+.dataset-workbench,
+.dataset-setup,
+.dataset-result-content {
+  min-width: 0;
+}
+
+.dataset-workbench {
+  display: grid;
+  gap: 24px;
+}
+
+.dataset-setup {
+  display: grid;
+  gap: 24px;
+  padding-bottom: 24px;
+}
+
 .dataset-view__actions {
   display: flex;
+  flex-wrap: wrap;
   gap: 12px;
+}
+
+.dataset-filter-empty {
+  margin: 0;
+  color: var(--tensor-muted);
+  font-size: 12px;
+  line-height: 1.8;
+}
+
+@media (max-width: 1000px) {
+  .dataset-workbench {
+    gap: 18px;
+  }
+}
+
+@media (max-width: 680px) {
+  .dataset-setup {
+    padding-bottom: 18px;
+  }
 }
 </style>

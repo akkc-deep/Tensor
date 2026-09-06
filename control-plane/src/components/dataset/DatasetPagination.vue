@@ -30,6 +30,7 @@ function updatePageSize(pageSize) {
       :page-size="pageSize"
       :page-count="totalPages"
       :page-sizes="PAGE_SIZES"
+      :pager-count="5"
       layout="sizes, prev, pager, next"
       prev-text="上一页"
       next-text="下一页"
@@ -47,5 +48,25 @@ function updatePageSize(pageSize) {
   flex-wrap: wrap;
   align-items: center;
   gap: 12px;
+  min-width: 0;
+  padding: 24px;
+  border-top: 1px solid var(--tensor-line);
+}
+
+.dataset-pagination :deep(.el-pagination) {
+  display: flex;
+  flex-wrap: wrap;
+  min-width: 0;
+}
+
+@media (max-width: 680px) {
+  .dataset-pagination {
+    padding: 18px;
+  }
+
+  .dataset-pagination :deep(.el-pagination__sizes) {
+    flex: 1 0 100%;
+    margin-right: 0;
+  }
 }
 </style>

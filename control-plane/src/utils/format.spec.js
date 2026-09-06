@@ -1,5 +1,5 @@
 import { formatDate, toApiDate, toApiMonth } from './date.js'
-import { formatCell, formatIngestedAt } from './format.js'
+import { decimalSign, formatCell, formatIngestedAt } from './format.js'
 import { hasValue, isRangeOrdered, matchesPattern } from './validation.js'
 
 describe('date utilities', () => {
@@ -39,6 +39,31 @@ describe('date utilities', () => {
 })
 
 describe('display utilities', () => {
+  it('classifies only ordinary non-zero decimal text without converting precision', () => {
+    for (const value of ['0.0100', '+12', 7]) {
+      expect(decimalSign(value)).toBe(1)
+    }
+    for (const value of ['-0.0100', -7]) {
+      expect(decimalSign(value)).toBe(-1)
+    }
+    for (const value of [
+      '0',
+      '+0.0000',
+      '-0.0000',
+      '',
+      null,
+      undefined,
+      ' 1',
+      '.5',
+      '1.',
+      '1e3',
+      '12元',
+      {},
+    ]) {
+      expect(decimalSign(value)).toBe(0)
+    }
+  })
+
   it('formats ingestion time in Asia/Shanghai to whole seconds by default', () => {
     expect(formatIngestedAt('2026-08-25T02:30:15.123Z')).toBe(
       '2026-08-25 10:30:15',

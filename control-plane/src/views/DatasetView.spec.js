@@ -21,6 +21,7 @@ vi.mock('../api/datasets.js', () => ({
 
 import { ClientError } from '../api/errors.js'
 import AsyncStatePanel from '../components/common/AsyncStatePanel.vue'
+import WorkbenchPanel from '../components/common/WorkbenchPanel.vue'
 import DataSourceSelect from '../components/download/DataSourceSelect.vue'
 import DatasetPagination from '../components/dataset/DatasetPagination.vue'
 import DatasetSelect from '../components/dataset/DatasetSelect.vue'
@@ -452,9 +453,61 @@ describe('DatasetView', () => {
       expect(wrapper.getComponent(DatasetTable).props('items')).toBe(
         completed.items,
       )
+      expect(wrapper.getComponent(DatasetTable).props()).toMatchObject({
+        pluginId: 'fixture',
+        apiName: 'daily',
+      })
     } finally {
       wrapper.unmount()
     }
+  })
+
+  it('organizes configuration and results in two labelled workbench panels', async () => {
+    const currentDefinition = definition({ displayName: '日线行情详情' })
+    const wrapper = await mountWithDefinition({ currentDefinition })
+
+    const panels = wrapper.findAllComponents(WorkbenchPanel)
+    expect(panels).toHaveLength(2)
+    expect(panels.map((panel) => panel.props())).toMatchObject([
+      {
+        headingId: 'dataset-config-title',
+        title: '查询配置',
+        meta: 'fixture',
+      },
+      {
+        headingId: 'dataset-result-title',
+        title: '日线行情详情',
+        meta: 'daily',
+      },
+    ])
+    expect(wrapper.get('.dataset-workbench').classes()).toContain(
+      'dataset-workbench',
+    )
+  })
+
+  it('keeps a real empty filter form and submits datasets without filter definitions', async () => {
+    const currentDataset = dataset({ filters: [] })
+    const currentDefinition = definition({ filters: [] })
+    const wrapper = await mountWithDefinition({
+      currentDataset,
+      currentDefinition,
+    })
+    const completed = pageResponse()
+    api.queryDataset.mockResolvedValueOnce(completed)
+
+    expect(wrapper.getComponent(DynamicFilterForm).props('filters')).toEqual([])
+    expect(wrapper.text()).toContain('此数据集无需填写筛选条件。')
+    await button(wrapper, '查询').trigger('click')
+    await flushPromises()
+
+    expect(api.queryDataset).toHaveBeenCalledOnce()
+    expect(api.queryDataset).toHaveBeenCalledWith('fixture', 'daily', {
+      page: 1,
+      pageSize: 50,
+    })
+    expect(wrapper.getComponent(DatasetTable).props('items')).toBe(
+      completed.items,
+    )
   })
 
   it('hides old records while loading and reset invalidates the request but keeps selection', async () => {
@@ -521,7 +574,10 @@ describe('DatasetView', () => {
       expect(wrapper.getComponent(DatasetTable).props()).toMatchObject({
         columns: currentDefinition.columns,
         items: first.items,
+        pluginId: 'fixture',
+        apiName: 'daily',
       })
+      expect(wrapper.findAllComponents(DatasetPagination)).toHaveLength(1)
       expect(wrapper.getComponent(DatasetPagination).props()).toMatchObject({
         page: 1,
         pageSize: 50,

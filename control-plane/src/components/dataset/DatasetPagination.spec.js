@@ -23,6 +23,7 @@ describe('DatasetPagination', () => {
       pageSize: 50,
       pageCount: 0,
       pageSizes: [20, 50, 100],
+      pagerCount: 5,
       layout: 'sizes, prev, pager, next',
       prevText: '上一页',
       nextText: '下一页',
