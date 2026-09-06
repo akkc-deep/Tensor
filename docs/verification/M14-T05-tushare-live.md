@@ -875,3 +875,543 @@ PY
   "task": "M14-T05"
 }
 ```
+
+## 2000档实际运行 2026-09-06T06:18:48.024311+00:00
+
+以下为本次启动器在CLI退出、终检和清理后记录的实际结果；空值表示未测量，原全49目标仍不完整。
+
+```json
+{
+  "controllerFailure": null,
+  "databaseAfterMigration": {
+    "businessTables": 50,
+    "counts": {
+      "adj_factor": 0,
+      "balancesheet": 0,
+      "block_trade": 0,
+      "broker_recommend": 0,
+      "cashflow": 0,
+      "daily": 0,
+      "daily_basic": 0,
+      "disclosure_date": 0,
+      "dividend": 0,
+      "express": 0,
+      "fina_audit": 0,
+      "fina_indicator": 0,
+      "fina_mainbz": 0,
+      "fixture_daily": 0,
+      "forecast": 0,
+      "hk_hold": 0,
+      "hs_const": 0,
+      "hsgt_top10": 0,
+      "income": 0,
+      "index_classify": 0,
+      "index_member": 0,
+      "index_member_all": 0,
+      "margin": 0,
+      "margin_detail": 0,
+      "moneyflow": 0,
+      "moneyflow_hsgt": 0,
+      "monthly": 0,
+      "namechange": 0,
+      "new_share": 0,
+      "pledge_detail": 0,
+      "pledge_stat": 0,
+      "repurchase": 0,
+      "share_float": 0,
+      "slb_len": 0,
+      "slb_sec": 0,
+      "slb_sec_detail": 0,
+      "stk_holdernumber": 0,
+      "stk_holdertrade": 0,
+      "stk_limit": 0,
+      "stk_managers": 0,
+      "stk_rewards": 0,
+      "stock_basic": 0,
+      "stock_company": 0,
+      "suspend_d": 0,
+      "top10_floatholders": 0,
+      "top10_holders": 0,
+      "top_inst": 0,
+      "top_list": 0,
+      "trade_cal": 0,
+      "weekly": 0
+    },
+    "successfulMigrations": 6
+  },
+  "databaseFinal": {
+    "businessTables": 50,
+    "counts": {
+      "adj_factor": 0,
+      "balancesheet": 0,
+      "block_trade": 0,
+      "broker_recommend": 0,
+      "cashflow": 0,
+      "daily": 0,
+      "daily_basic": 0,
+      "disclosure_date": 0,
+      "dividend": 0,
+      "express": 0,
+      "fina_audit": 0,
+      "fina_indicator": 0,
+      "fina_mainbz": 150,
+      "fixture_daily": 1,
+      "forecast": 0,
+      "hk_hold": 0,
+      "hs_const": 0,
+      "hsgt_top10": 0,
+      "income": 0,
+      "index_classify": 0,
+      "index_member": 0,
+      "index_member_all": 0,
+      "margin": 0,
+      "margin_detail": 0,
+      "moneyflow": 0,
+      "moneyflow_hsgt": 0,
+      "monthly": 0,
+      "namechange": 0,
+      "new_share": 0,
+      "pledge_detail": 0,
+      "pledge_stat": 0,
+      "repurchase": 0,
+      "share_float": 0,
+      "slb_len": 0,
+      "slb_sec": 0,
+      "slb_sec_detail": 0,
+      "stk_holdernumber": 0,
+      "stk_holdertrade": 0,
+      "stk_limit": 0,
+      "stk_managers": 0,
+      "stk_rewards": 1428,
+      "stock_basic": 5895,
+      "stock_company": 6294,
+      "suspend_d": 0,
+      "top10_floatholders": 0,
+      "top10_holders": 0,
+      "top_inst": 0,
+      "top_list": 0,
+      "trade_cal": 0,
+      "weekly": 0
+    },
+    "successfulMigrations": 6
+  },
+  "elapsedSeconds": 58,
+  "finalExitCode": 1,
+  "npxExitCode": 1,
+  "ownedContainerRemoved": true,
+  "ownedWorkersExited": true,
+  "postCliScan": {
+    "cleanupPassed": true,
+    "deletedArtifacts": 2,
+    "filesScanned": 5,
+    "npxExitCode": 1,
+    "scanPassed": true
+  },
+  "scopeId": "points-2000",
+  "selectedPageCountsAndExcludedEmptyMatched": false,
+  "specResults": {
+    "cleanup": {
+      "immutableInputs": true,
+      "jvmStopped": true,
+      "logScanned": true,
+      "networkDrained": true
+    },
+    "command": "npx playwright test e2e/tushare-live.spec.js --workers=1",
+    "downloads": [
+      {
+        "apiName": "stock_basic",
+        "durationMs": 2694,
+        "insertedRows": 5556,
+        "outcome": "SUCCESS",
+        "requestId": "ecdb2c3c-4c28-4e11-a557-19df2ce0b1ff",
+        "sourceRowCount": 5556,
+        "updatedRows": 0
+      },
+      {
+        "apiName": "stock_basic",
+        "durationMs": 31,
+        "insertedRows": 0,
+        "outcome": "EMPTY",
+        "requestId": "49daa717-3954-4480-ae62-e7353c3d509d",
+        "sourceRowCount": 0,
+        "updatedRows": 0
+      },
+      {
+        "apiName": "stock_basic",
+        "durationMs": 198,
+        "insertedRows": 339,
+        "outcome": "SUCCESS",
+        "requestId": "69b00ad9-e0d7-41b0-bdd4-5a6ec8e5be85",
+        "sourceRowCount": 339,
+        "updatedRows": 0
+      },
+      {
+        "apiName": "stock_company",
+        "durationMs": 1488,
+        "insertedRows": 2457,
+        "outcome": "SUCCESS",
+        "requestId": "b3d4124a-5233-4d16-b4ae-bd09e1128180",
+        "sourceRowCount": 2457,
+        "updatedRows": 0
+      },
+      {
+        "apiName": "stock_company",
+        "durationMs": 1863,
+        "insertedRows": 3083,
+        "outcome": "SUCCESS",
+        "requestId": "c4d0403b-864a-4b2a-859b-88ce7a536fd8",
+        "sourceRowCount": 3083,
+        "updatedRows": 0
+      },
+      {
+        "apiName": "stock_company",
+        "durationMs": 474,
+        "insertedRows": 754,
+        "outcome": "SUCCESS",
+        "requestId": "6f81e5b4-b47e-46f3-8f65-96e3e95c728f",
+        "sourceRowCount": 754,
+        "updatedRows": 0
+      },
+      {
+        "apiName": "income",
+        "durationMs": 32,
+        "insertedRows": 0,
+        "outcome": "EMPTY",
+        "requestId": "c5af136e-d728-4e6c-86e3-74ea8084b874",
+        "sourceRowCount": 0,
+        "updatedRows": 0
+      },
+      {
+        "apiName": "balancesheet",
+        "durationMs": 36,
+        "insertedRows": 0,
+        "outcome": "EMPTY",
+        "requestId": "c846b465-087e-4b39-9255-655b7c34187b",
+        "sourceRowCount": 0,
+        "updatedRows": 0
+      },
+      {
+        "apiName": "cashflow",
+        "durationMs": 29,
+        "insertedRows": 0,
+        "outcome": "EMPTY",
+        "requestId": "631b6b36-9d9a-4aa5-8537-99755b820078",
+        "sourceRowCount": 0,
+        "updatedRows": 0
+      },
+      {
+        "apiName": "fina_indicator",
+        "durationMs": 438,
+        "insertedRows": 0,
+        "outcome": "EMPTY",
+        "requestId": "df39e379-797b-4311-8954-5435ad6a882d",
+        "sourceRowCount": 0,
+        "updatedRows": 0
+      },
+      {
+        "apiName": "fina_audit",
+        "durationMs": 24,
+        "insertedRows": 0,
+        "outcome": "EMPTY",
+        "requestId": "ebf6c924-6235-41ee-9ab7-dc59b42f8283",
+        "sourceRowCount": 0,
+        "updatedRows": 0
+      },
+      {
+        "apiName": "fina_mainbz",
+        "durationMs": 109,
+        "insertedRows": 150,
+        "outcome": "SUCCESS",
+        "requestId": "902d0955-db63-47a0-a6e6-2e0b3c7f09b4",
+        "sourceRowCount": 150,
+        "updatedRows": 0
+      },
+      {
+        "apiName": "stk_rewards",
+        "durationMs": 628,
+        "insertedRows": 1428,
+        "outcome": "SUCCESS",
+        "requestId": "6bc2dccc-9c86-4c20-bc2d-9e0e841daef2",
+        "sourceRowCount": 1428,
+        "updatedRows": 0
+      },
+      {
+        "apiName": "stk_holdernumber",
+        "durationMs": 37,
+        "outcome": "ADAPTER_TYPE_INVALID",
+        "requestId": "841ad417-262b-4f40-a6ae-4154c536aac2"
+      }
+    ],
+    "finishedAt": "2026-09-06T06:18:46.240Z",
+    "fixture": [
+      {
+        "apiName": "fixture_daily",
+        "durationMs": 5,
+        "outcome": "SUCCESS",
+        "requestId": "c208176b-6720-4537-b52f-1e89d24ba7e3",
+        "resultCount": 0,
+        "totalElements": 0
+      },
+      {
+        "apiName": "fixture_daily",
+        "durationMs": 21,
+        "insertedRows": 1,
+        "outcome": "SUCCESS",
+        "requestId": "1ec50480-ccc1-4deb-b8d0-f74d3ebef109",
+        "sourceRowCount": 1,
+        "updatedRows": 0
+      },
+      {
+        "apiName": "fixture_daily",
+        "durationMs": 5,
+        "outcome": "SUCCESS",
+        "requestId": "00b5dbc7-4198-4dec-a687-5b4dadb3e8dd",
+        "resultCount": 1,
+        "totalElements": 1
+      },
+      {
+        "apiName": "fixture_daily",
+        "durationMs": 0,
+        "insertedRows": 0,
+        "outcome": "EMPTY",
+        "requestId": "9ef1452b-b513-42fb-b8ea-b300474faca1",
+        "sourceRowCount": 0,
+        "updatedRows": 0
+      },
+      {
+        "apiName": "fixture_daily",
+        "durationMs": 5,
+        "outcome": "SUCCESS",
+        "requestId": "605fdd81-4d41-4ad8-8c0c-7c932c876c49",
+        "resultCount": 1,
+        "totalElements": 1
+      }
+    ],
+    "inputs": {
+      "gitCommit": "ecbf035cf81fe56e1660f12959fb227f2398f5fc",
+      "jarSha256": "7f794f3494109c27f134c04846e486bda3fe18beec3a88246b58fbcea719cef9",
+      "manifestSha256": "37a317f6a2bc3e5113be5f127976d16d8349414c6476c7f6a194b084a5b0f7c2",
+      "specSha256": "0ab8f12d96fe622a257bdb08fc0f0882c4fc0d94758900af2dc6e2ab45b457a2"
+    },
+    "queries": [
+      {
+        "apiName": "stock_basic",
+        "durationMs": 2,
+        "outcome": "SUCCESS",
+        "requestId": "841a58e4-3489-4a87-91a9-9529a8a34416",
+        "resultCount": 0,
+        "totalElements": 0
+      },
+      {
+        "apiName": "stock_basic",
+        "durationMs": 6,
+        "outcome": "SUCCESS",
+        "requestId": "1eaafd75-f031-4b69-9fc4-7fd9bb3ea4b0",
+        "resultCount": 50,
+        "totalElements": 5895
+      },
+      {
+        "apiName": "stock_company",
+        "durationMs": 2,
+        "outcome": "SUCCESS",
+        "requestId": "a4c09307-ed2f-472e-a406-80dddef6b01c",
+        "resultCount": 0,
+        "totalElements": 0
+      },
+      {
+        "apiName": "stock_company",
+        "durationMs": 10,
+        "outcome": "SUCCESS",
+        "requestId": "ff473a62-6387-48b4-9a37-f2182fa03c6c",
+        "resultCount": 50,
+        "totalElements": 6294
+      },
+      {
+        "apiName": "income",
+        "durationMs": 2,
+        "outcome": "SUCCESS",
+        "requestId": "38d4e76b-35a5-4b34-baa6-f3542b7b2b09",
+        "resultCount": 0,
+        "totalElements": 0
+      },
+      {
+        "apiName": "income",
+        "durationMs": 2,
+        "outcome": "SUCCESS",
+        "requestId": "a312dd12-b700-4d7d-89cd-65db4655838f",
+        "resultCount": 0,
+        "totalElements": 0
+      },
+      {
+        "apiName": "balancesheet",
+        "durationMs": 2,
+        "outcome": "SUCCESS",
+        "requestId": "4eebc837-f89c-44c6-9850-1a56afedf538",
+        "resultCount": 0,
+        "totalElements": 0
+      },
+      {
+        "apiName": "balancesheet",
+        "durationMs": 3,
+        "outcome": "SUCCESS",
+        "requestId": "35f0109c-17f8-4db6-af93-35d2d5c918fb",
+        "resultCount": 0,
+        "totalElements": 0
+      },
+      {
+        "apiName": "cashflow",
+        "durationMs": 2,
+        "outcome": "SUCCESS",
+        "requestId": "1fa424a1-a6f6-47bf-91e8-cb7c1ddb3592",
+        "resultCount": 0,
+        "totalElements": 0
+      },
+      {
+        "apiName": "cashflow",
+        "durationMs": 2,
+        "outcome": "SUCCESS",
+        "requestId": "65b93b98-2532-4250-a4fb-96ad8a63a569",
+        "resultCount": 0,
+        "totalElements": 0
+      },
+      {
+        "apiName": "fina_indicator",
+        "durationMs": 2,
+        "outcome": "SUCCESS",
+        "requestId": "45840648-9a2b-450a-8050-cdce21a73095",
+        "resultCount": 0,
+        "totalElements": 0
+      },
+      {
+        "apiName": "fina_indicator",
+        "durationMs": 2,
+        "outcome": "SUCCESS",
+        "requestId": "3f2c9ce3-dd80-46b5-a786-b98b9fe9cd6d",
+        "resultCount": 0,
+        "totalElements": 0
+      },
+      {
+        "apiName": "fina_audit",
+        "durationMs": 3,
+        "outcome": "SUCCESS",
+        "requestId": "ddc397f2-cdb2-40af-b729-924a27126a08",
+        "resultCount": 0,
+        "totalElements": 0
+      },
+      {
+        "apiName": "fina_audit",
+        "durationMs": 2,
+        "outcome": "SUCCESS",
+        "requestId": "cbe80f57-df7f-434b-9733-f77b71f1f6f9",
+        "resultCount": 0,
+        "totalElements": 0
+      },
+      {
+        "apiName": "fina_mainbz",
+        "durationMs": 2,
+        "outcome": "SUCCESS",
+        "requestId": "b91c469a-3869-4aef-9bd4-f431dcca0f06",
+        "resultCount": 0,
+        "totalElements": 0
+      },
+      {
+        "apiName": "fina_mainbz",
+        "durationMs": 6,
+        "outcome": "SUCCESS",
+        "requestId": "5d9112b9-0591-4a30-a5ac-0dd5b2171dce",
+        "resultCount": 50,
+        "totalElements": 150
+      },
+      {
+        "apiName": "stk_rewards",
+        "durationMs": 2,
+        "outcome": "SUCCESS",
+        "requestId": "2f752fc9-0155-42e2-9041-51d2f0935d70",
+        "resultCount": 0,
+        "totalElements": 0
+      },
+      {
+        "apiName": "stk_rewards",
+        "durationMs": 4,
+        "outcome": "SUCCESS",
+        "requestId": "080aed4b-5a52-4626-aca1-ea24448eb8f5",
+        "resultCount": 50,
+        "totalElements": 1428
+      },
+      {
+        "apiName": "stk_holdernumber",
+        "durationMs": 2,
+        "outcome": "SUCCESS",
+        "requestId": "4e7a118a-b623-4d01-9542-1e2ad32e2c82",
+        "resultCount": 0,
+        "totalElements": 0
+      }
+    ],
+    "scope": {
+      "excludedInterfaces": [
+        {
+          "apiName": "top_inst",
+          "reason": "higher_points"
+        },
+        {
+          "apiName": "broker_recommend",
+          "reason": "higher_points"
+        },
+        {
+          "apiName": "share_float",
+          "reason": "permission_unverified"
+        },
+        {
+          "apiName": "hs_const",
+          "reason": "permission_unverified"
+        },
+        {
+          "apiName": "moneyflow_hsgt",
+          "reason": "permission_unverified"
+        },
+        {
+          "apiName": "hk_hold",
+          "reason": "permission_unverified"
+        },
+        {
+          "apiName": "index_member",
+          "reason": "permission_unverified"
+        },
+        {
+          "apiName": "hsgt_top10",
+          "reason": "permission_unverified"
+        },
+        {
+          "apiName": "namechange",
+          "reason": "permission_unverified"
+        }
+      ],
+      "id": "points-2000",
+      "manifestCases": 49,
+      "manifestSamples": 58,
+      "selectedCases": 40,
+      "selectedSamples": 48
+    },
+    "startedAt": "2026-09-06T06:17:51.401Z",
+    "task": "M14-T05",
+    "totals": {
+      "attemptedCases": 10,
+      "callIntervalMs": 2000,
+      "completedCases": 9,
+      "failedCases": 1,
+      "fixtureDownloadPostsObserved": 2,
+      "fixtureRecordsGetsObserved": 3,
+      "liveDownloadPostsObserved": 14,
+      "liveDownloadResultsRecorded": 14,
+      "liveQueryResultsRecorded": 19,
+      "liveRecordsGetsObserved": 19,
+      "manifestSamples": 58,
+      "registeredCases": 40,
+      "selectedSamples": 48,
+      "unexecutedCases": 30
+    },
+    "version": 1
+  },
+  "task": "M14-T05"
+}
+```
