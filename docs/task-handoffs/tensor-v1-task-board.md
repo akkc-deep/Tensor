@@ -99,7 +99,7 @@
 | 75 | M14-T05 | 真实 Tushare 49 接口受控页面验收 | `BLOCKED` | M14-T04 | docs/task-designs/M14-T05-design.md | docs/task-handoffs/M14-T05-handoff.md |
 | 76 | M14-T09 | 分红修复与2000档剩余验收 | `COMPLETED` | M14-T04, M14-T05 | docs/task-designs/M14-T09-design.md | docs/task-handoffs/M14-T09-handoff.md |
 | 77 | M14-T06 | `daily` 与 `balancesheet` 性能验证 | `COMPLETED` | M14-T03, M14-T05 | None | None |
-| 78 | M14-T07 | Token、SQL、依赖、网络和运行安全验证 | `NOT_STARTED` | M14-T02, M14-T03, M14-T04, M14-T05 | docs/task-designs/M14-T07-design.md | None |
+| 78 | M14-T07 | Token、SQL、依赖、网络和运行安全验证 | `READY` | M14-T02, M14-T03, M14-T04, M14-T05 | docs/task-designs/M14-T07-design.md | None |
 | 79 | M14-T08 | 全新环境 AC-001～018 与发布证据包 | `NOT_STARTED` | M14-T01, M14-T02, M14-T03, M14-T04, M14-T05, M14-T06, M14-T07 | None | None |
 
 ## Task Details
@@ -1170,7 +1170,7 @@
 - **Dependencies:** M14-T02, M14-T03, M14-T04, M14-T05.
 - **Sources:** `docs/superpowers/plans/tensor-modules/M14-integration-release.md` 的 `Task M14-T07` 任务卡。
 - **First action:** 读取 `docs/superpowers/plans/tensor-modules/M14-integration-release.md` 的 `Task M14-T07` 任务卡，并确认其 `Context boundary`、输入和目标文件均可定位。
-- **State evidence:** None.
+- **State evidence (design approved):** 用户明确回复“确认设计”，批准157317c中的完整M14-T07设计。已完整读取看板引用设计，Handoff为None；冻结生产JAR、假凭证/回环上游、S01～S08、既有测试及依赖扫描边界按该设计执行。观测NOT_STARTED后执行NOT_STARTED→READY；此转换不是安全测试通过，M14-T05原49缺口与ISSUE-009性能缺口保留。
 
 ### `M14-T08`
 
