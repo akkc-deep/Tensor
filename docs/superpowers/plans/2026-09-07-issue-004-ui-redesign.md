@@ -133,7 +133,7 @@ expect(downloadDataset).toHaveBeenCalledWith({
 
 **Interfaces:** 保留 `criteria()` 与 `useDatasetQuery` 全部接口；DatasetTable 新增可选 `pluginId`、`apiName`（默认空字符串），用于限定 daily / weekly 的前端展示映射。精确值仍通过 `formatCell` 展示。
 
-- [ ] 在现有 155 列、长文本和精度测试上增加数字对齐、固定列主题与涨跌符号用例。例如：
+- [x] 在现有 155 列、长文本和精度测试上增加数字对齐、固定列主题与涨跌符号用例。例如：
 
 ```js
 expect(formatCell('12345678901234567890.123456789012345678', {
@@ -143,12 +143,12 @@ expect(formatCell('12345678901234567890.123456789012345678', {
 // change='-0.0000' 不使用跌色；普通持仓数量不随正负上色。
 ```
 
-- [ ] 运行 `npm test -- src/components/dataset/DatasetTable.spec.js src/utils/format.spec.js`，确认新增行为未满足。
-- [ ] 组合上方选择 / 筛选面板和下方表格 / 分页面板；保留 `tsCode`、交易日及公告日起止字段、查询 / 重置和分页快照，默认 50 条、可选 20 / 50 / 100。
-- [ ] 检查与下载页共用的选择、面板和反馈，接入已有共享实现；本任务发现的同职责重复部分在此抽取并同步替换相关调用处，保留两页各自业务流程。公共组件变更后运行 `npm test -- src/views/DownloadView.spec.js src/components/common` 验证受影响调用方。
-- [ ] 表格数字右对齐、等宽数字；使用字符串判断符号和零，不调用 Number 处理业务值。小型展示映射限定 tushare_pro 的 daily / weekly，保留其它元数据列 label、顺序、来源列及格式化行为。
-- [ ] 固定列、表头、hover、tooltip 和空态使用共享主题；布局每层 `min-width: 0`，分页窄屏换行，表格横向滚动不撑开页面。
-- [ ] 运行 `npm test -- src/views/DatasetView.spec.js src/components/dataset src/composables/useDatasetQuery.spec.js src/composables/useDatasetFilters.spec.js src/utils/format.spec.js src/api/api.spec.js`；全部通过后核对范围、加入 Git 并独立提交。
+- [x] 运行 `npm test -- src/components/dataset/DatasetTable.spec.js src/utils/format.spec.js`，确认新增行为未满足。
+- [x] 组合上方选择 / 筛选面板和下方表格 / 分页面板；保留 `tsCode`、交易日及公告日起止字段、查询 / 重置和分页快照，默认 50 条、可选 20 / 50 / 100。
+- [x] 检查与下载页共用的选择、面板和反馈，接入已有共享实现；本任务发现的同职责重复部分在此抽取并同步替换相关调用处，保留两页各自业务流程。公共组件变更后运行 `npm test -- src/views/DownloadView.spec.js src/components/common` 验证受影响调用方。
+- [x] 表格数字右对齐、等宽数字；使用字符串判断符号和零，不调用 Number 处理业务值。小型展示映射限定 tushare_pro 的 daily / weekly，保留其它元数据列 label、顺序、来源列及格式化行为。
+- [x] 固定列、表头、hover、tooltip 和空态使用共享主题；布局每层 `min-width: 0`，分页窄屏换行，表格横向滚动不撑开页面。
+- [x] 运行 `npm test -- src/views/DatasetView.spec.js src/components/dataset src/composables/useDatasetQuery.spec.js src/composables/useDatasetFilters.spec.js src/utils/format.spec.js src/api/api.spec.js`；全部通过后核对范围、加入 Git 并独立提交。
 
 **Acceptance:** 全业务列与来源列可见，宽表格内部滚动；数值精度和单位正确；筛选、单边日期、重置、分页、错误重试和无 ts_code 数据集均可用；跨页同职责重复 UI 已共用组件，两页行为回归通过。
 

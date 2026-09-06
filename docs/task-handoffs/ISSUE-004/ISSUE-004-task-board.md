@@ -28,8 +28,8 @@
 | 2 | ISSUE-004-T02 | 侧栏、设置与业务状态保留 | COMPLETED | ISSUE-004-T01 | docs/task-designs/ISSUE-004-T02-design.md | docs/task-handoffs/ISSUE-004/ISSUE-004-T02-handoff.md |
 | 3 | ISSUE-004-T03 | 日期控件与原参数契约 | COMPLETED | ISSUE-004-T02 | docs/task-designs/ISSUE-004-T03-design.md | docs/task-handoffs/ISSUE-004/ISSUE-004-T03-handoff.md |
 | 4 | ISSUE-004-T04 | 下载工作台布局与反馈 | COMPLETED | ISSUE-004-T02, ISSUE-004-T03 | docs/task-designs/ISSUE-004-T04-design.md | docs/task-handoffs/ISSUE-004/ISSUE-004-T04-handoff.md |
-| 5 | ISSUE-004-T05 | 查看工作台与精确表格展示 | IN_PROGRESS | ISSUE-004-T02, ISSUE-004-T04 | docs/task-designs/ISSUE-004-T05-design.md | docs/task-handoffs/ISSUE-004/ISSUE-004-T05-handoff.md |
-| 6 | ISSUE-004-T06 | 正式前端回归与视觉验收 | NOT_STARTED | ISSUE-004-T04, ISSUE-004-T05 | None | None |
+| 5 | ISSUE-004-T05 | 查看工作台与精确表格展示 | COMPLETED | ISSUE-004-T02, ISSUE-004-T04 | docs/task-designs/ISSUE-004-T05-design.md | docs/task-handoffs/ISSUE-004/ISSUE-004-T05-handoff.md |
+| 6 | ISSUE-004-T06 | 正式前端回归与视觉验收 | IN_PROGRESS | ISSUE-004-T04, ISSUE-004-T05 | docs/task-designs/ISSUE-004-T06-design.md | docs/task-handoffs/ISSUE-004/ISSUE-004-T06-handoff.md |
 
 ## Task Details
 
@@ -108,6 +108,8 @@
 
 - **Execution evidence:** 2026-09-07 READY -> IN_PROGRESS；用户已明确要求执行 ISSUE-004 全部任务；已完整读取本任务设计和链接交接，按既定顺序启动。
 
+- **Execution evidence:** 2026-09-07 IN_PROGRESS -> COMPLETED；65fad74、a2d2de3；上筛选/下结果面板、无筛选可查询、EMPTY/SUCCESS单一分页已实现。CatalogSelect在下载/查看实际共用分类搜索、Escape和禁用事件保护；表格保留155列/原顺序/精确字符串，以字符串判断涨跌，daily百分数与weekly比率标签限定tushare_pro。针对性71项、公共调用方36项、全套24文件/170项、构建及diff检查退出0；移动端padding修正后构建通过，独立复审规格/质量通过。214项保护源仍仅既有用户POM差异；真实宽表/tooltip/五视口/49元数据由T06组合验收。
+
 ### ISSUE-004-T06
 
 - **Goal:** 用正式 Vue 构建证明视觉方案、跨页行为、全部 UI 元数据与客户端契约均已满足。
@@ -117,6 +119,10 @@
 - **Sources:** ① `docs/issues/problems/ISSUE-004-ui-visual-redesign.md` 关闭条件；② `docs/task-designs/ISSUE-004-design.md` Tests / Acceptance；③ `docs/superpowers/plans/2026-09-07-issue-004-ui-redesign.md` 的 ISSUE-004-T06；④ `control-plane/src/api/`、`docs/data-template/manifest.json`、`control-plane/e2e/tushare-metadata.spec.js` 的公开契约常量；⑤ T04 / T05 的页面和验证结果。
 - **First action:** 完成并链接 `docs/task-designs/ISSUE-004-T06-design.md`，明确 route stub、49 项覆盖映射、截图及验收记录格式。
 - **State evidence:** None。
+
+- **Execution evidence:** 2026-09-07 NOT_STARTED -> READY；前项已完成，后继专属设计已完整读取并链接，直接依赖已验证，next-task 交接已写入。
+
+- **Execution evidence:** 2026-09-07 READY -> IN_PROGRESS；用户已明确要求执行 ISSUE-004 全部任务；已完整读取本任务设计和链接交接，按既定顺序启动。
 
 ## Risks
 
