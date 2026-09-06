@@ -534,3 +534,22 @@ PY
   "task": "M14-T05"
 }
 ```
+
+## 启动日志阻塞的本地修复（2026-09-06）
+
+用户要求由执行者处理后，按修订设计完成本地诊断和修复。上面的真实失败报告保持原文，其已扫描版本在da56d38中，整篇旧SHA为814bae86e823c0f639e5c376056401c08fb778479f4ad33ee17e4e15a0f629cf；以下追加内容尚未在用户真实Token环境扫描，不复用旧文件哈希宣称当前整篇扫描通过。
+
+从当前spec生成本机临时探针，保留同一前置检查、原JAR、JVM环境、health和正常停机函数；不注册或执行live用例，不调用下载/records、不运行上游替身。诊断仅使用控制器新生成的合成Token，通过专门子进程TENSOR_TUSHARE_TOKEN环境传入；没有读取用户Token。日志命中只投影固定类别和已知框架标识布尔值，原文由现有保护逻辑丢弃。每次都使用新的独占MySQL8.4.6空schema。
+
+| 同一原JAR启动探针 | 实际结果 |
+|---|---|
+| RED：`python3 /private/tmp/m14-t05-startup-diagnostic.py /private/tmp/tensor-m14-t05-control.gsu6eluc` | 外层0、Node1；health未就绪，secretScan/FlywayMention/JDBCMarker=true；包络/长度/其他扫描标记false。6成功迁移、50业务表全空，JVM停止、终检及精确DB/卷清理通过 |
+| GREEN：同命令，控制目录换为`/private/tmp/tensor-m14-t05-control.dwbbqgr3` | 外层0、Node0；health就绪，无任何扫描触发；6成功迁移、50业务表全空，JVM停止、终检及精确DB/卷清理通过 |
+
+根因是第三方Flyway的INFO启动日志包含JDBC连接位置，与本任务禁止保存连接位置的日志合同冲突；本地RED复现了该路径。修复提交b8cc305d33590b07c3cd945849b6e0f6384a9702只在spec的applicationEnvironment新增一行固定 `LOGGING_LEVEL_ORG_FLYWAYDB=WARN`。它仅作用于JVM中的Flyway包，保留WARN/ERROR、全部业务完成日志、原argv和所有扫描规则；不修改生产文件、原JAR、模板、接口范围、样例或请求计数。
+
+同函数环境探针 `/tmp/m14-t05-flyway-env-probe.mjs` 在修复前因值undefined而RED；修复后GREEN，核对固定WARN覆盖外部同名TRACE、全局/业务日志覆盖不继承、DB/Token仅进入JVM、浏览器/辅助publicEnvironment不含这些输入。Node24语法、该环境探针、既有 `/tmp/m14-t05-pure-probe.mjs` 和diff检查均exit0；既有合成秘密扫描反例仍拒绝命中。此一行不改变注册或浏览器行为，未重复无关全套测试。独立定点审查Spec通过、Quality Approved、Ready，无Critical/Important/Minor。
+
+修复后spec SHA-256为72b9763941e7ed82fbf1b207a79ee515d3d7343c9831ce2604f8ec9abd7ee973；原JAR/manifest冻结哈希不变。新正式运行环境为 `/private/tmp/tensor-m14-t05-control.kybrot1f`，再次独立核对MySQL8.4.6/0表、最小权限/实际来源host、Java21、8080空闲及文件哈希/权限通过。launch.py与先前已审查的直接启动器逐字节一致，SHA仍为1423f0ebfa6cd48a6e818b6eccf13f593b23e39ce68b0dd9722663c5ea5fb263；新run-config将固定本次最终证据和输入哈希。旧j9045eey及两次诊断环境均已使用并清理，不可复用。
+
+本次GREEN只证明启动阻塞已修复，不证明任何真实Tushare接口、账户权限或fixture页面结果。固定40/48/80与fixture2/3仍待用户已有Token的终端执行正式新命令，结束后由同一Token环境完成整篇证据扫描和实际报告追加；真实错误仍保留，不自动重试。
