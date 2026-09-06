@@ -84,6 +84,33 @@ def scan_bytes(data, secret_patterns):
         raise GateError('secret-detected', {'hits': hits})
     return 0
 
+def reflection_verdict(data, submitted, response_body=None):
+    for value in submitted:
+        encoded = patterns([value])
+        if len(value) > 8:
+            require(not any(pattern in data for pattern in encoded),'submitted-value-reflected')
+            continue
+        # Short values need body context; transport counters and valid request IDs
+        # are not reflection evidence. The full credential scan still covers both.
+        body = response_body if response_body is not None else data
+        try:
+            body = json.loads(body)
+        except (ValueError,UnicodeError):
+            body = body.decode(errors='replace')
+        def reflected(item):
+            if isinstance(item,dict):
+                for key,child in item.items():
+                    if key == 'requestId' and isinstance(child,str) and re.fullmatch(r'[0-9a-fA-F]{8}(?:-[0-9a-fA-F]{4}){3}-[0-9a-fA-F]{12}',child):
+                        continue
+                    if reflected(key) or reflected(child):
+                        return True
+                return False
+            if isinstance(item,list):
+                return any(reflected(child) for child in item)
+            content = str(item).encode()
+            return any(re.search((rb'(?<![0-9])' if pattern.isdigit() else rb'(?<![A-Za-z0-9])') + re.escape(pattern) + (rb'(?![0-9])' if pattern.isdigit() else rb'(?![A-Za-z0-9])'),content) for pattern in encoded)
+        require(not reflected(body),'submitted-value-reflected')
+
 def scan_file(path, secret_patterns):
     try:
         info = path.lstat()
@@ -417,12 +444,12 @@ class Runtime:
             check['finishedAt'] = now()
             print('security gate: ' + label + ' ' + check['status'], flush=True)
 
-    def scan(self, data, category, public=False, submitted=()):
+    def scan(self, data, category, public=False, submitted=(), response_body=None):
         try:
             scan_bytes(data, self.secret_patterns)
             if public:
                 require(all(value.encode() not in data for value in FORBIDDEN), 'unsafe-public-detail')
-                require(not any(value in data for value in patterns(submitted)), 'submitted-value-reflected')
+                reflection_verdict(data,submitted,response_body)
         except GateError:
             self.fatal = True
             raise
@@ -754,7 +781,7 @@ class Runtime:
             if deadline:
                 deadline.cancel()
             connection.close()
-        self.scan(json.dumps(header_entries).encode() + b'\n' + data, 'http', public=True,submitted=submitted)
+        self.scan(json.dumps(header_entries).encode() + b'\n' + data, 'http', public=True,submitted=submitted,response_body=data)
         response_headers = normalize_headers(header_entries)
         if observe:
             self.observe_headers(response_headers, urllib.parse.urlsplit(path).path, status)
@@ -1243,7 +1270,7 @@ class Runtime:
         return {'observedStubCalls':self.stub_count,'unexpectedStubCalls':self.stub_failures,'configuredUpstream':'loopback-stub','jvmExternalUpstreamCalls':'not-measured'}
 
 def review_cases(directory, check, selected=None):
-    if selected in (None, 'headers', 'reflection'):
+    if selected in (None, 'headers', 'reflection', 'short-reflection'):
         from unittest.mock import patch
         def response_case(entries, body=b'{}', status=200, **options):
             runtime = Runtime.__new__(Runtime)
@@ -1289,6 +1316,25 @@ def review_cases(directory, check, selected=None):
         for number, encoded in enumerate(patterns([payload])):
             check('identifier-reflection-' + str(number),lambda data=encoded:reflected(b'prefix ' + data),True)
         check('identifier-reflection-form-url',lambda:reflected(urllib.parse.quote_plus(payload,safe='').encode()),True)
+    if selected in (None, 'short-reflection'):
+        collision_id = '10100000-0000-4000-8000-000000000000'
+        error = {'requestId':'00000000-0000-4000-8000-000000000000','code':'PARAM_INVALID','message':'Invalid parameter','retryable':False,'fieldErrors':[]}
+        def short_response(body, entries=clean_headers):
+            status,_,data = response_case(entries,json.dumps(body).encode(),400,submitted=('101',))
+            if isinstance(body,dict) and body.get('code') == 'PARAM_INVALID':
+                query_verdict(status,json.loads(data))
+        check('short-reflection-clean-uuid',lambda:short_response({**error,'requestId':collision_id}))
+        check('short-reflection-clean-transport-headers',lambda:short_response(error,clean_headers + [('Content-Length','101'),('Age','1010'),('X-Request-Id',collision_id)]))
+        check('short-reflection-message',lambda:short_response({**error,'message':'Invalid pageSize 101'}),True)
+        check('short-reflection-field-error',lambda:short_response({**error,'fieldErrors':[{'field':'pageSize','message':'Invalid value101'}]}),True)
+        check('short-reflection-numeric-field',lambda:short_response({**error,'rejectedValue':101}),True)
+        check('short-reflection-nested-field',lambda:short_response({**error,'details':{'value':'101'}}),True)
+        check('short-reflection-scalar-body',lambda:short_response(101),True)
+        check('short-reflection-string-body',lambda:short_response('101'),True)
+        for number,encoded in enumerate(patterns(['101'])):
+            check('short-reflection-encoded-' + str(number),lambda value=encoded:short_response({**error,'message':value.decode()}),True)
+        check('short-reflection-secret-header',lambda:short_response(error,clean_headers + [('X-Debug','M14_T07_TOKEN_review_canary')]),True)
+        check('short-reflection-secret-request-id',lambda:short_response({**error,'requestId':'M14_T07_TOKEN_review_canary'}),True)
     if selected in (None, 'logs'):
         request_id = '11111111-1111-1111-1111-111111111111'
         common = 'tensor.operation.completed requestId=' + request_id + ' operation='
