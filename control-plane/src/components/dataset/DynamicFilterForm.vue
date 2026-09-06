@@ -1,8 +1,9 @@
 <script setup>
-import { computed, nextTick, toRef } from 'vue'
+import { computed, toRef } from 'vue'
 
 import { useDatasetFilters } from '../../composables/useDatasetFilters.js'
-import FieldError from '../common/FieldError.vue'
+import { useFormValidation } from '../../composables/useFormValidation.js'
+import MetadataField from '../common/MetadataField.vue'
 
 const props = defineProps({
   filters: { type: Array, required: true },
@@ -12,22 +13,22 @@ const props = defineProps({
 const { values, errors, firstError, setValue, validateValues, criteria, reset } = useDatasetFilters(
   toRef(props, 'filters'),
 )
-const controls = new Map()
+const { setControl, validate } = useFormValidation(validateValues, firstError)
 
 const fields = computed(() => props.filters.flatMap((filter) => {
   if (filter.field === 'ts_code' && filter.operator === 'EQ' && filter.controlType === 'TEXT') {
-    return [{ key: 'tsCode', kind: 'text', label: '证券代码 (ts_code)' }]
+    return [{ key: 'tsCode', type: 'TEXT', label: '证券代码 (ts_code)' }]
   }
   if (filter.field === 'trade_date' && filter.operator === 'BETWEEN' && filter.controlType === 'DATE_RANGE') {
     return [
-      { key: 'tradeDateFrom', kind: 'date', label: '交易日期开始 (trade_date)' },
-      { key: 'tradeDateTo', kind: 'date', label: '交易日期结束 (trade_date)' },
+      { key: 'tradeDateFrom', type: 'DATE', label: '交易日期开始 (trade_date)' },
+      { key: 'tradeDateTo', type: 'DATE', label: '交易日期结束 (trade_date)' },
     ]
   }
   if (filter.field === 'ann_date' && filter.operator === 'BETWEEN' && filter.controlType === 'DATE_RANGE') {
     return [
-      { key: 'annDateFrom', kind: 'date', label: '公告日期开始 (ann_date)' },
-      { key: 'annDateTo', kind: 'date', label: '公告日期结束 (ann_date)' },
+      { key: 'annDateFrom', type: 'DATE', label: '公告日期开始 (ann_date)' },
+      { key: 'annDateTo', type: 'DATE', label: '公告日期结束 (ann_date)' },
     ]
   }
   return []
@@ -48,26 +49,8 @@ function controlId(key) {
   return `dataset-filter-${key}`
 }
 
-function errorId(key) {
-  return `${controlId(key)}-error`
-}
-
 function updateValue(key, value) {
   if (!props.disabled) setValue(key, value)
-}
-
-function setControl(key, control) {
-  if (control) controls.set(key, control)
-  else controls.delete(key)
-}
-
-async function validate() {
-  const valid = validateValues()
-  if (!valid) {
-    await nextTick()
-    controls.get(firstError.value)?.focus()
-  }
-  return valid
 }
 
 defineExpose({ validate, criteria, reset })
@@ -75,55 +58,34 @@ defineExpose({ validate, criteria, reset })
 
 <template>
   <div class="dynamic-filter-form">
-    <div
+    <MetadataField
       v-for="field in fields"
       :key="field.key"
-      v-input-a11y="{
-        id: controlId(field.key),
-        'aria-invalid': errors[field.key] ? 'true' : undefined,
-        'aria-describedby': errors[field.key] ? errorId(field.key) : undefined,
-      }"
-      class="filter-field"
+      :id="controlId(field.key)"
+      :ref="(control) => setControl(field.key, control)"
+      :label="field.label"
+      :type="field.type"
+      :model-value="values[field.key]"
+      :error="errors[field.key]"
+      :disabled="disabled"
       :data-filter="field.key"
-    >
-      <label class="filter-field__label" :for="controlId(field.key)">
-        {{ field.label }}
-      </label>
-      <el-date-picker
-        v-if="field.kind === 'date'"
-        :id="controlId(field.key)"
-        :ref="(control) => setControl(field.key, control)"
-        :model-value="values[field.key]"
-        type="date"
-        value-format="YYYY-MM-DD"
-        :disabled="disabled"
-        :aria-invalid="errors[field.key] ? 'true' : undefined"
-        :aria-describedby="errors[field.key] ? errorId(field.key) : undefined"
-        @update:model-value="updateValue(field.key, $event)"
-      />
-      <el-input
-        v-else
-        :id="controlId(field.key)"
-        :ref="(control) => setControl(field.key, control)"
-        :model-value="values[field.key]"
-        :disabled="disabled"
-        :aria-invalid="errors[field.key] ? 'true' : undefined"
-        :aria-describedby="errors[field.key] ? errorId(field.key) : undefined"
-        @update:model-value="updateValue(field.key, $event)"
-      />
-      <FieldError :id="errorId(field.key)" :message="errors[field.key] ?? ''" />
-    </div>
+      @update:model-value="updateValue(field.key, $event)"
+    />
   </div>
 </template>
 
 <style scoped>
-.dynamic-filter-form,
-.filter-field {
+.dynamic-filter-form {
   display: grid;
-  gap: 8px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  row-gap: 22px;
+  column-gap: 18px;
+  min-width: 0;
 }
 
-.filter-field__label {
-  font-weight: 600;
+@media (max-width: 680px) {
+  .dynamic-filter-form {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }
 </style>

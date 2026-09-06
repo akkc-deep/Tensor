@@ -47,7 +47,7 @@ describe('DynamicFilterForm', () => {
     expect(wrapper.findAll('[data-filter]').map((item) => item.attributes('data-filter'))).toEqual([
       'tsCode', 'tradeDateFrom', 'tradeDateTo', 'annDateFrom', 'annDateTo',
     ])
-    expect(wrapper.findAll('.filter-field__label').map((label) => label.text())).toEqual([
+    expect(wrapper.findAll('.metadata-field__label').map((label) => label.text())).toEqual([
       '证券代码 (ts_code)', '交易日期开始 (trade_date)', '交易日期结束 (trade_date)',
       '公告日期开始 (ann_date)', '公告日期结束 (ann_date)',
     ])

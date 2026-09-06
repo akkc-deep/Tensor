@@ -133,6 +133,15 @@ async function setFirstParameter(wrapper, value) {
   await nextTick()
 }
 
+async function setParameter(wrapper, name, value) {
+  wrapper
+    .getComponent(DynamicParameterForm)
+    .get(`[data-parameter="${name}"]`)
+    .getComponent(ElDatePicker)
+    .vm.$emit('update:modelValue', value)
+  await nextTick()
+}
+
 async function clickDownload(wrapper) {
   await wrapper.getComponent(DownloadAction).get('button').trigger('click')
   await flushPromises()
@@ -261,16 +270,18 @@ describe('DownloadView', () => {
     const pending = deferred()
     const completed = response()
     api.downloadDataset.mockReturnValueOnce(pending.promise)
-    const wrapper = await mountReady()
+    const wrapper = await mountReady({
+      sources: [source({ pluginId: 'tushare_pro' })],
+    })
     await selectApi(wrapper)
-    await setFirstParameter(wrapper, '2026-09-04')
+    await setFirstParameter(wrapper, '2026-08-07')
 
     await wrapper.getComponent(DownloadAction).get('button').trigger('click')
     await flushPromises()
     expect(api.downloadDataset).toHaveBeenCalledWith({
-      pluginId: 'fixture',
+      pluginId: 'tushare_pro',
       apiName: 'daily',
-      params: { trade_date: '20260904' },
+      params: { trade_date: '20260807' },
     })
     expect(wrapper.getComponent(DataSourceSelect).props('disabled')).toBe(true)
     expect(wrapper.getComponent(ApiSelect).props('disabled')).toBe(true)
@@ -300,6 +311,50 @@ describe('DownloadView', () => {
     expect(wrapper.text()).toContain('插入数7')
     expect(wrapper.text()).toContain('更新数5')
     expect(wrapper.getComponent(DataSourceSelect).props('disabled')).toBe(false)
+  })
+
+  it('blocks incomplete or reversed new_share ranges and submits the two original parameters once', async () => {
+    api.downloadDataset.mockResolvedValueOnce(response({ apiName: 'new_share' }))
+    const newShare = descriptor({
+      apiName: 'new_share',
+      parameters: [
+        parameter({
+          name: 'start_date',
+          label: '开始日期',
+          type: 'DATE_RANGE_MEMBER',
+          relatedParameter: 'end_date',
+        }),
+        parameter({
+          name: 'end_date',
+          label: '结束日期',
+          type: 'DATE_RANGE_MEMBER',
+          relatedParameter: 'start_date',
+        }),
+      ],
+    })
+    const wrapper = await mountReady({
+      sources: [source({ pluginId: 'tushare_pro' })],
+      apis: [newShare],
+    })
+    await selectApi(wrapper, 'new_share')
+
+    await setParameter(wrapper, 'start_date', '2026-08-07')
+    await clickDownload(wrapper)
+    expect(api.downloadDataset).not.toHaveBeenCalled()
+
+    await setParameter(wrapper, 'end_date', '2026-08-03')
+    await clickDownload(wrapper)
+    expect(api.downloadDataset).not.toHaveBeenCalled()
+
+    await setParameter(wrapper, 'start_date', '2026-08-03')
+    await setParameter(wrapper, 'end_date', '2026-08-07')
+    await clickDownload(wrapper)
+    expect(api.downloadDataset).toHaveBeenCalledTimes(1)
+    expect(api.downloadDataset).toHaveBeenCalledWith({
+      pluginId: 'tushare_pro',
+      apiName: 'new_share',
+      params: { start_date: '20260803', end_date: '20260807' },
+    })
   })
 
   it('preserves an EMPTY outcome without counts, failure, or placeholders', async () => {

@@ -90,7 +90,7 @@ describe('DynamicParameterForm', () => {
       ),
     ).toEqual(['SSE', 'SZSE', 'BSE'])
     expect(
-      wrapper.findAll('.parameter-field__label').map((label) => label.text()),
+      wrapper.findAll('.metadata-field__label').map((label) => label.text()),
     ).toEqual(allTypes().map(({ label }) => `${label}*`))
 
     const dateControl = field(wrapper, 'trade_date').get('input')
@@ -99,7 +99,7 @@ describe('DynamicParameterForm', () => {
       'aria-required': 'true',
       'aria-describedby': 'download-parameter-trade_date-description',
     })
-    expect(field(wrapper, 'trade_date').get('.parameter-field__description').text()).toBe(
+    expect(field(wrapper, 'trade_date').get('.metadata-field__description').text()).toBe(
       '<strong>交易日</strong>',
     )
     expect(field(wrapper, 'trade_date').find('strong').exists()).toBe(false)
