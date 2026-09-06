@@ -16,7 +16,8 @@
 - **Explicit unfinished-work transfer (2026-09-06):** 用户要求新增任务承接剩余工作。当前续接入口为 Order76/M14-T09；2026-09-06用户明确确认D-01，后续状态见该任务行与状态证据；M14-T05保留BLOCKED及原49目标未完成事实。此次使用明确标记为`transfer`的交接，记录未完成工作的责任转移，不是要求前驱COMPLETED的普通`next-task`交接，不触发READY/启动/完成或自动准备M14-T06。
 - **Allowed transitions:** `NOT_STARTED -> READY`, `READY -> IN_PROGRESS`, `IN_PROGRESS -> PAUSED`, `PAUSED -> IN_PROGRESS`, `READY -> BLOCKED`, `IN_PROGRESS -> BLOCKED`, `BLOCKED -> READY`, `IN_PROGRESS -> COMPLETED`.
 - **Previous execution instruction:** 用户此前要求暂缓M14-T05并先推进M14-T06；原49目标的9项缺口登记ISSUE-008，M14-T05保持BLOCKED，M14-T09保持COMPLETED。M14-T06当时进入设计准备，尚未启动。
-- **Current disposition / explicit exception:** 用户随后明确要求性能测试“先跳过吧，可以记录一个issue，直接标记完成”。仅本次M14-T06按该指示直接从NOT_STARTED标为COMPLETED，表示跳过收尾；未创建设计/测试或执行实测，不补造READY/IN_PROGRESS及验收通过证据。原性能要求转入 `docs/issues/problems/ISSUE-009-query-performance-verification.md`，仍未解决，项目性能/发布门禁保持。下一个预定义任务为Order78/M14-T07，尚未准备或启动；本次不生成普通验收完成的后继交接。
+- **Previous disposition / explicit exception:** 用户随后明确要求性能测试“先跳过吧，可以记录一个issue，直接标记完成”。仅本次M14-T06按该指示直接从NOT_STARTED标为COMPLETED，表示跳过收尾；未创建设计/测试或执行实测，不补造READY/IN_PROGRESS及验收通过证据。原性能要求转入 `docs/issues/problems/ISSUE-009-query-performance-verification.md`，仍未解决，项目性能/发布门禁保持。当时下一个预定义任务为Order78/M14-T07，尚未准备或启动，未生成普通验收完成的后继交接。
+- **Current execution:** 用户要求执行当前任务后明确“确认设计”；M14-T07详细设计157317c获批准，0d1d9b9记录NOT_STARTED→READY，0d403db单独记录READY→IN_PROGRESS。当前入口为M14-T07，按批准的假凭证/回环生产包安全验证设计实施；准确状态及结果见任务行与状态证据。原真实49及性能缺口不因安全任务启动而消失。
 
 ## Tasks
 
