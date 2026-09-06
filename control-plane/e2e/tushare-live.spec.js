@@ -752,6 +752,7 @@ function applicationEnvironment() {
   for (const name of DB_ENV) env[name] = process.env[name]
   env.TENSOR_TUSHARE_TOKEN = process.env.TENSOR_TUSHARE_TOKEN
   env.TENSOR_TUSHARE_BASE_URL = 'https://api.tushare.pro'
+  env.LOGGING_LEVEL_ORG_FLYWAYDB = 'WARN'
   return env
 }
 
