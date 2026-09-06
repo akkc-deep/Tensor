@@ -4,6 +4,10 @@
 
 ## Goal
 
+2026-09-06 当前修复输入更新：6gn542ah 已真实完成 stock_company 三样例/6294 行，ISSUE-005 关闭；全轮 9 通过、stk_holdernumber 失败、30 未运行，证据 `241813c` 保留。[ISSUE-006](../issues/problems/ISSUE-006-holdernumber-announcement-date.md) 独立限定兼容 `stk_holdernumber.ann_date` 的严格合法本地日期时间，以 DATE 合同映射其日历日期，不改通用转换器/元数据/SQL/样例。下一轮唯一冻结 JAR 为 `/private/tmp/tensor-issue-006-build.2rctzavi/data-plane/tensor-app/target/acceptance/tensor-app-1.0-SNAPSHOT-acceptance.jar`，SHA `f2fc35c933e69da5e85690fbabb13d691178538cd6ffb3b94284dfc95b10db89`，替代下文 ISSUE-005 阶段包引用；其余原输入规则继续适用。原包与 ISSUE-005 包均保留，不通过环境允许任意包。
+
+ISSUE-006 包从独立源码快照构建，复用原静态前端；与 ISSUE-005 包展开后同为 364 文件、无增删，仅 `TushareResponseValidator.class` 内容变化，其他产物合同继续适用。新增合成适配正反例与原相关回归通过，独立代码复审无 Critical/Important，唯一 Minor 的同名字段隔离测试已补强并随构建通过；既有 7 唯一打包测试通过。真实失败的字段未保留，本地/历史诊断不冒充该次真实字段；下一轮仍以完整页面结果判定成功或 BLOCKED。
+
 2026-09-06 产品修复接入：用户在真实 `stock_company` 失败后授权“继续修复”。独立 [ISSUE-005](../issues/proposals/ISSUE-005-tushare-decimal-decoding.md) 补齐原精度合同，相关 85 测试及独立复审通过。下一轮使用 `/private/tmp/tensor-issue-005-build.kibqgbn5/data-plane/tensor-app/target/acceptance/tensor-app-1.0-SNAPSHOT-acceptance.jar`，SHA-256 `7f794f3494109c27f134c04846e486bda3fe18beec3a88246b58fbcea719cef9`。此明确修订优先于下文历史“原 JAR”路径/hash引用：运行时将该修复包作为唯一冻结输入，仍严格校验 hash，不允许任意 JAR。原包保留且 hash 不变；真实历史失败记录不改写。
 
 修复包在独立源码快照以既有 acceptance profile 构建，复用原包全部静态前端资源；既有 production/acceptance 打包合同通过。归档展开后无增删，仅 `TushareProClient.class` 内容变化，其他类、依赖、49 份 YAML、6 份 SQL、页面和公开合同与原包逐字节一致。因此沿用 M14-T04 的既有合同证据。Java 修复/合成测试/构建只归属 ISSUE-005，不扩张 M14-T05 的页面验收实施范围；40/48/9、原 manifest、真实 Token 环境、安全门禁与失败停止规则均不变。

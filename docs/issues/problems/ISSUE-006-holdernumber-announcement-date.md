@@ -53,3 +53,5 @@ mvn -o -f data-plane/pom.xml -Pacceptance \
 - Live spec 接入只更新固定 JAR hash，设计记录新包优先于历史引用；语法与40项发现通过，40/48/80及9项排除不变。真实证据 `241813c` 全文 SHA 仍为 `699132b0e4373d9d74300f6b5b64b22a0b9c593601dd54b66feca428d9136afd`，未改写。
 - 定点复审确认上述 Minor 已关闭，无新增问题；独立实算包 hash 和364文件比较与设计/spec一致。
 - 新包合成 Token、仅 health 诊断（控制目录 `0xdt5neo`）：exit 0、health就绪、6成功迁移/50业务表全空；无秘密/包络扫描触发，JVM停止、终检扫描及清理通过，自有DB容器/卷/私密材料已删除。此目录已用完，不能供真实验收复用。
+
+- 最终启动器接入复审通过：新控制目录 `/private/tmp/tensor-m14-t05-control.1gpnb4ru`，launcher SHA `1f2345efddcedb7d5dbdb38005af65ac492e8a0f2ff92a4163d20736f2211b4b`；唯一改动为固定包路径。8项公开配置、四hash、40/48/9/2000ms、0700/0600和未使用状态均核对通过，无审查发现。真实新轮仍待用户已有Token终端执行。

@@ -20,7 +20,7 @@ import { setTimeout as delay } from 'node:timers/promises'
 const execFileAsync = promisify(execFile)
 const BASE_URL = 'http://127.0.0.1:8080'
 const MANIFEST_SHA = '37a317f6a2bc3e5113be5f127976d16d8349414c6476c7f6a194b084a5b0f7c2'
-const JAR_SHA = '7f794f3494109c27f134c04846e486bda3fe18beec3a88246b58fbcea719cef9'
+const JAR_SHA = 'f2fc35c933e69da5e85690fbabb13d691178538cd6ffb3b94284dfc95b10db89'
 const DOWNLOAD_KEYS = [
   'requestId', 'outcome', 'pluginId', 'apiName', 'sourceRowCount', 'insertedRows',
   'updatedRows', 'message',

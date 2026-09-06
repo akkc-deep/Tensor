@@ -13,17 +13,23 @@ pause
 
 ## Current State
 
+恢复准备更新：ISSUE-006 已修复并提交 `c38dbac`。限定 `stk_holdernumber.ann_date` 的合法日期时间规范化，94项相关回归通过；复审1项Minor测试边界已补强并通过定点复审，无剩余发现。真实历史样本仅内存校验：旧包在ann_date拒绝，新包149行全部适配且源行未改。新包构建/7唯一打包合同与仅health启动验证通过，6迁移/50表全空，诊断环境0xdt5neo已清理。
+
+下一轮唯一JAR：`/private/tmp/tensor-issue-006-build.2rctzavi/data-plane/tensor-app/target/acceptance/tensor-app-1.0-SNAPSHOT-acceptance.jar`，SHA `f2fc35c933e69da5e85690fbabb13d691178538cd6ffb3b94284dfc95b10db89`。与ISSUE-005包展开仅validator类变化，旧两包均保留。spec SHA `a81df4da7f92c6164062fa29a19902505dd5643c7c948a9aaa021f987220eee5`，语法/40发现通过；设计已明确新包接入。
+
+新正式控制目录 `/private/tmp/tensor-m14-t05-control.1gpnb4ru`：全新独占MySQL8.4.6空库及最小权限已验证；启动器只改变固定JAR路径，四项hash和40/48/9范围封存。用户在已有Token终端运行一次：`python3 /private/tmp/tensor-m14-t05-control.1gpnb4ru/launch.py`。此命令仅在看板独立完成BLOCKED→READY和READY→IN_PROGRESS后交付，不重复设置Token。新轮尚未运行，以下仍是6gn542ah历史实际结果：
+
 用户已执行 `6gn542ah` 一次性启动器，完整运行 58 秒，spec 阶段约 55 秒，npx/最终 exit 1。当前实际 9 passed、1 failed、30 did not run。stock_company 三组原样例全部 SUCCESS，分别插入 2457/3083/754，合计 6294，页面/来源时间/独立 DB 匹配；ISSUE-005 小数解码修复已真实验证并关闭。
 
-新失败发生于 stk_holdernumber 原样例，ADAPTER_TYPE_INVALID，唯一完成事件为 adapter 阶段，requestId 841ad417-262b-4f40-a6ae-4154c536aac2，durationMs 37，失败计数 unavailable；具体真实字段/值未保存。独立 ISSUE-006 已从历史模板定位 ann_date 混入合法日期时间格式，正在限定源字段兼容修复，不能把历史行号当作本次真实位置。
+新失败发生于 stk_holdernumber 原样例，ADAPTER_TYPE_INVALID，唯一完成事件为 adapter 阶段，requestId 841ad417-262b-4f40-a6ae-4154c536aac2，durationMs 37，失败计数 unavailable；具体真实字段/值未保存。独立 ISSUE-006 从历史模板定位 ann_date 混入合法日期时间格式并已修复，不能把历史行号当作本次真实位置。
 
 40 项验收尚未完成。初始 6 成功迁移/50 表全空，末态 stock_basic5895、stock_company6294、fina_mainbz150、stk_rewards1428、fixture1，其余45表0。实际真实POST14/records19，fixturePOST2/records3，38个完成事件逐requestId唯一。spec四项清理、worker退出、CLI终检/自动产物删除与DB/卷/私密材料清理全部通过，8080空闲。6gn542ah 已用完，不再运行旧命令。
 
 ## Changed Files
 
 - `docs/verification/M14-T05-tushare-live.md`：本轮原样安全报告已提交 `241813c`，整篇真实秘密扫描 SHA `699132b0e4373d9d74300f6b5b64b22a0b9c593601dd54b66feca428d9136afd`，控制器复核一致，旧前缀未变。
-- 本交接、权威看板：记录本轮真实结果并 BLOCKED。
-- ISSUE-005 记录真实关闭；新增 ISSUE-006 详情、限定兼容设计和实施计划。新修复尚未声称验证完成。
+- 本交接、权威看板：保留本轮真实BLOCKED结果，记录修复证据及恢复入口。
+- ISSUE-005 记录真实关闭；ISSUE-006 的代码/测试/文档已提交c38dbac，本地验证完成，真实复验未完成。验收接入只变固定JAR hash和设计/交接/状态，原证据未改写。
 
 ## Verification
 
@@ -78,13 +84,13 @@ pause
 
 ## Remaining Work
 
-1. 按 ISSUE-006 独立修复/测试/复审并验证新产物接入，保留通用严格转换规则与本轮实际失败。
-2. 修复条件成立后单独记录 BLOCKED→READY、READY→IN_PROGRESS，用新空库与用户已有Token终端完整复跑40/48/80和fixture2/3。当前不准备新真实运行，不额外探测上游。
+1. 用户在已有Token终端执行新的1gpnb4ru单次命令，完整复跑40/48/80和fixture2/3；不额外探测或自动重试。
+2. 消费新的run-finished和安全结果，核对整篇证据hash、实际完成/失败/未运行与独立DB和清理结论。stk_holdernumber真实通过后才关闭ISSUE-006。
 3. 全40和所有门禁通过仅报告2000档阶段完成并PAUSED；实际失败则BLOCKED。原49目标未完成，不准备后继。
 
 ## Resume Task
 
-恢复 M14-T05 的2000档真实页面验收，先完成 ISSUE-006 的限定日期兼容修复。
+以 ISSUE-006 的已验证新包恢复 M14-T05 的2000档真实页面验收。
 
 ## Start Here
 
@@ -93,12 +99,12 @@ pause
 3. `docs/issues/problems/ISSUE-006-holdernumber-announcement-date.md`。
 4. 本轮安全标记 `/private/tmp/tensor-m14-t05-control.6gn542ah/run-finished.json`，已终检产物根 `/private/tmp/tensor-m14-t05.gzcihjou`；不输出日志全文、业务行或私密材料。
 
-首动作：按 ISSUE-006 的限定源字段设计补合成 RED，再最小实现和 GREEN；不要再次修复已真实通过的 ISSUE-005，不复用任何已用完的启动器或要求重新配置Token。
+首动作：检查1gpnb4ru新运行标记；用户尚未运行时给顶部单条命令，已运行时直接消费安全结果。不要重复已完成的修复/本地验证，不复用已用完的6gn542ah/0xdt5neo启动器，不要求重新配置Token。
 
 ## Blocker
 
-- **Reason:** stk_holdernumber 返回真实 ADAPTER_TYPE_INVALID，9通过/1失败/30未运行；独立历史格式诊断和修复正在进行，真实具体字段未保留。
-- **Resolution condition:** ISSUE-006 的限定兼容修复与针对性回归/独立复审通过，新冻结产物路径/hash与验收设计明确接入后恢复复验；不能靠删除接口、换参数或原样重试解阻。
+- **Reason:** 6gn542ah 的 stk_holdernumber 返回真实ADAPTER_TYPE_INVALID，9通过/1失败/30未运行；独立限定兼容修复现已通过本地验证，真实历史错误不改判。
+- **Resolution condition:** ISSUE-006 的回归/独立复审、整批历史适配、新冻结包合同/启动及设计接入已成立，可恢复复验。新真实轮尚未验证，不能以本地通过代替真实通过；若失败应保留新证据并再次BLOCKED。
 
 ## Risks
 
