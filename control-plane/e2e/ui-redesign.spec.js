@@ -61,6 +61,44 @@ function expectBoxesStable(before, after) {
   })
 }
 
+async function tabTo(page, target, { backwards = false, limit = 40 } = {}) {
+  for (let step = 0; step < limit; step += 1) {
+    await page.keyboard.press(backwards ? 'Shift+Tab' : 'Tab')
+    if (await target.evaluate((element) => element === document.activeElement)) return
+  }
+  throw new Error(`Keyboard focus did not reach ${await target.evaluate((element) => element.outerHTML.slice(0, 160))}`)
+}
+
+async function expectFocusOutline(focused, outlined = focused) {
+  await expect(focused).toBeFocused()
+  expect(await focused.evaluate((element) => element.matches(':focus-visible'))).toBe(true)
+  expect(await outlined.evaluate((element) => {
+    const style = getComputedStyle(element)
+    return style.outlineStyle !== 'none' && Number.parseFloat(style.outlineWidth) > 0
+  })).toBe(true)
+}
+
+function pagedDatasetResponse(request, apiName) {
+  const pageNumber = Number(request.query.page)
+  const pageSize = Number(request.query.pageSize)
+  const totalElements = 201
+  const count = Math.min(pageSize, Math.max(0, totalElements - ((pageNumber - 1) * pageSize)))
+  return {
+    status: 200,
+    body: {
+      requestId: request.requestId,
+      pluginId: 'tushare_pro',
+      apiName,
+      page: pageNumber,
+      pageSize,
+      totalElements,
+      totalPages: Math.ceil(totalElements / pageSize),
+      columns: [...EXPECTED.get(apiName).columns.map(({ name }) => name), ...SOURCE_COLUMNS],
+      items: syntheticRecords(apiName, count),
+    },
+  }
+}
+
 async function selectCatalog(page, id, apiName) {
   const input = page.locator(`#${id}`)
   await expect(input).toBeEnabled()
@@ -215,10 +253,11 @@ test('下载状态、校验、往返缓存与原参数重试', async ({ page }) 
       downloadAttempt += 1
       if (downloadAttempt === 1) {
         await new Promise((resolve) => { releaseDownload = resolve })
-        return apiFailure(request.requestId, 'SOURCE_TIMEOUT')
+        return { status: 200, body: successDownload(request.body.apiName, request.requestId) }
       }
-      if (downloadAttempt === 3) return { status: 200, body: successDownload(request.body.apiName, request.requestId, 'EMPTY') }
-      if (downloadAttempt === 4) return apiFailure(request.requestId, 'PARAM_INVALID')
+      if (downloadAttempt === 2) return apiFailure(request.requestId, 'SOURCE_TIMEOUT')
+      if (downloadAttempt === 4) return { status: 200, body: successDownload(request.body.apiName, request.requestId, 'EMPTY') }
+      if (downloadAttempt === 5) return apiFailure(request.requestId, 'PARAM_INVALID')
       return { status: 200, body: successDownload(request.body.apiName, request.requestId) }
     },
   })
@@ -245,6 +284,12 @@ test('下载状态、校验、往返缓存与原参数重试', async ({ page }) 
   await page.getByRole('link', { name: /设置/ }).click()
   releaseDownload()
   await page.getByRole('link', { name: /数据下载/ }).click()
+  await expect(required).toHaveValue('2026-08-07')
+  await expect(page.getByRole('heading', { name: '下载成功' })).toBeVisible()
+  await expect(page.locator('.download-result__counts dd')).toHaveText(['12', '10', '2'])
+  expect(apiRequests(api, ({ method }) => method === 'POST')).toHaveLength(1)
+
+  await page.getByRole('button', { name: '开始下载' }).click()
   await expect(page.getByRole('heading', { name: '下载失败' })).toBeVisible()
   await required.fill('2026-08-08')
   await page.getByRole('link', { name: /设置/ }).click()
@@ -253,9 +298,10 @@ test('下载状态、校验、往返缓存与原参数重试', async ({ page }) 
   await page.getByRole('button', { name: '使用原参数重试' }).click()
   await expect(page.getByRole('heading', { name: '下载成功' })).toBeVisible()
   const posts = apiRequests(api, ({ method }) => method === 'POST')
-  expect(posts).toHaveLength(2)
+  expect(posts).toHaveLength(3)
   expect(posts[0].body.params).toEqual({ trade_date: '20260807' })
   expect(posts[1].body.params).toEqual({ trade_date: '20260807' })
+  expect(posts[2].body.params).toEqual({ trade_date: '20260807' })
 
   await page.getByRole('button', { name: '开始下载' }).click()
   await expect(page.getByRole('heading', { name: '下载成功，0 条数据' })).toBeVisible()
@@ -267,14 +313,14 @@ test('下载状态、校验、往返缓存与原参数重试', async ({ page }) 
   const start = page.locator('[data-parameter="start_date"] input')
   const end = page.locator('[data-parameter="end_date"] input')
   await page.getByRole('button', { name: '开始下载' }).click()
-  expect(apiRequests(api, ({ method }) => method === 'POST')).toHaveLength(4)
+  expect(apiRequests(api, ({ method }) => method === 'POST')).toHaveLength(5)
   await start.fill('2026-08-08')
   await start.press('Enter')
   await end.fill('2026-08-07')
   await end.press('Enter')
   await page.getByRole('button', { name: '开始下载' }).click()
   await expect(start).toHaveAttribute('aria-invalid', 'true')
-  expect(apiRequests(api, ({ method }) => method === 'POST')).toHaveLength(4)
+  expect(apiRequests(api, ({ method }) => method === 'POST')).toHaveLength(5)
   await end.fill('2026-08-09')
   await end.press('Enter')
   await page.getByRole('button', { name: '开始下载' }).click()
@@ -287,6 +333,7 @@ test('下载状态、校验、往返缓存与原参数重试', async ({ page }) 
 test('查询分页、未提交草稿、设置往返与重试快照', async ({ page }) => {
   let queryAttempt = 0
   let releaseStale
+  let releaseSelectionStale
   let releaseAcrossSettings
   const api = await installApi(page, {
     'GET /api/v1/data-sources/tushare_pro/datasets/daily/records': (request) => {
@@ -295,6 +342,8 @@ test('查询分页、未提交草稿、设置往返与重试快照', async ({ pa
       const waitForRelease = queryAttempt === 6
         ? new Promise((resolve) => { releaseStale = resolve })
         : queryAttempt === 7
+          ? new Promise((resolve) => { releaseSelectionStale = resolve })
+          : queryAttempt === 8
           ? new Promise((resolve) => { releaseAcrossSettings = resolve })
           : Promise.resolve()
       const pageNumber = Number(request.query.page)
@@ -340,9 +389,12 @@ test('查询分页、未提交草稿、设置往返与重试快照', async ({ pa
   expect(queries[4].query).toEqual(queries[3].query)
   await page.getByRole('button', { name: '重置', exact: true }).click()
   await expect(page.getByRole('heading', { name: '设置筛选条件后查询' })).toBeVisible()
+  await expect(page.locator('.dataset-select .el-select__selected-item:not(.el-select__input-wrapper)')).toContainText('daily')
 
   await page.getByRole('button', { name: '查询', exact: true }).click()
   await expect(page.getByRole('heading', { name: '正在查询数据' })).toBeVisible()
+  const resetQueryRequest = apiRequests(api, ({ path: requestPath }) => requestPath.endsWith('/daily/records')).at(-1)
+  expect(resetQueryRequest.query).toEqual({ page: '1', pageSize: '50' })
   await expect(from).toBeDisabled()
   await expect(page.getByRole('button', { name: '查询', exact: true })).toBeDisabled()
   await expect(page.getByRole('button', { name: '重置', exact: true })).toBeEnabled()
@@ -350,23 +402,46 @@ test('查询分页、未提交草稿、设置往返与重试快照', async ({ pa
   releaseStale()
   await expect(page.getByRole('heading', { name: '设置筛选条件后查询' })).toBeVisible()
   await expect(page.getByRole('region', { name: '数据表格，可横向滚动' })).toHaveCount(0)
+  await expect(page.locator('.dataset-select .el-select__selected-item:not(.el-select__input-wrapper)')).toContainText('daily')
 
+  await page.getByRole('button', { name: '查询', exact: true }).click()
+  await expect(page.getByRole('heading', { name: '正在查询数据' })).toBeVisible()
+  await selectCatalog(page, 'dataset-select', 'trade_cal')
+  releaseSelectionStale()
+  await expect(page.locator('.dataset-select .el-select__selected-item:not(.el-select__input-wrapper)')).toContainText('trade_cal')
+  await expect(page.getByRole('heading', { name: '设置筛选条件后查询' })).toBeVisible()
+  await expect(page.getByRole('region', { name: '数据表格，可横向滚动' })).toHaveCount(0)
+
+  await selectCatalog(page, 'dataset-select', 'income')
+  const annDateTo = page.locator('[data-filter="annDateTo"] input')
+  await annDateTo.fill('2026-08-07')
+  await annDateTo.press('Enter')
+  await page.getByRole('button', { name: '查询', exact: true }).click()
+  await expect(page.getByRole('region', { name: '数据表格，可横向滚动' })).toBeVisible()
+  const incomeQueries = apiRequests(api, ({ path: requestPath }) => requestPath.endsWith('/income/records'))
+  expect(incomeQueries).toHaveLength(1)
+  expect(incomeQueries[0].query).toEqual({ annDateTo: '2026-08-07', page: '1', pageSize: '50' })
+
+  await selectCatalog(page, 'dataset-select', 'daily')
   await page.getByRole('button', { name: '查询', exact: true }).click()
   await expect(page.getByRole('heading', { name: '正在查询数据' })).toBeVisible()
   await page.getByRole('link', { name: /设置/ }).click()
   releaseAcrossSettings()
   await page.getByRole('link', { name: /数据查看/ }).click()
   await expect(page.getByRole('region', { name: '数据表格，可横向滚动' })).toBeVisible()
-  expect(apiRequests(api, ({ path: requestPath }) => requestPath.endsWith('/daily/records'))).toHaveLength(7)
+  expect(apiRequests(api, ({ path: requestPath }) => requestPath.endsWith('/daily/records'))).toHaveLength(8)
   assertApiClean(api)
 })
 
 test.describe('主题、五视口与布局稳定性', () => {
   test.describe.configure({ timeout: 120_000 })
   for (const [width, height] of [[1440, 1080], [1024, 768], [768, 1024], [390, 844], [360, 800]]) {
-    test(`${width}x${height}：三页无页面横向溢出、主题换色不挪动布局`, async ({ page }) => {
+    test(`${width}x${height}：宽表分页、导航位置与三页四主题布局稳定`, async ({ page }) => {
       await page.setViewportSize({ width, height })
-      const api = await installApi(page)
+      const api = await installApi(page, {
+        'GET /api/v1/data-sources/tushare_pro/datasets/stock_company/records':
+          (request) => pagedDatasetResponse(request, 'stock_company'),
+      })
       await openDownloads(page)
       await chooseDownload(page, 'daily')
       const tradeDate = page.locator('[data-parameter="trade_date"] input')
@@ -377,10 +452,53 @@ test.describe('主题、五视口与布局稳定性', () => {
       const countColumns = await page.locator('.download-result__counts').evaluate((element) => getComputedStyle(element).gridTemplateColumns)
       expect(countColumns.split(' ')).toHaveLength(3)
       await page.evaluate(() => scrollTo(0, 0))
-      const baseline = await page.locator('.download-config-panel').boundingBox()
       expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true)
       const columns = await page.locator('.download-grid').evaluate((element) => getComputedStyle(element).gridTemplateColumns)
       expect(columns.split(' ').length).toBe(width <= 1000 ? 1 : 2)
+      const downloadTargets = [
+        page.locator('.app-nav__link.router-link-active'), page.locator('#download-api'),
+        page.getByRole('button', { name: '开始下载' }), page.locator('.download-config-panel'),
+        page.locator('.download-result-panel'),
+      ]
+      const downloadBaseline = await boxes(downloadTargets)
+
+      await openDataset(page, 'stock_company')
+      await page.getByRole('button', { name: '查询', exact: true }).click()
+      const table = page.getByRole('region', { name: '数据表格，可横向滚动' })
+      await expect(table).toBeVisible()
+      expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true)
+      const scroller = table.locator('.el-scrollbar__wrap')
+      expect(await scroller.evaluate((element) => element.scrollWidth > element.clientWidth)).toBe(true)
+      const fixedCell = table.locator('.el-table__body-wrapper td').first()
+      expect(await fixedCell.evaluate((element) => getComputedStyle(element).position)).toBe('sticky')
+      const status = page.getByRole('status').filter({ hasText: '共 201 条' })
+      const previous = page.getByRole('button', { name: /上一页/ })
+      const next = page.getByRole('button', { name: /下一页/ })
+      await expect(status).toContainText('第 1 / 5 页')
+      await expect(previous).toBeDisabled()
+      await expect(next).toBeEnabled()
+      await next.click()
+      await expect(status).toContainText('第 2 / 5 页')
+      await previous.click()
+      await expect(status).toContainText('第 1 / 5 页')
+      await page.locator('.el-pager li.number').filter({ hasText: /^2$/ }).click()
+      await expect(status).toContainText('第 2 / 5 页')
+      const pageSizeInput = page.locator('.el-pagination__sizes input')
+      await page.locator('.el-pagination__sizes .el-select__wrapper').click()
+      const pageSizeListbox = await pageSizeInput.getAttribute('aria-controls')
+      const sizeOptions = page.locator(`#${pageSizeListbox}`).getByRole('option')
+      await expect(sizeOptions).toHaveCount(3)
+      expect((await sizeOptions.allTextContents()).map((value) => Number.parseInt(value, 10))).toEqual([20, 50, 100])
+      await sizeOptions.filter({ hasText: /^100/ }).click()
+      await expect(status).toContainText('第 1 / 3 页')
+      await page.evaluate(() => scrollTo(0, 0))
+      const datasetTargets = [
+        page.locator('.app-nav__link.router-link-active'), page.locator('#dataset-select'),
+        page.getByRole('button', { name: '查询', exact: true }), page.locator('.dataset-result-content'),
+        page.locator('.dataset-pagination'), table,
+      ]
+      const datasetBaseline = await boxes(datasetTargets)
+
       await page.getByRole('link', { name: /设置/ }).click()
       await expect(page).toHaveURL(/\/settings$/)
       await expect(page.locator('.app-nav__link.router-link-active')).toContainText('设置')
@@ -389,27 +507,33 @@ test.describe('主题、五视口与布局稳定性', () => {
       const applyButton = page.getByRole('button', { name: '应用' })
       const geometryTargets = [page.locator('.app-nav__link.router-link-active'), themeInput, applyButton, page.locator('.settings-panel'), settingsReset]
       const settingsBaseline = await boxes(geometryTargets)
-      for (const color of ['#b52c63', '#ffff00', '#000000']) {
+      for (const color of ['#2857b4', '#b52c63', '#ffff00', '#000000']) {
         await themeInput.fill(color)
         await applyButton.click()
+        await page.evaluate(() => scrollTo(0, 0))
         expectBoxesStable(settingsBaseline, await boxes(geometryTargets))
+        expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true)
+        await page.getByRole('link', { name: /数据下载/ }).click()
+        await page.evaluate(() => scrollTo(0, 0))
+        expectBoxesStable(downloadBaseline, await boxes(downloadTargets))
+        expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true)
+        await page.getByRole('link', { name: /数据查看/ }).click()
+        await page.evaluate(() => scrollTo(0, 0))
+        expectBoxesStable(datasetBaseline, await boxes(datasetTargets))
+        expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true)
+        await page.getByRole('link', { name: /设置/ }).click()
       }
-      await page.getByRole('link', { name: /数据下载/ }).click()
-      await expect(page).toHaveURL(/\/downloads$/)
-      await expect(page.getByRole('heading', { name: '数据下载', level: 1 })).toBeVisible()
-      await page.evaluate(() => scrollTo(0, 0))
-      const themed = await page.locator('.download-config-panel').boundingBox()
-      expectBoxesStable([baseline], [themed])
-      await page.getByRole('link', { name: /数据查看/ }).click()
-      expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true)
-      await page.getByRole('link', { name: /设置/ }).click()
-      expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true)
+      const navBox = await page.locator('.app-nav').boundingBox()
+      const workspaceBox = await page.locator('.workspace-shell').boundingBox()
+      if (width < 680) expect(navBox.y + navBox.height).toBeLessThanOrEqual(workspaceBox.y + 0.5)
+      else expect(navBox.x + navBox.width).toBeLessThanOrEqual(workspaceBox.x + 0.5)
       assertApiClean(api)
     })
   }
 })
 
 test('设置零 API、四主题真实颜色、持久化降级、非法值与完整默认 palette', async ({ page, browser }) => {
+  test.setTimeout(180_000)
   const api = await installApi(page)
   await page.goto('/settings')
   expect(api.requests).toEqual([])
@@ -501,6 +625,80 @@ test('设置零 API、四主题真实颜色、持久化降级、非法值与完�
     assertApiClean(degradedApi)
     await context.close()
   }
+
+  const businessContext = await browser.newContext({ viewport: { width: 1024, height: 768 } })
+  const businessPage = await businessContext.newPage()
+  const businessApi = await installApi(businessPage, {
+    'GET /api/v1/data-sources/tushare_pro/datasets/daily/records':
+      (request) => pagedDatasetResponse(request, 'daily'),
+    'GET /api/v1/data-sources/tushare_pro/datasets/stock_company/records':
+      (request) => pagedDatasetResponse(request, 'stock_company'),
+  })
+  const themeColor = (name) => businessPage.evaluate((role) => {
+    const probe = document.createElement('span')
+    probe.style.color = `var(--tensor-${role})`
+    document.body.append(probe)
+    const value = getComputedStyle(probe).color
+    probe.remove()
+    return value
+  }, name)
+  const background = (locator) => locator.evaluate((element) => getComputedStyle(element).backgroundColor)
+  const foreground = (locator) => locator.evaluate((element) => getComputedStyle(element).color)
+
+  await openDownloads(businessPage)
+  await chooseDownload(businessPage, 'daily')
+  const businessDate = businessPage.locator('[data-parameter="trade_date"] input')
+  await businessDate.fill('2026-08-07')
+  await businessDate.press('Enter')
+  await businessPage.getByRole('button', { name: '开始下载' }).click()
+  await openDataset(businessPage, 'daily')
+  await businessPage.getByRole('button', { name: '查询', exact: true }).click()
+  await expect(businessPage.getByRole('status').filter({ hasText: '共 201 条' })).toContainText('第 1 / 5 页')
+
+  for (const color of ['#2857b4', '#b52c63', '#ffff00', '#000000']) {
+    await businessPage.getByRole('link', { name: /设置/ }).click()
+    await businessPage.getByLabel('主题色 HEX').fill(color)
+    await businessPage.getByRole('button', { name: '应用' }).click()
+    const [surface, raised, nav, textColor, accent] = await Promise.all(
+      ['surface', 'raised', 'nav', 'text', 'accent'].map(themeColor),
+    )
+
+    await businessPage.getByRole('link', { name: /数据下载/ }).click()
+    expect(await foreground(businessPage.locator('.async-state-panel--success .async-state-panel__mark'))).toBe('rgb(20, 120, 94)')
+    await businessDate.click()
+    const picker = businessPage.locator('.el-picker-panel:visible')
+    await expect(picker).toBeVisible()
+    expect(await background(picker)).toBe(nav)
+    expect(await background(picker.locator('td.current span').first())).toBe(accent)
+    await businessPage.keyboard.press('Escape')
+    await businessPage.locator('#download-api').click()
+    const apiListboxId = await businessPage.locator('#download-api').getAttribute('aria-controls')
+    const apiDropdown = businessPage.locator(`#${apiListboxId}`).locator('xpath=ancestor::*[contains(@class, "el-popper")][1]')
+    await expect(apiDropdown).toBeVisible()
+    expect(await background(apiDropdown)).toBe(nav)
+    await businessPage.keyboard.press('Escape')
+
+    await businessPage.getByRole('link', { name: /数据查看/ }).click()
+    const dailyTable = businessPage.getByRole('region', { name: '数据表格，可横向滚动' })
+    expect(await background(dailyTable.locator('.el-table__body-wrapper td').first())).toBe(surface)
+    expect(await background(dailyTable.locator('.el-table__header-wrapper th').first())).toBe(raised)
+    expect(await foreground(businessPage.locator('.el-pager li.is-active'))).toBe(accent)
+    expect(await foreground(dailyTable.locator('.dataset-table__change--up').first())).toBe('rgb(183, 45, 71)')
+    expect(await foreground(dailyTable.locator('.dataset-table__change--down').first())).toBe('rgb(20, 120, 94)')
+
+    await selectCatalog(businessPage, 'dataset-select', 'stock_company')
+    await businessPage.getByRole('button', { name: '查询', exact: true }).click()
+    const longCell = businessPage.getByText(/这是一段用于验证长文本提示/).first()
+    await longCell.hover()
+    const tooltip = businessPage.locator('.el-popper:visible').filter({ hasText: '<strong>' })
+    await expect(tooltip).toBeVisible()
+    expect(await background(tooltip)).toBe(textColor)
+    await businessPage.mouse.move(0, 0)
+    await selectCatalog(businessPage, 'dataset-select', 'daily')
+    await businessPage.getByRole('button', { name: '查询', exact: true }).click()
+  }
+  assertApiClean(businessApi)
+  await businessContext.close()
 })
 
 test('精确宽表、符号、单位、大整数、空值与纯文本 tooltip', async ({ page }) => {
@@ -555,38 +753,65 @@ test('精确宽表、符号、单位、大整数、空值与纯文本 tooltip', 
 test('键盘、焦点、移动端弹层与 reduced motion', async ({ page }) => {
   await page.setViewportSize({ width: 360, height: 800 })
   await page.emulateMedia({ reducedMotion: 'reduce' })
-  const api = await installApi(page)
+  const api = await installApi(page, {
+    'GET /api/v1/data-sources/tushare_pro/datasets/stock_company/records':
+      (request) => pagedDatasetResponse(request, 'stock_company'),
+  })
   await openDownloads(page)
-  await page.keyboard.press('Tab')
-  await expect(page.getByRole('link', { name: '跳转到工作区' })).toBeFocused()
+  const skipLink = page.getByRole('link', { name: '跳转到工作区' })
+  const downloadsLink = page.getByRole('link', { name: /数据下载/ })
+  const datasetsLink = page.getByRole('link', { name: /数据查看/ })
+  await tabTo(page, skipLink)
+  await expectFocusOutline(skipLink)
+  await tabTo(page, downloadsLink)
+  await expectFocusOutline(downloadsLink)
+  await tabTo(page, datasetsLink)
+  await expectFocusOutline(datasetsLink)
   await page.keyboard.press('Enter')
-  await expect(page.locator('#workspace')).toBeFocused()
-  await chooseDownload(page, 'daily')
+  await expect(page).toHaveURL(/\/datasets$/)
+  await expectFocusOutline(datasetsLink)
+  await tabTo(page, downloadsLink, { backwards: true })
+  await page.keyboard.press('Enter')
+  await expect(page).toHaveURL(/\/downloads$/)
+
+  const downloadApi = page.locator('#download-api')
+  await tabTo(page, downloadApi)
+  await expectFocusOutline(downloadApi, downloadApi.locator('xpath=ancestor::*[contains(@class, "el-select__wrapper")][1]'))
+  await page.keyboard.press('ControlOrMeta+A')
+  await page.keyboard.type('daily')
+  await page.keyboard.press('ArrowDown')
+  await page.keyboard.press('Enter')
+  await page.keyboard.press('Escape')
+  await expect(page.locator('.api-select .el-select__selected-item:not(.el-select__input-wrapper)')).toContainText('daily')
+
   const date = page.locator('[data-parameter="trade_date"] input')
-  await date.fill('2026-08-07')
-  await date.press('Enter')
-  await date.click()
+  await tabTo(page, date)
+  await expectFocusOutline(date, date.locator('xpath=ancestor::*[contains(@class, "el-input__wrapper")][1]'))
   const picker = page.locator('.el-picker-panel:visible')
   await expect(picker).toBeVisible()
   const pickerBox = await picker.boundingBox()
   expect(pickerBox.x).toBeGreaterThanOrEqual(0)
   expect(pickerBox.x + pickerBox.width).toBeLessThanOrEqual(360)
-  const selectedDate = picker.locator('td.current span').first()
-  await expect(selectedDate).toBeVisible()
-  const selectedDateStyle = await selectedDate.evaluate((element) => {
-    const computed = getComputedStyle(element)
-    return { color: computed.color, background: computed.backgroundColor }
-  })
-  expect(contrastRatio(selectedDateStyle.color, selectedDateStyle.background)).toBeGreaterThanOrEqual(5.5)
   await page.keyboard.press('Escape')
-  await page.getByRole('button', { name: '开始下载' }).focus()
+  await page.keyboard.press('ControlOrMeta+A')
+  await page.keyboard.type('2026-08-07')
+  await page.keyboard.press('Enter')
+  await expect(date).toHaveValue('2026-08-07')
+  const downloadButton = page.getByRole('button', { name: '开始下载' })
+  await tabTo(page, downloadButton)
+  await expectFocusOutline(downloadButton)
   await page.keyboard.press('Enter')
   await expect(page.getByRole('heading', { name: '下载成功' })).toBeVisible()
-  await page.getByRole('link', { name: /数据查看/ }).click()
+
+  await tabTo(page, datasetsLink)
+  await expectFocusOutline(datasetsLink)
+  await page.keyboard.press('Enter')
+  await expect(page).toHaveURL(/\/datasets$/)
   const datasetSelect = page.locator('#dataset-select')
   await expect(datasetSelect).toBeEnabled()
-  await datasetSelect.click()
-  await datasetSelect.fill('balancesheet')
+  await tabTo(page, datasetSelect)
+  await expectFocusOutline(datasetSelect, datasetSelect.locator('xpath=ancestor::*[contains(@class, "el-select__wrapper")][1]'))
+  await page.keyboard.type('stock_company')
   const listboxId = await datasetSelect.getAttribute('aria-controls')
   const dropdown = page.locator(`#${listboxId}`).locator('xpath=ancestor::*[contains(@class, "el-popper")][1]')
   await expect(dropdown).toBeVisible()
@@ -596,13 +821,43 @@ test('键盘、焦点、移动端弹层与 reduced motion', async ({ page }) => 
   await datasetSelect.press('ArrowDown')
   await datasetSelect.press('Enter')
   await datasetSelect.press('Escape')
-  await expect(page.locator('.dataset-setup')).toContainText('公告日期')
-  await page.getByRole('button', { name: '查询', exact: true }).click()
+  await expect(page.locator('.dataset-select .el-select__selected-item:not(.el-select__input-wrapper)')).toContainText('stock_company')
+  const queryButton = page.getByRole('button', { name: '查询', exact: true })
+  await tabTo(page, queryButton)
+  await expectFocusOutline(queryButton)
+  await page.keyboard.press('Enter')
+  const status = page.getByRole('status').filter({ hasText: '共 201 条' })
+  await expect(status).toContainText('第 1 / 5 页')
+
   const table = page.getByRole('region', { name: '数据表格，可横向滚动' })
-  await page.getByRole('button', { name: '重置', exact: true }).focus()
-  await page.keyboard.press('Tab')
-  await expect(table).toBeFocused()
-  expect(await table.evaluate((element) => getComputedStyle(element).outlineStyle)).not.toBe('none')
+  await tabTo(page, table)
+  await expectFocusOutline(table)
+
+  const pageSizeInput = page.locator('.el-pagination__sizes input')
+  await tabTo(page, pageSizeInput)
+  await expectFocusOutline(pageSizeInput, pageSizeInput.locator('xpath=ancestor::*[contains(@class, "el-select__wrapper")][1]'))
+  await page.keyboard.press('Enter')
+  await page.keyboard.press('ArrowDown')
+  await page.keyboard.press('Enter')
+  await page.keyboard.press('Escape')
+  await expect(status).toContainText('第 1 / 3 页')
+  const next = page.getByRole('button', { name: /下一页/ })
+  await tabTo(page, next)
+  await expectFocusOutline(next)
+  await page.keyboard.press('Enter')
+  await expect(status).toContainText('第 2 / 3 页')
+  const previous = page.getByRole('button', { name: /上一页/ })
+  await tabTo(page, previous)
+  await expectFocusOutline(previous)
+  await page.keyboard.press('Enter')
+  await expect(status).toContainText('第 1 / 3 页')
+  const secondPage = page.locator('.el-pager li.number').filter({ hasText: /^2$/ })
+  await tabTo(page, secondPage, { limit: 10 })
+  await expectFocusOutline(secondPage)
+  await page.keyboard.press('Enter')
+  await expect(status).toContainText('第 2 / 3 页')
+  await tabTo(page, table)
+  await expectFocusOutline(table)
   await page.keyboard.press('ArrowRight')
   expect(await table.locator('.el-scrollbar__wrap').evaluate((element) => element.scrollLeft)).toBeGreaterThan(0)
   assertApiClean(api)
