@@ -119,11 +119,11 @@ expect(downloadDataset).toHaveBeenCalledWith({
 
 **Interfaces:** 消费既有下载流程的 `state/result/error/canRetry` 与 T03 的元数据表单；保留选择、校验、提交与 retry 事件，不新建第二套业务状态。
 
-- [ ] 用真实组件测试补齐 SUBMITTING 时右侧可见状态和禁用控件；失败显示原错误、requestId 与适用的重试入口。例如 `expect(wrapper.get('[role="status"]').text()).toContain('正在下载')`；断言实际新视图在实现前失败。
-- [ ] 将配置分组与结果分组接入参考方案的双面板布局；数据源与接口并排，说明、参数、提交分区，计数由实际响应提供。
-- [ ] 复用现有 AsyncStatePanel 统一待操作、加载、空和失败反馈；重复且职责相同的面板结构抽取为共享组件，仅样式重复使用公共 CSS。成功仍由 DownloadResult 呈现，组件只接收必要参数与插槽。长接口名、说明、错误、请求 ID 可换行。
-- [ ] 下载错误保留“使用原参数重试”；元数据错误保持独立的“重新加载”入口，均沿用原 `canRetry` 条件。
-- [ ] 运行 `npm test -- src/views/DownloadView.spec.js src/components/download src/components/common`；全部通过后核对范围、加入 Git 并独立提交。
+- [x] 用真实组件测试补齐 SUBMITTING 时右侧可见状态和禁用控件；失败显示原错误、requestId 与适用的重试入口。例如 `expect(wrapper.get('[role="status"]').text()).toContain('正在下载')`；断言实际新视图在实现前失败。
+- [x] 将配置分组与结果分组接入参考方案的双面板布局；数据源与接口并排，说明、参数、提交分区，计数由实际响应提供。
+- [x] 复用现有 AsyncStatePanel 统一待操作、加载、空和失败反馈；重复且职责相同的面板结构抽取为共享组件，仅样式重复使用公共 CSS。成功仍由 DownloadResult 呈现，组件只接收必要参数与插槽。长接口名、说明、错误、请求 ID 可换行。
+- [x] 下载错误保留“使用原参数重试”；元数据错误保持独立的“重新加载”入口，均沿用原 `canRetry` 条件。
+- [x] 运行 `npm test -- src/views/DownloadView.spec.js src/components/download src/components/common`；全部通过后核对范围、加入 Git 并独立提交。
 
 **Acceptance:** 桌面左配置右结果、窄屏纵向；所有状态可见；动态参数、本次响应计数、锁和既有重试入口行为无回归，无样例业务值；同职责重复面板与反馈已通过公共组件复用。
 

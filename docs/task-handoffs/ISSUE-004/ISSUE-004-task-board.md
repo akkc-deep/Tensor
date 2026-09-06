@@ -27,8 +27,8 @@
 | 1 | ISSUE-004-T01 | 主题计算与全局样式基础 | COMPLETED | None | docs/task-designs/ISSUE-004-T01-design.md | None |
 | 2 | ISSUE-004-T02 | 侧栏、设置与业务状态保留 | COMPLETED | ISSUE-004-T01 | docs/task-designs/ISSUE-004-T02-design.md | docs/task-handoffs/ISSUE-004/ISSUE-004-T02-handoff.md |
 | 3 | ISSUE-004-T03 | 日期控件与原参数契约 | COMPLETED | ISSUE-004-T02 | docs/task-designs/ISSUE-004-T03-design.md | docs/task-handoffs/ISSUE-004/ISSUE-004-T03-handoff.md |
-| 4 | ISSUE-004-T04 | 下载工作台布局与反馈 | IN_PROGRESS | ISSUE-004-T02, ISSUE-004-T03 | docs/task-designs/ISSUE-004-T04-design.md | docs/task-handoffs/ISSUE-004/ISSUE-004-T04-handoff.md |
-| 5 | ISSUE-004-T05 | 查看工作台与精确表格展示 | NOT_STARTED | ISSUE-004-T02, ISSUE-004-T04 | None | None |
+| 4 | ISSUE-004-T04 | 下载工作台布局与反馈 | COMPLETED | ISSUE-004-T02, ISSUE-004-T03 | docs/task-designs/ISSUE-004-T04-design.md | docs/task-handoffs/ISSUE-004/ISSUE-004-T04-handoff.md |
+| 5 | ISSUE-004-T05 | 查看工作台与精确表格展示 | IN_PROGRESS | ISSUE-004-T02, ISSUE-004-T04 | docs/task-designs/ISSUE-004-T05-design.md | docs/task-handoffs/ISSUE-004/ISSUE-004-T05-handoff.md |
 | 6 | ISSUE-004-T06 | 正式前端回归与视觉验收 | NOT_STARTED | ISSUE-004-T04, ISSUE-004-T05 | None | None |
 
 ## Task Details
@@ -92,6 +92,8 @@
 
 - **Execution evidence:** 2026-09-07 READY -> IN_PROGRESS；用户明确要求按权威看板执行ISSUE-004，已完整读取本项设计和交接，按既定顺序启动。
 
+- **Execution evidence:** 2026-09-07 IN_PROGRESS -> COMPLETED；c2d4d52、f7363d1；配置/结果双面板呈现元数据加载、待操作、提交、成功、空、失败；提交态可见且保持禁用，计数来自响应，原参数和元数据重试资格不变。WorkbenchPanel在下载双面板及设置复用，AsyncStatePanel统一下载/查看错误和成功内容。针对性46项、调用方20项、全套24文件/164项、构建及diff检查退出0；移除审查发现的额外全局样式后构建通过，独立复审规格/质量通过。214项保护源仅既有用户后端POM差异；正式浏览器组合验收由T06完成。
+
 ### ISSUE-004-T05
 
 - **Goal:** 查看页形成清晰筛选 / 结果布局，宽表格保留全部字段和精确值。
@@ -101,6 +103,10 @@
 - **Sources:** ① `docs/issues/proposals/ISSUE-004-ui-visual-concepts.html` 查看页；② `docs/task-designs/ISSUE-004-design.md` 表格 / 响应式部分；③ `docs/superpowers/plans/2026-09-07-issue-004-ui-redesign.md` 的 ISSUE-004-T05；④ `control-plane/src/views/DatasetView.vue`、`control-plane/src/components/dataset/`、`control-plane/src/utils/format.js`、`control-plane/src/api/datasets.js`；⑤ T02 / T04 的直接输入与验证结果。
 - **First action:** 完成并链接 `docs/task-designs/ISSUE-004-T05-design.md`，写清展示映射、精确字符串符号规则及宽表格验收。
 - **State evidence:** None。
+
+- **Execution evidence:** 2026-09-07 NOT_STARTED -> READY；前项已完成，后继专属设计已完整读取并链接，直接依赖已验证，next-task 交接已写入。
+
+- **Execution evidence:** 2026-09-07 READY -> IN_PROGRESS；用户已明确要求执行 ISSUE-004 全部任务；已完整读取本任务设计和链接交接，按既定顺序启动。
 
 ### ISSUE-004-T06
 
