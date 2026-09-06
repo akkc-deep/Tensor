@@ -84,14 +84,14 @@ def scan_bytes(data, secret_patterns):
         raise GateError('secret-detected', {'hits': hits})
     return 0
 
-def reflection_verdict(data, submitted, response_body=None):
+def reflection_verdict(data, submitted, response_body=None, response_headers=()):
     for value in submitted:
         encoded = patterns([value])
         if len(value) > 8:
             require(not any(pattern in data for pattern in encoded),'submitted-value-reflected')
             continue
-        # Short values need body context; transport counters and valid request IDs
-        # are not reflection evidence. The full credential scan still covers both.
+        # Short values need context. Only validated transport counters and request
+        # IDs are metadata; the full credential scan still covers every header.
         body = response_body if response_body is not None else data
         try:
             body = json.loads(body)
@@ -110,6 +110,12 @@ def reflection_verdict(data, submitted, response_body=None):
             content = str(item).encode()
             return any(re.search((rb'(?<![0-9])' if pattern.isdigit() else rb'(?<![A-Za-z0-9])') + re.escape(pattern) + (rb'(?![0-9])' if pattern.isdigit() else rb'(?![A-Za-z0-9])'),content) for pattern in encoded)
         require(not reflected(body),'submitted-value-reflected')
+        for name,content in response_headers:
+            if name.lower() in ('content-length','age','retry-after') and re.fullmatch(r'[0-9]+',content):
+                continue
+            if name.lower() == 'x-request-id' and re.fullmatch(r'[0-9a-fA-F]{8}(?:-[0-9a-fA-F]{4}){3}-[0-9a-fA-F]{12}',content):
+                continue
+            require(not reflected(name) and not reflected(content),'submitted-value-reflected')
 
 def scan_file(path, secret_patterns):
     try:
@@ -444,12 +450,12 @@ class Runtime:
             check['finishedAt'] = now()
             print('security gate: ' + label + ' ' + check['status'], flush=True)
 
-    def scan(self, data, category, public=False, submitted=(), response_body=None):
+    def scan(self, data, category, public=False, submitted=(), response_body=None, response_headers=()):
         try:
             scan_bytes(data, self.secret_patterns)
             if public:
                 require(all(value.encode() not in data for value in FORBIDDEN), 'unsafe-public-detail')
-                reflection_verdict(data,submitted,response_body)
+                reflection_verdict(data,submitted,response_body,response_headers)
         except GateError:
             self.fatal = True
             raise
@@ -781,7 +787,7 @@ class Runtime:
             if deadline:
                 deadline.cancel()
             connection.close()
-        self.scan(json.dumps(header_entries).encode() + b'\n' + data, 'http', public=True,submitted=submitted,response_body=data)
+        self.scan(json.dumps(header_entries).encode() + b'\n' + data, 'http', public=True,submitted=submitted,response_body=data,response_headers=header_entries)
         response_headers = normalize_headers(header_entries)
         if observe:
             self.observe_headers(response_headers, urllib.parse.urlsplit(path).path, status)
@@ -1325,6 +1331,10 @@ def review_cases(directory, check, selected=None):
                 query_verdict(status,json.loads(data))
         check('short-reflection-clean-uuid',lambda:short_response({**error,'requestId':collision_id}))
         check('short-reflection-clean-transport-headers',lambda:short_response(error,clean_headers + [('Content-Length','101'),('Age','1010'),('X-Request-Id',collision_id)]))
+        check('short-reflection-validation-header',lambda:short_response(error,clean_headers + [('X-Validation-Error','Invalid pageSize=101')]),True)
+        check('short-reflection-other-header',lambda:short_response(error,clean_headers + [('X-Rejected-Value','101')]),True)
+        check('short-reflection-invalid-counter-header',lambda:short_response(error,clean_headers + [('Content-Length','Invalid pageSize=101')]),True)
+        check('short-reflection-invalid-request-id-header',lambda:short_response(error,clean_headers + [('X-Request-Id','101')]),True)
         check('short-reflection-message',lambda:short_response({**error,'message':'Invalid pageSize 101'}),True)
         check('short-reflection-field-error',lambda:short_response({**error,'fieldErrors':[{'field':'pageSize','message':'Invalid value101'}]}),True)
         check('short-reflection-numeric-field',lambda:short_response({**error,'rejectedValue':101}),True)
