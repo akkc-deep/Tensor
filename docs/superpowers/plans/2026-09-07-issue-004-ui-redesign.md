@@ -10,7 +10,7 @@
 
 **Spec:** [总体技术设计](../../task-designs/ISSUE-004-design.md) · [已确认的视觉方案](../../issues/proposals/ISSUE-004-ui-visual-concepts.md)。
 
-**Task board:** [ISSUE-004](../../task-handoffs/ISSUE-004/ISSUE-004-task-board.md)。看板是任务身份、次序、依赖和状态的唯一权威；下列复选项仅用于任务内执行记录。当前没有实施步骤已执行。
+**Task board:** [ISSUE-004](../../task-handoffs/ISSUE-004/ISSUE-004-task-board.md)。看板是任务身份、次序、依赖和状态的唯一权威；下列复选项仅用于任务内执行记录。任务内复选项随各项验收更新，权威状态以看板为准。
 
 ## Global Constraints
 
@@ -94,11 +94,11 @@ expect(wrapper.text()).toContain(theme.applied.value.toUpperCase())
 
 **Interfaces:** 下载表单保留 `validate()`、`normalizedValues()`、`reset()`，View 继续调用 `submit(params)`；查看表单保留 `validate()`、`criteria()`、`reset()`。字段数量、名称、类型、默认值和必填规则来自各自元数据。
 
-- [ ] 按用户明确的日期约束完成并链接本任务专属设计，列出单日期、原生起止、月份及无日期表单的现有控件和请求示例。
-- [ ] 运行 `npm test -- src/components/download/DynamicParameterForm.spec.js src/components/dataset/DynamicFilterForm.spec.js src/composables/useDatasetFilters.spec.js src/views/DownloadView.spec.js src/api/api.spec.js`，检查既有覆盖；已有行为测试直接复用，不为样式调整重复编写同构测试。
-- [ ] 统一两个表单中日期控件的宽度、标签、错误与窄屏排布；同职责的重复字段呈现抽取为共享组件，重复的输入属性处理逻辑集中复用。DATE 仍为一个 `type="date"`，DATE_RANGE_MEMBER 各保留一个独立 `type="date"`；MONTH 仍为月份。继续使用既有 `value-format="YYYY-MM-DD"` 及归一化，不增加推导字段。
-- [ ] 检查必填、非法日期、原生起止倒序、错误聚焦和接口切换清理；查看侧保留可空 / 单边日期。通过缓存页面往返测试确认控件值保持。
-- [ ] 核对实际请求：daily 输入 2026-08-07 后只发一次 `params: { trade_date: '20260807' }`；new_share 输入起止日期后只发一次原范围参数。仅对既有用例未覆盖的请求边界补充断言，例如：
+- [x] 按用户明确的日期约束完成并链接本任务专属设计，列出单日期、原生起止、月份及无日期表单的现有控件和请求示例。
+- [x] 运行 `npm test -- src/components/download/DynamicParameterForm.spec.js src/components/dataset/DynamicFilterForm.spec.js src/composables/useDatasetFilters.spec.js src/views/DownloadView.spec.js src/api/api.spec.js`，检查既有覆盖；已有行为测试直接复用，不为样式调整重复编写同构测试。
+- [x] 统一两个表单中日期控件的宽度、标签、错误与窄屏排布；同职责的重复字段呈现抽取为共享组件，重复的输入属性处理逻辑集中复用。DATE 仍为一个 `type="date"`，DATE_RANGE_MEMBER 各保留一个独立 `type="date"`；MONTH 仍为月份。继续使用既有 `value-format="YYYY-MM-DD"` 及归一化，不增加推导字段。
+- [x] 检查必填、非法日期、原生起止倒序、错误聚焦和接口切换清理；查看侧保留可空 / 单边日期。通过缓存页面往返测试确认控件值保持。
+- [x] 核对实际请求：daily 输入 2026-08-07 后只发一次 `params: { trade_date: '20260807' }`；new_share 输入起止日期后只发一次原范围参数。仅对既有用例未覆盖的请求边界补充断言，例如：
 
 ```js
 // 通过页面设置 new_share 原生起止参数并提交后，检查 mock 客户端。
@@ -109,7 +109,7 @@ expect(downloadDataset).toHaveBeenCalledWith({
 })
 ```
 
-- [ ] 重跑上述针对性测试及 `npm test -- src/composables/useDownloadFlow.spec.js`；全部通过后核对日期工具、业务流程和请求契约未改，将本任务改动加入 Git 并独立提交。
+- [x] 重跑上述针对性测试及 `npm test -- src/composables/useDownloadFlow.spec.js`；全部通过后核对日期工具、业务流程和请求契约未改，将本任务改动加入 Git 并独立提交。
 
 **Acceptance:** 单日期保持单日期，原生起止保持两个独立控件；现有日期校验、筛选语义和参数格式不变；每次有效下载提交只发一次请求，原计数与重试行为保持；两个表单的同职责重复呈现和输入属性处理已实际共用，标签、错误关联与聚焦无回归。
 

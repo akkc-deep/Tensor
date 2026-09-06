@@ -26,8 +26,8 @@
 | ---: | --- | --- | --- | --- | --- | --- |
 | 1 | ISSUE-004-T01 | 主题计算与全局样式基础 | COMPLETED | None | docs/task-designs/ISSUE-004-T01-design.md | None |
 | 2 | ISSUE-004-T02 | 侧栏、设置与业务状态保留 | COMPLETED | ISSUE-004-T01 | docs/task-designs/ISSUE-004-T02-design.md | docs/task-handoffs/ISSUE-004/ISSUE-004-T02-handoff.md |
-| 3 | ISSUE-004-T03 | 日期控件与原参数契约 | IN_PROGRESS | ISSUE-004-T02 | docs/task-designs/ISSUE-004-T03-design.md | docs/task-handoffs/ISSUE-004/ISSUE-004-T03-handoff.md |
-| 4 | ISSUE-004-T04 | 下载工作台布局与反馈 | NOT_STARTED | ISSUE-004-T02, ISSUE-004-T03 | None | None |
+| 3 | ISSUE-004-T03 | 日期控件与原参数契约 | COMPLETED | ISSUE-004-T02 | docs/task-designs/ISSUE-004-T03-design.md | docs/task-handoffs/ISSUE-004/ISSUE-004-T03-handoff.md |
+| 4 | ISSUE-004-T04 | 下载工作台布局与反馈 | IN_PROGRESS | ISSUE-004-T02, ISSUE-004-T03 | docs/task-designs/ISSUE-004-T04-design.md | docs/task-handoffs/ISSUE-004/ISSUE-004-T04-handoff.md |
 | 5 | ISSUE-004-T05 | 查看工作台与精确表格展示 | NOT_STARTED | ISSUE-004-T02, ISSUE-004-T04 | None | None |
 | 6 | ISSUE-004-T06 | 正式前端回归与视觉验收 | NOT_STARTED | ISSUE-004-T04, ISSUE-004-T05 | None | None |
 
@@ -76,6 +76,8 @@
 
 - **Execution evidence:** 2026-09-07 READY -> IN_PROGRESS；用户已明确要求执行 ISSUE-004 全部任务；已完整读取本任务设计和链接交接，按既定顺序启动。
 
+- **Execution evidence:** 2026-09-07 IN_PROGRESS -> COMPLETED；b4e486b、decb5c7；两个表单实际共用 MetadataField 和 useFormValidation，删除遗留 ARIA 副本；单日期/原生起止/月/可空及单边筛选、标签/错误关联/焦点和禁用通过。daily 与 new_share 明确断言精确原参数且仅一次请求。针对性7文件/58项、全套23文件/158项、构建退出0；审查修正后2文件/14项与 diff --check 通过，独立复审规格/质量通过。62个业务/API/日期/元数据及依赖文件散列未变；真实视口与弹层由T06组合验收。
+
 ### ISSUE-004-T04
 
 - **Goal:** 下载页按左配置 / 右结果布局呈现真实业务反馈。
@@ -85,6 +87,10 @@
 - **Sources:** ① `docs/issues/proposals/ISSUE-004-ui-visual-concepts.html` 下载页；② `docs/task-designs/ISSUE-004-design.md` 页面部分；③ `docs/superpowers/plans/2026-09-07-issue-004-ui-redesign.md` 的 ISSUE-004-T04；④ `control-plane/src/views/DownloadView.vue`、`control-plane/src/components/download/`、`control-plane/src/components/common/AsyncStatePanel.vue`；⑤ T02 / T03 的直接输入与验证结果。
 - **First action:** 完成并链接 `docs/task-designs/ISSUE-004-T04-design.md`，固定六类状态在两个面板中的位置及组件职责。
 - **State evidence:** None。
+
+- **Execution evidence:** 2026-09-07 NOT_STARTED -> READY；T03完成后已完成并链接T04专属设计，直接依赖输入一致，next-task交接已写入并链接。
+
+- **Execution evidence:** 2026-09-07 READY -> IN_PROGRESS；用户明确要求按权威看板执行ISSUE-004，已完整读取本项设计和交接，按既定顺序启动。
 
 ### ISSUE-004-T05
 
