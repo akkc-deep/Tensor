@@ -17,7 +17,7 @@ D-01分红修复963ea17及本地回归/迁移/幂等/schema/打包/49总合同�
 
 最新yx5keenc轮150秒，33 passed / 1 failed / 6 did not run。dividend SUCCESS38/38/0、末查/独立DB38；top10_holders SUCCESS320/320/0、末查/独立DB320，均完整通过。新阻塞为top10_floatholders SUCCESS280/280/0与当前EMPTY要求冲突，触发 `Safe check failed: empty interface stays empty`；独立DB280，但页面只做初查0，末查未执行，不能计为通过。
 
-新真实证据已先独立提交6ae877f，精确扫描和运行资源清理通过。D-03仅top10_floatholders当前预期修订已具体写入设计，尚未确认、未修改spec、未复跑。M14-T05保持BLOCKED，原49中的9项仍不覆盖，不自动准备M14-T06。
+新真实证据已先独立提交6ae877f，精确扫描和运行资源清理通过。D-03已获用户明确确认，正在实施限定预期修改和离线检查/新材料复审，尚未恢复真实复验。M14-T05保持BLOCKED，原49中的9项仍不覆盖，不自动准备M14-T06。
 
 ## Changed Files
 
@@ -39,7 +39,7 @@ D-01分红修复963ea17及本地回归/迁移/幂等/schema/打包/49总合同�
 
 ## Remaining Work
 
-1. 确认D-03：仅top10_floatholders当前预期改ok，保留历史empty/原参数和D-01/D-02覆盖，其他37项期望不变；确认后执行限定离线反例及新材料复审。
+1. 实施已确认D-03：仅top10_floatholders当前预期改ok，保留历史empty/原参数和D-01/D-02覆盖，其他37项期望不变；完成限定离线反例及新材料复审。
 2. 在新空环境完整复验40项及fixture，将新证据写入 `docs/verification/M14-T09-tushare-live-rerun-02.md`；不覆盖任何已扫描旧证据，不拼接本轮33项。
 3. 尚未执行6项：new_share、stk_managers、pledge_stat、pledge_detail、index_classify、index_member_all；没有本轮结果，不提前修改其预期。
 
@@ -53,16 +53,16 @@ M14-T09：分红修复与2000档剩余验收。分红修复及top10_holders当�
 2. 本pause交接与 `docs/verification/M14-T09-tushare-live-rerun-01.md`（6ae877f，固定SHA见上）。
 3. 上一轮 `docs/verification/M14-T09-tushare-live.md`、ISSUE-007修复设计和M14-T05继承的原范围/参数/安全合同。
 
-首动作：取得D-03单接口预期修订的明确确认并写入设计，再执行限定离线检查及新的运行材料接入。解阻证据齐备后BLOCKED→READY，再单独READY→IN_PROGRESS。用户已有命令/Token授权持续有效，无需重复设置。
+首动作：按已确认并写入设计的D-03，完成限定离线检查及新的运行材料接入。解阻证据齐备后BLOCKED→READY，再单独READY→IN_PROGRESS。用户已有命令/Token授权持续有效，无需重复设置。
 
-继续沿用冻结验收JAR `/private/tmp/tensor-m14-t09-green.MZ4kMkN9/data-plane/tensor-app/target/acceptance/tensor-app-1.0-SNAPSHOT-acceptance.jar`，SHA `81adba0dd6500f4aa43b4fa06b18c2c8e7b7454d9e6d4d6c734772cdaef1d002`。当前specSHA `20499ebe50010f07edcbfc6502ed13fe84aac06f557700f92f8cde7fd9757f94`，只含dividend/top10_holders两项覆盖；manifestSHA `37a317f6a2bc3e5113be5f127976d16d8349414c6476c7f6a194b084a5b0f7c2`。
+继续沿用冻结验收JAR `/private/tmp/tensor-m14-t09-green.MZ4kMkN9/data-plane/tensor-app/target/acceptance/tensor-app-1.0-SNAPSHOT-acceptance.jar`，SHA `81adba0dd6500f4aa43b4fa06b18c2c8e7b7454d9e6d4d6c734772cdaef1d002`。D-03当前specSHA `05a6601f656dcfb5528c6ed832ccb17ef2416cfa84397fb93f11da1bfbd5901e`，含dividend/top10_holders/top10_floatholders三项覆盖；manifestSHA `37a317f6a2bc3e5113be5f127976d16d8349414c6476c7f6a194b084a5b0f7c2`。
 
 yx5keenc、nuy4jdhx与kcznkmbm均已使用，绝不复用；当前安全扫描标记在yx5keenc/run-finished.json。无秘密辅助材料在 `/private/tmp/tensor-m14-t09-work.uxwc5bc6`，D-02启动模板为d02-launch-template.py；未来必须生成新独占目录/空库/配置，更新新证据路径和全部受影响hash。
 
 ## Blocker
 
-- **Reason:** top10_floatholders原样例实际返回SUCCESS280，合同仍要求EMPTY；D-02授权只扩展top10_holders，完整40项验收未通过。
-- **Resolution condition:** D-03明确确认、精确单接口期望修改及离线反例通过、新冻结运行材料独立复审齐备；历史失败证据及原manifest/参数保持。该条件仅恢复复验，不预先宣称40通过。
+- **Reason:** D-02轮top10_floatholders原样例实际返回SUCCESS280，当时合同要求EMPTY而失败；D-03现已确认并实施当前ok覆盖。当前剩余门禁为限定离线结果与新材料复审收尾及完整40项真实验收，旧轮失败不改判。
+- **Resolution condition:** D-03确认已具备；精确单接口修改和离线反例通过、新冻结运行材料独立复审齐备后记录解阻。历史失败证据及原manifest/参数保持，该条件仅恢复完整40项复验，不预先宣称通过。
 
 ## Risks
 
