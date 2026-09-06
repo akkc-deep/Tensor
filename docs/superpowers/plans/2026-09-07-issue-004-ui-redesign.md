@@ -34,7 +34,7 @@
 
 **Interfaces:** 输入已确认 HTML 的 palette / 混色算法；输出 `createTheme(value)`、`contrastRatio(a,b)`、`createThemeState()`、`useTheme()` 和 `--tensor-*` / Element Plus 变量。业务页不参与主题保存。
 
-- [ ] 在 `theme.spec.js` 先覆盖非法 HEX、完整默认 palette，以及白 / 黄 / 绿 / 黑 / 自定义色的实际对比度。例如：
+- [x] 在 `theme.spec.js` 先覆盖非法 HEX、完整默认 palette，以及白 / 黄 / 绿 / 黑 / 自定义色的实际对比度。例如：
 
 ```js
 const theme = createTheme('#ffff00')
@@ -47,11 +47,11 @@ expect(contrastRatio(theme.applied, '#ffffff')).toBeGreaterThanOrEqual(5.5)
 expect(createTheme('#123')).toBeNull()
 ```
 
-- [ ] 运行 `npm test -- src/utils/theme.spec.js`，确认缺少新能力的断言失败。
-- [ ] 提取纯函数；应用级主题状态读取 / 写入单个 HEX，向根节点写变量，在 App 提供共享实例。调用关系为 `App -> createThemeState -> createTheme -> document.documentElement.style`；`apply` 校验成功后才写状态、DOM 和存储。
-- [ ] 在 `useTheme.spec.js` 测读取损坏值、读写抛错、非法输入不改旧值、保存成功和默认重置。验证 `localStorage.setItem('tensor-issue004-accent', '#2857b4')`，而非持久化整套 palette。
-- [ ] 运行 `npm test -- src/utils/theme.spec.js src/composables/useTheme.spec.js src/App.spec.js` 与 `npm run build`；全部通过。此时仅建立主题基础，不拆现有页面布局，避免破坏未调整的布局测试。
-- [ ] 核对改动范围，将本任务文件加入 Git 并形成独立提交。
+- [x] 运行 `npm test -- src/utils/theme.spec.js`，确认缺少新能力的断言失败。
+- [x] 提取纯函数；应用级主题状态读取 / 写入单个 HEX，向根节点写变量，在 App 提供共享实例。调用关系为 `App -> createThemeState -> createTheme -> document.documentElement.style`；`apply` 校验成功后才写状态、DOM 和存储。
+- [x] 在 `useTheme.spec.js` 测读取损坏值、读写抛错、非法输入不改旧值、保存成功和默认重置。验证 `localStorage.setItem('tensor-issue004-accent', '#2857b4')`，而非持久化整套 palette。
+- [x] 运行 `npm test -- src/utils/theme.spec.js src/composables/useTheme.spec.js src/App.spec.js` 与 `npm run build`；全部通过。此时仅建立主题基础，不拆现有页面布局，避免破坏未调整的布局测试。
+- [x] 核对改动范围，将本任务文件加入 Git 并形成独立提交。
 
 **Acceptance:** 默认主题精确匹配；合法颜色整套生效且操作色达标；非法输入保持旧主题；存储故障仍能预览；无 API 客户端依赖。
 

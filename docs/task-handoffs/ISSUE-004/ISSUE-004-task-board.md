@@ -24,8 +24,8 @@
 
 | Order | Task ID | Title | Status | Dependencies | Design document | Handoff |
 | ---: | --- | --- | --- | --- | --- | --- |
-| 1 | ISSUE-004-T01 | 主题计算与全局样式基础 | READY | None | None | None |
-| 2 | ISSUE-004-T02 | 侧栏、设置与业务状态保留 | NOT_STARTED | ISSUE-004-T01 | None | None |
+| 1 | ISSUE-004-T01 | 主题计算与全局样式基础 | COMPLETED | None | docs/task-designs/ISSUE-004-T01-design.md | None |
+| 2 | ISSUE-004-T02 | 侧栏、设置与业务状态保留 | IN_PROGRESS | ISSUE-004-T01 | docs/task-designs/ISSUE-004-T02-design.md | docs/task-handoffs/ISSUE-004/ISSUE-004-T02-handoff.md |
 | 3 | ISSUE-004-T03 | 日期控件与原参数契约 | NOT_STARTED | ISSUE-004-T02 | None | None |
 | 4 | ISSUE-004-T04 | 下载工作台布局与反馈 | NOT_STARTED | ISSUE-004-T02, ISSUE-004-T03 | None | None |
 | 5 | ISSUE-004-T05 | 查看工作台与精确表格展示 | NOT_STARTED | ISSUE-004-T02, ISSUE-004-T04 | None | None |
@@ -41,7 +41,10 @@
 - **Dependencies:** None。
 - **Sources:** ① `docs/issues/proposals/ISSUE-004-ui-visual-concepts.md`；② `docs/issues/proposals/ISSUE-004-ui-visual-concepts.html` 的主题脚本；③ `docs/task-designs/ISSUE-004-design.md` 主题部分；④ `docs/superpowers/plans/2026-09-07-issue-004-ui-redesign.md` 的 ISSUE-004-T01；⑤ `control-plane/src/App.vue`、`control-plane/src/style.css`。
 - **First action:** 依据上述来源完成 `docs/task-designs/ISSUE-004-T01-design.md`，写清主题状态注入、变量清单及测试，并回填本行。
+- **Start evidence:** 2026-09-07 用户明确要求按权威看板执行 ISSUE-004；已完整读取总体设计、实施计划及 T01 专属设计，Handoff 为 None；READY -> IN_PROGRESS。
 - **State evidence:** 2026-09-07 用户要求查看 ISSUE-004 技术实现并完成任务拆分；本看板初始化首项为 READY，未收到启动实现请求、未执行实施步骤。现有前端基线为 20 文件 / 120 项单测通过、构建退出 0；不作为本任务完成证据。
+
+- **Execution evidence:** 2026-09-07 IN_PROGRESS -> COMPLETED；ba043c9；默认 palette、5.5:1、HEX 原子校验、读写降级及重置通过行为测试；针对性 3 文件/29 项、全套 22 文件/148 项与构建退出 0；独立审查规格/质量通过。计算共用 theme.js，状态共用 useTheme.js，App provide；根 CSS 统一映射。正式弹层计算样式由 T06 验证；既有 chunk 提示不扩展处理。
 
 ### ISSUE-004-T02
 
@@ -52,6 +55,10 @@
 - **Sources:** ① `docs/task-designs/ISSUE-004-design.md` 导航 / 设置 / 生命周期部分；② `docs/superpowers/plans/2026-09-07-issue-004-ui-redesign.md` 的 ISSUE-004-T02；③ `control-plane/src/layouts/AppLayout.vue`、`control-plane/src/router/index.js`；④ `control-plane/src/views/DownloadView.vue`、`control-plane/src/views/DatasetView.vue`；⑤ T01 的主题实现与验证结果。
 - **First action:** 在前项完成后，完成并链接 `docs/task-designs/ISSUE-004-T02-design.md`，明确两个缓存实例与延迟响应测试。
 - **State evidence:** None。
+
+- **Execution evidence:** 2026-09-07 NOT_STARTED -> READY；前项已完成，后继专属设计已完整读取并链接，直接依赖已验证，next-task 交接已写入。
+
+- **Execution evidence:** 2026-09-07 READY -> IN_PROGRESS；用户已明确要求执行 ISSUE-004 全部任务；已完整读取本任务设计和链接交接，按既定顺序启动。
 
 ### ISSUE-004-T03
 
