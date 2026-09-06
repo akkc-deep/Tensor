@@ -61,8 +61,8 @@ expect(createTheme('#123')).toBeNull()
 
 **Interfaces:** 使用 T01 的 `useTheme()`；保留现有业务页内部 refs。新增命名路由 `settings`；缓存具名 DownloadView / DatasetView，容量 2，key 为路由名。
 
-- [ ] 扩充路由 / 布局测试：三项语义导航、404、设置新开无 API 请求；下载表单填值、进入设置再返回后仍保持，`listDataSources` 不增加调用。
-- [ ] 为设置写交互测试，先证明当前缺少功能。示例验收动作：
+- [x] 扩充路由 / 布局测试：三项语义导航、404、设置新开无 API 请求；下载表单填值、进入设置再返回后仍保持，`listDataSources` 不增加调用。
+- [x] 为设置写交互测试，先证明当前缺少功能。示例验收动作：
 
 ```js
 await wrapper.get('input[type="text"]').setValue('#ffff00')
@@ -71,7 +71,7 @@ expect(theme.requested.value).toBe('#ffff00')
 expect(wrapper.text()).toContain(theme.applied.value.toUpperCase())
 ```
 
-- [ ] 实现响应式侧栏与设置表单，主题控件只出现在设置页。业务缓存结构如下，外层 KeepAlive 保持挂载，404 和设置不纳入 include：
+- [x] 实现响应式侧栏与设置表单，主题控件只出现在设置页。业务缓存结构如下，外层 KeepAlive 保持挂载，404 和设置不纳入 include：
 
 ```vue
 <RouterView v-slot="{ Component, route }">
@@ -81,10 +81,10 @@ expect(wrapper.text()).toContain(theme.applied.value.toUpperCase())
 </RouterView>
 ```
 
-- [ ] 增加延迟 Promise 测试：发起下载 / 查询后进入设置，响应到达再返回，状态正确且不重复发送；覆盖查询第 2 页、每页 100 条及错误重试快照保留。
-- [ ] 移除旧 1280px 页面下限，保留标签、焦点、跳转工作区入口；更新双导航与旧 CSS 断言，业务断言继续保留。
-- [ ] 检查应用壳、设置及现有页面中同职责的重复结构，复用现有组件或抽取简单组件并接入相关调用处；确认设置仍无 API 依赖、业务缓存生命周期保持。
-- [ ] 运行 `npm test -- src/router/index.spec.js src/layouts/AppLayout.spec.js src/views/SettingsView.spec.js` 与 `npm run build`；全部通过后核对范围、加入 Git 并独立提交。
+- [x] 增加延迟 Promise 测试：发起下载 / 查询后进入设置，响应到达再返回，状态正确且不重复发送；覆盖查询第 2 页、每页 100 条及错误重试快照保留。
+- [x] 移除旧 1280px 页面下限，保留标签、焦点、跳转工作区入口；更新双导航与旧 CSS 断言，业务断言继续保留。
+- [x] 检查应用壳、设置及现有页面中同职责的重复结构，复用现有组件或抽取简单组件并接入相关调用处；确认设置仍无 API 依赖、业务缓存生命周期保持。
+- [x] 运行 `npm test -- src/router/index.spec.js src/layouts/AppLayout.spec.js src/views/SettingsView.spec.js` 与 `npm run build`；全部通过后核对范围、加入 Git 并独立提交。
 
 **Acceptance:** 三入口可用；默认 / 自定义 / 错误 / 降级 / 重置状态正确；设置及回到已缓存页不产生新 API 请求；业务状态和在途操作保持；本次涉及的同职责重复结构已复用。
 

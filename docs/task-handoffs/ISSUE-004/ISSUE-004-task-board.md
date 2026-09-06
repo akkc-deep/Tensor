@@ -25,8 +25,8 @@
 | Order | Task ID | Title | Status | Dependencies | Design document | Handoff |
 | ---: | --- | --- | --- | --- | --- | --- |
 | 1 | ISSUE-004-T01 | 主题计算与全局样式基础 | COMPLETED | None | docs/task-designs/ISSUE-004-T01-design.md | None |
-| 2 | ISSUE-004-T02 | 侧栏、设置与业务状态保留 | IN_PROGRESS | ISSUE-004-T01 | docs/task-designs/ISSUE-004-T02-design.md | docs/task-handoffs/ISSUE-004/ISSUE-004-T02-handoff.md |
-| 3 | ISSUE-004-T03 | 日期控件与原参数契约 | NOT_STARTED | ISSUE-004-T02 | None | None |
+| 2 | ISSUE-004-T02 | 侧栏、设置与业务状态保留 | COMPLETED | ISSUE-004-T01 | docs/task-designs/ISSUE-004-T02-design.md | docs/task-handoffs/ISSUE-004/ISSUE-004-T02-handoff.md |
+| 3 | ISSUE-004-T03 | 日期控件与原参数契约 | IN_PROGRESS | ISSUE-004-T02 | docs/task-designs/ISSUE-004-T03-design.md | docs/task-handoffs/ISSUE-004/ISSUE-004-T03-handoff.md |
 | 4 | ISSUE-004-T04 | 下载工作台布局与反馈 | NOT_STARTED | ISSUE-004-T02, ISSUE-004-T03 | None | None |
 | 5 | ISSUE-004-T05 | 查看工作台与精确表格展示 | NOT_STARTED | ISSUE-004-T02, ISSUE-004-T04 | None | None |
 | 6 | ISSUE-004-T06 | 正式前端回归与视觉验收 | NOT_STARTED | ISSUE-004-T04, ISSUE-004-T05 | None | None |
@@ -60,6 +60,8 @@
 
 - **Execution evidence:** 2026-09-07 READY -> IN_PROGRESS；用户已明确要求执行 ISSUE-004 全部任务；已完整读取本任务设计和链接交接，按既定顺序启动。
 
+- **Execution evidence:** 2026-09-07 IN_PROGRESS -> COMPLETED；7f577e4；三入口、设置取色/HEX/校正/降级/重置及设置零 API 请求通过；真实业务页面往返保留日期、结果、每页100/第2页、失败原快照及在途下载/查询且不重发；PageHeading 在三页复用。针对性18项、全套23文件/157项、构建及 diff --check 均退出0，独立规格/质量审查通过。正式视口、焦点和计算样式按设计由 T06 组合验收。
+
 ### ISSUE-004-T03
 
 - **Goal:** 日期控件按现有下载参数和查看筛选元数据呈现，改版后原契约保持。
@@ -69,6 +71,10 @@
 - **Sources:** ① `docs/issues/proposals/ISSUE-004-ui-visual-concepts.md` 的日期约束；② `docs/task-designs/ISSUE-004-design.md` 日期部分；③ `docs/superpowers/plans/2026-09-07-issue-004-ui-redesign.md` 的 ISSUE-004-T03；④ `control-plane/src/components/download/DynamicParameterForm.vue`、`control-plane/src/components/dataset/DynamicFilterForm.vue`、`control-plane/src/api/downloads.js`；⑤ `data-plane/tensor-plugin-tushare/src/main/resources/datasets/tushare_pro/` 的参数定义。
 - **First action:** 按已确认的原日期契约完成并链接 `docs/task-designs/ISSUE-004-T03-design.md`，列出控件形态、原校验及一次请求的验收示例。
 - **State evidence:** 2026-09-07 用户明确要求沿用接口现有日期能力；已将本任务收敛为日期控件与原参数契约，撤销区间执行待确认项。状态保持 NOT_STARTED，本次仅修订设计与任务定义，未启动实现。
+
+- **Execution evidence:** 2026-09-07 NOT_STARTED -> READY；前项已完成，后继专属设计已完整读取并链接，直接依赖已验证，next-task 交接已写入。
+
+- **Execution evidence:** 2026-09-07 READY -> IN_PROGRESS；用户已明确要求执行 ISSUE-004 全部任务；已完整读取本任务设计和链接交接，按既定顺序启动。
 
 ### ISSUE-004-T04
 
