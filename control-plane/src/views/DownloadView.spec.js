@@ -278,6 +278,7 @@ describe('DownloadView', () => {
 
     await wrapper.getComponent(DownloadAction).get('button').trigger('click')
     await flushPromises()
+    expect(api.downloadDataset).toHaveBeenCalledTimes(1)
     expect(api.downloadDataset).toHaveBeenCalledWith({
       pluginId: 'tushare_pro',
       apiName: 'daily',

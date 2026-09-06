@@ -34,17 +34,6 @@ const fields = computed(() => props.filters.flatMap((filter) => {
   return []
 }))
 
-function syncInputAttributes(element, binding) {
-  const input = element.querySelector('input')
-  if (!input) return
-  for (const [name, value] of Object.entries(binding.value)) {
-    if (value === undefined) input.removeAttribute(name)
-    else input.setAttribute(name, value)
-  }
-}
-
-const vInputA11y = { mounted: syncInputAttributes, updated: syncInputAttributes }
-
 function controlId(key) {
   return `dataset-filter-${key}`
 }
