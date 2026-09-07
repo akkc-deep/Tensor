@@ -30,3 +30,4 @@
 | ISSUE-013 | 参数校验失败的查询缺少完成事件 | 新增 | 用户后续单独处理；4 个 S07 请求缺少事件，待修复设计 | [详情](problems/ISSUE-013-query-completion-events.md) |
 | ISSUE-014 | 安全 Maven 门禁未完成 | 新增 | 用户后续单独处理；依赖传输失败，待恢复并重跑 | [详情](problems/ISSUE-014-security-maven-verification.md) |
 | ISSUE-015 | 后端漏洞扫描未形成有效报告 | 新增 | 用户后续单独处理；漏洞数据更新失败，风险评估未完成 | [详情](problems/ISSUE-015-backend-dependency-audit.md) |
+| ISSUE-016 | UI 测试 YAML 解析器缺少严格字段校验 | 新增 | 从 ISSUE-004 延期项拆出，已登记，待解决方案 | [详情](problems/ISSUE-016-ui-fixture-yaml-validation.md) |
