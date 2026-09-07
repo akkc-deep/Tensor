@@ -23,9 +23,16 @@ import com.akkc.tensor.plugin.api.descriptor.ParameterType;
 import com.akkc.tensor.plugin.api.descriptor.QueryMode;
 import com.akkc.tensor.plugin.api.error.ErrorCode;
 import com.akkc.tensor.plugin.api.error.TensorException;
+import com.akkc.tensor.plugin.api.error.SourceException;
+import com.akkc.tensor.web.download.DownloadBindingException;
+import com.akkc.tensor.web.dto.FieldErrorResponse;
+import org.springframework.mock.http.MockHttpInputMessage;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import com.akkc.tensor.plugin.api.model.ApiName;
 import com.akkc.tensor.plugin.api.model.PluginId;
-import com.akkc.tensor.web.dto.DownloadRequest;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.validation.Valid;
@@ -109,6 +116,29 @@ class GlobalExceptionHandlerTest {
     @AfterEach
     void clearMdc() {
         MDC.clear();
+    }
+
+    @Test
+    void unwrapsOnlyOwnedDownloadBindingFailures() {
+        MDC.put(RequestIdFilter.MDC_KEY, REQUEST_ID);
+        var handler = new GlobalExceptionHandler();
+        var binding = new DownloadBindingException(
+                ErrorCode.PARAM_REQUIRED,
+                List.of(new FieldErrorResponse("trade_date", "is required")));
+        var input = new MockHttpInputMessage(new byte[0]);
+        var wrapped = new HttpMessageNotReadableException(
+                "Unreadable", new IllegalStateException(binding), input);
+        var required = handler.handleUnreadableBody(wrapped).getBody();
+        assertThat(required.code()).isEqualTo(ErrorCode.PARAM_REQUIRED);
+        assertThat(required.fieldErrors())
+                .containsExactly(new FieldErrorResponse("trade_date", "is required"));
+
+        var unrelated = new HttpMessageNotReadableException(
+                "Unreadable", new SourceException(ErrorCode.SOURCE_UNAVAILABLE, "Private source detail"), input);
+        var response = handler.handleUnreadableBody(unrelated).getBody();
+        assertThat(response.code()).isEqualTo(ErrorCode.PARAM_INVALID);
+        assertThat(response.fieldErrors())
+                .containsExactly(new FieldErrorResponse("request", "has invalid value"));
     }
 
     @ParameterizedTest
@@ -443,8 +473,13 @@ class GlobalExceptionHandlerTest {
             validator.validate(VALIDATION_API, values);
         }
 
+        record ValidationRequest(
+                @NotBlank @Pattern(regexp = "^[a-z][a-z0-9_]{1,63}$") String pluginId,
+                @NotBlank @Pattern(regexp = "^[a-z][a-z0-9_]{1,63}$") String apiName,
+                @NotNull Map<String, Object> params) {}
+
         @PostMapping("/test/bean")
-        void bean(@Valid @RequestBody DownloadRequest request) {
+        void bean(@Valid @RequestBody ValidationRequest request) {
         }
 
         @GetMapping("/test/input")

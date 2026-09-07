@@ -2,13 +2,12 @@ package com.akkc.tensor.web;
 
 import com.akkc.tensor.core.download.DownloadService;
 import com.akkc.tensor.observability.OperationLogger;
-import com.akkc.tensor.plugin.api.model.ApiName;
 import com.akkc.tensor.plugin.api.model.DatasetKey;
-import com.akkc.tensor.plugin.api.model.PluginId;
 import com.akkc.tensor.plugin.api.model.RequestId;
+import com.akkc.tensor.web.download.DownloadParameterResolver;
 import com.akkc.tensor.web.dto.DownloadRequest;
 import com.akkc.tensor.web.dto.DownloadResponse;
-import jakarta.validation.Valid;
+import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 import org.slf4j.MDC;
@@ -24,25 +23,28 @@ import org.springframework.web.bind.annotation.RestController;
 public final class DownloadController {
     private final DownloadService downloadService;
     private final OperationLogger operationLogger;
+    private final DownloadParameterResolver parameterResolver;
 
     public DownloadController(
-            DownloadService downloadService, OperationLogger operationLogger) {
+            DownloadService downloadService, OperationLogger operationLogger,
+            DownloadParameterResolver parameterResolver) {
         this.downloadService = Objects.requireNonNull(downloadService, "downloadService");
         this.operationLogger = Objects.requireNonNull(operationLogger, "operationLogger");
+        this.parameterResolver = Objects.requireNonNull(parameterResolver, "parameterResolver");
     }
 
     @PostMapping
-    public DownloadResponse download(@Valid @RequestBody DownloadRequest request) {
+    public DownloadResponse download(@RequestBody DownloadRequest request) {
         Objects.requireNonNull(request, "request");
         String value = MDC.get(RequestIdFilter.MDC_KEY);
         if (value == null) {
             throw new IllegalStateException("Request ID is unavailable");
         }
-        DatasetKey key = DatasetKey.of(
-                PluginId.of(request.pluginId()), ApiName.of(request.apiName()));
+        DatasetKey key = request.dataset();
+        Map<String, Object> parameters = parameterResolver.toRawValues(request.params(), request.suppliedFields());
         RequestId requestId = new RequestId(UUID.fromString(value));
-        return operationLogger.download(key, request.params(), () -> DownloadResponse.from(
+        return operationLogger.download(key, parameters, () -> DownloadResponse.from(
                 downloadService.execute(
-                        key.pluginId(), key.apiName(), request.params(), requestId)));
+                        key.pluginId(), key.apiName(), parameters, requestId)));
     }
 }

@@ -8,6 +8,11 @@ import ch.qos.logback.classic.spi.IThrowableProxy;
 import ch.qos.logback.core.read.ListAppender;
 import com.akkc.tensor.TensorApplication;
 import com.akkc.tensor.config.ApplicationConfiguration;
+import com.akkc.tensor.web.download.DownloadDescriptorResolver;
+import com.akkc.tensor.web.download.DownloadParameterResolver;
+import com.akkc.tensor.web.download.DownloadRequestDeserializer;
+import com.akkc.tensor.web.download.DownloadParameters.TradeDateParameters;
+import com.akkc.tensor.web.dto.DownloadRequest;
 import com.akkc.tensor.core.catalog.DatasetCatalog;
 import com.akkc.tensor.core.download.DownloadService;
 import com.akkc.tensor.core.query.DatasetQueryService;
@@ -87,6 +92,10 @@ class ProductionApplicationContextIT {
             captured = captureRootLog();
             second = start(mysql, SECRET);
             assertProductionGraph(second);
+            DownloadRequest bound = second.getBean(ObjectMapper.class).readValue(
+                    "{\"pluginId\":\"tushare_pro\",\"apiName\":\"daily\",\"params\":{\"trade_date\":\"20260905\"}}",
+                    DownloadRequest.class);
+            assertThat(bound.params()).isEqualTo(new TradeDateParameters("20260905"));
             HttpResponse secondHealth = get(second, "/actuator/health");
             assertHealth(second, secondHealth, 200, "UP");
             assertProbesUp(second);
@@ -165,6 +174,9 @@ class ProductionApplicationContextIT {
         assertUnique(context, OperationLogger.class);
         assertUnique(context, DataSourceController.class);
         assertUnique(context, DownloadController.class);
+        assertUnique(context, DownloadDescriptorResolver.class);
+        assertUnique(context, DownloadParameterResolver.class);
+        assertUnique(context, DownloadRequestDeserializer.class);
         assertUnique(context, DatasetController.class);
         assertUnique(context, GlobalExceptionHandler.class);
         assertUnique(context, RequestIdFilter.class);

@@ -163,7 +163,11 @@ class DatasetControllerIT {
         assertThat(Arrays.stream(DatasetController.class.getDeclaredMethods())
                 .filter(method -> Modifier.isPublic(method.getModifiers())))
                 .singleElement()
-                .satisfies(method -> assertThat(method.getName()).isEqualTo("listDatasetRecords"));
+                .satisfies(method -> {
+                    assertThat(method.getName()).isEqualTo("listDatasetRecords");
+                    assertThat(method.getParameterTypes())
+                            .containsExactly(com.akkc.tensor.web.dto.DatasetRecordsRequest.class);
+                });
         ConditionalOnWebApplication condition =
                 DatasetController.class.getAnnotation(ConditionalOnWebApplication.class);
         assertThat(condition).isNotNull();
@@ -542,6 +546,47 @@ class DatasetControllerIT {
     }
 
     @Test
+    void preservesRepeatedTsCodeCommaBinding() throws Exception {
+        Flow flow = flow(List.of(definition("ts_code")));
+        MvcResult repeated = flow.mockMvc().perform(get(PATH)
+                        .param("tsCode", "000001.SZ", "000002.SZ"))
+                .andExpect(status().isBadRequest())
+                .andReturn();
+        JsonNode repeatedBody = flow.objectMapper()
+                .readTree(repeated.getResponse().getContentAsByteArray());
+        assertThat(repeatedBody.get("code").textValue()).isEqualTo("PARAM_INVALID");
+        assertThat(repeatedBody.get("fieldErrors")).isEmpty();
+    }
+
+    @Test
+    void preservesEmptyTsCodeAsAnInvalidPresentFilter() throws Exception {
+        Flow flow = flow(List.of(definition("ts_code")));
+        MvcResult result = flow.mockMvc().perform(get(PATH).param("tsCode", ""))
+                .andExpect(status().isBadRequest())
+                .andReturn();
+
+        JsonNode body = flow.objectMapper()
+                .readTree(result.getResponse().getContentAsByteArray());
+        assertThat(body.get("code").textValue()).isEqualTo("PARAM_INVALID");
+        assertThat(body.get("fieldErrors")).isEmpty();
+    }
+
+    @Test
+    void reportsTheFirstDateConversionErrorBeforeAnInvalidPage() throws Exception {
+        Flow flow = flow(List.of(definition("trade_date")));
+
+        MvcResult multipleErrors = flow.mockMvc().perform(get(PATH)
+                        .param("tradeDateFrom", "invalid-date")
+                        .param("page", "invalid-page"))
+                .andExpect(status().isBadRequest())
+                .andReturn();
+        JsonNode errorBody = flow.objectMapper()
+                .readTree(multipleErrors.getResponse().getContentAsByteArray());
+        assertThat(errorBody.get("fieldErrors").get(0).get("field").textValue())
+                .isEqualTo("tradeDateFrom");
+    }
+
+    @Test
     void skipsUnknownQueryKeysWithoutAddingMetrics() throws Exception {
         Flow flow = flow(List.of(definition("ts_code")));
         try (CapturedLog log = capturedLog()) {
@@ -700,6 +745,7 @@ class DatasetControllerIT {
         StandaloneMockMvcBuilder builder = MockMvcBuilders
                 .standaloneSetup(new DatasetController(
                         catalog, queryService, operationLogger(registry)))
+                .setCustomArgumentResolvers(new DatasetRequestArgumentResolver())
                 .setMessageConverters(new MappingJackson2HttpMessageConverter(objectMapper));
         if (installRequestIdFilter) {
             builder.setControllerAdvice(new GlobalExceptionHandler())

@@ -1,19 +1,15 @@
 package com.akkc.tensor.web.dto;
 
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Pattern;
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import com.akkc.tensor.plugin.api.model.DatasetKey;
+import com.akkc.tensor.web.download.DownloadParameters;
+import java.util.Objects;
+import java.util.Set;
 
 public record DownloadRequest(
-        @NotBlank @Pattern(regexp = "^[a-z][a-z0-9_]{1,63}$") String pluginId,
-        @NotBlank @Pattern(regexp = "^[a-z][a-z0-9_]{1,63}$") String apiName,
-        @NotNull Map<String, Object> params) {
+        DatasetKey dataset, DownloadParameters params, Set<String> suppliedFields) {
     public DownloadRequest {
-        if (params != null) {
-            params = Collections.unmodifiableMap(new LinkedHashMap<>(params));
-        }
+        Objects.requireNonNull(dataset, "dataset");
+        Objects.requireNonNull(params, "params");
+        suppliedFields = Set.copyOf(suppliedFields);
     }
 }

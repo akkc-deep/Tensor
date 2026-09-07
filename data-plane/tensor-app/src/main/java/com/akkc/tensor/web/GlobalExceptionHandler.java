@@ -5,6 +5,7 @@ import com.akkc.tensor.plugin.api.error.ErrorCode;
 import com.akkc.tensor.plugin.api.error.TensorException;
 import com.akkc.tensor.web.dto.ApiErrorResponse;
 import com.akkc.tensor.web.dto.FieldErrorResponse;
+import com.akkc.tensor.web.download.DownloadBindingException;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.Map;
@@ -36,7 +37,7 @@ public final class GlobalExceptionHandler {
                 ? validation.fieldErrors().stream()
                         .map(field -> new FieldErrorResponse(field.field(), field.message()))
                         .toList()
-                : List.of();
+                : exception instanceof DownloadBindingException binding ? binding.fieldErrors() : List.of();
         return response(exception.code(), fields, exception);
     }
 
@@ -81,6 +82,11 @@ public final class GlobalExceptionHandler {
     @ExceptionHandler(HttpMessageNotReadableException.class)
     ResponseEntity<ApiErrorResponse> handleUnreadableBody(
             HttpMessageNotReadableException exception) {
+        for (Throwable cause = exception.getCause(); cause != null; cause = cause.getCause()) {
+            if (cause instanceof DownloadBindingException binding) {
+                return handleTensorException(binding);
+            }
+        }
         return response(
                 ErrorCode.PARAM_INVALID,
                 List.of(new FieldErrorResponse("request", "has invalid value")),
