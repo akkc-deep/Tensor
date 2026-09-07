@@ -26,6 +26,8 @@ import java.time.Clock;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import org.springframework.dao.DataAccessException;
+import org.springframework.transaction.TransactionException;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 public final class DownloadService {
@@ -90,7 +92,12 @@ public final class DownloadService {
         }
 
         AdaptedBatch batch = adapter.adapt(envelope, clock.instant());
-        WriteCounts counts = persistenceService.persist(batch);
+        WriteCounts counts;
+        try {
+            counts = persistenceService.persist(batch);
+        } catch (DataAccessException | TransactionException exception) {
+            throw persistenceFailure(exception);
+        }
         return new DownloadResult(
                 requestId,
                 DownloadOutcome.SUCCESS,
@@ -124,6 +131,18 @@ public final class DownloadService {
     private static SourceException invalidPayload() {
         return new SourceException(
                 ErrorCode.SOURCE_PAYLOAD_INVALID, "Source returned an invalid payload");
+    }
+
+    private static PersistenceException persistenceFailure(RuntimeException cause) {
+        PersistenceException exception = new PersistenceException();
+        exception.initCause(cause);
+        return exception;
+    }
+
+    private static final class PersistenceException extends TensorException {
+        private PersistenceException() {
+            super(ErrorCode.PERSISTENCE_FAILED, "Dataset persistence failed");
+        }
     }
 
     private static final class DownloadAccessException extends TensorException {

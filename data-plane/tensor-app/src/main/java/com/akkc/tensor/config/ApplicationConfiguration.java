@@ -7,6 +7,7 @@ import com.akkc.tensor.core.catalog.DatasetCatalog;
 import com.akkc.tensor.core.catalog.DatasetStartupValidator;
 import com.akkc.tensor.core.catalog.SchemaInspector;
 import com.akkc.tensor.core.download.DownloadService;
+import com.akkc.tensor.core.metadata.MetadataQueryService;
 import com.akkc.tensor.core.persistence.DatasetLockManager;
 import com.akkc.tensor.core.persistence.ExistingKeyRepository;
 import com.akkc.tensor.core.persistence.GenericUpsertRepository;
@@ -121,6 +122,11 @@ public final class ApplicationConfiguration {
             Clock clock) {
         return new DownloadService(
                 plugins, adapters, validator, persistence, clock);
+    }
+
+    @Bean
+    public MetadataQueryService metadataQueryService(PluginRegistry plugins, DatasetCatalog catalog) {
+        return new MetadataQueryService(plugins, catalog);
     }
 
     @Bean

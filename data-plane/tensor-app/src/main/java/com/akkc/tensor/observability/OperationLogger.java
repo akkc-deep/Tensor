@@ -1,28 +1,23 @@
 package com.akkc.tensor.observability;
 
+import com.akkc.tensor.core.query.DatasetPage;
+import com.akkc.tensor.core.query.QueryCriteria;
 import com.akkc.tensor.core.registry.PluginRegistry;
 import com.akkc.tensor.plugin.api.descriptor.ParameterDescriptor;
 import com.akkc.tensor.plugin.api.download.DownloadOutcome;
-import com.akkc.tensor.plugin.api.error.ErrorCode;
-import com.akkc.tensor.plugin.api.error.TensorException;
+import com.akkc.tensor.plugin.api.download.DownloadResult;
 import com.akkc.tensor.plugin.api.model.DatasetKey;
-import com.akkc.tensor.web.RequestIdFilter;
-import com.akkc.tensor.web.dto.DownloadResponse;
-import com.akkc.tensor.web.dto.PageResponse;
+import com.akkc.tensor.plugin.api.model.RequestId;
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.function.Supplier;
 import java.util.regex.Pattern;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.slf4j.MDC;
-import org.springframework.dao.DataAccessException;
-import org.springframework.transaction.TransactionException;
-import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 public final class OperationLogger {
     private static final Logger LOGGER = LoggerFactory.getLogger(OperationLogger.class);
@@ -48,87 +43,53 @@ public final class OperationLogger {
         parameterNames = Collections.unmodifiableMap(names);
     }
 
-    public DownloadResponse download(
+    public void recordQuerySuccess(
+            RequestId requestId,
             DatasetKey key,
-            Map<String, Object> parameters,
-            Supplier<DownloadResponse> operation) {
-        Objects.requireNonNull(key, "key");
-        Objects.requireNonNull(parameters, "parameters");
-        Objects.requireNonNull(operation, "operation");
-        if (!metrics.supports(key)) {
-            return operation.get();
-        }
-        String requestId = requestId();
-        List<String> summary = parameterNames.getOrDefault(key, List.of()).stream()
-                .filter(parameters::containsKey)
-                .filter(name -> !SENSITIVE_NAME.matcher(name).find())
-                .toList();
-        long started = System.nanoTime();
+            QueryCriteria criteria,
+            DatasetPage result,
+            Duration duration) {
         try {
-            DownloadResponse response = Objects.requireNonNull(
-                    operation.get(), "download response");
-            Duration duration = elapsed(started);
-            TensorMetrics.Outcome outcome = response.outcome() == DownloadOutcome.EMPTY
-                    ? TensorMetrics.Outcome.EMPTY
-                    : TensorMetrics.Outcome.SUCCESS;
-            recordDownloadMetrics(key, outcome, duration,
-                    response.sourceRowCount(), response.insertedRows(), response.updatedRows());
+            if (!metrics.supports(key)) {
+                return;
+            }
+            List<String> filters = filterNames(criteria);
+            recordQueryMetrics(key, duration);
             LOGGER.info(
-                    "tensor.operation.completed requestId={} operation=download pluginId={} apiName={} paramSummary={} sourceRowCount={} insertedRows={} updatedRows={} durationMs={} outcome={} failureStage=none errorCode=none",
-                    requestId, key.pluginId().value(), key.apiName().value(), summary,
-                    response.sourceRowCount(), response.insertedRows(), response.updatedRows(),
-                    duration.toMillis(), outcome.value());
-            return response;
-        } catch (RuntimeException failure) {
-            Duration duration = elapsed(started);
-            Failure classified = downloadFailure(failure);
-            recordDownloadMetrics(key, TensorMetrics.Outcome.FAILURE, duration, 0, 0, 0);
-            LOGGER.info(
-                    "tensor.operation.completed requestId={} operation=download pluginId={} apiName={} paramSummary={} sourceRowCount=unavailable insertedRows=unavailable updatedRows=unavailable durationMs={} outcome=failure failureStage={} errorCode={}",
-                    requestId, key.pluginId().value(), key.apiName().value(), summary,
-                    duration.toMillis(), classified.stage(), classified.code());
-            throw failure;
+                    "tensor.operation.completed requestId={} operation=query pluginId={} apiName={} filterNames={} page={} pageSize={} resultCount={} totalElements={} durationMs={} outcome=success failureStage=none errorCode=none",
+                    requestId.value(), key.pluginId().value(), key.apiName().value(), filters,
+                    result.page(), result.pageSize(), result.items().size(),
+                    result.totalElements(), duration.toMillis());
+        } catch (RuntimeException ignored) {
+            observationFailed("query");
         }
     }
 
-    public PageResponse query(
+    public void recordDownloadSuccess(
+            RequestId requestId,
             DatasetKey key,
-            List<String> filterNames,
-            Integer requestedPage,
-            Integer requestedPageSize,
-            Supplier<PageResponse> operation) {
-        Objects.requireNonNull(key, "key");
-        filterNames = List.copyOf(Objects.requireNonNull(filterNames, "filterNames"));
-        Objects.requireNonNull(operation, "operation");
-        if (!metrics.supports(key)) {
-            return operation.get();
-        }
-        String requestId = requestId();
-        long started = System.nanoTime();
+            Map<String, Object> parameters,
+            DownloadResult result,
+            Duration duration) {
         try {
-            PageResponse response = Objects.requireNonNull(
-                    operation.get(), "query response");
-            Duration duration = elapsed(started);
-            recordQueryMetrics(key, TensorMetrics.Outcome.SUCCESS, duration);
+            if (!metrics.supports(key)) {
+                return;
+            }
+            List<String> summary = parameterNames.getOrDefault(key, List.of()).stream()
+                    .filter(parameters::containsKey)
+                    .filter(name -> !SENSITIVE_NAME.matcher(name).find())
+                    .toList();
+            TensorMetrics.Outcome outcome = result.outcome() == DownloadOutcome.EMPTY
+                    ? TensorMetrics.Outcome.EMPTY
+                    : TensorMetrics.Outcome.SUCCESS;
+            recordDownloadMetrics(key, outcome, duration, result);
             LOGGER.info(
-                    "tensor.operation.completed requestId={} operation=query pluginId={} apiName={} filterNames={} page={} pageSize={} resultCount={} totalElements={} durationMs={} outcome=success failureStage=none errorCode=none",
-                    requestId, key.pluginId().value(), key.apiName().value(), filterNames,
-                    response.page(), response.pageSize(), response.items().size(),
-                    response.totalElements(), duration.toMillis());
-            return response;
-        } catch (RuntimeException failure) {
-            Duration duration = elapsed(started);
-            Failure classified = failure instanceof MethodArgumentTypeMismatchException
-                    ? new Failure(ErrorCode.PARAM_INVALID, "parameter")
-                    : domainFailure(failure, ErrorCode.QUERY_FAILED, "query");
-            recordQueryMetrics(key, TensorMetrics.Outcome.FAILURE, duration);
-            LOGGER.info(
-                    "tensor.operation.completed requestId={} operation=query pluginId={} apiName={} filterNames={} page={} pageSize={} resultCount=unavailable totalElements=unavailable durationMs={} outcome=failure failureStage={} errorCode={}",
-                    requestId, key.pluginId().value(), key.apiName().value(), filterNames,
-                    requestedPage == null ? "unavailable" : requestedPage,
-                    requestedPageSize == null ? "unavailable" : requestedPageSize, duration.toMillis(),
-                    classified.stage(), classified.code());
-            throw failure;
+                    "tensor.operation.completed requestId={} operation=download pluginId={} apiName={} paramSummary={} sourceRowCount={} insertedRows={} updatedRows={} durationMs={} outcome={} failureStage=none errorCode=none",
+                    requestId.value(), key.pluginId().value(), key.apiName().value(), summary,
+                    result.sourceRowCount(), result.insertedRows(), result.updatedRows(),
+                    duration.toMillis(), outcome.value());
+        } catch (RuntimeException ignored) {
+            observationFailed("download");
         }
     }
 
@@ -136,67 +97,42 @@ public final class OperationLogger {
             DatasetKey key,
             TensorMetrics.Outcome outcome,
             Duration duration,
-            long sourceRows,
-            long insertedRows,
-            long updatedRows) {
+            DownloadResult result) {
         try {
-            metrics.recordDownload(
-                    key, outcome, duration, sourceRows, insertedRows, updatedRows);
+            metrics.recordDownload(key, outcome, duration,
+                    result.sourceRowCount(), result.insertedRows(), result.updatedRows());
         } catch (RuntimeException ignored) {
-            LOGGER.warn("tensor.observation.failed operation=download");
+            observationFailed("download");
         }
     }
 
-    private void recordQueryMetrics(
-            DatasetKey key,
-            TensorMetrics.Outcome outcome,
-            Duration duration) {
+    private void recordQueryMetrics(DatasetKey key, Duration duration) {
         try {
-            metrics.recordQuery(key, outcome, duration);
+            metrics.recordQuery(key, TensorMetrics.Outcome.SUCCESS, duration);
         } catch (RuntimeException ignored) {
-            LOGGER.warn("tensor.observation.failed operation=query");
+            observationFailed("query");
         }
     }
 
-    private static Failure downloadFailure(RuntimeException failure) {
-        if (failure instanceof DataAccessException
-                || failure instanceof TransactionException) {
-            return new Failure(ErrorCode.PERSISTENCE_FAILED, "persistence");
+    private static List<String> filterNames(QueryCriteria criteria) {
+        ArrayList<String> names = new ArrayList<>(3);
+        if (criteria.tsCode() != null) {
+            names.add("ts_code");
         }
-        return domainFailure(failure, ErrorCode.INTERNAL_ERROR, "internal");
-    }
-
-    private static Failure domainFailure(
-            RuntimeException failure, ErrorCode fallback, String fallbackStage) {
-        if (!(failure instanceof TensorException tensor)) {
-            return new Failure(fallback, fallbackStage);
+        if (criteria.tradeDateFrom() != null || criteria.tradeDateTo() != null) {
+            names.add("trade_date");
         }
-        ErrorCode code = tensor.code();
-        return new Failure(code, switch (code) {
-            case PARAM_REQUIRED, PARAM_INVALID -> "parameter";
-            case PLUGIN_DISABLED, DATASET_MISCONFIGURED -> "registration";
-            case SOURCE_AUTH_FAILED, SOURCE_PERMISSION_DENIED, SOURCE_RATE_LIMITED,
-                    SOURCE_UNAVAILABLE, SOURCE_NETWORK_ERROR, SOURCE_TIMEOUT,
-                    SOURCE_PAYLOAD_INVALID -> "source";
-            case ADAPTER_FIELD_MISSING, ADAPTER_TYPE_INVALID -> "adapter";
-            case PERSISTENCE_FAILED -> "persistence";
-            case QUERY_FAILED -> "query";
-            case INTERNAL_ERROR -> "internal";
-        });
-    }
-
-    private static Duration elapsed(long started) {
-        return Duration.ofNanos(Math.max(0L, System.nanoTime() - started));
-    }
-
-    private static String requestId() {
-        String value = MDC.get(RequestIdFilter.MDC_KEY);
-        if (value == null || value.isBlank()) {
-            throw new IllegalStateException("Request ID is unavailable");
+        if (criteria.annDateFrom() != null || criteria.annDateTo() != null) {
+            names.add("ann_date");
         }
-        return value;
+        return List.copyOf(names);
     }
 
-    private record Failure(ErrorCode code, String stage) {
+    private static void observationFailed(String operation) {
+        try {
+            LOGGER.warn("tensor.observation.failed operation={}", operation);
+        } catch (RuntimeException ignored) {
+            // Observability must never affect a completed business operation.
+        }
     }
 }

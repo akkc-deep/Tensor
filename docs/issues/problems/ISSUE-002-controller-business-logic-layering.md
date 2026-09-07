@@ -2,7 +2,7 @@
 
 ## 当前阶段
 
-[Controller 业务逻辑分层方案](../proposals/ISSUE-002-controller-service-layering.md) 已确认，待制定实施计划；尚未修改生产代码。
+已解决（2026-09-07）。已按[确认方案](../proposals/ISSUE-002-controller-service-layering.md)完成分层实现，638 项后端测试、170 项前端测试及 7 项 JAR 契约全部通过。实施步骤及证据见[实施计划](../../superpowers/plans/2026-09-07-issue-002-controller-service-layering.md)。
 
 ## 问题描述
 
@@ -10,7 +10,7 @@
 
 本问题关注业务职责从 Controller 下沉，不以减少代码行数或统一增加 `Service` 接口为目标。
 
-## 已知事实
+## 重构前已知事实
 
 ### `DataSourceController`
 
@@ -84,7 +84,6 @@
 
 ## 非目标
 
-- 不在本问题记录阶段修改生产代码。
 - 不改变数据库结构、插件协议或数据集元数据格式。
 - 不增加新的 API 功能。
 - 不因分层重构改变客户端可观察行为。
@@ -98,11 +97,12 @@
 - 失败由 `GlobalExceptionHandler` 记录，不再产生查询或下载失败指标。
 - 架构测试约束 Controller 依赖和 `OperationLogger` 的 Web 隔离，不限制 Web 层合理的 DTO 投影。
 - ISSUE-001 与本问题独立设计和实施，不在一次变更中同时调整输入模型与业务分层。
+- 2026-09-07 实施期间用户确认：先构造输入值对象和 `QueryCriteria`；同时存在非法查询输入和数据集缺失时，先返回 `PARAM_INVALID`。例如缺失数据集且 `page=0`，由原 `DATASET_MISCONFIGURED` 调整为 `PARAM_INVALID`；未知插件同时传入非法 API 名称也按此顺序返回 `PARAM_INVALID`。
 
-## 后续产物
+## 交付产物
 
 1. 已确认的 [Controller 业务逻辑分层方案](../proposals/ISSUE-002-controller-service-layering.md)。
-2. 保持 HTTP 契约兼容的实施计划。
+2. [实施计划与验收证据](../../superpowers/plans/2026-09-07-issue-002-controller-service-layering.md)。
 3. 可独立验收的 Controller、Service、可观测性和架构测试任务。
 4. 实现、回归测试及验收证据。
 
@@ -115,3 +115,13 @@
 - HTTP 契约、错误码、成功日志和成功/空结果指标保持兼容，失败指标按已确认方案取消。
 - 用例 Service、Controller 和架构边界测试通过完整后端验证。
 - 实施结果及验证证据已记录。
+
+## 实施结果
+
+- 新增 `MetadataQueryService`，元数据访问规则全部下沉到 Core。
+- 扩展 `DatasetQueryService`，共享 `QueryCapabilities`；查询、下载持久化错误码由 Service 负责。
+- 三个 Controller 只保留输入适配、用例调用、响应投影和成功记录；未新增 Service 接口或 Facade。
+- `OperationLogger` 改为显式成功记录器，隔离指标和日志后端异常，保留成功日志字段与指标。
+- 全局异常处理器删除路径推断，未知异常统一 `INTERNAL_ERROR`；操作级失败日志、指标和耗时按方案取消。
+- 架构约束、Controller 的 Service/DTO 失败路径、敏感参数过滤和完整后端回归均通过；独立代码审查无剩余问题。
+- `mvn -Pacceptance verify`、前端生产构建及 Git 格式/范围检查通过；新增文件已加入版本控制。
