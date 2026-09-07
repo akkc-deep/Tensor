@@ -85,7 +85,6 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.MDC;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 import org.springframework.core.env.MapPropertySource;
-import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
@@ -463,7 +462,8 @@ class DownloadControllerIT {
                             API_NAME,
                             Map.of("scenario", "PERSISTENCE_FAILURE"),
                             requestId()))
-                    .isInstanceOf(DataAccessException.class)
+                    .isInstanceOfSatisfying(TensorException.class, failure ->
+                            assertThat(failure.code()).isEqualTo(ErrorCode.PERSISTENCE_FAILED))
                     .hasRootCauseMessage("Fixture persistence failure");
         } finally {
             jdbc.execute("DROP TRIGGER IF EXISTS m09_t03_fail");
@@ -525,7 +525,7 @@ class DownloadControllerIT {
         OperationLogger operations = operationLogger();
         DownloadParameterResolver resolver = new DownloadParameterResolver(new DownloadDescriptorResolver(
                 new PluginRegistry(List.of(fixturePlugin)), new AdapterRegistry(List.of(fixtureAdapter))),
-                new ParameterValidator(), operations);
+                new ParameterValidator());
         ObjectMapper mapper = new ObjectMapper().registerModule(new DownloadBindingConfiguration()
                 .downloadRequestJacksonModule(new DownloadRequestDeserializer(resolver)));
         return MockMvcBuilders.standaloneSetup(new DownloadController(service, operations, resolver))

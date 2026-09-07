@@ -35,7 +35,6 @@ import com.akkc.tensor.plugin.api.dataset.FilterDefinition;
 import com.akkc.tensor.plugin.api.dataset.LogicalType;
 import com.akkc.tensor.plugin.api.descriptor.QueryMode;
 import com.akkc.tensor.plugin.api.error.ErrorCode;
-import com.akkc.tensor.plugin.api.error.TensorException;
 import com.akkc.tensor.plugin.api.model.ApiName;
 import com.akkc.tensor.plugin.api.model.DatasetKey;
 import com.akkc.tensor.plugin.api.model.PluginId;
@@ -157,7 +156,6 @@ class DatasetControllerIT {
                 .singleElement()
                 .satisfies(constructor -> assertThat(constructor.getParameterTypes())
                         .containsExactly(
-                                DatasetCatalog.class,
                                 DatasetQueryService.class,
                                 OperationLogger.class));
         assertThat(Arrays.stream(DatasetController.class.getDeclaredMethods())
@@ -353,9 +351,9 @@ class DatasetControllerIT {
     void rejectsUnsupportedAndInvalidParametersBeforeDatabaseAccess() throws Exception {
         Flow restricted = flow(List.of(definition("ts_code")));
         assertControlledError(restricted, get(PATH).param("tradeDateFrom", "2026-08-07"),
-                400, ErrorCode.PARAM_INVALID, "Query parameters are invalid");
+                400, ErrorCode.PARAM_INVALID, "Parameters are invalid");
         assertControlledError(restricted, get(PATH).param("annDateTo", "2026-08-07"),
-                400, ErrorCode.PARAM_INVALID, "Query parameters are invalid");
+                400, ErrorCode.PARAM_INVALID, "Parameters are invalid");
 
         Flow full = flow(List.of(definition("ts_code", "trade_date", "ann_date")));
         List<MockHttpServletRequestBuilder> invalid = List.of(
@@ -366,7 +364,7 @@ class DatasetControllerIT {
                 get(PATH).param("pageSize", "10"));
         for (MockHttpServletRequestBuilder request : invalid) {
             assertControlledError(full, request, 400, ErrorCode.PARAM_INVALID,
-                    "Query parameters are invalid");
+                    "Parameters are invalid");
         }
         for (MockHttpServletRequestBuilder request : List.of(
                 get(PATH).param("tradeDateFrom", "2026-02-30"),
@@ -390,7 +388,7 @@ class DatasetControllerIT {
         assertControlledError(missing, get(PATH), 409, ErrorCode.DATASET_MISCONFIGURED,
                 "Dataset metadata is unavailable");
         assertControlledError(missing, get(PATH).param("page", "0"),
-                409, ErrorCode.DATASET_MISCONFIGURED, "Dataset metadata is unavailable");
+                400, ErrorCode.PARAM_INVALID, "Parameters are invalid");
 
         Flow unsafe = flow(List.of(definition("note")));
         assertControlledError(unsafe, get(PATH), 409, ErrorCode.DATASET_MISCONFIGURED,
@@ -444,7 +442,7 @@ class DatasetControllerIT {
         "sql,SELECT 1,,1,50,none",
         "secret-parameter-name,secret-parameter-value,,1,50,none"
     })
-    void recordsRejectedQueryOnceWithoutInputValues(
+    void rejectsInvalidQueryWithoutOperationEvents(
             String name, String value, String filter, String page, String pageSize, String field)
             throws Exception {
         Flow flow = flow(List.of(definition("ts_code")));
@@ -464,33 +462,21 @@ class DatasetControllerIT {
                      "retryable":false,"fieldErrors":%s}
                     """.formatted(REQUEST_ID, fields)));
             assertThat(flow.dataSource().connectionCount()).isZero();
-            assertThat(log.events()).singleElement().satisfies(event -> {
-                assertThat(event.getFormattedMessage()).contains(
-                        "requestId=" + REQUEST_ID, "operation=query", "pluginId=fixture",
-                        "apiName=query_records", "filterNames=[" + (filter == null ? "" : filter) + "]",
-                        " page=" + page + " ", " pageSize=" + pageSize + " ",
-                        "resultCount=unavailable", "totalElements=unavailable",
-                        "outcome=failure", "failureStage=parameter", "errorCode=PARAM_INVALID")
-                        .doesNotContain("secret-", "OR 1=1", "SELECT 1", "2026-")
-                        .containsPattern("durationMs=\\d+");
-                assertThat(event.getThrowableProxy()).isNull();
-            });
+            assertThat(log.events()).isEmpty();
         }
-        assertQueryMetrics(flow, "failure");
+        assertThat(flow.registry().getMeters()).isEmpty();
     }
 
     @Test
-    void recordsReversedDateRangeOnce() throws Exception {
+    void rejectsReversedDateRangeWithoutOperationEvents() throws Exception {
         Flow flow = flow(List.of(definition("trade_date", "ann_date")));
         try (CapturedLog log = capturedLog()) {
             assertControlledError(flow, get(PATH).param("tradeDateFrom", "2026-08-08")
                             .param("tradeDateTo", "2026-08-07"),
-                    400, ErrorCode.PARAM_INVALID, "Query parameters are invalid");
-            assertThat(log.events()).singleElement().satisfies(event ->
-                    assertThat(event.getFormattedMessage()).contains(
-                            "failureStage=parameter", "errorCode=PARAM_INVALID"));
+                    400, ErrorCode.PARAM_INVALID, "Parameters are invalid");
+            assertThat(log.events()).isEmpty();
         }
-        assertQueryMetrics(flow, "failure");
+        assertThat(flow.registry().getMeters()).isEmpty();
     }
 
     @Test
@@ -537,12 +523,19 @@ class DatasetControllerIT {
                 assertThat(body.get("fieldErrors").get(0).get("field").textValue()).isEqualTo(name);
                 assertThat(flow.dataSource().connectionCount()).isZero();
             }
-            assertThat(log.events()).singleElement().satisfies(event ->
-                    assertThat(event.getFormattedMessage()).contains(
-                            "requestId=" + body.get("requestId").textValue(),
-                            "outcome=" + (expected == 200 ? "success" : "failure")));
+            if (expected == 200) {
+                assertThat(log.events()).singleElement().satisfies(event ->
+                        assertThat(event.getFormattedMessage()).contains(
+                                "requestId=" + body.get("requestId").textValue(), "outcome=success"));
+            } else {
+                assertThat(log.events()).isEmpty();
+            }
         }
-        assertQueryMetrics(flow, expected == 200 ? "success" : "failure");
+        if (expected == 200) {
+            assertQueryMetrics(flow, "success");
+        } else {
+            assertThat(flow.registry().getMeters()).isEmpty();
+        }
     }
 
     @Test
@@ -676,13 +669,10 @@ class DatasetControllerIT {
                 .andExpect(org.springframework.test.web.servlet.result.MockMvcResultMatchers
                         .status().is(status))
                 .andReturn();
-        assertThat(result.getResolvedException())
-                .isInstanceOf(TensorException.class)
-                .satisfies(exception -> {
-                    TensorException tensorException = (TensorException) exception;
-                    assertThat(tensorException.code()).isEqualTo(code);
-                    assertThat(tensorException).hasMessage(message);
-                });
+        JsonNode body = flow.objectMapper().readTree(result.getResponse().getContentAsByteArray());
+        assertThat(body.get("code").asText()).isEqualTo(code.name());
+        assertThat(body.get("message").asText()).isEqualTo(message);
+        assertThat(body.get("fieldErrors")).isEmpty();
         assertThat(flow.dataSource().connectionCount()).isZero();
     }
 
@@ -744,7 +734,7 @@ class DatasetControllerIT {
         SimpleMeterRegistry registry = new SimpleMeterRegistry();
         StandaloneMockMvcBuilder builder = MockMvcBuilders
                 .standaloneSetup(new DatasetController(
-                        catalog, queryService, operationLogger(registry)))
+                        queryService, operationLogger(registry)))
                 .setCustomArgumentResolvers(new DatasetRequestArgumentResolver())
                 .setMessageConverters(new MappingJackson2HttpMessageConverter(objectMapper));
         if (installRequestIdFilter) {

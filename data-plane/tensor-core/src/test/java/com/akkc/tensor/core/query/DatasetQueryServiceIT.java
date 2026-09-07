@@ -16,6 +16,8 @@ import com.akkc.tensor.plugin.api.dataset.DatasetDefinition;
 import com.akkc.tensor.plugin.api.dataset.FilterDefinition;
 import com.akkc.tensor.plugin.api.dataset.LogicalType;
 import com.akkc.tensor.plugin.api.descriptor.QueryMode;
+import com.akkc.tensor.plugin.api.error.ErrorCode;
+import com.akkc.tensor.plugin.api.error.TensorException;
 import com.akkc.tensor.plugin.api.model.ApiName;
 import com.akkc.tensor.plugin.api.model.DatasetKey;
 import com.akkc.tensor.plugin.api.model.PluginId;
@@ -149,8 +151,11 @@ class DatasetQueryServiceIT {
         assertThatNullPointerException().isThrownBy(() -> service.query(compositeDefinition().datasetKey(), null))
                 .withMessage("criteria");
         DatasetKey unknown = new DatasetKey(new PluginId("m06"), new ApiName("unknown_query"));
-        assertThatIllegalArgumentException().isThrownBy(() -> service.query(unknown, criteria))
-                .withMessage("Dataset is not available");
+        assertThatThrownBy(() -> service.query(unknown, criteria))
+                .isInstanceOfSatisfying(TensorException.class, exception -> {
+                    assertThat(exception.code()).isEqualTo(ErrorCode.DATASET_MISCONFIGURED);
+                    assertThat(exception).hasMessage("Dataset metadata is unavailable");
+                });
         assertThat(rejecting.attempts()).isZero();
 
         List<String> mutableColumns = new ArrayList<>(List.of("value"));

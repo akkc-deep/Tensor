@@ -10,17 +10,14 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 public final class QuerySqlFactory {
-    private static final Set<String> SUPPORTED_FILTERS = Set.of("ts_code", "trade_date", "ann_date");
     private final SqlIdentifierPolicy identifiers = new SqlIdentifierPolicy();
 
     public QuerySql create(DatasetDefinition definition, QueryCriteria criteria) {
         Objects.requireNonNull(definition, "definition");
         Objects.requireNonNull(criteria, "criteria");
 
-        Set<String> filters = definition.filters().stream()
-                .map(filter -> filter.field())
-                .collect(Collectors.toUnmodifiableSet());
-        if (!SUPPORTED_FILTERS.containsAll(filters)) {
+        Set<String> filters = QueryCapabilities.filterNames(definition);
+        if (!QueryCapabilities.supports(definition)) {
             throw new IllegalArgumentException("Unsupported dataset filter metadata");
         }
 

@@ -6,8 +6,6 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import com.akkc.tensor.core.registry.AdapterRegistry;
 import com.akkc.tensor.core.registry.PluginRegistry;
 import com.akkc.tensor.core.validation.ParameterValidator;
-import com.akkc.tensor.observability.OperationLogger;
-import com.akkc.tensor.observability.TensorMetrics;
 import com.akkc.tensor.plugin.api.DataSourcePlugin;
 import com.akkc.tensor.plugin.api.dataset.DatasetDefinition;
 import com.akkc.tensor.plugin.api.descriptor.ApiDescriptor;
@@ -21,7 +19,6 @@ import com.akkc.tensor.plugin.api.model.ApiName;
 import com.akkc.tensor.plugin.fixture.FixtureConfiguration;
 import com.akkc.tensor.plugin.tushare.TusharePluginConfiguration;
 import com.akkc.tensor.web.download.DownloadParameters.*;
-import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -144,9 +141,7 @@ class DownloadParameterResolverTest {
             }
         };
         PluginRegistry plugins = new PluginRegistry(List.of(plugin));
-        PluginRegistry noMetrics = new PluginRegistry(List.of());
-        OperationLogger logger = new OperationLogger(noMetrics, new TensorMetrics(new SimpleMeterRegistry(), noMetrics));
         return new DownloadParameterResolver(new DownloadDescriptorResolver(plugins,
-                new AdapterRegistry(List.of(fixture.fixtureDatasetAdapter()))), VALIDATOR, logger);
+                new AdapterRegistry(List.of(fixture.fixtureDatasetAdapter()))), VALIDATOR);
     }
 }

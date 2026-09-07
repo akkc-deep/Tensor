@@ -66,8 +66,8 @@ class DownloadRequestBindingTest {
     // Changing binding order must not replace an earlier required/access error with a type error.
     @ParameterizedTest
     @MethodSource("invalidRequests")
-    void preservesErrorPriorityFieldsAndOneCompletionEvent(
-            String body, String code, String fields, boolean available, boolean adapters, int events)
+    void preservesErrorPriorityAndFieldsWithoutOperationEvents(
+            String body, String code, String fields, boolean available, boolean adapters)
             throws Exception {
         try (Flow flow = flow(available, adapters)) {
             var response = flow.mvc().perform(post("/api/v1/downloads")
@@ -76,10 +76,8 @@ class DownloadRequestBindingTest {
             assertThat(response.getStatus()).isEqualTo(code.startsWith("PARAM_") ? 400 : 409);
             assertThat(error.path("code").asText()).isEqualTo(code);
             assertThat(error.path("fieldErrors")).isEqualTo(flow.mapper().readTree(fields));
-            assertThat(flow.completed()).hasSize(events);
-            if (events != 0) {
-                assertThat(flow.completed().getFirst()).contains("errorCode=" + code);
-            }
+            assertThat(flow.completed()).isEmpty();
+            assertThat(flow.registry().getMeters()).isEmpty();
         }
     }
 
@@ -98,25 +96,25 @@ class DownloadRequestBindingTest {
     static Stream<Arguments> invalidRequests() {
         return Stream.of(
                 invalid("{\"params\":[],\"pluginId\":\"tushare_pro\",\"apiName\":\"daily\",\"params\":{\"trade_date\":\"20260905\"}}",
-                        "PARAM_INVALID", "request:has invalid value", true, true, 0),
-                invalid("{}", "PARAM_REQUIRED", "apiName:is required,params:is required,pluginId:is required", true, true, 0),
-                invalid("{\"pluginId\":\"\",\"params\":{}}", "PARAM_INVALID", "apiName:is required,pluginId:has invalid value", true, true, 0),
-                invalid("{\"pluginId\":\"Invalid\",\"apiName\":\"daily\",\"params\":null}", "PARAM_INVALID", "params:is required,pluginId:has invalid value", true, true, 0),
-                invalid("{\"pluginId\":\"Invalid\",\"params\":[]}", "PARAM_INVALID", "request:has invalid value", true, true, 0),
-                invalid(request("daily", "{}"), "PARAM_REQUIRED", "trade_date:is required", true, true, 1),
-                invalid(request("daily", "{\"ann_date\":123}"), "PARAM_REQUIRED", "trade_date:is required", true, true, 1),
-                invalid(request("income", "{\"ts_code\":123}"), "PARAM_REQUIRED", "ann_date:is required", true, true, 1),
-                invalid(request("income", "{\"ts_code\":123,\"ann_date\":\"invalid\",\"extra\":1}"), "PARAM_INVALID", "extra:is not declared,ts_code:has invalid value,ann_date:has invalid value", true, true, 1),
-                invalid(request("daily", "{\"trade_date\":123}"), "PARAM_INVALID", "trade_date:has invalid value", true, true, 1),
-                invalid(request("daily", "{\"trade_date\":true}"), "PARAM_INVALID", "trade_date:has invalid value", true, true, 1),
-                invalid(request("daily", "{\"trade_date\":[]}"), "PARAM_INVALID", "trade_date:has invalid value", true, true, 1),
-                invalid(request("daily", "{\"trade_date\":{}}"), "PARAM_INVALID", "trade_date:has invalid value", true, true, 1),
-                invalid(request("daily", "{\"trade_date\":null,\"unknown\":1}"), "PARAM_REQUIRED", "trade_date:is required", true, true, 1),
-                invalid(request("daily", "{\"trade_date\":\"20260230\",\"bad-field\":1}"), "PARAM_INVALID", "params:contains an invalid field name,trade_date:has invalid value", true, true, 1),
-                invalid(request("namechange", "{\"start_date\":\"20260907\",\"end_date\":\"20260906\"}"), "PARAM_INVALID", "start_date:must not be after end_date", true, true, 1),
-                invalid(request("daily", "{\"trade_date\":123}"), "PLUGIN_DISABLED", "", false, true, 1),
-                invalid(request("missing_api", "{\"trade_date\":123}"), "DATASET_MISCONFIGURED", "", true, true, 0),
-                invalid(request("daily", "{\"trade_date\":123}"), "DATASET_MISCONFIGURED", "", true, false, 1));
+                        "PARAM_INVALID", "request:has invalid value", true, true),
+                invalid("{}", "PARAM_REQUIRED", "apiName:is required,params:is required,pluginId:is required", true, true),
+                invalid("{\"pluginId\":\"\",\"params\":{}}", "PARAM_INVALID", "apiName:is required,pluginId:has invalid value", true, true),
+                invalid("{\"pluginId\":\"Invalid\",\"apiName\":\"daily\",\"params\":null}", "PARAM_INVALID", "params:is required,pluginId:has invalid value", true, true),
+                invalid("{\"pluginId\":\"Invalid\",\"params\":[]}", "PARAM_INVALID", "request:has invalid value", true, true),
+                invalid(request("daily", "{}"), "PARAM_REQUIRED", "trade_date:is required", true, true),
+                invalid(request("daily", "{\"ann_date\":123}"), "PARAM_REQUIRED", "trade_date:is required", true, true),
+                invalid(request("income", "{\"ts_code\":123}"), "PARAM_REQUIRED", "ann_date:is required", true, true),
+                invalid(request("income", "{\"ts_code\":123,\"ann_date\":\"invalid\",\"extra\":1}"), "PARAM_INVALID", "extra:is not declared,ts_code:has invalid value,ann_date:has invalid value", true, true),
+                invalid(request("daily", "{\"trade_date\":123}"), "PARAM_INVALID", "trade_date:has invalid value", true, true),
+                invalid(request("daily", "{\"trade_date\":true}"), "PARAM_INVALID", "trade_date:has invalid value", true, true),
+                invalid(request("daily", "{\"trade_date\":[]}"), "PARAM_INVALID", "trade_date:has invalid value", true, true),
+                invalid(request("daily", "{\"trade_date\":{}}"), "PARAM_INVALID", "trade_date:has invalid value", true, true),
+                invalid(request("daily", "{\"trade_date\":null,\"unknown\":1}"), "PARAM_REQUIRED", "trade_date:is required", true, true),
+                invalid(request("daily", "{\"trade_date\":\"20260230\",\"bad-field\":1}"), "PARAM_INVALID", "params:contains an invalid field name,trade_date:has invalid value", true, true),
+                invalid(request("namechange", "{\"start_date\":\"20260907\",\"end_date\":\"20260906\"}"), "PARAM_INVALID", "start_date:must not be after end_date", true, true),
+                invalid(request("daily", "{\"trade_date\":123}"), "PLUGIN_DISABLED", "", false, true),
+                invalid(request("missing_api", "{\"trade_date\":123}"), "DATASET_MISCONFIGURED", "", true, true),
+                invalid(request("daily", "{\"trade_date\":123}"), "DATASET_MISCONFIGURED", "", true, false));
     }
 
     @ParameterizedTest
@@ -140,12 +138,12 @@ class DownloadRequestBindingTest {
     }
 
     private static Arguments invalid(String body, String code, String errors,
-            boolean available, boolean adapters, int events) {
+            boolean available, boolean adapters) {
         String fields = errors.isEmpty() ? "[]" : Stream.of(errors.split(","))
                 .map(value -> value.split(":", 2))
                 .map(pair -> "{\"field\":\"" + pair[0] + "\",\"message\":\"" + pair[1] + "\"}")
                 .collect(java.util.stream.Collectors.joining(",", "[", "]"));
-        return Arguments.of(body, code, fields, available, adapters, events);
+        return Arguments.of(body, code, fields, available, adapters);
     }
 
     private static String request(String api, String params) {
@@ -173,11 +171,12 @@ class DownloadRequestBindingTest {
                 .<DatasetAdapter>map(definition -> new GenericDatasetAdapter(
                         definition, new ValueConverter(), new FingerprintKeyCodec())).toList() : List.of());
         ParameterValidator validator = new ParameterValidator();
-        OperationLogger operations = new OperationLogger(plugins, new TensorMetrics(new SimpleMeterRegistry(), plugins));
+        SimpleMeterRegistry registry = new SimpleMeterRegistry();
+        OperationLogger operations = new OperationLogger(plugins, new TensorMetrics(registry, plugins));
         DownloadService service = new DownloadService(plugins, adapters, validator,
                 mock(PersistenceService.class), Clock.systemUTC());
         DownloadParameterResolver resolver = new DownloadParameterResolver(
-                new DownloadDescriptorResolver(plugins, adapters), validator, operations);
+                new DownloadDescriptorResolver(plugins, adapters), validator);
         ObjectMapper mapper = new ObjectMapper().registerModule(new DownloadBindingConfiguration()
                 .downloadRequestJacksonModule(new DownloadRequestDeserializer(resolver)));
         LocalValidatorFactoryBean beanValidator = new LocalValidatorFactoryBean();
@@ -190,11 +189,11 @@ class DownloadRequestBindingTest {
         ListAppender<ILoggingEvent> appender = new ListAppender<>();
         appender.start();
         logger.addAppender(appender);
-        return new Flow(mvc, mapper, beanValidator, logger, appender);
+        return new Flow(mvc, mapper, beanValidator, registry, logger, appender);
     }
 
     private record Flow(MockMvc mvc, ObjectMapper mapper, LocalValidatorFactoryBean validator,
-            Logger logger, ListAppender<ILoggingEvent> appender) implements AutoCloseable {
+            SimpleMeterRegistry registry, Logger logger, ListAppender<ILoggingEvent> appender) implements AutoCloseable {
         List<String> completed() {
             return appender.list.stream().map(ILoggingEvent::getFormattedMessage)
                     .filter(message -> message.startsWith("tensor.operation.completed")).toList();
@@ -203,6 +202,7 @@ class DownloadRequestBindingTest {
             logger.detachAppender(appender);
             appender.stop();
             validator.close();
+            registry.close();
         }
     }
 }

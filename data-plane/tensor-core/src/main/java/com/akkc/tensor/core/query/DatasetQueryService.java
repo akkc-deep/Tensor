@@ -2,6 +2,8 @@ package com.akkc.tensor.core.query;
 
 import com.akkc.tensor.core.catalog.DatasetCatalog;
 import com.akkc.tensor.plugin.api.dataset.DatasetDefinition;
+import com.akkc.tensor.plugin.api.error.ErrorCode;
+import com.akkc.tensor.plugin.api.error.TensorException;
 import com.akkc.tensor.plugin.api.model.DatasetKey;
 import java.util.List;
 import java.util.Objects;
@@ -21,9 +23,20 @@ public final class DatasetQueryService {
         Objects.requireNonNull(key, "key");
         Objects.requireNonNull(criteria, "criteria");
         DatasetDefinition definition = datasetCatalog.find(key)
-                .orElseThrow(() -> new IllegalArgumentException("Dataset is not available"));
+                .orElseThrow(() -> access(ErrorCode.DATASET_MISCONFIGURED));
+        if (!QueryCapabilities.supports(definition)) {
+            throw access(ErrorCode.DATASET_MISCONFIGURED);
+        }
+        if (!QueryCapabilities.accepts(definition, criteria)) {
+            throw access(ErrorCode.PARAM_INVALID);
+        }
         QuerySql querySql = querySqlFactory.create(definition, criteria);
-        long totalElements = repository.count(querySql);
+        long totalElements;
+        try {
+            totalElements = repository.count(querySql);
+        } catch (RuntimeException exception) {
+            throw queryFailure(exception);
+        }
         List<String> columns = GenericQueryRepository.columns(definition);
         if (totalElements == 0) {
             return new DatasetPage(columns, List.of(), 1, criteria.pageSize(), 0, 0);
@@ -42,12 +55,36 @@ public final class DatasetQueryService {
                     criteria.pageSize());
             querySql = querySqlFactory.create(definition, normalized);
         }
-        return new DatasetPage(
-                columns,
-                repository.query(definition, querySql),
-                page,
-                criteria.pageSize(),
-                totalElements,
-                totalPages);
+        try {
+            return new DatasetPage(
+                    columns,
+                    repository.query(definition, querySql),
+                    page,
+                    criteria.pageSize(),
+                    totalElements,
+                    totalPages);
+        } catch (RuntimeException exception) {
+            throw queryFailure(exception);
+        }
+    }
+
+    private static QueryAccessException access(ErrorCode code) {
+        return new QueryAccessException(
+                code,
+                code == ErrorCode.PARAM_INVALID
+                        ? "Query parameters are invalid"
+                        : "Dataset metadata is unavailable");
+    }
+
+    private static QueryAccessException queryFailure(RuntimeException cause) {
+        QueryAccessException exception = new QueryAccessException(ErrorCode.QUERY_FAILED, "Dataset query failed");
+        exception.initCause(cause);
+        return exception;
+    }
+
+    private static final class QueryAccessException extends TensorException {
+        private QueryAccessException(ErrorCode code, String message) {
+            super(code, message);
+        }
     }
 }

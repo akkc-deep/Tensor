@@ -2,7 +2,7 @@
 
 关联问题：[ISSUE-002：Controller 承担过多业务逻辑](../problems/ISSUE-002-controller-business-logic-layering.md)
 
-方案状态：已确认，待制定实施计划。
+方案状态：已实现并通过完整验收（2026-09-07）。参见[实施计划](../../superpowers/plans/2026-09-07-issue-002-controller-service-layering.md)。
 
 ## 方案结论
 
@@ -109,6 +109,8 @@ operationLogger.recordQuerySuccess(
 
 return response;
 ```
+
+实施补充（2026-09-07 用户确认）：Controller 先构造并校验输入值对象和 `QueryCriteria`，因此非法查询输入优先于数据集访问错误。例如数据集不存在且 `page=0` 时返回 `PARAM_INVALID`。
 
 先完成核心查询和响应投影，再记录成功，避免查询失败或 DTO 投影失败时误记成功。`OperationLogger` 不放入 `finally`，因为失败时不存在合法 `DatasetPage`，且日志异常不应覆盖原业务异常。
 

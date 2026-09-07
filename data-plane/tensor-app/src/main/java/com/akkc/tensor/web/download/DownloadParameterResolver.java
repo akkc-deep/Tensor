@@ -1,7 +1,6 @@
 package com.akkc.tensor.web.download;
 
 import com.akkc.tensor.core.validation.ParameterValidator;
-import com.akkc.tensor.observability.OperationLogger;
 import com.akkc.tensor.plugin.api.descriptor.ApiDescriptor;
 import com.akkc.tensor.plugin.api.error.TensorException;
 import com.akkc.tensor.plugin.api.model.DatasetKey;
@@ -13,15 +12,13 @@ import java.util.stream.Collectors;
 public final class DownloadParameterResolver {
     private final DownloadDescriptorResolver descriptors;
     private final ParameterValidator validator;
-    private final OperationLogger operations;
     private final Map<ParameterShape, ParameterCodec<?>> byShape;
     private final Map<Class<?>, ParameterCodec<?>> byType;
 
     public DownloadParameterResolver(DownloadDescriptorResolver descriptors,
-            ParameterValidator validator, OperationLogger operations) {
+            ParameterValidator validator) {
         this.descriptors = descriptors;
         this.validator = validator;
-        this.operations = operations;
         var codecs = ParameterCodec.supported();
         byShape = codecs.stream().collect(Collectors.toUnmodifiableMap(ParameterCodec::shape, Function.identity()));
         byType = codecs.stream().collect(Collectors.toUnmodifiableMap(ParameterCodec::parameterType, Function.identity()));
@@ -36,10 +33,7 @@ public final class DownloadParameterResolver {
             }
             return codec.read(new ParameterJsonReader(values, api, validator));
         } catch (TensorException failure) {
-            // Binding failures do not reach the Controller; emit the existing failure event here.
-            DownloadBindingException binding = DownloadBindingException.from(failure);
-            operations.download(dataset, values, () -> { throw binding; });
-            throw binding;
+            throw DownloadBindingException.from(failure);
         }
     }
 

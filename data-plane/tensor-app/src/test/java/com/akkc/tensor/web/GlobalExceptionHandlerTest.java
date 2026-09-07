@@ -12,9 +12,8 @@ import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.read.ListAppender;
 import com.akkc.tensor.config.WebSecurityHeadersConfiguration;
-import com.akkc.tensor.core.catalog.DatasetCatalog;
+import com.akkc.tensor.core.metadata.MetadataQueryService;
 import com.akkc.tensor.core.query.DatasetQueryService;
-import com.akkc.tensor.core.registry.PluginRegistry;
 import com.akkc.tensor.core.validation.ParameterValidator;
 import com.akkc.tensor.observability.OperationLogger;
 import com.akkc.tensor.plugin.api.descriptor.ApiDescriptor;
@@ -244,11 +243,11 @@ class GlobalExceptionHandlerTest {
 
     @ParameterizedTest
     @CsvSource({
-        "POST,/api/v1/downloads,PERSISTENCE_FAILED",
-        "GET,/api/v1/data-sources/test/datasets/test/records,QUERY_FAILED",
+        "POST,/api/v1/downloads,INTERNAL_ERROR",
+        "GET,/api/v1/data-sources/test/datasets/test/records,INTERNAL_ERROR",
         "GET,/test/unknown,INTERNAL_ERROR"
     })
-    void classifiesUntypedFailuresByExactOperation(
+    void mapsUntypedFailuresToInternalErrorRegardlessOfRoute(
             String method, String path, ErrorCode code) throws Exception {
         MockHttpServletRequestBuilder request = MockMvcRequestBuilders.request(
                 HttpMethod.valueOf(method), URI.create(path));
@@ -273,13 +272,12 @@ class GlobalExceptionHandlerTest {
     @MethodSource("unsupportedDatasetMethods")
     void rejectsUnsupportedDatasetMethodsBeforeBusinessAccess(String method, String path)
             throws Exception {
-        PluginRegistry plugins = mock(PluginRegistry.class);
-        DatasetCatalog catalog = mock(DatasetCatalog.class);
+        MetadataQueryService metadata = mock(MetadataQueryService.class);
         DatasetQueryService queries = mock(DatasetQueryService.class);
         OperationLogger operations = mock(OperationLogger.class);
         MockMvc mvc = MockMvcBuilders.standaloneSetup(
-                        new DataSourceController(plugins, catalog),
-                        new DatasetController(catalog, queries, operations))
+                        new DataSourceController(metadata),
+                        new DatasetController(queries, operations))
                 .setControllerAdvice(new GlobalExceptionHandler())
                 .addFilters(new RequestIdFilter(),
                         new WebSecurityHeadersConfiguration().securityHeadersFilter().getFilter())
@@ -303,7 +301,7 @@ class GlobalExceptionHandlerTest {
                 .isEqualTo("camera=(), microphone=(), geolocation=()");
         assertThat(result.getResponse().getHeader("Cross-Origin-Opener-Policy"))
                 .isEqualTo("same-origin");
-        verifyNoInteractions(plugins, catalog, queries, operations);
+        verifyNoInteractions(metadata, queries, operations);
     }
 
     private static Stream<Arguments> unsupportedDatasetMethods() {

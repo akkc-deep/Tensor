@@ -2,11 +2,13 @@ package com.akkc.tensor.web;
 
 import com.akkc.tensor.core.download.DownloadService;
 import com.akkc.tensor.observability.OperationLogger;
+import com.akkc.tensor.plugin.api.download.DownloadResult;
 import com.akkc.tensor.plugin.api.model.DatasetKey;
 import com.akkc.tensor.plugin.api.model.RequestId;
 import com.akkc.tensor.web.download.DownloadParameterResolver;
 import com.akkc.tensor.web.dto.DownloadRequest;
 import com.akkc.tensor.web.dto.DownloadResponse;
+import java.time.Duration;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
@@ -43,8 +45,12 @@ public final class DownloadController {
         DatasetKey key = request.dataset();
         Map<String, Object> parameters = parameterResolver.toRawValues(request.params(), request.suppliedFields());
         RequestId requestId = new RequestId(UUID.fromString(value));
-        return operationLogger.download(key, parameters, () -> DownloadResponse.from(
-                downloadService.execute(
-                        key.pluginId(), key.apiName(), parameters, requestId)));
+        long started = System.nanoTime();
+        DownloadResult result = downloadService.execute(
+                key.pluginId(), key.apiName(), parameters, requestId);
+        Duration duration = Duration.ofNanos(System.nanoTime() - started);
+        DownloadResponse response = DownloadResponse.from(result);
+        operationLogger.recordDownloadSuccess(requestId, key, parameters, result, duration);
+        return response;
     }
 }

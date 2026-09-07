@@ -16,6 +16,7 @@ import com.akkc.tensor.web.dto.DownloadRequest;
 import com.akkc.tensor.core.catalog.DatasetCatalog;
 import com.akkc.tensor.core.download.DownloadService;
 import com.akkc.tensor.core.query.DatasetQueryService;
+import com.akkc.tensor.core.metadata.MetadataQueryService;
 import com.akkc.tensor.core.registry.AdapterRegistry;
 import com.akkc.tensor.core.registry.PluginRegistry;
 import com.akkc.tensor.plugin.api.DatasetAdapter;
@@ -170,6 +171,7 @@ class ProductionApplicationContextIT {
         assertUnique(context, AdapterRegistry.class);
         assertUnique(context, DownloadService.class);
         assertUnique(context, DatasetQueryService.class);
+        assertUnique(context, MetadataQueryService.class);
         assertUnique(context, TensorMetrics.class);
         assertUnique(context, OperationLogger.class);
         assertUnique(context, DataSourceController.class);

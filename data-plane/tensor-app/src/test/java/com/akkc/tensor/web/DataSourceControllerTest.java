@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 
 import com.akkc.tensor.core.catalog.DatasetCatalog;
+import com.akkc.tensor.core.metadata.MetadataQueryService;
 import com.akkc.tensor.core.registry.PluginRegistry;
 import com.akkc.tensor.plugin.api.dataset.BusinessKeyDefinition;
 import com.akkc.tensor.plugin.api.dataset.BusinessKeyMode;
@@ -62,8 +63,9 @@ class DataSourceControllerTest {
 
     @BeforeEach
     void setUp() {
-        DataSourceController controller = new DataSourceController(pluginRegistry, datasetCatalog);
+        DataSourceController controller = new DataSourceController(new MetadataQueryService(pluginRegistry, datasetCatalog));
         mockMvc = MockMvcBuilders.standaloneSetup(controller)
+                .setControllerAdvice(new GlobalExceptionHandler())
                 .setCustomArgumentResolvers(new DatasetRequestArgumentResolver())
                 .setMessageConverters(new MappingJackson2HttpMessageConverter(objectMapper))
                 .addFilters(new RequestIdFilter())
@@ -300,12 +302,15 @@ class DataSourceControllerTest {
     }
 
     @Test
-    void checksTheRawPluginPathBeforeParsingAMalformedApiName() throws Exception {
-        org.mockito.Mockito.when(pluginRegistry.descriptors()).thenReturn(List.of(
-                descriptor("other_plugin", true, true, true, null, List.of(), List.of())));
+    void rejectsMalformedApiNameBeforeMetadataAccess() throws Exception {
+        MvcResult result = mockMvc.perform(get("/api/v1/data-sources/unknown/datasets/INVALID")
+                        .header(RequestIdFilter.HEADER_NAME, REQUEST_ID)).andReturn();
 
-        assertConflict("/api/v1/data-sources/unknown/datasets/INVALID",
-                ErrorCode.DATASET_MISCONFIGURED);
+        assertThat(result.getResponse().getStatus()).isEqualTo(400);
+        JsonNode body = objectMapper.readTree(result.getResponse().getContentAsByteArray());
+        assertThat(body.get("code").asText()).isEqualTo("PARAM_INVALID");
+        assertThat(body.get("fieldErrors")).isEmpty();
+        org.mockito.Mockito.verifyNoInteractions(pluginRegistry, datasetCatalog);
     }
 
     @Test

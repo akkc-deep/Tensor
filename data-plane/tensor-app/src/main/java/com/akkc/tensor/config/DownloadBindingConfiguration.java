@@ -3,7 +3,6 @@ package com.akkc.tensor.config;
 import com.akkc.tensor.core.registry.AdapterRegistry;
 import com.akkc.tensor.core.registry.PluginRegistry;
 import com.akkc.tensor.core.validation.ParameterValidator;
-import com.akkc.tensor.observability.OperationLogger;
 import com.akkc.tensor.web.download.DownloadDescriptorResolver;
 import com.akkc.tensor.web.download.DownloadParameterResolver;
 import com.akkc.tensor.web.download.DownloadRequestDeserializer;
@@ -24,8 +23,8 @@ public final class DownloadBindingConfiguration {
 
     @Bean
     public DownloadParameterResolver downloadParameterResolver(DownloadDescriptorResolver descriptors,
-            ParameterValidator validator, OperationLogger operations) {
-        return new DownloadParameterResolver(descriptors, validator, operations);
+            ParameterValidator validator) {
+        return new DownloadParameterResolver(descriptors, validator);
     }
 
     @Bean
