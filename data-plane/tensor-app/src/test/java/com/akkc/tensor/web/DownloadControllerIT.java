@@ -13,6 +13,14 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.akkc.tensor.config.DownloadBindingConfiguration;
+import com.akkc.tensor.web.download.DownloadDescriptorResolver;
+import com.akkc.tensor.web.download.DownloadParameterResolver;
+import com.akkc.tensor.web.download.DownloadRequestDeserializer;
+import com.akkc.tensor.web.download.DownloadParameters.ScenarioParameters;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
+import java.util.Set;
 import com.akkc.tensor.core.adapter.GenericDatasetAdapter;
 import com.akkc.tensor.core.catalog.DatasetCatalog;
 import com.akkc.tensor.core.catalog.DatasetStartupValidator;
@@ -183,7 +191,7 @@ class DownloadControllerIT {
         assertThat(DownloadController.class.getConstructors())
                 .singleElement()
                 .satisfies(constructor -> assertThat(constructor.getParameterTypes())
-                        .containsExactly(DownloadService.class, OperationLogger.class));
+                        .containsExactly(DownloadService.class, OperationLogger.class, DownloadParameterResolver.class));
         assertThat(Arrays.stream(DownloadController.class.getDeclaredMethods())
                 .filter(method -> Modifier.isPublic(method.getModifiers())))
                 .singleElement()
@@ -193,18 +201,13 @@ class DownloadControllerIT {
                     assertThat(method.getReturnType()).isEqualTo(DownloadResponse.class);
                 });
 
-        LinkedHashMap<String, Object> source = new LinkedHashMap<>();
-        source.put("scenario", "SUCCESS");
-        source.put("requested_by", "test");
-        DownloadRequest request = new DownloadRequest("fixture", "fixture_daily", source);
-        source.put("extra", "not-copied");
-        assertThat(request.params()).containsExactly(
-                Map.entry("scenario", "SUCCESS"), Map.entry("requested_by", "test"));
-        assertThatThrownBy(() -> request.params().put("other", "value"))
+        var suppliedFields = new java.util.HashSet<>(Set.of("scenario"));
+        DownloadRequest request = new DownloadRequest(DATASET_KEY, new ScenarioParameters("SUCCESS"), suppliedFields);
+        suppliedFields.clear();
+        assertThat(request.params()).isEqualTo(new ScenarioParameters("SUCCESS"));
+        assertThat(request.suppliedFields()).containsExactly("scenario");
+        assertThatThrownBy(() -> request.suppliedFields().clear())
                 .isInstanceOf(UnsupportedOperationException.class);
-        assertThat(beanValidator.validate(new DownloadRequest("Fixture", "FIXTURE", null)))
-                .extracting(violation -> violation.getPropertyPath().toString())
-                .contains("pluginId", "apiName", "params");
 
         RequestId requestId = requestId();
         DownloadResponse empty = DownloadResponse.from(new DownloadResult(
@@ -519,7 +522,15 @@ class DownloadControllerIT {
     }
 
     private static MockMvc mockMvc(DownloadService service) {
-        return MockMvcBuilders.standaloneSetup(new DownloadController(service, operationLogger()))
+        OperationLogger operations = operationLogger();
+        DownloadParameterResolver resolver = new DownloadParameterResolver(new DownloadDescriptorResolver(
+                new PluginRegistry(List.of(fixturePlugin)), new AdapterRegistry(List.of(fixtureAdapter))),
+                new ParameterValidator(), operations);
+        ObjectMapper mapper = new ObjectMapper().registerModule(new DownloadBindingConfiguration()
+                .downloadRequestJacksonModule(new DownloadRequestDeserializer(resolver)));
+        return MockMvcBuilders.standaloneSetup(new DownloadController(service, operations, resolver))
+                .setMessageConverters(new MappingJackson2HttpMessageConverter(mapper))
+                .setControllerAdvice(new GlobalExceptionHandler())
                 .setValidator(beanValidator)
                 .addFilters(new RequestIdFilter())
                 .build();

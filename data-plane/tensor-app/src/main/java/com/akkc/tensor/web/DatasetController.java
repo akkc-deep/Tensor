@@ -11,6 +11,7 @@ import com.akkc.tensor.plugin.api.error.TensorException;
 import com.akkc.tensor.plugin.api.model.ApiName;
 import com.akkc.tensor.plugin.api.model.DatasetKey;
 import com.akkc.tensor.plugin.api.model.PluginId;
+import com.akkc.tensor.web.dto.DatasetRecordsRequest;
 import com.akkc.tensor.web.dto.PageResponse;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -23,13 +24,10 @@ import java.util.stream.Collectors;
 import org.slf4j.MDC;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.http.HttpStatus;
-import org.springframework.util.MultiValueMap;
 import org.springframework.util.NumberUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
@@ -58,16 +56,13 @@ public final class DatasetController {
     }
 
     @GetMapping("/{pluginId}/datasets/{apiName}/records")
-    public PageResponse listDatasetRecords(
-            @PathVariable("pluginId") String pluginId,
-            @PathVariable("apiName") String apiName,
-            @RequestParam(value = "tsCode", required = false) String tsCode,
-            @RequestParam MultiValueMap<String, String> parameters) {
-        String tradeDateFromValue = parameters.getFirst("tradeDateFrom");
-        String tradeDateToValue = parameters.getFirst("tradeDateTo");
-        String annDateFromValue = parameters.getFirst("annDateFrom");
-        String annDateToValue = parameters.getFirst("annDateTo");
-        DatasetKey key = key(pluginId, apiName);
+    public PageResponse listDatasetRecords(DatasetRecordsRequest request) {
+        String tsCode = request.tsCode();
+        String tradeDateFromValue = request.tradeDate().from();
+        String tradeDateToValue = request.tradeDate().to();
+        String annDateFromValue = request.annDate().from();
+        String annDateToValue = request.annDate().to();
+        DatasetKey key = key(request.path().pluginId(), request.path().apiName());
         String requestId = MDC.get(RequestIdFilter.MDC_KEY);
         if (requestId == null) {
             throw new IllegalStateException("Request ID is unavailable");
@@ -82,8 +77,8 @@ public final class DatasetController {
         if (StringUtils.hasText(annDateFromValue) || StringUtils.hasText(annDateToValue)) {
             filterNames.add("ann_date");
         }
-        Integer page = pageNumber(parameters.get("page"), 1);
-        Integer pageSize = pageNumber(parameters.get("pageSize"), 50);
+        Integer page = pageNumber(request.pagination().page(), 1);
+        Integer pageSize = pageNumber(request.pagination().pageSize(), 50);
         return operationLogger.query(key, filterNames, page, pageSize, () -> {
             LocalDate tradeDateFrom = date(tradeDateFromValue, "tradeDateFrom");
             LocalDate tradeDateTo = date(tradeDateToValue, "tradeDateTo");
@@ -95,7 +90,7 @@ public final class DatasetController {
             if (pageSize == null) {
                 throw typeMismatch("pageSize", int.class);
             }
-            if (!SUPPORTED_PARAMETERS.containsAll(parameters.keySet())) {
+            if (!SUPPORTED_PARAMETERS.containsAll(request.parameterNames())) {
                 throw new InvalidQueryException();
             }
             DatasetDefinition definition = datasetCatalog.find(key)

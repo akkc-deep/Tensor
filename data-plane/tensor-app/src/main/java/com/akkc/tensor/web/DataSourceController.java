@@ -12,6 +12,7 @@ import com.akkc.tensor.plugin.api.model.PluginId;
 import com.akkc.tensor.web.dto.ApiDescriptorResponse;
 import com.akkc.tensor.web.dto.DataSourceResponse;
 import com.akkc.tensor.web.dto.DatasetDefinitionResponse;
+import com.akkc.tensor.web.dto.DatasetPath;
 import java.util.List;
 import java.util.Objects;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
@@ -60,12 +61,10 @@ public final class DataSourceController {
     }
 
     @GetMapping("/{pluginId}/datasets/{apiName}")
-    public DatasetDefinitionResponse getDatasetDefinition(
-            @PathVariable("pluginId") String pluginId,
-            @PathVariable("apiName") String apiName) {
-        PluginId id = PluginId.of(pluginId);
+    public DatasetDefinitionResponse getDatasetDefinition(DatasetPath path) {
+        PluginId id = PluginId.of(path.pluginId());
         requireRegistered(id);
-        DatasetDefinition definition = datasetCatalog.find(DatasetKey.of(id, ApiName.of(apiName)))
+        DatasetDefinition definition = datasetCatalog.find(DatasetKey.of(id, ApiName.of(path.apiName())))
                 .orElseThrow(() -> new MetadataAccessException(ErrorCode.DATASET_MISCONFIGURED));
         try {
             return DatasetDefinitionResponse.from(definition);

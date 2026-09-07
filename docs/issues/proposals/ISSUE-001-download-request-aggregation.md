@@ -2,7 +2,9 @@
 
 关联问题：[ISSUE-001：Controller 方法入口参数不够聚合](../problems/ISSUE-001-method-input-aggregation.md)
 
-方案状态：总体方案已确认，待整理为正式任务设计和实施计划。
+方案状态：已按[正式设计](../../task-designs/ISSUE-001-designs.md)实施，最终验证见[验收记录](../../verification/ISSUE-001-controller-inputs.md)。
+
+下文保留已确认架构说明。最终实现将 13 个 record 集中于 `DownloadParameters`，并在 `DownloadRequest` 增加 `suppliedFields` 字段名集合，以保持缺失字段与显式 null 的 Map/日志差异。反序列化阶段的私有 `WireValues` 仅保留 Jackson 原有结构解析及重复字段行为，不作为 Controller 请求模型或未知结构回退。
 
 ## 方案结论
 
@@ -575,5 +577,4 @@ Jackson 可能把自定义绑定异常包装为 `HttpMessageNotReadableException
 - 现有成功、空结果、源端失败、校验失败和持久化失败测试继续通过。
 - 不增加 49 个重复 Controller，也不增加万能参数对象或裸 Map 回退类型。
 
-本文件只记录已确认的架构方案。下一步应按照 `docs/task-designs` 的规范形成正式设计，明确实际文件、
-实施步骤、测试命令和验收证据，再进行任务拆分；当前阶段不修改生产代码。
+本文件记录架构方案；最终实现细节、实施步骤与验证结果分别由[正式设计](../../task-designs/ISSUE-001-designs.md)、[实施计划](../../superpowers/plans/2026-09-07-issue-001-controller-inputs.md)和[验收记录](../../verification/ISSUE-001-controller-inputs.md)维护。

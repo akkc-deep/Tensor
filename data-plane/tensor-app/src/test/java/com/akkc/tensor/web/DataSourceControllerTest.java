@@ -29,6 +29,7 @@ import com.akkc.tensor.web.dto.DatasetDefinitionResponse;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.IntStream;
@@ -63,9 +64,29 @@ class DataSourceControllerTest {
     void setUp() {
         DataSourceController controller = new DataSourceController(pluginRegistry, datasetCatalog);
         mockMvc = MockMvcBuilders.standaloneSetup(controller)
+                .setCustomArgumentResolvers(new DatasetRequestArgumentResolver())
                 .setMessageConverters(new MappingJackson2HttpMessageConverter(objectMapper))
                 .addFilters(new RequestIdFilter())
                 .build();
+    }
+
+    @Test
+    void aggregatesOnlyTheDatasetDefinitionPath() {
+        assertThat(Arrays.stream(DataSourceController.class.getDeclaredMethods())
+                .filter(method -> method.getName().equals("listPluginApis")))
+                .singleElement()
+                .satisfies(method -> assertThat(method.getParameterTypes())
+                        .containsExactly(String.class));
+        assertThat(Arrays.stream(DataSourceController.class.getDeclaredMethods())
+                .filter(method -> method.getName().equals("listPluginDatasets")))
+                .singleElement()
+                .satisfies(method -> assertThat(method.getParameterTypes())
+                        .containsExactly(String.class));
+        assertThat(Arrays.stream(DataSourceController.class.getDeclaredMethods())
+                .filter(method -> method.getName().equals("getDatasetDefinition")))
+                .singleElement()
+                .satisfies(method -> assertThat(method.getParameterTypes())
+                        .containsExactly(com.akkc.tensor.web.dto.DatasetPath.class));
     }
 
     @Test
@@ -230,6 +251,23 @@ class DataSourceControllerTest {
     }
 
     @Test
+    void resolvesDatasetIdentityFromThePathWhenQueryNamesCollide() throws Exception {
+        org.mockito.Mockito.when(pluginRegistry.descriptors()).thenReturn(List.of(
+                descriptor("tushare_pro", true, false, false,
+                        "credential is not configured", List.of(), List.of())));
+        DatasetDefinition definition = dataset("daily", List.of("trade_date"), null);
+        org.mockito.Mockito.when(datasetCatalog.find(
+                        DatasetKey.of(PluginId.of("tushare_pro"), ApiName.of("daily"))))
+                .thenReturn(Optional.of(definition));
+
+        JsonNode body = body("/api/v1/data-sources/tushare_pro/datasets/daily"
+                + "?pluginId=other&apiName=other");
+
+        assertThat(body.get("pluginId").textValue()).isEqualTo("tushare_pro");
+        assertThat(body.get("apiName").textValue()).isEqualTo("daily");
+    }
+
+    @Test
     void rejectsDatasetListForAnUnregisteredPlugin() throws Exception {
         org.mockito.Mockito.when(pluginRegistry.descriptors()).thenReturn(List.of(
                 descriptor("other_plugin", true, true, true, null, List.of(), List.of())));
@@ -258,6 +296,15 @@ class DataSourceControllerTest {
 
         String pluginId = scenario.equals("unknown_plugin") ? "unknown" : "tushare_pro";
         assertConflict("/api/v1/data-sources/" + pluginId + "/datasets/daily",
+                ErrorCode.DATASET_MISCONFIGURED);
+    }
+
+    @Test
+    void checksTheRawPluginPathBeforeParsingAMalformedApiName() throws Exception {
+        org.mockito.Mockito.when(pluginRegistry.descriptors()).thenReturn(List.of(
+                descriptor("other_plugin", true, true, true, null, List.of(), List.of())));
+
+        assertConflict("/api/v1/data-sources/unknown/datasets/INVALID",
                 ErrorCode.DATASET_MISCONFIGURED);
     }
 
