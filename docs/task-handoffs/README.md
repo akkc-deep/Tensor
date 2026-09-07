@@ -4,7 +4,7 @@
 
 | 目录 | 内容 | 任务看板 |
 | --- | --- | --- |
-| [tensor-v1/](tensor-v1/) | Tensor v1 正式任务：1 份看板、77 份任务交接 | [Tensor v1 看板](tensor-v1/tensor-v1-task-board.md) |
+| [tensor-v1/](tensor-v1/) | Tensor v1 正式任务：1 份看板、78 份任务交接 | [Tensor v1 看板](tensor-v1/tensor-v1-task-board.md) |
 | [ISSUE-004/](ISSUE-004/) | UI 改版任务；当前已有看板，后续交接放在同一目录 | [ISSUE-004 看板](ISSUE-004/ISSUE-004-task-board.md) |
 
 ```text

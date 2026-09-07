@@ -415,7 +415,7 @@ class ObservabilityTest {
                 .isEqualTo("health");
         assertThat(source.getProperty("management.endpoint.health.probes.enabled")).isEqualTo(true);
         assertThat(source.getProperty("management.endpoint.health.show-components"))
-                .isEqualTo("always");
+                .isEqualTo("never");
         assertThat(source.getProperty("management.endpoint.health.show-details")).isEqualTo("never");
         assertThat(source.getProperty("management.endpoint.env.show-values")).isEqualTo("never");
         assertThat(source.getProperty("management.endpoint.configprops.show-values"))

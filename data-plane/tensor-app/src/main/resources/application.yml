@@ -41,7 +41,7 @@ management:
     health:
       probes:
         enabled: true
-      show-components: always
+      show-components: never
       show-details: never
     env:
       show-values: never

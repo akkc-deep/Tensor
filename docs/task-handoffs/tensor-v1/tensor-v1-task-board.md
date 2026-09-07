@@ -5,7 +5,8 @@
 - **Project ID:** `tensor-v1`.
 - **Goal:** 按契约优先的模块化单体路线图交付 Tensor v1：完成 49 个 Tushare Pro 数据集的下载、适配、单事务 Upsert、只读查询、Vue 控制面、单 JAR 打包及发布验证。
 - **Scope:** 包含 M00–M14 的 77 个原预定义任务及 2026-09-05 批准增补的 M13-T05 验收打包任务及 2026-09-06 用户要求增补的 M14-T09 剩余工作承接任务（共 79 项）；排除路线图明确范围外的热加载、外部插件 JAR、任务队列、登录权限、导出、插件市场，以及除 M14-T09 明确承接的 ISSUE-007 外、后续发现后另行规划的缺陷修复任务。
-- **Completion condition:** 79 个已登记任务全部为 `COMPLETED`，其任务验收和模块门禁全部通过，并满足路线图中 49/49 数据集契约、AC-001～018、性能、安全、单 JAR 和全新环境页面闭环条件。
+- **Completion condition:** 本轮按下述 2026-09-07 依赖调整执行：M14-T05 剩余 9 项真实接口验收与 M14-T06 性能验证转由 ISSUE-008/009 后续单独处理，不作为本轮完成或发布准入前提；其余已登记任务及适用门禁须通过，包括 49/49 数据集自动契约、适用 AC-001～018、安全、单 JAR 和全新环境页面闭环。发布证据须逐项注明这两项延期范围与未验证事实，不能宣称原 49 项真实验收或性能目标已通过。
+- **M14-T08 completion boundary (2026-09-07):** 用户随后将 M14-T08 收窄为“AC 映射与发布证据收尾”。该任务按现有证据映射、版本/缺口披露及三份文档的完整准确性验收，不再要求执行上述技术门禁；文档任务完成不代表项目技术验收或当前候选版本发布准入通过。
 
 ## Workflow
 
@@ -17,7 +18,9 @@
 - **Allowed transitions:** `NOT_STARTED -> READY`, `READY -> IN_PROGRESS`, `IN_PROGRESS -> PAUSED`, `PAUSED -> IN_PROGRESS`, `READY -> BLOCKED`, `IN_PROGRESS -> BLOCKED`, `BLOCKED -> READY`, `IN_PROGRESS -> COMPLETED`.
 - **Previous execution instruction:** 用户此前要求暂缓M14-T05并先推进M14-T06；原49目标的9项缺口登记ISSUE-008，M14-T05保持BLOCKED，M14-T09保持COMPLETED。M14-T06当时进入设计准备，尚未启动。
 - **Previous disposition / explicit exception:** 用户随后明确要求性能测试“先跳过吧，可以记录一个issue，直接标记完成”。仅本次M14-T06按该指示直接从NOT_STARTED标为COMPLETED，表示跳过收尾；未创建设计/测试或执行实测，不补造READY/IN_PROGRESS及验收通过证据。原性能要求转入 `docs/issues/problems/ISSUE-009-query-performance-verification.md`，仍未解决，项目性能/发布门禁保持。当时下一个预定义任务为Order78/M14-T07，尚未准备或启动，未生成普通验收完成的后继交接。
-- **Current execution / explicit exception:** 用户明确要求“先标记完成吧，后续我单独处理这些问题”。仅本次M14-T07按该指示直接从BLOCKED标为COMPLETED，表示任务收尾；ISSUE-010～015全部保留未解决，由用户后续单独处理。正式结果仍为18通过/6失败/0未执行、退出1，证据67b1be6未改写，安全验收未通过。原暂停交接保留为历史证据；M14-T08保持NOT_STARTED，原真实49及性能缺口保留。
+- **Previous execution / explicit exception:** 用户明确要求“先标记完成吧，后续我单独处理这些问题”。仅本次M14-T07按该指示直接从BLOCKED标为COMPLETED，表示任务收尾；ISSUE-010～015全部保留未解决，由用户后续单独处理。正式结果仍为18通过/6失败/0未执行、退出1，证据67b1be6未改写，安全验收未通过。原暂停交接保留为历史证据；M14-T08保持NOT_STARTED，原真实49及性能缺口保留。
+- **Current dependency adjustment (2026-09-07):** 用户明确要求“把ISSUE08的9项真实接口先标记为不依赖，后续我单独处理，ISSUE009也一样，标记为不依赖”，取代本轮先解决 ISSUE-008 的安排。ISSUE-008 剩余 9 接口与 ISSUE-009 性能验证均为“不依赖”，不阻塞 M14-T08 的设计、启动、验收及本轮发布准入；两个 issue 保持未解决并由用户后续单独处理。M14-T08 移除 M14-T05/M14-T06 的完成依赖，改为直接消费 M14-T09 已完成的 40 接口证据；49 项自动契约及其余门禁保留，ISSUE-010～015 的安全阻塞不在本次豁免内。仅调整依赖与适用验收范围，不改变任务状态、既有 Design/Handoff 或历史结果；此前文档关于这两项阻塞发布的要求以本条为准。
+- **Current task scope adjustment (2026-09-07):** 用户明确要求“把M14-T08收窄为 AC 映射与发布证据收尾”。以本条取代此前 M14-T08 的候选包冻结/构建、验收工具接入、新环境首跑、回归、安全复扫及固定 40 接口复验要求；只消费现有记录并交付发布清单、AC/需求映射和发布摘要。49 自动契约/40 真实接口保留为历史证据，ISSUE-008/009 延期和 ISSUE-015 原风险接受如实记录，不以历史门禁失败或本次未复验阻止文档任务完成，也不据此宣称当前版本发布就绪。本次仅修改任务定义和设计，不新建六项子任务，不执行状态转换。
 
 ## Tasks
 
@@ -101,7 +104,7 @@
 | 76 | M14-T09 | 分红修复与2000档剩余验收 | `COMPLETED` | M14-T04, M14-T05 | docs/task-designs/M14-T09-design.md | docs/task-handoffs/tensor-v1/M14-T09-handoff.md |
 | 77 | M14-T06 | `daily` 与 `balancesheet` 性能验证 | `COMPLETED` | M14-T03, M14-T05 | None | None |
 | 78 | M14-T07 | Token、SQL、依赖、网络和运行安全验证 | `COMPLETED` | M14-T02, M14-T03, M14-T04, M14-T05 | docs/task-designs/M14-T07-design.md | docs/task-handoffs/tensor-v1/M14-T07-handoff.md |
-| 79 | M14-T08 | 全新环境 AC-001～018 与发布证据包 | `NOT_STARTED` | M14-T01, M14-T02, M14-T03, M14-T04, M14-T05, M14-T06, M14-T07 | None | None |
+| 79 | M14-T08 | AC 映射与发布证据收尾 | `COMPLETED` | M14-T01, M14-T02, M14-T03, M14-T04, M14-T09, M14-T07 | docs/task-designs/M14-T08-designs.md | docs/task-handoffs/tensor-v1/M14-T08-handoff.md |
 
 ## Task Details
 
@@ -1063,6 +1066,7 @@
 - **Dependencies:** M14-T04.
 - **Sources:** `docs/superpowers/plans/tensor-modules/M14-integration-release.md` 的 `Task M14-T05` 任务卡。
 - **First action:** 用户已暂缓本任务，剩余9接口登记ISSUE-008；不启动真实调用。后续执行入口以Workflow最新安排为准。M14-T09的完整40项已完成，原49目标仍未完成。
+- **Dependency disposition (2026-09-07):** 用户将 ISSUE-008 剩余 9 项真实接口标记为“不依赖”，后续单独处理；本任务保留 BLOCKED 与原未完成事实，不再作为 M14-T08 或本轮发布准入的完成依赖。已完成 40 接口证据由 M14-T09 直接提供。
 - **State evidence (deferred to issue):** 用户明确要求“M14-05的先不解决了，放在issue里面，然后继续进行M14-06”。已完整读取本任务设计与pause交接，以最终40项可用证据和原9项排除依据登记 `docs/issues/problems/ISSUE-008-tushare-live-coverage-gap.md`，更新同一交接和设计的当前入口。本任务保持BLOCKED，无状态转换或真实请求；M14-T06按明确执行安排推进，原49及发布门禁不改判通过。
 - **State evidence (readiness):** 2026-09-06：M14-T04完成记录 `80a9491` 已先独立提交，再按预定义Order选中75/M14-T05，观测NOT_STARTED、Design/Handoff为None。使用任务契约设计技能完成145行 `docs/task-designs/M14-T05-design.md`，就绪审查3Important/1Minor经定点修正全部Addressed、无新Critical/Important/Minor，Ready for implementation: Yes；修正精确DownloadResponse八键、600/330秒分阶段钩子预算、CLI完全退出后的独占产物扫描/删除与页面静态资源允许列表。`9b3d263` 提交设计并仅回填Design document，链接后完整读取。设计冻结两实施文件、原验收JAR、manifest49接口/58样例、37ok/12empty接口级判定、98次真实dataset查询、独立fixture2POST/3查询、真实Token环境/账户权限频率额度前置确认、单worker/零重试、新空schema、按不同业务键的计数和页面记录/来源/时间核对、安全与正常清理。结构/引用/manifest数量哈希、两实施文件缺席、依赖决定及约束一致性均已核对；唯一任务依赖仍M14-T04，M14-T02公开fixture合同仅作为任务卡指定补充来源。先按完整模板写 `docs/task-handoffs/tensor-v1/M14-T05-handoff.md`，列清直接输入的产物/决定/理由/约束/用途/既有可用性证据，链接后执行真实 `NOT_STARTED -> READY`。本轮只设计/交接，live spec及实际证据尚未创建，本地安全探针、账户权限/额度/Token和真实上游矩阵未验证；首动作直接实施完成设计，不补设计、不将预期写成实跑通过。用户并行ISSUE-004及target资源未纳入提交。
 
@@ -1160,6 +1164,7 @@
 - **Dependencies:** M14-T03, M14-T05.
 - **Sources:** `docs/superpowers/plans/tensor-modules/M14-integration-release.md` 的 `Task M14-T06` 任务卡。
 - **First action:** 本轮已按用户要求跳过并收尾，无实施动作。后续性能验证从 `docs/issues/problems/ISSUE-009-query-performance-verification.md` 的设计与关闭条件进入。
+- **Dependency disposition (2026-09-07):** 用户将 ISSUE-009 性能验证标记为“不依赖”，后续单独处理；不再作为 M14-T08 或本轮发布准入前提。COMPLETED 仍仅表示此前任务管理收尾，性能未实测、issue 未解决。
 - **State evidence (entry selected):** 用户明确暂缓M14-T05并要求先进行M14-T06；9项未覆盖已登记ISSUE-008。本任务当前NOT_STARTED，正在消费M14-T03页面/合成上游合同、M14-T05历史输入和M14-T09已验证冻结包，准备精确性能设计。M14-T05的完成状态不作为本次启动门禁，但未覆盖事实与发布要求保留；本记录不是READY或启动转换。
 - **State evidence (user-directed closure):** 用户明确要求“那也先跳过吧，可以记录一个issue，直接标记完成”。观测本任务NOT_STARTED、Design/Handoff均None后，依该用户指示的单次例外直接标记COMPLETED，未伪造中间状态。已登记ISSUE-009并链接原性能合同；数据规模建议未获确认，设计、脚本、页面测试和性能报告均未创建，性能实测次数为0。本次只完成文档登记与看板收尾；ISSUE-009保持未解决，原性能/发布门禁未通过，其他任务状态与依赖不变。
 
@@ -1181,13 +1186,24 @@
 
 ### `M14-T08`
 
-- **Goal:** 交付“全新环境 AC-001～018 与发布证据包”。
-- **Scope:** 包含该交付物及其直接测试与验证；不包含其他预定义任务的交付物，也不扩展 `docs/superpowers/plans/tensor-modules/M14-integration-release.md` 中该任务卡明确的文件、主要语言、接口和排除边界。
-- **Acceptance:** “全新环境 AC-001～018 与发布证据包”已按该任务卡指定的位置和行为形成；任务卡列出的全部测试、验证命令和检查得到其注明的预期结果；没有混入排除范围。
-- **Dependencies:** M14-T01, M14-T02, M14-T03, M14-T04, M14-T05, M14-T06, M14-T07.
-- **Sources:** `docs/superpowers/plans/tensor-modules/M14-integration-release.md` 的 `Task M14-T08` 任务卡。
-- **First action:** 读取 `docs/superpowers/plans/tensor-modules/M14-integration-release.md` 的 `Task M14-T08` 任务卡，并确认其 `Context boundary`、输入和目标文件均可定位。
-- **State evidence:** None.
+- **Goal:** 交付“AC 映射与发布证据收尾”：整理现有验收记录，形成发布清单、AC/需求映射和发布摘要。
+- **Scope:** 仅编写 `docs/verification/release-checklist.md`、`docs/verification/ac-001-018.md`、`docs/verification/release-summary.md` 并核对文档。逐项记录现有证据版本、日期、命令/退出码、结果及局限；不冻结/重建候选包、不接入验收工具、不首跑新环境、不重跑自动门禁/安全扫描/40 真实接口，不执行 ISSUE-008/009 或其他缺陷修复。
+- **Acceptance:** 三份文档完整、准确且相互链接，AC-001～018、PRD-F-001～031 和 PRD 10.1～10.6 均有证据覆盖判断及缺口说明；49 自动契约与 40 真实接口分列原版本结果，ISSUE-008/009 延期及 ISSUE-015 原风险接受明确。记录“已有证据完成归档，当前候选版本尚未完成本轮整体验收”，允许在如实披露验证缺口后完成文档任务，不将本次未复验或历史失败改写为通过。
+- **Dependencies:** M14-T01, M14-T02, M14-T03, M14-T04, M14-T09, M14-T07；只消费其已有证据，不要求本次重新验证或改变历史状态。
+- **Deferred / not required:** ISSUE-008（9 项真实接口验收）、ISSUE-009（性能验证）；均未解决，后续由用户单独处理。M14-T09 的直接输入为 `docs/verification/M14-T09-tushare-live-rerun-02.md`，既有 40 通过/0 失败/0 未运行，不等于 49 项真实验收通过。
+- **Sources:** ① 本任务设计与 M14 任务卡；② PRD 与 `docs/traceability/tensor-v1-requirements.md`；③ M14-T01～04/T09/T07 已有验收文档；④ ISSUE-010～015 专项记录、ISSUE-004 UI 记录与 M13-T04 首跑交接；⑤ 问题索引、ISSUE-008/009 延期及 ISSUE-015 决定，精确路径见设计。
+- **First action:** 完整读取 `docs/task-designs/M14-T08-designs.md`，按其有序来源整理原验证版本/命令/结果/局限，建立 `docs/verification/release-checklist.md` 的现有证据索引，不运行历史命令。
+- **State evidence (dependency adjustment, before design):** 2026-09-07 按用户明确指示移除上述两项前置依赖并同步任务卡；用户进一步明确 M14-T08 不完成 ISSUE-008 的 9 项缺口，只覆盖已经完成的 40 项，已写入当时的 Scope。当时状态为 NOT_STARTED，Design/Handoff 均为 None，未启动验收或补造结果。
+- **State evidence (scope narrowed, 2026-09-07):** 用户明确要求将 M14-T08 收窄为 AC 映射与发布证据收尾；已完整读取原设计并在相同路径修订，同步任务标题、范围、验收和任务卡。仅修改定义，状态保持 NOT_STARTED，Order 79、依赖 ID、Design 路径和 Handoff=None 保留；三份交付文档尚未创建，不记录启动或完成。
+- **Handoff preparation (2026-09-07):** 用户要求完成交接，并将在独立新任务启动实施。已完整读取当前收窄设计，核对 Order78/M14-T07 已按用户决定管理收尾、Order79/M14-T08 为选定后继；直接输入及补充来源可访问，历史安全失败与后续专项/风险接受按新文档范围分列，无阻止文档交付准备的冲突。已创建并链接 `docs/task-handoffs/tensor-v1/M14-T08-handoff.md`（next-task），随后单独准备 READY；不修改前驱历史结果，不创建三份实施交付物。
+
+- **State evidence (ready for separate task, 2026-09-07):** 交接已先写入并链接；再次读取设计并观测 NOT_STARTED 后，依据用户明确交接准备请求和上述输入就绪事实执行 NOT_STARTED -> READY。此转换只准备后续独立任务入口，用户将另行启动；未执行 READY -> IN_PROGRESS，三份发布文档仍未创建，未运行构建、产品测试、安全扫描或真实接口。
+
+- **State evidence (start, 2026-09-07):** 用户在本次独立任务明确要求“按照权威任务看板执行当前任务；先读取其设计文档和交接文件（如有），再按既定工作流完成任务”。已完整读取本任务收窄设计、next-task 交接及任务卡，核对 Order 79、READY、Design/Handoff 一致；据此执行 READY -> IN_PROGRESS，保留原交接路径为入口。只整理现有脱敏证据及三份文档，不执行历史产品门禁；工作区已有修改保持原样。
+
+- **State evidence (completion, 2026-09-07):** 已再次完整读取当前设计，观测 IN_PROGRESS；三份产物 `docs/verification/release-checklist.md`、`docs/verification/ac-001-018.md`、`docs/verification/release-summary.md` 已形成并加入 Git。证据按原轮次分列日期、命令/退出码、计数、源码/产物身份与局限；31 份来源当前 SHA-256 单列，保留工作区未提交来源的可追踪性边界。18 项 AC、31 项 PRD-F 和六类 NFR 均保留原文、优先级/直接部分内联关系、覆盖判断及本次未复验；AC-018/PRD-F-031 为部分支持。49 自动契约与 40 真实接口分列，ISSUE-008/009 延期和 ISSUE-015 原 35 条高阈值/27 CVE/四类分析缺口接受范围均如实记录。临时只读文档检查 exit 0，18/31/6、224 个本地链接/锚点、31 来源散列、历史计数/身份与安全摘要均通过；git diff --check 和 cached --check 均 exit 0。独立规格与质量审查通过，无 Critical/Important/Minor；实际检查见 release-checklist.md。入口 627 个已跟踪文件除本任务看板外内容保持，原索引条目保留；未执行构建、产品回归、安全扫描或真实接口。本任务结果级文档验收满足，执行 IN_PROGRESS -> COMPLETED；结论为“已有证据完成归档，当前候选版本尚未完成本轮整体验收”，不表示项目技术验收或发布准入通过。原交接保留为进入快照，M14-T05 及其他任务/issue 状态不变。
+
+- **Successor disposition (2026-09-07):** M14-T08 完成后按预定义 Order 检查，没有大于 79 的后继任务；不新增任务或交接，不将“无后继”解释为仍披露的技术缺口已经解决。
 
 ## Risks
 

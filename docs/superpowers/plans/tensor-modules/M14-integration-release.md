@@ -168,23 +168,33 @@
 - [ ] Run `scripts/security/verify-release.sh`; expect exit 0 and write a redacted evidence summary.
 - [ ] Commit as `test(security): verify release controls` when Git exists.
 
-### Task M14-T08: 全新环境验收与发布证据包（3.0h）
+### Task M14-T08: AC 映射与发布证据收尾
+
+**Design:** [M14-T08 专属设计](../../../task-designs/M14-T08-designs.md)。
+
+**Scope adjustment (2026-09-07):** 用户明确要求“把M14-T08收窄为 AC 映射与发布证据收尾”。本任务仅整理已有验收文档并核对映射，不执行候选包冻结/构建、工具接入、新环境首跑、自动回归、安全复扫或 40 接口真实复验；这五类工作不再作为本任务完成前提，不新建相应子任务。产品验证缺口须披露，但不阻止文档交付完成。
+
+**Dependencies:** M14-T01、T02、T03、T04、T09、T07，仅消费已有证据。49 自动契约与 T09 固定 40 接口的结果按各自原版本记录；ISSUE-008 九接口与 ISSUE-009 性能验证仍为“不依赖，用户后续单独处理”。安全原失败、ISSUE-010～014 专项验证及 ISSUE-015 原风险接受分别归档，不改写历史结果或将不同版本合并为当前候选整体验收通过。
+
+**Context boundary:** Read the linked design, PRD/traceability, existing verification documents, runbooks, task handoffs and issue decisions. Do not run their historical commands or inspect production implementation/credentials to manufacture new acceptance evidence.
 
 **Files:**
 - Create: `docs/verification/release-checklist.md`
 - Create: `docs/verification/ac-001-018.md`
 - Create: `docs/verification/release-summary.md`
 
-**Interfaces:** Final evidence links every requirement/AC to a fresh command, test result or controlled manual observation.
+**Interfaces:** Each AC/requirement maps to existing evidence with its original version, date, result and limitations; document checks are the only new verification in this task.
 
-- [ ] Confirm task design; require M14-T01～T07 evidence and zero unresolved defects or design gaps.
-- [ ] On a clean environment, follow M13 runbook with only Java 21, MySQL 8.4, DB config and live Token; do not read implementation source while operating.
-- [ ] Run packaged smoke, Maven verify, frontend tests, Playwright suite, 49 contract script, live test, performance and security scripts; record commands, timestamps and exit codes.
-- [ ] Fill AC-001 through AC-018 individually with evidence links and record P0/P1 status, 49/49 counts, performance numbers and secret-scan result.
-- [ ] Verify scope-excluded features have no half-finished routes or controls and production JAR contains no fixture/test resources.
-- [ ] Mark release ready only if every gate passes; otherwise list exact blocking defect task IDs and do not accept M14-T08.
+- [ ] Read the narrowed design and ordered sources; inventory existing commands, timestamps, exit codes, counts, source/JAR identities and coverage limitations without rerunning commands.
+- [ ] Write `release-checklist.md`, keeping original execution results separate from current dispositions; record missing evidence, different versions, ISSUE-008/009 deferrals and ISSUE-015 accepted risks explicitly.
+- [ ] Map all 18 ACs, PRD-F-001～031 with original P0/P1, and PRD 10.1～10.6 in `ac-001-018.md`. Preserve direct/partial coverage semantics and mark every AC as not reverified in this task.
+- [ ] Write `release-summary.md`: existing evidence has been archived; the current candidate has not completed a new end-to-end acceptance run. Do not claim release readiness, full-49 live coverage, performance success or a new overall security pass.
+- [ ] Check document structure, exact requirement IDs, source links, original counts/versions, safe summaries and `git diff --check`; add new deliverables to Git and record these document checks.
+- [ ] Complete M14-T08 only when the three documents are accurate, complete and traceable. Disclosed product verification gaps do not prevent this documentation task from completing; leave other tasks/issues and historical outcomes unchanged.
 - [ ] Commit the redacted evidence package as `docs: record Tensor v1 release verification` when Git exists.
 
 ## Module Gate
 
-M14 is complete only when M14-T01～T08 have passed, every defect correction task and design gap is closed, AC-001～018 and PRD-F-001～031 have fresh evidence, 49 live cases have controlled outcomes, performance/security gates pass and the clean-environment runbook succeeds.
+M14-T08 now completes on AC mapping and accurate archival of existing release evidence, per the owner's 2026-09-07 scope decision. Fresh builds, test-tool adaptation, clean-environment runs, automated/security reruns and live reruns are not gates for this documentation task. Document completion does not establish the current candidate's technical acceptance or release readiness.
+
+Technical release conclusions must remain supported by evidence for the stated version: applicable AC-001～018 and PRD-F-001～031, 49 automated contracts, the authorized 40 live cases, security and clean-environment operation. Existing gaps and different artifact versions remain visible rather than being resolved by this task. ISSUE-008's nine live interfaces and ISSUE-009 performance verification remain owner-deferred, non-required items; ISSUE-015 retains its original accepted-risk boundary. This task neither declares those original goals passed nor changes other task/issue statuses.

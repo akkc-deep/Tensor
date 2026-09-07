@@ -1,6 +1,8 @@
 package com.akkc.tensor.web;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -9,7 +11,12 @@ import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.read.ListAppender;
+import com.akkc.tensor.config.WebSecurityHeadersConfiguration;
+import com.akkc.tensor.core.catalog.DatasetCatalog;
+import com.akkc.tensor.core.query.DatasetQueryService;
+import com.akkc.tensor.core.registry.PluginRegistry;
 import com.akkc.tensor.core.validation.ParameterValidator;
+import com.akkc.tensor.observability.OperationLogger;
 import com.akkc.tensor.plugin.api.descriptor.ApiDescriptor;
 import com.akkc.tensor.plugin.api.descriptor.ParameterDescriptor;
 import com.akkc.tensor.plugin.api.descriptor.ParameterType;
@@ -36,6 +43,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.EnumSource;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
@@ -230,6 +239,50 @@ class GlobalExceptionHandlerTest {
         assertNoSensitive(body);
     }
 
+    @ParameterizedTest
+    @MethodSource("unsupportedDatasetMethods")
+    void rejectsUnsupportedDatasetMethodsBeforeBusinessAccess(String method, String path)
+            throws Exception {
+        PluginRegistry plugins = mock(PluginRegistry.class);
+        DatasetCatalog catalog = mock(DatasetCatalog.class);
+        DatasetQueryService queries = mock(DatasetQueryService.class);
+        OperationLogger operations = mock(OperationLogger.class);
+        MockMvc mvc = MockMvcBuilders.standaloneSetup(
+                        new DataSourceController(plugins, catalog),
+                        new DatasetController(catalog, queries, operations))
+                .setControllerAdvice(new GlobalExceptionHandler())
+                .addFilters(new RequestIdFilter(),
+                        new WebSecurityHeadersConfiguration().securityHeadersFilter().getFilter())
+                .build();
+
+        MvcResult result = mvc.perform(identified(MockMvcRequestBuilders
+                        .request(HttpMethod.valueOf(method), path)
+                        .contentType(MediaType.APPLICATION_JSON).content("{}")))
+                .andExpect(status().isMethodNotAllowed())
+                .andReturn();
+
+        assertThat(result.getResponse().getContentAsString()).isEmpty();
+        assertThat(result.getResponse().getHeader("Allow")).isEqualTo("GET");
+        assertThat(result.getResponse().getHeader(RequestIdFilter.HEADER_NAME)).isEqualTo(REQUEST_ID);
+        assertThat(result.getResponse().getHeader("Cache-Control")).isEqualTo("no-store");
+        assertThat(result.getResponse().getHeader("Content-Security-Policy")).isNotBlank();
+        assertThat(result.getResponse().getHeader("X-Content-Type-Options")).isEqualTo("nosniff");
+        assertThat(result.getResponse().getHeader("X-Frame-Options")).isEqualTo("DENY");
+        assertThat(result.getResponse().getHeader("Referrer-Policy")).isEqualTo("no-referrer");
+        assertThat(result.getResponse().getHeader("Permissions-Policy"))
+                .isEqualTo("camera=(), microphone=(), geolocation=()");
+        assertThat(result.getResponse().getHeader("Cross-Origin-Opener-Policy"))
+                .isEqualTo("same-origin");
+        verifyNoInteractions(plugins, catalog, queries, operations);
+    }
+
+    private static Stream<Arguments> unsupportedDatasetMethods() {
+        String datasets = "/api/v1/data-sources/tushare_pro/datasets";
+        return Stream.of(datasets, datasets + "/stock_company", datasets + "/stock_company/records")
+                .flatMap(path -> Stream.of("POST", "PUT", "PATCH", "DELETE")
+                        .map(method -> Arguments.of(method, path)));
+    }
+
     @Test
     void exposesOnlyTheApprovedSurfaceAndWritesSanitizedLogs() throws Exception {
         assertThat(Modifier.isFinal(GlobalExceptionHandler.class.getModifiers())).isTrue();
@@ -247,7 +300,7 @@ class GlobalExceptionHandlerTest {
         assertThat(Stream.of(GlobalExceptionHandler.class.getDeclaredMethods())
                 .filter(method -> method.isAnnotationPresent(
                         org.springframework.web.bind.annotation.ExceptionHandler.class)))
-                .hasSize(7);
+                .hasSize(8);
 
         Logger logger = (Logger) LoggerFactory.getLogger(GlobalExceptionHandler.class);
         ListAppender<ILoggingEvent> appender = new ListAppender<>();

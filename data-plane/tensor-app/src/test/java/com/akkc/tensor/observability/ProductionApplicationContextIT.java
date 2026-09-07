@@ -48,7 +48,10 @@ class ProductionApplicationContextIT {
     private static final String SECRET = "m09-t06-token-password-secret";
     private static final String INVALID_PAGE = "not-a-number";
     private static final List<String> HIDDEN_ENDPOINTS = List.of(
-            "/actuator", "/actuator/env", "/actuator/configprops", "/actuator/metrics");
+            "/actuator", "/actuator/env", "/actuator/configprops", "/actuator/metrics",
+            "/actuator/beans", "/actuator/heapdump", "/actuator/logfile", "/actuator/mappings",
+            "/actuator/health/db", "/actuator/health/liveness/livenessState",
+            "/actuator/health/readiness/readinessState", "/actuator/health/unknown");
 
     @Test
     void startsTheSafeProductionServletGraphAndTracksOnlyDatabaseHealth() throws Exception {
@@ -66,7 +69,8 @@ class ProductionApplicationContextIT {
             first = start(mysql, "");
             assertProductionGraph(first);
             HttpResponse firstHealth = get(first, "/actuator/health");
-            assertHealth(first, firstHealth, 200, "UP", "UP");
+            assertHealth(first, firstHealth, 200, "UP");
+            assertProbesUp(first);
             HttpResponse metadata = get(first, "/api/v1/data-sources");
             assertMetadata(first, metadata, false, false);
             HttpResponse invalid = get(first,
@@ -84,7 +88,8 @@ class ProductionApplicationContextIT {
             second = start(mysql, SECRET);
             assertProductionGraph(second);
             HttpResponse secondHealth = get(second, "/actuator/health");
-            assertHealth(second, secondHealth, 200, "UP", "UP");
+            assertHealth(second, secondHealth, 200, "UP");
+            assertProbesUp(second);
             HttpResponse secondMetadata = get(second, "/api/v1/data-sources");
             assertMetadata(second, secondMetadata, true, true);
             assertSafeResponse(secondHealth, jdbcUrl, username);
@@ -94,7 +99,8 @@ class ProductionApplicationContextIT {
 
             mysql.stop();
             HttpResponse down = get(second, "/actuator/health");
-            assertHealth(second, down, 503, "DOWN", "DOWN");
+            assertHealth(second, down, 503, "DOWN");
+            assertProbesUp(second);
             assertSafeResponse(down, jdbcUrl, username);
         } finally {
             if (captured != null) {
@@ -224,15 +230,18 @@ class ProductionApplicationContextIT {
             ConfigurableApplicationContext context,
             HttpResponse response,
             int status,
-            String health,
-            String database) throws Exception {
+            String health) throws Exception {
         assertThat(response.status()).isEqualTo(status);
         assertSecurityHeaders(response);
         JsonNode body = context.getBean(ObjectMapper.class).readTree(response.body());
-        assertThat(body.path("status").textValue()).isEqualTo(health);
-        assertThat(body.path("components").path("db").path("status").textValue())
-                .isEqualTo(database);
-        assertThat(body.path("components").path("db").has("details")).isFalse();
+        assertThat(body).isEqualTo(context.getBean(ObjectMapper.class)
+                .valueToTree(Map.of("status", health)));
+    }
+
+    private static void assertProbesUp(ConfigurableApplicationContext context) throws Exception {
+        for (String probe : List.of("liveness", "readiness")) {
+            assertHealth(context, get(context, "/actuator/health/" + probe), 200, "UP");
+        }
     }
 
     private static void assertSafeParameterError(

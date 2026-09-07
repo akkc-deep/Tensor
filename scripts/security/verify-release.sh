@@ -29,6 +29,7 @@ import tempfile
 import threading
 import time
 import urllib.parse
+import urllib.request
 import xml.etree.ElementTree as ET
 import zipfile
 from datetime import datetime, timezone
@@ -221,7 +222,7 @@ def health_structure(body):
 
 def scanner_diagnostics(output, exit_code, report_present):
     categories = []
-    for label,pattern in [('nvd-invalid-api-key',br'Invalid API Key'),('nvd-http-failure',br'(?:NVD|nvd\.nist)[^\n]*(?:HTTP[^\n]*[45][0-9]{2})'),('cisa-http-403',br'cisa[^\n]*\b403\b'),('vulnerability-data-missing',br'NoDataException')]:
+    for label,pattern in [('nvd-invalid-api-key',br'Invalid API Key'),('nvd-http-failure',br'(?:NVD|nvd\.nist)[^\n]*(?:HTTP[^\n]*[45][0-9]{2})'),('cisa-http-403',br'cisa[^\n]*\b403\b'),('vulnerability-data-missing',br'NoDataException'),('assembly-analyzer-unavailable',br'Assembly Analyzer could not be initialized'),('node-lockfile-missing',br'No lock file exists[^\n]*false negatives'),('node-modules-missing',br'node_modules directory does not exist'),('oss-index-credentials-missing',br'OSS Index Analyzer disabled due to missing credentials')]:
         if re.search(pattern,output,re.I):
             categories.append(label)
     if not report_present:
@@ -278,10 +279,14 @@ def dependency_verdict(report, exit_code, inventory, modules):
     deps = report.get('dependencies')
     require(isinstance(deps, list) and len(deps) > 0, 'dependency-coverage-empty')
     covered, hashes, refs, advisories, unresolved, high = {}, {}, set(), [], 0, 0
-    for dep in deps:
+    entries = list(deps)
+    for dep in entries:
         require(isinstance(dep, dict) and not dep.get('analysisExceptions'), 'dependency-analysis-failed')
+        related = dep.get('relatedDependencies', [])
+        require(isinstance(related, list), 'dependency-related-invalid')
+        entries.extend(related)
         coordinates = []
-        for package in dep.get('packages', []):
+        for package in dep.get('packages', dep.get('packageIds', [])):
             identifier = package.get('id', '')
             match = re.fullmatch(r'pkg:maven/([^/]+)/([^@]+)@([^?]+)(?:\?.*)?', identifier)
             if match:
@@ -658,6 +663,18 @@ class Runtime:
                     (self.packaged_libraries/filename).write_bytes(data)
                     self.inventory[filename] = {'coordinates':coordinates,'sha256':hashlib.sha256(data).hexdigest()}
         count = scan_zip(self.jar.read_bytes(), self.secret_patterns, visit)
+        for filename, identity in self.inventory.items():
+            if identity['coordinates'] or not filename.startswith('spring-boot-jarmode-tools-'):
+                continue
+            version = filename.removeprefix('spring-boot-jarmode-tools-').removesuffix('.jar')
+            base = 'https://repo.maven.apache.org/maven2/org/springframework/boot/spring-boot-jarmode-tools/' + version + '/' + filename.removesuffix('.jar')
+            opener = urllib.request.build_opener(urllib.request.ProxyHandler({}))
+            with opener.open(base + '.jar', timeout=30) as response:
+                require(hashlib.sha256(response.read()).hexdigest() == identity['sha256'], 'packaged-metadata-jar-mismatch')
+            with opener.open(base + '.pom', timeout=30) as response:
+                pom = response.read()
+            scan_bytes(pom, self.secret_patterns)
+            (self.packaged_libraries / (filename.removesuffix('.jar') + '.pom')).write_bytes(pom)
         require(sorted(re.match(r'V(\d+)__', name).group(1) for name in migrations) == ['1','2','3','4','5','7'], 'jar-migrations-invalid')
         require(sorted(modules) == ['tensor-core-1.0-SNAPSHOT.jar','tensor-plugin-api-1.0-SNAPSHOT.jar','tensor-plugin-tushare-1.0-SNAPSHOT.jar'], 'jar-modules-invalid')
         resources = [name for name in names if 'datasets/tushare_pro/' in name and name.endswith(('.yml','.yaml'))]
@@ -677,6 +694,8 @@ class Runtime:
         output.mkdir(mode=0o700); cache.mkdir(mode=0o700)
         args = [self.mvn,'-B','-ntp','-f','data-plane/pom.xml','-Dmaven.repo.local=' + str(self.maven_repo),'org.owasp:dependency-check-maven:13.0.0:aggregate','-DfailBuildOnCVSS=7','-DfailOnError=true','-DautoUpdate=true','-DskipTestScope=false','-DskipProvidedScope=false','-DskipRuntimeScope=false','-Dformat=JSON','-Dodc.outputDirectory=' + str(output),'-DdataDirectory=' + str(cache),'-DnvdApiKeyEnvironmentVariable=M14_SECURITY_NVD_API_KEY','-DscanDirectory=' + str(self.packaged_libraries)]
         extra = {'M14_SECURITY_NVD_API_KEY':self.inputs['M14_SECURITY_NVD_API_KEY']} if self.inputs['M14_SECURITY_NVD_API_KEY'] else {}
+        if not extra:
+            args.append('-DnvdDatafeedUrl=https://nvd.nist.gov/feeds/json/cve/2.0/nvdcve-2.0-{0}.json.gz')
         code, scanned_output = self.run('backend-dependency-audit', args, cwd=self.snapshot, extra=extra, timeout=7200, gate='backend_audit')
         report_path = output/'dependency-check-report.json'
         diagnostics = scanner_diagnostics(scanned_output,code,report_path.exists())
@@ -688,9 +707,12 @@ class Runtime:
         except (OSError, ValueError):
             raise GateError('dependency-report-invalid',diagnostics) from None
         try:
-            return dependency_verdict(report, code, self.inventory, self.modules)
+            summary = dependency_verdict(report, code, self.inventory, self.modules)
         except GateError as error:
             raise GateError(str(error),{**(error.details or {}),'scanner':diagnostics}) from None
+        if diagnostics['failureCategories']:
+            raise GateError('dependency-scanner-incomplete', {**summary, 'scanner':diagnostics})
+        return summary
 
     def frontend_audit(self):
         code, output = self.run('frontend-dependency-audit', [self.npm,'audit','--package-lock-only','--audit-level=high','--json'], cwd=self.snapshot/'control-plane', timeout=600, gate='frontend_audit')
@@ -1658,6 +1680,29 @@ def self_test(directory):
     check('dependency-coverage', lambda: dependency_verdict(dependency, 0, {'other-1.jar':{'coordinates':[],'sha256':'b'*64}}, ['module']), True)
     check('dependency-exact-bytes', lambda: dependency_verdict(dependency, 0, {'library-1.jar':{'coordinates':['org.example:library:1'],'sha256':'b'*64}}, ['module']), True)
     check('dependency-reactor', lambda: dependency_verdict(dependency, 0, inventory, ['missing']), True)
+    bundled = copy.deepcopy(dependency)
+    bundled['dependencies'][0]['relatedDependencies'] = [{'fileName':'bundled-1.jar', 'sha256':'b'*64, 'packageIds':[{'id':'pkg:maven/org.example/bundled@1'}]}]
+    bundled_inventory = {**inventory, 'bundled-1.jar':{'coordinates':['org.example:bundled:1'], 'sha256':'b'*64}}
+    check('dependency-bundled-coverage', lambda: dependency_verdict(bundled, 0, bundled_inventory, ['module']))
+    check('dependency-bundled-exact-bytes', lambda: dependency_verdict(bundled, 0, {**bundled_inventory, 'bundled-1.jar':{'coordinates':['org.example:bundled:1'], 'sha256':'c'*64}}, ['module']), True)
+    for label, extra in [('high', {'vulnerabilities':[{'name':'CVE-2026-0001','severity':'HIGH'}]}), ('analysis-error', {'analysisExceptions':[{}]})]:
+        bad = copy.deepcopy(bundled)
+        bad['dependencies'][0]['relatedDependencies'][0].update(extra)
+        check('dependency-bundled-' + label, lambda b=bad: dependency_verdict(b, 0, inventory, ['module']), True)
+    def scanner_report_case(label, output):
+        owned = directory / ('scanner-report-' + label); owned.mkdir()
+        runtime = Runtime.__new__(Runtime)
+        runtime.directory, runtime.snapshot, runtime.maven_repo, runtime.packaged_libraries = owned, owned, owned, owned
+        runtime.mvn = 'mvn'; runtime.inputs = {'M14_SECURITY_NVD_API_KEY':''}; runtime.secret_patterns = ()
+        runtime.inventory, runtime.modules = inventory, ['module']
+        def run(*args, **kwargs):
+            (owned / 'dependency-report/dependency-check-report.json').write_text(json.dumps(dependency))
+            return 0, output
+        runtime.run = run
+        return runtime.backend_audit()
+    check('scanner-report-clean', lambda: scanner_report_case('clean', b'Analysis Complete'))
+    for label, output in [('assembly', b'.NET Assembly Analyzer could not be initialized'), ('node-lock', b'No lock file exists - this will result in false negatives'), ('node-modules', b'the node_modules directory does not exist'), ('oss-credentials', b'Sonatype OSS Index Analyzer disabled due to missing credentials')]:
+        check('scanner-report-' + label, lambda l=label,o=output: scanner_report_case(l, o), True)
     reports = []
     for name in TEST_CLASSES:
         file = directory / ('TEST-' + name + '.xml')

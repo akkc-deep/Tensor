@@ -10,6 +10,9 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.read.ListAppender;
+import com.akkc.tensor.config.WebSecurityHeadersConfiguration;
 import com.akkc.tensor.core.catalog.DatasetCatalog;
 import com.akkc.tensor.core.catalog.DatasetStartupValidator;
 import com.akkc.tensor.core.catalog.SchemaInspector;
@@ -19,6 +22,11 @@ import com.akkc.tensor.core.query.GenericQueryRepository;
 import com.akkc.tensor.core.registry.PluginRegistry;
 import com.akkc.tensor.observability.OperationLogger;
 import com.akkc.tensor.observability.TensorMetrics;
+import com.akkc.tensor.plugin.api.DataSourcePlugin;
+import com.akkc.tensor.plugin.api.descriptor.ApiDescriptor;
+import com.akkc.tensor.plugin.api.descriptor.PluginDescriptor;
+import com.akkc.tensor.plugin.api.descriptor.PluginReadiness;
+import com.akkc.tensor.plugin.api.download.DownloadEnvelope;
 import com.akkc.tensor.plugin.api.dataset.BusinessKeyDefinition;
 import com.akkc.tensor.plugin.api.dataset.BusinessKeyMode;
 import com.akkc.tensor.plugin.api.dataset.ColumnDefinition;
@@ -60,6 +68,9 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
@@ -382,6 +393,175 @@ class DatasetControllerIT {
                 "Dataset metadata is unavailable");
     }
 
+    @ParameterizedTest
+    @CsvSource({
+        "table,other_table", "column,introduction", "columns,*", "sort,ts_code DESC",
+        "orderBy,ts_code", "sql,SELECT 1", "unknown,value", "ts_code,000001.SZ",
+        "Page,1", "sql,''"
+    })
+    void rejectsExtraParametersWithSafeErrorsBeforeDatabaseAccess(String name, String value)
+            throws Exception {
+        Flow flow = flow(List.of(definition("ts_code", "trade_date", "ann_date")));
+        for (String[] values : List.of(new String[] {value}, new String[] {value, value})) {
+            flow.dataSource().reset();
+            MvcResult result = flow.mockMvc().perform(get(PATH)
+                            .header(RequestIdFilter.HEADER_NAME, REQUEST_ID)
+                            .param("tsCode", "000001.SZ")
+                            .param("page", "1")
+                            .param("pageSize", "20")
+                            .param(name, values))
+                    .andExpect(status().isBadRequest())
+                    .andExpect(header().string(RequestIdFilter.HEADER_NAME, REQUEST_ID))
+                    .andExpect(header().string("X-Content-Type-Options", "nosniff"))
+                    .andExpect(header().string("Cache-Control", "no-store"))
+                    .andReturn();
+            JsonNode body = flow.objectMapper().readTree(result.getResponse().getContentAsByteArray());
+            assertThat(body).isEqualTo(flow.objectMapper().readTree("""
+                    {"requestId":"%s","code":"PARAM_INVALID","message":"Parameters are invalid",
+                     "retryable":false,"fieldErrors":[]}
+                    """.formatted(REQUEST_ID)));
+            assertThat(flow.dataSource().connectionCount()).isZero();
+        }
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+        "tsCode,x' OR 1=1 --,ts_code,1,50,none",
+        "page,1 OR 1=1,,unavailable,50,page",
+        "page,2147483648,,unavailable,50,page",
+        "page,0,,0,50,none",
+        "pageSize,101,,1,101,none",
+        "pageSize,secret-pagination-value,,1,unavailable,pageSize",
+        "tradeDateFrom,2026-08-07,trade_date,1,50,none",
+        "tradeDateFrom,secret-date-value,trade_date,1,50,tradeDateFrom",
+        "tradeDateTo,2026-02-30,trade_date,1,50,tradeDateTo",
+        "annDateFrom,secret-date-value,ann_date,1,50,annDateFrom",
+        "annDateTo,2026-13-01,ann_date,1,50,annDateTo",
+        "sql,SELECT 1,,1,50,none",
+        "secret-parameter-name,secret-parameter-value,,1,50,none"
+    })
+    void recordsRejectedQueryOnceWithoutInputValues(
+            String name, String value, String filter, String page, String pageSize, String field)
+            throws Exception {
+        Flow flow = flow(List.of(definition("ts_code")));
+        try (CapturedLog log = capturedLog()) {
+            MvcResult result = flow.mockMvc().perform(get(PATH)
+                            .header(RequestIdFilter.HEADER_NAME, REQUEST_ID)
+                            .param(name, value))
+                    .andExpect(status().isBadRequest())
+                    .andExpect(header().string(RequestIdFilter.HEADER_NAME, REQUEST_ID))
+                    .andExpect(header().string("X-Content-Type-Options", "nosniff"))
+                    .andReturn();
+            JsonNode body = flow.objectMapper().readTree(result.getResponse().getContentAsByteArray());
+            String fields = field.equals("none") ? "[]"
+                    : "[{\"field\":\"" + field + "\",\"message\":\"has invalid value\"}]";
+            assertThat(body).isEqualTo(flow.objectMapper().readTree("""
+                    {"requestId":"%s","code":"PARAM_INVALID","message":"Parameters are invalid",
+                     "retryable":false,"fieldErrors":%s}
+                    """.formatted(REQUEST_ID, fields)));
+            assertThat(flow.dataSource().connectionCount()).isZero();
+            assertThat(log.events()).singleElement().satisfies(event -> {
+                assertThat(event.getFormattedMessage()).contains(
+                        "requestId=" + REQUEST_ID, "operation=query", "pluginId=fixture",
+                        "apiName=query_records", "filterNames=[" + (filter == null ? "" : filter) + "]",
+                        " page=" + page + " ", " pageSize=" + pageSize + " ",
+                        "resultCount=unavailable", "totalElements=unavailable",
+                        "outcome=failure", "failureStage=parameter", "errorCode=PARAM_INVALID")
+                        .doesNotContain("secret-", "OR 1=1", "SELECT 1", "2026-")
+                        .containsPattern("durationMs=\\d+");
+                assertThat(event.getThrowableProxy()).isNull();
+            });
+        }
+        assertQueryMetrics(flow, "failure");
+    }
+
+    @Test
+    void recordsReversedDateRangeOnce() throws Exception {
+        Flow flow = flow(List.of(definition("trade_date", "ann_date")));
+        try (CapturedLog log = capturedLog()) {
+            assertControlledError(flow, get(PATH).param("tradeDateFrom", "2026-08-08")
+                            .param("tradeDateTo", "2026-08-07"),
+                    400, ErrorCode.PARAM_INVALID, "Query parameters are invalid");
+            assertThat(log.events()).singleElement().satisfies(event ->
+                    assertThat(event.getFormattedMessage()).contains(
+                            "failureStage=parameter", "errorCode=PARAM_INVALID"));
+        }
+        assertQueryMetrics(flow, "failure");
+    }
+
+    @Test
+    void recordsSuccessfulQueryOnceWithNormalizedPagination() throws Exception {
+        Flow flow = flow(List.of(definition("ts_code", "trade_date", "ann_date")));
+        try (CapturedLog log = capturedLog()) {
+            flow.mockMvc().perform(get(PATH).header(RequestIdFilter.HEADER_NAME, REQUEST_ID)
+                            .param("tsCode", "000001.SZ").param("tradeDateFrom", "2026-08-07")
+                            .param("annDateTo", "2026-08-08").param("page", "99").param("pageSize", "20"))
+                    .andExpect(status().isOk());
+            assertThat(log.events()).singleElement().satisfies(event ->
+                    assertThat(event.getFormattedMessage()).contains(
+                            "requestId=" + REQUEST_ID, "filterNames=[ts_code, trade_date, ann_date]",
+                            "page=1 pageSize=20", "resultCount=0 totalElements=0",
+                            "outcome=success failureStage=none errorCode=none")
+                            .doesNotContain("000001.SZ", "2026-"));
+        }
+        assertQueryMetrics(flow, "success");
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+        "page,1,2,200", "pageSize,20,50,200",
+        "tradeDateFrom,2026-08-07,2026-08-08,200",
+        "tradeDateFrom,'',2026-08-08,200",
+        "page,'',2,400", "page,'',,200", "pageSize,'',,200",
+        "page,'1,2',,400", "tradeDateFrom,'2026-08-07,2026-08-08',,400",
+        "tradeDateFrom,' 2026-08-07 ',,400", "tradeDateFrom,'   ',,200"
+    })
+    void preservesParameterBindingSemantics(String name, String first, String second, int expected)
+            throws Exception {
+        Flow flow = flow(List.of(definition("trade_date")));
+        try (CapturedLog log = capturedLog()) {
+            MvcResult result = flow.mockMvc().perform(get(PATH)
+                            .param(name, second == null ? new String[] {first} : new String[] {first, second}))
+                    .andExpect(status().is(expected)).andReturn();
+            JsonNode body = flow.objectMapper().readTree(result.getResponse().getContentAsByteArray());
+            if (expected == 200) {
+                assertThat(body.get("page").intValue()).isEqualTo(1);
+                assertThat(body.get("pageSize").intValue())
+                        .isEqualTo(name.equals("pageSize") && !first.isEmpty() ? 20 : 50);
+            } else {
+                assertThat(body.get("code").textValue()).isEqualTo("PARAM_INVALID");
+                assertThat(body.get("fieldErrors").get(0).get("field").textValue()).isEqualTo(name);
+                assertThat(flow.dataSource().connectionCount()).isZero();
+            }
+            assertThat(log.events()).singleElement().satisfies(event ->
+                    assertThat(event.getFormattedMessage()).contains(
+                            "requestId=" + body.get("requestId").textValue(),
+                            "outcome=" + (expected == 200 ? "success" : "failure")));
+        }
+        assertQueryMetrics(flow, expected == 200 ? "success" : "failure");
+    }
+
+    @Test
+    void skipsUnknownQueryKeysWithoutAddingMetrics() throws Exception {
+        Flow flow = flow(List.of(definition("ts_code")));
+        try (CapturedLog log = capturedLog()) {
+            flow.mockMvc().perform(get(PATH.replace("query_records", "unknown")))
+                    .andExpect(status().isConflict());
+            assertThat(log.events()).isEmpty();
+        }
+        assertThat(flow.registry().getMeters()).isEmpty();
+        assertThat(flow.dataSource().connectionCount()).isZero();
+    }
+
+    private static void assertQueryMetrics(Flow flow, String outcome) {
+        assertThat(flow.registry().get("tensor_query_total")
+                .tags("plugin", "fixture", "api", "query_records", "outcome", outcome)
+                .counter().count()).isEqualTo(1);
+        assertThat(flow.registry().get("tensor_query_duration_seconds")
+                .tags("plugin", "fixture", "api", "query_records", "outcome", outcome)
+                .timer().count()).isEqualTo(1);
+    }
+
     @Test
     void normalizesAnOutOfRangePageAndSerializesPreciseRows() throws Exception {
         for (int index = 1; index <= 23; index++) {
@@ -516,22 +696,65 @@ class DatasetControllerIT {
                         new JacksonPrecisionConfiguration().precisionModule())
                 .featuresToDisable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
                 .build();
+        SimpleMeterRegistry registry = new SimpleMeterRegistry();
         StandaloneMockMvcBuilder builder = MockMvcBuilders
                 .standaloneSetup(new DatasetController(
-                        catalog, queryService, operationLogger()))
+                        catalog, queryService, operationLogger(registry)))
                 .setMessageConverters(new MappingJackson2HttpMessageConverter(objectMapper));
         if (installRequestIdFilter) {
-            builder.addFilters(new RequestIdFilter());
+            builder.setControllerAdvice(new GlobalExceptionHandler())
+                    .addFilters(new RequestIdFilter(),
+                            new WebSecurityHeadersConfiguration().securityHeadersFilter().getFilter());
         }
         MockMvc mockMvc = builder.build();
         dataSource.reset();
-        return new Flow(mockMvc, objectMapper, dataSource);
+        return new Flow(mockMvc, objectMapper, dataSource, registry);
     }
 
-    private static OperationLogger operationLogger() {
-        PluginRegistry plugins = new PluginRegistry(List.of());
-        return new OperationLogger(
-                plugins, new TensorMetrics(new SimpleMeterRegistry(), plugins));
+    private static OperationLogger operationLogger(SimpleMeterRegistry registry) {
+        DataSourcePlugin plugin = new DataSourcePlugin() {
+            @Override
+            public PluginDescriptor descriptor() {
+                return new PluginDescriptor(PLUGIN_ID, "Fixture", "Query fixture", true, true, true,
+                        null, List.of(new ApiDescriptor(API_NAME, "Records", "Fixture",
+                                QueryMode.trade_date, List.of())), List.of(DATASET_KEY));
+            }
+
+            @Override
+            public PluginReadiness readiness() {
+                return new PluginReadiness(true, true, true, null);
+            }
+
+            @Override
+            public DownloadEnvelope download(ApiName apiName, Map<String, Object> parameters) {
+                throw new AssertionError("Queries must not download data");
+            }
+        };
+        PluginRegistry plugins = new PluginRegistry(List.of(plugin));
+        return new OperationLogger(plugins, new TensorMetrics(registry, plugins));
+    }
+
+    private static CapturedLog capturedLog() {
+        ch.qos.logback.classic.Logger logger =
+                (ch.qos.logback.classic.Logger) LoggerFactory.getLogger(OperationLogger.class);
+        ListAppender<ILoggingEvent> appender = new ListAppender<>();
+        appender.start();
+        logger.addAppender(appender);
+        return new CapturedLog(logger, appender);
+    }
+
+    private record CapturedLog(ch.qos.logback.classic.Logger logger,
+                               ListAppender<ILoggingEvent> appender) implements AutoCloseable {
+        List<ILoggingEvent> events() {
+            return appender.list.stream().filter(event -> event.getFormattedMessage()
+                    .startsWith("tensor.operation.completed")).toList();
+        }
+
+        @Override
+        public void close() {
+            logger.detachAppender(appender);
+            appender.stop();
+        }
     }
 
     private static void insert(
@@ -560,7 +783,8 @@ class DatasetControllerIT {
     private record Flow(
             MockMvc mockMvc,
             ObjectMapper objectMapper,
-            CountingDataSource dataSource) {}
+            CountingDataSource dataSource,
+            SimpleMeterRegistry registry) {}
 
     private static final class CountingDataSource implements DataSource {
         private final DataSource delegate;

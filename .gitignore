@@ -12,6 +12,9 @@ dist
 dist-ssr
 *.local
 
+# Maven build output
+/data-plane/*/target/
+
 # Editor directories and files
 control-plane/.vscode/extensions.json
 !.vscode/extensions.json

@@ -64,6 +64,8 @@ smoke 只检查指定敏感键/头、JDBC 标记及调用者提供的两个非�
 
 生产默认只暴露 health 家族，禁用 Actuator discovery；无需开放 `env`、`configprops`、`metrics`。根 `/actuator/health` 包含数据库检查，必须达到 HTTP 200 且根状态 UP 才能开放流量；`/actuator/health/readiness` 只作为辅助，不替代根检查。Token 的配置状态与数据库健康独立。
 
+根 health、liveness、readiness 默认只返回 `status`，不公开组件、分组或详情，组件子路径返回 404。数据库中断时根 health 返回 HTTP 503 和 `{"status":"DOWN"}`；探针保持自身的存活/接流量语义。
+
 `/`、`/index.html`、`/api/**` 和 Actuator 使用 `no-store`；`/downloads`、`/datasets` 等 UI fallback 保留 `no-cache`；`/assets/**` 使用 `public, max-age=31536000, immutable`，即一年 immutable 缓存。UI 可以直接刷新，未知 API 或文件资源仍应返回其真实错误状态。
 
 ## 数据库权限与版本维护

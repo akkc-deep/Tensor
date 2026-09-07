@@ -22,6 +22,7 @@ import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 import org.springframework.dao.DataAccessException;
 import org.springframework.transaction.TransactionException;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 public final class OperationLogger {
     private static final Logger LOGGER = LoggerFactory.getLogger(OperationLogger.class);
@@ -93,8 +94,8 @@ public final class OperationLogger {
     public PageResponse query(
             DatasetKey key,
             List<String> filterNames,
-            int requestedPage,
-            int requestedPageSize,
+            Integer requestedPage,
+            Integer requestedPageSize,
             Supplier<PageResponse> operation) {
         Objects.requireNonNull(key, "key");
         filterNames = List.copyOf(Objects.requireNonNull(filterNames, "filterNames"));
@@ -117,12 +118,15 @@ public final class OperationLogger {
             return response;
         } catch (RuntimeException failure) {
             Duration duration = elapsed(started);
-            Failure classified = domainFailure(failure, ErrorCode.QUERY_FAILED, "query");
+            Failure classified = failure instanceof MethodArgumentTypeMismatchException
+                    ? new Failure(ErrorCode.PARAM_INVALID, "parameter")
+                    : domainFailure(failure, ErrorCode.QUERY_FAILED, "query");
             recordQueryMetrics(key, TensorMetrics.Outcome.FAILURE, duration);
             LOGGER.info(
                     "tensor.operation.completed requestId={} operation=query pluginId={} apiName={} filterNames={} page={} pageSize={} resultCount=unavailable totalElements=unavailable durationMs={} outcome=failure failureStage={} errorCode={}",
                     requestId, key.pluginId().value(), key.apiName().value(), filterNames,
-                    requestedPage, requestedPageSize, duration.toMillis(),
+                    requestedPage == null ? "unavailable" : requestedPage,
+                    requestedPageSize == null ? "unavailable" : requestedPageSize, duration.toMillis(),
                     classified.stage(), classified.code());
             throw failure;
         }
