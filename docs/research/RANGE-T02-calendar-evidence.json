@@ -1,0 +1,1292 @@
+{
+  "taskId": "RANGE-T02",
+  "reviewDate": "2026-09-08",
+  "sources": [
+    {
+      "id": "TS-trade_cal",
+      "publisher": "Tushare",
+      "title": "trade_cal 原接口说明",
+      "url": "https://tushare.pro/document/2?doc_id=26",
+      "retrievedAt": "2026-09-08T05:06:37.877411+00:00",
+      "publishedAt": null,
+      "effectiveRange": null,
+      "rawSha256": "be25c0d3391fd6715939669e9725a36815b6fb4425efbf3915b86678afee0835",
+      "excerpt": "交易日历 接口：trade_cal，可以通过 数据工具 调试和查看数据。 描述：获取各大交易所交易日历数据,默认提取的是上交所 积分：需2000积分 输入参数 名称 类型 必选 描述 exchange str N 交易所 SSE上交所,SZSE深交所,CFFEX 中金所,SHFE 上期所,CZCE 郑商所,DCE 大商所,INE 上能源 start_date str N 开始日期 （格式：YYYYMMDD 下同） end_date str N 结束日期 is_open str N 是否交易 '0'休市 '1'交易 输出参数 名称 类型 默认显示 描述 exchange str Y 交易所 SSE上交所 SZSE深交所 cal_date str Y 日历日期 is_open str Y 是否交易 0休市 1交易 pretrade_date str Y 上一个交易日 接口示例 pro = ts.pro_api()\n\n\ndf = pro.trade_cal(exchange='', start_date='20180101', end_date='20181231') 或者 df = pro.query('trade_cal', start_date='20180101', end_date='20181231') 数据样例 exchange  cal_date  is_open\n0           SSE  20180101        0\n1           SSE  20180102        1\n2           SSE  20180103        1\n3           SSE  20180104        1\n4           SSE  20180105        1\n5           SSE  20180106        0\n6           SSE  20180107        0\n7           SSE  20180108        1\n8           SSE  20180109        1\n9           SSE  20180110        1\n10          SSE  20180111        1\n11          SSE  20180112        1\n12          SSE  20180113        0\n13          SSE  20180114        0\n14          SSE  20180115        1\n15          SSE  20180116        1\n16          SSE  20180117        1\n17          SSE  20180118        1\n18          SSE  20180119        1\n19          SSE  20180120        0\n20          SSE  20180121        0",
+      "status": "READABLE"
+    },
+    {
+      "id": "TS-adj_factor",
+      "publisher": "Tushare",
+      "title": "adj_factor 原接口说明",
+      "url": "https://tushare.pro/document/2?doc_id=28",
+      "retrievedAt": "2026-09-08T05:06:37.878259+00:00",
+      "publishedAt": null,
+      "effectiveRange": null,
+      "rawSha256": "c3647d529ce85a8244353f503d1188bde8367aa975f8b562c81c5d3921fefd96",
+      "excerpt": "复权因子 接口：adj_factor，可以通过 数据工具 调试和查看数据。 更新时间：盘前9点15~20分完成当日复权因子入库 描述：本接口由Tushare自行生产，获取股票复权因子，可提取单只股票全部历史复权因子，也可以提取单日全部股票的复权因子。 积分要求：2000积分起，5000以上可高频调取 输入参数 名称 类型 必选 描述 ts_code str N 股票代码 trade_date str N 交易日期(YYYYMMDD，下同) start_date str N 开始日期 end_date str N 结束日期 注：日期都填YYYYMMDD格式，比如20181010 输出参数 名称 类型 必选 描述 ts_code str Y 股票代码 trade_date str Y 交易日期 adj_factor float Y 复权因子 接口示例 pro = ts . pro_api () #提取000001全部复权因子 df = pro . adj_factor ( ts_code = '000001.SZ' , trade_date = '' ) #提取2018年7月18日复权因子 df = pro . adj_factor ( ts_code = '' , trade_date = '20180718' ) 或者 df = pro . query ( 'adj_factor' , trade_date = '20180718' ) 数据样例 ts_code trade_date  adj_factor\n0     000001.SZ   20180809     108.031\n1     000001.SZ   20180808     108.031\n2     000001.SZ   20180807     108.031\n3     000001.SZ   20180806     108.031\n4     000001.SZ   20180803     108.031\n5     000001.SZ   20180802     108.031\n6     000001.SZ   20180801     108.031\n7     000001.SZ   20180731     108.031\n8     000001.SZ   20180730     108.031\n9     000001.SZ   20180727     108.031\n10    000001.SZ   20180726     108.031\n11    000001.SZ   20180725     108.031\n12    000001.SZ   20180724     108.031\n13    000001.SZ   20180723     108.031\n14    000001.SZ   20180720     108.031\n15    000001.SZ   20180719     108.031\n16    000001.SZ   20180718     108.031\n17    000001.SZ   20180717     108.031\n18    000001.SZ   20180716     108.031\n19    000001.SZ   20180713     108.031\n20    000001.SZ   20180712     108.031",
+      "status": "READABLE"
+    },
+    {
+      "id": "TS-block_trade",
+      "publisher": "Tushare",
+      "title": "block_trade 原接口说明",
+      "url": "https://tushare.pro/document/2?doc_id=161",
+      "retrievedAt": "2026-09-08T05:06:38.508084+00:00",
+      "publishedAt": null,
+      "effectiveRange": null,
+      "rawSha256": "aadf8cdbf5019f5b636136f6f2b51a16fbc44e62fbfb3a4ed26e2d0c2666a5f4",
+      "excerpt": "大宗交易 接口：block_trade 描述：大宗交易 限量：单次最大1000条，总量不限制 积分：2000积分可调取，每分钟内限制次数，超过5000积分频次相对较高，具体请参阅 积分获取办法 输入参数 名称 类型 必选 描述 ts_code str N TS代码（股票代码和日期至少输入一个参数） trade_date str N 交易日期（格式：YYYYMMDD，下同） start_date str N 开始日期 end_date str N 结束日期 输出参数 名称 类型 默认显示 描述 ts_code str Y TS代码 trade_date str Y 交易日历 price float Y 成交价 vol float Y 成交量（万股） amount float Y 成交金额 buyer str Y 买方营业部 seller str Y 卖方营业部 接口使用 pro = ts.pro_api()\n\ndf = pro.block_trade(trade_date='20181227') 数据示例 ts_code   trade_date  price      vol     amount  \\\n0   600436.SH   20181227  86.95     9.49     825.16   \n1   603160.SH   20181227  70.00    28.57    2000.00   \n2   601318.SH   20181227  55.76  1800.00  100368.00   \n3   601318.SH   20181227  55.76   332.00   18512.32   \n4   601318.SH   20181227  55.76   288.00   16058.88   \n5   601318.SH   20181227  55.76   170.00    9479.20   \n6   601318.SH   20181227  55.76    72.00    4014.72   \n7   603508.SH   20181227  35.72    56.00    2000.32   \n8   600681.SH   20181227  10.69   111.00    1186.59   \n9   603606.SH   20181227   8.93    23.92     213.61   \n10  601108.SH   20181227   6.76  2000.00   13520.00   \n11  601108.SH   20181227   6.41   700.00    4487.00   \n12  600746.SH   20181227   5.75   244.71    1407.08   \n13  600016.SH   20181227   5.65  1326.00    7491.90   \n14  600016.SH   20181227   5.54  3500.00   19390.00   \n15  601011.SH   20181227   5.00   659.26    3296.30   \n16  601011.SH   20181227   5.00   596.75    2983.77   \n17  600984.SH   20181227   4.96   296.00    1468.16   \n18  601398.SH   20181227   4.74   172.20     816.23\n\n                                                 buyer                     seller  \n0   安信证券股份有限公司成都交子大道证券营业部      安信证券股份有限公司成都交子大道证券营业部  \n1   中国银河证券股份有限公司总部      长江证券股份有限公司武汉巨龙大道证券营业部  \n2   恒泰证券股份有限公司总部                       机构专用  \n3   华鑫证券有限责任公司合肥梅山路证券营业部                       机构专用  \n4   华泰证券股份有限公司上海徐汇区天钥桥路证券营业部                       机构专用  \n5   东兴证券股份有限公司上海肇嘉浜路证券营业部                       机构专用  \n6   长江证券股份有限公司荆州北京西路证券营业部                       机构专用  \n7   东方证券股份有限公司公司总部         江海证券有限公司深圳民田路证券营业部  \n8   国信证券股份有限公司深圳振华路证券营业部         中航证券有限公司深圳春风路证券营业部  \n9   广发证券股份有限公司广州天河北路大都会广场证券营业部    第一创业证券股份有限公司深圳深南大道证券营业部  \n10  中国国际金融股份有限公司北京建国门外大街证券营业部       财通证券股份有限公司杭州体育馆证券营业部  \n11  中国银河证券股份有限公司杭州庆春路证券营业部      财通证券股份有限公司淳安新安大街证券营业部  \n12  中信证券股份有限公司镇江正东路证券营业部        中信证券股份有限公司总部(非营业场所)  \n13  太平洋证券股份有限公司厦门高林中路证券营业部      华福证券有限责任公司厦门湖滨南路证券营业部  \n14  中信证券股份有限公司北京安外大街证券营业部                       机构专用  \n15  中国中投证券有限责任公司合肥长江中路证券营业部      中信证券股份有限公司中山中山四路证券营业部  \n16  中国中投证券有限责任公司合肥长江中路证券营业部         海通证券股份有限公司北京光华路营业部  \n17  财富证券有限责任公司长沙八一路证券营业部         中航证券有限公司北京慧忠路证券营业部  \n18  九州证券股份有限公司重庆分公司            九州证券股份有限公司重庆分公司",
+      "status": "READABLE"
+    },
+    {
+      "id": "TS-daily",
+      "publisher": "Tushare",
+      "title": "daily 原接口说明",
+      "url": "https://tushare.pro/document/2?doc_id=27",
+      "retrievedAt": "2026-09-08T05:06:37.877844+00:00",
+      "publishedAt": null,
+      "effectiveRange": null,
+      "rawSha256": "01ba0afed6696640dfa5b641c1a6837324f9e53808bc95371d75c6c59c4d5a1e",
+      "excerpt": "A股日线行情 接口：daily，可以通过 数据工具 调试和查看数据 数据说明：交易日每天15点～16点之间入库。本接口是未复权行情，停牌期间不提供数据 调取说明：基础积分每分钟内可调取500次，每次6000条数据，一次请求相当于提取一个股票23年历史 描述：获取股票行情数据，或通过 通用行情接口 获取数据，包含了前后复权数据 输入参数 名称 类型 必选 描述 ts_code str N 股票代码（支持多个股票同时提取，逗号分隔） trade_date str N 交易日期（YYYYMMDD） start_date str N 开始日期(YYYYMMDD) end_date str N 结束日期(YYYYMMDD) 注：日期都填YYYYMMDD格式，比如20181010 输出参数 名称 类型 默认显示 描述 ts_code str Y 股票代码 trade_date str Y 交易日期 open float Y 开盘价 high float Y 最高价 low float Y 最低价 close float Y 收盘价 pre_close float Y 昨收价【除权价】 change float Y 涨跌额 pct_chg float Y 涨跌幅（%） 【基于除权后的昨收计算的涨跌幅：（今收-除权昨收）/除权昨收 】 vol float Y 成交量 （手） amount float Y 成交额 （千元） ah_vol float N 盘后成交量 （手） ah_amount float N 盘后成交额 （千元） 接口示例 pro = ts . pro_api () #提取单个股票，跨时间段的历史日线 df = pro . daily ( ts_code = '000001.SZ' , start_date = '20180701' , end_date = '20180718' ) #通过日期取历史某一天的全部历史 df = pro . daily ( trade_date = '20180810' ) # 指定提取“盘后固定成交量”和“盘后固定成交金额”数据（2026-07-06开始有数据）\n\ndf = pro.daily(trade_date='20260707', fields='ts_code,open,close,ah_vol,ah_amount') 注：建议提供循环日期来提取全市场数据，不要通过循环ts_code来拉取历史 数据样例 ts_code     trade_date  open  high   low  close  pre_close  change    pct_chg  vol        amount\n0  000001.SZ   20180718  8.75  8.85  8.69   8.70       8.72   -0.02       -0.23   525152.77   460697.377\n1  000001.SZ   20180717  8.74  8.75  8.66   8.72       8.73   -0.01       -0.11   375356.33   326396.994\n2  000001.SZ   20180716  8.85  8.90  8.69   8.73       8.88   -0.15       -1.69   689845.58   603427.713\n3  000001.SZ   20180713  8.92  8.94  8.82   8.88       8.88    0.00        0.00   603378.21   535401.175\n4  000001.SZ   20180712  8.60  8.97  8.58   8.88       8.64    0.24        2.78  1140492.31  1008658.828\n5  000001.SZ   20180711  8.76  8.83  8.68   8.78       8.98   -0.20       -2.23   851296.70   744765.824\n6  000001.SZ   20180710  9.02  9.02  8.89   8.98       9.03   -0.05       -0.55   896862.02   803038.965\n7  000001.SZ   20180709  8.69  9.03  8.68   9.03       8.66    0.37        4.27  1409954.60  1255007.609\n8  000001.SZ   20180706  8.61  8.78  8.45   8.66       8.60    0.06        0.70   988282.69   852071.526\n9  000001.SZ   20180705  8.62  8.73  8.55   8.60       8.61   -0.01       -0.12   835768.77   722169.579",
+      "status": "READABLE"
+    },
+    {
+      "id": "TS-daily_basic",
+      "publisher": "Tushare",
+      "title": "daily_basic 原接口说明",
+      "url": "https://tushare.pro/document/2?doc_id=32",
+      "retrievedAt": "2026-09-08T05:06:38.126722+00:00",
+      "publishedAt": null,
+      "effectiveRange": null,
+      "rawSha256": "8ea0871ff166dd82f006feb8f198ce49595f9091dace0b8f32ca03440d20199f",
+      "excerpt": "每日指标 接口：daily_basic，可以通过 数据工具 调试和查看数据。 更新时间：交易日每日15点～17点之间 描述：获取全部股票每日重要的基本面指标，可用于选股分析、报表展示等。单次请求最大返回6000条数据，可按日线循环提取全部历史。 积分：至少2000积分才可以调取，5000积分无总量限制，具体请参阅 积分获取办法 输入参数 名称 类型 必选 描述 ts_code str Y 股票代码（二选一） trade_date str N 交易日期 （二选一） start_date str N 开始日期(YYYYMMDD) end_date str N 结束日期(YYYYMMDD) 注：日期都填YYYYMMDD格式，比如20181010 输出参数 名称 类型 默认显示 描述 ts_code str Y TS股票代码 trade_date str Y 交易日期 close float Y 当日收盘价 turnover_rate float Y 换手率 (成交量/无限售流通股数) turnover_rate_f float Y 换手率（自由流通股）(成交量/自由流通股数) volume_ratio float Y 量比 VOL/MA pe float Y 市盈率（总市值/净利润， 亏损的PE为空） pe_ttm float Y 市盈率（ 总市值/净利润TTM，亏损的PE为空） pb float Y 市净率（总市值/(净资产-其他权益工具)） ps float Y 市销率 (总市值/营业收入(最新年报)) ps_ttm float Y 市销率（TTM）(总市值/营业收入TTM) dv_ratio float Y 股息率 （%），除息日发生在去年期间的派现 dv_ttm float Y 股息率（TTM）（%），除息日在近12个月且分红报告期在12个月以内的派现 total_share float Y 总股本 （万股） float_share float Y 流通股本 （万股） free_share float Y 自由流通股本 （万） total_mv float Y 总市值 （万元） circ_mv float Y 流通市值（万元） limit_status int N 收盘涨跌状态：0-平盘，1-上涨(不含涨停)，2-涨停(不含一字涨停)，3-一字涨停，4-下跌(不含跌停)，5-跌停(不含一字跌停)，6-一字跌停 接口用法 pro = ts . pro_api () df = pro . daily_basic ( ts_code = '' , trade_date = '20180726' , fields = 'ts_code,trade_date,turnover_rate,volume_ratio,pe,pb' ) 或者 df = pro . query ( 'daily_basic' , ts_code = '' , trade_date = '20180726' , fields = 'ts_code,trade_date,turnover_rate,volume_ratio,pe,pb' ) 数据样例 ts_code     trade_date  turnover_rate  volume_ratio        pe       pb\n0     600230.SH   20180726         2.4584          0.72    8.6928   3.7203\n1     600237.SH   20180726         1.4737          0.88  166.4001   1.8868\n2     002465.SZ   20180726         0.7489          0.72   71.8943   2.6391\n3     300732.SZ   20180726         6.7083          0.77   21.8101   3.2513\n4     600007.SH   20180726         0.0381          0.61   23.7696   2.3774\n5     300068.SZ   20180726         1.4583          0.52   27.8166   1.7549\n6     300552.SZ   20180726         2.0728          0.95   56.8004   2.9279\n7     601369.SH   20180726         0.2088          0.95   44.1163   1.8001\n8     002518.SZ   20180726         0.5814          0.76   15.1004   2.5626\n9     002913.SZ   20180726        12.1096          1.03   33.1279   2.9217\n10    601818.SH   20180726         0.1893          0.86    6.3064   0.7209\n11    600926.SH   20180726         0.6065          0.46    9.1772   0.9808\n12    002166.SZ   20180726         0.7582          0.82   16.9868   3.3452\n13    600841.SH   20180726         0.3754          1.02   66.2647   2.2302\n14    300634.SZ   20180726        23.1127          1.26  120.3053  14.3168\n15    300126.SZ   20180726         1.2304          1.11  348.4306   1.5171\n16    300718.SZ   20180726        17.6612          0.92   32.0239   3.8661\n17    000708.SZ   20180726         0.5575          0.70   10.3674   1.0276\n18    002626.SZ   20180726         0.6187          0.83   22.7580   4.2446\n19    600816.SH   20180726         0.6745          0.65   11.0778   3.2214",
+      "status": "READABLE"
+    },
+    {
+      "id": "TS-margin_detail",
+      "publisher": "Tushare",
+      "title": "margin_detail 原接口说明",
+      "url": "https://tushare.pro/document/2?doc_id=59",
+      "retrievedAt": "2026-09-08T05:06:38.327768+00:00",
+      "publishedAt": null,
+      "effectiveRange": null,
+      "rawSha256": "18d1ff18b57b16d3dd9165b507f99a4b6d483c303c19d8a38e6b969004aa6a9f",
+      "excerpt": "融资融券交易明细 接口：margin_detail 描述：获取沪深两市每日融资融券明细，交易所于每天8点30左右更新上一日数据。 注：深交所和北交所每周五的数据在下周一上午更新。 限量：单次请求最大返回6000行数据，可根据日期循环 权限：2000积分可获得本接口权限，积分越高权限越大，具体参考 权限说明 输入参数 名称 类型 必选 描述 trade_date str N 交易日期（格式：YYYYMMDD，下同） ts_code str N TS代码 start_date str N 开始日期 end_date str N 结束日期 输出参数 名称 类型 描述 trade_date str 交易日期 ts_code str TS股票代码 name str 股票名称 （20190910后有数据） rzye float 融资余额(元) rqye float 融券余额(元) rzmre float 融资买入额(元) rqyl float 融券余量（股） rzche float 融资偿还额(元) rqchl float 融券偿还量(股) rqmcl float 融券卖出量(股,份,手) rzrqye float 融资融券余额(元) 接口使用 pro = ts . pro_api () df = pro . margin_detail ( trade_date = '20180802' ) 或者 df = pro . query ( 'margin_detail' , trade_date = '20180802' ) 数据样例 trade_date    ts_code          rzye        rqye        rzmre       rqyl  \\\n0     20180802  000001.SZ  4.430811e+09   8238210.0   78800436.0   921500.0   \n1     20180802  000002.SZ  2.613071e+09  30772020.0  186176338.0  1439290.0   \n2     20180802  000006.SZ  8.214685e+08   1008250.0   15199626.0   185000.0   \n3     20180802  000009.SZ  1.318175e+09     74451.0    8010979.0    15674.0   \n4     20180802  000012.SZ  6.422077e+08    190201.0    7831261.0    38347.0   \n5     20180802  000022.SZ  1.891423e+08   1761368.0    8868547.0    99400.0   \n6     20180802  000027.SZ  3.583209e+08    104157.0    4235209.0    21300.0   \n7     20180802  000028.SZ  2.885056e+08    524656.0    4737219.0    12100.0   \n8     20180802  000030.SZ  1.076096e+08    965944.0    2717503.0   200820.0   \n9     20180802  000031.SZ  5.659868e+08     90675.0    2056441.0    15500.0   \n10    20180802  000036.SZ  3.974383e+08    620420.0    5980093.0   110199.0   \n11    20180802  000039.SZ  1.047953e+09   2519010.0   17651054.0   215300.0   \n12    20180802  000043.SZ  3.496989e+08     14532.0    2299872.0     2100.0   \n13    20180802  000046.SZ  7.221042e+08   2208480.0   17142811.0   344000.0   \n14    20180802  000049.SZ  3.914922e+08   1795218.0   12595082.0    65783.0   \n15    20180802  000050.SZ  1.884433e+09    517992.0   51120876.0    38200.0   \n16    20180802  000059.SZ  7.077480e+08    587805.0   49392632.0    78900.0   \n17    20180802  000060.SZ  1.425264e+09   2372025.0   21992232.0   520181.0   \n18    20180802  000061.SZ  6.317999e+08    547716.0    5760238.0   105128.0   \n19    20180802  000062.SZ  5.627777e+08    795577.0    3060551.0    39191.0   \n20    20180802  000063.SZ  2.581872e+09   3873697.0  194982814.0   276101.0\n\n           rzche     rqchl      rqmcl        rzrqye  \n0    147005397.0  544400.0   260000.0  4.439049e+09  \n1    133408689.0  437600.0   516700.0  2.643843e+09  \n2     16084617.0   90000.0      100.0  8.224767e+08  \n3     11337406.0   80000.0     2000.0  1.318249e+09  \n4      8260616.0       0.0    26700.0  6.423979e+08  \n5      8464082.0   10000.0    19400.0  1.909037e+08  \n6      2999201.0   21700.0        0.0  3.584250e+08  \n7      4526179.0    4400.0        0.0  2.890302e+08  \n8      1906548.0   14140.0   171700.0  1.085755e+08  \n9      4193433.0   37600.0     7500.0  5.660775e+08  \n10 ",
+      "status": "READABLE"
+    },
+    {
+      "id": "TS-moneyflow",
+      "publisher": "Tushare",
+      "title": "moneyflow 原接口说明",
+      "url": "https://tushare.pro/document/2?doc_id=170",
+      "retrievedAt": "2026-09-08T05:06:38.127361+00:00",
+      "publishedAt": null,
+      "effectiveRange": null,
+      "rawSha256": "ddec2e40705b6b0246d26683bdb5f1d5ca79d475d81f70b36007c3b211de933b",
+      "excerpt": "个股资金流向 接口：moneyflow，可以通过 数据工具 调试和查看数据。 描述：获取沪深A股票资金流向数据，分析大单小单成交情况，用于判别资金动向，数据开始于2010年。 限量：单次最大提取6000行记录，总量不限制 积分：用户需要至少2000积分才可以调取，基础积分有流量控制，积分越多权限越大，请自行提高积分，具体请参阅 积分获取办法 输入参数 名称 类型 必选 描述 ts_code str N 股票代码 （股票和时间参数至少输入一个） trade_date str N 交易日期 start_date str N 开始日期 end_date str N 结束日期 输出参数 名称 类型 默认显示 描述 ts_code str Y TS代码 trade_date str Y 交易日期 buy_sm_vol int Y 小单买入量（手） buy_sm_amount float Y 小单买入金额（万元） sell_sm_vol int Y 小单卖出量（手） sell_sm_amount float Y 小单卖出金额（万元） buy_md_vol int Y 中单买入量（手） buy_md_amount float Y 中单买入金额（万元） sell_md_vol int Y 中单卖出量（手） sell_md_amount float Y 中单卖出金额（万元） buy_lg_vol int Y 大单买入量（手） buy_lg_amount float Y 大单买入金额（万元） sell_lg_vol int Y 大单卖出量（手） sell_lg_amount float Y 大单卖出金额（万元） buy_elg_vol int Y 特大单买入量（手） buy_elg_amount float Y 特大单买入金额（万元） sell_elg_vol int Y 特大单卖出量（手） sell_elg_amount float Y 特大单卖出金额（万元） net_mf_vol int Y 净流入量（手） net_mf_amount float Y 净流入额（万元） 各类别统计规则如下： 小单 ：5万以下 中单 ：5万～20万 大单 ：20万～100万 特大单 ：成交额>=100万 ，数据基于主动买卖单统计 注：净流入为主动买卖单的净值，基于L2订单计算，此处不能简单把大小单总和相减。 接口示例 pro = ts . pro_api ( 'your token' ) #获取单日全部股票数据 df = pro . moneyflow ( trade_date = '20190315' ) #获取单个股票数据 df = pro . moneyflow ( ts_code = '002149.SZ' , start_date = '20190115' , end_date = '20190315' ) 数据示例 ts_code trade_date  buy_sm_vol  buy_sm_amount  sell_sm_vol  \\\n0     000779.SZ   20190315       11377        1150.17        11100   \n1     000933.SZ   20190315       94220        4803.22       105924   \n2     002270.SZ   20190315       43979        2330.96        45893   \n3     002319.SZ   20190315       21502        2952.88        17155   \n4     002604.SZ   20190315       31944         607.35        58667   \n5     300065.SZ   20190315       16048        2294.71        16425   \n6     600062.SH   20190315       55439        7432.13        65765   \n7     002735.SZ   20190315        3220         797.10         4598   \n8     300196.SZ   20190315       12534        1286.02         8340   \n9     300350.SZ   20190315       15346        1120.12        18853   \n10    600193.SH   20190315       12183         503.73        19576   \n11    002866.SZ   20190315       16932        2213.68        16037   \n12    300481.SZ   20190315       21386        4275.33        21863   \n13    600527.SH   20190315      115462        2975.44        79272   \n14    603980.SH   20190315       13957        1924.69        11718   \n15    600658.SH   20190315       71767        4826.73        69535   \n16    600812.SH   20190315       26140        1247.47        34923   \n17    002013.SZ   20190315      170234       12286.02       148509   \n18    600789.SH   20190315      211012       21644.56       150598   \n19    601636.SH   20190315       70737        3117.43        68073   \n20    000807.SZ   20190315      129668        6361.06       122077\n\n...\n\n     sell_sm_amount  buy_md_vol  buy_md_amount  sell_md_vol  sell_md_amount  \\\n0            1122.97       13012        1316.72        14812         1498.90   \n1            5411.72      135976        6935.40       154023         7863.00   \n2       ",
+      "status": "READABLE"
+    },
+    {
+      "id": "TS-monthly",
+      "publisher": "Tushare",
+      "title": "monthly 原接口说明",
+      "url": "https://tushare.pro/document/2?doc_id=145",
+      "retrievedAt": "2026-09-08T05:06:37.878183+00:00",
+      "publishedAt": null,
+      "effectiveRange": null,
+      "rawSha256": "7b6ef6b5113900feae0a791553116800fa8732f413814c0b90c7999148e655f5",
+      "excerpt": "月线行情 接口：monthly 描述：获取A股月线数据 限量：单次最大4500行，总量不限制 积分：用户需要至少2000积分才可以调取，具体请参阅 积分获取办法 输入参数 名称 类型 必选 描述 ts_code str N TS代码 （ts_code,trade_date两个参数任选一） trade_date str N 交易日期 （每月最后一个交易日日期，YYYYMMDD格式） start_date str N 开始日期 end_date str N 结束日期 输出参数 名称 类型 默认显示 描述 ts_code str Y 股票代码 trade_date str Y 交易日期 close float Y 月收盘价 open float Y 月开盘价 high float Y 月最高价 low float Y 月最低价 pre_close float Y 上月收盘价 change float Y 月涨跌额 pct_chg float Y 月涨跌幅 （未复权，如果是复权请用 通用行情接口 ） vol float Y 月成交量 amount float Y 月成交额 接口用法 pro = ts.pro_api()\n\ndf = pro.monthly(ts_code='000001.SZ', start_date='20180101', end_date='20181101', fields='ts_code,trade_date,open,high,low,close,vol,amount') 或者 df = pro.monthly(trade_date='20181031', fields='ts_code,trade_date,open,high,low,close,vol,amount') 数据样例 ts_code trade_date  close   open   high    low          vol  \\\n0   000001.SZ   20181031  10.91  10.70  11.46   9.70  27801557.09   \n1   000001.SZ   20180930  11.05  10.09  11.27   9.68  18821004.99   \n2   000001.SZ   20180831  10.13   9.42  10.43   8.64  21896873.02   \n3   000001.SZ   20180731   9.42   9.05   9.59   8.45  20430278.02   \n4   000001.SZ   20180630   9.09  10.15  10.46   8.87  18179888.58   \n5   000001.SZ   20180531  10.18  10.97  11.23  10.02  18267177.83   \n6   000001.SZ   20180430  10.85  10.87  11.94  10.51  23495990.53   \n7   000001.SZ   20180331  10.90  11.92  12.34  10.55  23129969.15   \n8   000001.SZ   20180228  12.05  13.95  14.57  11.38  25624473.21   \n9   000001.SZ   20180131  14.05  13.35  15.13  12.86  46145376.46   \n10  000001.SZ   20171231  13.30  13.40  13.86  12.64  29661838.16   \n11  000001.SZ   20171130  13.38  11.56  15.24  11.09  42481293.87   \n12  000001.SZ   20171031  11.54  11.57  11.73  11.12  13951964.07   \n13  000001.SZ   20170930  11.11  11.28  11.94  10.82  16101838.41   \n14  000001.SZ   20170831  11.28  10.64  11.74   9.99  26281362.76   \n15  000001.SZ   20170731  10.67   9.40  11.33   9.27  35360949.04   \n16  000001.SZ   20170630   9.39   9.20   9.49   8.99  12718091.74   \n17  000001.SZ   20170531   9.20   8.96   9.23   8.54  12252646.46   \n18  000001.SZ   20170430   8.99   9.16   9.22   8.89   8024338.26   \n19  000001.SZ   20170331   9.17   9.49   9.55   9.06  12889345.37   \n20  000001.SZ   20170228   9.48   9.34   9.62   9.23   8460527.09   \n21  000001.SZ   20170131   9.33   9.11   9.34   9.07   7629258.66 \n\n          amount  \n0   2.960878e+07  \n1   1.942842e+07  \n2   2.088672e+07  \n3   1.832737e+07  \n4   1.791251e+07  \n5   1.965278e+07  \n6   2.655691e+07  \n7   2.692560e+07  \n8   3.322504e+07  \n9   6.454870e+07  \n10  3.914290e+07  \n11  5.604279e+07  \n12  1.597217e+07  \n13  1.827867e+07  \n14  2.859479e+07  \n15  3.736988e+07  \n16  1.171552e+07  \n17  1.083921e+07  \n18  7.268941e+06  \n19  1.197751e+07  \n20  7.977982e+06  \n21  7.001209e+06",
+      "status": "READABLE"
+    },
+    {
+      "id": "TS-stk_limit",
+      "publisher": "Tushare",
+      "title": "stk_limit 原接口说明",
+      "url": "https://tushare.pro/document/2?doc_id=183",
+      "retrievedAt": "2026-09-08T05:06:38.125582+00:00",
+      "publishedAt": null,
+      "effectiveRange": null,
+      "rawSha256": "3a89e6b2b4d5ab6de1ed7f3b6c8b226ba9855957ed499aaef17eedc657d54140",
+      "excerpt": "每日涨跌停价格 接口：stk_limit 描述：获取全市场（包含A/B股和基金）每日涨跌停价格，包括涨停价格，跌停价格等，每个交易日9点左右更新当日股票涨跌停价格。 限量：单次最多提取5800条记录，可循环调取，总量不限制 积分：用户积2000积分可调取，单位分钟有流控，积分越高流量越大，请自行提高积分，具体请参阅 积分获取办法 输入参数 名称 类型 必选 描述 ts_code str N 股票代码 trade_date str N 交易日期 start_date str N 开始日期 end_date str N 结束日期 输出参数 名称 类型 默认显示 描述 trade_date str Y 交易日期 ts_code str Y TS股票代码 pre_close float N 昨日收盘价 up_limit float Y 涨停价 down_limit float Y 跌停价 asset_type str N 类型 STK exchange str N 交易所：SSE/SZSE/BSE 接口示例 pro = ts . pro_api () #获取单日全部股票数据涨跌停价格 df = pro . stk_limit ( trade_date = '20190625' ) #获取单个股票数据 df = pro . stk_limit ( ts_code = '002149.SZ' , start_date = '20190115' , end_date = '20190615' ) 数据示例 trade_date    ts_code  up_limit  down_limit\n0      20190625  000001.SZ     15.06       12.32\n1      20190625  000002.SZ     30.94       25.32\n2      20190625  000004.SZ     25.15       20.57\n3      20190625  000005.SZ      3.49        2.85\n4      20190625  000006.SZ      6.14        5.02\n5      20190625  000007.SZ      7.74        6.34\n6      20190625  000008.SZ      4.28        3.50\n7      20190625  000009.SZ      6.36        5.20\n8      20190625  000010.SZ      3.51        3.17\n9      20190625  000011.SZ     10.58        8.66\n10     20190625  000012.SZ      5.16        4.22\n11     20190625  000014.SZ     10.98        8.98\n12     20190625  000016.SZ      4.81        3.93\n13     20190625  000017.SZ      5.15        4.21\n14     20190625  000018.SZ      1.44        1.30\n15     20190625  000019.SZ      8.09        6.62\n16     20190625  000020.SZ     12.21        9.99\n17     20190625  000021.SZ      9.30        7.61\n18     20190625  000023.SZ     14.61       11.95\n19     20190625  000025.SZ     23.08       18.88\n20     20190625  000026.SZ      8.66        7.08",
+      "status": "READABLE"
+    },
+    {
+      "id": "TS-suspend_d",
+      "publisher": "Tushare",
+      "title": "suspend_d 原接口说明",
+      "url": "https://tushare.pro/document/2?doc_id=214",
+      "retrievedAt": "2026-09-08T05:06:38.062618+00:00",
+      "publishedAt": null,
+      "effectiveRange": null,
+      "rawSha256": "7d9a294d1dc50c06f090b37528e4c7958e31c1797b9818ceb3639c164468b6c5",
+      "excerpt": "每日停复牌信息 接口：suspend_d 更新时间：不定期 描述：至少需要2000积分 可以调用，5000积分可以获得更高的频次，按日期方式获取股票每日停复牌信息 输入参数 名称 类型 必选 描述 ts_code str N 股票代码(可输入多值) trade_date str N 交易日日期 start_date str N 停复牌查询开始日期 end_date str N 停复牌查询结束日期 suspend_type str N 停复牌类型：S-停牌,R-复牌 输出参数 名称 类型 默认显示 描述 ts_code str Y TS代码 trade_date str Y 停复牌日期（覆盖从停牌到覆盖期间的连续日期） suspend_timing str Y 日内停牌时间段（日内停牌才有值，否则为空值） suspend_type str Y 停复牌类型：S-停牌，R-复牌 接口用法 pro = ts . pro_api () #提取2020-03-12的停牌股票 df = pro . suspend_d ( suspend_type = 'S' , trade_date = '20200312' ) 数据样例 ts_code suspend_type trade_date suspend_timing 0 000029 . SZ S 20200312 None 1 000502 . SZ S 20200312 None 2 000939 . SZ S 20200312 None 3 000977 . SZ S 20200312 None 4 000995 . SZ S 20200312 None 5 002260 . SZ S 20200312 None 6 002450 . SZ S 20200312 None 7 002604 . SZ S 20200312 None 8 300028 . SZ S 20200312 None 9 300104 . SZ S 20200312 None 10 300216 . SZ S 20200312 None 11 300592 . SZ S 20200312 None 12 300819 . SZ S 20200312 09 : 30 - 10 : 00 13 300821 . SZ S 20200312 09 : 30 - 10 : 00 14 600074 . SH S 20200312 None 15 600145 . SH S 20200312 None 16 600228 . SH S 20200312 None 17 600310 . SH S 20200312 None 18 600610 . SH S 20200312 None 19 600745 . SH S 20200312 None 20 600766 . SH S 20200312 None 21 600891 . SH S 20200312 None 22 601127 . SH S 20200312 None 23 601162 . SH S 20200312 None 24 603002 . SH S 20200312 None 25 603399 . SH S 20200312 None",
+      "status": "READABLE"
+    },
+    {
+      "id": "TS-top_inst",
+      "publisher": "Tushare",
+      "title": "top_inst 原接口说明",
+      "url": "https://tushare.pro/document/2?doc_id=107",
+      "retrievedAt": "2026-09-08T05:06:38.421810+00:00",
+      "publishedAt": null,
+      "effectiveRange": null,
+      "rawSha256": "bc9a51b1ba6e5c3121ef95f1e816f7f9bb4665d096df6a856f93eb01711184a2",
+      "excerpt": "龙虎榜机构明细 接口：top_inst 描述：龙虎榜机构成交明细 限量：单次请求最大返回10000行数据，可根据参数循环获取全部历史 积分：用户需要至少5000积分才可以调取，具体请参阅 积分获取办法 输入参数 名称 类型 必选 描述 trade_date str Y 交易日期 ts_code str N TS代码 输出参数 名称 类型 默认显示 描述 trade_date str Y 交易日期 ts_code str Y TS代码 exalter str Y 营业部名称 side str Y 买卖类型0：买入金额最大的前5名， 1：卖出金额最大的前5名 buy float Y 买入额（元） buy_rate float Y 买入占总成交比例 sell float Y 卖出额（元） sell_rate float Y 卖出占总成交比例 net_buy float Y 净成交额（元） reason str Y 上榜理由 接口用法 pro = ts.pro_api()\n\ndf = pro.top_inst(trade_date='20210525')\n\n或者\n\ndf = pro.query('top_inst', trade_date='20210524', ts_code='000592.SZ', fields='trade_date,buy,sell,side,reason') 数据样例 trade_date          buy         sell side                   reason\n0    20210524  19627524.05  25593683.67    0              涨幅偏离值达7%的证券\n1    20210524   9091252.00  18009704.00    0              涨幅偏离值达7%的证券\n2    20210524  35168640.99  13344062.12    0              涨幅偏离值达7%的证券\n3    20210524  18812912.60  12121352.00    0              涨幅偏离值达7%的证券\n4    20210524   1684986.00  12076417.00    0              涨幅偏离值达7%的证券\n5    20210524  37071259.81   3956982.00    1              涨幅偏离值达7%的证券\n6    20210524  35168640.99  13344062.12    1              涨幅偏离值达7%的证券\n7    20210524  21487772.44     84795.00    1              涨幅偏离值达7%的证券\n8    20210524  19627524.05  25593683.67    1              涨幅偏离值达7%的证券\n9    20210524  18812912.60  12121352.00    1              涨幅偏离值达7%的证券\n10   20210524  28720777.05  53009929.06    0  连续三个交易日内，涨幅偏离值累计达20%的证券\n11   20210524  35504648.99  46382533.92    0  连续三个交易日内，涨幅偏离值累计达20%的证券\n12   20210524  35344119.44  46305551.88    0  连续三个交易日内，涨幅偏离值累计达20%的证券\n13   20210524   9091252.00  26481086.00    0  连续三个交易日内，涨幅偏离值累计达20%的证券\n14   20210524  23609443.87  23791701.41    0  连续三个交易日内，涨幅偏离值累计达20%的证券\n15   20210524  49699663.21   3956982.00    1  连续三个交易日内，涨幅偏离值累计达20%的证券\n16   20210524  35504648.99  46382533.92    1  连续三个交易日内，涨幅偏离值累计达20%的证券\n17   20210524  35344119.44  46305551.88    1  连续三个交易日内，涨幅偏离值累计达20%的证券\n18   20210524  29607924.52  19374138.00    1  连续三个交易日内，涨幅偏离值累计达20%的证券\n19   20210524  28720777.05  53009929.06    1  连续三个交易日内，涨幅偏离值累计达20%的证券",
+      "status": "READABLE"
+    },
+    {
+      "id": "TS-top_list",
+      "publisher": "Tushare",
+      "title": "top_list 原接口说明",
+      "url": "https://tushare.pro/document/2?doc_id=106",
+      "retrievedAt": "2026-09-08T05:06:38.335386+00:00",
+      "publishedAt": null,
+      "effectiveRange": null,
+      "rawSha256": "4d4470d7d1bd285b0b8d155b8e71c01ff7cfac81389f585faca4910bffaeaf33",
+      "excerpt": "龙虎榜每日明细 接口：top_list 描述：龙虎榜每日交易明细 数据历史： 2005年至今 限量：单次请求返回最大10000行数据，可通过参数循环获取全部历史 积分：用户需要至少2000积分才可以调取，具体请参阅 积分获取办法 输入参数 名称 类型 必选 描述 trade_date str Y 交易日期 ts_code str N 股票代码 输出参数 名称 类型 默认显示 描述 trade_date str Y 交易日期 ts_code str Y TS代码 name str Y 名称 close float Y 收盘价 pct_change float Y 涨跌幅 turnover_rate float Y 换手率 amount float Y 总成交额 l_sell float Y 龙虎榜卖出额 l_buy float Y 龙虎榜买入额 l_amount float Y 龙虎榜成交额 net_amount float Y 龙虎榜净买入额 net_rate float Y 龙虎榜净买额占比 amount_rate float Y 龙虎榜成交额占比 float_values float Y 当日流通市值 reason str Y 上榜理由 接口用户 pro = ts.pro_api()\n\ndf = pro.top_list(trade_date='20180928')\n\n或者\n\ndf = pro.query('top_list', trade_date='20180928', ts_code='002219.SZ') 数据样例 trade_date    ts_code  name   close  pct_change  turnover_rate  \\\n0    20180928  000007.SZ   全新好   7.830    -10.0000           0.24   \n1    20180928  000017.SZ  深中华A   4.660      9.9057           7.44   \n2    20180928  000505.SZ  京粮控股   5.750      9.9426           3.61   \n3    20180928  000566.SZ  海南海药   6.120     10.0719           2.51   \n4    20180928  000593.SZ  大通燃气   7.990     -8.0552          13.37   \n5    20180928  000971.SZ  高升控股   3.990     -9.9323           0.94   \n6    20180928  002219.SZ  恒康医疗   4.360     10.1010           7.11   \n7    20180928  002219.SZ  恒康医疗   4.360     10.1010           7.11   \n8    20180928  002333.SZ  罗普斯金   9.500     -9.9526           0.24   \n9    20180928  002445.SZ  中南文化   3.140     -6.5476          11.66   \n10   20180928  002813.SZ  路畅科技  25.500     10.0086          18.48   \n11   20180928  002892.SZ   科力尔  29.970      2.8130          25.67   \n12   20180928  002917.SZ   金奥博  29.120      6.1611          28.33   \n13   20180928  002923.SZ  润都股份  26.700      0.0000          25.56   \n14   20180928  002930.SZ  宏川智慧  30.990     10.0106          12.22   \n15   20180928  002931.SZ  锋龙股份  35.310     10.0000          20.39   \n\n         amount        l_sell         l_buy      l_amount    net_amount  \\\n0    13736952.0  1.373695e+07  9.071055e+06  2.280801e+07 -4.665897e+06   \n1   101054192.0  7.329639e+06  2.836120e+07  3.569084e+07  2.103156e+07   \n2    74555564.0  8.547019e+06  2.143432e+07  2.998134e+07  1.288731e+07   \n3   165464131.0  2.555165e+07  2.192522e+07  4.747687e+07 -3.626437e+06   \n4   307769383.0  4.250203e+07  1.169383e+07  5.419587e+07 -3.080820e+07   \n5    22255422.0  5.998390e+06  3.371550e+06  9.369940e+06 -2.626840e+06   \n6   550236631.0  4.180139e+07  3.942085e+07  8.122223e+07 -2.380538e+06   \n7   800737935.0  6.724486e+07  5.763500e+07  1.248799e+08 -9.609865e+06   \n8    10943050.0  1.094305e+07  2.862350e+06  1.380540e+07 -8.080700e+06   \n9   477766761.0  3.059160e+07  7.482957e+07  1.054212e+08  4.423796e+07   \n10  138607013.0  1.219620e+07  2.408786e+07  3.628407e+07  1.189166e+07   \n11  199046728.0  5.973278e+07  3.066344e+07  9.039623e+07 -2.906934e+07   \n12  229118953.0  1.285196e+07  1.632610e+07  2.917805e+07  3.474138e+06   \n13  203570158.0  4.148259e+07  2.583138e+07  6.731397e+07 -1.565121e+07   \n14  226882184.0  1.456010e+0",
+      "status": "READABLE"
+    },
+    {
+      "id": "TS-weekly",
+      "publisher": "Tushare",
+      "title": "weekly 原接口说明",
+      "url": "https://tushare.pro/document/2?doc_id=144",
+      "retrievedAt": "2026-09-08T05:06:37.878101+00:00",
+      "publishedAt": null,
+      "effectiveRange": null,
+      "rawSha256": "2379565c72b2f1057488103daf902cbb3ace8eefa813e0c23b2baff42b43d8b3",
+      "excerpt": "周线行情 接口：weekly 描述：获取A股周线行情，本接口每周最后一个交易日更新，如需要使用每天更新的周线数据，请使用 日度更新的周线行情接口 。 限量：单次最大6000行，可使用交易日期循环提取，总量不限制 积分：用户需要至少2000积分才可以调取，具体请参阅 积分获取办法 输入参数 名称 类型 必选 描述 ts_code str N TS代码 （ts_code,trade_date两个参数任选一） trade_date str N 交易日期 （每周最后一个交易日期，YYYYMMDD格式） start_date str N 开始日期 end_date str N 结束日期 输出参数 名称 类型 默认显示 描述 ts_code str Y 股票代码 trade_date str Y 交易日期 close float Y 周收盘价 open float Y 周开盘价 high float Y 周最高价 low float Y 周最低价 pre_close float Y 上一周收盘价 change float Y 周涨跌额 pct_chg float Y 周涨跌 （未复权，未 100，如果是复权请用 通用行情接口 ，如需%单位请 100 ） vol float Y 周成交量 amount float Y 周成交额 接口用法 pro = ts.pro_api()\n\ndf = pro.weekly(ts_code='000001.SZ', start_date='20180101', end_date='20181101', fields='ts_code,trade_date,open,high,low,close,vol,amount') 或者 df = pro.weekly(trade_date='20181123', fields='ts_code,trade_date,open,high,low,close,vol,amount') 数据样例 ts_code   trade_date  close   open   high    low          vol  \\\n0   000001.SZ   20181026  11.18  10.81  11.46  10.71   9062500.14   \n1   000001.SZ   20181019  10.76  10.39  10.78   9.92   7235319.55   \n2   000001.SZ   20181012  10.30  10.70  10.79   9.70   7257596.97   \n3   000001.SZ   20180928  11.05  10.52  11.27  10.48   5458134.13   \n4   000001.SZ   20180921  10.67   9.80  10.70   9.68   5120305.29   \n5   000001.SZ   20180914   9.84  10.01  10.10   9.81   3534261.76   \n6   000001.SZ   20180907  10.01  10.09  10.55   9.93   4708303.81   \n7   000001.SZ   20180831  10.13  10.02  10.43   9.97   6715867.92   \n8   000001.SZ   20180824  10.03   8.90  10.28   8.87   6697713.52   \n9   000001.SZ   20180817   8.81   9.12   9.16   8.64   3206923.44   \n10  000001.SZ   20180810   9.23   8.94   9.35   8.88   3054338.56   \n11  000001.SZ   20180803   8.91   9.32   9.50   8.88   3648566.35   \n12  000001.SZ   20180727   9.25   9.04   9.59   9.00   5170189.41   \n13  000001.SZ   20180720   9.11   8.85   9.20   8.61   3806004.47   \n14  000001.SZ   20180713   8.88   8.69   9.03   8.58   4901983.84   \n15  000001.SZ   20180706   8.66   9.05   9.05   8.45   5125563.53   \n16  000001.SZ   20180629   9.09   9.91   9.92   8.87   5150575.93 \n\n          amount  \n0   1.002282e+07  \n1   7.482596e+06  \n2   7.483906e+06  \n3   5.904901e+06  \n4   5.225262e+06  \n5   3.501724e+06  \n6   4.796533e+06  \n7   6.858804e+06  \n8   6.358840e+06  \n9   2.854248e+06  \n10  2.787629e+06  \n11  3.363448e+06  \n12  4.826484e+06  \n13  3.371040e+06  \n14  4.346872e+06  \n15  4.446723e+06  \n16  4.764107e+06",
+      "status": "READABLE"
+    },
+    {
+      "id": "TS-margin",
+      "publisher": "Tushare",
+      "title": "margin 原接口说明",
+      "url": "https://tushare.pro/document/2?doc_id=58",
+      "retrievedAt": "2026-09-08T05:06:37.877730+00:00",
+      "publishedAt": null,
+      "effectiveRange": null,
+      "rawSha256": "3fed6d93d0eaf0a65c6a54ddcd1e01b58ebf4fb56be4bea9cb854ba655cb7b84",
+      "excerpt": "融资融券交易汇总 接口：margin 描述：获取融资融券每日交易汇总数据，交易所于每天8点30左右更新上一日数据，本接口最晚9点05分会更新完数据。 注：深交所和北交所每周五的数据在下周一上午更新。 限量：单次请求最大返回4000行数据，可根据日期循环 权限：2000积分可获得本接口权限，积分越高权限越大，具体参考 权限说明 输入参数 名称 类型 必选 描述 trade_date str N 交易日期（格式：YYYYMMDD，下同） start_date str N 开始日期 end_date str N 结束日期 exchange_id str N 交易所代码（SSE上交所SZSE深交所BSE北交所） 输出参数 名称 类型 描述 trade_date str 交易日期 exchange_id str 交易所代码（SSE上交所SZSE深交所BSE北交所） rzye float 融资余额(元) rzmre float 融资买入额(元) rzche float 融资偿还额(元) rqye float 融券余额(元) rqmcl float 融券卖出量(股,份,手) rzrqye float 融资融券余额(元) rqyl float 融券余量(股,份,手) 接口使用 pro = ts . pro_api () df = pro . margin ( trade_date = '20180802' ) 或者 df = pro . query ( 'margin' , trade_date = '20180802' , exchange_id = 'SSE' ) 数据样例 trade_date exchange_id          rzye         rzmre         rzche  \\\n0   20180802        SZSE  3.495054e+11  1.347549e+10  1.463921e+10   \n1   20180802         SSE  5.311746e+11  1.484584e+10  1.573947e+10\n\n           rqye       rqmcl        rzrqye  \n0  1.083380e+09  24418046.0  3.505888e+11  \n1  6.029618e+09  83721012.0  5.372042e+11 说明 融资融券数据从证券交易所网站直接获取，提供了有记录以来的全部汇总和明细数据。 根据交所网站提示：数据根据券商申报的数据汇总，由券商保证数据的真实、完整、准确。 其中： 本日融资余额(元)=前日融资余额＋本日融资买入-本日融资偿还额 本日融券余量(股)=前日融券余量＋本日融券卖出量-本日融券买入量-本日现券偿还量 本日融券余额(元)=本日融券余量×本日收盘价 本日融资融券余额(元)=本日融资余额＋本日融券余额 2014年9月22日起，“融资融券交易总量”数据包含调出标的证券名单的证券的融资融券余额",
+      "status": "READABLE"
+    },
+    {
+      "id": "TS-slb_len",
+      "publisher": "Tushare",
+      "title": "slb_len 原接口说明",
+      "url": "https://tushare.pro/document/2?doc_id=331",
+      "retrievedAt": "2026-09-08T05:06:38.332585+00:00",
+      "publishedAt": null,
+      "effectiveRange": null,
+      "rawSha256": "918040aa7183121cfdf36b3198887c5a60daaccd20d9573053f0af560adab53b",
+      "excerpt": "转融资交易汇总 接口：slb_len 描述：转融通融资汇总 限量：单次最大可以提取5000行数据，可循环获取所有历史 积分：2000积分每分钟请求200次，5000积分500次请求 输入参数 名称 类型 必选 描述 trade_date str N 交易日期（YYYYMMDD格式，下同） start_date str N 开始日期 end_date str N 结束日期 输出参数 名称 类型 默认显示 描述 trade_date str Y 交易日期 ob float Y 期初余额(亿元) auc_amount float Y 竞价成交金额(亿元) repo_amount float Y 再借成交金额(亿元) repay_amount float Y 偿还金额(亿元) cb float Y 期末余额(亿元) 接口示例 pro = ts.pro_api()\n\ndf = pro.slb_len(start_date='20240601', end_date='20240620') 数据示例 trade_date    ob auc_amount repo_amount repay_amount     cb\n0    20240620  1435.50       None        3.10         3.10  1435.50\n1    20240619  1435.50       None        2.70         2.70  1435.50\n2    20240618  1440.20       None       29.50        34.20  1435.50\n3    20240617  1442.20       None        3.00         5.00  1440.20\n4    20240614  1442.20       None        None         None  1442.20\n5    20240613  1445.20       None        2.90         5.90  1442.20\n6    20240612  1445.20       None        3.30         3.30  1445.20\n7    20240611  1454.20       None        2.70        11.70  1445.20\n8    20240607  1454.20       None        None         None  1454.20\n9    20240606  1454.20       None       26.00        26.00  1454.20\n10   20240605  1455.60       None        6.00         7.40  1454.20\n11   20240604  1406.00      50.00        6.40         6.80  1455.60\n12   20240603  1406.00       None        1.00         1.00  1406.00",
+      "status": "READABLE"
+    },
+    {
+      "id": "TS-slb_sec",
+      "publisher": "Tushare",
+      "title": "slb_sec 原接口说明",
+      "url": "https://tushare.pro/document/2?doc_id=332",
+      "retrievedAt": "2026-09-08T05:06:38.333612+00:00",
+      "publishedAt": null,
+      "effectiveRange": null,
+      "rawSha256": "f3ee0cff9af54e2ab3862b27ece13df20bc9377b9756ed6a1f27853065cd4352",
+      "excerpt": "转融券交易汇总 接口：slb_sec 描述：转融通转融券交易汇总 限量：单次最大可以提取5000行数据，可循环获取所有历史 积分：2000积分每分钟请求200次，5000积分500次请求 输入参数 名称 类型 必选 描述 trade_date str N 交易日期（YYYYMMDD格式，下同） ts_code str N 股票代码 start_date str N 开始日期 end_date str N 结束日期 输出参数 名称 类型 默认显示 描述 trade_date str Y 交易日期（YYYYMMDD） ts_code str Y 股票代码 name str Y 股票名称 ope_inv float Y 期初余量(万股) lent_qnt float Y 转融券融出数量(万股) cls_inv float Y 期末余量(万股) end_bal float Y 期末余额(万元) 接口示例 pro = ts.pro_api()\n\ndf = pro.slb_sec(trade_date='20240620') 数据示例 trade_date   ts_code   name  ope_inv lent_qnt  cls_inv   end_bal\n0      20240620  000001.SZ   平安银行   186.97     1.43   188.40   2004.70\n1      20240620  000002.SZ    万科Ａ  3456.26     3.18  3376.80  24346.73\n2      20240620  000006.SZ   深振业Ａ    17.08     None    17.08     64.56\n3      20240620  000008.SZ   神州高铁    17.07     None    17.07     33.97\n4      20240620  000009.SZ   中国宝安   315.61     0.66   310.56   2822.99\n...         ...        ...    ...      ...      ...      ...       ...\n2249   20240620  688798.SH  XD艾为电    65.35     1.32    63.40   3727.91\n2250   20240620  688800.SH    瑞可达     6.49     None     6.36    191.18\n2251   20240620  688819.SH   天能股份   108.34     1.05   108.44   2717.34\n2252   20240620  688981.SH   中芯国际   303.00    22.45   315.30  15386.64\n2253   20240620  689009.SH   九号公司   259.35     5.72   253.62  10583.56",
+      "status": "READABLE"
+    },
+    {
+      "id": "TS-slb_sec_detail",
+      "publisher": "Tushare",
+      "title": "slb_sec_detail 原接口说明",
+      "url": "https://tushare.pro/document/2?doc_id=333",
+      "retrievedAt": "2026-09-08T05:06:38.334571+00:00",
+      "publishedAt": null,
+      "effectiveRange": null,
+      "rawSha256": "098cac11f612cd5ddbdb229c5f0dfab9e4529ecb286482256e7eddbbed59d883",
+      "excerpt": "转融券交易明细 接口：slb_sec_detail 描述：转融券交易明细 限量：单次最大可以提取5000行数据，可循环获取所有历史 积分：2000积分每分钟请求200次，5000积分500次请求 输入参数 名称 类型 必选 描述 trade_date str N 交易日期（YYYYMMDD格式，下同） ts_code str N 股票代码 start_date str N 开始日期 end_date str N 结束日期 输出参数 名称 类型 默认显示 描述 trade_date str Y 交易日期（YYYYMMDD） ts_code str Y 股票代码 name str Y 股票名称 tenor str Y 期 限(天) fee_rate float Y 融出费率(%) lent_qnt float Y 转融券融出数量(万股) 接口示例 pro = ts.pro_api()\n\ndf = pro.slb_sec_detail(trade_date='20240620') 数据示例 trade_date    ts_code   name     tenor fee_rate lent_qnt\n0     20240620  000001.SZ   平安银行    14     2.20     1.43\n1     20240620  000002.SZ    万科Ａ    14     4.60     2.27\n2     20240620  000009.SZ   中国宝安    14     7.10     0.66\n3     20240620  000016.SZ   深康佳Ａ    14     1.40     9.68\n4     20240620  000031.SZ    大悦城    14     3.80     0.22\n..         ...        ...    ...   ...      ...      ...\n932   20240620  688789.SH   宏华数科    14     1.40     0.84\n933   20240620  688798.SH  XD艾为电    14     1.40     1.32\n934   20240620  688819.SH   天能股份    14     2.10     0.74\n935   20240620  688981.SH   中芯国际    14     3.10     0.10\n936   20240620  689009.SH   九号公司    14     1.40     5.72",
+      "status": "READABLE"
+    },
+    {
+      "id": "TS-hk_hold",
+      "publisher": "Tushare",
+      "title": "hk_hold 原接口说明",
+      "url": "https://tushare.pro/document/2?doc_id=188",
+      "retrievedAt": "2026-09-08T05:06:38.327175+00:00",
+      "publishedAt": null,
+      "effectiveRange": null,
+      "rawSha256": "bbf4318386ca0ea4c5072fc5e67fe0302f473ccbeba7238c45607226236dfadf",
+      "excerpt": "404, 文档不存在！",
+      "status": "UNAVAILABLE"
+    },
+    {
+      "id": "TS-hsgt_top10",
+      "publisher": "Tushare",
+      "title": "hsgt_top10 原接口说明",
+      "url": "https://tushare.pro/document/2?doc_id=48",
+      "retrievedAt": "2026-09-08T05:06:38.132903+00:00",
+      "publishedAt": null,
+      "effectiveRange": null,
+      "rawSha256": "0f76a04b55a8f4e5d99c0d22c2b345927fb2ff0cbaf6cec3dd9a9f30b4c8d428",
+      "excerpt": "沪深股通十大成交股 接口：hsgt_top10 描述：获取沪股通、深股通每日前十大成交详细数据，每天18~20点之间完成当日更新 输入参数 名称 类型 必选 描述 ts_code str N 股票代码（二选一） trade_date str N 交易日期（二选一） start_date str N 开始日期 end_date str N 结束日期 market_type str N 市场类型（1：沪市 3：深市） 输出参数 名称 类型 必选 描述 trade_date str Y 交易日期 ts_code str Y 股票代码 name str Y 股票名称 close float Y 收盘价 change float Y 涨跌额 rank int Y 资金排名 market_type str Y 市场类型（1：沪市 3：深市） amount float Y 成交金额（元） net_amount float Y 净成交金额（元） buy float Y 买入金额（元） sell float Y 卖出金额（元） 接口用法 pro = ts . pro_api () pro . hsgt_top10 ( trade_date = '20180725' , market_type = '1' ) 或者 pro . query ( 'hsgt_top10' , ts_code = '600519.SH' , start_date = '20180701' , end_date = '20180725' ) 数据样例 trade_date ts_code name close change rank market_type \\ 0 20180725 600009 . SH 上海机场 62.69 2.0677 9 1 1 20180725 600019 . SH 宝钢股份 8.62 0.9368 7 1 2 20180725 600036 . SH 招商银行 28.22 1.6937 10 1 3 20180725 600276 . SH 恒瑞医药 71.89 1.2393 5 1 4 20180725 600519 . SH 贵州茅台 743.81 - 0.2133 2 1 5 20180725 600585 . SH 海螺水泥 38.23 - 0.4427 3 1 6 20180725 600690 . SH 青岛海尔 18.09 0.0000 8 1 7 20180725 600887 . SH 伊利股份 27.54 - 1.7131 6 1 8 20180725 601318 . SH 中国平安 62.16 0.6803 1 1 9 20180725 601888 . SH 中国国旅 74.19 5.5184 4 1 amount net_amount buy sell 0 240958518.0 31199144.0 136078831.0 104879687.0 1 245582396.0 81732606.0 163657501.0 81924895.0 2 240655550.0 142328622.0 191492086.0 49163464.0 3 329472455.0 - 71519443.0 128976506.0 200495949.0 4 508590993.0 226149667.0 367370330.0 141220663.0 5 357946144.0 51215890.0 204581017.0 153365127.0 6 243840019.0 - 55595149.0 94122435.0 149717584.0 7 296552611.0 - 40273759.0 128139426.0 168413185.0 8 534002916.0 287838388.0 410920652.0 123082264.0 9 342115066.0 - 63262966.0 139426050.0 202689016.0",
+      "status": "READABLE"
+    },
+    {
+      "id": "TS-moneyflow_hsgt",
+      "publisher": "Tushare",
+      "title": "moneyflow_hsgt 原接口说明",
+      "url": "https://tushare.pro/document/2?doc_id=47",
+      "retrievedAt": "2026-09-08T05:06:38.131955+00:00",
+      "publishedAt": null,
+      "effectiveRange": null,
+      "rawSha256": "bbf4318386ca0ea4c5072fc5e67fe0302f473ccbeba7238c45607226236dfadf",
+      "excerpt": "404, 文档不存在！",
+      "status": "UNAVAILABLE"
+    },
+    {
+      "id": "SSE-2026-notice",
+      "publisher": "上海证券交易所",
+      "title": "关于上海证券交易所2026年部分节假日休市安排的通知",
+      "url": "https://www.sse.com.cn/disclosure/announcement/general/c/c_20251222_10802507.shtml",
+      "retrievedAt": "2026-09-08T05:12:58.695679+00:00",
+      "publishedAt": "2025-12-22",
+      "effectiveRange": {
+        "start": "2026-01-01",
+        "end": "2026-12-31"
+      },
+      "rawSha256": "31a7485aac90814727a0bb09a30763cb81b753863e51a6c986ad2ffc9c76a697",
+      "excerpt": "上证公告〔2025〕45号 根据中国证监会有关通知要求，上海证券交易所（以下简称本所）现将2026年部分节假日休市安排通知如下。 一、休市安排 （一）元旦：1月1日（星期四）至1月3日（星期六）休市，1月5日（星期一）起照常开市。另外，1月4日（星期日）为周末休市。 （二）春节：2月15日（星期日）至2月23日（星期一）休市，2月24日（星期二）起照常开市。另外，2月14日（星期六）、2月28日（星期六）为周末休市。 （三）清明节：4月4日（星期六）至4月6日（星期一）休市，4月7日（星期二）起照常开市。 （四）劳动节：5月1日（星期五）至5月5日（星期二）休市，5月6日（星期三）起照常开市。另外，5月9日（星期六）为周末休市。 （五）端午节：6月19日（星期五）至6月21日（星期日）休市，6月22日（星期一）起照常开市。 （六）中秋节：9月25日（星期五）至9月27日（星期日）休市，9月28日（星期一）起照常开市。 （七）国庆节：10月1日（星期四）至10月7日（星期三）休市，10月8日（星期四）起照常开市。另外，9月20日（星期日）、10月10日（星期六）为周末休市。 二、有关清算事宜，根据中国证券登记结算有限责任公司的安排进行。 三、有关春节、国庆节测试事宜，本所将另行通知。 请各市场参与人据此安排相关工作。 上海证券交易所 2025年12月22日 ",
+      "status": "READABLE"
+    },
+    {
+      "id": "SSE-dragon-notice",
+      "publisher": "上海证券交易所",
+      "title": "关于2026年端午节休市安排的公告",
+      "url": "https://www.sse.com.cn/disclosure/announcement/general/c/c_20260611_10821419.shtml",
+      "retrievedAt": "2026-09-08T05:12:58.696066+00:00",
+      "publishedAt": "2026-06-11",
+      "effectiveRange": {
+        "start": "2026-06-19",
+        "end": "2026-06-22"
+      },
+      "rawSha256": "3bcb39fdc494d339aef5a63944744b35a0072e3f45f8318a1f9bc6b05732d1d0",
+      "excerpt": "上证公告〔2026〕16号 根据《关于上海证券交易所2026年部分节假日休市安排的通知》（上证公告〔2025〕45号），上海证券交易所现将2026年端午节休市安排通知如下。 一、休市安排：6月19日（星期五）至6月21日（星期日）休市，6月22日（星期一）起照常开市。 二、有关清算事宜将根据中国证券登记结算有限责任公司的安排进行。 请各市场参与人据此安排好有关工作。 上海证券交易所 2026年6月11日 ",
+      "status": "READABLE"
+    },
+    {
+      "id": "SSE-holiday-notices",
+      "publisher": "上海证券交易所",
+      "title": "休市安排相关公告索引",
+      "url": "https://www.sse.com.cn/disclosure/dealinstruc/closed/list/",
+      "retrievedAt": "2026-09-08T05:11:50.087925+00:00",
+      "publishedAt": null,
+      "effectiveRange": null,
+      "rawSha256": "7f6edf3b50efc41f175a33ec62a486841634fe2e6aa1219b29a0418effbb6898",
+      "excerpt": "2026-06-11 关于2026年端午节休市安排的公告 2026-04-23 关于2026年劳动节休市安排的公告 2026-03-31 关于2026年清明节休市安排的公告 2026-02-05 关于2026年春节休市安排的公告 2025-12-22 关于上海证券交易所2026年部分节假日休市安排的通知 2025-09-25 关于2025年国庆节、中秋节休市安排的公告 2025-05-22 关于2025年端午节休市安排的公告 2025-04-24 关于2025年劳动节休市安排的公告 2025-03-27 关于2025年清明节休市安排的公告 2025-01-23 关于2025年春节休市安排的公告 2024-12-23 关于上海证券交易所2025年部分节假日休市安排的通知 2024-09-19 关于2024年国庆节休市安排的公告 2024-09-05 关于2024年中秋节休市安排的公告 2024-05-30 关于2024年端午节休市安排的公告 2024-04-25 关于2024年劳动节休市安排的公告 ",
+      "status": "READABLE"
+    },
+    {
+      "id": "SZSE-calendar",
+      "publisher": "深圳证券交易所",
+      "title": "交易日历页面",
+      "url": "https://www.szse.cn/aboutus/calendar/index.html",
+      "retrievedAt": "2026-09-08T05:11:50.088036+00:00",
+      "publishedAt": null,
+      "effectiveRange": null,
+      "rawSha256": "c172b73cf8301d68b194464a6efca3a719f04274d9b22d6df680c69460eddad9",
+      "excerpt": "已读取官网日历页面；HTML 含“交易日历”及 trade-calendar-full 空容器，通过 tradeCanledar_new.js / stopResTrading_new.js 动态加载。本轮未取得逐日日历或更新时间；静态 HTML 不能证明任何一天开闭市。",
+      "status": "UNAVAILABLE"
+    },
+    {
+      "id": "SZSE-calendar-code",
+      "publisher": "深圳证券交易所",
+      "title": "日历页面引用的同站脚本（本轮 HTTP 404）",
+      "url": "https://www.szse.cn/modules/tradeCalendar/js/tradeCanledar_new.js",
+      "retrievedAt": "2026-09-08T05:14:50.104784+00:00",
+      "publishedAt": null,
+      "effectiveRange": null,
+      "rawSha256": "d5086c31d9a9d3da1e5a28e3c5f516c997b4508b20dee99ccda33b1b75d3976b",
+      "excerpt": "HTTP 404，未获得日历脚本正文，无法从此响应确认日历数据来源或覆盖。",
+      "status": "UNAVAILABLE"
+    },
+    {
+      "id": "BSE-home",
+      "publisher": "北京证券交易所",
+      "title": "北交所官网入口（本轮 HTTP 403）",
+      "url": "https://www.bse.cn/",
+      "retrievedAt": "2026-09-08T05:06:38.518046+00:00",
+      "publishedAt": null,
+      "effectiveRange": null,
+      "rawSha256": "977db83080bc7d0a8cc79ce72d036432e2bb9b6cd02c61593ddeb1c353399b53",
+      "excerpt": "HTTPS 及 HTTP 官网入口均返回 403 Forbidden，本轮未获得北交所权威日历及修订正文；不代表官网不存在或 BSE 不支持业务。",
+      "status": "UNAVAILABLE"
+    },
+    {
+      "id": "CSF-rules",
+      "publisher": "中国证券金融股份有限公司",
+      "title": "本司业务规则索引",
+      "url": "http://www.csf.com.cn/publish/main/1040/1045/index.html",
+      "retrievedAt": "2026-09-08T05:08:22.210824+00:00",
+      "publishedAt": null,
+      "effectiveRange": null,
+      "rawSha256": "da82b3629290241e9cf3ef09eb33bd23cbd78ef16773f2998e083bf9c6865f64",
+      "excerpt": "当前位置： 主页 > 法律规则 > 本司业务规则 关于合格境外机构投资者和人民币合格境外机构投资者申请参与转融通证券出借有关事项的通知... [2024-05-24] 关于基金公司申请参与证券出借有关事项的通知（2019年施行） [2024-05-24] 中国证券金融股份有限公司转融通业务规则（试行）（2023年6月修订） [2023-07-07] 中国证券金融股份有限公司转融通业务保证金管理实施细则（试行）（2023年修订） [2023-02-24] 中国证券金融股份有限公司 上海证券交易所 中国证券登记结算有限责任公司科创板做市借券... [2022-12-25] 第1/1页  共5条 | 首页 上一页 下一页 尾页 ﻿ ",
+      "status": "READABLE"
+    },
+    {
+      "id": "CSF-business-rules",
+      "publisher": "中国证券金融股份有限公司",
+      "title": "转融通业务规则（试行）（2023年6月修订），第20—21、82—85、92条",
+      "url": "http://www.csf.com.cn/publish/main/1040/1045/20230707103811731229229/1688697506450.pdf",
+      "retrievedAt": "2026-09-08T05:09:09.903433+00:00",
+      "publishedAt": null,
+      "effectiveRange": null,
+      "rawSha256": "0ceb18c0609592ecd04e429d6fd34c3e63d27cfae6bbf79c6fbf8fe56708ee14",
+      "excerpt": "第二十条 本公司根据市场状况，可以暂停单只或所有转融通\n标的证券的转融券交易，以及采取本公司认为必要的其他措施。\n第五章 转融通申报与成交\n第二十一条 本公司开展转融通业务的交易日为每周一至周五，\n国家法定节假日和证券交易所公告的休市日除外。\n5\n--- PAGE 6 ---\n本公司接受证券公司转融资申报指令的时间为每个交易日 9:30\n至 11:30、13:00 至 15:00，申报指令当日有效，在 15:00 前可撤销。\n本规则另有规定的除外。\n本公司接受证券公司转融券申报指令的时间为每个交易日 9:15\n至 11:30、13:00 至 15:00，申报指令当日有效。申报指令未成交的，\n在 15:00 前可撤销。\n经中国证监会同意， 本公司可以调整交易日期和交易时间并向市\n场公告。\n\n第八十二条 本公司建立转融通业务信息披露机制，通过本公司\n网站、转融通业务平台等途径对外披露转融通业务相关信息。\n第八十三条 本公司在每个交易日开市前公布转融通业务前一交\n易日以下相关信息：\n（一）前一交易日转融资成交金额；\n（二）截至前一交易日的转融资余额；\n（三） 前一交易日每只转融通标的证券的成交数量、 期限和费率；\n（四）截至前一交易日每只转融通标的证券的转融券余量；\n（五）本公司认为需要披露的其他信息。\n18\n--- PAGE 19 ---\n第八十四条 本公司在每个交易日开市前发布以下转融通业务相\n关信息：\n（一）当日转融资期限与费率；\n（二）当日转融通标的证券名单、期限与费率；\n（三）当日转融通可充抵保证金证券的名单和折算率；\n（四）本公司认为需要披露的其他信息。\n第八十五条 发生影响或者可能影响转融通业务正常开展的重大\n事件，本公司及时向市场公告相关情况及处理措施。\n\n第九十二条 转融通业务出现下列异常情况之一的，本公司可以\n暂停全部或者部分转融通业务并公告：\n（一）不可抗力；\n（二）意外事故；\n（三）技术故障；\n（四）交易活动出现异常，已经或者可能危及市场稳定；\n（五）本公司认定的其他异常情况。\n第十一章 附 则\n\n版本标识：2023年6月修订；索引显示2023-07-07。未从本 PDF 确认精确生效日，不能将 URL 日期当成生效日。",
+      "status": "READABLE"
+    },
+    {
+      "id": "CSF-suspension",
+      "publisher": "中国证券金融股份有限公司",
+      "title": "关于暂停转融券业务的通知",
+      "url": "http://www.csf.com.cn/publish/main/1009/1010/20240710172038468505945/index.html",
+      "retrievedAt": "2026-09-08T05:10:54.472298+00:00",
+      "publishedAt": "2024-07-10",
+      "effectiveRange": {
+        "start": "2024-07-11",
+        "end": null
+      },
+      "rawSha256": "d297ce84b25b527fd594b965a8f3c3162efea12c7f111c6b502ab402bca01417",
+      "excerpt": "关于暂停转融券业务的通知 发布时间：2024-07-10 各市场参与人： 为维护市场稳定运行，进一步加强逆周期调节，经中国证监会同意，本公司决定自2024年7月11日起暂停转融券业务。存量转融券合约可以依法存续和展期，但不得晚于2024年9月30日归还了结。 特此通知。 中国证券金融股份有限公司 2024年7月10 日 ﻿ ",
+      "status": "READABLE"
+    },
+    {
+      "id": "CSF-announcements",
+      "publisher": "中国证券金融股份有限公司",
+      "title": "公司公告索引（含暂停及后续分析）",
+      "url": "http://www.csf.com.cn/publish/main/1009/1010/index.html",
+      "retrievedAt": "2026-09-08T05:09:09.903817+00:00",
+      "publishedAt": null,
+      "effectiveRange": null,
+      "rawSha256": "fdcdf97c28a7c7153cdf74a1feaad20caa2f1fdc43b0d56264c287dd4c823068",
+      "excerpt": "当前位置： 主页 > 信息披露 > 公司公告 中国证券金融股份有限公司2025年校园招聘公告 [2025-04-03] 中国证券金融股份有限公司关于公司股东变更的公告 [2025-02-14] 严正声明 [2024-08-05] 暂停转融券实施两周情况分析报告 [2024-07-26] 关于暂停转融券业务的通知 [2024-07-10] 关于暂停转融通借入证券实时可用的通知 [2024-01-28] 关于修订发布《中国证券金融股份有限公司融资融券业务统计与监控规则》的通知 [2023-02-23] 关于发布《中国证券金融股份有限公司转融通业务规则（试行）（2023年修订）》等规则的... [2023-02-17] 中证金融优化转融通机制修订发布相关业务规则 [2023-02-17] 关于就《中国证券金融股份有限公司转融通业务规则（试行）（征求意见稿）》等规则公开... [2023-02-01] 中国证券金融股份有限公司负责人2023年度薪酬情况 [2025-04-28] 中国证券金融股份有限公司2023年度工资总额信息披露 [2025-04-28] 关于在线办理询证业务相关事项的通知 [2025-02-21] 中国证券金融股份有限公司关于废止7项业务规则文件的公告 [2025-02-14] 国新办举行新闻发布会介绍金融支持经济高质量发展有关情况 [2024-09-25] 关于发布《证券公司归还差错处理指南》的通知 [2023-12-22] 中国证券金融公司转让老旧机房及办公设备的公告 [2023-09-28] 中国证券金融股份有限公司2022年度工资总额信息披露 [2023-09-27] 中国证券金融股份有限公司负责人2022年度薪酬情况 [2023-09-27] 中国证券金融股份有限公司2023年办公电脑采购项目中标候选人公示 [2023-05-11] 中国证券金融股份有限公司2023年办公电脑采购项目招标公告 [2023-04-06] 中国证券金融股份有限公司数据备份系统项目中标结果公示 [2023-03-14] 中国证券金融股份有限公司数据备份系统项目中标候选人公示 [2023-03-10] 中国证券金融股份有限公司数据备份系统项目公开招标公告 [2023-02-07] 关于修改《转融通业务合同之补充合同》第一至三条的通知 [2022-12-16] 中国证券金融股份有限公司2021年度工资总额信息披露 [2022-12-02] 中国证券金融股份有限公司2020年度工资总额信息披露 [2022-12-02] 中国证券金融股份有限公司2019年度工资总额信息披露 [2022-12-02] 科创板做市借券业务正式上线平稳起步 [2022-11-14] 中国证券金融股份有限公司2022年度拟接收应届毕业生公示公告 [2022-11-10] 第1/6页  共156条 | 首页 上一页 下一页 尾页 ﻿ ",
+      "status": "READABLE"
+    },
+    {
+      "id": "CSF-faq",
+      "publisher": "中国证券金融股份有限公司",
+      "title": "转融资交易及信息披露 FAQ",
+      "url": "http://www.csf.com.cn/publish/main/1022/1026/index.html",
+      "retrievedAt": "2026-09-08T05:08:22.211321+00:00",
+      "publishedAt": null,
+      "effectiveRange": null,
+      "rawSha256": "ab33ed9abea5bfb9b48f666d4abeb29722b80563e7c0f4ede992c7ba8ac29ba3",
+      "excerpt": "转融资再借交易有什么规定？ 证券公司92-182天期转融资合约到期后，可以在归还当日申请再借，再借费率参考竞价成交费率或费率下限。证券公司再借申报金额不超过原合约金额，再借期限范围可以选择92-182天内的任意期限，不可以申请再借1-91天期的转融资。再借申报指令提交时间为每个交易日9:30-11:30、13:00-15:00。再借申报指令当日有效，在15:00前可撤销。 提前了结的转融资或者1-91天期的转融资到期后，不可以申请再借，有资金需求的证券公司可以在竞价日参与竞价。 证券公司转融资竞价前是否需要足额缴纳保证金？ 证券公司转融资竞价申报时，中证金融公司对证券公司的保证金不进行校验。证券公司可以在竞价日（T日）11:30以后根据竞价成交结果，再缴纳保证金。但证券公司当日补缴的保证金，只能为现金。如果证券公司需要缴存证券作为保证金的，应于T-1日15:00前提交。 需要注意的是，证券公司申报转融资再借指令时，中证金融公司校验保证金比例和现金比例，不符合规定的，证券公司无法申报。 转融资交易资金划付是如何安排的？ 转融资交易资金包括竞价交易资金和再借交易资金两部分，虽然交易时间不同，但资金划付时间是一致的，具体划付时间和路径如下： 竞价日11:30竞价指令申报结束后或者交易日15:00再借指令申报结束后，按照转融资成交规则，在转融通业务系统自动完成转融资资金分配。中证金融公司按现有清算交收路径，于15:00后通过中国结算划付转融资资金至相应证券公司的备付金账户，资金一般实时到账。 上述资金划付安排实现了证券公司的转融资交易当日申报、当日成交、当日资金可用。 中证金融公司披露的转融资业务信息有哪些？ 中证金融公司通过公司网站、转融通业务平台等途径对外披露转融通业务相关信息。在每个交易日开市前，公布前一交易日转融资竞价和再借成交金额、偿还金额以及截至前一交易日的转融资余额，发布当日转融资期限区间的费率上下限、以及相应期限区间的加权平均成交费率等信息。 发生影响或者可能影响转融通业务正常开展的重大事件，中证金融公司及时向市场公告相关情况及处理措施。 ",
+      "status": "READABLE"
+    },
+    {
+      "id": "HKEX-connect-calendar",
+      "publisher": "香港交易所",
+      "title": "Trading Hour, Trading and Settlement Calendar（页面更新2025-12-22）",
+      "url": "https://www.hkex.com.hk/Mutual-Market/Stock-Connect/Reference-Materials/Trading-Hour,-Trading-and-Settlement-Calendar?sc_lang=en",
+      "retrievedAt": "2026-09-08T05:09:09.903903+00:00",
+      "publishedAt": null,
+      "effectiveRange": {
+        "start": "2026-01-01",
+        "end": "2026-12-31"
+      },
+      "rawSha256": "31cf2dfede6d03ec01484ae3f96c24fc0fd847028c6b7d90f42276e0387530a9",
+      "excerpt": "Trading Calendar and Trading Hours Trading Hours Trading calendar of Stock Connect (2026) ( pdf / csv ) Trading calendar of Stock Connect (2025) ( pdf / csv ) Trading arrangement during Severe Weather Conditions Settlement Calendar Settlement calendar for Northbound Trading (2026) Settlement calendar for Northbound Trading (2025) Updated 22 Dec 2025 ",
+      "status": "READABLE"
+    },
+    {
+      "id": "HKEX-2026-csv",
+      "publisher": "香港交易所",
+      "title": "Trading Calendar of Stock Connect (Jan 2026 - Dec 2026)，CSV",
+      "url": "https://www.hkex.com.hk/-/media/HKEX-Market/Mutual-Market/Stock-Connect/Reference-Materials/Trading-Hour,-Trading-and-Settlement-Calendar/2026-Calendar_csv_e.csv",
+      "retrievedAt": "2026-09-08T05:10:54.629470+00:00",
+      "publishedAt": null,
+      "effectiveRange": {
+        "start": "2026-01-01",
+        "end": "2026-12-31"
+      },
+      "rawSha256": "b7b608bea647788ef05bd2843cdbeca718fb1a7742ec3ae0127d903dfcf5b403",
+      "excerpt": "Trading Calendar of Stock Connect (Jan 2026 - Dec 2026)\nDate,Day of Week,Hong Kong,Shanghai & Shenzhen,Northbound Trading,Southbound Trading\n2026-01-01,Thu,Holiday,Holiday,Closed,Closed\n2026-01-02,Fri,,Holiday,Closed,Closed\n2026-01-05,Mon,,,,\n2026-01-06,Tue,,,,\n2026-01-07,Wed,,,,\n2026-01-08,Thu,,,,\n2026-01-09,Fri,,,,\n2026-01-12,Mon,,,,\n2026-01-13,Tue,,,,\n2026-01-14,Wed,,,,\n2026-01-15,Thu,,,,\n2026-01-16,Fri,,,,\n2026-01-19,Mon,,,,\n2026-01-20,Tue,,,,\n2026-01-21,Wed,,,,\n2026-01-22,Thu,,,,\n2026-01-23,Fri,,,,\n2026-01-26,Mon,,,,\n2026-01-27,Tue,,,,\n2026-01-28,Wed,,,,\n2026-01-29,Thu,,,,\n2026-01-30,Fri,,,,\n2026-02-02,Mon,,,,\n2026-02-03,Tue,,,,\n2026-02-04,Wed,,,,\n2026-02-05,Thu,,,,\n2026-02-06,Fri,,,,\n2026-02-09,Mon,,,,\n2026-02-10,Tue,,,,\n2026-02-11,Wed,,,,\n2026-02-12,Thu,,,,\n2026-02-13,Fri,,,,\n2026-02-16,Mon,Half Day,Holiday,Closed,Closed\n2026-02-17,Tue,Holiday,Holiday,Closed,Closed\n2026-02-18,Wed,Holiday,Holiday,Closed,Closed\n2026-02-19,Thu,Holiday,Holiday,Closed,Closed\n2026-02-20,Fri,,Holiday,Closed,Closed\n2026-02-23,Mon,,Holiday,Closed,Closed\n2026-02-24,Tue,,,,\n2026-02-25,Wed,,,,\n2026-02-26,Thu,,,,\n2026-02-27,Fri,,,,\n2026-03-02,Mon,,,,\n2026-03-03,Tue,,,,\n2026-03-04,Wed,,,,\n2026-03-05,Thu,,,,\n2026-03-06,Fri,,,,\n2026-03-09,Mon,,,,\n2026-03-10,Tue,,,,\n2026-03-11,Wed,,,,\n2026-03-12,Thu,,,,\n2026-03-13,Fri,,,,\n2026-03-16,Mon,,,,\n2026-03-17,Tue,,,,\n2026-03-18,Wed,,,,\n2026-03-19,Thu,,,,\n2026-03-20,Fri,,,,\n2026-03-23,Mon,,,,\n2026-03-24,Tue,,,,\n2026-03-25,Wed,,,,\n2026-03-26,Thu,,,,\n2026-03-27,Fri,,,,\n2026-03-30,Mon,,,,\n2026-03-31,Tue,,,,\n2026-04-01,Wed,,,,\n2026-04-02,Thu,,,,\n2026-04-03,Fri,Holiday,,Closed,Closed\n2026-04-06,Mon,Holiday,Holiday,Closed,Closed\n2026-04-07,Tue,Holiday,,Closed,Closed\n2026-04-08,Wed,,,,\n2026-04-09,Thu,,,,\n2026-04-10,Fri,,,,\n2026-04-13,Mon,,,,\n2026-04-14,Tue,,,,\n2026-04-15,Wed,,,,\n2026-04-16,Thu,,,,\n2026-04-17,Fri,,,,\n2026-04-20,Mon,,,,\n2026-04-21,Tue,,,,\n2026-04-22,Wed,,,,\n2026-04-23,Thu,,,,\n2026-04-24,Fri,,,,\n2026-04-27,Mon,,,,\n2026-04-28,Tue,,,,\n2026-04-29,Wed,,,,\n2026-04-30,Thu,,,,\n2026-05-01,Fri,Holiday,Holiday,Closed,Closed\n2026-05-04,Mon,,Holiday,Closed,Closed\n2026-05-05,Tue,,Holiday,Closed,Closed\n2026-05-06,Wed,,,,\n2026-05-07,Thu,,,,\n2026-05-08,Fri,,,,\n2026-05-11,Mon,,,,\n2026-05-12,Tue,,,,\n2026-05-13,Wed,,,,\n2026-05-14,Thu,,,,\n2026-05-15,Fri,,,,\n2026-05-18,Mon,,,,\n2026-05-19,Tue,,,,\n2026-05-20,Wed,,,,\n2026-05-21,Thu,,,,\n2026-05-22,Fri,,,,\n2026-05-25,Mon,Holiday,,Closed,Closed\n2026-05-26,Tue,,,,\n2026-05-27,Wed,,,,\n2026-05-28,Thu,,,,\n2026-05-29,Fri,,,,\n2026-06-01,Mon,,,,\n2026-06-02,Tue,,,,\n2026-06-03,Wed,,,,\n2026-06-04,Thu,,,,\n2026-06-05,Fri,,,,\n2026-06-08,Mon,,,,\n2026-06-09,Tue,,,,\n2026-06-10,Wed,,,,\n2026-06-11,Thu,,,,\n2026-06-12,Fri,,,,\n2026-06-15,Mon,,,,\n2026-06-16,Tue,,,,\n2026-06-17,Wed,,,,\n2026-06-18,Thu,,,,\n2026-06-19,Fri,Holiday,Holiday,Closed,Closed\n2026-06-22,Mon,,,,\n2026-06-23,Tue,,,,\n2026-06-24,Wed,,,,\n2026-06-25,Thu,,,,\n2026-06-26,Fri,,,,\n2026-06-29,Mon,,,,\n2026-06-30,Tue,,,,\n2026-07-01,Wed,Holiday,,Closed,Closed\n2026-07-02,Thu,,,,\n2026-07-03,Fri,,,,\n2026-07-06,Mon,,,,\n2026-07-07,Tue,,,,\n2026-07-08,Wed,,,,\n2026-07-09,Thu,,,,\n2026-07-10,Fri,,,,\n2026-07-13,Mon,,,,\n2026-07-14,Tue,,,,\n2026-07-15,Wed,,,,\n2026-07-16,Thu,,,,\n2026-07-17,Fri,,,,\n2026-07-20,Mon,,,,\n2026-07-21,Tue,,,,\n2026-07-22,Wed,,,,\n2026-07-23,Thu,,,,\n2026-07-24,Fri,,,,\n2026-07-27,Mon,,,,\n2026-07-28,Tue,,,,\n2026-07-29,Wed,,,,\n2026-07-30,Thu,,,,\n2026-07-31,Fri,,,,\n2026-08-03,Mon,,,,\n2026-08-04,Tue,,,,\n2026-08-05,Wed,,,,\n2026-08-06,Thu,,,,\n2026-08-07,Fri,,,,\n2026-08-10,Mon,,,,\n2026-08-11,Tue,,,,\n2026-08-12,Wed,,,,\n2026-08-13,Thu,,,,\n2026-08-14,Fri,,,,\n2026-08-17,Mon,,,,\n2026-08-18,Tue,,,,\n2026-08-19,Wed,,,,\n2026-08-20,Thu,,,,\n2026-08-21,Fri,,,,\n2026-08-24,Mon,,,,\n2026-08-25,Tue,,,,\n2026-08-26,Wed,,,,\n2026-08-27,Thu,,,,\n2026-08-28,Fri,,,,\n2026-08-31,Mon,,,,\n2026-09-01,Tue,,,,\n2026-09-02,Wed,,,,\n2026-09-03,Thu,,,,\n2026-09-04,Fri,,,,\n2026-09-07,Mon,,,,\n2026-09-08,Tue,,,,\n2026-09-09,Wed,,,,\n2026-09-10,Thu,,,,\n2026-09-11,Fri,,,,\n2026-09-14,Mon,,,,\n2026-09-15,Tue,,,,\n2026-09-16,Wed,,,,\n2026-09-17,Thu,,,,\n2026-09-18,Fri,,,,\n2026-09-21,Mon,,,,\n2026-09-22,Tue,,,,\n2026-09-23,Wed,,,,\n2026-09-24,Thu,,,,\n2026-09-25,Fri,,Holiday,Closed,Closed\n2026-09-28,Mon,,,,\n2026-09-29,Tue,,,,\n2026-09-30,Wed,,,,\n2026-10-01,Thu,Holiday,Holiday,Closed,Closed\n2026-10-02,Fri,,Holiday,Closed,Closed\n2026-10-05,Mon,,Holiday,Closed,Closed\n2026-10-06,Tue,,Holiday,Closed,Closed\n2026-10-07,Wed,,Holiday,Closed,Closed\n2026-10-08,Thu,,,,\n2026-10-09,Fri,,,,\n2026-10-12,Mon,,,,\n2026-10-13,Tue,,,,\n2026-10-14,Wed,,,,\n2026-10-15,Thu,,,,\n2026-10-16,Fri,,,,\n2026-10-19,Mon,Holiday,,Closed,Closed\n2026-10-20,Tue,,,,\n2026-10-21,Wed,,,,\n2026-10-22,Thu,,,,\n2026-10-23,Fri,,,,\n2026-10-26,Mon,,,,\n2026-10-27,Tue,,,,\n2026-10-28,Wed,,,,\n2026-10-29,Thu,,,,\n2026-10-30,Fri,,,,\n2026-11-02,Mon,,,,\n2026-11-03,Tue,,,,\n2026-11-04,Wed,,,,\n2026-11-05,Thu,,,,\n2026-11-06,Fri,,,,\n2026-11-09,Mon,,,,\n2026-11-10,Tue,,,,\n2026-11-11,Wed,,,,\n2026-11-12,Thu,,,,\n2026-11-13,Fri,,,,\n2026-11-16,Mon,,,,\n2026-11-17,Tue,,,,\n2026-11-18,Wed,,,,\n2026-11-19,Thu,,,,\n2026-11-20,Fri,,,,\n2026-11-23,Mon,,,,\n2026-11-24,Tue,,,,\n2026-11-25,Wed,,,,\n2026-11-26,Thu,,,,\n2026-11-27,Fri,,,,\n2026-11-30,Mon,,,,\n2026-12-01,Tue,,,,\n2026-12-02,Wed,,,,\n2026-12-03,Thu,,,,\n2026-12-04,Fri,,,,\n2026-12-07,Mon,,,,\n2026-12-08,Tue,,,,\n2026-12-09,Wed,,,,\n2026-12-10,Thu,,,,\n2026-12-11,Fri,,,,\n2026-12-14,Mon,,,,\n2026-12-15,Tue,,,,\n2026-12-16,Wed,,,,\n2026-12-17,Thu,,,,\n2026-12-18,Fri,,,,\n2026-12-21,Mon,,,,\n2026-12-22,Tue,,,,\n2026-12-23,Wed,,,,\n2026-12-24,Thu,Half Day,,,Half Day\n2026-12-25,Fri,Holiday,,Closed,Closed\n2026-12-28,Mon,,,,\n2026-12-29,Tue,,,,\n2026-12-30,Wed,,,,\n2026-12-31,Thu,Half Day,,,Half Day\n",
+      "status": "READABLE"
+    },
+    {
+      "id": "HKEX-2026-pdf",
+      "publisher": "香港交易所",
+      "title": "Trading Calendar of Stock Connect (Jan 2026 - Dec 2026)，PDF",
+      "url": "https://www.hkex.com.hk/-/media/HKEX-Market/Mutual-Market/Stock-Connect/Reference-Materials/Trading-Hour,-Trading-and-Settlement-Calendar/2026-Calendar_pdf_e.pdf",
+      "retrievedAt": "2026-09-08T05:10:54.473212+00:00",
+      "publishedAt": null,
+      "effectiveRange": {
+        "start": "2026-01-01",
+        "end": "2026-12-31"
+      },
+      "rawSha256": "fc557de3a0b7436b087d145ac9e62134fc8cecb2c22077fc2567dcd9570a877d",
+      "excerpt": "已提取并查看原表；列按周一至周五排列；Hong Kong / Shanghai & Shenzhen / Northbound Trading / Southbound Trading 分行。2026-04-03：香港 Holiday、内地空白、北向及南向 Closed；2026-12-24、31：香港及南向 Half Day、北向空白。空白单元格未在表中另附机器语义图例，应结合正式交易时间规则核对，不能把任意源的空值直接当开盘。",
+      "status": "READABLE"
+    },
+    {
+      "id": "HKEX-connect-faq",
+      "publisher": "香港交易所",
+      "title": "Trading Calendar Enhancement for Stock Connect FAQ（版本2024-09-23），§1.1—1.3及§4",
+      "url": "https://www.hkex.com.hk/-/media/HKEX-Market/Mutual-Market/Stock-Connect/Reference-Materials/Trading-Calendar-Enhancement-for-Stock-Connect/FAQ-for-Trading-Calendar-Enhancement-for-Stock-Connect.pdf",
+      "retrievedAt": "2026-09-08T05:10:54.871991+00:00",
+      "publishedAt": "2024-09-23",
+      "effectiveRange": {
+        "start": "2023-04-24",
+        "end": null
+      },
+      "rawSha256": "bd89b7e0e08127306036cbdb774047d4ea1b76bb8cfd5d35e9910782e4ff1e9d",
+      "excerpt": "1.1 What is trading calendar enhancement for Stock Connect?\nUnder the existing Northbound arrangements for Stock Connect, trading is available on a Hong\nKong trading day (T day), when both the Hong Kong and Mainland China markets are open\nand banking services are available in both markets on the corresponding money settlement\nday (T+1 day).\nAs such, Northbound trading on Stock Connect would be closed on the trading day before a\nHong Kong public holiday because banking services are not available in the Hong Kong market\non public holidays. The enhancement to Stock Connect trading calendar will enable\nNorthbound trading under Stock Connect on all trading days that are mutual to the Hong Kong\nand Mainland China markets. Similar adjustments will also be made to the Southbound\narrangements of Stock Connect.\n1.2 When will the trading calendar enhancement take effect?\nThe trading calendar enhancement will take effect from 24 April 2023. Information relating to\nthis initiative can be found on the HKEX website2\n.\n1.3 How many trading days will be added after the enhancement?\nThe enhancement enables Northbound trading on Stock Connect on all trading days that are\nmutual to the Hong Kong and Mainland China markets. After the enhancement, there will be 3\nadditional Northbound trading days (i.e. 25 May 2023, 20 October 2023 and 22 December\n2023) and 6 additional Southbound trading days (i.e. 27 to 28 April 2023, 20 to 21 June 2023\nand 27 to 28 September 2023) in 2023. The updated 2023 trading calendar is available on the\nHKEX website.\nPart 4: SEVERE WEATHER CONDITIONS\n4.1 What are the severe weather arrangements for trading and settlement on H-1 day?\nOn a severe weather trading day, the trading and settlement arrangements in the securities\nmarket under severe weather condition will be the same as a normal Northbound trading day\nand will be applicable on H-1 day as well.\n4.2 What is the severe weather arrangement for corporate actions handling on H-1 day?\nCorporate actions handling of SSE/SZSE securities under severe weather condition should\nfollow existing arrangements of a normal day and will be applicable on H-1 day as well.\n",
+      "status": "READABLE"
+    },
+    {
+      "id": "HKEX-enhancement",
+      "publisher": "香港交易所",
+      "title": "Trading Calendar Enhancement，公告与更新索引",
+      "url": "https://www.hkex.com.hk/Mutual-Market/Stock-Connect/Reference-Materials/Trading-Calendar-Enhancement-for-Stock-Connect?sc_lang=en",
+      "retrievedAt": "2026-09-08T05:09:09.904051+00:00",
+      "publishedAt": null,
+      "effectiveRange": null,
+      "rawSha256": "d5cc938c84bf3ada12e904eeb0ad7775efae4743313ff02cc3b66ac3a9a270e9",
+      "excerpt": "FAQ and Briefing Materials Trading Calendar Enhancement for Stock Connect FAQ (Updated as of 23 September 2024) Webinar Briefing ( PDF / Video ) Circulars and Client Notice SEHK Circulars Trading Calendar Enhancement for Stock Connect Trading Calendar Enhancement for Stock Connect – Webinar Launch of Trading Calendar Enhancement for Stock Connect Official Launch of Trading Calendar Enhancement for Stock Connect HKSCC Circulars Trading Calendar Enhancement for Stock Connect Trading Calendar Enhancement for Stock Connect – Webinar Briefings Trading Calendar Enhancement for Stock Connect – Supplemental Information Launch of Trading Calendar Enhancement for Stock Connect Official Launch of Trading Calendar Enhancement for Stock Connect - Reminder Client Notice Arrangement of HKEX Orion Market Data Platform China Connect (Securities) (OMD-CC) for Trading Calendar Enhancement for Stock Connect Trading Calendar Enhancement for Stock Connect - Webinar Launch of Trading Calendar Enhancement for Stock Connect Official Launch of Trading Calendar Enhancement for Stock Connect News Release HKEX Welcomes Enhancement to Stock Connect Trading Calendar HKEX Welcomes Additional Stock Connect Trading Days Updated 07 Aug 2025 ",
+      "status": "READABLE"
+    },
+    {
+      "id": "HKEX-trading-hours",
+      "publisher": "香港交易所",
+      "title": "Securities Market / Stock Connect (Northbound) 交易时间",
+      "url": "https://www.hkex.com.hk/Services/Trading-hours-and-Severe-Weather-Arrangements/Trading-Hours?sc_lang=en",
+      "retrievedAt": "2026-09-08T05:12:58.696159+00:00",
+      "publishedAt": null,
+      "effectiveRange": null,
+      "rawSha256": "eb33db4239c817563cb834728dea890f8bec986dd581480b25546e955f142cf6",
+      "excerpt": "Hong Kong Securities Market Trading is conducted on Monday to Friday (excluding public holidays) at the following times: Full Day Trading Half Day Trading Auction Session Pre-opening Session 9:00 a.m. - 9:30 a.m. Continuous Trading Session Morning Session 9:30 a.m. - 12:00 noon Extended Morning Session 12:00 noon - 1:00 p.m. Not applicable Afternoon Session 1:00 p.m. - 4:00 p.m. Not applicable Auction Session Closing Auction Session 4:00 p.m. to a random closing between 4:08 p.m. and 4:10 p.m. 12:00 noon to a random closing between 12:08 p.m. and 12:10 p.m. Note: There is no Extended Morning Session and Afternoon Session on the eves of Christmas, New Year and Lunar New Year.  There will be no Extended Morning Session if there is no Morning Session. Updated 16 Sep 2017 Stock Connect (Northbound) Trading is conducted on Monday to Friday (excluding non-Northbound Trading days) at the following times: SSE/SZSE Trading Hours Time for EPs to input Northbound orders (1) Opening Call Auction 9:15 a.m. - 9:25 a.m. 9:10 a.m. - 11:30 a.m. Continuous Auction (Morning) 9:30 a.m. - 11:30 a.m. Continuous Auction (Afternoon) 1:00 p.m. - 2:57 p.m. 12:55 p.m. - 3:00 p.m. Closing Call Auction 2:57 p.m. - 3:00 p.m. Note (1): Time Period Remarks 9:20 a.m.– 9:25 a.m SSE/SZSE will not accept order cancellation 2:57 p.m.– 3:00 p.m SSE/SZSE will not accept order cancellation. 9:10 a.m. – 9:15 a.m.; 9:25 a.m.– 9:30 a.m.; 12:55 p.m.– 1:00 p.m Orders and order cancellations can be accepted by SEHK but will not be processed by SSE/SZSE until SSE’s and SZSE's market open. Orders that are not executed during the opening call auction session will automatically enter the continuous auction session. Updated 20 Aug 2018 ",
+      "status": "READABLE"
+    },
+    {
+      "id": "HKEX-weather",
+      "publisher": "香港交易所",
+      "title": "Severe Weather Trading 安排与修订入口",
+      "url": "https://www.hkex.com.hk/Services/Trading-hours-and-Severe-Weather-Arrangements/Severe-Weather-Arrangements/Overview?sc_lang=en",
+      "retrievedAt": "2026-09-08T05:11:50.088318+00:00",
+      "publishedAt": null,
+      "effectiveRange": {
+        "start": "2024-09-23",
+        "end": null
+      },
+      "rawSha256": "37c9e8d9422f4974d78f72fc434b906cc100a3d376550ebf47197c3092326979",
+      "excerpt": " to our calendar containing trading and clearing information, public holidays and more Research Reports Research and survey conducted by HKEX on its securities and derivatives markets and related topics Connect Programmes Connect Hub Stock Connect Bond Connect Swap Connect Daily Statistics Statistics on Shanghai and Shenzhen Connect updated daily Market Highlights View the market capitalization, number of listed companies and more in the Hong Kong, Shanghai and Shenzhen markets Eligible Securities A list of securities eligible for trading under Shanghai and Shenzhen Stock Connect Market Data Securities Prices Equities Exchange Traded Products Derivative Warrants Inline Warrants Callable Bull / Bear Contracts Real Estate Investment Trusts Debt Securities Futures & Options Prices Equity Index Single Stock Foreign Exchange Interest Rate Commodities Statistics Consolidated Reports Securities Market Derivatives Market Participant Clearing, Settlement and Depository HKEXnews View listed company announcements and more on the centralised platform for regulatory filings and disclosures News Alerts Sign up to receive company announcements or website updates by email Market Data Services Vendors can sign up to purchase wholesale market data from HKEX’s Market Data Services department HKEX - Our Services Trading Hours & Severe Weather Arrangements Severe Weather Arrangements Overview Overview Trading Hours & Severe Weather Arrangements Severe Weather Arrangements Trading Hours Severe Weather Arrangements Severe Weather Trading Arrangements OVERVIEW TRADING CLEARING AND SETTLEMENT EIPO Overview HKEX ’s Severe Weather Trading (SWT) arrangements have been in effect since 2024 . Hong Kong’s securities and derivatives markets, including Stock Connect trading, derivatives holiday trading and after-hours trading session , will continue to operate according to the pre-determined trading calendar, regardless of severe weather conditions. Overview Hong Kong’s role as a leading international financial centre has strengthened by increasing participation of both international and Mainland investors. To enhance Hong Kong’s competitiveness as a trading and risk management hub and an international financial centre, HKEX, under the support of the HKSAR Government and in consultation with regulatory authorities, has completed a market consultation and decided to keep Hong Kong's securities and derivatives markets open to provide trading, clearing and settlement services during severe weather conditions. This initiative will make Hong Kong's markets available for local, mainland and international investors to respond to the latest global market development during Hong Kong's trading hours, including trading and risk management on index rebalancing days, regardless of the weather conditions. To ensure safety, remote working and the use of online services are strongly encouraged on a SWT day, and no public-facing physical outlets should provide services.  HKEX has made some operational adjustments to ensure the market continues operating in a robust and resilient manner, as certain services provided only via physical outlets will be unavailable. Investors should consult their respective brokers and banks on their service provisions under severe weather conditions. exchange participants and clearing participants swt readiness status (Last update: 31 mar 2025) HKEX is pleased to have received confirmations from all securities and derivatives market participants declaring their readiness to operate under SW conditions. All EPs and CPs are expected to fulfil their day-to-day operational requirements (e.g. fulfilling settlement obligations and regulatory reporting, etc.) on a SWT day. Reference materials Related documents and forms Consultation paper (Nov 2023) Conclusions paper (Jun 2024) Summary of SWT arrangements (Jun 2024) FAQ on SWT (Last update: 16 May 2025) Circular Exchanges or Clearing Houses Contact Information Circular THE STOCK EXCHANGE OF HONG KONG LIMITED (SEHK) Participant General Enquiry Hotline: 2840 3626 Email: trd@hkex.com.hk Market Readiness Related Information (15 Jul 2024) Practice Session for Severe Weather Trading (2 Aug 2024) Implementation of Severe Weather Trading starting from 23 September 2024 (16 Sep 2024) HONG KONG FUTURES EXCHANGE LIMITED (HKFE) HKATS Hotline: 2211 6360 Market Readiness Related Information (15 Jul 2024) Practice Session for Severe Weather Trading (2 Aug 2024) Implementation of Severe Weather Trading starting from 23 September 2024 (16 Sep 2024) Large Open Position (“LOP”) Reporting Procedures for Severe Weather Trading (16 Sep 2024) THE STOCK EXCHANGE OF HONG KONG LIMITED (SEHK) - OPTIONS TRADING HKATS Hotline : 2211 6360 Market Readiness Related Information (15 Jul 2024) Practice Session for Severe Weather Trading (2 Aug 2024) Implementation of Severe Weather Trading starting from 23 September 2024 (16 Sep 2024) Large Open Position (“LOP”) Reporting Procedures for Severe Weather Trading (16 Sep 2024) HONG KONG SECURITIES CLEARING COMPANY LIMITED (HKSCC) CCASS Hotline: 2979 7111 Email: clearingps@hkex.com.hk Market Readiness Related Information (15 Jul 2024) Practice Session for Severe Weather Trading (2 Aug 2024) Implementation of Severe Weather Trading starting from 23 September 2024 (16 Sep 2024) HKFE CLEARING CORPORATION LIMITED (HKCC) D CASS Hotline: 2979 7222 Email: clearingpsd@hkex.com.hk Market Readiness Related Information (15 Jul 2024) Practice Session for Severe Weather Trading (2 Aug 2024) Implementation of Severe Weather Trading starting from 23 September 2024 (16 Sep 2024) THE SEHK OPTIONS CLEARING HOUSE LIMITED (SEOCH) DCASS Hotline: 2979 7222 Email: clearingpsd@hkex.com.hk Market Readiness Related Information (15 Jul 2024) Practice Session for Severe Weather Trading (2 Aug 2024) Implementation of Severe Weather Trading starting from 23 September 2024 (16 Sep 2024) FREQUENTLY ASKED QUESTIONS Enter a question, keyword, or topic View All FAQs Updated 19 Sep 2024 ",
+      "status": "READABLE"
+    },
+    {
+      "id": "SZSE-connect-rules",
+      "publisher": "深圳证券交易所",
+      "title": "深港通业务实施办法（2024年修订）发布通知",
+      "url": "https://www.szse.cn/szhk/szhkrulesdirector/szhkrules/t20240614_607685.html",
+      "retrievedAt": "2026-09-08T05:10:54.473141+00:00",
+      "publishedAt": "2024-06-14",
+      "effectiveRange": null,
+      "rawSha256": "174e02cf175c0317f7a635760ca9ebc3b7df2af412e6f1ed9c9886a6c8b6c7eb",
+      "excerpt": "业务规则 位置： 深港通 / 深港通规则/指南 / 业务规则 关于发布《深圳证券交易所深港通业务实施办法（2024年修订）》及有关事项的通知 时间： 2024-06-14 字体： 大 中 小 深证上〔 2024〕 462 号 各市场参与人： 为持续优化互联互通机制，进一步扩大深港通 ETF标的范围，本所对《深圳证券交易所深港通业务实施办法》（以下简称《实施办法》）进行了修订，经中国证监会批准，现予以发布，自发布之日起施行。本所于2023年3月3日发布的《深圳证券交易所深港通业务实施办法（2023年修订）》（深证上〔2023〕153号）同时废止。 为确保修订后《实施办法》顺利施行，现将有关事项通知如下： 一、《实施办法》修订施行后首次深股通 ETF考察和调整安排 （一）《实施办法》修订施行后 ， 深股通 ETF首次调入的考察日为2024年6月17日（深股通ETF定期调整考察日）。在该考察日属于《实施办法》第二十五条规定范围的本所上市股票ETF，将调入深股通ETF，但调入生效日前触及《实施办法》第二十八条调出情形的除外。 （二） 属于 深股通 范围 的本所上市股票 ETF ， 在 2024年6月17日（深股通ETF定期调整考察日）触及《实施办法》第二十六条规定情形的，将调出深股通。 （三）深股通 ETF调整名单将于7月12日由香港联交所证券交易服务公司另行公告，预计自7月22日起生效，请予以关注。 二、《实施办法》修订施行后首次港股通 ETF考察和调入安排 （一）《实施办法》修订施行后 ， 港股通 ETF首次调入的考察日为2024年6月17日。在该考察日属于《实施办法》第七十六条规定范围的香港联交所上市股票ETF，将调入港股通，但调入生效日前触及《实施办法》第七十九条调出情形的除外。 （二）已调入港股通的香港联交所上市股票 ETF，在前述考察日不进行调出考察。 （三）港股通 ETF调整名单将于7月12日由本所证券交易服务公司另行公告，预计自7月22日起生效，请予以关注。 三、规则施行衔接安排 本次《实施办法》修订施行前深港通部分业务安排继续执行（详见附件 3）。 附件： 1 ． 深圳证券交易所深港通业务实施办法（2024年修订） 2 ． 《深圳证券交易所深港通业务实施办法》修订说明 3 ． 《深圳证券交易所深港通业务实施办法（2024年修订）》施行衔接安排 深圳证券交易所 2024年 6 月 14 日 打印 收藏 关闭",
+      "status": "READABLE"
+    },
+    {
+      "id": "SZSE-connect-rules-pdf",
+      "publisher": "深圳证券交易所",
+      "title": "深港通业务实施办法（2024年修订），第32、84条",
+      "url": "http://docs.static.szse.cn/www/szhk/szhkrulesdirector/szhkrules/W020240614673497419312.pdf",
+      "retrievedAt": "2026-09-08T05:11:50.088231+00:00",
+      "publishedAt": null,
+      "effectiveRange": null,
+      "rawSha256": "64c0a06cae1cd633a37c7b68faf6a331e08a75b54362ec824f21e1a1021b54f5",
+      "excerpt": "第三十二条 深股通交易日和交易时间由联交所证券交易服\n务公司在其指定网站公布。\n第八十四条 港股通交易日和交易时间由本所证券交易服务\n公司在其指定网站公布。每个港股通交易日的交易时间包括开市\n前时段、持续交易时段和收市竞价交易时段，具体按联交所的规\n定执行。\n发生本所证券交易服务公司认定的特殊情形，导致或者可能\n导致港股通交易无法正常进行的，本所证券交易服务公司可以调\n整港股通交易日、交易时间并向市场公布。\n",
+      "status": "READABLE"
+    }
+  ],
+  "interfaces": [
+    {
+      "apiName": "adj_factor",
+      "calendarProfile": "C-A",
+      "scopeEvidence": {
+        "conclusion": "自行生产的股票复权因子、可取单日全部股票；原页样例仅明确 .SZ。没有逐交易所及证券类别完整清单。",
+        "sourceIds": [
+          "TS-adj_factor"
+        ]
+      },
+      "requiredCalendars": [
+        {
+          "marketOrDirection": "SZSE",
+          "sourceIds": [
+            "TS-adj_factor",
+            "TS-trade_cal",
+            "SZSE-calendar"
+          ],
+          "condition": "无市场筛选；属于目前已证实的必要集合",
+          "equivalenceEvidence": "独立市场；不能以另一交易所替代"
+        }
+      ],
+      "unresolvedScope": [
+        "SSE／BSE及A/B股等证券覆盖未逐项声明；“全部股票”不足以冻结完整必要集合。"
+      ],
+      "unionRule": "任一必要日历确认开盘即保留，仅全部确认休市才跳过；必要集合未知或任一必要来源未知时不得计算部分并集。",
+      "coverageRule": "只对实际待处理自然日逐日核对，包含首次起止两端；重试仅核对明细日期（如3／7日）。核对来源市场／业务身份与生效范围；同源同日一致重复可去重，冲突、缺日、空来源、非法开闭值或范围不足均未确认，不能只数行。较宽来源仅消费任务日期；全部必要来源确认后才计算并集。 SSE 候选核对 TS-trade_cal 与 SSE-2026-notice、SSE-holiday-notices（本轮另读 SSE-dragon-notice）；SZSE 日历页面未取得逐日结论，BSE 官网本轮403且 TS-trade_cal 未列 BSE。非2026年须另取对应年份权威安排；本次资料不覆盖全部历史年份。",
+      "freshnessRule": "每次首次下载和每轮重试在本轮重新获取／确认原始来源、发布或更新标识、生效范围及相关修订公告；同轮可复用，不跨次缓存。以任务日期适用版本为准；原文无更新时间或不能排除后续修订时不能仅凭下载时间、页面存在或业务数据已更新判定新鲜。 Tushare接口页的业务入库时刻不是trade_cal的修订承诺；本轮尚无沪深日历与权威逐日结果的一致性／更新验证。",
+      "status": "UNCONFIRMED",
+      "rejection": "CALENDAR_UNCONFIRMED",
+      "liveExcluded": false,
+      "liveStatus": "NOT_RUN",
+      "remainingEvidence": [
+        "SSE／BSE及A/B股等证券覆盖未逐项声明；“全部股票”不足以冻结完整必要集合。",
+        "补齐全部必要市场每个任务日期的权威覆盖与修订确认，以及Tushare日历表达的一致性；非排除接口仅由T20按专属设计选择实测。"
+      ]
+    },
+    {
+      "apiName": "block_trade",
+      "calendarProfile": "C-A",
+      "scopeEvidence": {
+        "conclusion": "大宗交易；输入称股票代码，样例明确 .SH；没有全市场／证券类别的完整边界。",
+        "sourceIds": [
+          "TS-block_trade"
+        ]
+      },
+      "requiredCalendars": [
+        {
+          "marketOrDirection": "SSE",
+          "sourceIds": [
+            "TS-block_trade",
+            "TS-trade_cal",
+            "SSE-2026-notice",
+            "SSE-holiday-notices"
+          ],
+          "condition": "无市场筛选；属于目前已证实的必要集合",
+          "equivalenceEvidence": "独立市场；不能以另一交易所替代"
+        }
+      ],
+      "unresolvedScope": [
+        "SZSE／BSE、B股或基金等是否覆盖未由原页完整说明。"
+      ],
+      "unionRule": "任一必要日历确认开盘即保留，仅全部确认休市才跳过；必要集合未知或任一必要来源未知时不得计算部分并集。",
+      "coverageRule": "只对实际待处理自然日逐日核对，包含首次起止两端；重试仅核对明细日期（如3／7日）。核对来源市场／业务身份与生效范围；同源同日一致重复可去重，冲突、缺日、空来源、非法开闭值或范围不足均未确认，不能只数行。较宽来源仅消费任务日期；全部必要来源确认后才计算并集。 SSE 候选核对 TS-trade_cal 与 SSE-2026-notice、SSE-holiday-notices（本轮另读 SSE-dragon-notice）；SZSE 日历页面未取得逐日结论，BSE 官网本轮403且 TS-trade_cal 未列 BSE。非2026年须另取对应年份权威安排；本次资料不覆盖全部历史年份。",
+      "freshnessRule": "每次首次下载和每轮重试在本轮重新获取／确认原始来源、发布或更新标识、生效范围及相关修订公告；同轮可复用，不跨次缓存。以任务日期适用版本为准；原文无更新时间或不能排除后续修订时不能仅凭下载时间、页面存在或业务数据已更新判定新鲜。 Tushare接口页的业务入库时刻不是trade_cal的修订承诺；本轮尚无沪深日历与权威逐日结果的一致性／更新验证。",
+      "status": "UNCONFIRMED",
+      "rejection": "CALENDAR_UNCONFIRMED",
+      "liveExcluded": false,
+      "liveStatus": "NOT_RUN",
+      "remainingEvidence": [
+        "SZSE／BSE、B股或基金等是否覆盖未由原页完整说明。",
+        "补齐全部必要市场每个任务日期的权威覆盖与修订确认，以及Tushare日历表达的一致性；非排除接口仅由T20按专属设计选择实测。"
+      ]
+    },
+    {
+      "apiName": "daily",
+      "calendarProfile": "C-A",
+      "scopeEvidence": {
+        "conclusion": "A股日线；样例明确 .SZ，停牌期间不提供数据；全市场描述未列逐交易所清单。",
+        "sourceIds": [
+          "TS-daily"
+        ]
+      },
+      "requiredCalendars": [
+        {
+          "marketOrDirection": "SZSE",
+          "sourceIds": [
+            "TS-daily",
+            "TS-trade_cal",
+            "SZSE-calendar"
+          ],
+          "condition": "无市场筛选；属于目前已证实的必要集合",
+          "equivalenceEvidence": "独立市场；不能以另一交易所替代"
+        }
+      ],
+      "unresolvedScope": [
+        "SSE／BSE完整市场集合仍需原接口覆盖依据；不得借 stock_basic 的枚举证明 daily。"
+      ],
+      "unionRule": "任一必要日历确认开盘即保留，仅全部确认休市才跳过；必要集合未知或任一必要来源未知时不得计算部分并集。",
+      "coverageRule": "只对实际待处理自然日逐日核对，包含首次起止两端；重试仅核对明细日期（如3／7日）。核对来源市场／业务身份与生效范围；同源同日一致重复可去重，冲突、缺日、空来源、非法开闭值或范围不足均未确认，不能只数行。较宽来源仅消费任务日期；全部必要来源确认后才计算并集。 SSE 候选核对 TS-trade_cal 与 SSE-2026-notice、SSE-holiday-notices（本轮另读 SSE-dragon-notice）；SZSE 日历页面未取得逐日结论，BSE 官网本轮403且 TS-trade_cal 未列 BSE。非2026年须另取对应年份权威安排；本次资料不覆盖全部历史年份。",
+      "freshnessRule": "每次首次下载和每轮重试在本轮重新获取／确认原始来源、发布或更新标识、生效范围及相关修订公告；同轮可复用，不跨次缓存。以任务日期适用版本为准；原文无更新时间或不能排除后续修订时不能仅凭下载时间、页面存在或业务数据已更新判定新鲜。 Tushare接口页的业务入库时刻不是trade_cal的修订承诺；本轮尚无沪深日历与权威逐日结果的一致性／更新验证。",
+      "status": "UNCONFIRMED",
+      "rejection": "CALENDAR_UNCONFIRMED",
+      "liveExcluded": false,
+      "liveStatus": "NOT_RUN",
+      "remainingEvidence": [
+        "SSE／BSE完整市场集合仍需原接口覆盖依据；不得借 stock_basic 的枚举证明 daily。",
+        "补齐全部必要市场每个任务日期的权威覆盖与修订确认，以及Tushare日历表达的一致性；非排除接口仅由T20按专属设计选择实测。"
+      ]
+    },
+    {
+      "apiName": "daily_basic",
+      "calendarProfile": "C-A",
+      "scopeEvidence": {
+        "conclusion": "全部股票每日指标；样例含 .SH 和 .SZ，未列完整交易所或证券类别。",
+        "sourceIds": [
+          "TS-daily_basic"
+        ]
+      },
+      "requiredCalendars": [
+        {
+          "marketOrDirection": "SSE",
+          "sourceIds": [
+            "TS-daily_basic",
+            "TS-trade_cal",
+            "SSE-2026-notice",
+            "SSE-holiday-notices"
+          ],
+          "condition": "无市场筛选；属于目前已证实的必要集合",
+          "equivalenceEvidence": "独立市场；不能以另一交易所替代"
+        },
+        {
+          "marketOrDirection": "SZSE",
+          "sourceIds": [
+            "TS-daily_basic",
+            "TS-trade_cal",
+            "SZSE-calendar"
+          ],
+          "condition": "无市场筛选；属于目前已证实的必要集合",
+          "equivalenceEvidence": "独立市场；不能以另一交易所替代"
+        }
+      ],
+      "unresolvedScope": [
+        "是否覆盖 BSE、B股等未清楚限定；样例仅证明已出现的市场，不证明穷尽。"
+      ],
+      "unionRule": "任一必要日历确认开盘即保留，仅全部确认休市才跳过；必要集合未知或任一必要来源未知时不得计算部分并集。",
+      "coverageRule": "只对实际待处理自然日逐日核对，包含首次起止两端；重试仅核对明细日期（如3／7日）。核对来源市场／业务身份与生效范围；同源同日一致重复可去重，冲突、缺日、空来源、非法开闭值或范围不足均未确认，不能只数行。较宽来源仅消费任务日期；全部必要来源确认后才计算并集。 SSE 候选核对 TS-trade_cal 与 SSE-2026-notice、SSE-holiday-notices（本轮另读 SSE-dragon-notice）；SZSE 日历页面未取得逐日结论，BSE 官网本轮403且 TS-trade_cal 未列 BSE。非2026年须另取对应年份权威安排；本次资料不覆盖全部历史年份。",
+      "freshnessRule": "每次首次下载和每轮重试在本轮重新获取／确认原始来源、发布或更新标识、生效范围及相关修订公告；同轮可复用，不跨次缓存。以任务日期适用版本为准；原文无更新时间或不能排除后续修订时不能仅凭下载时间、页面存在或业务数据已更新判定新鲜。 Tushare接口页的业务入库时刻不是trade_cal的修订承诺；本轮尚无沪深日历与权威逐日结果的一致性／更新验证。",
+      "status": "UNCONFIRMED",
+      "rejection": "CALENDAR_UNCONFIRMED",
+      "liveExcluded": false,
+      "liveStatus": "NOT_RUN",
+      "remainingEvidence": [
+        "是否覆盖 BSE、B股等未清楚限定；样例仅证明已出现的市场，不证明穷尽。",
+        "补齐全部必要市场每个任务日期的权威覆盖与修订确认，以及Tushare日历表达的一致性；非排除接口仅由T20按专属设计选择实测。"
+      ]
+    },
+    {
+      "apiName": "margin_detail",
+      "calendarProfile": "C-A",
+      "scopeEvidence": {
+        "conclusion": "正文“沪深两市每日融资融券明细”，同页更新说明又写“深交所和北交所每周五的数据在下周一上午更新”。",
+        "sourceIds": [
+          "TS-margin_detail"
+        ]
+      },
+      "requiredCalendars": [
+        {
+          "marketOrDirection": "SSE",
+          "sourceIds": [
+            "TS-margin_detail",
+            "TS-trade_cal",
+            "SSE-2026-notice",
+            "SSE-holiday-notices"
+          ],
+          "condition": "无市场筛选；属于目前已证实的必要集合",
+          "equivalenceEvidence": "独立市场；不能以另一交易所替代"
+        },
+        {
+          "marketOrDirection": "SZSE",
+          "sourceIds": [
+            "TS-margin_detail",
+            "TS-trade_cal",
+            "SZSE-calendar"
+          ],
+          "condition": "无市场筛选；属于目前已证实的必要集合",
+          "equivalenceEvidence": "独立市场；不能以另一交易所替代"
+        }
+      ],
+      "unresolvedScope": [
+        "BSE范围存在同页矛盾，无法确定应为沪深并集还是三市场并集；不能按说明任取其一。"
+      ],
+      "unionRule": "任一必要日历确认开盘即保留，仅全部确认休市才跳过；必要集合未知或任一必要来源未知时不得计算部分并集。",
+      "coverageRule": "只对实际待处理自然日逐日核对，包含首次起止两端；重试仅核对明细日期（如3／7日）。核对来源市场／业务身份与生效范围；同源同日一致重复可去重，冲突、缺日、空来源、非法开闭值或范围不足均未确认，不能只数行。较宽来源仅消费任务日期；全部必要来源确认后才计算并集。 SSE 候选核对 TS-trade_cal 与 SSE-2026-notice、SSE-holiday-notices（本轮另读 SSE-dragon-notice）；SZSE 日历页面未取得逐日结论，BSE 官网本轮403且 TS-trade_cal 未列 BSE。非2026年须另取对应年份权威安排；本次资料不覆盖全部历史年份。",
+      "freshnessRule": "每次首次下载和每轮重试在本轮重新获取／确认原始来源、发布或更新标识、生效范围及相关修订公告；同轮可复用，不跨次缓存。以任务日期适用版本为准；原文无更新时间或不能排除后续修订时不能仅凭下载时间、页面存在或业务数据已更新判定新鲜。 Tushare接口页的业务入库时刻不是trade_cal的修订承诺；本轮尚无沪深日历与权威逐日结果的一致性／更新验证。",
+      "status": "CONFLICT",
+      "rejection": "CALENDAR_UNCONFIRMED",
+      "liveExcluded": false,
+      "liveStatus": "NOT_RUN",
+      "remainingEvidence": [
+        "BSE范围存在同页矛盾，无法确定应为沪深并集还是三市场并集；不能按说明任取其一。",
+        "补齐全部必要市场每个任务日期的权威覆盖与修订确认，以及Tushare日历表达的一致性；非排除接口仅由T20按专属设计选择实测。"
+      ]
+    },
+    {
+      "apiName": "moneyflow",
+      "calendarProfile": "C-A",
+      "scopeEvidence": {
+        "conclusion": "原页明确“沪深A股票资金流向数据”，数据开始于2010年；必要市场集合为SSE和SZSE，不含由本地推测的BSE。",
+        "sourceIds": [
+          "TS-moneyflow"
+        ]
+      },
+      "requiredCalendars": [
+        {
+          "marketOrDirection": "SSE",
+          "sourceIds": [
+            "TS-moneyflow",
+            "TS-trade_cal",
+            "SSE-2026-notice",
+            "SSE-holiday-notices"
+          ],
+          "condition": "无市场筛选；属于目前已证实的必要集合",
+          "equivalenceEvidence": "独立市场；不能以另一交易所替代"
+        },
+        {
+          "marketOrDirection": "SZSE",
+          "sourceIds": [
+            "TS-moneyflow",
+            "TS-trade_cal",
+            "SZSE-calendar"
+          ],
+          "condition": "无市场筛选；属于目前已证实的必要集合",
+          "equivalenceEvidence": "独立市场；不能以另一交易所替代"
+        }
+      ],
+      "unresolvedScope": [],
+      "unionRule": "任一必要日历确认开盘即保留，仅全部确认休市才跳过；必要集合未知或任一必要来源未知时不得计算部分并集。",
+      "coverageRule": "只对实际待处理自然日逐日核对，包含首次起止两端；重试仅核对明细日期（如3／7日）。核对来源市场／业务身份与生效范围；同源同日一致重复可去重，冲突、缺日、空来源、非法开闭值或范围不足均未确认，不能只数行。较宽来源仅消费任务日期；全部必要来源确认后才计算并集。 SSE 候选核对 TS-trade_cal 与 SSE-2026-notice、SSE-holiday-notices（本轮另读 SSE-dragon-notice）；SZSE 日历页面未取得逐日结论，BSE 官网本轮403且 TS-trade_cal 未列 BSE。非2026年须另取对应年份权威安排；本次资料不覆盖全部历史年份。",
+      "freshnessRule": "每次首次下载和每轮重试在本轮重新获取／确认原始来源、发布或更新标识、生效范围及相关修订公告；同轮可复用，不跨次缓存。以任务日期适用版本为准；原文无更新时间或不能排除后续修订时不能仅凭下载时间、页面存在或业务数据已更新判定新鲜。 Tushare接口页的业务入库时刻不是trade_cal的修订承诺；本轮尚无沪深日历与权威逐日结果的一致性／更新验证。",
+      "status": "UNCONFIRMED",
+      "rejection": "CALENDAR_UNCONFIRMED",
+      "liveExcluded": false,
+      "liveStatus": "NOT_RUN",
+      "remainingEvidence": [
+        "补齐全部必要市场每个任务日期的权威覆盖与修订确认，以及Tushare日历表达的一致性；非排除接口仅由T20按专属设计选择实测。"
+      ]
+    },
+    {
+      "apiName": "monthly",
+      "calendarProfile": "C-A",
+      "scopeEvidence": {
+        "conclusion": "A股月线，输入称每月最后一个交易日；同页样例有20180930、20180630等周末月末日期。",
+        "sourceIds": [
+          "TS-monthly"
+        ]
+      },
+      "requiredCalendars": [
+        {
+          "marketOrDirection": "SZSE",
+          "sourceIds": [
+            "TS-monthly",
+            "TS-trade_cal",
+            "SZSE-calendar"
+          ],
+          "condition": "无市场筛选；属于目前已证实的必要集合",
+          "equivalenceEvidence": "独立市场；不能以另一交易所替代"
+        }
+      ],
+      "unresolvedScope": [
+        "完整A股市场集合未枚举；样例月末非交易日与输入语义不一致，须先确认日历过滤会否漏掉真实月线。"
+      ],
+      "unionRule": "任一必要日历确认开盘即保留，仅全部确认休市才跳过；必要集合未知或任一必要来源未知时不得计算部分并集。",
+      "coverageRule": "只对实际待处理自然日逐日核对，包含首次起止两端；重试仅核对明细日期（如3／7日）。核对来源市场／业务身份与生效范围；同源同日一致重复可去重，冲突、缺日、空来源、非法开闭值或范围不足均未确认，不能只数行。较宽来源仅消费任务日期；全部必要来源确认后才计算并集。 SSE 候选核对 TS-trade_cal 与 SSE-2026-notice、SSE-holiday-notices（本轮另读 SSE-dragon-notice）；SZSE 日历页面未取得逐日结论，BSE 官网本轮403且 TS-trade_cal 未列 BSE。非2026年须另取对应年份权威安排；本次资料不覆盖全部历史年份。",
+      "freshnessRule": "每次首次下载和每轮重试在本轮重新获取／确认原始来源、发布或更新标识、生效范围及相关修订公告；同轮可复用，不跨次缓存。以任务日期适用版本为准；原文无更新时间或不能排除后续修订时不能仅凭下载时间、页面存在或业务数据已更新判定新鲜。 Tushare接口页的业务入库时刻不是trade_cal的修订承诺；本轮尚无沪深日历与权威逐日结果的一致性／更新验证。",
+      "status": "CONFLICT",
+      "rejection": "CALENDAR_UNCONFIRMED",
+      "liveExcluded": false,
+      "liveStatus": "NOT_RUN",
+      "remainingEvidence": [
+        "完整A股市场集合未枚举；样例月末非交易日与输入语义不一致，须先确认日历过滤会否漏掉真实月线。",
+        "补齐全部必要市场每个任务日期的权威覆盖与修订确认，以及Tushare日历表达的一致性；非排除接口仅由T20按专属设计选择实测。"
+      ]
+    },
+    {
+      "apiName": "stk_limit",
+      "calendarProfile": "C-A",
+      "scopeEvidence": {
+        "conclusion": "全市场包含A/B股和基金，输出exchange明确SSE/SZSE/BSE；三个市场均必要，不能漏掉B股和基金。",
+        "sourceIds": [
+          "TS-stk_limit"
+        ]
+      },
+      "requiredCalendars": [
+        {
+          "marketOrDirection": "SSE",
+          "sourceIds": [
+            "TS-stk_limit",
+            "TS-trade_cal",
+            "SSE-2026-notice",
+            "SSE-holiday-notices"
+          ],
+          "condition": "无市场筛选；属于目前已证实的必要集合",
+          "equivalenceEvidence": "独立市场；不能以另一交易所替代"
+        },
+        {
+          "marketOrDirection": "SZSE",
+          "sourceIds": [
+            "TS-stk_limit",
+            "TS-trade_cal",
+            "SZSE-calendar"
+          ],
+          "condition": "无市场筛选；属于目前已证实的必要集合",
+          "equivalenceEvidence": "独立市场；不能以另一交易所替代"
+        },
+        {
+          "marketOrDirection": "BSE",
+          "sourceIds": [
+            "TS-stk_limit",
+            "TS-trade_cal",
+            "BSE-home"
+          ],
+          "condition": "无市场筛选；属于目前已证实的必要集合",
+          "equivalenceEvidence": "独立市场；不能以另一交易所替代"
+        }
+      ],
+      "unresolvedScope": [],
+      "unionRule": "任一必要日历确认开盘即保留，仅全部确认休市才跳过；必要集合未知或任一必要来源未知时不得计算部分并集。",
+      "coverageRule": "只对实际待处理自然日逐日核对，包含首次起止两端；重试仅核对明细日期（如3／7日）。核对来源市场／业务身份与生效范围；同源同日一致重复可去重，冲突、缺日、空来源、非法开闭值或范围不足均未确认，不能只数行。较宽来源仅消费任务日期；全部必要来源确认后才计算并集。 SSE 候选核对 TS-trade_cal 与 SSE-2026-notice、SSE-holiday-notices（本轮另读 SSE-dragon-notice）；SZSE 日历页面未取得逐日结论，BSE 官网本轮403且 TS-trade_cal 未列 BSE。非2026年须另取对应年份权威安排；本次资料不覆盖全部历史年份。",
+      "freshnessRule": "每次首次下载和每轮重试在本轮重新获取／确认原始来源、发布或更新标识、生效范围及相关修订公告；同轮可复用，不跨次缓存。以任务日期适用版本为准；原文无更新时间或不能排除后续修订时不能仅凭下载时间、页面存在或业务数据已更新判定新鲜。 Tushare接口页的业务入库时刻不是trade_cal的修订承诺；本轮尚无沪深日历与权威逐日结果的一致性／更新验证。",
+      "status": "UNCONFIRMED",
+      "rejection": "CALENDAR_UNCONFIRMED",
+      "liveExcluded": false,
+      "liveStatus": "NOT_RUN",
+      "remainingEvidence": [
+        "BSE：补齐权威逐日日历及特殊修订机制；单独验证合法日历读取方式，不从margin支持推断trade_cal支持。",
+        "补齐全部必要市场每个任务日期的权威覆盖与修订确认，以及Tushare日历表达的一致性；非排除接口仅由T20按专属设计选择实测。"
+      ]
+    },
+    {
+      "apiName": "suspend_d",
+      "calendarProfile": "C-A",
+      "scopeEvidence": {
+        "conclusion": "股票每日停复牌，样例含.SH和.SZ；输出覆盖停牌到复牌期间连续日期，更新时间不定期。",
+        "sourceIds": [
+          "TS-suspend_d"
+        ]
+      },
+      "requiredCalendars": [
+        {
+          "marketOrDirection": "SSE",
+          "sourceIds": [
+            "TS-suspend_d",
+            "TS-trade_cal",
+            "SSE-2026-notice",
+            "SSE-holiday-notices"
+          ],
+          "condition": "无市场筛选；属于目前已证实的必要集合",
+          "equivalenceEvidence": "独立市场；不能以另一交易所替代"
+        },
+        {
+          "marketOrDirection": "SZSE",
+          "sourceIds": [
+            "TS-suspend_d",
+            "TS-trade_cal",
+            "SZSE-calendar"
+          ],
+          "condition": "无市场筛选；属于目前已证实的必要集合",
+          "equivalenceEvidence": "独立市场；不能以另一交易所替代"
+        }
+      ],
+      "unresolvedScope": [
+        "BSE及证券类型覆盖未穷尽；连续停牌日期与市场休市必须分开。"
+      ],
+      "unionRule": "任一必要日历确认开盘即保留，仅全部确认休市才跳过；必要集合未知或任一必要来源未知时不得计算部分并集。",
+      "coverageRule": "只对实际待处理自然日逐日核对，包含首次起止两端；重试仅核对明细日期（如3／7日）。核对来源市场／业务身份与生效范围；同源同日一致重复可去重，冲突、缺日、空来源、非法开闭值或范围不足均未确认，不能只数行。较宽来源仅消费任务日期；全部必要来源确认后才计算并集。 SSE 候选核对 TS-trade_cal 与 SSE-2026-notice、SSE-holiday-notices（本轮另读 SSE-dragon-notice）；SZSE 日历页面未取得逐日结论，BSE 官网本轮403且 TS-trade_cal 未列 BSE。非2026年须另取对应年份权威安排；本次资料不覆盖全部历史年份。",
+      "freshnessRule": "每次首次下载和每轮重试在本轮重新获取／确认原始来源、发布或更新标识、生效范围及相关修订公告；同轮可复用，不跨次缓存。以任务日期适用版本为准；原文无更新时间或不能排除后续修订时不能仅凭下载时间、页面存在或业务数据已更新判定新鲜。 Tushare接口页的业务入库时刻不是trade_cal的修订承诺；本轮尚无沪深日历与权威逐日结果的一致性／更新验证。",
+      "status": "UNCONFIRMED",
+      "rejection": "CALENDAR_UNCONFIRMED",
+      "liveExcluded": false,
+      "liveStatus": "NOT_RUN",
+      "remainingEvidence": [
+        "BSE及证券类型覆盖未穷尽；连续停牌日期与市场休市必须分开。",
+        "补齐全部必要市场每个任务日期的权威覆盖与修订确认，以及Tushare日历表达的一致性；非排除接口仅由T20按专属设计选择实测。"
+      ]
+    },
+    {
+      "apiName": "top_inst",
+      "calendarProfile": "C-A",
+      "scopeEvidence": {
+        "conclusion": "龙虎榜机构成交明细；样例明确.SZ；上榜理由、机构类型不能证明完整交易所集合。",
+        "sourceIds": [
+          "TS-top_inst"
+        ]
+      },
+      "requiredCalendars": [
+        {
+          "marketOrDirection": "SZSE",
+          "sourceIds": [
+            "TS-top_inst",
+            "TS-trade_cal",
+            "SZSE-calendar"
+          ],
+          "condition": "无市场筛选；属于目前已证实的必要集合",
+          "equivalenceEvidence": "独立市场；不能以另一交易所替代"
+        }
+      ],
+      "unresolvedScope": [
+        "SSE／BSE及证券类型适用范围未明确；真实调用排除。"
+      ],
+      "unionRule": "任一必要日历确认开盘即保留，仅全部确认休市才跳过；必要集合未知或任一必要来源未知时不得计算部分并集。",
+      "coverageRule": "只对实际待处理自然日逐日核对，包含首次起止两端；重试仅核对明细日期（如3／7日）。核对来源市场／业务身份与生效范围；同源同日一致重复可去重，冲突、缺日、空来源、非法开闭值或范围不足均未确认，不能只数行。较宽来源仅消费任务日期；全部必要来源确认后才计算并集。 SSE 候选核对 TS-trade_cal 与 SSE-2026-notice、SSE-holiday-notices（本轮另读 SSE-dragon-notice）；SZSE 日历页面未取得逐日结论，BSE 官网本轮403且 TS-trade_cal 未列 BSE。非2026年须另取对应年份权威安排；本次资料不覆盖全部历史年份。",
+      "freshnessRule": "每次首次下载和每轮重试在本轮重新获取／确认原始来源、发布或更新标识、生效范围及相关修订公告；同轮可复用，不跨次缓存。以任务日期适用版本为准；原文无更新时间或不能排除后续修订时不能仅凭下载时间、页面存在或业务数据已更新判定新鲜。 Tushare接口页的业务入库时刻不是trade_cal的修订承诺；本轮尚无沪深日历与权威逐日结果的一致性／更新验证。",
+      "status": "UNCONFIRMED",
+      "rejection": "CALENDAR_UNCONFIRMED",
+      "liveExcluded": true,
+      "liveStatus": "NOT_RUN",
+      "remainingEvidence": [
+        "SSE／BSE及证券类型适用范围未明确；真实调用排除。",
+        "仅补充公开证据和受控合同；ISSUE-008未恢复前不安排T20真实调用。"
+      ]
+    },
+    {
+      "apiName": "top_list",
+      "calendarProfile": "C-A",
+      "scopeEvidence": {
+        "conclusion": "龙虎榜每日交易明细，历史2005年至今；样例明确.SZ，未完整列出市场。",
+        "sourceIds": [
+          "TS-top_list"
+        ]
+      },
+      "requiredCalendars": [
+        {
+          "marketOrDirection": "SZSE",
+          "sourceIds": [
+            "TS-top_list",
+            "TS-trade_cal",
+            "SZSE-calendar"
+          ],
+          "condition": "无市场筛选；属于目前已证实的必要集合",
+          "equivalenceEvidence": "独立市场；不能以另一交易所替代"
+        }
+      ],
+      "unresolvedScope": [
+        "SSE／BSE及证券类型范围未完整声明；没有上榜股票不表示休市。"
+      ],
+      "unionRule": "任一必要日历确认开盘即保留，仅全部确认休市才跳过；必要集合未知或任一必要来源未知时不得计算部分并集。",
+      "coverageRule": "只对实际待处理自然日逐日核对，包含首次起止两端；重试仅核对明细日期（如3／7日）。核对来源市场／业务身份与生效范围；同源同日一致重复可去重，冲突、缺日、空来源、非法开闭值或范围不足均未确认，不能只数行。较宽来源仅消费任务日期；全部必要来源确认后才计算并集。 SSE 候选核对 TS-trade_cal 与 SSE-2026-notice、SSE-holiday-notices（本轮另读 SSE-dragon-notice）；SZSE 日历页面未取得逐日结论，BSE 官网本轮403且 TS-trade_cal 未列 BSE。非2026年须另取对应年份权威安排；本次资料不覆盖全部历史年份。",
+      "freshnessRule": "每次首次下载和每轮重试在本轮重新获取／确认原始来源、发布或更新标识、生效范围及相关修订公告；同轮可复用，不跨次缓存。以任务日期适用版本为准；原文无更新时间或不能排除后续修订时不能仅凭下载时间、页面存在或业务数据已更新判定新鲜。 Tushare接口页的业务入库时刻不是trade_cal的修订承诺；本轮尚无沪深日历与权威逐日结果的一致性／更新验证。",
+      "status": "UNCONFIRMED",
+      "rejection": "CALENDAR_UNCONFIRMED",
+      "liveExcluded": false,
+      "liveStatus": "NOT_RUN",
+      "remainingEvidence": [
+        "SSE／BSE及证券类型范围未完整声明；没有上榜股票不表示休市。",
+        "补齐全部必要市场每个任务日期的权威覆盖与修订确认，以及Tushare日历表达的一致性；非排除接口仅由T20按专属设计选择实测。"
+      ]
+    },
+    {
+      "apiName": "weekly",
+      "calendarProfile": "C-A",
+      "scopeEvidence": {
+        "conclusion": "A股周线，每周最后一个交易日更新；样例明确.SZ，未枚举完整市场。",
+        "sourceIds": [
+          "TS-weekly"
+        ]
+      },
+      "requiredCalendars": [
+        {
+          "marketOrDirection": "SZSE",
+          "sourceIds": [
+            "TS-weekly",
+            "TS-trade_cal",
+            "SZSE-calendar"
+          ],
+          "condition": "无市场筛选；属于目前已证实的必要集合",
+          "equivalenceEvidence": "独立市场；不能以另一交易所替代"
+        }
+      ],
+      "unresolvedScope": [
+        "SSE／BSE市场集合未穷尽；开盘日不一定有新周线记录。"
+      ],
+      "unionRule": "任一必要日历确认开盘即保留，仅全部确认休市才跳过；必要集合未知或任一必要来源未知时不得计算部分并集。",
+      "coverageRule": "只对实际待处理自然日逐日核对，包含首次起止两端；重试仅核对明细日期（如3／7日）。核对来源市场／业务身份与生效范围；同源同日一致重复可去重，冲突、缺日、空来源、非法开闭值或范围不足均未确认，不能只数行。较宽来源仅消费任务日期；全部必要来源确认后才计算并集。 SSE 候选核对 TS-trade_cal 与 SSE-2026-notice、SSE-holiday-notices（本轮另读 SSE-dragon-notice）；SZSE 日历页面未取得逐日结论，BSE 官网本轮403且 TS-trade_cal 未列 BSE。非2026年须另取对应年份权威安排；本次资料不覆盖全部历史年份。",
+      "freshnessRule": "每次首次下载和每轮重试在本轮重新获取／确认原始来源、发布或更新标识、生效范围及相关修订公告；同轮可复用，不跨次缓存。以任务日期适用版本为准；原文无更新时间或不能排除后续修订时不能仅凭下载时间、页面存在或业务数据已更新判定新鲜。 Tushare接口页的业务入库时刻不是trade_cal的修订承诺；本轮尚无沪深日历与权威逐日结果的一致性／更新验证。",
+      "status": "UNCONFIRMED",
+      "rejection": "CALENDAR_UNCONFIRMED",
+      "liveExcluded": false,
+      "liveStatus": "NOT_RUN",
+      "remainingEvidence": [
+        "SSE／BSE市场集合未穷尽；开盘日不一定有新周线记录。",
+        "补齐全部必要市场每个任务日期的权威覆盖与修订确认，以及Tushare日历表达的一致性；非排除接口仅由T20按专属设计选择实测。"
+      ]
+    },
+    {
+      "apiName": "margin",
+      "calendarProfile": "C-M",
+      "scopeEvidence": {
+        "conclusion": "原接口exchange_id输入／输出均明确SSE、SZSE、BSE；数据从各证券交易所网站获取。SZSE/BSE周五数据下周一更新是业务数据发布时间，不是休市判据。",
+        "sourceIds": [
+          "TS-margin"
+        ]
+      },
+      "requiredCalendars": [
+        {
+          "marketOrDirection": "SSE",
+          "sourceIds": [
+            "TS-margin",
+            "TS-trade_cal",
+            "SSE-2026-notice",
+            "SSE-holiday-notices"
+          ],
+          "condition": "exchange_id=SSE：只使用本市场融资融券业务日历；trade_cal有输入／输出依据，但业务适用性、逐日覆盖和更新仍待确认",
+          "equivalenceEvidence": "独立市场；不能以另一交易所替代"
+        },
+        {
+          "marketOrDirection": "SZSE",
+          "sourceIds": [
+            "TS-margin",
+            "TS-trade_cal",
+            "SZSE-calendar"
+          ],
+          "condition": "exchange_id=SZSE：只使用本市场融资融券业务日历；trade_cal有输入／输出依据，但业务适用性、逐日覆盖和更新仍待确认",
+          "equivalenceEvidence": "独立市场；不能以另一交易所替代"
+        },
+        {
+          "marketOrDirection": "BSE",
+          "sourceIds": [
+            "TS-margin",
+            "TS-trade_cal",
+            "BSE-home"
+          ],
+          "condition": "exchange_id=BSE：只使用本市场融资融券业务日历；公开trade_cal未列BSE，分支未确认",
+          "equivalenceEvidence": "独立市场；不能以另一交易所替代"
+        }
+      ],
+      "unresolvedScope": [],
+      "unionRule": "任一必要日历确认开盘即保留，仅全部确认休市才跳过；必要集合未知或任一必要来源未知时不得计算部分并集。",
+      "coverageRule": "只对实际待处理自然日逐日核对，包含首次起止两端；重试仅核对明细日期（如3／7日）。核对来源市场／业务身份与生效范围；同源同日一致重复可去重，冲突、缺日、空来源、非法开闭值或范围不足均未确认，不能只数行。较宽来源仅消费任务日期；全部必要来源确认后才计算并集。 按冻结的exchange_id逐分支核对，不计算三个互斥选项的并集。 SSE 候选核对 TS-trade_cal 与 SSE-2026-notice、SSE-holiday-notices（本轮另读 SSE-dragon-notice）；SZSE 日历页面未取得逐日结论，BSE 官网本轮403且 TS-trade_cal 未列 BSE。非2026年须另取对应年份权威安排；本次资料不覆盖全部历史年份。",
+      "freshnessRule": "每次首次下载和每轮重试在本轮重新获取／确认原始来源、发布或更新标识、生效范围及相关修订公告；同轮可复用，不跨次缓存。以任务日期适用版本为准；原文无更新时间或不能排除后续修订时不能仅凭下载时间、页面存在或业务数据已更新判定新鲜。",
+      "status": "UNCONFIRMED",
+      "rejection": "CALENDAR_UNCONFIRMED",
+      "liveExcluded": false,
+      "liveStatus": "NOT_RUN",
+      "remainingEvidence": [
+        "SSE：融资融券业务日期与本市场日历的正式适用依据及运行覆盖／修订核对。",
+        "SZSE：相同业务适用依据，并补齐本轮未读出的权威逐日来源。",
+        "BSE：业务支持已经公开列明，日历来源和修订仍未确认；不能删枚举、默认SSE或发送未经核实的trade_cal(BSE)。"
+      ]
+    },
+    {
+      "apiName": "slb_len",
+      "calendarProfile": "C-S",
+      "scopeEvidence": {
+        "conclusion": "转融资业务，原接口对应中证金融转融通业务；规则第21条给出专属交易日规则，第82—85条说明披露及重大变更公告。再借和余额披露不局限竞价日。",
+        "sourceIds": [
+          "TS-slb_len",
+          "CSF-business-rules",
+          "CSF-rules",
+          "CSF-announcements",
+          "CSF-faq"
+        ]
+      },
+      "requiredCalendars": [
+        {
+          "marketOrDirection": "CSF_REFINANCING",
+          "sourceIds": [
+            "TS-slb_len",
+            "CSF-business-rules",
+            "CSF-rules",
+            "CSF-announcements",
+            "CSF-faq"
+          ],
+          "condition": "仅对应原接口的业务；须按任务日期取得当时有效规则和业务安排",
+          "equivalenceEvidence": "第21条：周一至周五，国家法定节假日和证券交易所公告休市日除外；经证监会同意可调整并公告。属有条件复用依据，未逐名列出交易所，也未证明任一市场开盘即业务开放；不能直接复用C-A并集。"
+        }
+      ],
+      "unresolvedScope": [
+        "第21条“证券交易所”对应的必要市场集合及差异日期处理未在所读条款中明示，暂无完整逐业务日历。"
+      ],
+      "unionRule": "任一必要日历确认开盘即保留，仅全部确认休市才跳过；必要集合未知或任一必要来源未知时不得计算部分并集。",
+      "coverageRule": "只对实际待处理自然日逐日核对，包含首次起止两端；重试仅核对明细日期（如3／7日）。核对来源市场／业务身份与生效范围；同源同日一致重复可去重，冲突、缺日、空来源、非法开闭值或范围不足均未确认，不能只数行。较宽来源仅消费任务日期；全部必要来源确认后才计算并集。 以CSF业务日历为一个必要业务来源；只有正式等价关系全部确认时才可复用对应交易所日历，不能只取SSE。转融资竞价日不是整个转融资业务日历。",
+      "freshnessRule": "每次首次下载和每轮重试在本轮重新获取／确认原始来源、发布或更新标识、生效范围及相关修订公告；同轮可复用，不跨次缓存。以任务日期适用版本为准；原文无更新时间或不能排除后续修订时不能仅凭下载时间、页面存在或业务数据已更新判定新鲜。 查CSF-rules与CSF-announcements，核对第21条日期调整及第85／92条重大事件；2023规则版本不覆盖全部历史日期。",
+      "status": "UNCONFIRMED",
+      "rejection": "CALENDAR_UNCONFIRMED",
+      "liveExcluded": false,
+      "liveStatus": "NOT_RUN",
+      "remainingEvidence": [
+        "补齐规则第21条所指交易所集合、历史生效区间、特殊休市或日期调整公告及可靠逐日源；证明是否及何时等价。",
+        "验证slb_len的再借、偿还及余额记录对应业务日期与更新依据，T20按设计选择。"
+      ]
+    },
+    {
+      "apiName": "slb_sec",
+      "calendarProfile": "C-S",
+      "scopeEvidence": {
+        "conclusion": "转融券汇总业务，原接口对应中证金融转融通业务；规则第21条给出专属交易日规则，第82—85条说明披露及重大变更公告。原站导航标（停），正式2024-07-10通知自7月11日暂停转融券，存量不晚于9月30日归还。",
+        "sourceIds": [
+          "TS-slb_sec",
+          "CSF-business-rules",
+          "CSF-rules",
+          "CSF-announcements",
+          "CSF-suspension"
+        ]
+      },
+      "requiredCalendars": [
+        {
+          "marketOrDirection": "CSF_SECURITIES_REFINANCING",
+          "sourceIds": [
+            "TS-slb_sec",
+            "CSF-business-rules",
+            "CSF-rules",
+            "CSF-announcements",
+            "CSF-suspension"
+          ],
+          "condition": "仅对应原接口的业务；须按任务日期取得当时有效规则和业务安排",
+          "equivalenceEvidence": "第21条：周一至周五，国家法定节假日和证券交易所公告休市日除外；经证监会同意可调整并公告。属有条件复用依据，未逐名列出交易所，也未证明任一市场开盘即业务开放；不能直接复用C-A并集。"
+        }
+      ],
+      "unresolvedScope": [
+        "第21条“证券交易所”对应的必要市场集合及差异日期处理未在所读条款中明示，暂无完整逐业务日历。"
+      ],
+      "unionRule": "任一必要日历确认开盘即保留，仅全部确认休市才跳过；必要集合未知或任一必要来源未知时不得计算部分并集。",
+      "coverageRule": "只对实际待处理自然日逐日核对，包含首次起止两端；重试仅核对明细日期（如3／7日）。核对来源市场／业务身份与生效范围；同源同日一致重复可去重，冲突、缺日、空来源、非法开闭值或范围不足均未确认，不能只数行。较宽来源仅消费任务日期；全部必要来源确认后才计算并集。 以CSF业务日历为一个必要业务来源；只有正式等价关系全部确认时才可复用对应交易所日历，不能只取SSE。转融资竞价日不是整个转融资业务日历。",
+      "freshnessRule": "每次首次下载和每轮重试在本轮重新获取／确认原始来源、发布或更新标识、生效范围及相关修订公告；同轮可复用，不跨次缓存。以任务日期适用版本为准；原文无更新时间或不能排除后续修订时不能仅凭下载时间、页面存在或业务数据已更新判定新鲜。 查CSF-rules与CSF-announcements，核对第21条日期调整及第85／92条重大事件；2023规则版本不覆盖全部历史日期。",
+      "status": "UNCONFIRMED",
+      "rejection": "CALENDAR_UNCONFIRMED",
+      "liveExcluded": false,
+      "liveStatus": "NOT_RUN",
+      "remainingEvidence": [
+        "补齐规则第21条所指交易所集合、历史生效区间、特殊休市或日期调整公告及可靠逐日源；证明是否及何时等价。",
+        "核对暂停、存量归还及历史数据留存／更新机制；暂停不等于普通日历闭市，空响应不得被认作休市。T20按设计选择历史合法范围。"
+      ]
+    },
+    {
+      "apiName": "slb_sec_detail",
+      "calendarProfile": "C-S",
+      "scopeEvidence": {
+        "conclusion": "转融券明细业务，原接口对应中证金融转融通业务；规则第21条给出专属交易日规则，第82—85条说明披露及重大变更公告。原站导航标（停），正式2024-07-10通知自7月11日暂停转融券，存量不晚于9月30日归还。",
+        "sourceIds": [
+          "TS-slb_sec_detail",
+          "CSF-business-rules",
+          "CSF-rules",
+          "CSF-announcements",
+          "CSF-suspension"
+        ]
+      },
+      "requiredCalendars": [
+        {
+          "marketOrDirection": "CSF_SECURITIES_REFINANCING",
+          "sourceIds": [
+            "TS-slb_sec_detail",
+            "CSF-business-rules",
+            "CSF-rules",
+            "CSF-announcements",
+            "CSF-suspension"
+          ],
+          "condition": "仅对应原接口的业务；须按任务日期取得当时有效规则和业务安排",
+          "equivalenceEvidence": "第21条：周一至周五，国家法定节假日和证券交易所公告休市日除外；经证监会同意可调整并公告。属有条件复用依据，未逐名列出交易所，也未证明任一市场开盘即业务开放；不能直接复用C-A并集。"
+        }
+      ],
+      "unresolvedScope": [
+        "第21条“证券交易所”对应的必要市场集合及差异日期处理未在所读条款中明示，暂无完整逐业务日历。"
+      ],
+      "unionRule": "任一必要日历确认开盘即保留，仅全部确认休市才跳过；必要集合未知或任一必要来源未知时不得计算部分并集。",
+      "coverageRule": "只对实际待处理自然日逐日核对，包含首次起止两端；重试仅核对明细日期（如3／7日）。核对来源市场／业务身份与生效范围；同源同日一致重复可去重，冲突、缺日、空来源、非法开闭值或范围不足均未确认，不能只数行。较宽来源仅消费任务日期；全部必要来源确认后才计算并集。 以CSF业务日历为一个必要业务来源；只有正式等价关系全部确认时才可复用对应交易所日历，不能只取SSE。转融资竞价日不是整个转融资业务日历。",
+      "freshnessRule": "每次首次下载和每轮重试在本轮重新获取／确认原始来源、发布或更新标识、生效范围及相关修订公告；同轮可复用，不跨次缓存。以任务日期适用版本为准；原文无更新时间或不能排除后续修订时不能仅凭下载时间、页面存在或业务数据已更新判定新鲜。 查CSF-rules与CSF-announcements，核对第21条日期调整及第85／92条重大事件；2023规则版本不覆盖全部历史日期。",
+      "status": "UNCONFIRMED",
+      "rejection": "CALENDAR_UNCONFIRMED",
+      "liveExcluded": false,
+      "liveStatus": "NOT_RUN",
+      "remainingEvidence": [
+        "补齐规则第21条所指交易所集合、历史生效区间、特殊休市或日期调整公告及可靠逐日源；证明是否及何时等价。",
+        "核对暂停、存量归还及历史数据留存／更新机制；暂停不等于普通日历闭市，空响应不得被认作休市。T20按设计选择历史合法范围。"
+      ]
+    },
+    {
+      "apiName": "hk_hold",
+      "calendarProfile": "C-N",
+      "scopeEvidence": {
+        "conclusion": "原接口旧文档返回“404, 文档不存在！”，当前实际业务方向、历史时段及停更情况无法从原页确认；名称和本地字段不能替代原接口证据。",
+        "sourceIds": [
+          "TS-hk_hold"
+        ]
+      },
+      "requiredCalendars": [],
+      "unresolvedScope": [
+        "沪股通／深股通／南向港股通各方向是否实际覆盖未确认；持股披露日期、业务开放日期及披露制度变更的关系待证。"
+      ],
+      "unionRule": "任一必要日历确认开盘即保留，仅全部确认休市才跳过；必要集合未知或任一必要来源未知时不得计算部分并集。",
+      "coverageRule": "只对实际待处理自然日逐日核对，包含首次起止两端；重试仅核对明细日期（如3／7日）。核对来源市场／业务身份与生效范围；同源同日一致重复可去重，冲突、缺日、空来源、非法开闭值或范围不足均未确认，不能只数行。较宽来源仅消费任务日期；全部必要来源确认后才计算并集。 HKEX的南北向年表及SSE／SZSE港股通安排只能作为日后已证实方向的候选来源，当前requiredCalendars为空代表未知，绝不代表全休市。",
+      "freshnessRule": "每次首次下载和每轮重试在本轮重新获取／确认原始来源、发布或更新标识、生效范围及相关修订公告；同轮可复用，不跨次缓存。以任务日期适用版本为准；原文无更新时间或不能排除后续修订时不能仅凭下载时间、页面存在或业务数据已更新判定新鲜。 原接口资料恢复且实际方向确认之前，不能借新接口、普通香港日历或本地字段构造日历。",
+      "status": "UNCONFIRMED",
+      "rejection": "CALENDAR_UNCONFIRMED",
+      "liveExcluded": true,
+      "liveStatus": "NOT_RUN",
+      "remainingEvidence": [
+        "恢复可追溯的原接口公开范围、日期与方向说明；逐方向补齐权威日历及特殊修订依据。",
+        "ISSUE-008保持不依赖、未解决；不安排T20真实调用。"
+      ]
+    },
+    {
+      "apiName": "hsgt_top10",
+      "calendarProfile": "C-N",
+      "scopeEvidence": {
+        "conclusion": "原接口明确沪股通、深股通每日十大成交；market_type=1沪市／3深市，原条件未筛选方向，必要集合是北向沪股通及北向深股通；不含南向。",
+        "sourceIds": [
+          "TS-hsgt_top10"
+        ]
+      },
+      "requiredCalendars": [
+        {
+          "marketOrDirection": "NORTHBOUND_SH",
+          "sourceIds": [
+            "TS-hsgt_top10",
+            "HKEX-connect-calendar",
+            "HKEX-2026-csv",
+            "HKEX-2026-pdf",
+            "HKEX-trading-hours",
+            "HKEX-connect-faq",
+            "HKEX-enhancement",
+            "HKEX-weather",
+            "SZSE-connect-rules-pdf"
+          ],
+          "condition": "无market_type筛选，两个北向业务方向均必要",
+          "equivalenceEvidence": "使用HKEX公布的Stock Connect北向安排；其2026表合列Shanghai & Shenzhen，北向栏适用于两者；独立跟踪方向修订，不能使用普通港股交易日替代。"
+        },
+        {
+          "marketOrDirection": "NORTHBOUND_SZ",
+          "sourceIds": [
+            "TS-hsgt_top10",
+            "HKEX-connect-calendar",
+            "HKEX-2026-csv",
+            "HKEX-2026-pdf",
+            "HKEX-trading-hours",
+            "HKEX-connect-faq",
+            "HKEX-enhancement",
+            "HKEX-weather",
+            "SZSE-connect-rules-pdf"
+          ],
+          "condition": "无market_type筛选，两个北向业务方向均必要",
+          "equivalenceEvidence": "使用HKEX公布的Stock Connect北向安排；其2026表合列Shanghai & Shenzhen，北向栏适用于两者；独立跟踪方向修订，不能使用普通港股交易日替代。"
+        }
+      ],
+      "unresolvedScope": [],
+      "unionRule": "任一必要日历确认开盘即保留，仅全部确认休市才跳过；必要集合未知或任一必要来源未知时不得计算部分并集。",
+      "coverageRule": "只对实际待处理自然日逐日核对，包含首次起止两端；重试仅核对明细日期（如3／7日）。核对来源市场／业务身份与生效范围；同源同日一致重复可去重，冲突、缺日、空来源、非法开闭值或范围不足均未确认，不能只数行。较宽来源仅消费任务日期；全部必要来源确认后才计算并集。 本次2026官方表覆盖全年261个周一至周五；Closed为闭市，表内常规空白须结合交易时间与FAQ规则确认为正常交易，不能通用于其他源空值。周末闭市由HKEX-trading-hours的北向周一至周五规则支持；Half Day仍为开盘。超出2026范围须读取对应官方年度表及当时制度，否则拒绝。",
+      "freshnessRule": "每次首次下载和每轮重试在本轮重新获取／确认原始来源、发布或更新标识、生效范围及相关修订公告；同轮可复用，不跨次缓存。以任务日期适用版本为准；原文无更新时间或不能排除后续修订时不能仅凭下载时间、页面存在或业务数据已更新判定新鲜。 每轮重读HKEX-connect-calendar所链相应年度表与HKEX-enhancement／HKEX-weather及业务公告；核对更新标识和适用日期。2023-04-24前后不能使用同一假日前结算限制，2024-09-23后不能机械按台风停市。DOCUMENTED仅证明静态来源与适用关系，本轮获取或修订确认失败仍拒绝。",
+      "status": "DOCUMENTED",
+      "rejection": "CALENDAR_UNCONFIRMED",
+      "liveExcluded": true,
+      "liveStatus": "NOT_RUN",
+      "remainingEvidence": [
+        "ISSUE-008真实调用仍排除；仅做公开资料和受控覆盖。2026年度表与运行解析／当天特殊安排尚未做功能验证；其他年份必须取得其年度及历史规则证据后使用。"
+      ]
+    },
+    {
+      "apiName": "moneyflow_hsgt",
+      "calendarProfile": "C-X",
+      "scopeEvidence": {
+        "conclusion": "原接口旧文档返回“404, 文档不存在！”，当前实际业务方向、历史时段及停更情况无法从原页确认；名称和本地字段不能替代原接口证据。",
+        "sourceIds": [
+          "TS-moneyflow_hsgt"
+        ]
+      },
+      "requiredCalendars": [],
+      "unresolvedScope": [
+        "沪股通／深股通／南向港股通各方向是否实际覆盖未确认；沪深北向与沪深南向是否同时覆盖及历史变化待证。"
+      ],
+      "unionRule": "任一必要日历确认开盘即保留，仅全部确认休市才跳过；必要集合未知或任一必要来源未知时不得计算部分并集。",
+      "coverageRule": "只对实际待处理自然日逐日核对，包含首次起止两端；重试仅核对明细日期（如3／7日）。核对来源市场／业务身份与生效范围；同源同日一致重复可去重，冲突、缺日、空来源、非法开闭值或范围不足均未确认，不能只数行。较宽来源仅消费任务日期；全部必要来源确认后才计算并集。 HKEX的南北向年表及SSE／SZSE港股通安排只能作为日后已证实方向的候选来源，当前requiredCalendars为空代表未知，绝不代表全休市。",
+      "freshnessRule": "每次首次下载和每轮重试在本轮重新获取／确认原始来源、发布或更新标识、生效范围及相关修订公告；同轮可复用，不跨次缓存。以任务日期适用版本为准；原文无更新时间或不能排除后续修订时不能仅凭下载时间、页面存在或业务数据已更新判定新鲜。 原接口资料恢复且实际方向确认之前，不能借新接口、普通香港日历或本地字段构造日历。",
+      "status": "UNCONFIRMED",
+      "rejection": "CALENDAR_UNCONFIRMED",
+      "liveExcluded": true,
+      "liveStatus": "NOT_RUN",
+      "remainingEvidence": [
+        "恢复可追溯的原接口公开范围、日期与方向说明；逐方向补齐权威日历及特殊修订依据。",
+        "ISSUE-008保持不依赖、未解决；不安排T20真实调用。"
+      ]
+    }
+  ]
+}

@@ -7,6 +7,8 @@ import com.akkc.tensor.plugin.api.error.ErrorCode;
 import com.akkc.tensor.plugin.api.error.TensorException;
 import java.time.LocalDate;
 import java.time.YearMonth;
+import java.time.temporal.ChronoUnit;
+import com.akkc.tensor.plugin.api.download.DownloadPolicy;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
 import java.time.format.DateTimeParseException;
@@ -40,8 +42,21 @@ public final class ParameterValidator {
 
     public ValidatedParameters validate(ApiDescriptor api, Map<String, Object> raw) {
         Objects.requireNonNull(api, "api");
+        ValidatedParameters result = validate(api.parameters(), raw);
+        if (api.downloadPolicy().mode() != DownloadPolicy.Mode.ORIGINAL_PARAMS) {
+            LocalDate start = LocalDate.parse((String) result.values().get("start_date"), DATE);
+            LocalDate end = LocalDate.parse((String) result.values().get("end_date"), DATE);
+            if (ChronoUnit.DAYS.between(start, end) + 1 > api.downloadPolicy().limits().maxRangeDays()) {
+                throw new ParameterValidationException(ErrorCode.PARAM_INVALID,
+                        List.of(new FieldError("end_date", "must be within 31 inclusive days")));
+            }
+        }
+        return result;
+    }
+
+    public ValidatedParameters validate(List<ParameterDescriptor> parameters, Map<String, Object> raw) {
+        parameters = List.copyOf(Objects.requireNonNull(parameters, "parameters"));
         Objects.requireNonNull(raw, "raw");
-        List<ParameterDescriptor> parameters = api.parameters();
         Metadata metadata = validateMetadata(parameters);
         Map<String, String> normalized = new LinkedHashMap<>();
         Set<String> invalid = new HashSet<>();
@@ -148,14 +163,14 @@ public final class ParameterValidator {
         try {
             normalized = switch (parameter.type()) {
                 case DATE, DATE_RANGE_MEMBER -> {
-                    if (!DATE_VALUE.matcher(value).matches()) {
+                    if (!DATE_VALUE.matcher(value).matches() || value.startsWith("0000")) {
                         yield null;
                     }
                     LocalDate.parse(value, DATE);
                     yield value;
                 }
                 case MONTH -> {
-                    if (!MONTH_VALUE.matcher(value).matches()) {
+                    if (!MONTH_VALUE.matcher(value).matches() || value.startsWith("0000")) {
                         yield null;
                     }
                     YearMonth.parse(value, MONTH);
@@ -163,7 +178,7 @@ public final class ParameterValidator {
                 }
                 case TS_CODE -> {
                     String code = value.strip().toUpperCase(Locale.ROOT);
-                    yield TS_CODE.matcher(code).matches() ? code : null;
+                    yield code.length() <= 64 && TS_CODE.matcher(code).matches() ? code : null;
                 }
                 case ENUM -> parameter.allowedValues().contains(value) ? value : null;
                 case TEXT -> value.strip();

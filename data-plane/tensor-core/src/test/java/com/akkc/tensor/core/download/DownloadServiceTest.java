@@ -22,6 +22,8 @@ import com.akkc.tensor.plugin.api.descriptor.PluginReadiness;
 import com.akkc.tensor.plugin.api.descriptor.QueryMode;
 import com.akkc.tensor.plugin.api.download.AdaptedBatch;
 import com.akkc.tensor.plugin.api.download.DownloadEnvelope;
+import com.akkc.tensor.plugin.api.download.FetchResult;
+import com.akkc.tensor.plugin.api.download.DownloadContext;
 import com.akkc.tensor.plugin.api.download.DownloadStatus;
 import com.akkc.tensor.plugin.api.error.ErrorCode;
 import com.akkc.tensor.plugin.api.error.TensorException;
@@ -62,6 +64,64 @@ class DownloadServiceTest {
         }
     }
 
+    @Test
+    void sourceParametersRemainTheOnlyCurrentExecutionInputs() {
+        var source = List.of(new com.akkc.tensor.plugin.api.descriptor.ParameterDescriptor("trade_date", "Trade date", null,
+                com.akkc.tensor.plugin.api.descriptor.ParameterType.DATE, true, null, List.of(), null, null));
+        var policy = com.akkc.tensor.test.DownloadPolicies.tradeRange();
+        var api = new ApiDescriptor(API_NAME, "Daily", "Market", QueryMode.trade_date,
+                com.akkc.tensor.plugin.api.download.DownloadParameterProjection.project(source, policy), policy, source);
+        var params = Map.<String,Object>of("trade_date", "20260903");
+        var plugin = mock(DataSourcePlugin.class);
+        when(plugin.descriptor()).thenReturn(new PluginDescriptor(PLUGIN_ID, "Test", "Test", true, true, true, null, List.of(api), List.of(KEY)));
+        when(plugin.readiness()).thenReturn(new PluginReadiness(true, true, true, null));
+        var envelope = new DownloadEnvelope(PLUGIN_ID, API_NAME, params, List.of("value"), 0, List.of(), DownloadStatus.SUCCESS, null);
+        when(plugin.download(org.mockito.ArgumentMatchers.eq(API_NAME), org.mockito.ArgumentMatchers.eq(params), org.mockito.ArgumentMatchers.any()))
+                .thenReturn(new FetchResult(envelope, List.of()));
+        var adapter = mock(DatasetAdapter.class);
+        when(adapter.datasetKey()).thenReturn(KEY);
+        when(adapter.definition()).thenReturn(definition());
+        var persistence = mock(PersistenceService.class);
+        var service = new DownloadService(new PluginRegistry(List.of(plugin)), new AdapterRegistry(List.of(adapter)),
+                new ParameterValidator(), persistence, Clock.fixed(NOW, ZoneOffset.UTC));
+        assertThat(service.execute(PLUGIN_ID, API_NAME, params, RequestId.newId()).outcome())
+                .isEqualTo(com.akkc.tensor.plugin.api.download.DownloadOutcome.EMPTY);
+        org.mockito.Mockito.verify(plugin).download(org.mockito.ArgumentMatchers.eq(API_NAME), org.mockito.ArgumentMatchers.eq(params), org.mockito.ArgumentMatchers.any());
+        org.mockito.Mockito.verify(adapter, org.mockito.Mockito.never()).adapt(org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.any());
+        org.mockito.Mockito.verifyNoInteractions(persistence);
+        assertThatThrownBy(() -> new ParameterValidator().validate(api, params))
+                .isInstanceOfSatisfying(TensorException.class, e -> assertThat(e.code()).isEqualTo(ErrorCode.PARAM_REQUIRED));
+        assertThat(new ParameterValidator().validate(api.sourceParameters(), params).values()).isEqualTo(params);
+    }
+
+    @Test
+    void rejectsNullOrExplicitUnitFailuresBeforeAdaptationOrPersistence() {
+        var envelope = new DownloadEnvelope(PLUGIN_ID, API_NAME, Map.of(), List.of("value"), 1, List.of(List.of("row")), DownloadStatus.SUCCESS, null);
+        var failure = new FetchResult.UnitFailure(new com.akkc.tensor.plugin.api.download.RecoverySelector(
+                com.akkc.tensor.plugin.api.download.RecoverySelector.TargetType.REQUEST, "",
+                com.akkc.tensor.plugin.api.download.RecoverySelector.TimeType.NONE, ""), ErrorCode.SOURCE_TRUNCATED, "Source is truncated");
+        var missingEnvelope = mock(FetchResult.class);
+        for (FetchResult fetched : java.util.Arrays.asList(null, missingEnvelope, new FetchResult(envelope, List.of(failure)))) {
+            var plugin = mock(DataSourcePlugin.class);
+            var api = new ApiDescriptor(API_NAME, "Daily", "Market", QueryMode.snapshot, List.of(), com.akkc.tensor.test.DownloadPolicies.original(), List.of());
+            when(plugin.descriptor()).thenReturn(new PluginDescriptor(PLUGIN_ID, "Test", "Test", true, true, true, null, List.of(api), List.of(KEY)));
+            when(plugin.readiness()).thenReturn(new PluginReadiness(true, true, true, null));
+            when(plugin.download(org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.any())).thenReturn(fetched);
+            var adapter = mock(DatasetAdapter.class);
+            when(adapter.datasetKey()).thenReturn(KEY); when(adapter.definition()).thenReturn(definition());
+            var persistence = mock(PersistenceService.class);
+            var service = new DownloadService(new PluginRegistry(List.of(plugin)), new AdapterRegistry(List.of(adapter)),
+                    new ParameterValidator(), persistence, Clock.fixed(NOW, ZoneOffset.UTC));
+            assertThatThrownBy(() -> service.execute(PLUGIN_ID, API_NAME, Map.of(), RequestId.newId()))
+                    .isInstanceOfSatisfying(TensorException.class, e -> {
+                        assertThat(e.code()).isEqualTo(ErrorCode.SOURCE_PAYLOAD_INVALID);
+                        assertThat(e.getMessage()).isEqualTo("Source returned an invalid payload");
+                    });
+            org.mockito.Mockito.verify(adapter, org.mockito.Mockito.never()).adapt(org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.any());
+            org.mockito.Mockito.verifyNoInteractions(persistence);
+        }
+    }
+
     private static DownloadService service(PersistenceService persistence) {
         DatasetDefinition definition = definition();
         AdaptedBatch batch = new AdaptedBatch(
@@ -72,7 +132,7 @@ class DownloadServiceTest {
             public PluginDescriptor descriptor() {
                 return new PluginDescriptor(
                         PLUGIN_ID, "Download test", "Download test", true, true, true, null,
-                        List.of(new ApiDescriptor(API_NAME, "Daily", "market", QueryMode.snapshot, List.of())),
+                        List.of(new ApiDescriptor(API_NAME, "Daily", "market", QueryMode.snapshot, List.of(), com.akkc.tensor.test.DownloadPolicies.original(), List.of())),
                         List.of(KEY));
             }
 
@@ -82,10 +142,10 @@ class DownloadServiceTest {
             }
 
             @Override
-            public DownloadEnvelope download(ApiName apiName, Map<String, Object> params) {
-                return new DownloadEnvelope(
+            public FetchResult download(ApiName apiName, Map<String, Object> params, DownloadContext context) {
+                return new FetchResult(new DownloadEnvelope(
                         PLUGIN_ID, API_NAME, Map.of(), List.of("value"), 1, List.of(List.of("row")),
-                        DownloadStatus.SUCCESS, null);
+                        DownloadStatus.SUCCESS, null), List.of());
             }
         };
         DatasetAdapter adapter = new DatasetAdapter() {

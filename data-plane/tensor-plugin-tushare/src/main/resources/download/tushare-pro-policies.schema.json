@@ -1,0 +1,1341 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "policies"
+  ],
+  "properties": {
+    "policies": {
+      "type": "array",
+      "minItems": 49,
+      "maxItems": 49,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "apiName",
+          "mode",
+          "dateSemantic",
+          "description",
+          "calendarProfile",
+          "limits",
+          "sourceRequestMode",
+          "sourceDateParameter",
+          "requestEvidenceStatus",
+          "batchPlanning",
+          "recoveryPolicy",
+          "completenessPolicy",
+          "calendarEvidenceStatus",
+          "evidenceRefs"
+        ],
+        "properties": {
+          "apiName": {
+            "enum": [
+              "adj_factor",
+              "block_trade",
+              "daily",
+              "daily_basic",
+              "hk_hold",
+              "hsgt_top10",
+              "margin",
+              "margin_detail",
+              "moneyflow",
+              "moneyflow_hsgt",
+              "monthly",
+              "slb_len",
+              "slb_sec",
+              "slb_sec_detail",
+              "stk_limit",
+              "suspend_d",
+              "top_inst",
+              "top_list",
+              "weekly",
+              "balancesheet",
+              "cashflow",
+              "disclosure_date",
+              "dividend",
+              "express",
+              "fina_audit",
+              "fina_indicator",
+              "fina_mainbz",
+              "forecast",
+              "income",
+              "repurchase",
+              "share_float",
+              "stk_holdertrade",
+              "top10_floatholders",
+              "top10_holders",
+              "broker_recommend",
+              "namechange",
+              "new_share",
+              "trade_cal",
+              "hs_const",
+              "index_classify",
+              "index_member",
+              "index_member_all",
+              "pledge_detail",
+              "pledge_stat",
+              "stk_holdernumber",
+              "stk_managers",
+              "stk_rewards",
+              "stock_basic",
+              "stock_company"
+            ]
+          },
+          "mode": {
+            "enum": [
+              "TRADE_DATE_RANGE",
+              "ANN_DATE_RANGE",
+              "MONTH_RANGE",
+              "NATIVE_RANGE",
+              "ORIGINAL_PARAMS"
+            ]
+          },
+          "dateSemantic": {
+            "enum": [
+              "TRADE_DATE",
+              "ANN_DATE",
+              "COVERED_MONTH",
+              "CALENDAR_DATE",
+              "IPO_DATE",
+              "NONE"
+            ]
+          },
+          "description": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "\\S"
+          },
+          "calendarProfile": {
+            "enum": [
+              null,
+              "C-A",
+              "C-M",
+              "C-S",
+              "C-N",
+              "C-X"
+            ]
+          },
+          "limits": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "maxRangeDays"
+                ],
+                "properties": {
+                  "maxRangeDays": {
+                    "const": 31
+                  }
+                }
+              }
+            ]
+          },
+          "sourceRequestMode": {
+            "enum": [
+              null,
+              "DATE",
+              "MONTH",
+              "RANGE",
+              "NONE"
+            ]
+          },
+          "sourceDateParameter": {
+            "enum": [
+              null,
+              "trade_date",
+              "ann_date",
+              "month"
+            ]
+          },
+          "requestEvidenceStatus": {
+            "enum": [
+              "DOCUMENTED_CANDIDATE",
+              "UNCONFIRMED",
+              "CONFLICT"
+            ]
+          },
+          "batchPlanning": {
+            "enum": [
+              "SINGLE_DATE",
+              "SINGLE_MONTH",
+              "SOURCE_RANGE",
+              "ORIGINAL_PARAMS",
+              "UNCONFIRMED"
+            ]
+          },
+          "recoveryPolicy": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "mode",
+              "targetField",
+              "timeField",
+              "unitTimeType",
+              "independentRecoveryVerified",
+              "evidenceRefs"
+            ],
+            "properties": {
+              "mode": {
+                "const": "REQUEST"
+              },
+              "targetField": {
+                "type": "null"
+              },
+              "timeField": {
+                "type": "null"
+              },
+              "unitTimeType": {
+                "type": "null"
+              },
+              "independentRecoveryVerified": {
+                "const": false
+              },
+              "evidenceRefs": {
+                "type": "array",
+                "minItems": 1,
+                "uniqueItems": true,
+                "items": {
+                  "type": "string",
+                  "minLength": 1,
+                  "pattern": "^(?!/)(?!.*(?:\\.\\.|:|\\\\))\\S+$"
+                }
+              }
+            }
+          },
+          "completenessPolicy": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "status",
+              "paginationStatus",
+              "documentedLimit",
+              "requirement"
+            ],
+            "properties": {
+              "status": {
+                "const": "UNCONFIRMED"
+              },
+              "paginationStatus": {
+                "const": "UNCONFIRMED"
+              },
+              "documentedLimit": {
+                "type": "string",
+                "minLength": 1,
+                "pattern": "\\S"
+              },
+              "requirement": {
+                "type": "string",
+                "minLength": 1,
+                "pattern": "\\S"
+              }
+            }
+          },
+          "calendarEvidenceStatus": {
+            "enum": [
+              null,
+              "DOCUMENTED",
+              "UNCONFIRMED",
+              "CONFLICT"
+            ]
+          },
+          "evidenceRefs": {
+            "type": "array",
+            "minItems": 1,
+            "uniqueItems": true,
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "pattern": "^(?!/)(?!.*(?:\\.\\.|:|\\\\))\\S+$"
+            }
+          }
+        },
+        "allOf": [
+          {
+            "if": {
+              "properties": {
+                "apiName": {
+                  "const": "adj_factor"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "mode": {
+                  "const": "TRADE_DATE_RANGE"
+                },
+                "calendarProfile": {
+                  "const": "C-A"
+                },
+                "dateSemantic": {
+                  "const": "TRADE_DATE"
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "apiName": {
+                  "const": "balancesheet"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "mode": {
+                  "const": "ANN_DATE_RANGE"
+                },
+                "calendarProfile": {
+                  "const": null
+                },
+                "dateSemantic": {
+                  "const": "ANN_DATE"
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "apiName": {
+                  "const": "block_trade"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "mode": {
+                  "const": "TRADE_DATE_RANGE"
+                },
+                "calendarProfile": {
+                  "const": "C-A"
+                },
+                "dateSemantic": {
+                  "const": "TRADE_DATE"
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "apiName": {
+                  "const": "broker_recommend"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "mode": {
+                  "const": "MONTH_RANGE"
+                },
+                "calendarProfile": {
+                  "const": null
+                },
+                "dateSemantic": {
+                  "const": "COVERED_MONTH"
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "apiName": {
+                  "const": "cashflow"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "mode": {
+                  "const": "ANN_DATE_RANGE"
+                },
+                "calendarProfile": {
+                  "const": null
+                },
+                "dateSemantic": {
+                  "const": "ANN_DATE"
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "apiName": {
+                  "const": "daily"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "mode": {
+                  "const": "TRADE_DATE_RANGE"
+                },
+                "calendarProfile": {
+                  "const": "C-A"
+                },
+                "dateSemantic": {
+                  "const": "TRADE_DATE"
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "apiName": {
+                  "const": "daily_basic"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "mode": {
+                  "const": "TRADE_DATE_RANGE"
+                },
+                "calendarProfile": {
+                  "const": "C-A"
+                },
+                "dateSemantic": {
+                  "const": "TRADE_DATE"
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "apiName": {
+                  "const": "disclosure_date"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "mode": {
+                  "const": "ANN_DATE_RANGE"
+                },
+                "calendarProfile": {
+                  "const": null
+                },
+                "dateSemantic": {
+                  "const": "ANN_DATE"
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "apiName": {
+                  "const": "dividend"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "mode": {
+                  "const": "ANN_DATE_RANGE"
+                },
+                "calendarProfile": {
+                  "const": null
+                },
+                "dateSemantic": {
+                  "const": "ANN_DATE"
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "apiName": {
+                  "const": "express"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "mode": {
+                  "const": "ANN_DATE_RANGE"
+                },
+                "calendarProfile": {
+                  "const": null
+                },
+                "dateSemantic": {
+                  "const": "ANN_DATE"
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "apiName": {
+                  "const": "fina_audit"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "mode": {
+                  "const": "ANN_DATE_RANGE"
+                },
+                "calendarProfile": {
+                  "const": null
+                },
+                "dateSemantic": {
+                  "const": "ANN_DATE"
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "apiName": {
+                  "const": "fina_indicator"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "mode": {
+                  "const": "ANN_DATE_RANGE"
+                },
+                "calendarProfile": {
+                  "const": null
+                },
+                "dateSemantic": {
+                  "const": "ANN_DATE"
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "apiName": {
+                  "const": "fina_mainbz"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "mode": {
+                  "const": "ANN_DATE_RANGE"
+                },
+                "calendarProfile": {
+                  "const": null
+                },
+                "dateSemantic": {
+                  "const": "ANN_DATE"
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "apiName": {
+                  "const": "forecast"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "mode": {
+                  "const": "ANN_DATE_RANGE"
+                },
+                "calendarProfile": {
+                  "const": null
+                },
+                "dateSemantic": {
+                  "const": "ANN_DATE"
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "apiName": {
+                  "const": "hk_hold"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "mode": {
+                  "const": "TRADE_DATE_RANGE"
+                },
+                "calendarProfile": {
+                  "const": "C-N"
+                },
+                "dateSemantic": {
+                  "const": "TRADE_DATE"
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "apiName": {
+                  "const": "hs_const"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "mode": {
+                  "const": "ORIGINAL_PARAMS"
+                },
+                "calendarProfile": {
+                  "const": null
+                },
+                "dateSemantic": {
+                  "const": "NONE"
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "apiName": {
+                  "const": "hsgt_top10"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "mode": {
+                  "const": "TRADE_DATE_RANGE"
+                },
+                "calendarProfile": {
+                  "const": "C-N"
+                },
+                "dateSemantic": {
+                  "const": "TRADE_DATE"
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "apiName": {
+                  "const": "income"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "mode": {
+                  "const": "ANN_DATE_RANGE"
+                },
+                "calendarProfile": {
+                  "const": null
+                },
+                "dateSemantic": {
+                  "const": "ANN_DATE"
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "apiName": {
+                  "const": "index_classify"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "mode": {
+                  "const": "ORIGINAL_PARAMS"
+                },
+                "calendarProfile": {
+                  "const": null
+                },
+                "dateSemantic": {
+                  "const": "NONE"
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "apiName": {
+                  "const": "index_member"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "mode": {
+                  "const": "ORIGINAL_PARAMS"
+                },
+                "calendarProfile": {
+                  "const": null
+                },
+                "dateSemantic": {
+                  "const": "NONE"
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "apiName": {
+                  "const": "index_member_all"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "mode": {
+                  "const": "ORIGINAL_PARAMS"
+                },
+                "calendarProfile": {
+                  "const": null
+                },
+                "dateSemantic": {
+                  "const": "NONE"
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "apiName": {
+                  "const": "margin"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "mode": {
+                  "const": "TRADE_DATE_RANGE"
+                },
+                "calendarProfile": {
+                  "const": "C-M"
+                },
+                "dateSemantic": {
+                  "const": "TRADE_DATE"
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "apiName": {
+                  "const": "margin_detail"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "mode": {
+                  "const": "TRADE_DATE_RANGE"
+                },
+                "calendarProfile": {
+                  "const": "C-A"
+                },
+                "dateSemantic": {
+                  "const": "TRADE_DATE"
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "apiName": {
+                  "const": "moneyflow"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "mode": {
+                  "const": "TRADE_DATE_RANGE"
+                },
+                "calendarProfile": {
+                  "const": "C-A"
+                },
+                "dateSemantic": {
+                  "const": "TRADE_DATE"
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "apiName": {
+                  "const": "moneyflow_hsgt"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "mode": {
+                  "const": "TRADE_DATE_RANGE"
+                },
+                "calendarProfile": {
+                  "const": "C-X"
+                },
+                "dateSemantic": {
+                  "const": "TRADE_DATE"
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "apiName": {
+                  "const": "monthly"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "mode": {
+                  "const": "TRADE_DATE_RANGE"
+                },
+                "calendarProfile": {
+                  "const": "C-A"
+                },
+                "dateSemantic": {
+                  "const": "TRADE_DATE"
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "apiName": {
+                  "const": "namechange"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "mode": {
+                  "const": "NATIVE_RANGE"
+                },
+                "calendarProfile": {
+                  "const": null
+                },
+                "dateSemantic": {
+                  "const": "ANN_DATE"
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "apiName": {
+                  "const": "new_share"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "mode": {
+                  "const": "NATIVE_RANGE"
+                },
+                "calendarProfile": {
+                  "const": null
+                },
+                "dateSemantic": {
+                  "const": "IPO_DATE"
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "apiName": {
+                  "const": "pledge_detail"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "mode": {
+                  "const": "ORIGINAL_PARAMS"
+                },
+                "calendarProfile": {
+                  "const": null
+                },
+                "dateSemantic": {
+                  "const": "NONE"
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "apiName": {
+                  "const": "pledge_stat"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "mode": {
+                  "const": "ORIGINAL_PARAMS"
+                },
+                "calendarProfile": {
+                  "const": null
+                },
+                "dateSemantic": {
+                  "const": "NONE"
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "apiName": {
+                  "const": "repurchase"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "mode": {
+                  "const": "ANN_DATE_RANGE"
+                },
+                "calendarProfile": {
+                  "const": null
+                },
+                "dateSemantic": {
+                  "const": "ANN_DATE"
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "apiName": {
+                  "const": "share_float"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "mode": {
+                  "const": "ANN_DATE_RANGE"
+                },
+                "calendarProfile": {
+                  "const": null
+                },
+                "dateSemantic": {
+                  "const": "ANN_DATE"
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "apiName": {
+                  "const": "slb_len"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "mode": {
+                  "const": "TRADE_DATE_RANGE"
+                },
+                "calendarProfile": {
+                  "const": "C-S"
+                },
+                "dateSemantic": {
+                  "const": "TRADE_DATE"
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "apiName": {
+                  "const": "slb_sec"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "mode": {
+                  "const": "TRADE_DATE_RANGE"
+                },
+                "calendarProfile": {
+                  "const": "C-S"
+                },
+                "dateSemantic": {
+                  "const": "TRADE_DATE"
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "apiName": {
+                  "const": "slb_sec_detail"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "mode": {
+                  "const": "TRADE_DATE_RANGE"
+                },
+                "calendarProfile": {
+                  "const": "C-S"
+                },
+                "dateSemantic": {
+                  "const": "TRADE_DATE"
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "apiName": {
+                  "const": "stk_holdernumber"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "mode": {
+                  "const": "ORIGINAL_PARAMS"
+                },
+                "calendarProfile": {
+                  "const": null
+                },
+                "dateSemantic": {
+                  "const": "NONE"
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "apiName": {
+                  "const": "stk_holdertrade"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "mode": {
+                  "const": "ANN_DATE_RANGE"
+                },
+                "calendarProfile": {
+                  "const": null
+                },
+                "dateSemantic": {
+                  "const": "ANN_DATE"
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "apiName": {
+                  "const": "stk_limit"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "mode": {
+                  "const": "TRADE_DATE_RANGE"
+                },
+                "calendarProfile": {
+                  "const": "C-A"
+                },
+                "dateSemantic": {
+                  "const": "TRADE_DATE"
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "apiName": {
+                  "const": "stk_managers"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "mode": {
+                  "const": "ORIGINAL_PARAMS"
+                },
+                "calendarProfile": {
+                  "const": null
+                },
+                "dateSemantic": {
+                  "const": "NONE"
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "apiName": {
+                  "const": "stk_rewards"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "mode": {
+                  "const": "ORIGINAL_PARAMS"
+                },
+                "calendarProfile": {
+                  "const": null
+                },
+                "dateSemantic": {
+                  "const": "NONE"
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "apiName": {
+                  "const": "stock_basic"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "mode": {
+                  "const": "ORIGINAL_PARAMS"
+                },
+                "calendarProfile": {
+                  "const": null
+                },
+                "dateSemantic": {
+                  "const": "NONE"
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "apiName": {
+                  "const": "stock_company"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "mode": {
+                  "const": "ORIGINAL_PARAMS"
+                },
+                "calendarProfile": {
+                  "const": null
+                },
+                "dateSemantic": {
+                  "const": "NONE"
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "apiName": {
+                  "const": "suspend_d"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "mode": {
+                  "const": "TRADE_DATE_RANGE"
+                },
+                "calendarProfile": {
+                  "const": "C-A"
+                },
+                "dateSemantic": {
+                  "const": "TRADE_DATE"
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "apiName": {
+                  "const": "top10_floatholders"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "mode": {
+                  "const": "ANN_DATE_RANGE"
+                },
+                "calendarProfile": {
+                  "const": null
+                },
+                "dateSemantic": {
+                  "const": "ANN_DATE"
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "apiName": {
+                  "const": "top10_holders"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "mode": {
+                  "const": "ANN_DATE_RANGE"
+                },
+                "calendarProfile": {
+                  "const": null
+                },
+                "dateSemantic": {
+                  "const": "ANN_DATE"
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "apiName": {
+                  "const": "top_inst"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "mode": {
+                  "const": "TRADE_DATE_RANGE"
+                },
+                "calendarProfile": {
+                  "const": "C-A"
+                },
+                "dateSemantic": {
+                  "const": "TRADE_DATE"
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "apiName": {
+                  "const": "top_list"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "mode": {
+                  "const": "TRADE_DATE_RANGE"
+                },
+                "calendarProfile": {
+                  "const": "C-A"
+                },
+                "dateSemantic": {
+                  "const": "TRADE_DATE"
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "apiName": {
+                  "const": "trade_cal"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "mode": {
+                  "const": "NATIVE_RANGE"
+                },
+                "calendarProfile": {
+                  "const": null
+                },
+                "dateSemantic": {
+                  "const": "CALENDAR_DATE"
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "apiName": {
+                  "const": "weekly"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "mode": {
+                  "const": "TRADE_DATE_RANGE"
+                },
+                "calendarProfile": {
+                  "const": "C-A"
+                },
+                "dateSemantic": {
+                  "const": "TRADE_DATE"
+                }
+              }
+            }
+          }
+        ]
+      }
+    }
+  }
+}

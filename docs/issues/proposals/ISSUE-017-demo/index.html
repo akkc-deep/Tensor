@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <title>Tensor · 数据工作台 Demo</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%232857b4'/%3E%3Cpath d='M8 9h16M16 9v15' stroke='white' stroke-width='3'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="styles.css">
+  <script src="assets/vue.global.prod.js" defer></script>
+  <script src="data.js" defer></script>
+  <script src="app.js" defer></script>
+</head>
+<body>
+<div id="app" v-cloak :class="{ 'reduce-motion': motion === 'reduce', 'system-font': font === 'system' }">
+  <a class="skip" href="#main">跳转到工作区</a>
+  <aside class="sidebar">
+    <a class="brand" href="#datasets" aria-label="Tensor 数据工作台">
+      <svg class="brand-mark" viewBox="0 0 32 36" fill="none" aria-hidden="true"><path d="m16 2 14 8v16l-14 8L2 26V10L16 2Z M2 10l14 8 14-8 M16 18v16 M9 14V6 M23 14v16 M2 26l14-8"/></svg>
+      <span>Tensor<span class="brand-description">证券数据工作台</span></span>
+    </a>
+    <nav class="navigation" aria-label="主导航">
+      <a href="#datasets" :class="{ active: route === 'datasets' }" :aria-current="route === 'datasets' ? 'page' : null"><ui-icon name="table"></ui-icon>数据查看</a>
+      <a href="#downloads" :class="{ active: route === 'downloads' }" :aria-current="route === 'downloads' ? 'page' : null"><ui-icon name="download"></ui-icon>数据下载</a>
+    </nav>
+    <div class="sidebar-bottom">
+      <a class="settings-link" href="#settings" :class="{ active: route === 'settings' }" :aria-current="route === 'settings' ? 'page' : null"><ui-icon name="settings"></ui-icon>外观与设置</a>
+      <div class="demo-note"><span class="demo-dot"></span><span>交互预览<span>使用本地样例数据</span></span><code>v2</code></div>
+    </div>
+  </aside>
+
+  <main id="main" tabindex="-1">
+    <header class="page-heading">
+      <div><h1>{{ titles[route] }}</h1><p>{{ descriptions[route] }}</p></div>
+      <details class="preview-info"><summary><ui-icon name="flask"></ui-icon><span>Demo</span><ui-icon name="chevron"></ui-icon></summary><div class="info-popover">这是可操作的 UI 预览。行情与公司数据取自仓库样例，财务宽表与精度测试为合成数据。下载为本地模拟，不调用真实接口。<a href="README.md" target="_blank">查看使用说明</a></div></details>
+    </header>
+
+    <section v-show="route === 'datasets'" class="page dataset-page" aria-label="数据查看">
+      <div class="context-bar">
+        <div class="source-field"><label for="query-source">数据源</label><demo-picker id="query-source" v-model="source" :options="sources"></demo-picker></div>
+        <div class="dataset-field"><label for="query-dataset">数据集</label><demo-picker id="query-dataset" :model-value="datasetKey" :options="datasetOptions" @update:model-value="selectDataset" searchable></demo-picker></div>
+        <div class="context-description"><span class="source-square">T</span><span>{{ dataset.category }}<small>{{ datasetKey === 'precision' || datasetKey === 'balancesheet' ? '合成排版样例' : '仓库数据样例 · 2026-08-07' }}</small></span></div>
+      </div>
+      <form class="query-form" @submit.prevent="query()">
+        <div class="filter code-filter"><label for="query-code">证券代码</label><div class="input-with-icon"><ui-icon name="search"></ui-icon><input id="query-code" v-model="draft.code" placeholder="例如 000001.SZ" autocomplete="off" spellcheck="false"></div></div>
+        <div v-if="dataset.dateKey" class="filter date-filter"><label for="query-start">{{ dataset.dateKey === 'ann_date' ? '公告日期' : '交易日期' }}</label><div class="date-range"><input id="query-start" v-model="draft.start" type="date" aria-label="开始日期"><span>至</span><input id="query-end" v-model="draft.end" type="date" aria-label="结束日期"></div></div>
+        <div class="form-actions"><button class="button primary" type="submit" :disabled="queryState === 'loading'"><ui-icon :name="queryState === 'loading' ? 'spinner' : 'search'"></ui-icon>{{ queryState === 'loading' ? '查询中' : '查询' }}</button><button class="button quiet" type="button" @click="resetQuery">重置</button></div>
+      </form>
+      <p v-if="queryError" class="field-error" role="alert">{{ queryError }}</p>
+
+      <div class="data-surface" :aria-busy="queryState === 'loading'">
+        <div class="table-toolbar"><div class="table-title"><ui-icon name="table"></ui-icon><h2>{{ dataset.label }}</h2><span class="record-count">{{ filtered.length }} 条</span></div><div class="table-tools"><span class="field-count">{{ dataset.columns.length }} 个字段</span><div class="density-control" aria-label="表格行高"><button v-for="item in densities" :key="item.value" :class="{ selected: density === item.value }" :aria-pressed="density === item.value" @click="setPreference('density', item.value)" :title="item.label"><ui-icon :name="item.icon"></ui-icon><span>{{ item.label }}</span></button></div></div></div>
+        <div v-if="queryState === 'error'" class="empty-state" role="alert"><span class="state-icon error"><ui-icon name="alert"></ui-icon></span><h3>查询暂未完成</h3><p>这是错误状态演示。可以保留当前筛选条件重新查询。</p><button class="button secondary" @click="query(true)"><ui-icon name="retry"></ui-icon>重新查询</button></div>
+        <div v-else-if="queryState !== 'loading' && filtered.length === 0" class="empty-state" role="status"><span class="state-icon"><ui-icon name="search"></ui-icon></span><h3>没有找到匹配的数据</h3><p>试试其他证券代码或日期，或者重置筛选查看全部样例。</p><button class="button secondary" @click="resetQuery">重置筛选</button></div>
+        <div v-else class="table-scroll" :class="['density-' + density, { loading: queryState === 'loading' }]" ref="tableScroller" tabindex="0" role="region" aria-label="数据表格，可横向和纵向滚动">
+          <table :style="{ width: tableWidth + 'px' }"><caption class="sr-only">{{ dataset.label }}，{{ filtered.length }} 条样例记录</caption><colgroup><col v-for="col in displayColumns" :key="col.key" :style="{ width: col.width + 'px' }"></colgroup>
+            <thead><tr><th v-for="(col, index) in displayColumns" :key="col.key" scope="col" :class="{ numeric: col.numeric, pinned: index === 0 }"><span class="column-label">{{ col.label }}</span><span class="column-code">{{ col.key !== col.label ? col.key : '\u00a0' }}</span></th></tr></thead>
+            <tbody><tr v-for="(row, rowIndex) in pageRows" :key="rowIndex"><td v-for="(col, colIndex) in displayColumns" :key="col.key" :class="[{ numeric: col.numeric, pinned: colIndex === 0, 'code-cell': col.key === 'ts_code', 'date-cell': col.kind === 'DATE', 'null-cell': row[col.key] == null }, marketClass(row[col.key], col.key)]">
+              <template v-if="col.numeric && row[col.key] != null"><span class="decimal-value" :style="{ '--fraction-width': col.fraction + 'ch' }"><span>{{ numberParts(row[col.key], col.key).integer }}</span><span class="decimal-point" :class="{ invisible: !numberParts(row[col.key], col.key).hasPoint }">{{ numberParts(row[col.key], col.key).hasPoint ? '.' : '' }}</span><span class="fraction">{{ numberParts(row[col.key], col.key).fraction }}</span></span></template>
+              <button v-else-if="col.long && row[col.key]" class="text-cell" @click="openText(col.label, row[col.key])" :aria-label="'查看完整' + col.label">{{ row[col.key] }}</button>
+              <span v-else>{{ row[col.key] == null || row[col.key] === '' ? '—' : row[col.key] }}</span>
+            </td></tr></tbody>
+          </table>
+        </div>
+          <div v-if="queryState === 'loading'" class="loading-overlay" role="status"><ui-icon name="spinner"></ui-icon><span>正在查询样例数据</span></div>
+        <footer class="pagination"><span class="pagination-summary">{{ filtered.length ? (page - 1) * pageSize + 1 : 0 }}–{{ Math.min(page * pageSize, filtered.length) }}<span> / {{ filtered.length }} 条</span></span><div class="pagination-actions"><label for="page-size">每页</label><select id="page-size" :disabled="queryState === 'loading'" :value="pageSize" @change="resizePage(Number($event.target.value))"><option v-for="size in [20, 50, 100]" :value="size">{{ size }} 条</option></select><button class="icon-button" aria-label="上一页" :disabled="page <= 1 || queryState === 'loading'" @click="changePage(page - 1)"><ui-icon name="left"></ui-icon></button><span class="page-number">{{ page }}<span> / {{ pageCount }}</span></span><button class="icon-button" aria-label="下一页" :disabled="page >= pageCount || queryState === 'loading'" @click="changePage(page + 1)"><ui-icon name="right"></ui-icon></button></div></footer>
+      </div>
+      <div class="table-bottom"><span><ui-icon name="info"></ui-icon>{{ datasetKey === 'precision' ? '高精度值按原始字符串展示，保留末尾零与负零。' : datasetKey === 'balancesheet' ? '155 列财务表使用合成数据，可横向滚动检查固定列与对齐。' : '全部字段均可横向浏览；长文本可点击查看。' }}</span><label class="scenario-control">反馈预览<select v-model="scenario"><option value="success">正常返回</option><option value="empty">空结果</option><option value="error">请求失败</option><option value="slow">慢速响应</option></select></label></div>
+    </section>
+
+    <section v-show="route === 'downloads'" class="page download-page" aria-label="数据下载">
+      <div class="download-surface">
+        <div class="download-context"><div><label for="download-source">数据源</label><demo-picker id="download-source" v-model="source" :options="sources"></demo-picker></div><div><label for="download-api">数据接口</label><demo-picker id="download-api" :model-value="downloadApi" :options="downloadOptions" @update:model-value="selectDownload" searchable :disabled="downloadState === 'loading'"></demo-picker></div></div>
+        <div class="api-summary"><span>{{ data[downloadApi].category }}<span class="divider-dot">·</span>{{ downloadApi === 'daily' ? '按交易日期下载' : downloadApi === 'balancesheet' ? '按证券代码与公告日期下载' : '按交易所下载' }}</span><details><summary>接口详情<ui-icon name="chevron"></ui-icon></summary><p>{{ data[downloadApi].label }} · {{ downloadApi }}。本 Demo 演示参数填写与本次结果反馈；所有下载均为本地模拟。</p></details></div>
+        <form @submit.prevent="download()" class="download-form">
+          <div class="section-title"><h2>请求参数</h2><span>按照接口所需信息填写</span></div>
+          <div class="parameter-fields">
+            <div v-if="downloadApi === 'balancesheet'" class="filter"><label for="download-code">证券代码 <span class="required">*</span></label><input id="download-code" v-model="downloadDraft.code" placeholder="000001.SZ" required :disabled="downloadState === 'loading'" pattern="[0-9]{6}\.(SH|SZ|BJ)" title="请输入 000001.SZ 形式的证券代码"></div>
+            <div v-if="downloadApi !== 'stock_company'" class="filter"><label for="download-date">{{ downloadApi === 'daily' ? '交易日期' : '公告日期' }} <span class="required">*</span></label><input id="download-date" v-model="downloadDraft.date" type="date" required :disabled="downloadState === 'loading'"><small>示例日期：2026-08-07</small></div>
+            <div v-else class="filter"><label for="download-exchange">交易所 <span class="required">*</span></label><demo-picker id="download-exchange" v-model="downloadDraft.exchange" :options="exchanges" :disabled="downloadState === 'loading'"></demo-picker></div>
+          </div>
+          <div class="download-actions"><button class="button primary" type="submit" :disabled="downloadState === 'loading'"><ui-icon :name="downloadState === 'loading' ? 'spinner' : 'download'"></ui-icon>{{ downloadState === 'loading' ? '正在下载' : '开始下载' }}</button><span>在下方查看本次下载结果</span></div>
+        </form>
+        <div class="result-area" aria-live="polite" :aria-busy="downloadState === 'loading'">
+          <transition name="result" mode="out-in"><div :key="downloadState" class="receipt" :class="downloadState">
+            <template v-if="downloadState === 'idle'"><span class="state-icon"><ui-icon name="inbox"></ui-icon></span><div><h3>准备好，即可开始</h3><p>选择接口、填写参数，本次结果会显示在这里。</p></div></template>
+            <template v-else-if="downloadState === 'loading'"><span class="state-icon"><ui-icon name="spinner"></ui-icon></span><div><h3>正在获取数据</h3><p>已提交本次演示请求，请稍候。</p></div></template>
+            <template v-else-if="downloadState === 'success'"><span class="state-icon success"><ui-icon name="check"></ui-icon></span><div class="receipt-heading"><h3>下载完成</h3><p>{{ downloadSnapshot.api }}<span class="divider-dot">·</span>{{ downloadSnapshot.date || downloadSnapshot.exchange }}<span class="divider-dot">·</span>模拟结果</p></div><dl class="counts"><div><dt>上游返回</dt><dd>{{ downloadSnapshot.count }}</dd></div><div><dt>新写入</dt><dd>{{ Math.max(0, downloadSnapshot.count - 2) }}</dd></div><div><dt>已更新</dt><dd>2</dd></div></dl></template>
+            <template v-else-if="downloadState === 'empty'"><span class="state-icon"><ui-icon name="inbox"></ui-icon></span><div><h3>下载完成，0 条数据</h3><p>此演示场景没有可写入的数据，可以调整参数后再试。</p></div></template>
+            <template v-else><span class="state-icon error"><ui-icon name="alert"></ui-icon></span><div class="error-receipt"><h3>数据源暂时不可用</h3><p>这是失败状态演示，你的参数已保留，可以使用原参数重试。</p><code>请求 ID：demo-download-017</code><button class="button secondary" @click="download(true)"><ui-icon name="retry"></ui-icon>使用原参数重试</button></div></template>
+          </div></transition>
+        </div>
+      </div>
+      <div class="download-footnote"><span><ui-icon name="flask"></ui-icon>本地模拟下载，不写入业务数据。</span><label class="scenario-control">反馈预览<select v-model="scenario"><option value="success">正常返回</option><option value="empty">空结果</option><option value="error">请求失败</option><option value="slow">慢速响应</option></select></label></div>
+    </section>
+
+    <section v-show="route === 'settings'" class="page settings-page" aria-label="外观与设置">
+      <div class="settings-section"><h2>工作台外观</h2><p class="section-description">调整到适合你的阅读和操作习惯，立即在整个工作台生效。</p>
+        <div class="setting-row"><div><h3>主题颜色</h3><p>保留轻盈的表面层次，让主要操作清晰可见。</p></div><div class="theme-swatches"><button v-for="color in swatches" :style="{ '--swatch': color.value }" :aria-label="color.label" :aria-pressed="themeHex.toLowerCase() === color.value" @click="applyTheme(color.value)"><ui-icon v-if="themeHex.toLowerCase() === color.value" name="check"></ui-icon></button></div></div>
+        <div class="custom-theme"><label for="theme-hex">自定义颜色</label><input type="color" :value="themeHex" aria-label="自定义取色" @input="applyTheme($event.target.value)"><input id="theme-hex" v-model="themeDraft" maxlength="7" spellcheck="false" aria-label="主题色 HEX" :aria-invalid="!!themeError" @keydown.enter.prevent="applyTheme(themeDraft)"><button class="button secondary" @click="applyTheme(themeDraft)">应用</button><span v-if="themeError" class="field-error" role="alert">{{ themeError }}</span></div>
+        <div class="appearance-preview"><div class="mini-nav"><span class="mini-logo">Tensor</span><span class="mini-selected"><ui-icon name="table"></ui-icon>数据查看</span><span><ui-icon name="download"></ui-icon>数据下载</span></div><div class="mini-workspace"><div><strong>日线行情</strong><button class="button primary" @click="go('datasets')">查看样例<ui-icon name="right"></ui-icon></button></div><div class="mini-row mini-header"><span>证券代码</span><span>收盘价</span><span>涨跌额</span></div><div class="mini-row"><span>000001.SZ</span><span>11.1900</span><span class="negative">-0.0800</span></div><div class="mini-row"><span>000002.SZ</span><span>3.2200</span><span class="negative">-0.0400</span></div></div></div>
+        <p class="theme-saved" role="status">{{ storageStatus }}<span v-if="themeApplied.toLowerCase() !== themeHex.toLowerCase()"> · 为保证对比度，实际应用色为 {{ themeApplied }}</span></p>
+      </div>
+      <div class="settings-section"><h2>文字与交互</h2><div class="setting-row"><div><h3>界面字体</h3><p>中英文字形、数字与标点一起比较。</p></div><div class="segmented"><button :class="{ selected: font === 'noto' }" :aria-pressed="font === 'noto'" @click="setPreference('font', 'noto')">Noto Sans SC</button><button :class="{ selected: font === 'system' }" :aria-pressed="font === 'system'" @click="setPreference('font', 'system')">系统字体</button></div></div>
+        <div class="type-specimen"><span>数据的每一处细节，都清晰可读。</span><p>Tensor · 日线行情 · 000001.SZ</p><div>123.4500 <span>−0.0000</span> 9223372036854775807</div></div>
+        <div class="setting-row"><div><h3>界面动效</h3><p>{{ prefersReduced ? '系统已启用减少动画，工作台将遵循系统设置。' : '轻量过渡连接操作与结果，反馈始终即时。' }}</p></div><div class="segmented"><button :class="{ selected: motion === 'standard' }" :aria-pressed="motion === 'standard'" @click="setPreference('motion', 'standard')">标准</button><button :class="{ selected: motion === 'reduce' }" :aria-pressed="motion === 'reduce'" @click="setPreference('motion', 'reduce')">减少动画</button></div></div>
+        <div class="setting-row"><div><h3>表格密度</h3><p>统一改变行高和留白，保持列与数字对齐。</p></div><div class="segmented"><button v-for="item in densities" :class="{ selected: density === item.value }" :aria-pressed="density === item.value" @click="setPreference('density', item.value)">{{ item.label }}</button></div></div>
+      </div>
+      <div class="settings-footer"><button class="button secondary" @click="resetPreferences"><ui-icon name="retry"></ui-icon>恢复默认外观</button><span>偏好仅保存在当前浏览器</span></div>
+    </section>
+  </main>
+  <dialog ref="textDialog" class="text-dialog" @click="closeOnBackdrop"><header><h2>{{ detailTitle }}</h2><button class="icon-button" aria-label="关闭全文" @click="textDialog.close()"><ui-icon name="close"></ui-icon></button></header><p>{{ detailText }}</p></dialog>
+</div>
+<noscript>此交互 Demo 需要启用 JavaScript。</noscript>
+</body>
+</html>

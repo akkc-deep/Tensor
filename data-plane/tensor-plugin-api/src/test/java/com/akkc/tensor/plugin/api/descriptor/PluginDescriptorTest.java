@@ -46,7 +46,7 @@ class PluginDescriptorTest {
 
     @Test
     void constructsApiWithoutParameters() {
-        ApiDescriptor api = new ApiDescriptor(ApiName.of("daily"), "Daily", "Market", QueryMode.trade_date, List.of());
+        ApiDescriptor api = new ApiDescriptor(ApiName.of("daily"), "Daily", "Market", QueryMode.trade_date, List.of(), com.akkc.tensor.test.DownloadPolicies.original(), List.of());
 
         assertThat(api.parameters()).isEmpty();
     }
@@ -56,7 +56,7 @@ class PluginDescriptorTest {
         PluginId pluginId = PluginId.of("tushare_pro");
         ApiName apiName = ApiName.of("daily");
         ApiDescriptor api = new ApiDescriptor(apiName, "Daily", "Market", QueryMode.trade_date,
-                List.of(parameter("trade_date", ParameterType.DATE, true, null, List.of(), null, null)));
+                List.of(parameter("trade_date", ParameterType.DATE, true, null, List.of(), null, null)), com.akkc.tensor.test.DownloadPolicies.original(), List.of(parameter("trade_date", ParameterType.DATE, true, null, List.of(), null, null)));
         PluginDescriptor descriptor = new PluginDescriptor(pluginId, "Tushare Pro", "Market data", true, true, true,
                 null, List.of(api), List.of(DatasetKey.of(pluginId, apiName)));
 
@@ -122,25 +122,25 @@ class PluginDescriptorTest {
         ParameterDescriptor first = parameter("trade_date", ParameterType.DATE, false, null, List.of(), null, null);
         ParameterDescriptor second = parameter("trade_date", ParameterType.TEXT, false, null, List.of(), null, null);
         assertThatNullPointerException().isThrownBy(
-                () -> new ApiDescriptor(null, "Daily", "Market", QueryMode.trade_date, List.of()));
+                () -> new ApiDescriptor(null, "Daily", "Market", QueryMode.trade_date, List.of(), com.akkc.tensor.test.DownloadPolicies.original(), List.of()));
         assertThatIllegalArgumentException().isThrownBy(
-                () -> new ApiDescriptor(ApiName.of("daily"), " ", "Market", QueryMode.trade_date, List.of()));
+                () -> new ApiDescriptor(ApiName.of("daily"), " ", "Market", QueryMode.trade_date, List.of(), com.akkc.tensor.test.DownloadPolicies.original(), List.of()));
         assertThatIllegalArgumentException().isThrownBy(
-                () -> new ApiDescriptor(ApiName.of("daily"), "Daily", "x".repeat(65), QueryMode.trade_date, List.of()));
+                () -> new ApiDescriptor(ApiName.of("daily"), "Daily", "x".repeat(65), QueryMode.trade_date, List.of(), com.akkc.tensor.test.DownloadPolicies.original(), List.of()));
         assertThatNullPointerException().isThrownBy(
-                () -> new ApiDescriptor(ApiName.of("daily"), "Daily", "Market", QueryMode.trade_date, null));
+                () -> new ApiDescriptor(ApiName.of("daily"), "Daily", "Market", QueryMode.trade_date, null, com.akkc.tensor.test.DownloadPolicies.original(), null));
         assertThatNullPointerException().isThrownBy(
                 () -> new ApiDescriptor(ApiName.of("daily"), "Daily", "Market", QueryMode.trade_date,
-                        java.util.Arrays.asList(first, null)));
+                        java.util.Arrays.asList(first, null), com.akkc.tensor.test.DownloadPolicies.original(), java.util.Arrays.asList(first, null)));
         assertThatIllegalArgumentException().isThrownBy(
-                () -> new ApiDescriptor(ApiName.of("daily"), "Daily", "Market", QueryMode.trade_date, List.of(first, second)));
+                () -> new ApiDescriptor(ApiName.of("daily"), "Daily", "Market", QueryMode.trade_date, List.of(first, second), com.akkc.tensor.test.DownloadPolicies.original(), List.of(first, second)));
     }
 
     @Test
     void makesParameterListsImmutableCopies() {
         List<ParameterDescriptor> parameters = new ArrayList<>(List.of(
                 parameter("trade_date", ParameterType.DATE, false, null, List.of(), null, null)));
-        ApiDescriptor api = new ApiDescriptor(ApiName.of("daily"), "Daily", "Market", QueryMode.trade_date, parameters);
+        ApiDescriptor api = new ApiDescriptor(ApiName.of("daily"), "Daily", "Market", QueryMode.trade_date, parameters, com.akkc.tensor.test.DownloadPolicies.original(), parameters);
         parameters.clear();
 
         assertThat(api.parameters()).hasSize(1);
@@ -182,7 +182,7 @@ class PluginDescriptorTest {
     void rejectsInvalidPluginReferencesAndDuplicates() {
         PluginId pluginId = PluginId.of("tushare_pro");
         ApiName apiName = ApiName.of("daily");
-        ApiDescriptor api = new ApiDescriptor(apiName, "Daily", "Market", QueryMode.trade_date, List.of());
+        ApiDescriptor api = new ApiDescriptor(apiName, "Daily", "Market", QueryMode.trade_date, List.of(), com.akkc.tensor.test.DownloadPolicies.original(), List.of());
         DatasetKey dataset = DatasetKey.of(pluginId, apiName);
         assertThatIllegalArgumentException().isThrownBy(
                 () -> plugin(pluginId, List.of(api, api), List.of()));
@@ -199,7 +199,7 @@ class PluginDescriptorTest {
         PluginId pluginId = PluginId.of("tushare_pro");
         ApiName apiName = ApiName.of("daily");
         List<ApiDescriptor> apis = new ArrayList<>(List.of(
-                new ApiDescriptor(apiName, "Daily", "Market", QueryMode.trade_date, List.of())));
+                new ApiDescriptor(apiName, "Daily", "Market", QueryMode.trade_date, List.of(), com.akkc.tensor.test.DownloadPolicies.original(), List.of())));
         List<DatasetKey> datasets = new ArrayList<>(List.of(DatasetKey.of(pluginId, apiName)));
         PluginDescriptor descriptor = plugin(pluginId, apis, datasets);
         apis.clear();

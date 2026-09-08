@@ -1,6 +1,7 @@
 package com.akkc.tensor.plugin.api.descriptor;
 
 import com.akkc.tensor.plugin.api.model.ApiName;
+import com.akkc.tensor.plugin.api.download.DownloadPolicy;
 import java.util.List;
 import java.util.Objects;
 
@@ -9,7 +10,9 @@ public record ApiDescriptor(
         String displayName,
         String category,
         QueryMode queryMode,
-        List<ParameterDescriptor> parameters
+        List<ParameterDescriptor> parameters,
+        DownloadPolicy downloadPolicy,
+        List<ParameterDescriptor> sourceParameters
 ) {
     public ApiDescriptor {
         Objects.requireNonNull(apiName, "apiName");
@@ -19,6 +22,11 @@ public record ApiDescriptor(
             throw new IllegalArgumentException("category must be at most 64 characters");
         }
         Objects.requireNonNull(queryMode, "queryMode");
+        Objects.requireNonNull(downloadPolicy, "downloadPolicy");
+        sourceParameters = List.copyOf(Objects.requireNonNull(sourceParameters, "sourceParameters"));
+        if (sourceParameters.stream().map(ParameterDescriptor::name).distinct().count() != sourceParameters.size()) {
+            throw new IllegalArgumentException("sourceParameters must not contain duplicate names");
+        }
         parameters = List.copyOf(Objects.requireNonNull(parameters, "parameters"));
         if (parameters.stream().map(ParameterDescriptor::name).collect(java.util.stream.Collectors.toSet()).size()
                 != parameters.size()) {

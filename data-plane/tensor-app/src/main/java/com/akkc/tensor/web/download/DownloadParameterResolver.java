@@ -2,6 +2,8 @@ package com.akkc.tensor.web.download;
 
 import com.akkc.tensor.core.validation.ParameterValidator;
 import com.akkc.tensor.plugin.api.descriptor.ApiDescriptor;
+import com.akkc.tensor.plugin.api.descriptor.ParameterDescriptor;
+import java.util.List;
 import com.akkc.tensor.plugin.api.error.TensorException;
 import com.akkc.tensor.plugin.api.model.DatasetKey;
 import java.util.Map;
@@ -27,14 +29,26 @@ public final class DownloadParameterResolver {
     public DownloadParameters resolve(DatasetKey dataset, Map<String, Object> values) {
         try {
             ApiDescriptor api = descriptors.requireApi(dataset);
-            ParameterCodec<?> codec = byShape.get(ParameterShape.from(api));
-            if (codec == null) {
-                throw DownloadDescriptorResolver.misconfigured();
-            }
-            return codec.read(new ParameterJsonReader(values, api, validator));
+            return bind(api.sourceParameters(), values);
         } catch (TensorException failure) {
             throw DownloadBindingException.from(failure);
         }
+    }
+
+    /** Projected range binding; the running HTTP deserializer switches here in RANGE-T14. */
+    public DownloadParameters resolveDownload(DatasetKey dataset, Map<String, Object> values) {
+        try {
+            ApiDescriptor api = descriptors.requireApi(dataset);
+            return bind(api.parameters(), validator.validate(api, values).values());
+        } catch (TensorException failure) {
+            throw DownloadBindingException.from(failure);
+        }
+    }
+
+    private DownloadParameters bind(List<ParameterDescriptor> parameters, Map<String, Object> values) {
+        ParameterCodec<?> codec = byShape.get(ParameterShape.from(parameters));
+        if (codec == null) throw DownloadDescriptorResolver.misconfigured();
+        return codec.read(new ParameterJsonReader(values, parameters, validator));
     }
 
     public Map<String, Object> toRawValues(DownloadParameters parameters, Set<String> suppliedFields) {

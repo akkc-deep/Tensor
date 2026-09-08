@@ -47,6 +47,8 @@ import com.akkc.tensor.plugin.api.descriptor.PluginReadiness;
 import com.akkc.tensor.plugin.api.descriptor.QueryMode;
 import com.akkc.tensor.plugin.api.download.AdaptedBatch;
 import com.akkc.tensor.plugin.api.download.DownloadEnvelope;
+import com.akkc.tensor.plugin.api.download.FetchResult;
+import com.akkc.tensor.plugin.api.download.DownloadContext;
 import com.akkc.tensor.plugin.api.download.DownloadOutcome;
 import com.akkc.tensor.plugin.api.download.DownloadResult;
 import com.akkc.tensor.plugin.api.download.DownloadStatus;
@@ -130,7 +132,7 @@ class DownloadControllerIT {
                 .dataSource(dataSource)
                 .locations("classpath:db/migration")
                 .load();
-        assertThat(flyway.migrate().migrationsExecuted).isEqualTo(7);
+        assertThat(flyway.migrate().migrationsExecuted).isEqualTo(8);
         assertThat(flyway.validateWithResult().validationSuccessful).isTrue();
 
         fixtureContext = new AnnotationConfigApplicationContext();
@@ -299,7 +301,7 @@ class DownloadControllerIT {
                     assertThat(exception.code()).isEqualTo(ErrorCode.PLUGIN_DISABLED);
                     assertThat(exception).hasMessage("Download plugin is unavailable");
                 });
-        verify(unavailable, never()).download(any(), any());
+        verify(unavailable, never()).download(any(), any(), org.mockito.ArgumentMatchers.any());
 
         CountingPlugin unknownApiPlugin = new CountingPlugin(fixturePlugin);
         DownloadService unknownApiService = service(
@@ -571,6 +573,8 @@ class DownloadControllerIT {
                 QueryMode.snapshot,
                 List.of(new ParameterDescriptor(
                         "required_value", "Required", null, ParameterType.TEXT,
+                        true, null, List.of(), null, null)), com.akkc.tensor.test.DownloadPolicies.original(), List.of(new ParameterDescriptor(
+                        "required_value", "Required", null, ParameterType.TEXT,
                         true, null, List.of(), null, null)));
     }
 
@@ -679,9 +683,9 @@ class DownloadControllerIT {
         }
 
         @Override
-        public DownloadEnvelope download(ApiName apiName, Map<String, Object> params) {
+        public FetchResult download(ApiName apiName, Map<String, Object> params, DownloadContext context) {
             downloads++;
-            return delegate.download(apiName, params);
+            return delegate.download(apiName, params, context);
         }
     }
 
@@ -732,8 +736,9 @@ class DownloadControllerIT {
         }
 
         @Override
-        public DownloadEnvelope download(ApiName apiName, Map<String, Object> params) {
-            return downloader.apply(apiName, params);
+        public FetchResult download(ApiName apiName, Map<String, Object> params, DownloadContext context) {
+            DownloadEnvelope envelope = downloader.apply(apiName, params);
+            return envelope == null ? null : new FetchResult(envelope, List.of());
         }
     }
 

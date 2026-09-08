@@ -187,8 +187,12 @@ class ProductionApplicationContextIT {
         assertThat(context.getBeansOfType(FilterRegistrationBean.class))
                 .containsKey("securityHeadersFilter");
 
+        assertUnique(context, com.akkc.tensor.core.retry.TaskParametersJson.class);
+        assertUnique(context, com.akkc.tensor.core.retry.RetryTaskRepository.class);
+        assertUnique(context, com.akkc.tensor.core.retry.RetryTaskStorageService.class);
+
         Flyway flyway = context.getBean(Flyway.class);
-        assertThat(flyway.info().applied()).hasSize(7);
+        assertThat(flyway.info().applied()).hasSize(8);
         List<?> definitions = context.getBean("tushareDatasetDefinitions", List.class);
         List<?> adapters = context.getBean("tensorDatasetAdapters", List.class);
         assertThat(definitions).hasSize(49).allSatisfy(

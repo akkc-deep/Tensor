@@ -82,7 +82,7 @@ class DividendBusinessKeyMigrationIT {
     void migratesFreshDatabaseAndValidatesRepeatably() {
         Flyway flyway = flyway(dataSource);
 
-        assertThat(flyway.migrate().migrationsExecuted).isEqualTo(7);
+        assertThat(flyway.migrate().migrationsExecuted).isEqualTo(8);
         assertThat(flyway.validateWithResult().validationSuccessful).isTrue();
         assertThat(flyway.migrate().migrationsExecuted).isZero();
 
@@ -100,7 +100,7 @@ class DividendBusinessKeyMigrationIT {
         insertLegacyRows(jdbc);
         List<DividendRow> before = dividendRows(jdbc);
 
-        Flyway v7 = flyway(dataSource);
+        Flyway v7 = Flyway.configure().dataSource(dataSource).locations("classpath:db/migration").target("7").load();
         assertThat(v7.migrate().migrationsExecuted).isOne();
         assertThat(v7.validateWithResult().validationSuccessful).isTrue();
 
@@ -138,7 +138,8 @@ class DividendBusinessKeyMigrationIT {
                 null, null, null, new BigDecimal("0.110000000000000000"),
                 new BigDecimal("0.110000000000000000"), null, null, null, null, null,
                 "legacy-plugin", "dividend", Instant.parse("2026-09-05T01:02:03.456Z")));
-        assertThat(flyway(dataSource).migrate().migrationsExecuted).isOne();
+        assertThat(Flyway.configure().dataSource(dataSource).locations("classpath:db/migration")
+                .target("7").load().migrate().migrationsExecuted).isOne();
 
         DatasetDefinition definition = dividendDefinition();
         DatasetCatalog catalog = new DatasetStartupValidator(

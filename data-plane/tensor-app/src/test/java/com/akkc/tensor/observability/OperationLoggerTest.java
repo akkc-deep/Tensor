@@ -24,6 +24,8 @@ import com.akkc.tensor.plugin.api.descriptor.PluginDescriptor;
 import com.akkc.tensor.plugin.api.descriptor.PluginReadiness;
 import com.akkc.tensor.plugin.api.descriptor.QueryMode;
 import com.akkc.tensor.plugin.api.download.DownloadEnvelope;
+import com.akkc.tensor.plugin.api.download.FetchResult;
+import com.akkc.tensor.plugin.api.download.DownloadContext;
 import com.akkc.tensor.plugin.api.download.DownloadOutcome;
 import com.akkc.tensor.plugin.api.download.DownloadResult;
 import com.akkc.tensor.plugin.api.model.ApiName;
@@ -375,7 +377,7 @@ class OperationLoggerTest {
                 KNOWN.pluginId(), "Test plugin", "Test data source", true, true, true, null,
                 List.of(new ApiDescriptor(
                         KNOWN.apiName(), "Daily", "Market", QueryMode.trade_date,
-                        List.of(
+                        List.of(parameter("start_date", ParameterType.DATE), parameter("end_date", ParameterType.DATE)), com.akkc.tensor.test.DownloadPolicies.tradeRange(), List.of(
                                 parameter("trade_date", ParameterType.DATE),
                                 parameter("ts_code", ParameterType.TS_CODE),
                                 parameter("token", ParameterType.TEXT),
@@ -396,7 +398,7 @@ class OperationLoggerTest {
         }
 
         @Override
-        public DownloadEnvelope download(ApiName apiName, Map<String, Object> params) {
+        public FetchResult download(ApiName apiName, Map<String, Object> params, DownloadContext context) {
             throw new UnsupportedOperationException("logger tests do not call plugins");
         }
 

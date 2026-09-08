@@ -26,6 +26,29 @@ class ParameterValidatorTest {
     private final ParameterValidator validator = new ParameterValidator();
 
     @Test
+    void limitsProjectedRangesTo31InclusiveDaysButKeepsSourceListValidationUncapped() {
+        var policy = com.akkc.tensor.test.DownloadPolicies.tradeRange();
+        var source = List.of(parameter("trade_date", ParameterType.DATE, true, null, List.of(), null, null));
+        var projected = com.akkc.tensor.plugin.api.download.DownloadParameterProjection.project(source, policy);
+        var api = new ApiDescriptor(new ApiName("daily"), "Daily", "Test", QueryMode.trade_date, projected, policy, source);
+        var allowed = Map.<String, Object>of("start_date", "20260131", "end_date", "20260302");
+        var tooLong = Map.<String, Object>of("start_date", "20260131", "end_date", "20260303");
+        assertThat(validator.validate(api, allowed).values()).isEqualTo(allowed);
+        for (var endpoints : List.of(List.of("20260903", "20260903"), List.of("20240229", "20240301"),
+                List.of("20261231", "20270101"), List.of("00010101", "00010131"), List.of("99991201", "99991231"))) {
+            var valid = Map.<String, Object>of("start_date", endpoints.get(0), "end_date", endpoints.get(1));
+            assertThat(validator.validate(api, valid).values()).isEqualTo(valid);
+        }
+        assertThatThrownBy(() -> validator.validate(api, tooLong))
+                .isInstanceOfSatisfying(ParameterValidationException.class, failure -> {
+                    assertThat(failure.code()).isEqualTo(ErrorCode.PARAM_INVALID);
+                    assertThat(failure.fieldErrors()).containsExactly(
+                            new FieldError("end_date", "must be within 31 inclusive days"));
+                });
+        assertThat(validator.validate(projected, tooLong).values()).isEqualTo(tooLong);
+    }
+
+    @Test
     void normalizesAllParameterTypesInDescriptorOrderAndReturnsImmutableSnapshots() {
         ApiDescriptor api = api(
                 parameter("text", ParameterType.TEXT, true, null, List.of(), null, null),
@@ -160,8 +183,11 @@ class ParameterValidatorTest {
         assertThat(validator.validate(api, Map.of("ts_code", "\u2003000001.sz\t")).values())
                 .containsExactly(Map.entry("ts_code", "000001.SZ"));
 
+        assertThat(validator.validate(api, Map.of("ts_code", " " + "a".repeat(61) + ".sz ")).values())
+                .containsEntry("ts_code", "A".repeat(61) + ".SZ");
+
         for (String invalid : List.of(
-                "000001", ".SZ", "000001.", "000001.SZ.EXTRA", "000 001.SZ", "000001.S-Z")) {
+                "000001", ".SZ", "000001.", "000001.SZ.EXTRA", "000 001.SZ", "000001.S-Z", "A".repeat(62) + ".SZ")) {
             assertInvalid(descriptor, invalid);
         }
     }
@@ -177,7 +203,7 @@ class ParameterValidatorTest {
 
         for (String invalid : List.of(
                 "2024-02-29", " 20240229", "20240229 ", "20240230", "20230229", "20241301",
-                "+123450228", "-00010101")) {
+                "+123450228", "-00010101", "00000101")) {
             assertInvalid(descriptor, invalid);
         }
     }
@@ -192,7 +218,7 @@ class ParameterValidatorTest {
                 .containsExactly(Map.entry("month", "202402"));
 
         for (String invalid : List.of(
-                "2024-02", " 202402", "202402 ", "20242", "202400", "202413", "+1234502")) {
+                "2024-02", " 202402", "202402 ", "20242", "202400", "202413", "+1234502", "000001")) {
             assertInvalid(descriptor, invalid);
         }
     }
@@ -251,7 +277,7 @@ class ParameterValidatorTest {
 
     @Test
     void rejectsInvalidCallsMetadataAndPublicValueObjectsAtTheirBoundaries() throws Exception {
-        assertThatNullPointerException().isThrownBy(() -> validator.validate(null, Map.of()));
+        assertThatNullPointerException().isThrownBy(() -> validator.validate((ApiDescriptor) null, Map.of()));
         assertThatNullPointerException().isThrownBy(() -> validator.validate(api(), null));
 
         assertInvalidMetadata(
@@ -282,7 +308,7 @@ class ParameterValidatorTest {
         assertThat(Modifier.isPublic(validate.getModifiers())).isTrue();
         assertThat(ParameterValidator.class.getDeclaredMethods())
                 .filteredOn(method -> Modifier.isPublic(method.getModifiers()))
-                .containsExactly(validate);
+                .containsExactlyInAnyOrder(validate, ParameterValidator.class.getDeclaredMethod("validate", List.class, Map.class));
 
         assertThat(ValidatedParameters.class.isRecord()).isTrue();
         assertThat(ValidatedParameters.class.getRecordComponents()).extracting(component -> component.getName())
@@ -341,7 +367,7 @@ class ParameterValidatorTest {
 
     private static ApiDescriptor api(ParameterDescriptor... parameters) {
         return new ApiDescriptor(
-                new ApiName("contract_api"), "Contract API", "test", QueryMode.snapshot, List.of(parameters));
+                new ApiName("contract_api"), "Contract API", "test", QueryMode.snapshot, List.of(parameters), com.akkc.tensor.test.DownloadPolicies.original(), List.of(parameters));
     }
 
     private static ParameterDescriptor parameter(

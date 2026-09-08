@@ -27,6 +27,8 @@ import com.akkc.tensor.plugin.api.descriptor.ApiDescriptor;
 import com.akkc.tensor.plugin.api.descriptor.PluginDescriptor;
 import com.akkc.tensor.plugin.api.descriptor.PluginReadiness;
 import com.akkc.tensor.plugin.api.download.DownloadEnvelope;
+import com.akkc.tensor.plugin.api.download.FetchResult;
+import com.akkc.tensor.plugin.api.download.DownloadContext;
 import com.akkc.tensor.plugin.api.dataset.BusinessKeyDefinition;
 import com.akkc.tensor.plugin.api.dataset.BusinessKeyMode;
 import com.akkc.tensor.plugin.api.dataset.ColumnDefinition;
@@ -753,7 +755,7 @@ class DatasetControllerIT {
             public PluginDescriptor descriptor() {
                 return new PluginDescriptor(PLUGIN_ID, "Fixture", "Query fixture", true, true, true,
                         null, List.of(new ApiDescriptor(API_NAME, "Records", "Fixture",
-                                QueryMode.trade_date, List.of())), List.of(DATASET_KEY));
+                                QueryMode.trade_date, List.of(), com.akkc.tensor.test.DownloadPolicies.original(), List.of())), List.of(DATASET_KEY));
             }
 
             @Override
@@ -762,7 +764,7 @@ class DatasetControllerIT {
             }
 
             @Override
-            public DownloadEnvelope download(ApiName apiName, Map<String, Object> parameters) {
+            public FetchResult download(ApiName apiName, Map<String, Object> parameters, DownloadContext context) {
                 throw new AssertionError("Queries must not download data");
             }
         };

@@ -23,7 +23,7 @@ class TushareErrorClassifierTest {
             "m07-t03-secret-sentinel credential=value https://secret.invalid raw-body";
 
     @Test
-    void exposesOnlyFourPackagePrivateStaticOperationsOnAStatelessFinalType() {
+    void exposesOnlyTheSpecifiedPackagePrivateStaticOperationsOnAStatelessFinalType() {
         assertThat(Modifier.isPublic(TushareErrorClassifier.class.getModifiers())).isFalse();
         assertThat(Modifier.isFinal(TushareErrorClassifier.class.getModifiers())).isTrue();
         assertThat(TushareErrorClassifier.class.getDeclaredConstructors())
@@ -38,7 +38,8 @@ class TushareErrorClassifierTest {
                 .toArray(Method[]::new);
         assertThat(operations).extracting(Method::getName)
                 .containsExactlyInAnyOrder(
-                        "classifyHttp", "classifyBusiness", "classifyTransport", "invalidPayload");
+                        "classifyHttp", "classifyBusiness", "classifyTransport", "invalidPayload",
+                        "requestUnconfirmed", "truncated", "completenessUnconfirmed");
         assertThat(operations).allMatch(method -> Modifier.isStatic(method.getModifiers())
                 && !Modifier.isPublic(method.getModifiers())
                 && !Modifier.isProtected(method.getModifiers())
@@ -146,7 +147,13 @@ class TushareErrorClassifierTest {
                 ErrorCode.SOURCE_TIMEOUT,
                 TushareErrorClassifier.classifyTransport(new SocketTimeoutException(UNTRUSTED)),
                 ErrorCode.SOURCE_PAYLOAD_INVALID,
-                TushareErrorClassifier.invalidPayload());
+                TushareErrorClassifier.invalidPayload(),
+                ErrorCode.SOURCE_REQUEST_UNCONFIRMED,
+                TushareErrorClassifier.requestUnconfirmed(),
+                ErrorCode.SOURCE_TRUNCATED,
+                TushareErrorClassifier.truncated(),
+                ErrorCode.SOURCE_COMPLETENESS_UNCONFIRMED,
+                TushareErrorClassifier.completenessUnconfirmed());
         Map<ErrorCode, String> messages = Map.of(
                 ErrorCode.SOURCE_AUTH_FAILED, "Tushare credentials were rejected",
                 ErrorCode.SOURCE_PERMISSION_DENIED, "Tushare API permission is unavailable",
@@ -154,7 +161,10 @@ class TushareErrorClassifierTest {
                 ErrorCode.SOURCE_UNAVAILABLE, "Tushare service is unavailable",
                 ErrorCode.SOURCE_NETWORK_ERROR, "Tushare could not be reached",
                 ErrorCode.SOURCE_TIMEOUT, "Tushare response timed out",
-                ErrorCode.SOURCE_PAYLOAD_INVALID, "Tushare returned an invalid payload");
+                ErrorCode.SOURCE_PAYLOAD_INVALID, "Tushare returned an invalid payload",
+                ErrorCode.SOURCE_REQUEST_UNCONFIRMED, "Tushare request conditions are unconfirmed",
+                ErrorCode.SOURCE_TRUNCATED, "Tushare response was truncated",
+                ErrorCode.SOURCE_COMPLETENESS_UNCONFIRMED, "Tushare completeness is unconfirmed");
 
         failures.forEach((code, failure) -> {
             assertSource(failure, code, messages.get(code));

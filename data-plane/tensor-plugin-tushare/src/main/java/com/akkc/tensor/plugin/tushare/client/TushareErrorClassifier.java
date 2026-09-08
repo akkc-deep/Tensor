@@ -72,6 +72,20 @@ final class TushareErrorClassifier {
         return failure(ErrorCode.SOURCE_PAYLOAD_INVALID);
     }
 
+    static SourceException requestUnconfirmed() {
+        return new SourceException(
+                ErrorCode.SOURCE_REQUEST_UNCONFIRMED, "Tushare request conditions are unconfirmed");
+    }
+
+    static SourceException truncated() {
+        return new SourceException(ErrorCode.SOURCE_TRUNCATED, "Tushare response was truncated");
+    }
+
+    static SourceException completenessUnconfirmed() {
+        return new SourceException(
+                ErrorCode.SOURCE_COMPLETENESS_UNCONFIRMED, "Tushare completeness is unconfirmed");
+    }
+
     private static SourceException failure(ErrorCode code) {
         String message = switch (code) {
             case SOURCE_AUTH_FAILED -> "Tushare credentials were rejected";

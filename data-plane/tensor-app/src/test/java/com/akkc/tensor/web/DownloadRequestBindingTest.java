@@ -28,6 +28,8 @@ import com.akkc.tensor.plugin.api.descriptor.ApiDescriptor;
 import com.akkc.tensor.plugin.api.descriptor.PluginDescriptor;
 import com.akkc.tensor.plugin.api.descriptor.PluginReadiness;
 import com.akkc.tensor.plugin.api.download.DownloadEnvelope;
+import com.akkc.tensor.plugin.api.download.FetchResult;
+import com.akkc.tensor.plugin.api.download.DownloadContext;
 import com.akkc.tensor.plugin.api.download.DownloadStatus;
 import com.akkc.tensor.plugin.api.model.ApiName;
 import com.akkc.tensor.plugin.api.model.PluginId;
@@ -50,6 +52,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 
 class DownloadRequestBindingTest {
+    private static final Map<ApiName, com.akkc.tensor.plugin.api.download.DownloadPolicy> POLICIES = new TusharePluginConfiguration().tushareDownloadPolicies();
     private static final List<DatasetDefinition> DEFINITIONS =
             new TusharePluginConfiguration().tushareDatasetDefinitions();
     private static final PluginId PLUGIN = PluginId.of("tushare_pro");
@@ -134,6 +137,8 @@ class DownloadRequestBindingTest {
     static Stream<Arguments> validRequests() {
         return Stream.of(
                 Arguments.of("daily", "{\"trade_date\":\"20260905\"}", "[trade_date]"),
+                Arguments.of("broker_recommend", "{\"month\":\"202609\"}", "[month]"),
+                Arguments.of("trade_cal", "{\"exchange\":\"SSE\",\"start_date\":\"20260101\",\"end_date\":\"20260303\"}", "[exchange, start_date, end_date]"),
                 Arguments.of("index_classify", "{}", "[]"));
     }
 
@@ -156,14 +161,14 @@ class DownloadRequestBindingTest {
                 return new PluginDescriptor(PLUGIN, "Test", "Test", true, available, available,
                         available ? null : "Unavailable", DEFINITIONS.stream().map(definition ->
                         new ApiDescriptor(definition.datasetKey().apiName(), definition.displayName(),
-                                definition.category(), definition.queryMode(), definition.parameters())).toList(),
+                                definition.category(), definition.queryMode(), com.akkc.tensor.plugin.api.download.DownloadParameterProjection.project(definition.parameters(), POLICIES.get(definition.datasetKey().apiName())), POLICIES.get(definition.datasetKey().apiName()), definition.parameters())).toList(),
                         DEFINITIONS.stream().map(DatasetDefinition::datasetKey).toList());
             }
             public PluginReadiness readiness() {
                 return new PluginReadiness(true, available, available, available ? null : "Unavailable");
             }
-            public DownloadEnvelope download(ApiName api, Map<String, Object> params) {
-                return new DownloadEnvelope(PLUGIN, api, params, List.of("ts_code"), 0, List.of(), DownloadStatus.SUCCESS, null);
+            public FetchResult download(ApiName api, Map<String, Object> params, DownloadContext context) {
+                return new FetchResult(new DownloadEnvelope(PLUGIN, api, params, List.of("ts_code"), 0, List.of(), DownloadStatus.SUCCESS, null), List.of());
             }
         };
         PluginRegistry plugins = new PluginRegistry(List.of(plugin));

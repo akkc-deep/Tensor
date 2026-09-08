@@ -13,7 +13,11 @@ record ParameterShape(List<Field> fields) {
     }
 
     static ParameterShape from(ApiDescriptor api) {
-        return new ParameterShape(api.parameters().stream().map(Field::from).toList());
+        return from(api.parameters());
+    }
+
+    static ParameterShape from(List<ParameterDescriptor> parameters) {
+        return new ParameterShape(parameters.stream().map(Field::from).toList());
     }
 
     static ParameterShape of(Field... fields) {

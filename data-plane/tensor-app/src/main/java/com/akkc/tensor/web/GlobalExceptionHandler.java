@@ -164,6 +164,11 @@ public final class GlobalExceptionHandler {
                     SOURCE_UNAVAILABLE,
                     SOURCE_NETWORK_ERROR,
                     SOURCE_PAYLOAD_INVALID -> HttpStatus.BAD_GATEWAY;
+            case SOURCE_REQUEST_UNCONFIRMED, DOWNLOAD_BUSY, RETRY_TASK_INVALID -> HttpStatus.CONFLICT;
+            case CALENDAR_UNCONFIRMED, SOURCE_TRUNCATED, SOURCE_COMPLETENESS_UNCONFIRMED -> HttpStatus.BAD_GATEWAY;
+            case DATA_CONFLICT -> HttpStatus.UNPROCESSABLE_ENTITY;
+            case RETRY_TASK_NOT_FOUND -> HttpStatus.NOT_FOUND;
+            case TASK_RECORD_SAVE_UNCONFIRMED, COMMIT_UNCONFIRMED -> HttpStatus.INTERNAL_SERVER_ERROR;
             case SOURCE_TIMEOUT -> HttpStatus.GATEWAY_TIMEOUT;
         };
     }
@@ -186,6 +191,16 @@ public final class GlobalExceptionHandler {
             case PERSISTENCE_FAILED -> "Persistence failed";
             case QUERY_FAILED -> "Query failed";
             case INTERNAL_ERROR -> "Internal server error";
+            case SOURCE_REQUEST_UNCONFIRMED -> "Source request conditions are unconfirmed";
+            case CALENDAR_UNCONFIRMED -> "Applicable calendars are unconfirmed";
+            case SOURCE_TRUNCATED -> "Source response is truncated";
+            case SOURCE_COMPLETENESS_UNCONFIRMED -> "Source response completeness is unconfirmed";
+            case DATA_CONFLICT -> "Source data contains conflicting values";
+            case RETRY_TASK_NOT_FOUND -> "Retry task was not found";
+            case DOWNLOAD_BUSY -> "A download is already running";
+            case RETRY_TASK_INVALID -> "Saved retry task is invalid";
+            case TASK_RECORD_SAVE_UNCONFIRMED -> "Failure record save is unconfirmed";
+            case COMMIT_UNCONFIRMED -> "Commit is unconfirmed";
         };
     }
 }

@@ -1,0 +1,1332 @@
+policies:
+- apiName: adj_factor
+  mode: TRADE_DATE_RANGE
+  dateSemantic: TRADE_DATE
+  description: 按区间内已确认的适用交易日期下载；来源请求与完整性仍需核实。
+  calendarProfile: C-A
+  limits:
+    maxRangeDays: 31
+  sourceRequestMode: DATE
+  sourceDateParameter: trade_date
+  requestEvidenceStatus: DOCUMENTED_CANDIDATE
+  batchPlanning: SINGLE_DATE
+  recoveryPolicy:
+    mode: REQUEST
+    targetField: null
+    timeField: null
+    unitTimeType: null
+    independentRecoveryVerified: false
+    evidenceRefs:
+    - docs/research/RANGE-T01-source-evidence.json#apiName=adj_factor
+  completenessPolicy:
+    status: UNCONFIRMED
+    paginationStatus: UNCONFIRMED
+    documentedLimit: 未明示
+    requirement: 正文明确单日全部股票，仍须核实当日覆盖和来源是否存在未述截断
+  calendarEvidenceStatus: UNCONFIRMED
+  evidenceRefs:
+  - docs/research/RANGE-T01-source-evidence.json#apiName=adj_factor
+  - docs/research/RANGE-T02-calendar-evidence.json#apiName=adj_factor
+- apiName: balancesheet
+  mode: ANN_DATE_RANGE
+  dateSemantic: ANN_DATE
+  description: 按公告日期范围下载，公告日期不等于报告期；来源请求与完整性仍需核实。
+  calendarProfile: null
+  limits:
+    maxRangeDays: 31
+  sourceRequestMode: RANGE
+  sourceDateParameter: null
+  requestEvidenceStatus: DOCUMENTED_CANDIDATE
+  batchPlanning: SOURCE_RANGE
+  recoveryPolicy:
+    mode: REQUEST
+    targetField: null
+    timeField: null
+    unitTimeType: null
+    independentRecoveryVerified: false
+    evidenceRefs:
+    - docs/research/RANGE-T01-source-evidence.json#apiName=balancesheet
+  completenessPolicy:
+    status: UNCONFIRMED
+    paginationStatus: UNCONFIRMED
+    documentedLimit: 未明示
+    requirement: 同公告日多报告类型／修订版本及未明示上限，不能用行少证明完整
+  calendarEvidenceStatus: null
+  evidenceRefs:
+  - docs/research/RANGE-T01-source-evidence.json#apiName=balancesheet
+- apiName: block_trade
+  mode: TRADE_DATE_RANGE
+  dateSemantic: TRADE_DATE
+  description: 按区间内已确认的适用交易日期下载；来源请求与完整性仍需核实。
+  calendarProfile: C-A
+  limits:
+    maxRangeDays: 31
+  sourceRequestMode: RANGE
+  sourceDateParameter: null
+  requestEvidenceStatus: DOCUMENTED_CANDIDATE
+  batchPlanning: SOURCE_RANGE
+  recoveryPolicy:
+    mode: REQUEST
+    targetField: null
+    timeField: null
+    unitTimeType: null
+    independentRecoveryVerified: false
+    evidenceRefs:
+    - docs/research/RANGE-T01-source-evidence.json#apiName=block_trade
+  completenessPolicy:
+    status: UNCONFIRMED
+    paginationStatus: UNCONFIRMED
+    documentedLimit: '1000'
+    requirement: 需确认无股票区间接受及多笔成交取全；单日也可能超过1000
+  calendarEvidenceStatus: UNCONFIRMED
+  evidenceRefs:
+  - docs/research/RANGE-T01-source-evidence.json#apiName=block_trade
+  - docs/research/RANGE-T02-calendar-evidence.json#apiName=block_trade
+- apiName: broker_recommend
+  mode: MONTH_RANGE
+  dateSemantic: COVERED_MONTH
+  description: 下载区间覆盖的完整自然月；来源请求与完整性仍需核实。
+  calendarProfile: null
+  limits:
+    maxRangeDays: 31
+  sourceRequestMode: MONTH
+  sourceDateParameter: month
+  requestEvidenceStatus: DOCUMENTED_CANDIDATE
+  batchPlanning: SINGLE_MONTH
+  recoveryPolicy:
+    mode: REQUEST
+    targetField: null
+    timeField: null
+    unitTimeType: null
+    independentRecoveryVerified: false
+    evidenceRefs:
+    - docs/research/RANGE-T01-source-evidence.json#apiName=broker_recommend
+  completenessPolicy:
+    status: UNCONFIRMED
+    paginationStatus: UNCONFIRMED
+    documentedLimit: '1000'
+    requirement: 每月多券商股票推荐取全，循环一词未说明单月超过1000怎样继续
+  calendarEvidenceStatus: null
+  evidenceRefs:
+  - docs/research/RANGE-T01-source-evidence.json#apiName=broker_recommend
+- apiName: cashflow
+  mode: ANN_DATE_RANGE
+  dateSemantic: ANN_DATE
+  description: 按公告日期范围下载，公告日期不等于报告期；来源请求与完整性仍需核实。
+  calendarProfile: null
+  limits:
+    maxRangeDays: 31
+  sourceRequestMode: RANGE
+  sourceDateParameter: null
+  requestEvidenceStatus: DOCUMENTED_CANDIDATE
+  batchPlanning: SOURCE_RANGE
+  recoveryPolicy:
+    mode: REQUEST
+    targetField: null
+    timeField: null
+    unitTimeType: null
+    independentRecoveryVerified: false
+    evidenceRefs:
+    - docs/research/RANGE-T01-source-evidence.json#apiName=cashflow
+  completenessPolicy:
+    status: UNCONFIRMED
+    paginationStatus: UNCONFIRMED
+    documentedLimit: 未明示
+    requirement: 同公告日多报告类型／修订与来源结束依据未确认
+  calendarEvidenceStatus: null
+  evidenceRefs:
+  - docs/research/RANGE-T01-source-evidence.json#apiName=cashflow
+- apiName: daily
+  mode: TRADE_DATE_RANGE
+  dateSemantic: TRADE_DATE
+  description: 按区间内已确认的适用交易日期下载；来源请求与完整性仍需核实。
+  calendarProfile: C-A
+  limits:
+    maxRangeDays: 31
+  sourceRequestMode: DATE
+  sourceDateParameter: trade_date
+  requestEvidenceStatus: DOCUMENTED_CANDIDATE
+  batchPlanning: SINGLE_DATE
+  recoveryPolicy:
+    mode: REQUEST
+    targetField: null
+    timeField: null
+    unitTimeType: null
+    independentRecoveryVerified: false
+    evidenceRefs:
+    - docs/research/RANGE-T01-source-evidence.json#apiName=daily
+  completenessPolicy:
+    status: UNCONFIRMED
+    paginationStatus: UNCONFIRMED
+    documentedLimit: '6000'
+    requirement: 单日6000边界及缺股原因待核实；停牌无记录合法，不能用当前上市数当历史应有行数
+  calendarEvidenceStatus: UNCONFIRMED
+  evidenceRefs:
+  - docs/research/RANGE-T01-source-evidence.json#apiName=daily
+  - docs/research/RANGE-T02-calendar-evidence.json#apiName=daily
+- apiName: daily_basic
+  mode: TRADE_DATE_RANGE
+  dateSemantic: TRADE_DATE
+  description: 按区间内已确认的适用交易日期下载；来源请求与完整性仍需核实。
+  calendarProfile: C-A
+  limits:
+    maxRangeDays: 31
+  sourceRequestMode: DATE
+  sourceDateParameter: trade_date
+  requestEvidenceStatus: DOCUMENTED_CANDIDATE
+  batchPlanning: SINGLE_DATE
+  recoveryPolicy:
+    mode: REQUEST
+    targetField: null
+    timeField: null
+    unitTimeType: null
+    independentRecoveryVerified: false
+    evidenceRefs:
+    - docs/research/RANGE-T01-source-evidence.json#apiName=daily_basic
+  completenessPolicy:
+    status: UNCONFIRMED
+    paginationStatus: UNCONFIRMED
+    documentedLimit: '6000'
+    requirement: 按日不豁免6000上限；无股票仅区间不满足已确认二选一条件
+  calendarEvidenceStatus: UNCONFIRMED
+  evidenceRefs:
+  - docs/research/RANGE-T01-source-evidence.json#apiName=daily_basic
+  - docs/research/RANGE-T02-calendar-evidence.json#apiName=daily_basic
+- apiName: disclosure_date
+  mode: ANN_DATE_RANGE
+  dateSemantic: ANN_DATE
+  description: 按公告日期范围下载，公告日期不等于报告期；来源请求与完整性仍需核实。
+  calendarProfile: null
+  limits:
+    maxRangeDays: 31
+  sourceRequestMode: DATE
+  sourceDateParameter: ann_date
+  requestEvidenceStatus: DOCUMENTED_CANDIDATE
+  batchPlanning: SINGLE_DATE
+  recoveryPolicy:
+    mode: REQUEST
+    targetField: null
+    timeField: null
+    unitTimeType: null
+    independentRecoveryVerified: false
+    evidenceRefs:
+    - docs/research/RANGE-T01-source-evidence.json#apiName=disclosure_date
+  completenessPolicy:
+    status: UNCONFIRMED
+    paginationStatus: UNCONFIRMED
+    documentedLimit: '6000'
+    requirement: 按最新公告日不保证保有历史每次计划；同日6000及日期筛选需核实
+  calendarEvidenceStatus: null
+  evidenceRefs:
+  - docs/research/RANGE-T01-source-evidence.json#apiName=disclosure_date
+- apiName: dividend
+  mode: ANN_DATE_RANGE
+  dateSemantic: ANN_DATE
+  description: 按公告日期范围下载，公告日期不等于报告期；来源请求与完整性仍需核实。
+  calendarProfile: null
+  limits:
+    maxRangeDays: 31
+  sourceRequestMode: DATE
+  sourceDateParameter: ann_date
+  requestEvidenceStatus: DOCUMENTED_CANDIDATE
+  batchPlanning: SINGLE_DATE
+  recoveryPolicy:
+    mode: REQUEST
+    targetField: null
+    timeField: null
+    unitTimeType: null
+    independentRecoveryVerified: false
+    evidenceRefs:
+    - docs/research/RANGE-T01-source-evidence.json#apiName=dividend
+  completenessPolicy:
+    status: UNCONFIRMED
+    paginationStatus: UNCONFIRMED
+    documentedLimit: '2000'
+    requirement: 不能拿 imp_ann_date／ex_date 替代；同日多分红方案取全未确认
+  calendarEvidenceStatus: null
+  evidenceRefs:
+  - docs/research/RANGE-T01-source-evidence.json#apiName=dividend
+- apiName: express
+  mode: ANN_DATE_RANGE
+  dateSemantic: ANN_DATE
+  description: 按公告日期范围下载，公告日期不等于报告期；来源请求与完整性仍需核实。
+  calendarProfile: null
+  limits:
+    maxRangeDays: 31
+  sourceRequestMode: null
+  sourceDateParameter: null
+  requestEvidenceStatus: UNCONFIRMED
+  batchPlanning: UNCONFIRMED
+  recoveryPolicy:
+    mode: REQUEST
+    targetField: null
+    timeField: null
+    unitTimeType: null
+    independentRecoveryVerified: false
+    evidenceRefs:
+    - docs/research/RANGE-T01-source-evidence.json#apiName=express
+  completenessPolicy:
+    status: UNCONFIRMED
+    paginationStatus: UNCONFIRMED
+    documentedLimit: 未明示
+    requirement: 合法请求先未成立，不能用 REQUEST 绕过；不得换 express_vip
+  calendarEvidenceStatus: null
+  evidenceRefs:
+  - docs/research/RANGE-T01-source-evidence.json#apiName=express
+- apiName: fina_audit
+  mode: ANN_DATE_RANGE
+  dateSemantic: ANN_DATE
+  description: 按公告日期范围下载，公告日期不等于报告期；来源请求与完整性仍需核实。
+  calendarProfile: null
+  limits:
+    maxRangeDays: 31
+  sourceRequestMode: RANGE
+  sourceDateParameter: null
+  requestEvidenceStatus: DOCUMENTED_CANDIDATE
+  batchPlanning: SOURCE_RANGE
+  recoveryPolicy:
+    mode: REQUEST
+    targetField: null
+    timeField: null
+    unitTimeType: null
+    independentRecoveryVerified: false
+    evidenceRefs:
+    - docs/research/RANGE-T01-source-evidence.json#apiName=fina_audit
+  completenessPolicy:
+    status: UNCONFIRMED
+    paginationStatus: UNCONFIRMED
+    documentedLimit: 未明示
+    requirement: 同公告日跨报告期及审计记录取全、未明示上限需核实
+  calendarEvidenceStatus: null
+  evidenceRefs:
+  - docs/research/RANGE-T01-source-evidence.json#apiName=fina_audit
+- apiName: fina_indicator
+  mode: ANN_DATE_RANGE
+  dateSemantic: ANN_DATE
+  description: 按公告日期范围下载，公告日期不等于报告期；来源请求与完整性仍需核实。
+  calendarProfile: null
+  limits:
+    maxRangeDays: 31
+  sourceRequestMode: DATE
+  sourceDateParameter: ann_date
+  requestEvidenceStatus: DOCUMENTED_CANDIDATE
+  batchPlanning: SINGLE_DATE
+  recoveryPolicy:
+    mode: REQUEST
+    targetField: null
+    timeField: null
+    unitTimeType: null
+    independentRecoveryVerified: false
+    evidenceRefs:
+    - docs/research/RANGE-T01-source-evidence.json#apiName=fina_indicator
+  completenessPolicy:
+    status: UNCONFIRMED
+    paginationStatus: UNCONFIRMED
+    documentedLimit: '100'
+    requirement: 单股单公告日也需取全；按报告期过滤后本地筛公告会遗漏
+  calendarEvidenceStatus: null
+  evidenceRefs:
+  - docs/research/RANGE-T01-source-evidence.json#apiName=fina_indicator
+- apiName: fina_mainbz
+  mode: ANN_DATE_RANGE
+  dateSemantic: ANN_DATE
+  description: 按公告日期范围下载，公告日期不等于报告期；来源请求与完整性仍需核实。
+  calendarProfile: null
+  limits:
+    maxRangeDays: 31
+  sourceRequestMode: null
+  sourceDateParameter: null
+  requestEvidenceStatus: UNCONFIRMED
+  batchPlanning: UNCONFIRMED
+  recoveryPolicy:
+    mode: REQUEST
+    targetField: null
+    timeField: null
+    unitTimeType: null
+    independentRecoveryVerified: false
+    evidenceRefs:
+    - docs/research/RANGE-T01-source-evidence.json#apiName=fina_mainbz
+  completenessPolicy:
+    status: UNCONFIRMED
+    paginationStatus: UNCONFIRMED
+    documentedLimit: '100'
+    requirement: 当前公告合同无合法依据；type/period 循环与100上限不能补足公告归属
+  calendarEvidenceStatus: null
+  evidenceRefs:
+  - docs/research/RANGE-T01-source-evidence.json#apiName=fina_mainbz
+- apiName: forecast
+  mode: ANN_DATE_RANGE
+  dateSemantic: ANN_DATE
+  description: 按公告日期范围下载，公告日期不等于报告期；来源请求与完整性仍需核实。
+  calendarProfile: null
+  limits:
+    maxRangeDays: 31
+  sourceRequestMode: DATE
+  sourceDateParameter: ann_date
+  requestEvidenceStatus: CONFLICT
+  batchPlanning: SINGLE_DATE
+  recoveryPolicy:
+    mode: REQUEST
+    targetField: null
+    timeField: null
+    unitTimeType: null
+    independentRecoveryVerified: false
+    evidenceRefs:
+    - docs/research/RANGE-T01-source-evidence.json#apiName=forecast
+  completenessPolicy:
+    status: UNCONFIRMED
+    paginationStatus: UNCONFIRMED
+    documentedLimit: '3500'
+    requirement: 需先确认不带股票的 ann_date 请求合法及整体3500边界，区间不直接启用
+  calendarEvidenceStatus: null
+  evidenceRefs:
+  - docs/research/RANGE-T01-source-evidence.json#apiName=forecast
+- apiName: hk_hold
+  mode: TRADE_DATE_RANGE
+  dateSemantic: TRADE_DATE
+  description: 按区间内已确认的适用交易日期下载；来源请求与完整性仍需核实。
+  calendarProfile: C-N
+  limits:
+    maxRangeDays: 31
+  sourceRequestMode: null
+  sourceDateParameter: null
+  requestEvidenceStatus: UNCONFIRMED
+  batchPlanning: UNCONFIRMED
+  recoveryPolicy:
+    mode: REQUEST
+    targetField: null
+    timeField: null
+    unitTimeType: null
+    independentRecoveryVerified: false
+    evidenceRefs:
+    - docs/research/RANGE-T01-source-evidence.json#apiName=hk_hold
+  completenessPolicy:
+    status: UNCONFIRMED
+    paginationStatus: UNCONFIRMED
+    documentedLimit: 无法确认
+    requirement: 对象 code／exchange 及全市场范围、取全方式均未确认
+  calendarEvidenceStatus: UNCONFIRMED
+  evidenceRefs:
+  - docs/research/RANGE-T01-source-evidence.json#apiName=hk_hold
+  - docs/research/RANGE-T02-calendar-evidence.json#apiName=hk_hold
+- apiName: hs_const
+  mode: ORIGINAL_PARAMS
+  dateSemantic: NONE
+  description: 按原有条件下载，不增加日期筛选，也不承诺仅返回最新数据。
+  calendarProfile: null
+  limits: null
+  sourceRequestMode: null
+  sourceDateParameter: null
+  requestEvidenceStatus: UNCONFIRMED
+  batchPlanning: UNCONFIRMED
+  recoveryPolicy:
+    mode: REQUEST
+    targetField: null
+    timeField: null
+    unitTimeType: null
+    independentRecoveryVerified: false
+    evidenceRefs:
+    - docs/research/RANGE-T01-source-evidence.json#apiName=hs_const
+  completenessPolicy:
+    status: UNCONFIRMED
+    paginationStatus: UNCONFIRMED
+    documentedLimit: 无法确认
+    requirement: hs_type 选择及全标的取全依据未确认
+  calendarEvidenceStatus: null
+  evidenceRefs:
+  - docs/research/RANGE-T01-source-evidence.json#apiName=hs_const
+- apiName: hsgt_top10
+  mode: TRADE_DATE_RANGE
+  dateSemantic: TRADE_DATE
+  description: 按区间内已确认的适用交易日期下载；来源请求与完整性仍需核实。
+  calendarProfile: C-N
+  limits:
+    maxRangeDays: 31
+  sourceRequestMode: DATE
+  sourceDateParameter: trade_date
+  requestEvidenceStatus: DOCUMENTED_CANDIDATE
+  batchPlanning: SINGLE_DATE
+  recoveryPolicy:
+    mode: REQUEST
+    targetField: null
+    timeField: null
+    unitTimeType: null
+    independentRecoveryVerified: false
+    evidenceRefs:
+    - docs/research/RANGE-T01-source-evidence.json#apiName=hsgt_top10
+  completenessPolicy:
+    status: UNCONFIRMED
+    paginationStatus: UNCONFIRMED
+    documentedLimit: 未明示
+    requirement: 不能机械要求每天每市场10条；需核实两方向实际结果、空数据及取全
+  calendarEvidenceStatus: DOCUMENTED
+  evidenceRefs:
+  - docs/research/RANGE-T01-source-evidence.json#apiName=hsgt_top10
+  - docs/research/RANGE-T02-calendar-evidence.json#apiName=hsgt_top10
+- apiName: income
+  mode: ANN_DATE_RANGE
+  dateSemantic: ANN_DATE
+  description: 按公告日期范围下载，公告日期不等于报告期；来源请求与完整性仍需核实。
+  calendarProfile: null
+  limits:
+    maxRangeDays: 31
+  sourceRequestMode: RANGE
+  sourceDateParameter: null
+  requestEvidenceStatus: DOCUMENTED_CANDIDATE
+  batchPlanning: SOURCE_RANGE
+  recoveryPolicy:
+    mode: REQUEST
+    targetField: null
+    timeField: null
+    unitTimeType: null
+    independentRecoveryVerified: false
+    evidenceRefs:
+    - docs/research/RANGE-T01-source-evidence.json#apiName=income
+  completenessPolicy:
+    status: UNCONFIRMED
+    paginationStatus: UNCONFIRMED
+    documentedLimit: 未明示
+    requirement: 所有 report_type／修订版本完整性与边界未确认
+  calendarEvidenceStatus: null
+  evidenceRefs:
+  - docs/research/RANGE-T01-source-evidence.json#apiName=income
+- apiName: index_classify
+  mode: ORIGINAL_PARAMS
+  dateSemantic: NONE
+  description: 按原有条件下载，不增加日期筛选，也不承诺仅返回最新数据。
+  calendarProfile: null
+  limits: null
+  sourceRequestMode: NONE
+  sourceDateParameter: null
+  requestEvidenceStatus: DOCUMENTED_CANDIDATE
+  batchPlanning: ORIGINAL_PARAMS
+  recoveryPolicy:
+    mode: REQUEST
+    targetField: null
+    timeField: null
+    unitTimeType: null
+    independentRecoveryVerified: false
+    evidenceRefs:
+    - docs/research/RANGE-T01-source-evidence.json#apiName=index_classify
+  completenessPolicy:
+    status: UNCONFIRMED
+    paginationStatus: UNCONFIRMED
+    documentedLimit: 未明示
+    requirement: 511个2021分类及359个2014分类是版本介绍，不是空请求返回数量合同
+  calendarEvidenceStatus: null
+  evidenceRefs:
+  - docs/research/RANGE-T01-source-evidence.json#apiName=index_classify
+- apiName: index_member
+  mode: ORIGINAL_PARAMS
+  dateSemantic: NONE
+  description: 按原有条件下载，不增加日期筛选，也不承诺仅返回最新数据。
+  calendarProfile: null
+  limits: null
+  sourceRequestMode: null
+  sourceDateParameter: null
+  requestEvidenceStatus: UNCONFIRMED
+  batchPlanning: UNCONFIRMED
+  recoveryPolicy:
+    mode: REQUEST
+    targetField: null
+    timeField: null
+    unitTimeType: null
+    independentRecoveryVerified: false
+    evidenceRefs:
+    - docs/research/RANGE-T01-source-evidence.json#apiName=index_member
+  completenessPolicy:
+    status: UNCONFIRMED
+    paginationStatus: UNCONFIRMED
+    documentedLimit: 无法确认
+    requirement: 旧接口默认范围和取全未确认，不能换 index_member_all
+  calendarEvidenceStatus: null
+  evidenceRefs:
+  - docs/research/RANGE-T01-source-evidence.json#apiName=index_member
+- apiName: index_member_all
+  mode: ORIGINAL_PARAMS
+  dateSemantic: NONE
+  description: 按原有条件下载，不增加日期筛选，也不承诺仅返回最新数据。
+  calendarProfile: null
+  limits: null
+  sourceRequestMode: NONE
+  sourceDateParameter: null
+  requestEvidenceStatus: DOCUMENTED_CANDIDATE
+  batchPlanning: ORIGINAL_PARAMS
+  recoveryPolicy:
+    mode: REQUEST
+    targetField: null
+    timeField: null
+    unitTimeType: null
+    independentRecoveryVerified: false
+    evidenceRefs:
+    - docs/research/RANGE-T01-source-evidence.json#apiName=index_member_all
+  completenessPolicy:
+    status: UNCONFIRMED
+    paginationStatus: UNCONFIRMED
+    documentedLimit: '2000'
+    requirement: 2000上限可能截断全分类成员；按行业循环还需可靠分类全集及集合等价依据
+  calendarEvidenceStatus: null
+  evidenceRefs:
+  - docs/research/RANGE-T01-source-evidence.json#apiName=index_member_all
+- apiName: margin
+  mode: TRADE_DATE_RANGE
+  dateSemantic: TRADE_DATE
+  description: 按区间内已确认的适用交易日期下载；来源请求与完整性仍需核实。
+  calendarProfile: C-M
+  limits:
+    maxRangeDays: 31
+  sourceRequestMode: RANGE
+  sourceDateParameter: null
+  requestEvidenceStatus: DOCUMENTED_CANDIDATE
+  batchPlanning: SOURCE_RANGE
+  recoveryPolicy:
+    mode: REQUEST
+    targetField: null
+    timeField: null
+    unitTimeType: null
+    independentRecoveryVerified: false
+    evidenceRefs:
+    - docs/research/RANGE-T01-source-evidence.json#apiName=margin
+  completenessPolicy:
+    status: UNCONFIRMED
+    paginationStatus: UNCONFIRMED
+    documentedLimit: '4000'
+    requirement: 31天与交易所维度给出小规模候选，但缺行、更新延迟及完整结束依据须确认
+  calendarEvidenceStatus: UNCONFIRMED
+  evidenceRefs:
+  - docs/research/RANGE-T01-source-evidence.json#apiName=margin
+  - docs/research/RANGE-T02-calendar-evidence.json#apiName=margin
+- apiName: margin_detail
+  mode: TRADE_DATE_RANGE
+  dateSemantic: TRADE_DATE
+  description: 按区间内已确认的适用交易日期下载；来源请求与完整性仍需核实。
+  calendarProfile: C-A
+  limits:
+    maxRangeDays: 31
+  sourceRequestMode: RANGE
+  sourceDateParameter: null
+  requestEvidenceStatus: DOCUMENTED_CANDIDATE
+  batchPlanning: SOURCE_RANGE
+  recoveryPolicy:
+    mode: REQUEST
+    targetField: null
+    timeField: null
+    unitTimeType: null
+    independentRecoveryVerified: false
+    evidenceRefs:
+    - docs/research/RANGE-T01-source-evidence.json#apiName=margin_detail
+  completenessPolicy:
+    status: UNCONFIRMED
+    paginationStatus: UNCONFIRMED
+    documentedLimit: '6000'
+    requirement: 全市场单日及多日6000截断，实际市场覆盖不能按提示猜测
+  calendarEvidenceStatus: CONFLICT
+  evidenceRefs:
+  - docs/research/RANGE-T01-source-evidence.json#apiName=margin_detail
+  - docs/research/RANGE-T02-calendar-evidence.json#apiName=margin_detail
+- apiName: moneyflow
+  mode: TRADE_DATE_RANGE
+  dateSemantic: TRADE_DATE
+  description: 按区间内已确认的适用交易日期下载；来源请求与完整性仍需核实。
+  calendarProfile: C-A
+  limits:
+    maxRangeDays: 31
+  sourceRequestMode: RANGE
+  sourceDateParameter: null
+  requestEvidenceStatus: DOCUMENTED_CANDIDATE
+  batchPlanning: SOURCE_RANGE
+  recoveryPolicy:
+    mode: REQUEST
+    targetField: null
+    timeField: null
+    unitTimeType: null
+    independentRecoveryVerified: false
+    evidenceRefs:
+    - docs/research/RANGE-T01-source-evidence.json#apiName=moneyflow
+  completenessPolicy:
+    status: UNCONFIRMED
+    paginationStatus: UNCONFIRMED
+    documentedLimit: '6000'
+    requirement: 无股票区间接受及6000截断需验证；总量不限制不提供结束合同
+  calendarEvidenceStatus: UNCONFIRMED
+  evidenceRefs:
+  - docs/research/RANGE-T01-source-evidence.json#apiName=moneyflow
+  - docs/research/RANGE-T02-calendar-evidence.json#apiName=moneyflow
+- apiName: moneyflow_hsgt
+  mode: TRADE_DATE_RANGE
+  dateSemantic: TRADE_DATE
+  description: 按区间内已确认的适用交易日期下载；来源请求与完整性仍需核实。
+  calendarProfile: C-X
+  limits:
+    maxRangeDays: 31
+  sourceRequestMode: null
+  sourceDateParameter: null
+  requestEvidenceStatus: UNCONFIRMED
+  batchPlanning: UNCONFIRMED
+  recoveryPolicy:
+    mode: REQUEST
+    targetField: null
+    timeField: null
+    unitTimeType: null
+    independentRecoveryVerified: false
+    evidenceRefs:
+    - docs/research/RANGE-T01-source-evidence.json#apiName=moneyflow_hsgt
+  completenessPolicy:
+    status: UNCONFIRMED
+    paginationStatus: UNCONFIRMED
+    documentedLimit: 无法确认
+    requirement: 方向、日期、原参数及全部方向取全均未确认
+  calendarEvidenceStatus: UNCONFIRMED
+  evidenceRefs:
+  - docs/research/RANGE-T01-source-evidence.json#apiName=moneyflow_hsgt
+  - docs/research/RANGE-T02-calendar-evidence.json#apiName=moneyflow_hsgt
+- apiName: monthly
+  mode: TRADE_DATE_RANGE
+  dateSemantic: TRADE_DATE
+  description: 按区间内已确认的适用交易日期下载；来源请求与完整性仍需核实。保留月线记录，不扩大输入区间。
+  calendarProfile: C-A
+  limits:
+    maxRangeDays: 31
+  sourceRequestMode: DATE
+  sourceDateParameter: trade_date
+  requestEvidenceStatus: DOCUMENTED_CANDIDATE
+  batchPlanning: SINGLE_DATE
+  recoveryPolicy:
+    mode: REQUEST
+    targetField: null
+    timeField: null
+    unitTimeType: null
+    independentRecoveryVerified: false
+    evidenceRefs:
+    - docs/research/RANGE-T01-source-evidence.json#apiName=monthly
+  completenessPolicy:
+    status: UNCONFIRMED
+    paginationStatus: UNCONFIRMED
+    documentedLimit: '4500'
+    requirement: 单月全市场也可能触及4500；不可缩到单日便宣称完整
+  calendarEvidenceStatus: CONFLICT
+  evidenceRefs:
+  - docs/research/RANGE-T01-source-evidence.json#apiName=monthly
+  - docs/research/RANGE-T02-calendar-evidence.json#apiName=monthly
+- apiName: namechange
+  mode: NATIVE_RANGE
+  dateSemantic: ANN_DATE
+  description: 按公告日期范围下载；实际筛选与完整性仍需来源核实。
+  calendarProfile: null
+  limits:
+    maxRangeDays: 31
+  sourceRequestMode: RANGE
+  sourceDateParameter: null
+  requestEvidenceStatus: DOCUMENTED_CANDIDATE
+  batchPlanning: SOURCE_RANGE
+  recoveryPolicy:
+    mode: REQUEST
+    targetField: null
+    timeField: null
+    unitTimeType: null
+    independentRecoveryVerified: false
+    evidenceRefs:
+    - docs/research/RANGE-T01-source-evidence.json#apiName=namechange
+  completenessPolicy:
+    status: UNCONFIRMED
+    paginationStatus: UNCONFIRMED
+    documentedLimit: 未明示
+    requirement: 公开文案可区分 ann_date；筛选字段与包含性未实测，完整结束未确认
+  calendarEvidenceStatus: null
+  evidenceRefs:
+  - docs/research/RANGE-T01-source-evidence.json#apiName=namechange
+- apiName: new_share
+  mode: NATIVE_RANGE
+  dateSemantic: IPO_DATE
+  description: 按IPO申购日期范围下载；实际筛选与完整性仍需来源核实。
+  calendarProfile: null
+  limits:
+    maxRangeDays: 31
+  sourceRequestMode: RANGE
+  sourceDateParameter: null
+  requestEvidenceStatus: DOCUMENTED_CANDIDATE
+  batchPlanning: SOURCE_RANGE
+  recoveryPolicy:
+    mode: REQUEST
+    targetField: null
+    timeField: null
+    unitTimeType: null
+    independentRecoveryVerified: false
+    evidenceRefs:
+    - docs/research/RANGE-T01-source-evidence.json#apiName=new_share
+  completenessPolicy:
+    status: UNCONFIRMED
+    paginationStatus: UNCONFIRMED
+    documentedLimit: '2000'
+    requirement: 2000边界及 ipo_date／issue_date 不同样例的筛选、包含性需实测
+  calendarEvidenceStatus: null
+  evidenceRefs:
+  - docs/research/RANGE-T01-source-evidence.json#apiName=new_share
+- apiName: pledge_detail
+  mode: ORIGINAL_PARAMS
+  dateSemantic: NONE
+  description: 按原有条件下载，不增加日期筛选，也不承诺仅返回最新数据。
+  calendarProfile: null
+  limits: null
+  sourceRequestMode: NONE
+  sourceDateParameter: null
+  requestEvidenceStatus: DOCUMENTED_CANDIDATE
+  batchPlanning: ORIGINAL_PARAMS
+  recoveryPolicy:
+    mode: REQUEST
+    targetField: null
+    timeField: null
+    unitTimeType: null
+    independentRecoveryVerified: false
+    evidenceRefs:
+    - docs/research/RANGE-T01-source-evidence.json#apiName=pledge_detail
+  completenessPolicy:
+    status: UNCONFIRMED
+    paginationStatus: UNCONFIRMED
+    documentedLimit: '1000'
+    requirement: 空请求的默认时间覆盖及1000截断未确认；不能悄加日期缩小范围
+  calendarEvidenceStatus: null
+  evidenceRefs:
+  - docs/research/RANGE-T01-source-evidence.json#apiName=pledge_detail
+- apiName: pledge_stat
+  mode: ORIGINAL_PARAMS
+  dateSemantic: NONE
+  description: 按原有条件下载，不增加日期筛选，也不承诺仅返回最新数据。
+  calendarProfile: null
+  limits: null
+  sourceRequestMode: NONE
+  sourceDateParameter: null
+  requestEvidenceStatus: DOCUMENTED_CANDIDATE
+  batchPlanning: ORIGINAL_PARAMS
+  recoveryPolicy:
+    mode: REQUEST
+    targetField: null
+    timeField: null
+    unitTimeType: null
+    independentRecoveryVerified: false
+    evidenceRefs:
+    - docs/research/RANGE-T01-source-evidence.json#apiName=pledge_stat
+  completenessPolicy:
+    status: UNCONFIRMED
+    paginationStatus: UNCONFIRMED
+    documentedLimit: '1000'
+    requirement: 默认截止期／历史范围及1000截断未确认
+  calendarEvidenceStatus: null
+  evidenceRefs:
+  - docs/research/RANGE-T01-source-evidence.json#apiName=pledge_stat
+- apiName: repurchase
+  mode: ANN_DATE_RANGE
+  dateSemantic: ANN_DATE
+  description: 按公告日期范围下载，公告日期不等于报告期；来源请求与完整性仍需核实。
+  calendarProfile: null
+  limits:
+    maxRangeDays: 31
+  sourceRequestMode: RANGE
+  sourceDateParameter: null
+  requestEvidenceStatus: DOCUMENTED_CANDIDATE
+  batchPlanning: SOURCE_RANGE
+  recoveryPolicy:
+    mode: REQUEST
+    targetField: null
+    timeField: null
+    unitTimeType: null
+    independentRecoveryVerified: false
+    evidenceRefs:
+    - docs/research/RANGE-T01-source-evidence.json#apiName=repurchase
+  completenessPolicy:
+    status: UNCONFIRMED
+    paginationStatus: UNCONFIRMED
+    documentedLimit: 仅无条件默认2000
+    requirement: 默认2000不是公告区间最大值；真实区间取全合同未公开
+  calendarEvidenceStatus: null
+  evidenceRefs:
+  - docs/research/RANGE-T01-source-evidence.json#apiName=repurchase
+- apiName: share_float
+  mode: ANN_DATE_RANGE
+  dateSemantic: ANN_DATE
+  description: 按公告日期范围下载，公告日期不等于报告期；来源请求与完整性仍需核实。
+  calendarProfile: null
+  limits:
+    maxRangeDays: 31
+  sourceRequestMode: DATE
+  sourceDateParameter: ann_date
+  requestEvidenceStatus: DOCUMENTED_CANDIDATE
+  batchPlanning: SINGLE_DATE
+  recoveryPolicy:
+    mode: REQUEST
+    targetField: null
+    timeField: null
+    unitTimeType: null
+    independentRecoveryVerified: false
+    evidenceRefs:
+    - docs/research/RANGE-T01-source-evidence.json#apiName=share_float
+  completenessPolicy:
+    status: UNCONFIRMED
+    paginationStatus: UNCONFIRMED
+    documentedLimit: '6000'
+    requirement: 同公告日所有 float_date／股东记录取全与6000边界未确认
+  calendarEvidenceStatus: null
+  evidenceRefs:
+  - docs/research/RANGE-T01-source-evidence.json#apiName=share_float
+- apiName: slb_len
+  mode: TRADE_DATE_RANGE
+  dateSemantic: TRADE_DATE
+  description: 按区间内已确认的适用交易日期下载；来源请求与完整性仍需核实。
+  calendarProfile: C-S
+  limits:
+    maxRangeDays: 31
+  sourceRequestMode: RANGE
+  sourceDateParameter: null
+  requestEvidenceStatus: DOCUMENTED_CANDIDATE
+  batchPlanning: SOURCE_RANGE
+  recoveryPolicy:
+    mode: REQUEST
+    targetField: null
+    timeField: null
+    unitTimeType: null
+    independentRecoveryVerified: false
+    evidenceRefs:
+    - docs/research/RANGE-T01-source-evidence.json#apiName=slb_len
+  completenessPolicy:
+    status: UNCONFIRMED
+    paginationStatus: UNCONFIRMED
+    documentedLimit: '5000'
+    requirement: 循环获取历史未给单段结束合同；ob 是余额而非股票标识
+  calendarEvidenceStatus: UNCONFIRMED
+  evidenceRefs:
+  - docs/research/RANGE-T01-source-evidence.json#apiName=slb_len
+  - docs/research/RANGE-T02-calendar-evidence.json#apiName=slb_len
+- apiName: slb_sec
+  mode: TRADE_DATE_RANGE
+  dateSemantic: TRADE_DATE
+  description: 按区间内已确认的适用交易日期下载；来源请求与完整性仍需核实。
+  calendarProfile: C-S
+  limits:
+    maxRangeDays: 31
+  sourceRequestMode: RANGE
+  sourceDateParameter: null
+  requestEvidenceStatus: DOCUMENTED_CANDIDATE
+  batchPlanning: SOURCE_RANGE
+  recoveryPolicy:
+    mode: REQUEST
+    targetField: null
+    timeField: null
+    unitTimeType: null
+    independentRecoveryVerified: false
+    evidenceRefs:
+    - docs/research/RANGE-T01-source-evidence.json#apiName=slb_sec
+  completenessPolicy:
+    status: UNCONFIRMED
+    paginationStatus: UNCONFIRMED
+    documentedLimit: '5000'
+    requirement: 5000截断、历史可用性及停止更新后的合法空须核实
+  calendarEvidenceStatus: UNCONFIRMED
+  evidenceRefs:
+  - docs/research/RANGE-T01-source-evidence.json#apiName=slb_sec
+  - docs/research/RANGE-T02-calendar-evidence.json#apiName=slb_sec
+- apiName: slb_sec_detail
+  mode: TRADE_DATE_RANGE
+  dateSemantic: TRADE_DATE
+  description: 按区间内已确认的适用交易日期下载；来源请求与完整性仍需核实。
+  calendarProfile: C-S
+  limits:
+    maxRangeDays: 31
+  sourceRequestMode: RANGE
+  sourceDateParameter: null
+  requestEvidenceStatus: DOCUMENTED_CANDIDATE
+  batchPlanning: SOURCE_RANGE
+  recoveryPolicy:
+    mode: REQUEST
+    targetField: null
+    timeField: null
+    unitTimeType: null
+    independentRecoveryVerified: false
+    evidenceRefs:
+    - docs/research/RANGE-T01-source-evidence.json#apiName=slb_sec_detail
+  completenessPolicy:
+    status: UNCONFIRMED
+    paginationStatus: UNCONFIRMED
+    documentedLimit: '5000'
+    requirement: 多期限／费率记录须取全；5000及停止更新边界未确认
+  calendarEvidenceStatus: UNCONFIRMED
+  evidenceRefs:
+  - docs/research/RANGE-T01-source-evidence.json#apiName=slb_sec_detail
+  - docs/research/RANGE-T02-calendar-evidence.json#apiName=slb_sec_detail
+- apiName: stk_holdernumber
+  mode: ORIGINAL_PARAMS
+  dateSemantic: NONE
+  description: 按原有条件下载，不增加日期筛选，也不承诺仅返回最新数据。
+  calendarProfile: null
+  limits: null
+  sourceRequestMode: NONE
+  sourceDateParameter: null
+  requestEvidenceStatus: DOCUMENTED_CANDIDATE
+  batchPlanning: ORIGINAL_PARAMS
+  recoveryPolicy:
+    mode: REQUEST
+    targetField: null
+    timeField: null
+    unitTimeType: null
+    independentRecoveryVerified: false
+    evidenceRefs:
+    - docs/research/RANGE-T01-source-evidence.json#apiName=stk_holdernumber
+  completenessPolicy:
+    status: UNCONFIRMED
+    paginationStatus: UNCONFIRMED
+    documentedLimit: '3000'
+    requirement: 单股原条件默认覆盖及3000上限；enddate 是截止条件，end_date 是公告区间结束
+  calendarEvidenceStatus: null
+  evidenceRefs:
+  - docs/research/RANGE-T01-source-evidence.json#apiName=stk_holdernumber
+- apiName: stk_holdertrade
+  mode: ANN_DATE_RANGE
+  dateSemantic: ANN_DATE
+  description: 按公告日期范围下载，公告日期不等于报告期；来源请求与完整性仍需核实。
+  calendarProfile: null
+  limits:
+    maxRangeDays: 31
+  sourceRequestMode: RANGE
+  sourceDateParameter: null
+  requestEvidenceStatus: DOCUMENTED_CANDIDATE
+  batchPlanning: SOURCE_RANGE
+  recoveryPolicy:
+    mode: REQUEST
+    targetField: null
+    timeField: null
+    unitTimeType: null
+    independentRecoveryVerified: false
+    evidenceRefs:
+    - docs/research/RANGE-T01-source-evidence.json#apiName=stk_holdertrade
+  completenessPolicy:
+    status: UNCONFIRMED
+    paginationStatus: UNCONFIRMED
+    documentedLimit: '3000'
+    requirement: 同股多股东／方向／数量记录取全，3000截断待核实
+  calendarEvidenceStatus: null
+  evidenceRefs:
+  - docs/research/RANGE-T01-source-evidence.json#apiName=stk_holdertrade
+- apiName: stk_limit
+  mode: TRADE_DATE_RANGE
+  dateSemantic: TRADE_DATE
+  description: 按区间内已确认的适用交易日期下载；来源请求与完整性仍需核实。
+  calendarProfile: C-A
+  limits:
+    maxRangeDays: 31
+  sourceRequestMode: RANGE
+  sourceDateParameter: null
+  requestEvidenceStatus: DOCUMENTED_CANDIDATE
+  batchPlanning: SOURCE_RANGE
+  recoveryPolicy:
+    mode: REQUEST
+    targetField: null
+    timeField: null
+    unitTimeType: null
+    independentRecoveryVerified: false
+    evidenceRefs:
+    - docs/research/RANGE-T01-source-evidence.json#apiName=stk_limit
+  completenessPolicy:
+    status: UNCONFIRMED
+    paginationStatus: UNCONFIRMED
+    documentedLimit: '5800'
+    requirement: 单日也可能超过5800；不能只按A股宇宙证明取全
+  calendarEvidenceStatus: UNCONFIRMED
+  evidenceRefs:
+  - docs/research/RANGE-T01-source-evidence.json#apiName=stk_limit
+  - docs/research/RANGE-T02-calendar-evidence.json#apiName=stk_limit
+- apiName: stk_managers
+  mode: ORIGINAL_PARAMS
+  dateSemantic: NONE
+  description: 按原有条件下载，不增加日期筛选，也不承诺仅返回最新数据。
+  calendarProfile: null
+  limits: null
+  sourceRequestMode: NONE
+  sourceDateParameter: null
+  requestEvidenceStatus: DOCUMENTED_CANDIDATE
+  batchPlanning: ORIGINAL_PARAMS
+  recoveryPolicy:
+    mode: REQUEST
+    targetField: null
+    timeField: null
+    unitTimeType: null
+    independentRecoveryVerified: false
+    evidenceRefs:
+    - docs/research/RANGE-T01-source-evidence.json#apiName=stk_managers
+  completenessPolicy:
+    status: UNCONFIRMED
+    paginationStatus: UNCONFIRMED
+    documentedLimit: 未明示
+    requirement: 默认覆盖和全管理层记录完整性未确认；输出 end_date 是离任日期
+  calendarEvidenceStatus: null
+  evidenceRefs:
+  - docs/research/RANGE-T01-source-evidence.json#apiName=stk_managers
+- apiName: stk_rewards
+  mode: ORIGINAL_PARAMS
+  dateSemantic: NONE
+  description: 按原有条件下载，不增加日期筛选，也不承诺仅返回最新数据。
+  calendarProfile: null
+  limits: null
+  sourceRequestMode: NONE
+  sourceDateParameter: null
+  requestEvidenceStatus: DOCUMENTED_CANDIDATE
+  batchPlanning: ORIGINAL_PARAMS
+  recoveryPolicy:
+    mode: REQUEST
+    targetField: null
+    timeField: null
+    unitTimeType: null
+    independentRecoveryVerified: false
+    evidenceRefs:
+    - docs/research/RANGE-T01-source-evidence.json#apiName=stk_rewards
+  completenessPolicy:
+    status: UNCONFIRMED
+    paginationStatus: UNCONFIRMED
+    documentedLimit: 未明示
+    requirement: 单股所有管理层／报告期和默认历史范围取全未确认
+  calendarEvidenceStatus: null
+  evidenceRefs:
+  - docs/research/RANGE-T01-source-evidence.json#apiName=stk_rewards
+- apiName: stock_basic
+  mode: ORIGINAL_PARAMS
+  dateSemantic: NONE
+  description: 按原有条件下载，不增加日期筛选，也不承诺仅返回最新数据。
+  calendarProfile: null
+  limits: null
+  sourceRequestMode: NONE
+  sourceDateParameter: null
+  requestEvidenceStatus: DOCUMENTED_CANDIDATE
+  batchPlanning: ORIGINAL_PARAMS
+  recoveryPolicy:
+    mode: REQUEST
+    targetField: null
+    timeField: null
+    unitTimeType: null
+    independentRecoveryVerified: false
+    evidenceRefs:
+    - docs/research/RANGE-T01-source-evidence.json#apiName=stock_basic
+  completenessPolicy:
+    status: UNCONFIRMED
+    paginationStatus: UNCONFIRMED
+    documentedLimit: '6000'
+    requirement: 有单次全量公开保证且说明上限随市场增长；需核实所选状态与当期边界，不能忽略异常截断
+  calendarEvidenceStatus: null
+  evidenceRefs:
+  - docs/research/RANGE-T01-source-evidence.json#apiName=stock_basic
+- apiName: stock_company
+  mode: ORIGINAL_PARAMS
+  dateSemantic: NONE
+  description: 按原有条件下载，不增加日期筛选，也不承诺仅返回最新数据。
+  calendarProfile: null
+  limits: null
+  sourceRequestMode: NONE
+  sourceDateParameter: null
+  requestEvidenceStatus: DOCUMENTED_CANDIDATE
+  batchPlanning: ORIGINAL_PARAMS
+  recoveryPolicy:
+    mode: REQUEST
+    targetField: null
+    timeField: null
+    unitTimeType: null
+    independentRecoveryVerified: false
+    evidenceRefs:
+    - docs/research/RANGE-T01-source-evidence.json#apiName=stock_company
+  completenessPolicy:
+    status: UNCONFIRMED
+    paginationStatus: UNCONFIRMED
+    documentedLimit: '4500'
+    requirement: 当前已按交易所，不再扩市场；单交易所若触顶仍需取全证据
+  calendarEvidenceStatus: null
+  evidenceRefs:
+  - docs/research/RANGE-T01-source-evidence.json#apiName=stock_company
+- apiName: suspend_d
+  mode: TRADE_DATE_RANGE
+  dateSemantic: TRADE_DATE
+  description: 按区间内已确认的适用交易日期下载；来源请求与完整性仍需核实。
+  calendarProfile: C-A
+  limits:
+    maxRangeDays: 31
+  sourceRequestMode: RANGE
+  sourceDateParameter: null
+  requestEvidenceStatus: DOCUMENTED_CANDIDATE
+  batchPlanning: SOURCE_RANGE
+  recoveryPolicy:
+    mode: REQUEST
+    targetField: null
+    timeField: null
+    unitTimeType: null
+    independentRecoveryVerified: false
+    evidenceRefs:
+    - docs/research/RANGE-T01-source-evidence.json#apiName=suspend_d
+  completenessPolicy:
+    status: UNCONFIRMED
+    paginationStatus: UNCONFIRMED
+    documentedLimit: 未明示
+    requirement: 需核实输出连续覆盖及 S/R 同日记录；不把停牌当市场休市
+  calendarEvidenceStatus: UNCONFIRMED
+  evidenceRefs:
+  - docs/research/RANGE-T01-source-evidence.json#apiName=suspend_d
+  - docs/research/RANGE-T02-calendar-evidence.json#apiName=suspend_d
+- apiName: top10_floatholders
+  mode: ANN_DATE_RANGE
+  dateSemantic: ANN_DATE
+  description: 按公告日期范围下载，公告日期不等于报告期；来源请求与完整性仍需核实。
+  calendarProfile: null
+  limits:
+    maxRangeDays: 31
+  sourceRequestMode: null
+  sourceDateParameter: null
+  requestEvidenceStatus: UNCONFIRMED
+  batchPlanning: UNCONFIRMED
+  recoveryPolicy:
+    mode: REQUEST
+    targetField: null
+    timeField: null
+    unitTimeType: null
+    independentRecoveryVerified: false
+    evidenceRefs:
+    - docs/research/RANGE-T01-source-evidence.json#apiName=top10_floatholders
+  completenessPolicy:
+    status: UNCONFIRMED
+    paginationStatus: UNCONFIRMED
+    documentedLimit: 未明示
+    requirement: 股票条件与公告语义两项缺口，不能以最多十人推断完整
+  calendarEvidenceStatus: null
+  evidenceRefs:
+  - docs/research/RANGE-T01-source-evidence.json#apiName=top10_floatholders
+- apiName: top10_holders
+  mode: ANN_DATE_RANGE
+  dateSemantic: ANN_DATE
+  description: 按公告日期范围下载，公告日期不等于报告期；来源请求与完整性仍需核实。
+  calendarProfile: null
+  limits:
+    maxRangeDays: 31
+  sourceRequestMode: null
+  sourceDateParameter: null
+  requestEvidenceStatus: UNCONFIRMED
+  batchPlanning: UNCONFIRMED
+  recoveryPolicy:
+    mode: REQUEST
+    targetField: null
+    timeField: null
+    unitTimeType: null
+    independentRecoveryVerified: false
+    evidenceRefs:
+    - docs/research/RANGE-T01-source-evidence.json#apiName=top10_holders
+  completenessPolicy:
+    status: UNCONFIRMED
+    paginationStatus: UNCONFIRMED
+    documentedLimit: 未明示
+    requirement: 股票条件与公告语义两项缺口，多个报告期可能各十人
+  calendarEvidenceStatus: null
+  evidenceRefs:
+  - docs/research/RANGE-T01-source-evidence.json#apiName=top10_holders
+- apiName: top_inst
+  mode: TRADE_DATE_RANGE
+  dateSemantic: TRADE_DATE
+  description: 按区间内已确认的适用交易日期下载；来源请求与完整性仍需核实。
+  calendarProfile: C-A
+  limits:
+    maxRangeDays: 31
+  sourceRequestMode: DATE
+  sourceDateParameter: trade_date
+  requestEvidenceStatus: DOCUMENTED_CANDIDATE
+  batchPlanning: SINGLE_DATE
+  recoveryPolicy:
+    mode: REQUEST
+    targetField: null
+    timeField: null
+    unitTimeType: null
+    independentRecoveryVerified: false
+    evidenceRefs:
+    - docs/research/RANGE-T01-source-evidence.json#apiName=top_inst
+  completenessPolicy:
+    status: UNCONFIRMED
+    paginationStatus: UNCONFIRMED
+    documentedLimit: '10000'
+    requirement: 单日多机构／方向／原因行完整结束未确认
+  calendarEvidenceStatus: UNCONFIRMED
+  evidenceRefs:
+  - docs/research/RANGE-T01-source-evidence.json#apiName=top_inst
+  - docs/research/RANGE-T02-calendar-evidence.json#apiName=top_inst
+- apiName: top_list
+  mode: TRADE_DATE_RANGE
+  dateSemantic: TRADE_DATE
+  description: 按区间内已确认的适用交易日期下载；来源请求与完整性仍需核实。
+  calendarProfile: C-A
+  limits:
+    maxRangeDays: 31
+  sourceRequestMode: DATE
+  sourceDateParameter: trade_date
+  requestEvidenceStatus: DOCUMENTED_CANDIDATE
+  batchPlanning: SINGLE_DATE
+  recoveryPolicy:
+    mode: REQUEST
+    targetField: null
+    timeField: null
+    unitTimeType: null
+    independentRecoveryVerified: false
+    evidenceRefs:
+    - docs/research/RANGE-T01-source-evidence.json#apiName=top_list
+  completenessPolicy:
+    status: UNCONFIRMED
+    paginationStatus: UNCONFIRMED
+    documentedLimit: '10000'
+    requirement: 单日多上榜原因行不可按每股一行判断取全
+  calendarEvidenceStatus: UNCONFIRMED
+  evidenceRefs:
+  - docs/research/RANGE-T01-source-evidence.json#apiName=top_list
+  - docs/research/RANGE-T02-calendar-evidence.json#apiName=top_list
+- apiName: trade_cal
+  mode: NATIVE_RANGE
+  dateSemantic: CALENDAR_DATE
+  description: 按日历日期范围下载；实际筛选与完整性仍需来源核实。
+  calendarProfile: null
+  limits:
+    maxRangeDays: 31
+  sourceRequestMode: RANGE
+  sourceDateParameter: null
+  requestEvidenceStatus: DOCUMENTED_CANDIDATE
+  batchPlanning: SOURCE_RANGE
+  recoveryPolicy:
+    mode: REQUEST
+    targetField: null
+    timeField: null
+    unitTimeType: null
+    independentRecoveryVerified: false
+    evidenceRefs:
+    - docs/research/RANGE-T01-source-evidence.json#apiName=trade_cal
+  completenessPolicy:
+    status: UNCONFIRMED
+    paginationStatus: UNCONFIRMED
+    documentedLimit: 未明示
+    requirement: 逐日全集可核对：请求交易所×每个自然日恰一有效记录，必须含两端及休市；BSE来源支持未确认
+  calendarEvidenceStatus: null
+  evidenceRefs:
+  - docs/research/RANGE-T01-source-evidence.json#apiName=trade_cal
+- apiName: weekly
+  mode: TRADE_DATE_RANGE
+  dateSemantic: TRADE_DATE
+  description: 按区间内已确认的适用交易日期下载；来源请求与完整性仍需核实。保留周线记录，不扩大输入区间。
+  calendarProfile: C-A
+  limits:
+    maxRangeDays: 31
+  sourceRequestMode: DATE
+  sourceDateParameter: trade_date
+  requestEvidenceStatus: DOCUMENTED_CANDIDATE
+  batchPlanning: SINGLE_DATE
+  recoveryPolicy:
+    mode: REQUEST
+    targetField: null
+    timeField: null
+    unitTimeType: null
+    independentRecoveryVerified: false
+    evidenceRefs:
+    - docs/research/RANGE-T01-source-evidence.json#apiName=weekly
+  completenessPolicy:
+    status: UNCONFIRMED
+    paginationStatus: UNCONFIRMED
+    documentedLimit: '6000'
+    requirement: 全市场6000上限及非周末交易日合法空需确认
+  calendarEvidenceStatus: UNCONFIRMED
+  evidenceRefs:
+  - docs/research/RANGE-T01-source-evidence.json#apiName=weekly
+  - docs/research/RANGE-T02-calendar-evidence.json#apiName=weekly

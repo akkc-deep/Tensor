@@ -61,6 +61,35 @@ class FixturePluginTest {
             """;
 
     @Test
+    void checksServerAroundFixtureResponseAndRefusesUnconfirmedCalendar() {
+        var factory = org.mockito.Mockito.mock(FixtureEnvelopeFactory.class);
+        var plugin = new FixturePlugin(expectedDefinition(), factory);
+        var params = Map.<String,Object>of("scenario", "EMPTY");
+        var fault = new IllegalStateException("server unavailable");
+        assertThatThrownBy(() -> plugin.download(API_NAME, params, () -> { throw fault; })).isSameAs(fault);
+        org.mockito.Mockito.verifyNoInteractions(factory);
+        assertThatThrownBy(() -> plugin.confirmCalendar(API_NAME,
+                new com.akkc.tensor.plugin.api.download.CalendarScope(Map.of(), java.util.Set.of(java.time.LocalDate.of(2026, 9, 3))), () -> {}))
+                .isInstanceOf(com.akkc.tensor.plugin.api.error.CalendarUnconfirmedException.class);
+        org.mockito.Mockito.verifyNoInteractions(factory);
+        var envelope = new FixtureEnvelopeFactory().create(FixtureScenario.EMPTY, params);
+        org.mockito.Mockito.when(factory.create(FixtureScenario.EMPTY, params)).thenReturn(envelope);
+        var checks = new java.util.concurrent.atomic.AtomicInteger();
+        var result = plugin.download(API_NAME, params, checks::incrementAndGet);
+        assertThat(checks).hasValue(2);
+        assertThat(result.envelope()).isSameAs(envelope);
+        assertThat(result.failures()).isEmpty();
+        checks.set(0);
+        assertThatThrownBy(() -> plugin.download(API_NAME, params, () -> { if (checks.incrementAndGet() == 2) throw fault; })).isSameAs(fault);
+        assertThat(checks).hasValue(2);
+        org.mockito.Mockito.verify(factory, org.mockito.Mockito.times(2)).create(FixtureScenario.EMPTY, params);
+        org.mockito.Mockito.verifyNoMoreInteractions(factory);
+        var api = plugin.descriptor().apis().getFirst();
+        assertThat(api.parameters()).isEqualTo(api.sourceParameters());
+        assertThat(api.downloadPolicy().mode()).isEqualTo(com.akkc.tensor.plugin.api.download.DownloadPolicy.Mode.ORIGINAL_PARAMS);
+    }
+
+    @Test
     void exposesTheNewConstructorAndRejectsInvalidDependencies() {
         assertThat(FixturePlugin.class.getModifiers()).satisfies(modifiers ->
                 assertThat(java.lang.reflect.Modifier.isFinal(modifiers)).isTrue());
@@ -149,30 +178,30 @@ class FixturePluginTest {
     @Test
     void routesExactScenariosAndRejectsInvalidDirectInputsSafely() {
         FixturePlugin plugin = plugin();
-        assertThat(plugin.download(API_NAME, Map.of("scenario", "SUCCESS")).data())
+        assertThat(plugin.download(API_NAME, Map.of("scenario", "SUCCESS"), () -> {}).envelope().data())
                 .containsExactly(Arrays.asList("000001.SZ", "20260807", "11.23", null));
-        assertThat(plugin.download(API_NAME, Map.of("scenario", "EMPTY")).data()).isEmpty();
-        assertThat(plugin.download(API_NAME, Map.of("scenario", "TYPE_FAILURE")).data())
+        assertThat(plugin.download(API_NAME, Map.of("scenario", "EMPTY"), () -> {}).envelope().data()).isEmpty();
+        assertThat(plugin.download(API_NAME, Map.of("scenario", "TYPE_FAILURE"), () -> {}).envelope().data())
                 .containsExactly(Arrays.asList("000001.SZ", "20260807", "not-a-decimal", null));
-        assertThat(plugin.download(API_NAME, Map.of("scenario", "PERSISTENCE_FAILURE")).data())
+        assertThat(plugin.download(API_NAME, Map.of("scenario", "PERSISTENCE_FAILURE"), () -> {}).envelope().data())
                 .containsExactly(List.of("000001.SZ", "20260807", "11.23", "PERSISTENCE_FAILURE"));
-        assertThatThrownBy(() -> plugin.download(API_NAME, Map.of("scenario", "SOURCE_FAILURE")))
+        assertThatThrownBy(() -> plugin.download(API_NAME, Map.of("scenario", "SOURCE_FAILURE"), () -> {}).envelope())
                 .isInstanceOfSatisfying(SourceException.class, exception -> {
                     assertThat(exception.code()).isEqualTo(ErrorCode.SOURCE_UNAVAILABLE);
                     assertThat(exception.getMessage()).isEqualTo("Fixture source unavailable");
                     assertThat(exception.retryable()).isTrue();
                     assertThat(exception).hasNoCause();
                 });
-        assertThatThrownBy(() -> plugin.download(ApiName.of("fixture_other"), Map.of()))
+        assertThatThrownBy(() -> plugin.download(ApiName.of("fixture_other"), Map.of(), () -> {}).envelope())
                 .isInstanceOf(IllegalArgumentException.class).hasMessage("Unknown Fixture API");
-        assertThatThrownBy(() -> plugin.download(API_NAME, Map.of()))
+        assertThatThrownBy(() -> plugin.download(API_NAME, Map.of(), () -> {}).envelope())
                 .isInstanceOf(IllegalArgumentException.class).hasMessage("Unknown Fixture scenario");
-        assertThatThrownBy(() -> plugin.download(API_NAME, Map.of("scenario", 7)))
+        assertThatThrownBy(() -> plugin.download(API_NAME, Map.of("scenario", 7), () -> {}).envelope())
                 .isInstanceOf(IllegalArgumentException.class).hasMessage("Unknown Fixture scenario");
-        assertThatThrownBy(() -> plugin.download(API_NAME, Map.of("scenario", "success")))
+        assertThatThrownBy(() -> plugin.download(API_NAME, Map.of("scenario", "success"), () -> {}).envelope())
                 .isInstanceOf(IllegalArgumentException.class).hasMessage("Unknown Fixture scenario");
-        assertThatNullPointerException().isThrownBy(() -> plugin.download(null, Map.of()));
-        assertThatNullPointerException().isThrownBy(() -> plugin.download(API_NAME, null));
+        assertThatNullPointerException().isThrownBy(() -> plugin.download(null, Map.of(), () -> {}).envelope());
+        assertThatNullPointerException().isThrownBy(() -> plugin.download(API_NAME, null, () -> {}).envelope());
     }
 
     private static FixturePlugin plugin() {

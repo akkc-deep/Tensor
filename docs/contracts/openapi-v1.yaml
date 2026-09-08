@@ -2,7 +2,7 @@ openapi: 3.1.0
 info:
   title: Tensor v1 REST API
   version: v1
-  description: Shared REST contract for Tensor v1 metadata, downloads, and read-only dataset queries.
+  description: Shared REST target contract for Tensor v1 metadata, range downloads, current failure tasks, and read-only queries. RANGE-T03 updates documentation only; running endpoints have not yet migrated. Source evidence and live verification remain separate.
 paths:
   /api/v1/data-sources:
     get:
@@ -46,21 +46,67 @@ paths:
   /api/v1/downloads:
     post:
       operationId: downloadDataset
+      description: One synchronous download. Validate input and source readiness, acquire the single-instance slot,
+        confirm all necessary calendars before business calls. Explicit in-business source/adaptation/conflict failures
+        are saved and execution continues through all planned ranges without automatic retry. Storage failure or unknown
+        commit stops with an error and confirmed subtotals. No cancel/pause/stop endpoint or idempotency protocol;
+        client disconnect does not cancel execution or release the slot, which remains held until actual completion.
+        Request IDs trace only. Running endpoints have not yet migrated.
       requestBody:
         required: true
         content:
           application/json:
             schema: {$ref: '#/components/schemas/DownloadRequest'}
             examples:
-              dailyDownload:
-                value: {pluginId: tushare_pro, apiName: daily, params: {trade_date: '20260807'}}
+              dailySameDay:
+                value:
+                  pluginId: tushare_pro
+                  apiName: daily
+                  params: {start_date: '20260901', end_date: '20260901'}
+                summary: Target contract only; source and account capability are not verified.
+              incomeRange:
+                value:
+                  pluginId: tushare_pro
+                  apiName: income
+                  params: {ts_code: 000001.SZ, start_date: '20260901', end_date: '20260910'}
+                summary: Target contract only; source and account capability are not verified.
+              marginRange:
+                value:
+                  pluginId: tushare_pro
+                  apiName: margin
+                  params: {exchange_id: SSE, start_date: '20260901', end_date: '20260910'}
+                summary: Target contract only; source and account capability are not verified.
+              brokerRecommendThreeMonths:
+                value:
+                  pluginId: tushare_pro
+                  apiName: broker_recommend
+                  params: {start_date: '20260131', end_date: '20260302'}
+                summary: Target contract only; source and account capability are not verified.
+              tradeCalendarSameDay:
+                value:
+                  pluginId: tushare_pro
+                  apiName: trade_cal
+                  params: {exchange: SSE, start_date: '20260901', end_date: '20260901'}
+                summary: Target contract only; source and account capability are not verified.
+              stockBasic:
+                value:
+                  pluginId: tushare_pro
+                  apiName: stock_basic
+                  params: {list_status: L}
+                summary: Target contract only; source and account capability are not verified.
+              indexClassify:
+                value:
+                  pluginId: tushare_pro
+                  apiName: index_classify
+                  params: {}
+                summary: Target contract only; source and account capability are not verified.
       responses:
         '200':
-          description: A committed successful or valid empty download.
+          description: All planned ranges attempted; confirmed unit subtotals and currently saved failures.
           headers:
             X-Request-Id:
               required: true
-              description: Matches the requestId in this response body.
+              description: Equals body requestId and any nested downloadResult.requestId.
               schema: {type: string, minLength: 1}
               example: c52bce3d-5aa5-4c8e-ae64-e73cb76d8f33
           content:
@@ -68,15 +114,117 @@ paths:
               schema: {$ref: '#/components/schemas/DownloadResponse'}
               examples:
                 success:
-                  value: {requestId: c52bce3d-5aa5-4c8e-ae64-e73cb76d8f33, outcome: SUCCESS, pluginId: tushare_pro, apiName: daily, sourceRowCount: 5535, insertedRows: 5535, updatedRows: 0, message: 下载成功}
+                  value:
+                    requestId: c52bce3d-5aa5-4c8e-ae64-e73cb76d8f33
+                    outcome: SUCCESS
+                    pluginId: tushare_pro
+                    apiName: daily
+                    sourceRowCount: 10
+                    insertedRows: 10
+                    updatedRows: 0
+                    message: 下载成功
+                    completedUnits: 1
+                    failedUnits: 0
+                    notStartedUnits: 0
+                    skippedClosedDates: 0
+                    taskId: null
+                    remainingFailedUnits: 0
+                    failureRecordStatus: NOT_REQUIRED
+                    failures: []
+                    notStartedScopes: []
+                    unconfirmedScopes: []
+                partialUnits:
+                  value:
+                    requestId: c52bce3d-5aa5-4c8e-ae64-e73cb76d8f33
+                    outcome: PARTIAL
+                    pluginId: tushare_pro
+                    apiName: daily
+                    sourceRowCount: 20
+                    insertedRows: 18
+                    updatedRows: 2
+                    message: 完成 2 项，失败 1 项
+                    completedUnits: 2
+                    failedUnits: 1
+                    notStartedUnits: 0
+                    skippedClosedDates: 0
+                    taskId: 11111111-1111-4111-8111-111111111111
+                    remainingFailedUnits: 1
+                    failureRecordStatus: CONFIRMED
+                    failures:
+                    - {targetType: STOCK, targetValue: 000002.SZ, timeType: DATE, timeValue: '2026-09-03', errorCode: ADAPTER_TYPE_INVALID,
+                      errorMessage: 字段类型不符合定义}
+                    notStartedScopes: []
+                    unconfirmedScopes: []
+                  summary: 受控合同示例，独立恢复未真实启用。
                 empty:
-                  value: {requestId: c52bce3d-5aa5-4c8e-ae64-e73cb76d8f33, outcome: EMPTY, pluginId: tushare_pro, apiName: monthly, sourceRowCount: 0, insertedRows: 0, updatedRows: 0, message: 下载成功，0 条数据}
-        '400': &parameterInvalid
-          description: Input validation failure.
+                  value:
+                    requestId: c52bce3d-5aa5-4c8e-ae64-e73cb76d8f33
+                    outcome: EMPTY
+                    pluginId: tushare_pro
+                    apiName: daily
+                    sourceRowCount: 0
+                    insertedRows: 0
+                    updatedRows: 0
+                    message: 下载成功，0 条数据
+                    completedUnits: 1
+                    failedUnits: 0
+                    notStartedUnits: 0
+                    skippedClosedDates: 0
+                    taskId: null
+                    remainingFailedUnits: 0
+                    failureRecordStatus: NOT_REQUIRED
+                    failures: []
+                    notStartedScopes: []
+                    unconfirmedScopes: []
+                allClosed:
+                  value:
+                    requestId: c52bce3d-5aa5-4c8e-ae64-e73cb76d8f33
+                    outcome: NO_OPEN_DATES
+                    pluginId: tushare_pro
+                    apiName: daily
+                    sourceRowCount: 0
+                    insertedRows: 0
+                    updatedRows: 0
+                    message: 所选区间无开盘日期
+                    completedUnits: 0
+                    failedUnits: 0
+                    notStartedUnits: 0
+                    skippedClosedDates: 2
+                    taskId: null
+                    remainingFailedUnits: 0
+                    failureRecordStatus: NOT_REQUIRED
+                    failures: []
+                    notStartedScopes: []
+                    unconfirmedScopes: []
+                allFailed:
+                  value:
+                    requestId: c52bce3d-5aa5-4c8e-ae64-e73cb76d8f33
+                    outcome: FAILED
+                    pluginId: tushare_pro
+                    apiName: daily
+                    sourceRowCount: 0
+                    insertedRows: 0
+                    updatedRows: 0
+                    message: 失败 1 项，已保存
+                    completedUnits: 0
+                    failedUnits: 1
+                    notStartedUnits: 0
+                    skippedClosedDates: 0
+                    taskId: 11111111-1111-4111-8111-111111111111
+                    remainingFailedUnits: 1
+                    failureRecordStatus: CONFIRMED
+                    failures:
+                    - {targetType: REQUEST, targetValue: '', timeType: RANGE, timeValue: 2026-09-01/2026-09-02, errorCode: SOURCE_TIMEOUT,
+                      errorMessage: 来源请求超时，请稍后手动重试}
+                    notStartedScopes: []
+                    unconfirmedScopes: []
+        '400':
+          description: Input invalid or required field missing; no business request. Old/mixed date parameters are
+            rejected.
           headers:
             X-Request-Id:
               required: true
-              description: Matches the requestId in this error body.
+              description: Equals body requestId and any nested downloadResult.requestId.
               schema: {type: string, minLength: 1}
               example: c52bce3d-5aa5-4c8e-ae64-e73cb76d8f33
           content:
@@ -84,33 +232,136 @@ paths:
               schema: {$ref: '#/components/schemas/ApiError'}
               examples:
                 invalidDateRange:
-                  value: {requestId: c52bce3d-5aa5-4c8e-ae64-e73cb76d8f33, code: PARAM_INVALID, message: 开始日期不能晚于结束日期, retryable: false, fieldErrors: [{field: start_date, message: 必须早于或等于结束日期}]}
-        '409': *pluginDisabled
-        '422': &adapterFieldMissing
-          description: Adapted data has a required source field missing or violates a declared type constraint.
+                  value:
+                    requestId: c52bce3d-5aa5-4c8e-ae64-e73cb76d8f33
+                    code: PARAM_INVALID
+                    message: 开始日期不能晚于结束日期
+                    retryable: false
+                    fieldErrors: []
+        '409':
+          description: Slot busy, plugin disabled, or source legal request unconfirmed; no new first-download task.
           headers:
-            X-Request-Id: {required: true, schema: {type: string, minLength: 1}}
+            X-Request-Id:
+              required: true
+              description: Equals body requestId and any nested downloadResult.requestId.
+              schema: {type: string, minLength: 1}
+              example: c52bce3d-5aa5-4c8e-ae64-e73cb76d8f33
           content:
             application/json:
               schema: {$ref: '#/components/schemas/ApiError'}
-        '500': &persistenceFailed
-          description: The persistence transaction failed and was rolled back; no committed download was formed.
+              examples:
+                busy:
+                  value:
+                    requestId: c52bce3d-5aa5-4c8e-ae64-e73cb76d8f33
+                    code: DOWNLOAD_BUSY
+                    message: 已有下载执行中，请等待实际结束
+                    retryable: true
+                    fieldErrors: []
+                sourceRequestUnconfirmed:
+                  value:
+                    requestId: c52bce3d-5aa5-4c8e-ae64-e73cb76d8f33
+                    code: SOURCE_REQUEST_UNCONFIRMED
+                    message: 原接口合法请求方式未确认，未执行
+                    retryable: false
+                    fieldErrors: []
+        '500':
+          description: Current unit persistence failure, failure record save unconfirmed, or commit unknown. Previously
+            committed units remain; stop and include any confirmed execution subtotals.
           headers:
-            X-Request-Id: {required: true, schema: {type: string, minLength: 1}}
+            X-Request-Id:
+              required: true
+              description: Equals body requestId and any nested downloadResult.requestId.
+              schema: {type: string, minLength: 1}
+              example: c52bce3d-5aa5-4c8e-ae64-e73cb76d8f33
           content:
             application/json:
               schema: {$ref: '#/components/schemas/ApiError'}
-        '502': &sourceUnavailable
-          description: Source processing failure.
+              examples:
+                recordSaveUnknown:
+                  value:
+                    requestId: c52bce3d-5aa5-4c8e-ae64-e73cb76d8f33
+                    code: TASK_RECORD_SAVE_UNCONFIRMED
+                    message: 失败记录保存未确认，已停止
+                    retryable: false
+                    fieldErrors: []
+                    downloadResult:
+                      requestId: c52bce3d-5aa5-4c8e-ae64-e73cb76d8f33
+                      outcome: UNCONFIRMED
+                      pluginId: tushare_pro
+                      apiName: daily
+                      sourceRowCount: 10
+                      insertedRows: 10
+                      updatedRows: 0
+                      message: 结果未确认；计数仅包含此前确认项
+                      completedUnits: 1
+                      failedUnits: 1
+                      notStartedUnits: null
+                      skippedClosedDates: 0
+                      taskId: null
+                      remainingFailedUnits: null
+                      failureRecordStatus: UNCONFIRMED
+                      failures:
+                      - {targetType: REQUEST, targetValue: '', timeType: DATE, timeValue: '2026-09-03', errorCode: SOURCE_TIMEOUT,
+                        errorMessage: 来源请求超时，请稍后手动重试}
+                      notStartedScopes:
+                      - {targetType: REQUEST, targetValue: '', timeType: RANGE, timeValue: 2026-09-04/2026-09-10}
+                      unconfirmedScopes: []
+                commitUnknown:
+                  value:
+                    requestId: c52bce3d-5aa5-4c8e-ae64-e73cb76d8f33
+                    code: COMMIT_UNCONFIRMED
+                    message: 当前范围提交结果未确认，已停止
+                    retryable: false
+                    fieldErrors: []
+                    downloadResult:
+                      requestId: c52bce3d-5aa5-4c8e-ae64-e73cb76d8f33
+                      outcome: UNCONFIRMED
+                      pluginId: tushare_pro
+                      apiName: daily
+                      sourceRowCount: 10
+                      insertedRows: 10
+                      updatedRows: 0
+                      message: 结果未确认；计数仅包含此前确认项
+                      completedUnits: 1
+                      failedUnits: 0
+                      notStartedUnits: null
+                      skippedClosedDates: 0
+                      taskId: null
+                      remainingFailedUnits: null
+                      failureRecordStatus: UNCONFIRMED
+                      failures: []
+                      notStartedScopes:
+                      - {targetType: REQUEST, targetValue: '', timeType: RANGE, timeValue: 2026-09-04/2026-09-10}
+                      unconfirmedScopes:
+                      - {targetType: REQUEST, targetValue: '', timeType: DATE, timeValue: '2026-09-03'}
+        '502':
+          description: Pre-business source or necessary calendar failure. In-business source failures are saved then
+            continued and returned via 200 PARTIAL/FAILED.
           headers:
-            X-Request-Id: {required: true, schema: {type: string, minLength: 1}}
+            X-Request-Id:
+              required: true
+              description: Equals body requestId and any nested downloadResult.requestId.
+              schema: {type: string, minLength: 1}
+              example: c52bce3d-5aa5-4c8e-ae64-e73cb76d8f33
           content:
             application/json:
               schema: {$ref: '#/components/schemas/ApiError'}
-        '504': &sourceTimeout
-          description: The source did not respond in time.
+              examples:
+                calendarUnconfirmed:
+                  value:
+                    requestId: c52bce3d-5aa5-4c8e-ae64-e73cb76d8f33
+                    code: CALENDAR_UNCONFIRMED
+                    message: 日历未确认，未执行；已有失败项保留
+                    retryable: true
+                    fieldErrors: []
+        '504':
+          description: Pre-business source timeout. In-business timeouts are saved and later planned ranges continue.
           headers:
-            X-Request-Id: {required: true, schema: {type: string, minLength: 1}}
+            X-Request-Id:
+              required: true
+              description: Equals body requestId and any nested downloadResult.requestId.
+              schema: {type: string, minLength: 1}
+              example: c52bce3d-5aa5-4c8e-ae64-e73cb76d8f33
           content:
             application/json:
               schema: {$ref: '#/components/schemas/ApiError'}
@@ -209,6 +460,627 @@ paths:
           content:
             application/json:
               schema: {$ref: '#/components/schemas/ApiError'}
+  /api/v1/retry-tasks:
+    get:
+      operationId: listRetryTasks
+      description: Read current saved failures only; no slot acquisition or calendar/business calls. pluginId and
+        apiName independently filter saved identifiers, including offline plugins. Sort updatedAt DESC, taskId DESC.
+        Normalize beyond-end requests to last page; empty page=1, totalElements=totalPages=0, items=[].
+      parameters:
+      - name: pluginId
+        in: query
+        required: false
+        schema: {type: string, pattern: '^[a-z][a-z0-9_]{1,63}$'}
+      - name: apiName
+        in: query
+        required: false
+        schema: {type: string, pattern: '^[a-z][a-z0-9_]{1,63}$'}
+      - name: page
+        in: query
+        required: false
+        schema: {type: integer, minimum: 1, default: 1}
+      - name: pageSize
+        in: query
+        required: false
+        schema:
+          type: integer
+          enum: [20, 50, 100]
+          default: 20
+      responses:
+        '200':
+          description: Current failure task page.
+          headers:
+            X-Request-Id:
+              required: true
+              description: Equals body requestId and any nested downloadResult.requestId.
+              schema: {type: string, minLength: 1}
+              example: c52bce3d-5aa5-4c8e-ae64-e73cb76d8f33
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/RetryTaskPage'}
+              examples:
+                tasks:
+                  value:
+                    requestId: c52bce3d-5aa5-4c8e-ae64-e73cb76d8f33
+                    page: 1
+                    pageSize: 20
+                    totalElements: 1
+                    totalPages: 1
+                    items:
+                    - taskId: 11111111-1111-4111-8111-111111111111
+                      pluginId: tushare_pro
+                      apiName: margin
+                      pluginDisplayName: Tushare Pro
+                      apiDisplayName: 融资融券汇总
+                      originalDateRange: {startDate: '20260901', endDate: '20260910'}
+                      originalDateRangeStatus: RECORDED
+                      failedItemCount: 2
+                      failedScopes:
+                      - {targetType: REQUEST, targetValue: '', timeType: DATE, timeValue: '2026-09-03'}
+                      - {targetType: REQUEST, targetValue: '', timeType: DATE, timeValue: '2026-09-07'}
+                      createdAt: '2026-09-08T01:30:15.123Z'
+                      updatedAt: '2026-09-08T01:30:15.123Z'
+                emptyTasks:
+                  value:
+                    requestId: c52bce3d-5aa5-4c8e-ae64-e73cb76d8f33
+                    page: 1
+                    pageSize: 20
+                    totalElements: 0
+                    totalPages: 0
+                    items: []
+        '400':
+          description: Invalid filter or pagination input.
+          headers:
+            X-Request-Id:
+              required: true
+              description: Equals body requestId and any nested downloadResult.requestId.
+              schema: {type: string, minLength: 1}
+              example: c52bce3d-5aa5-4c8e-ae64-e73cb76d8f33
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/ApiError'}
+        '500':
+          description: 'QUERY_FAILED: current records could not be queried.'
+          headers:
+            X-Request-Id:
+              required: true
+              description: Equals body requestId and any nested downloadResult.requestId.
+              schema: {type: string, minLength: 1}
+              example: c52bce3d-5aa5-4c8e-ae64-e73cb76d8f33
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/ApiError'}
+  /api/v1/retry-tasks/{taskId}:
+    parameters:
+    - &part2_001
+      name: taskId
+      in: path
+      required: true
+      schema: {type: string, format: uuid}
+    get:
+      operationId: getRetryTask
+      description: Read actual committed task and all current items without a slot or network checks. During execution
+        this is a snapshot; no historical totals or inferred success. A missing task is 404.
+      responses:
+        '200':
+          description: Current task, original input and exact failed selectors; no item pagination.
+          headers:
+            X-Request-Id:
+              required: true
+              description: Equals body requestId and any nested downloadResult.requestId.
+              schema: {type: string, minLength: 1}
+              example: c52bce3d-5aa5-4c8e-ae64-e73cb76d8f33
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/RetryTaskDetail'}
+              examples:
+                detail:
+                  value:
+                    taskId: 11111111-1111-4111-8111-111111111111
+                    pluginId: tushare_pro
+                    apiName: margin
+                    pluginDisplayName: Tushare Pro
+                    apiDisplayName: 融资融券汇总
+                    originalDateRange: {startDate: '20260901', endDate: '20260910'}
+                    originalDateRangeStatus: RECORDED
+                    failedItemCount: 2
+                    failedScopes:
+                    - {targetType: REQUEST, targetValue: '', timeType: DATE, timeValue: '2026-09-03'}
+                    - {targetType: REQUEST, targetValue: '', timeType: DATE, timeValue: '2026-09-07'}
+                    createdAt: '2026-09-08T01:30:15.123Z'
+                    updatedAt: '2026-09-08T01:30:15.123Z'
+                    requestId: c52bce3d-5aa5-4c8e-ae64-e73cb76d8f33
+                    taskParams: {exchange_id: SSE, start_date: '20260901', end_date: '20260910'}
+                    items:
+                    - {targetType: REQUEST, targetValue: '', timeType: DATE, timeValue: '2026-09-03', errorCode: SOURCE_TIMEOUT,
+                      errorMessage: 来源请求超时，请稍后手动重试, updatedAt: '2026-09-08T01:30:15.123Z'}
+                    - {targetType: REQUEST, targetValue: '', timeType: DATE, timeValue: '2026-09-07', errorCode: SOURCE_TIMEOUT,
+                      errorMessage: 来源请求超时，请稍后手动重试, updatedAt: '2026-09-08T01:30:15.123Z'}
+                    retrying: false
+                    canExecute: false
+                    executionBlocker: {code: CALENDAR_UNCONFIRMED, message: 必要日历尚未确认；未发起来源请求}
+                partialRetry:
+                  value:
+                    taskId: 11111111-1111-4111-8111-111111111111
+                    pluginId: tushare_pro
+                    apiName: margin
+                    pluginDisplayName: Tushare Pro
+                    apiDisplayName: 融资融券汇总
+                    originalDateRange: {startDate: '20260901', endDate: '20260910'}
+                    originalDateRangeStatus: RECORDED
+                    failedItemCount: 1
+                    failedScopes:
+                    - {targetType: REQUEST, targetValue: '', timeType: DATE, timeValue: '2026-09-07'}
+                    createdAt: '2026-09-08T01:30:15.123Z'
+                    updatedAt: '2026-09-08T01:30:15.123Z'
+                    requestId: c52bce3d-5aa5-4c8e-ae64-e73cb76d8f33
+                    taskParams: {exchange_id: SSE, start_date: '20260901', end_date: '20260910'}
+                    items:
+                    - {targetType: REQUEST, targetValue: '', timeType: DATE, timeValue: '2026-09-07', errorCode: SOURCE_TIMEOUT,
+                      errorMessage: 来源请求超时，请稍后手动重试, updatedAt: '2026-09-08T01:30:15.123Z'}
+                    retrying: false
+                    canExecute: false
+                    executionBlocker: {code: CALENDAR_UNCONFIRMED, message: 必要日历尚未确认；未发起来源请求}
+                twoStocksSameDay:
+                  value:
+                    taskId: 11111111-1111-4111-8111-111111111111
+                    pluginId: tushare_pro
+                    apiName: daily
+                    pluginDisplayName: Tushare Pro
+                    apiDisplayName: 日线行情
+                    originalDateRange: {startDate: '20260901', endDate: '20260910'}
+                    originalDateRangeStatus: RECORDED
+                    failedItemCount: 2
+                    failedScopes:
+                    - {targetType: STOCK, targetValue: 000001.SZ, timeType: DATE, timeValue: '2026-09-03'}
+                    - {targetType: STOCK, targetValue: 600000.SH, timeType: DATE, timeValue: '2026-09-03'}
+                    createdAt: '2026-09-08T01:30:15.123Z'
+                    updatedAt: '2026-09-08T01:30:15.123Z'
+                    requestId: c52bce3d-5aa5-4c8e-ae64-e73cb76d8f33
+                    taskParams: {start_date: '20260901', end_date: '20260910'}
+                    items:
+                    - {targetType: STOCK, targetValue: 000001.SZ, timeType: DATE, timeValue: '2026-09-03', errorCode: SOURCE_TIMEOUT,
+                      errorMessage: 来源请求超时，请稍后手动重试, updatedAt: '2026-09-08T01:30:15.123Z'}
+                    - {targetType: STOCK, targetValue: 600000.SH, timeType: DATE, timeValue: '2026-09-03', errorCode: SOURCE_TIMEOUT,
+                      errorMessage: 来源请求超时，请稍后手动重试, updatedAt: '2026-09-08T01:30:15.123Z'}
+                    retrying: false
+                    canExecute: false
+                    executionBlocker: {code: CALENDAR_UNCONFIRMED, message: 必要日历尚未确认；未发起来源请求}
+                  summary: 受控合同示例，独立恢复未真实启用。
+                notApplicable:
+                  value:
+                    taskId: 11111111-1111-4111-8111-111111111111
+                    pluginId: tushare_pro
+                    apiName: stock_basic
+                    pluginDisplayName: Tushare Pro
+                    apiDisplayName: 股票基础信息
+                    originalDateRange: null
+                    originalDateRangeStatus: NOT_APPLICABLE
+                    failedItemCount: 1
+                    failedScopes:
+                    - {targetType: REQUEST, targetValue: '', timeType: NONE, timeValue: ''}
+                    createdAt: '2026-09-08T01:30:15.123Z'
+                    updatedAt: '2026-09-08T01:30:15.123Z'
+                    requestId: c52bce3d-5aa5-4c8e-ae64-e73cb76d8f33
+                    taskParams: {list_status: L}
+                    items:
+                    - {targetType: REQUEST, targetValue: '', timeType: NONE, timeValue: '', errorCode: SOURCE_TIMEOUT,
+                      errorMessage: 来源请求超时，请稍后手动重试, updatedAt: '2026-09-08T01:30:15.123Z'}
+                    retrying: false
+                    canExecute: true
+                    executionBlocker: null
+                notRecorded:
+                  value:
+                    taskId: 11111111-1111-4111-8111-111111111111
+                    pluginId: tushare_pro
+                    apiName: margin
+                    pluginDisplayName: Tushare Pro
+                    apiDisplayName: 融资融券汇总
+                    originalDateRange: null
+                    originalDateRangeStatus: NOT_RECORDED
+                    failedItemCount: 2
+                    failedScopes:
+                    - {targetType: REQUEST, targetValue: '', timeType: DATE, timeValue: '2026-09-03'}
+                    - {targetType: REQUEST, targetValue: '', timeType: DATE, timeValue: '2026-09-07'}
+                    createdAt: '2026-09-08T01:30:15.123Z'
+                    updatedAt: '2026-09-08T01:30:15.123Z'
+                    requestId: c52bce3d-5aa5-4c8e-ae64-e73cb76d8f33
+                    taskParams: {exchange_id: SSE}
+                    items:
+                    - {targetType: REQUEST, targetValue: '', timeType: DATE, timeValue: '2026-09-03', errorCode: SOURCE_TIMEOUT,
+                      errorMessage: 来源请求超时，请稍后手动重试, updatedAt: '2026-09-08T01:30:15.123Z'}
+                    - {targetType: REQUEST, targetValue: '', timeType: DATE, timeValue: '2026-09-07', errorCode: SOURCE_TIMEOUT,
+                      errorMessage: 来源请求超时，请稍后手动重试, updatedAt: '2026-09-08T01:30:15.123Z'}
+                    retrying: false
+                    canExecute: false
+                    executionBlocker: {code: CALENDAR_UNCONFIRMED, message: 必要日历尚未确认；未发起来源请求}
+                unconfirmedOriginalRange:
+                  value:
+                    taskId: 11111111-1111-4111-8111-111111111111
+                    pluginId: tushare_pro
+                    apiName: margin
+                    pluginDisplayName: Tushare Pro
+                    apiDisplayName: 融资融券汇总
+                    originalDateRange: null
+                    originalDateRangeStatus: UNCONFIRMED
+                    failedItemCount: 2
+                    failedScopes:
+                    - {targetType: REQUEST, targetValue: '', timeType: DATE, timeValue: '2026-09-03'}
+                    - {targetType: REQUEST, targetValue: '', timeType: DATE, timeValue: '2026-09-07'}
+                    createdAt: '2026-09-08T01:30:15.123Z'
+                    updatedAt: '2026-09-08T01:30:15.123Z'
+                    requestId: c52bce3d-5aa5-4c8e-ae64-e73cb76d8f33
+                    taskParams: {exchange_id: SSE, start_date: '20260901'}
+                    items:
+                    - {targetType: REQUEST, targetValue: '', timeType: DATE, timeValue: '2026-09-03', errorCode: SOURCE_TIMEOUT,
+                      errorMessage: 来源请求超时，请稍后手动重试, updatedAt: '2026-09-08T01:30:15.123Z'}
+                    - {targetType: REQUEST, targetValue: '', timeType: DATE, timeValue: '2026-09-07', errorCode: SOURCE_TIMEOUT,
+                      errorMessage: 来源请求超时，请稍后手动重试, updatedAt: '2026-09-08T01:30:15.123Z'}
+                    retrying: false
+                    canExecute: false
+                    executionBlocker: {code: RETRY_TASK_INVALID, message: 原始区间缺少结束日期，保留记录并拒绝执行}
+                pluginOffline:
+                  value:
+                    taskId: 11111111-1111-4111-8111-111111111111
+                    pluginId: tushare_pro
+                    apiName: margin
+                    pluginDisplayName: null
+                    apiDisplayName: null
+                    originalDateRange: {startDate: '20260901', endDate: '20260910'}
+                    originalDateRangeStatus: RECORDED
+                    failedItemCount: 2
+                    failedScopes:
+                    - {targetType: REQUEST, targetValue: '', timeType: DATE, timeValue: '2026-09-03'}
+                    - {targetType: REQUEST, targetValue: '', timeType: DATE, timeValue: '2026-09-07'}
+                    createdAt: '2026-09-08T01:30:15.123Z'
+                    updatedAt: '2026-09-08T01:30:15.123Z'
+                    requestId: c52bce3d-5aa5-4c8e-ae64-e73cb76d8f33
+                    taskParams: {exchange_id: SSE, start_date: '20260901', end_date: '20260910'}
+                    items:
+                    - {targetType: REQUEST, targetValue: '', timeType: DATE, timeValue: '2026-09-03', errorCode: SOURCE_TIMEOUT,
+                      errorMessage: 来源请求超时，请稍后手动重试, updatedAt: '2026-09-08T01:30:15.123Z'}
+                    - {targetType: REQUEST, targetValue: '', timeType: DATE, timeValue: '2026-09-07', errorCode: SOURCE_TIMEOUT,
+                      errorMessage: 来源请求超时，请稍后手动重试, updatedAt: '2026-09-08T01:30:15.123Z'}
+                    retrying: false
+                    canExecute: false
+                    executionBlocker: {code: PLUGIN_DISABLED, message: 原插件不可用，请检查其配置}
+        '400':
+          description: Invalid UUID.
+          headers:
+            X-Request-Id:
+              required: true
+              description: Equals body requestId and any nested downloadResult.requestId.
+              schema: {type: string, minLength: 1}
+              example: c52bce3d-5aa5-4c8e-ae64-e73cb76d8f33
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/ApiError'}
+        '404':
+          description: No saved task.
+          headers:
+            X-Request-Id:
+              required: true
+              description: Equals body requestId and any nested downloadResult.requestId.
+              schema: {type: string, minLength: 1}
+              example: c52bce3d-5aa5-4c8e-ae64-e73cb76d8f33
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/ApiError'}
+              examples:
+                notFound:
+                  value:
+                    requestId: c52bce3d-5aa5-4c8e-ae64-e73cb76d8f33
+                    code: RETRY_TASK_NOT_FOUND
+                    message: 当前失败任务不存在，请刷新列表
+                    retryable: false
+                    fieldErrors: []
+        '500':
+          description: 'QUERY_FAILED: task could not be queried.'
+          headers:
+            X-Request-Id:
+              required: true
+              description: Equals body requestId and any nested downloadResult.requestId.
+              schema: {type: string, minLength: 1}
+              example: c52bce3d-5aa5-4c8e-ae64-e73cb76d8f33
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/ApiError'}
+  /api/v1/retry-tasks/{taskId}/execute:
+    parameters:
+    - *part2_001
+    post:
+      operationId: executeRetryTask
+      description: 'Manual synchronous retry of actual remaining saved selectors in the original task, preserving
+        original input display dates. Request body must be zero bytes: {}, null or any content is PARAM_INVALID. Validate
+        input first (400), acquire slot next (409 when busy, no queue), then reread actual task (404 when absent).
+        Busy takes precedence over the subsequent absent-task lookup. Do not recreate deleted items, merge ranges,
+        change conditions, or deduplicate by X-Request-Id. Client disconnect does not cancel execution or release
+        its slot. No cancellation, automatic replay or permanent idempotency.'
+      responses:
+        '200':
+          description: All planned ranges attempted; confirmed unit subtotals and currently saved failures.
+          headers:
+            X-Request-Id:
+              required: true
+              description: Equals body requestId and any nested downloadResult.requestId.
+              schema: {type: string, minLength: 1}
+              example: c52bce3d-5aa5-4c8e-ae64-e73cb76d8f33
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/DownloadResponse'}
+              examples:
+                success:
+                  value:
+                    requestId: c52bce3d-5aa5-4c8e-ae64-e73cb76d8f33
+                    outcome: SUCCESS
+                    pluginId: tushare_pro
+                    apiName: daily
+                    sourceRowCount: 10
+                    insertedRows: 10
+                    updatedRows: 0
+                    message: 下载成功
+                    completedUnits: 1
+                    failedUnits: 0
+                    notStartedUnits: 0
+                    skippedClosedDates: 0
+                    taskId: null
+                    remainingFailedUnits: 0
+                    failureRecordStatus: NOT_REQUIRED
+                    failures: []
+                    notStartedScopes: []
+                    unconfirmedScopes: []
+                partialUnits:
+                  value:
+                    requestId: c52bce3d-5aa5-4c8e-ae64-e73cb76d8f33
+                    outcome: PARTIAL
+                    pluginId: tushare_pro
+                    apiName: daily
+                    sourceRowCount: 20
+                    insertedRows: 18
+                    updatedRows: 2
+                    message: 完成 2 项，失败 1 项
+                    completedUnits: 2
+                    failedUnits: 1
+                    notStartedUnits: 0
+                    skippedClosedDates: 0
+                    taskId: 11111111-1111-4111-8111-111111111111
+                    remainingFailedUnits: 1
+                    failureRecordStatus: CONFIRMED
+                    failures:
+                    - {targetType: STOCK, targetValue: 000002.SZ, timeType: DATE, timeValue: '2026-09-03', errorCode: ADAPTER_TYPE_INVALID,
+                      errorMessage: 字段类型不符合定义}
+                    notStartedScopes: []
+                    unconfirmedScopes: []
+                  summary: 受控合同示例，独立恢复未真实启用。
+                empty:
+                  value:
+                    requestId: c52bce3d-5aa5-4c8e-ae64-e73cb76d8f33
+                    outcome: EMPTY
+                    pluginId: tushare_pro
+                    apiName: daily
+                    sourceRowCount: 0
+                    insertedRows: 0
+                    updatedRows: 0
+                    message: 下载成功，0 条数据
+                    completedUnits: 1
+                    failedUnits: 0
+                    notStartedUnits: 0
+                    skippedClosedDates: 0
+                    taskId: null
+                    remainingFailedUnits: 0
+                    failureRecordStatus: NOT_REQUIRED
+                    failures: []
+                    notStartedScopes: []
+                    unconfirmedScopes: []
+                allClosed:
+                  value:
+                    requestId: c52bce3d-5aa5-4c8e-ae64-e73cb76d8f33
+                    outcome: NO_OPEN_DATES
+                    pluginId: tushare_pro
+                    apiName: daily
+                    sourceRowCount: 0
+                    insertedRows: 0
+                    updatedRows: 0
+                    message: 所选范围无开盘日期
+                    completedUnits: 0
+                    failedUnits: 0
+                    notStartedUnits: 0
+                    skippedClosedDates: 2
+                    taskId: null
+                    remainingFailedUnits: 0
+                    failureRecordStatus: NOT_REQUIRED
+                    failures: []
+                    notStartedScopes: []
+                    unconfirmedScopes: []
+                allFailed:
+                  value:
+                    requestId: c52bce3d-5aa5-4c8e-ae64-e73cb76d8f33
+                    outcome: FAILED
+                    pluginId: tushare_pro
+                    apiName: daily
+                    sourceRowCount: 0
+                    insertedRows: 0
+                    updatedRows: 0
+                    message: 失败 1 项，已保存
+                    completedUnits: 0
+                    failedUnits: 1
+                    notStartedUnits: 0
+                    skippedClosedDates: 0
+                    taskId: 11111111-1111-4111-8111-111111111111
+                    remainingFailedUnits: 1
+                    failureRecordStatus: CONFIRMED
+                    failures:
+                    - {targetType: REQUEST, targetValue: '', timeType: RANGE, timeValue: 2026-09-01/2026-09-02, errorCode: SOURCE_TIMEOUT,
+                      errorMessage: 来源请求超时，请稍后手动重试}
+                    notStartedScopes: []
+                    unconfirmedScopes: []
+        '400':
+          description: Input invalid or required field missing; no business request. Old/mixed date parameters are
+            rejected.
+          headers:
+            X-Request-Id:
+              required: true
+              description: Equals body requestId and any nested downloadResult.requestId.
+              schema: {type: string, minLength: 1}
+              example: c52bce3d-5aa5-4c8e-ae64-e73cb76d8f33
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/ApiError'}
+              examples:
+                invalidDateRange:
+                  value:
+                    requestId: c52bce3d-5aa5-4c8e-ae64-e73cb76d8f33
+                    code: PARAM_INVALID
+                    message: 开始日期不能晚于结束日期
+                    retryable: false
+                    fieldErrors: []
+        '409':
+          description: DOWNLOAD_BUSY, PLUGIN_DISABLED, RETRY_TASK_INVALID or SOURCE_REQUEST_UNCONFIRMED; retain existing
+            task records. Static canExecute is revalidated.
+          headers:
+            X-Request-Id:
+              required: true
+              description: Equals body requestId and any nested downloadResult.requestId.
+              schema: {type: string, minLength: 1}
+              example: c52bce3d-5aa5-4c8e-ae64-e73cb76d8f33
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/ApiError'}
+              examples:
+                busy:
+                  value:
+                    requestId: c52bce3d-5aa5-4c8e-ae64-e73cb76d8f33
+                    code: DOWNLOAD_BUSY
+                    message: 已有下载执行中，请等待实际结束
+                    retryable: true
+                    fieldErrors: []
+                sourceRequestUnconfirmed:
+                  value:
+                    requestId: c52bce3d-5aa5-4c8e-ae64-e73cb76d8f33
+                    code: SOURCE_REQUEST_UNCONFIRMED
+                    message: 原接口合法请求方式未确认，未执行
+                    retryable: false
+                    fieldErrors: []
+        '500':
+          description: Current unit persistence failure, failure record save unconfirmed, or commit unknown. Previously
+            committed units remain; stop and include any confirmed execution subtotals.
+          headers:
+            X-Request-Id:
+              required: true
+              description: Equals body requestId and any nested downloadResult.requestId.
+              schema: {type: string, minLength: 1}
+              example: c52bce3d-5aa5-4c8e-ae64-e73cb76d8f33
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/ApiError'}
+              examples:
+                recordSaveUnknown:
+                  value:
+                    requestId: c52bce3d-5aa5-4c8e-ae64-e73cb76d8f33
+                    code: TASK_RECORD_SAVE_UNCONFIRMED
+                    message: 失败记录保存未确认，已停止
+                    retryable: false
+                    fieldErrors: []
+                    downloadResult:
+                      requestId: c52bce3d-5aa5-4c8e-ae64-e73cb76d8f33
+                      outcome: UNCONFIRMED
+                      pluginId: tushare_pro
+                      apiName: daily
+                      sourceRowCount: 10
+                      insertedRows: 10
+                      updatedRows: 0
+                      message: 结果未确认；计数仅包含此前确认项
+                      completedUnits: 1
+                      failedUnits: 1
+                      notStartedUnits: null
+                      skippedClosedDates: 0
+                      taskId: null
+                      remainingFailedUnits: null
+                      failureRecordStatus: UNCONFIRMED
+                      failures:
+                      - {targetType: REQUEST, targetValue: '', timeType: DATE, timeValue: '2026-09-03', errorCode: SOURCE_TIMEOUT,
+                        errorMessage: 来源请求超时，请稍后手动重试}
+                      notStartedScopes:
+                      - {targetType: REQUEST, targetValue: '', timeType: RANGE, timeValue: 2026-09-04/2026-09-10}
+                      unconfirmedScopes: []
+                commitUnknown:
+                  value:
+                    requestId: c52bce3d-5aa5-4c8e-ae64-e73cb76d8f33
+                    code: COMMIT_UNCONFIRMED
+                    message: 当前范围提交结果未确认，已停止
+                    retryable: false
+                    fieldErrors: []
+                    downloadResult:
+                      requestId: c52bce3d-5aa5-4c8e-ae64-e73cb76d8f33
+                      outcome: UNCONFIRMED
+                      pluginId: tushare_pro
+                      apiName: daily
+                      sourceRowCount: 10
+                      insertedRows: 10
+                      updatedRows: 0
+                      message: 结果未确认；计数仅包含此前确认项
+                      completedUnits: 1
+                      failedUnits: 0
+                      notStartedUnits: null
+                      skippedClosedDates: 0
+                      taskId: null
+                      remainingFailedUnits: null
+                      failureRecordStatus: UNCONFIRMED
+                      failures: []
+                      notStartedScopes:
+                      - {targetType: REQUEST, targetValue: '', timeType: RANGE, timeValue: 2026-09-04/2026-09-10}
+                      unconfirmedScopes:
+                      - {targetType: REQUEST, targetValue: '', timeType: DATE, timeValue: '2026-09-03'}
+        '502':
+          description: Pre-business source or necessary calendar failure. In-business source failures are saved then
+            continued and returned via 200 PARTIAL/FAILED.
+          headers:
+            X-Request-Id:
+              required: true
+              description: Equals body requestId and any nested downloadResult.requestId.
+              schema: {type: string, minLength: 1}
+              example: c52bce3d-5aa5-4c8e-ae64-e73cb76d8f33
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/ApiError'}
+              examples:
+                calendarUnconfirmed:
+                  value:
+                    requestId: c52bce3d-5aa5-4c8e-ae64-e73cb76d8f33
+                    code: CALENDAR_UNCONFIRMED
+                    message: 日历未确认，未执行；已有失败项保留
+                    retryable: true
+                    fieldErrors: []
+        '504':
+          description: Pre-business source timeout. In-business timeouts are saved and later planned ranges continue.
+          headers:
+            X-Request-Id:
+              required: true
+              description: Equals body requestId and any nested downloadResult.requestId.
+              schema: {type: string, minLength: 1}
+              example: c52bce3d-5aa5-4c8e-ae64-e73cb76d8f33
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/ApiError'}
+        '404':
+          description: Current task does not exist.
+          headers:
+            X-Request-Id:
+              required: true
+              description: Equals body requestId and any nested downloadResult.requestId.
+              schema: {type: string, minLength: 1}
+              example: c52bce3d-5aa5-4c8e-ae64-e73cb76d8f33
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/ApiError'}
+              examples:
+                notFound:
+                  value:
+                    requestId: c52bce3d-5aa5-4c8e-ae64-e73cb76d8f33
+                    code: RETRY_TASK_NOT_FOUND
+                    message: 当前失败任务不存在，请刷新列表
+                    retryable: false
+                    fieldErrors: []
 components:
   schemas:
     DataSourceSummary:
@@ -221,7 +1093,7 @@ components:
         description: {type: string, minLength: 1}
         enabled: {type: boolean}
         credentialConfigured: {type: boolean}
-        downloadAvailable: {type: boolean}
+        downloadAvailable: {type: boolean, description: Only existing plugin and credential configuration readiness; not proof of source or calendar capability.}
         unavailableReason: {type: [string, 'null']}
       allOf:
         - if: {properties: {downloadAvailable: {const: true}}, required: [downloadAvailable]}
@@ -231,13 +1103,15 @@ components:
     ApiDescriptor:
       type: object
       additionalProperties: false
-      required: [apiName, displayName, category, queryMode, parameters]
+      required: [apiName, displayName, category, queryMode, parameters, downloadPolicy]
       properties:
         apiName: {type: string, pattern: '^[a-z][a-z0-9_]{1,63}$'}
         displayName: {type: string, minLength: 1}
         category: {type: string, minLength: 1, maxLength: 64}
         queryMode: {enum: [trade_date, ann_date, snapshot, date_range]}
+        downloadPolicy: {$ref: '#/components/schemas/DownloadPolicy'}
         parameters:
+          description: Download projection; 38 range targets replace old date fields with required start_date/end_date DATE_RANGE_MEMBER fields mutually relatedParameter, following preserved additional conditions. The 11 original parameter arrays remain unchanged. queryMode and dataset query filters are independent.
           type: array
           items:
             type: object
@@ -344,6 +1218,98 @@ components:
                 then: {required: [length]}
               - if: {properties: {logicalType: {const: DECIMAL}}, required: [logicalType]}
                 then: {required: [precision, scale]}
+    RangeParams:
+      type: object
+      additionalProperties: false
+      required: [start_date, end_date]
+      properties:
+        start_date: &part3_001 {type: string, pattern: '^[0-9]{8}$', description: 'YYYYMMDD; strict Gregorian date, not
+            ISO format:date.'}
+        end_date: *part3_001
+      description: Both endpoints are required with no defaults. Strict Gregorian dates, start_date <= end_date, inclusive
+        range <=31 natural days BEFORE calendar filtering or full-month expansion. Same-day and 31-day inputs are valid;
+        32 days, reversed or impossible dates are PARAM_INVALID. Schema checks shape; binder checks calendar and differences.
+        Old trade_date/ann_date/month alone or mixed are PARAM_INVALID; missing required fields are PARAM_REQUIRED.
+    StockRangeParams:
+      type: object
+      additionalProperties: false
+      required: [ts_code, start_date, end_date]
+      properties:
+        ts_code: {type: string, pattern: '^\s*[A-Za-z0-9]+\.[A-Za-z0-9]+\s*$', description: One code.market value; binder
+            trims and uppercases. No comma-separated stocks or six-digit-only restriction.}
+        start_date: &part3_002 {type: string, pattern: '^[0-9]{8}$', description: 'YYYYMMDD; strict Gregorian date, not
+            ISO format:date.'}
+        end_date: *part3_002
+      description: Both endpoints are required with no defaults. Strict Gregorian dates, start_date <= end_date, inclusive
+        range <=31 natural days BEFORE calendar filtering or full-month expansion. Same-day and 31-day inputs are valid;
+        32 days, reversed or impossible dates are PARAM_INVALID. Schema checks shape; binder checks calendar and differences.
+        Old trade_date/ann_date/month alone or mixed are PARAM_INVALID; missing required fields are PARAM_REQUIRED.
+    ExchangeIdRangeParams:
+      type: object
+      additionalProperties: false
+      required: [exchange_id, start_date, end_date]
+      properties:
+        exchange_id:
+          enum: [SSE, SZSE, BSE]
+        start_date: &part3_003 {type: string, pattern: '^[0-9]{8}$', description: 'YYYYMMDD; strict Gregorian date, not
+            ISO format:date.'}
+        end_date: *part3_003
+      description: Both endpoints are required with no defaults. Strict Gregorian dates, start_date <= end_date, inclusive
+        range <=31 natural days BEFORE calendar filtering or full-month expansion. Same-day and 31-day inputs are valid;
+        32 days, reversed or impossible dates are PARAM_INVALID. Schema checks shape; binder checks calendar and differences.
+        Old trade_date/ann_date/month alone or mixed are PARAM_INVALID; missing required fields are PARAM_REQUIRED.
+    ExchangeRangeParams:
+      type: object
+      additionalProperties: false
+      required: [exchange, start_date, end_date]
+      properties:
+        exchange:
+          enum: [SSE, SZSE, BSE]
+        start_date: &part3_004 {type: string, pattern: '^[0-9]{8}$', description: 'YYYYMMDD; strict Gregorian date, not
+            ISO format:date.'}
+        end_date: *part3_004
+      description: Both endpoints are required with no defaults. Strict Gregorian dates, start_date <= end_date, inclusive
+        range <=31 natural days BEFORE calendar filtering or full-month expansion. Same-day and 31-day inputs are valid;
+        32 days, reversed or impossible dates are PARAM_INVALID. Schema checks shape; binder checks calendar and differences.
+        Old trade_date/ann_date/month alone or mixed are PARAM_INVALID; missing required fields are PARAM_REQUIRED.
+    EmptyParams:
+      type: object
+      additionalProperties: false
+      required: []
+      properties: {}
+      description: Original conditions only. Added date parameters are PARAM_INVALID.
+    StockParams:
+      type: object
+      additionalProperties: false
+      required: [ts_code]
+      properties:
+        ts_code: {type: string, pattern: '^\s*[A-Za-z0-9]+\.[A-Za-z0-9]+\s*$', description: One code.market value; binder
+            trims and uppercases. No comma-separated stocks or six-digit-only restriction.}
+      description: Original conditions only. Added date parameters are PARAM_INVALID.
+    HsTypeParams:
+      type: object
+      additionalProperties: false
+      required: [hs_type]
+      properties:
+        hs_type:
+          enum: [SH, SZ]
+      description: Original conditions only. Added date parameters are PARAM_INVALID.
+    ListStatusParams:
+      type: object
+      additionalProperties: false
+      required: [list_status]
+      properties:
+        list_status:
+          enum: [L, P, D]
+      description: Original conditions only. Added date parameters are PARAM_INVALID.
+    ExchangeParams:
+      type: object
+      additionalProperties: false
+      required: [exchange]
+      properties:
+        exchange:
+          enum: [SSE, SZSE, BSE]
+      description: Original conditions only. Added date parameters are PARAM_INVALID.
     DownloadRequest:
       type: object
       additionalProperties: false
@@ -355,28 +1321,588 @@ components:
           type: object
           propertyNames: {pattern: '^[a-z][a-z0-9_]{1,63}$'}
           additionalProperties: {type: string}
-    DownloadResponse:
+      description: 'Target range contract: 38 range APIs and 11 original-parameter APIs. Tushare shapes do not prove
+        a legal upstream request or source availability. Other plugins retain their own ApiDescriptor validation (including
+        fixture scenario). Unknown outer fields and non-string params are rejected.'
+      allOf:
+      - if:
+          properties:
+            pluginId: {const: tushare_pro}
+          required: [pluginId]
+        then:
+          properties:
+            apiName:
+              enum: [adj_factor, block_trade, daily, daily_basic, hk_hold, hsgt_top10, margin, margin_detail, moneyflow,
+                moneyflow_hsgt, monthly, slb_len, slb_sec, slb_sec_detail, stk_limit, suspend_d, top_inst, top_list,
+                weekly, balancesheet, cashflow, disclosure_date, dividend, express, fina_audit, fina_indicator, fina_mainbz,
+                forecast, income, repurchase, share_float, stk_holdertrade, top10_floatholders, top10_holders, broker_recommend,
+                namechange, new_share, trade_cal, hs_const, index_classify, index_member, index_member_all, pledge_detail,
+                pledge_stat, stk_holdernumber, stk_managers, stk_rewards, stock_basic, stock_company]
+      - if:
+          properties:
+            pluginId: {const: tushare_pro}
+            apiName:
+              enum: [adj_factor, block_trade, daily, daily_basic, hk_hold, hsgt_top10, margin_detail, moneyflow, moneyflow_hsgt,
+                monthly, slb_len, slb_sec, slb_sec_detail, stk_limit, suspend_d, top_inst, top_list, weekly, disclosure_date,
+                dividend, express, forecast, repurchase, share_float, stk_holdertrade, top10_floatholders, top10_holders,
+                broker_recommend, namechange, new_share]
+          required: [pluginId, apiName]
+        then:
+          properties:
+            params: {$ref: '#/components/schemas/RangeParams'}
+      - if:
+          properties:
+            pluginId: {const: tushare_pro}
+            apiName:
+              enum: [balancesheet, cashflow, fina_audit, fina_indicator, fina_mainbz, income]
+          required: [pluginId, apiName]
+        then:
+          properties:
+            params: {$ref: '#/components/schemas/StockRangeParams'}
+      - if:
+          properties:
+            pluginId: {const: tushare_pro}
+            apiName:
+              enum: [margin]
+          required: [pluginId, apiName]
+        then:
+          properties:
+            params: {$ref: '#/components/schemas/ExchangeIdRangeParams'}
+      - if:
+          properties:
+            pluginId: {const: tushare_pro}
+            apiName:
+              enum: [trade_cal]
+          required: [pluginId, apiName]
+        then:
+          properties:
+            params: {$ref: '#/components/schemas/ExchangeRangeParams'}
+      - if:
+          properties:
+            pluginId: {const: tushare_pro}
+            apiName:
+              enum: [index_classify, index_member, index_member_all, pledge_detail, pledge_stat, stk_managers]
+          required: [pluginId, apiName]
+        then:
+          properties:
+            params: {$ref: '#/components/schemas/EmptyParams'}
+      - if:
+          properties:
+            pluginId: {const: tushare_pro}
+            apiName:
+              enum: [stk_holdernumber, stk_rewards]
+          required: [pluginId, apiName]
+        then:
+          properties:
+            params: {$ref: '#/components/schemas/StockParams'}
+      - if:
+          properties:
+            pluginId: {const: tushare_pro}
+            apiName:
+              enum: [hs_const]
+          required: [pluginId, apiName]
+        then:
+          properties:
+            params: {$ref: '#/components/schemas/HsTypeParams'}
+      - if:
+          properties:
+            pluginId: {const: tushare_pro}
+            apiName:
+              enum: [stock_basic]
+          required: [pluginId, apiName]
+        then:
+          properties:
+            params: {$ref: '#/components/schemas/ListStatusParams'}
+      - if:
+          properties:
+            pluginId: {const: tushare_pro}
+            apiName:
+              enum: [stock_company]
+          required: [pluginId, apiName]
+        then:
+          properties:
+            params: {$ref: '#/components/schemas/ExchangeParams'}
+    DownloadPolicy:
       type: object
       additionalProperties: false
-      required: [requestId, outcome, pluginId, apiName, sourceRowCount, insertedRows, updatedRows, message]
+      required: [mode, dateSemantic, description, calendarProfile, limits]
+      properties:
+        mode:
+          enum: [TRADE_DATE_RANGE, ANN_DATE_RANGE, MONTH_RANGE, NATIVE_RANGE, ORIGINAL_PARAMS]
+        dateSemantic:
+          enum: [TRADE_DATE, ANN_DATE, COVERED_MONTH, CALENDAR_DATE, IPO_DATE, NONE]
+        description: {type: string, minLength: 1}
+        calendarProfile:
+          enum: [C-A, C-M, C-S, C-N, C-X, null]
+        limits:
+          oneOf:
+          - type: object
+            additionalProperties: false
+            required: [maxRangeDays]
+            properties:
+              maxRangeDays: {const: 31}
+          - {type: 'null'}
+      description: 'Public download projection only. mode denotes target input, not executable or live-verified capability.
+        Internal sourceRequestMode/sourceDateParameter/batchPlanning/completenessPolicy/recoveryPolicy and evidence
+        URLs are not exposed. Trade dates use all necessary confirmed calendars; announcement dates are not reporting
+        periods; covered months are complete months. weekly/monthly retain periodic records and do not expand the selected
+        range. Native wording: trade_cal calendar dates, new_share IPO subscription dates, namechange announcement dates;
+        actual filtering and completeness still require source verification. Original parameters do not assert latest-only
+        data.'
+      allOf:
+      - if:
+          properties:
+            mode: {const: TRADE_DATE_RANGE}
+          required: [mode]
+        then:
+          properties:
+            dateSemantic: {const: TRADE_DATE}
+            calendarProfile:
+              enum: [C-A, C-M, C-S, C-N, C-X]
+      - if:
+          properties:
+            mode: {const: ANN_DATE_RANGE}
+          required: [mode]
+        then:
+          properties:
+            dateSemantic: {const: ANN_DATE}
+      - if:
+          properties:
+            mode: {const: MONTH_RANGE}
+          required: [mode]
+        then:
+          properties:
+            dateSemantic: {const: COVERED_MONTH}
+      - if:
+          properties:
+            mode: {const: NATIVE_RANGE}
+          required: [mode]
+        then:
+          properties:
+            dateSemantic:
+              enum: [CALENDAR_DATE, IPO_DATE, ANN_DATE]
+      - if:
+          properties:
+            mode: {const: ORIGINAL_PARAMS}
+        then:
+          properties:
+            dateSemantic: {const: NONE}
+            limits: {type: 'null'}
+        else:
+          properties:
+            limits:
+              type: object
+              additionalProperties: false
+              required: [maxRangeDays]
+              properties:
+                maxRangeDays: {const: 31}
+      - if:
+          properties:
+            mode:
+              not: {const: TRADE_DATE_RANGE}
+        then:
+          properties:
+            calendarProfile: {type: 'null'}
+    RecoveryScope:
+      type: object
+      additionalProperties: false
+      required: [targetType, targetValue, timeType, timeValue]
+      properties:
+        targetType: &part3_005
+          enum: [STOCK, REQUEST]
+        targetValue: &part3_006 {type: string, maxLength: 64}
+        timeType: &part3_007
+          enum: [DATE, MONTH, RANGE, NONE]
+        timeValue: &part3_008 {type: string, maxLength: 64}
+      description: Exact object and time selector. REQUEST has empty targetValue and preserves public task conditions.
+        STOCK is a single normalized code, never a stock list. DATE is strict Gregorian YYYY-MM-DD; MONTH strict YYYY-MM;
+        RANGE is ordered strict Gregorian start/end and must span genuinely multiple days (semantic validation). Native
+        same-day range requests are saved as DATE and reconstructed with equal source start_date/end_date. NONE has
+        an empty timeValue. Do not merge non-contiguous dates or different stocks on one date; saved REQUEST/RANGE boundaries
+        stay frozen on retry.
+      allOf: &part3_009
+      - if:
+          properties:
+            targetType: {const: REQUEST}
+          required: [targetType]
+        then:
+          properties:
+            targetValue: {const: ''}
+      - if:
+          properties:
+            targetType: {const: STOCK}
+          required: [targetType]
+        then:
+          properties:
+            targetValue: {type: string, minLength: 1, pattern: '^[A-Z0-9]+\.[A-Z0-9]+$'}
+      oneOf: &part3_010
+      - properties:
+          timeType: {const: DATE}
+          timeValue: {type: string, format: date, pattern: '^[0-9]{4}-[0-9]{2}-[0-9]{2}$'}
+        required: [timeType, timeValue]
+      - properties:
+          timeType: {const: MONTH}
+          timeValue: {type: string, pattern: '^[0-9]{4}-(0[1-9]|1[0-2])$'}
+        required: [timeType, timeValue]
+      - properties:
+          timeType: {const: RANGE}
+          timeValue: {type: string, pattern: '^[0-9]{4}-[0-9]{2}-[0-9]{2}/[0-9]{4}-[0-9]{2}-[0-9]{2}$'}
+        required: [timeType, timeValue]
+      - properties:
+          timeType: {const: NONE}
+          timeValue: {const: ''}
+        required: [timeType, timeValue]
+    RecoveryFailure:
+      type: object
+      additionalProperties: false
+      required: [targetType, targetValue, timeType, timeValue, errorCode, errorMessage]
+      properties:
+        targetType: *part3_005
+        targetValue: *part3_006
+        timeType: *part3_007
+        timeValue: *part3_008
+        errorCode: &part3_016 {type: string, minLength: 1, maxLength: 64}
+        errorMessage: &part3_017 {type: string, minLength: 1, maxLength: 512}
+      description: 'Explicit unit failure and safe summary, possibly not saved: consult failureRecordStatus. Historical
+        errorCode strings remain displayable even if absent from the current catalogue; newly generated codes belong
+        to it. Never include raw upstream responses or diagnostics.'
+      allOf: *part3_009
+      oneOf: *part3_010
+    DownloadExecutionResult:
+      type: object
+      additionalProperties: false
+      required: [requestId, outcome, pluginId, apiName, sourceRowCount, insertedRows, updatedRows, message, completedUnits,
+        failedUnits, notStartedUnits, skippedClosedDates, taskId, remainingFailedUnits, failureRecordStatus, failures,
+        notStartedScopes, unconfirmedScopes]
+      properties:
+        requestId: {type: string, minLength: 1, description: Equals X-Request-Id and any enclosing ApiError.requestId.}
+        outcome:
+          enum: [SUCCESS, EMPTY, NO_OPEN_DATES, PARTIAL, FAILED, UNCONFIRMED]
+        pluginId: &part3_011 {type: string, pattern: '^[a-z][a-z0-9_]{1,63}$'}
+        apiName: *part3_011
+        sourceRowCount: {type: integer, format: int64, minimum: 0, description: 'R: full source rows of confirmed completed
+            units in this execution only; excludes failed partial pages and unknown commits.'}
+        insertedRows: {type: integer, format: int64, minimum: 0, description: 'I: confirmed inserted rows of completed
+            units only.'}
+        updatedRows: {type: integer, format: int64, minimum: 0, description: 'U: confirmed updated rows of completed
+            units only.'}
+        message: {type: string, minLength: 1}
+        completedUnits: {type: integer, format: int64, minimum: 0, description: 'S: confirmed full commits or valid
+            empty recovery units; filtered closed dates are not units.'}
+        failedUnits: {type: integer, format: int64, minimum: 0, description: 'F: explicit failures this execution; persistence
+            confirmation is separate. One failures entry per explicit unit.'}
+        notStartedUnits:
+          type: [integer, 'null']
+          format: int64
+          minimum: 0
+          description: 'N: count only when the remaining recovery-unit set is known; null means unknown, never infer
+            zero or count from range-array length.'
+        skippedClosedDates: {type: integer, format: int64, minimum: 0, description: 'H: distinct natural dates fully
+            confirmed closed and skipped in this execution; same day counts once across stocks.'}
+        taskId:
+          oneOf:
+          - {type: string, format: uuid}
+          - {type: 'null'}
+          description: Only a confirmed saved task that still has failure items; otherwise null. A pre-generated ID
+            is not evidence.
+        remainingFailedUnits:
+          type: [integer, 'null']
+          format: int64
+          minimum: 0
+          description: Confirmed current DB failures at end, independent of F; zero without a task, null if storage/commit
+            uncertainty prevents confirmation.
+        failureRecordStatus:
+          enum: [NOT_REQUIRED, CONFIRMED, UNCONFIRMED]
+          description: No records need retention, record/deletion result confirmed, or latest save/deletion not confirmed;
+            response-only.
+        failures:
+          type: array
+          items: {$ref: '#/components/schemas/RecoveryFailure'}
+        notStartedScopes:
+          type: array
+          items: {$ref: '#/components/schemas/RecoveryScope'}
+          description: Actual ranges known not started, including REQUEST ranges before independent units are known.
+            Not persisted; length does not define N.
+        unconfirmedScopes:
+          type: array
+          items: {$ref: '#/components/schemas/RecoveryScope'}
+          description: Executed ranges with unknown result; disjoint from confirmed completed/failed ranges. Not saved
+            as new failures and not counted as S or F.
+      description: Current execution only, never persisted as task history. S/F/N count recovery units, not requests,
+        rows or dates; no guessed totalUnits. Only a known complete set without unknown results permits S+F+N reconciliation.
+        Unknown outcomes retain earlier confirmed R/I/U subtotals, never present them as full execution totals. Error
+        responses may stop with actual notStartedScopes; storage/commit uncertainty uses UNCONFIRMED.
+      allOf:
+      - if:
+          properties:
+            completedUnits: {const: 0}
+          required: [completedUnits]
+        then:
+          properties:
+            sourceRowCount: {const: 0}
+            insertedRows: {const: 0}
+            updatedRows: {const: 0}
+      - if:
+          properties:
+            outcome: {const: EMPTY}
+          required: [outcome]
+        then:
+          properties:
+            completedUnits: {minimum: 1}
+            failedUnits: {const: 0}
+            sourceRowCount: {const: 0}
+            insertedRows: {const: 0}
+            updatedRows: {const: 0}
+      - if:
+          properties:
+            outcome: {const: SUCCESS}
+          required: [outcome]
+        then:
+          properties:
+            completedUnits: {minimum: 1}
+            failedUnits: {const: 0}
+            sourceRowCount: {minimum: 1}
+      - if:
+          properties:
+            outcome: {const: NO_OPEN_DATES}
+          required: [outcome]
+        then:
+          properties:
+            completedUnits: {const: 0}
+            failedUnits: {const: 0}
+            sourceRowCount: {const: 0}
+            insertedRows: {const: 0}
+            updatedRows: {const: 0}
+            skippedClosedDates: {minimum: 1}
+      - if:
+          properties:
+            outcome: {const: PARTIAL}
+          required: [outcome]
+        then:
+          properties:
+            completedUnits: {minimum: 1}
+            failedUnits: {minimum: 1}
+      - if:
+          properties:
+            outcome: {const: FAILED}
+          required: [outcome]
+        then:
+          properties:
+            completedUnits: {const: 0}
+            failedUnits: {minimum: 1}
+      - if:
+          properties:
+            outcome: {const: UNCONFIRMED}
+          required: [outcome]
+        then:
+          properties:
+            failureRecordStatus: {const: UNCONFIRMED}
+    DownloadResponse:
+      allOf:
+      - {$ref: '#/components/schemas/DownloadExecutionResult'}
+      - properties:
+          outcome:
+            enum: [SUCCESS, EMPTY, NO_OPEN_DATES, PARTIAL, FAILED]
+          notStartedUnits: {const: 0}
+          notStartedScopes: {maxItems: 0}
+          unconfirmedScopes: {maxItems: 0}
+          failureRecordStatus:
+            enum: [NOT_REQUIRED, CONFIRMED]
+      - if:
+          properties:
+            outcome:
+              enum: [PARTIAL, FAILED]
+        then:
+          properties:
+            taskId: {type: string, format: uuid}
+            remainingFailedUnits: {minimum: 1, type: integer}
+            failureRecordStatus: {const: CONFIRMED}
+            failures: {minItems: 1}
+        else:
+          properties:
+            taskId: {type: 'null'}
+            remainingFailedUnits: {const: 0}
+            failures: {maxItems: 0}
+      description: 'HTTP 200 only after all planned ranges are attempted. SUCCESS has positive confirmed R; EMPTY has
+        completed valid empty units; NO_OPEN_DATES has no units and H>0 (first download: 所选区间无开盘日期; retry: 所选范围无开盘日期).
+        Valid empty plus failure is PARTIAL. PARTIAL/FAILED require confirmed saved failures. UNCONFIRMED is only an
+        error downloadResult.'
+    OriginalDateRange:
+      type: object
+      additionalProperties: false
+      required: [startDate, endDate]
+      properties:
+        startDate: &part3_012 {type: string, pattern: '^[0-9]{8}$', description: 'YYYYMMDD; strict Gregorian date, not ISO
+            format:date.'}
+        endDate: *part3_012
+      description: Original validated inclusive <=31-day input, frozen before filtering/month expansion. Derived only
+        from saved taskParams.start_date/end_date; never inferred from failure selectors, current forms or history.
+    RetryTaskSummary:
+      type: object
+      additionalProperties: false
+      required: [taskId, pluginId, apiName, pluginDisplayName, apiDisplayName, originalDateRange, originalDateRangeStatus,
+        failedItemCount, failedScopes, createdAt, updatedAt]
+      properties:
+        taskId: {type: string, format: uuid}
+        pluginId: &part3_013 {type: string, pattern: '^[a-z][a-z0-9_]{1,63}$'}
+        apiName: *part3_013
+        pluginDisplayName:
+          type: [string, 'null']
+        apiDisplayName:
+          type: [string, 'null']
+        originalDateRange:
+          oneOf:
+          - {$ref: '#/components/schemas/OriginalDateRange'}
+          - {type: 'null'}
+        originalDateRangeStatus:
+          enum: [RECORDED, NOT_APPLICABLE, NOT_RECORDED, UNCONFIRMED]
+        failedItemCount: {type: integer, format: int64, minimum: 1}
+        failedScopes:
+          type: array
+          items: {$ref: '#/components/schemas/RecoveryScope'}
+          minItems: 1
+          uniqueItems: true
+        createdAt: &part3_014 {type: string, format: date-time, pattern: '^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$',
+          description: UTC timestamp with millisecond precision and Z suffix.}
+        updatedAt: *part3_014
+      description: 'Only actual currently saved failures. Count equals complete failedScopes length. Names may be null
+        when metadata is unavailable; display saved identifiers. Original range status: RECORDED=valid original endpoints,
+        NOT_APPLICABLE=known ORIGINAL_PARAMS without dates (不适用), NOT_RECORDED=known range mode missing both endpoints
+        (未记录), UNCONFIRMED=partial/invalid dates or unknown mode (原始区间未确认). Never reconstruct a continuous failed range
+        from sparse dates, collapse different stocks, or infer success from absence.'
+      allOf:
+      - if:
+          properties:
+            originalDateRangeStatus: {const: RECORDED}
+        then:
+          properties:
+            originalDateRange: {$ref: '#/components/schemas/OriginalDateRange'}
+        else:
+          properties:
+            originalDateRange: {type: 'null'}
+    RetryTaskPage:
+      type: object
+      additionalProperties: false
+      required: [requestId, page, pageSize, totalElements, totalPages, items]
       properties:
         requestId: {type: string, minLength: 1}
-        outcome: {enum: [SUCCESS, EMPTY]}
-        pluginId: {type: string, pattern: '^[a-z][a-z0-9_]{1,63}$'}
-        apiName: {type: string, pattern: '^[a-z][a-z0-9_]{1,63}$'}
-        sourceRowCount: {type: integer, format: int64, minimum: 0}
-        insertedRows: {type: integer, format: int64, minimum: 0}
-        updatedRows: {type: integer, format: int64, minimum: 0}
-        message: {type: string, minLength: 1}
-      allOf:
-        - if: {properties: {outcome: {const: EMPTY}}, required: [outcome]}
-          then:
+        page: {type: integer, minimum: 1}
+        pageSize:
+          type: integer
+          enum: [20, 50, 100]
+          default: 20
+        totalElements: &part3_015 {type: integer, format: int64, minimum: 0}
+        totalPages: *part3_015
+        items:
+          type: array
+          items: {$ref: '#/components/schemas/RetryTaskSummary'}
+      description: updatedAt DESC, taskId DESC. Normalize out-of-range requests to the last page; empty results have
+        page=1, totalElements=totalPages=0, items=[]. Only tasks are paginated; details are not.
+    RetryTaskItem:
+      type: object
+      additionalProperties: false
+      required: [targetType, targetValue, timeType, timeValue, errorCode, errorMessage, updatedAt]
+      properties:
+        targetType: *part3_005
+        targetValue: *part3_006
+        timeType: *part3_007
+        timeValue: *part3_008
+        errorCode: *part3_016
+        errorMessage: *part3_017
+        updatedAt: {type: string, format: date-time, pattern: '^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$', description: UTC
+            timestamp with millisecond precision and Z suffix.}
+      description: Current saved failure with safe last-known cause, sorted by targetType,targetValue,timeType,timeValue
+        ascending string order. Full selector determines identity, not only date.
+      allOf: *part3_009
+      oneOf: *part3_010
+    RetryTaskDetail:
+      type: object
+      additionalProperties: false
+      required: [taskId, pluginId, apiName, pluginDisplayName, apiDisplayName, originalDateRange, originalDateRangeStatus,
+        failedItemCount, failedScopes, createdAt, updatedAt, requestId, taskParams, items, retrying, canExecute, executionBlocker]
+      properties:
+        taskId: {type: string, format: uuid}
+        pluginId: &part3_018 {type: string, pattern: '^[a-z][a-z0-9_]{1,63}$'}
+        apiName: *part3_018
+        pluginDisplayName:
+          type: [string, 'null']
+        apiDisplayName:
+          type: [string, 'null']
+        originalDateRange:
+          oneOf:
+          - {$ref: '#/components/schemas/OriginalDateRange'}
+          - {type: 'null'}
+        originalDateRangeStatus:
+          enum: [RECORDED, NOT_APPLICABLE, NOT_RECORDED, UNCONFIRMED]
+        failedItemCount: {type: integer, format: int64, minimum: 1}
+        failedScopes:
+          type: array
+          items: {$ref: '#/components/schemas/RecoveryScope'}
+          minItems: 1
+          uniqueItems: true
+        createdAt: &part3_019 {type: string, format: date-time, pattern: '^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$',
+          description: UTC timestamp with millisecond precision and Z suffix.}
+        updatedAt: *part3_019
+        requestId: {type: string, minLength: 1}
+        taskParams: {type: object, description: 'Safe JSON object (not a JSON string) of stored whitelisted public conditions
+            plus frozen original endpoints, snake_case keys. No credentials, paging positions or current STOCK/time
+            selector copied back. Strip original date display keys in an in-memory copy before rebuilding the exact
+            retry request. Missing both old endpoints may still retry from selectors; one endpoint, invalid endpoints,
+            dates on an original-only task or incompatible conditions block execution without hiding records.'}
+        items:
+          type: array
+          items: {$ref: '#/components/schemas/RetryTaskItem'}
+          minItems: 1
+        retrying: {type: boolean, description: Current process is retrying this task; not persisted.}
+        canExecute: {type: boolean, description: Static compatibility and slot snapshot at GET time only; execute revalidates.
+            True iff executionBlocker is null; not a promise of live-source support.}
+        executionBlocker:
+          oneOf:
+          - type: object
+            additionalProperties: false
+            required: [code, message]
             properties:
-              sourceRowCount: {maximum: 0}
-              insertedRows: {maximum: 0}
-              updatedRows: {maximum: 0}
-        - if: {properties: {outcome: {const: SUCCESS}}, required: [outcome]}
-          then: {properties: {sourceRowCount: {minimum: 1}}}
+              code: &part3_020 {type: string, minLength: 1}
+              message: *part3_020
+          - {type: 'null'}
+      description: 'All current items, no detail pagination or historic counts. items match failedScopes and failedItemCount
+        exactly, sorted targetType,targetValue,timeType,timeValue ASC. GET performs no business or calendar network
+        calls and uses no download slot; observes current committed records. Execution blocker priority: busy slot,
+        plugin/credential unavailable, task parameter/selector incompatibility, known source-legality rejection, known
+        calendar rejection. Mode from registered policy remains available when plugin disabled. No persistent retrying/canExecute/blocker
+        fields; clicking can still fail at runtime.'
+      allOf:
+      - if:
+          properties:
+            originalDateRangeStatus: {const: RECORDED}
+        then:
+          properties:
+            originalDateRange: {$ref: '#/components/schemas/OriginalDateRange'}
+        else:
+          properties:
+            originalDateRange: {type: 'null'}
+      - if:
+          properties:
+            canExecute: {const: true}
+        then:
+          properties:
+            executionBlocker: {type: 'null'}
+        else:
+          properties:
+            executionBlocker:
+              type: object
+              additionalProperties: false
+              required: [code, message]
+              properties:
+                code: &part3_021 {type: string, minLength: 1}
+                message: *part3_021
+      - if:
+          properties:
+            originalDateRangeStatus: {const: UNCONFIRMED}
+          required: [originalDateRangeStatus]
+        then:
+          properties:
+            canExecute: {const: false}
     PageResponse:
       type: object
       additionalProperties: false
@@ -407,9 +1933,10 @@ components:
       properties:
         requestId: {type: string, minLength: 1, description: Must equal the X-Request-Id response header.}
         code:
-          enum: [PARAM_REQUIRED, PARAM_INVALID, PLUGIN_DISABLED, DATASET_MISCONFIGURED, SOURCE_AUTH_FAILED, SOURCE_PERMISSION_DENIED, SOURCE_RATE_LIMITED, SOURCE_UNAVAILABLE, SOURCE_NETWORK_ERROR, SOURCE_TIMEOUT, SOURCE_PAYLOAD_INVALID, ADAPTER_FIELD_MISSING, ADAPTER_TYPE_INVALID, PERSISTENCE_FAILED, QUERY_FAILED, INTERNAL_ERROR]
+          enum: [PARAM_REQUIRED, PARAM_INVALID, PLUGIN_DISABLED, DATASET_MISCONFIGURED, SOURCE_AUTH_FAILED, SOURCE_PERMISSION_DENIED, SOURCE_RATE_LIMITED, SOURCE_UNAVAILABLE, SOURCE_NETWORK_ERROR, SOURCE_TIMEOUT, SOURCE_PAYLOAD_INVALID, ADAPTER_FIELD_MISSING, ADAPTER_TYPE_INVALID, PERSISTENCE_FAILED, QUERY_FAILED, INTERNAL_ERROR, SOURCE_REQUEST_UNCONFIRMED, CALENDAR_UNCONFIRMED, SOURCE_TRUNCATED, SOURCE_COMPLETENESS_UNCONFIRMED, DATA_CONFLICT, RETRY_TASK_NOT_FOUND, DOWNLOAD_BUSY, RETRY_TASK_INVALID, TASK_RECORD_SAVE_UNCONFIRMED, COMMIT_UNCONFIRMED]
         message: {type: string, minLength: 1}
         retryable: {type: boolean}
+        downloadResult: {$ref: '#/components/schemas/DownloadExecutionResult', description: Optional only after business execution starts; retains confirmed subtotals and actual unknown/unstarted ranges. Equals enclosing requestId; never reverses earlier commits.}
         fieldErrors:
           type: array
           items: {$ref: '#/components/schemas/FieldError'}
@@ -420,3 +1947,55 @@ components:
       properties:
         field: {type: string, minLength: 1}
         message: {type: string, minLength: 1}
+
+# Documentation targets only; not executable plugin policy or proof of availability.
+x-tensor-range-targets:
+- {apiName: adj_factor, mode: TRADE_DATE_RANGE, paramsSchema: RangeParams, calendarProfile: C-A, liveExcluded: false}
+- {apiName: block_trade, mode: TRADE_DATE_RANGE, paramsSchema: RangeParams, calendarProfile: C-A, liveExcluded: false}
+- {apiName: daily, mode: TRADE_DATE_RANGE, paramsSchema: RangeParams, calendarProfile: C-A, liveExcluded: false}
+- {apiName: daily_basic, mode: TRADE_DATE_RANGE, paramsSchema: RangeParams, calendarProfile: C-A, liveExcluded: false}
+- {apiName: hk_hold, mode: TRADE_DATE_RANGE, paramsSchema: RangeParams, calendarProfile: C-N, liveExcluded: true}
+- {apiName: hsgt_top10, mode: TRADE_DATE_RANGE, paramsSchema: RangeParams, calendarProfile: C-N, liveExcluded: true}
+- {apiName: margin, mode: TRADE_DATE_RANGE, paramsSchema: ExchangeIdRangeParams, calendarProfile: C-M, liveExcluded: false}
+- {apiName: margin_detail, mode: TRADE_DATE_RANGE, paramsSchema: RangeParams, calendarProfile: C-A, liveExcluded: false}
+- {apiName: moneyflow, mode: TRADE_DATE_RANGE, paramsSchema: RangeParams, calendarProfile: C-A, liveExcluded: false}
+- {apiName: moneyflow_hsgt, mode: TRADE_DATE_RANGE, paramsSchema: RangeParams, calendarProfile: C-X, liveExcluded: true}
+- {apiName: monthly, mode: TRADE_DATE_RANGE, paramsSchema: RangeParams, calendarProfile: C-A, liveExcluded: false}
+- {apiName: slb_len, mode: TRADE_DATE_RANGE, paramsSchema: RangeParams, calendarProfile: C-S, liveExcluded: false}
+- {apiName: slb_sec, mode: TRADE_DATE_RANGE, paramsSchema: RangeParams, calendarProfile: C-S, liveExcluded: false}
+- {apiName: slb_sec_detail, mode: TRADE_DATE_RANGE, paramsSchema: RangeParams, calendarProfile: C-S, liveExcluded: false}
+- {apiName: stk_limit, mode: TRADE_DATE_RANGE, paramsSchema: RangeParams, calendarProfile: C-A, liveExcluded: false}
+- {apiName: suspend_d, mode: TRADE_DATE_RANGE, paramsSchema: RangeParams, calendarProfile: C-A, liveExcluded: false}
+- {apiName: top_inst, mode: TRADE_DATE_RANGE, paramsSchema: RangeParams, calendarProfile: C-A, liveExcluded: true}
+- {apiName: top_list, mode: TRADE_DATE_RANGE, paramsSchema: RangeParams, calendarProfile: C-A, liveExcluded: false}
+- {apiName: weekly, mode: TRADE_DATE_RANGE, paramsSchema: RangeParams, calendarProfile: C-A, liveExcluded: false}
+- {apiName: balancesheet, mode: ANN_DATE_RANGE, paramsSchema: StockRangeParams, calendarProfile: null, liveExcluded: false}
+- {apiName: cashflow, mode: ANN_DATE_RANGE, paramsSchema: StockRangeParams, calendarProfile: null, liveExcluded: false}
+- {apiName: disclosure_date, mode: ANN_DATE_RANGE, paramsSchema: RangeParams, calendarProfile: null, liveExcluded: false}
+- {apiName: dividend, mode: ANN_DATE_RANGE, paramsSchema: RangeParams, calendarProfile: null, liveExcluded: false}
+- {apiName: express, mode: ANN_DATE_RANGE, paramsSchema: RangeParams, calendarProfile: null, liveExcluded: false}
+- {apiName: fina_audit, mode: ANN_DATE_RANGE, paramsSchema: StockRangeParams, calendarProfile: null, liveExcluded: false}
+- {apiName: fina_indicator, mode: ANN_DATE_RANGE, paramsSchema: StockRangeParams, calendarProfile: null, liveExcluded: false}
+- {apiName: fina_mainbz, mode: ANN_DATE_RANGE, paramsSchema: StockRangeParams, calendarProfile: null, liveExcluded: false}
+- {apiName: forecast, mode: ANN_DATE_RANGE, paramsSchema: RangeParams, calendarProfile: null, liveExcluded: false}
+- {apiName: income, mode: ANN_DATE_RANGE, paramsSchema: StockRangeParams, calendarProfile: null, liveExcluded: false}
+- {apiName: repurchase, mode: ANN_DATE_RANGE, paramsSchema: RangeParams, calendarProfile: null, liveExcluded: false}
+- {apiName: share_float, mode: ANN_DATE_RANGE, paramsSchema: RangeParams, calendarProfile: null, liveExcluded: true}
+- {apiName: stk_holdertrade, mode: ANN_DATE_RANGE, paramsSchema: RangeParams, calendarProfile: null, liveExcluded: false}
+- {apiName: top10_floatholders, mode: ANN_DATE_RANGE, paramsSchema: RangeParams, calendarProfile: null, liveExcluded: false}
+- {apiName: top10_holders, mode: ANN_DATE_RANGE, paramsSchema: RangeParams, calendarProfile: null, liveExcluded: false}
+- {apiName: broker_recommend, mode: MONTH_RANGE, paramsSchema: RangeParams, calendarProfile: null, liveExcluded: true}
+- {apiName: namechange, mode: NATIVE_RANGE, paramsSchema: RangeParams, calendarProfile: null, liveExcluded: true}
+- {apiName: new_share, mode: NATIVE_RANGE, paramsSchema: RangeParams, calendarProfile: null, liveExcluded: false}
+- {apiName: trade_cal, mode: NATIVE_RANGE, paramsSchema: ExchangeRangeParams, calendarProfile: null, liveExcluded: false}
+- {apiName: hs_const, mode: ORIGINAL_PARAMS, paramsSchema: HsTypeParams, calendarProfile: null, liveExcluded: true}
+- {apiName: index_classify, mode: ORIGINAL_PARAMS, paramsSchema: EmptyParams, calendarProfile: null, liveExcluded: false}
+- {apiName: index_member, mode: ORIGINAL_PARAMS, paramsSchema: EmptyParams, calendarProfile: null, liveExcluded: true}
+- {apiName: index_member_all, mode: ORIGINAL_PARAMS, paramsSchema: EmptyParams, calendarProfile: null, liveExcluded: false}
+- {apiName: pledge_detail, mode: ORIGINAL_PARAMS, paramsSchema: EmptyParams, calendarProfile: null, liveExcluded: false}
+- {apiName: pledge_stat, mode: ORIGINAL_PARAMS, paramsSchema: EmptyParams, calendarProfile: null, liveExcluded: false}
+- {apiName: stk_holdernumber, mode: ORIGINAL_PARAMS, paramsSchema: StockParams, calendarProfile: null, liveExcluded: false}
+- {apiName: stk_managers, mode: ORIGINAL_PARAMS, paramsSchema: EmptyParams, calendarProfile: null, liveExcluded: false}
+- {apiName: stk_rewards, mode: ORIGINAL_PARAMS, paramsSchema: StockParams, calendarProfile: null, liveExcluded: false}
+- {apiName: stock_basic, mode: ORIGINAL_PARAMS, paramsSchema: ListStatusParams, calendarProfile: null, liveExcluded: false}
+- {apiName: stock_company, mode: ORIGINAL_PARAMS, paramsSchema: ExchangeParams, calendarProfile: null, liveExcluded: false}

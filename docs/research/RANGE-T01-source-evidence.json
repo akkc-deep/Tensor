@@ -1,0 +1,3102 @@
+{
+  "taskId": "RANGE-T01",
+  "reviewDate": "2026-09-08",
+  "provenance": "重新核读同日官方调研缓存；49份原HTML摘要匹配既有evidence.json。本轮未重新下载网页、未读取凭证、业务API调用0。保存相关公开摘录，不将历史账号验证计为本轮结果。",
+  "gates": {
+    "Q": "来源请求合法：日期语义、必填条件及原条件等价都有依据；缺页／冲突未解决不执行业务请求。错误码由T03固定，不自行新增。",
+    "C": "整体完整：必须有当前请求适用的来源取全依据，并通过包络、字段、行宽、对象／时间范围校验；单日、短响应、HTTP 200、总量不限制均不能单独作判据。已知截断 SOURCE_TRUNCATED；未知是否取全 SOURCE_COMPLETENESS_UNCONFIRMED；两者均不提交部分响应。",
+    "P": "分页未确认：45份可读输入表均未声明limit/offset，4份旧页缺失；不得从SDK接受任意参数推断支持。仅在独立证实参数及稳定结束合同后启用；后续页失败／游标重复／总数矛盾使完整批次失败，不续传或自动拆小重试。",
+    "R": "独立恢复：仅对象与时间归属、单元全部数据以及同API精确单独重试均经验证后才能启用STOCK_TIME；否则REQUEST保留公共条件和原批次时间边界。REQUEST仍受Q/C门槛约束，不能提交未证完整的数据。",
+    "K": "19项交易日期须先由T02确认适用日历；任一必要来源未确认则CALENDAR_UNCONFIRMED且零业务调用。其他30项不经过辅助日历屏障。",
+    "V": "本任务真实调用为0；包含性、取全和独立恢复候选实测由T20依其设计选定，不能拿旧单日验收升级本轮状态。ISSUE-008的9项不安排真实调用。"
+  },
+  "guides": [
+    {
+      "url": "https://tushare.pro/document/1?doc_id=230",
+      "rawPageSha256": "6fdb342fbf11672ac31c2ddfde4ec168e3088ccdffa3a3ee0be0edaa54408a95",
+      "excerpts": [
+        "分别是交易日期和证券代码。如果你是想提取部分个股的历史数据，用ts_code参数，加上开始和结束日期可以方便提取数据。 但！如果是要获取所有历史数据，我们不建议通过ts_code来循环，而是用trade_date来提取，道理很简单，上市公司有5000多个，需要循环5000多次，每年的交易日也就才220左右，所以效率更高。总的来说，积分越高可以调取的频次会越高。 也就是以下方式： import tushare as ts pro = ts . pro_api () df = pro . daily ( trade_date = '20200325' ) 在循环提取数据时，首先我们可以通过交易日历拿到一段历史的交易日。 # 获取20200101～20200401之间所有有交易"
+      ]
+    },
+    {
+      "url": "https://tushare.pro/document/1?doc_id=130",
+      "rawPageSha256": "49a41194a8c77d7eb71d1c0466b08515ff0c3aff09857deb4a8e1088492d5a06",
+      "excerpts": [
+        "参数 api_name：接口名称，比如stock_basic\n\ntoken ：用户唯一标识，可通过登录pro网站获取\n\nparams：接口参数，如daily接口中start_date和end_date\n\nfields：字段列表，用于接口获取指定的字段，以逗号分隔，如\"open,high,low,close\" token的获取，请参与之前公众号文章《开启Pro体验的正确打开方式》，如需注册用户，可直接点击“阅读原文”完成。 输出参数 code： 接口返回码，2002表示权限问题。\n\nmsg：错误信息，比如“系统内部错误”，“没有权限”等\n\ndata：数据，data里包含fields和items字段，分别为字段和数据内容 以下，我们从几个方面来介绍具体的使用过程。 API工具",
+        " 输出参数 code： 接口返回码，2002表示权限问题。\n\nmsg：错误信息，比如“系统内部错误”，“没有权限”等\n\ndata：数据，data里包含fields和items字段，分别为字段和数据内容 以下，我们从几个方面来介绍具体的使用过程。 API工具快速检测 如果想简单快速获得数据API的效果，检测一下可用性，又不想写代码的话，postman这个工具或许可以派上用场。 运行postman，选择POST方式，在API地址栏里输入： http://api.tushare.pro ，然后在下面点击body，输入json格式的参数。 之后，点击“Send”按钮，我们可以在结果栏目里看到调取API的最终效果。 代码快速检测 有的程序员可能更喜欢用代码的方式来检查API的效果，"
+      ]
+    },
+    {
+      "url": "https://tushare.pro/document/1?doc_id=131",
+      "rawPageSha256": "0f43c05346ea51492bd42dc95321094c503c6fdd8d5750edb2715481250d9520",
+      "excerpts": [
+        "oken: pro = ts.pro_api('your token') 数据调取 以获取交易日历信息为例： df = pro.trade_cal(exchange='', start_date='20180901', end_date='20181001', fields='exchange,cal_date,is_open,pretrade_date', is_open='0') 或者 df = pro.query('trade_cal', exchange='', start_date='20180901', end_date='20181001', fields='exchange,cal_date,is_open,pretrade_date', is_open="
+      ]
+    },
+    {
+      "url": "https://tushare.pro/document/1?doc_id=122",
+      "rawPageSha256": "2dc45da47d0c9de0eecfdee749087ae9f4efb5e88c1f60d834d86e10e80ce43b",
+      "excerpts": [
+        "有重复数据？ 如果发现有重复数据，绝大多数可能都是本季（年）度的财务数据有过修正，可以通过update_flag来确定，update_flag=1为修正后的数据，update_flag=0为初始数据。如果提取不到update_flag字段，请再fields参数指定，比如fields='ts_code,period,update_flag' ，字段用逗号分隔即可。 8、什么情况下Tushare积分会减少？ 目前有两种情况下积分会减少，一是自己（手工或通过程序）注册的无效账号获得积分，会不定期清理；二是通过活动赠送的积分，一年后到期清理。除此以外不会减少积分，现阶段调取数据暂时不消耗积分。 9、我在公开发布的网站或者论文里用到了Tushare的数据，是否需要标注来源？ 需要。"
+      ]
+    }
+  ],
+  "interfaces": [
+    {
+      "apiName": "adj_factor",
+      "mode": "TRADE_DATE_RANGE",
+      "current": {
+        "path": "data-plane/tensor-plugin-tushare/src/main/resources/datasets/tushare_pro/adj_factor.yaml",
+        "sha256": "b93255984e3ef7ef34ca48d954fd1d7c96e83e99a4796dc296f7c181f9475f31",
+        "parametersYaml": "parameters:\n  - { name: trade_date, label: 交易日期, type: DATE, required: true }",
+        "businessKeyYaml": "businessKey: { mode: COMPOSITE, fields: [ts_code, trade_date] }"
+      },
+      "source": {
+        "url": "https://tushare.pro/document/2?doc_id=28",
+        "rawPageSha256": "c3647d529ce85a8244353f503d1188bde8367aa975f8b562c81c5d3921fefd96",
+        "status": "READABLE",
+        "introduction": "复权因子\n接口：adj_factor，可以通过\n数据工具\n调试和查看数据。\n更新时间：盘前9点15~20分完成当日复权因子入库\n描述：本接口由Tushare自行生产，获取股票复权因子，可提取单只股票全部历史复权因子，也可以提取单日全部股票的复权因子。\n积分要求：2000积分起，5000以上可高频调取",
+        "inputParameters": {
+          "ts_code": "str; N; 股票代码",
+          "trade_date": "str; N; 交易日期(YYYYMMDD，下同)",
+          "start_date": "str; N; 开始日期",
+          "end_date": "str; N; 结束日期"
+        },
+        "outputAttribution": {},
+        "requestExamples": "pro\n=\nts\n.\npro_api\n()\n#提取000001全部复权因子\ndf\n=\npro\n.\nadj_factor\n(\nts_code\n=\n'000001.SZ'\n,\ntrade_date\n=\n''\n)\n#提取2018年7月18日复权因子\ndf\n=\npro\n.\nadj_factor\n(\nts_code\n=\n''\n,\ntrade_date\n=\n'20180718'\n)\n或者\ndf\n=\npro\n.\nquery\n(\n'adj_factor'\n,\ntrade_date\n=\n'20180718'\n)"
+      },
+      "request": {
+        "candidateMode": "DATE",
+        "legality": "DOCUMENTED_CANDIDATE",
+        "params": "{trade_date=d}",
+        "conclusion": "单日 trade_date 全市场有正文与示例；单股历史不证明无股票区间合法"
+      },
+      "date": {
+        "semantic": "trade_date：交易日期",
+        "rangeSemanticDiffers": false,
+        "endpoints": "单日期候选按枚举覆盖输入两端；单日筛选效果未实测",
+        "liveVerified": false
+      },
+      "completeness": {
+        "documentedLimit": "未明示",
+        "pagination": "UNCONFIRMED",
+        "gapOrConditionalCriterion": "正文明确单日全部股票，仍须核实当日覆盖和来源是否存在未述截断",
+        "requiredGates": [
+          "Q",
+          "C",
+          "P",
+          "K"
+        ]
+      },
+      "recovery": {
+        "policy": "REQUEST",
+        "time": "DATE",
+        "rebuild": "原公共条件+所存失败时间；NONE不加日期，RANGE不拆小；单日原生接口仍发送相等起止参数",
+        "independentRetryCandidateOrRestriction": "ts_code+trade_date；需证明该组合与全市场当日中该股数据相等",
+        "independentRecoveryVerified": false,
+        "enableGate": "R"
+      },
+      "live": {
+        "status": "NOT_RUN",
+        "owner": "T20按权限和完成设计选择，非49项全量调用承诺"
+      }
+    },
+    {
+      "apiName": "block_trade",
+      "mode": "TRADE_DATE_RANGE",
+      "current": {
+        "path": "data-plane/tensor-plugin-tushare/src/main/resources/datasets/tushare_pro/block_trade.yaml",
+        "sha256": "13d5d221323a4f9241f5b431a38be0dbbb00d98884b2210e05fe47cbc57e23c4",
+        "parametersYaml": "parameters:\n  - { name: trade_date, label: 交易日期, type: DATE, required: true }",
+        "businessKeyYaml": "businessKey: { mode: COMPOSITE, fields: [trade_date, ts_code, buyer, seller, price, vol] }"
+      },
+      "source": {
+        "url": "https://tushare.pro/document/2?doc_id=161",
+        "rawPageSha256": "aadf8cdbf5019f5b636136f6f2b51a16fbc44e62fbfb3a4ed26e2d0c2666a5f4",
+        "status": "READABLE",
+        "introduction": "大宗交易\n接口：block_trade\n描述：大宗交易\n限量：单次最大1000条，总量不限制\n积分：2000积分可调取，每分钟内限制次数，超过5000积分频次相对较高，具体请参阅\n积分获取办法",
+        "inputParameters": {
+          "ts_code": "str; N; TS代码（股票代码和日期至少输入一个参数）",
+          "trade_date": "str; N; 交易日期（格式：YYYYMMDD，下同）",
+          "start_date": "str; N; 开始日期",
+          "end_date": "str; N; 结束日期"
+        },
+        "outputAttribution": {
+          "ts_code": "str; Y; TS代码",
+          "trade_date": "str; Y; 交易日历",
+          "price": "float; Y; 成交价",
+          "vol": "float; Y; 成交量（万股）",
+          "buyer": "str; Y; 买方营业部",
+          "seller": "str; Y; 卖方营业部"
+        },
+        "requestExamples": ""
+      },
+      "request": {
+        "candidateMode": "RANGE",
+        "legality": "DOCUMENTED_CANDIDATE",
+        "params": "{start_date=s, end_date=e}",
+        "conclusion": "股票代码与日期至少一个；区间与单日均列入参数表"
+      },
+      "date": {
+        "semantic": "trade_date：交易日期",
+        "rangeSemanticDiffers": false,
+        "endpoints": "公开开始/结束标签及样例不构成当前条件下两端包含性的实测；未核实",
+        "liveVerified": false
+      },
+      "completeness": {
+        "documentedLimit": "1000",
+        "pagination": "UNCONFIRMED",
+        "gapOrConditionalCriterion": "需确认无股票区间接受及多笔成交取全；单日也可能超过1000",
+        "requiredGates": [
+          "Q",
+          "C",
+          "P",
+          "K"
+        ]
+      },
+      "recovery": {
+        "policy": "REQUEST",
+        "time": "RANGE；两端相同时DATE，重建仍用原来源日期方式",
+        "rebuild": "原公共条件+所存失败时间；NONE不加日期，RANGE不拆小；单日原生接口仍发送相等起止参数",
+        "independentRetryCandidateOrRestriction": "ts_code+相同起止范围或 trade_date；同股多笔买卖必须整体取全",
+        "independentRecoveryVerified": false,
+        "enableGate": "R"
+      },
+      "live": {
+        "status": "NOT_RUN",
+        "owner": "T20按权限和完成设计选择，非49项全量调用承诺"
+      }
+    },
+    {
+      "apiName": "daily",
+      "mode": "TRADE_DATE_RANGE",
+      "current": {
+        "path": "data-plane/tensor-plugin-tushare/src/main/resources/datasets/tushare_pro/daily.yaml",
+        "sha256": "a66d1222c26801df80a29ad7b6cc34982ed81e6931972b5e947b4ff54d395eec",
+        "parametersYaml": "parameters:\n  - { name: trade_date, label: 交易日期, type: DATE, required: true }",
+        "businessKeyYaml": "businessKey: { mode: COMPOSITE, fields: [ts_code, trade_date] }"
+      },
+      "source": {
+        "url": "https://tushare.pro/document/2?doc_id=27",
+        "rawPageSha256": "01ba0afed6696640dfa5b641c1a6837324f9e53808bc95371d75c6c59c4d5a1e",
+        "status": "READABLE",
+        "introduction": "A股日线行情\n接口：daily，可以通过\n数据工具\n调试和查看数据\n数据说明：交易日每天15点～16点之间入库。本接口是未复权行情，停牌期间不提供数据\n调取说明：基础积分每分钟内可调取500次，每次6000条数据，一次请求相当于提取一个股票23年历史\n描述：获取股票行情数据，或通过\n通用行情接口\n获取数据，包含了前后复权数据",
+        "inputParameters": {
+          "ts_code": "str; N; 股票代码（支持多个股票同时提取，逗号分隔）",
+          "trade_date": "str; N; 交易日期（YYYYMMDD）",
+          "start_date": "str; N; 开始日期(YYYYMMDD)",
+          "end_date": "str; N; 结束日期(YYYYMMDD)"
+        },
+        "outputAttribution": {
+          "ts_code": "str; Y; 股票代码",
+          "trade_date": "str; Y; 交易日期"
+        },
+        "requestExamples": "pro\n=\nts\n.\npro_api\n()\n#提取单个股票，跨时间段的历史日线\ndf\n=\npro\n.\ndaily\n(\nts_code\n=\n'000001.SZ'\n,\nstart_date\n=\n'20180701'\n,\nend_date\n=\n'20180718'\n)\n#通过日期取历史某一天的全部历史\ndf\n=\npro\n.\ndaily\n(\ntrade_date\n=\n'20180810'\n)\n#\n指定提取“盘后固定成交量”和“盘后固定成交金额”数据（2026-07-06开始有数据）\n\ndf = pro.daily(trade_date='20260707', fields='ts_code,open,close,ah_vol,ah_amount')\n注：建议提供循环日期来提取全市场数据，不要通过循环ts_code来拉取历史"
+      },
+      "request": {
+        "candidateMode": "DATE",
+        "legality": "DOCUMENTED_CANDIDATE",
+        "params": "{trade_date=d}",
+        "conclusion": "官方明确 trade_date 全市场并建议按日期循环；区间示例携带股票"
+      },
+      "date": {
+        "semantic": "trade_date：交易日期",
+        "rangeSemanticDiffers": false,
+        "endpoints": "单日期候选按枚举覆盖输入两端；单日筛选效果未实测",
+        "liveVerified": false
+      },
+      "completeness": {
+        "documentedLimit": "6000",
+        "pagination": "UNCONFIRMED",
+        "gapOrConditionalCriterion": "单日6000边界及缺股原因待核实；停牌无记录合法，不能用当前上市数当历史应有行数",
+        "requiredGates": [
+          "Q",
+          "C",
+          "P",
+          "K"
+        ]
+      },
+      "recovery": {
+        "policy": "REQUEST",
+        "time": "DATE",
+        "rebuild": "原公共条件+所存失败时间；NONE不加日期，RANGE不拆小；单日原生接口仍发送相等起止参数",
+        "independentRetryCandidateOrRestriction": "ts_code+trade_date 或相同两端；与已证明完整的全市场对应集合比较",
+        "independentRecoveryVerified": false,
+        "enableGate": "R"
+      },
+      "live": {
+        "status": "NOT_RUN",
+        "owner": "T20按权限和完成设计选择，非49项全量调用承诺"
+      }
+    },
+    {
+      "apiName": "daily_basic",
+      "mode": "TRADE_DATE_RANGE",
+      "current": {
+        "path": "data-plane/tensor-plugin-tushare/src/main/resources/datasets/tushare_pro/daily_basic.yaml",
+        "sha256": "2f6dd399cf93428678881c255cd4501e3b7a61d5a4ddde90aa66ab7f0dba0d0d",
+        "parametersYaml": "parameters:\n  - { name: trade_date, label: 交易日期, type: DATE, required: true }",
+        "businessKeyYaml": "businessKey: { mode: COMPOSITE, fields: [ts_code, trade_date] }"
+      },
+      "source": {
+        "url": "https://tushare.pro/document/2?doc_id=32",
+        "rawPageSha256": "8ea0871ff166dd82f006feb8f198ce49595f9091dace0b8f32ca03440d20199f",
+        "status": "READABLE",
+        "introduction": "每日指标\n接口：daily_basic，可以通过\n数据工具\n调试和查看数据。\n更新时间：交易日每日15点～17点之间\n描述：获取全部股票每日重要的基本面指标，可用于选股分析、报表展示等。单次请求最大返回6000条数据，可按日线循环提取全部历史。\n积分：至少2000积分才可以调取，5000积分无总量限制，具体请参阅\n积分获取办法",
+        "inputParameters": {
+          "ts_code": "str; Y; 股票代码（二选一）",
+          "trade_date": "str; N; 交易日期 （二选一）",
+          "start_date": "str; N; 开始日期(YYYYMMDD)",
+          "end_date": "str; N; 结束日期(YYYYMMDD)"
+        },
+        "outputAttribution": {
+          "ts_code": "str; Y; TS股票代码",
+          "trade_date": "str; Y; 交易日期"
+        },
+        "requestExamples": ""
+      },
+      "request": {
+        "candidateMode": "DATE",
+        "legality": "DOCUMENTED_CANDIDATE",
+        "params": "{trade_date=d}",
+        "conclusion": "ts_code 标Y但描述与 trade_date 二选一；正文支持按日线循环"
+      },
+      "date": {
+        "semantic": "trade_date：交易日期",
+        "rangeSemanticDiffers": false,
+        "endpoints": "单日期候选按枚举覆盖输入两端；单日筛选效果未实测",
+        "liveVerified": false
+      },
+      "completeness": {
+        "documentedLimit": "6000",
+        "pagination": "UNCONFIRMED",
+        "gapOrConditionalCriterion": "按日不豁免6000上限；无股票仅区间不满足已确认二选一条件",
+        "requiredGates": [
+          "Q",
+          "C",
+          "P",
+          "K"
+        ]
+      },
+      "recovery": {
+        "policy": "REQUEST",
+        "time": "DATE",
+        "rebuild": "原公共条件+所存失败时间；NONE不加日期，RANGE不拆小；单日原生接口仍发送相等起止参数",
+        "independentRetryCandidateOrRestriction": "ts_code+trade_date；估值字段与完整响应对应记录比较",
+        "independentRecoveryVerified": false,
+        "enableGate": "R"
+      },
+      "live": {
+        "status": "NOT_RUN",
+        "owner": "T20按权限和完成设计选择，非49项全量调用承诺"
+      }
+    },
+    {
+      "apiName": "hk_hold",
+      "mode": "TRADE_DATE_RANGE",
+      "current": {
+        "path": "data-plane/tensor-plugin-tushare/src/main/resources/datasets/tushare_pro/hk_hold.yaml",
+        "sha256": "7a6984477494fe3bc1695b6a517f6eee862bd3df1c2b6734927a10fb2c98822d",
+        "parametersYaml": "parameters:\n  - { name: trade_date, label: 交易日期, type: DATE, required: true }",
+        "businessKeyYaml": "businessKey: { mode: COMPOSITE, fields: [trade_date, code, exchange] }"
+      },
+      "source": {
+        "url": "https://tushare.pro/document/2?doc_id=188",
+        "rawPageSha256": "bbf4318386ca0ea4c5072fc5e67fe0302f473ccbeba7238c45607226236dfadf",
+        "status": "MISSING_PAGE",
+        "introduction": "404, 文档不存在！",
+        "inputParameters": {},
+        "outputAttribution": {},
+        "requestExamples": ""
+      },
+      "request": {
+        "candidateMode": "UNCONFIRMED",
+        "legality": "UNCONFIRMED",
+        "params": "无已核实合法转换；保持原条件，拒绝猜参",
+        "conclusion": "旧官方页正文404；当前 trade_date 合同未得到本轮公开依据"
+      },
+      "date": {
+        "semantic": "目标trade_date；官方旧页缺失，输出时间归属未核实",
+        "rangeSemanticDiffers": false,
+        "endpoints": "公开开始/结束标签及样例不构成当前条件下两端包含性的实测；未核实",
+        "liveVerified": false
+      },
+      "completeness": {
+        "documentedLimit": "无法确认",
+        "pagination": "UNCONFIRMED",
+        "gapOrConditionalCriterion": "对象 code／exchange 及全市场范围、取全方式均未确认",
+        "requiredGates": [
+          "Q",
+          "C",
+          "P",
+          "K"
+        ]
+      },
+      "recovery": {
+        "policy": "REQUEST",
+        "time": "未确定：请求合法方式未核实，不据此创建不可重建的失败单元",
+        "rebuild": "原公共条件+所存失败时间；NONE不加日期，RANGE不拆小；单日原生接口仍发送相等起止参数",
+        "independentRetryCandidateOrRestriction": "不得猜 ts_code；code 不能自动映射 STOCK；ISSUE-008 排除",
+        "independentRecoveryVerified": false,
+        "enableGate": "R"
+      },
+      "live": {
+        "status": "EXCLUDED_ISSUE_008",
+        "owner": "用户后续单独处理"
+      }
+    },
+    {
+      "apiName": "hsgt_top10",
+      "mode": "TRADE_DATE_RANGE",
+      "current": {
+        "path": "data-plane/tensor-plugin-tushare/src/main/resources/datasets/tushare_pro/hsgt_top10.yaml",
+        "sha256": "1f55946a30192eb25b3951fb37d62fc167afd6fd4dc8ed6aa5eccb70aa69d7bc",
+        "parametersYaml": "parameters:\n  - { name: trade_date, label: 交易日期, type: DATE, required: true }",
+        "businessKeyYaml": "businessKey: { mode: COMPOSITE, fields: [trade_date, ts_code, market_type] }"
+      },
+      "source": {
+        "url": "https://tushare.pro/document/2?doc_id=48",
+        "rawPageSha256": "0f76a04b55a8f4e5d99c0d22c2b345927fb2ff0cbaf6cec3dd9a9f30b4c8d428",
+        "status": "READABLE",
+        "introduction": "沪深股通十大成交股\n接口：hsgt_top10\n描述：获取沪股通、深股通每日前十大成交详细数据，每天18~20点之间完成当日更新",
+        "inputParameters": {
+          "ts_code": "str; N; 股票代码（二选一）",
+          "trade_date": "str; N; 交易日期（二选一）",
+          "start_date": "str; N; 开始日期",
+          "end_date": "str; N; 结束日期",
+          "market_type": "str; N; 市场类型（1：沪市 3：深市）"
+        },
+        "outputAttribution": {},
+        "requestExamples": ""
+      },
+      "request": {
+        "candidateMode": "DATE",
+        "legality": "DOCUMENTED_CANDIDATE",
+        "params": "{trade_date=d}",
+        "conclusion": "ts_code／trade_date 二选一；实际覆盖沪股通和深股通"
+      },
+      "date": {
+        "semantic": "trade_date：交易日期",
+        "rangeSemanticDiffers": false,
+        "endpoints": "单日期候选按枚举覆盖输入两端；单日筛选效果未实测",
+        "liveVerified": false
+      },
+      "completeness": {
+        "documentedLimit": "未明示",
+        "pagination": "UNCONFIRMED",
+        "gapOrConditionalCriterion": "不能机械要求每天每市场10条；需核实两方向实际结果、空数据及取全",
+        "requiredGates": [
+          "Q",
+          "C",
+          "P",
+          "K"
+        ]
+      },
+      "recovery": {
+        "policy": "REQUEST",
+        "time": "DATE",
+        "rebuild": "原公共条件+所存失败时间；NONE不加日期，RANGE不拆小；单日原生接口仍发送相等起止参数",
+        "independentRetryCandidateOrRestriction": "ts_code+trade_date；同股 market_type 全部保留；ISSUE-008 排除",
+        "independentRecoveryVerified": false,
+        "enableGate": "R"
+      },
+      "live": {
+        "status": "EXCLUDED_ISSUE_008",
+        "owner": "用户后续单独处理"
+      }
+    },
+    {
+      "apiName": "margin",
+      "mode": "TRADE_DATE_RANGE",
+      "current": {
+        "path": "data-plane/tensor-plugin-tushare/src/main/resources/datasets/tushare_pro/margin.yaml",
+        "sha256": "ffdeee42b82ff48858b95f81da72a8642b96b7ab39dc16ecc1ce6fc468fb0ec3",
+        "parametersYaml": "parameters:\n  - { name: exchange_id, label: 交易所, type: ENUM, required: true, allowedValues: [SSE, SZSE, BSE] }\n  - { name: trade_date, label: 交易日期, type: DATE, required: true }",
+        "businessKeyYaml": "businessKey: { mode: COMPOSITE, fields: [trade_date, exchange_id] }"
+      },
+      "source": {
+        "url": "https://tushare.pro/document/2?doc_id=58",
+        "rawPageSha256": "3fed6d93d0eaf0a65c6a54ddcd1e01b58ebf4fb56be4bea9cb854ba655cb7b84",
+        "status": "READABLE",
+        "introduction": "融资融券交易汇总\n接口：margin\n描述：获取融资融券每日交易汇总数据，交易所于每天8点30左右更新上一日数据，本接口最晚9点05分会更新完数据。\n注：深交所和北交所每周五的数据在下周一上午更新。\n限量：单次请求最大返回4000行数据，可根据日期循环\n权限：2000积分可获得本接口权限，积分越高权限越大，具体参考\n权限说明",
+        "inputParameters": {
+          "trade_date": "str; N; 交易日期（格式：YYYYMMDD，下同）",
+          "start_date": "str; N; 开始日期",
+          "end_date": "str; N; 结束日期",
+          "exchange_id": "str; N; 交易所代码（SSE上交所SZSE深交所BSE北交所）"
+        },
+        "outputAttribution": {
+          "trade_date": "str; 交易日期",
+          "exchange_id": "str; 交易所代码（SSE上交所SZSE深交所BSE北交所）"
+        },
+        "requestExamples": ""
+      },
+      "request": {
+        "candidateMode": "RANGE",
+        "legality": "DOCUMENTED_CANDIDATE",
+        "params": "{exchange_id=<原值>, start_date=s, end_date=e}",
+        "conclusion": "保留 exchange_id；官方输入输出均列 SSE／SZSE／BSE；可按日期循环"
+      },
+      "date": {
+        "semantic": "trade_date：交易日期",
+        "rangeSemanticDiffers": false,
+        "endpoints": "公开开始/结束标签及样例不构成当前条件下两端包含性的实测；未核实",
+        "liveVerified": false
+      },
+      "completeness": {
+        "documentedLimit": "4000",
+        "pagination": "UNCONFIRMED",
+        "gapOrConditionalCriterion": "31天与交易所维度给出小规模候选，但缺行、更新延迟及完整结束依据须确认",
+        "requiredGates": [
+          "Q",
+          "C",
+          "P",
+          "K"
+        ]
+      },
+      "recovery": {
+        "policy": "REQUEST",
+        "time": "RANGE；两端相同时DATE，重建仍用原来源日期方式",
+        "rebuild": "原公共条件+所存失败时间；NONE不加日期，RANGE不拆小；单日原生接口仍发送相等起止参数",
+        "independentRetryCandidateOrRestriction": "非股票汇总；REQUEST 保留 exchange_id 与整个时间范围",
+        "independentRecoveryVerified": false,
+        "enableGate": "R"
+      },
+      "live": {
+        "status": "NOT_RUN",
+        "owner": "T20按权限和完成设计选择，非49项全量调用承诺"
+      }
+    },
+    {
+      "apiName": "margin_detail",
+      "mode": "TRADE_DATE_RANGE",
+      "current": {
+        "path": "data-plane/tensor-plugin-tushare/src/main/resources/datasets/tushare_pro/margin_detail.yaml",
+        "sha256": "a10ca98069ca11e5e24ae078eaa5e42bfb717dba92ad9e0e0e1ea46aee87b677",
+        "parametersYaml": "parameters:\n  - { name: trade_date, label: 交易日期, type: DATE, required: true }",
+        "businessKeyYaml": "businessKey: { mode: COMPOSITE, fields: [trade_date, ts_code] }"
+      },
+      "source": {
+        "url": "https://tushare.pro/document/2?doc_id=59",
+        "rawPageSha256": "18d1ff18b57b16d3dd9165b507f99a4b6d483c303c19d8a38e6b969004aa6a9f",
+        "status": "READABLE",
+        "introduction": "融资融券交易明细\n接口：margin_detail\n描述：获取沪深两市每日融资融券明细，交易所于每天8点30左右更新上一日数据。\n注：深交所和北交所每周五的数据在下周一上午更新。\n限量：单次请求最大返回6000行数据，可根据日期循环\n权限：2000积分可获得本接口权限，积分越高权限越大，具体参考\n权限说明",
+        "inputParameters": {
+          "trade_date": "str; N; 交易日期（格式：YYYYMMDD，下同）",
+          "ts_code": "str; N; TS代码",
+          "start_date": "str; N; 开始日期",
+          "end_date": "str; N; 结束日期"
+        },
+        "outputAttribution": {
+          "trade_date": "str; 交易日期",
+          "ts_code": "str; TS股票代码"
+        },
+        "requestExamples": ""
+      },
+      "request": {
+        "candidateMode": "RANGE",
+        "legality": "DOCUMENTED_CANDIDATE",
+        "params": "{start_date=s, end_date=e}",
+        "conclusion": "日期和可选股票、起止参数公开；正文沪深两市而更新提示提到北交所"
+      },
+      "date": {
+        "semantic": "trade_date：交易日期",
+        "rangeSemanticDiffers": false,
+        "endpoints": "公开开始/结束标签及样例不构成当前条件下两端包含性的实测；未核实",
+        "liveVerified": false
+      },
+      "completeness": {
+        "documentedLimit": "6000",
+        "pagination": "UNCONFIRMED",
+        "gapOrConditionalCriterion": "全市场单日及多日6000截断，实际市场覆盖不能按提示猜测",
+        "requiredGates": [
+          "Q",
+          "C",
+          "P",
+          "K"
+        ]
+      },
+      "recovery": {
+        "policy": "REQUEST",
+        "time": "RANGE；两端相同时DATE，重建仍用原来源日期方式",
+        "rebuild": "原公共条件+所存失败时间；NONE不加日期，RANGE不拆小；单日原生接口仍发送相等起止参数",
+        "independentRetryCandidateOrRestriction": "ts_code+同范围或 trade_date；单股范围取全与市场覆盖需核实",
+        "independentRecoveryVerified": false,
+        "enableGate": "R"
+      },
+      "live": {
+        "status": "NOT_RUN",
+        "owner": "T20按权限和完成设计选择，非49项全量调用承诺"
+      }
+    },
+    {
+      "apiName": "moneyflow",
+      "mode": "TRADE_DATE_RANGE",
+      "current": {
+        "path": "data-plane/tensor-plugin-tushare/src/main/resources/datasets/tushare_pro/moneyflow.yaml",
+        "sha256": "469f7ffefeda1c12b36b2958ab052c9d1d6c3f02ce0209e2d98f1c8f9714d206",
+        "parametersYaml": "parameters:\n  - { name: trade_date, label: 交易日期, type: DATE, required: true }",
+        "businessKeyYaml": "businessKey: { mode: COMPOSITE, fields: [ts_code, trade_date] }"
+      },
+      "source": {
+        "url": "https://tushare.pro/document/2?doc_id=170",
+        "rawPageSha256": "ddec2e40705b6b0246d26683bdb5f1d5ca79d475d81f70b36007c3b211de933b",
+        "status": "READABLE",
+        "introduction": "个股资金流向\n接口：moneyflow，可以通过\n数据工具\n调试和查看数据。\n描述：获取沪深A股票资金流向数据，分析大单小单成交情况，用于判别资金动向，数据开始于2010年。\n限量：单次最大提取6000行记录，总量不限制\n积分：用户需要至少2000积分才可以调取，基础积分有流量控制，积分越多权限越大，请自行提高积分，具体请参阅\n积分获取办法",
+        "inputParameters": {
+          "ts_code": "str; N; 股票代码 （股票和时间参数至少输入一个）",
+          "trade_date": "str; N; 交易日期",
+          "start_date": "str; N; 开始日期",
+          "end_date": "str; N; 结束日期"
+        },
+        "outputAttribution": {
+          "ts_code": "str; Y; TS代码",
+          "trade_date": "str; Y; 交易日期"
+        },
+        "requestExamples": "pro\n=\nts\n.\npro_api\n(\n'your token'\n)\n#获取单日全部股票数据\ndf\n=\npro\n.\nmoneyflow\n(\ntrade_date\n=\n'20190315'\n)\n#获取单个股票数据\ndf\n=\npro\n.\nmoneyflow\n(\nts_code\n=\n'002149.SZ'\n,\nstart_date\n=\n'20190115'\n,\nend_date\n=\n'20190315'\n)"
+      },
+      "request": {
+        "candidateMode": "RANGE",
+        "legality": "DOCUMENTED_CANDIDATE",
+        "params": "{start_date=s, end_date=e}",
+        "conclusion": "股票或时间至少一个；正文为沪深A股，当前无股票输入"
+      },
+      "date": {
+        "semantic": "trade_date：交易日期",
+        "rangeSemanticDiffers": false,
+        "endpoints": "公开开始/结束标签及样例不构成当前条件下两端包含性的实测；未核实",
+        "liveVerified": false
+      },
+      "completeness": {
+        "documentedLimit": "6000",
+        "pagination": "UNCONFIRMED",
+        "gapOrConditionalCriterion": "无股票区间接受及6000截断需验证；总量不限制不提供结束合同",
+        "requiredGates": [
+          "Q",
+          "C",
+          "P",
+          "K"
+        ]
+      },
+      "recovery": {
+        "policy": "REQUEST",
+        "time": "RANGE；两端相同时DATE，重建仍用原来源日期方式",
+        "rebuild": "原公共条件+所存失败时间；NONE不加日期，RANGE不拆小；单日原生接口仍发送相等起止参数",
+        "independentRetryCandidateOrRestriction": "ts_code+同范围或 trade_date；逐股单元不能由缺少记录推导",
+        "independentRecoveryVerified": false,
+        "enableGate": "R"
+      },
+      "live": {
+        "status": "NOT_RUN",
+        "owner": "T20按权限和完成设计选择，非49项全量调用承诺"
+      }
+    },
+    {
+      "apiName": "moneyflow_hsgt",
+      "mode": "TRADE_DATE_RANGE",
+      "current": {
+        "path": "data-plane/tensor-plugin-tushare/src/main/resources/datasets/tushare_pro/moneyflow_hsgt.yaml",
+        "sha256": "acd0bd3a802a1a53b11329fbbbb12743af897829bf0eaf0a18488cbd81e7fd3f",
+        "parametersYaml": "parameters:\n  - { name: trade_date, label: 交易日期, type: DATE, required: true }",
+        "businessKeyYaml": "businessKey: { mode: COMPOSITE, fields: [trade_date] }"
+      },
+      "source": {
+        "url": "https://tushare.pro/document/2?doc_id=47",
+        "rawPageSha256": "bbf4318386ca0ea4c5072fc5e67fe0302f473ccbeba7238c45607226236dfadf",
+        "status": "MISSING_PAGE",
+        "introduction": "404, 文档不存在！",
+        "inputParameters": {},
+        "outputAttribution": {},
+        "requestExamples": ""
+      },
+      "request": {
+        "candidateMode": "UNCONFIRMED",
+        "legality": "UNCONFIRMED",
+        "params": "无已核实合法转换；保持原条件，拒绝猜参",
+        "conclusion": "旧官方页正文404；不能借同名资金流新接口替换"
+      },
+      "date": {
+        "semantic": "目标trade_date；官方旧页缺失，业务方向及输出归属未核实",
+        "rangeSemanticDiffers": false,
+        "endpoints": "公开开始/结束标签及样例不构成当前条件下两端包含性的实测；未核实",
+        "liveVerified": false
+      },
+      "completeness": {
+        "documentedLimit": "无法确认",
+        "pagination": "UNCONFIRMED",
+        "gapOrConditionalCriterion": "方向、日期、原参数及全部方向取全均未确认",
+        "requiredGates": [
+          "Q",
+          "C",
+          "P",
+          "K"
+        ]
+      },
+      "recovery": {
+        "policy": "REQUEST",
+        "time": "未确定：请求合法方式未核实，不据此创建不可重建的失败单元",
+        "rebuild": "原公共条件+所存失败时间；NONE不加日期，RANGE不拆小；单日原生接口仍发送相等起止参数",
+        "independentRetryCandidateOrRestriction": "本地仅 trade_date 键；REQUEST；ISSUE-008 排除",
+        "independentRecoveryVerified": false,
+        "enableGate": "R"
+      },
+      "live": {
+        "status": "EXCLUDED_ISSUE_008",
+        "owner": "用户后续单独处理"
+      }
+    },
+    {
+      "apiName": "monthly",
+      "mode": "TRADE_DATE_RANGE",
+      "current": {
+        "path": "data-plane/tensor-plugin-tushare/src/main/resources/datasets/tushare_pro/monthly.yaml",
+        "sha256": "40eae50527001353c16b748ee17ab5a534143e59afd709de0f16a02151a4035d",
+        "parametersYaml": "parameters:\n  - { name: trade_date, label: 交易日期, type: DATE, required: true }",
+        "businessKeyYaml": "businessKey: { mode: COMPOSITE, fields: [ts_code, trade_date] }"
+      },
+      "source": {
+        "url": "https://tushare.pro/document/2?doc_id=145",
+        "rawPageSha256": "7b6ef6b5113900feae0a791553116800fa8732f413814c0b90c7999148e655f5",
+        "status": "READABLE",
+        "introduction": "月线行情\n接口：monthly\n描述：获取A股月线数据\n限量：单次最大4500行，总量不限制\n积分：用户需要至少2000积分才可以调取，具体请参阅\n积分获取办法",
+        "inputParameters": {
+          "ts_code": "str; N; TS代码 （ts_code,trade_date两个参数任选一）",
+          "trade_date": "str; N; 交易日期 （每月最后一个交易日日期，YYYYMMDD格式）",
+          "start_date": "str; N; 开始日期",
+          "end_date": "str; N; 结束日期"
+        },
+        "outputAttribution": {
+          "ts_code": "str; Y; 股票代码",
+          "trade_date": "str; Y; 交易日期"
+        },
+        "requestExamples": ""
+      },
+      "request": {
+        "candidateMode": "DATE",
+        "legality": "DOCUMENTED_CANDIDATE",
+        "params": "{trade_date=d}",
+        "conclusion": "trade_date 为每月最后交易日期；与 ts_code 任选一"
+      },
+      "date": {
+        "semantic": "trade_date：每月最后交易日期，保持月线粒度",
+        "rangeSemanticDiffers": false,
+        "endpoints": "单日期候选按枚举覆盖输入两端；单日筛选效果未实测",
+        "liveVerified": false
+      },
+      "completeness": {
+        "documentedLimit": "4500",
+        "pagination": "UNCONFIRMED",
+        "gapOrConditionalCriterion": "单月全市场也可能触及4500；不可缩到单日便宣称完整",
+        "requiredGates": [
+          "Q",
+          "C",
+          "P",
+          "K"
+        ]
+      },
+      "recovery": {
+        "policy": "REQUEST",
+        "time": "DATE",
+        "rebuild": "原公共条件+所存失败时间；NONE不加日期，RANGE不拆小；单日原生接口仍发送相等起止参数",
+        "independentRetryCandidateOrRestriction": "ts_code+trade_date；保持月线粒度，不扩整月或构造逐日记录",
+        "independentRecoveryVerified": false,
+        "enableGate": "R"
+      },
+      "live": {
+        "status": "NOT_RUN",
+        "owner": "T20按权限和完成设计选择，非49项全量调用承诺"
+      }
+    },
+    {
+      "apiName": "slb_len",
+      "mode": "TRADE_DATE_RANGE",
+      "current": {
+        "path": "data-plane/tensor-plugin-tushare/src/main/resources/datasets/tushare_pro/slb_len.yaml",
+        "sha256": "516f44e40dee818425e0b9a0247c51610085994d5190f789021d817e52b855eb",
+        "parametersYaml": "parameters:\n  - { name: trade_date, label: 交易日期, type: DATE, required: true }",
+        "businessKeyYaml": "businessKey: { mode: COMPOSITE, fields: [trade_date, ob] }"
+      },
+      "source": {
+        "url": "https://tushare.pro/document/2?doc_id=331",
+        "rawPageSha256": "918040aa7183121cfdf36b3198887c5a60daaccd20d9573053f0af560adab53b",
+        "status": "READABLE",
+        "introduction": "转融资交易汇总\n接口：slb_len\n描述：转融通融资汇总\n限量：单次最大可以提取5000行数据，可循环获取所有历史\n积分：2000积分每分钟请求200次，5000积分500次请求",
+        "inputParameters": {
+          "trade_date": "str; N; 交易日期（YYYYMMDD格式，下同）",
+          "start_date": "str; N; 开始日期",
+          "end_date": "str; N; 结束日期"
+        },
+        "outputAttribution": {
+          "trade_date": "str; Y; 交易日期",
+          "ob": "float; Y; 期初余额(亿元)"
+        },
+        "requestExamples": "pro = ts.pro_api()\n\ndf = pro.slb_len(start_date='20240601', end_date='20240620')"
+      },
+      "request": {
+        "candidateMode": "RANGE",
+        "legality": "DOCUMENTED_CANDIDATE",
+        "params": "{start_date=s, end_date=e}",
+        "conclusion": "官方示例仅 start_date/end_date；交易日期范围有公开依据"
+      },
+      "date": {
+        "semantic": "trade_date：交易日期",
+        "rangeSemanticDiffers": false,
+        "endpoints": "公开开始/结束标签及样例不构成当前条件下两端包含性的实测；未核实",
+        "liveVerified": false
+      },
+      "completeness": {
+        "documentedLimit": "5000",
+        "pagination": "UNCONFIRMED",
+        "gapOrConditionalCriterion": "循环获取历史未给单段结束合同；ob 是余额而非股票标识",
+        "requiredGates": [
+          "Q",
+          "C",
+          "P",
+          "K"
+        ]
+      },
+      "recovery": {
+        "policy": "REQUEST",
+        "time": "RANGE；两端相同时DATE，重建仍用原来源日期方式",
+        "rebuild": "原公共条件+所存失败时间；NONE不加日期，RANGE不拆小；单日原生接口仍发送相等起止参数",
+        "independentRetryCandidateOrRestriction": "无股票参数及对象；REQUEST 保留完整范围，不用 ob 作 STOCK",
+        "independentRecoveryVerified": false,
+        "enableGate": "R"
+      },
+      "live": {
+        "status": "NOT_RUN",
+        "owner": "T20按权限和完成设计选择，非49项全量调用承诺"
+      }
+    },
+    {
+      "apiName": "slb_sec",
+      "mode": "TRADE_DATE_RANGE",
+      "current": {
+        "path": "data-plane/tensor-plugin-tushare/src/main/resources/datasets/tushare_pro/slb_sec.yaml",
+        "sha256": "00bb8b0a90b673fd2f796c9b8daa8a0a932704ea85a6ebc9235433ff02b7a395",
+        "parametersYaml": "parameters:\n  - { name: trade_date, label: 交易日期, type: DATE, required: true }",
+        "businessKeyYaml": "businessKey: { mode: COMPOSITE, fields: [trade_date, ts_code] }"
+      },
+      "source": {
+        "url": "https://tushare.pro/document/2?doc_id=332",
+        "rawPageSha256": "f3ee0cff9af54e2ab3862b27ece13df20bc9377b9756ed6a1f27853065cd4352",
+        "status": "READABLE",
+        "introduction": "转融券交易汇总\n接口：slb_sec\n描述：转融通转融券交易汇总\n限量：单次最大可以提取5000行数据，可循环获取所有历史\n积分：2000积分每分钟请求200次，5000积分500次请求",
+        "inputParameters": {
+          "trade_date": "str; N; 交易日期（YYYYMMDD格式，下同）",
+          "ts_code": "str; N; 股票代码",
+          "start_date": "str; N; 开始日期",
+          "end_date": "str; N; 结束日期"
+        },
+        "outputAttribution": {
+          "trade_date": "str; Y; 交易日期（YYYYMMDD）",
+          "ts_code": "str; Y; 股票代码"
+        },
+        "requestExamples": "pro = ts.pro_api()\n\ndf = pro.slb_sec(trade_date='20240620')"
+      },
+      "request": {
+        "candidateMode": "RANGE",
+        "legality": "DOCUMENTED_CANDIDATE",
+        "params": "{start_date=s, end_date=e}",
+        "conclusion": "可选股票与日期区间公开；既有调研记录导航标停"
+      },
+      "date": {
+        "semantic": "trade_date：交易日期",
+        "rangeSemanticDiffers": false,
+        "endpoints": "公开开始/结束标签及样例不构成当前条件下两端包含性的实测；未核实",
+        "liveVerified": false
+      },
+      "completeness": {
+        "documentedLimit": "5000",
+        "pagination": "UNCONFIRMED",
+        "gapOrConditionalCriterion": "5000截断、历史可用性及停止更新后的合法空须核实",
+        "requiredGates": [
+          "Q",
+          "C",
+          "P",
+          "K"
+        ]
+      },
+      "recovery": {
+        "policy": "REQUEST",
+        "time": "RANGE；两端相同时DATE，重建仍用原来源日期方式",
+        "rebuild": "原公共条件+所存失败时间；NONE不加日期，RANGE不拆小；单日原生接口仍发送相等起止参数",
+        "independentRetryCandidateOrRestriction": "ts_code+同范围或 trade_date；需确认停止更新影响与单元完整性",
+        "independentRecoveryVerified": false,
+        "enableGate": "R"
+      },
+      "live": {
+        "status": "NOT_RUN",
+        "owner": "T20按权限和完成设计选择，非49项全量调用承诺"
+      }
+    },
+    {
+      "apiName": "slb_sec_detail",
+      "mode": "TRADE_DATE_RANGE",
+      "current": {
+        "path": "data-plane/tensor-plugin-tushare/src/main/resources/datasets/tushare_pro/slb_sec_detail.yaml",
+        "sha256": "8664afb1cdbb5f001de0da1a055ddc6151916c5caec0589860d2970a703b0499",
+        "parametersYaml": "parameters:\n  - { name: trade_date, label: 交易日期, type: DATE, required: true }",
+        "businessKeyYaml": "businessKey: { mode: COMPOSITE, fields: [trade_date, ts_code, tenor, fee_rate] }"
+      },
+      "source": {
+        "url": "https://tushare.pro/document/2?doc_id=333",
+        "rawPageSha256": "098cac11f612cd5ddbdb229c5f0dfab9e4529ecb286482256e7eddbbed59d883",
+        "status": "READABLE",
+        "introduction": "转融券交易明细\n接口：slb_sec_detail\n描述：转融券交易明细\n限量：单次最大可以提取5000行数据，可循环获取所有历史\n积分：2000积分每分钟请求200次，5000积分500次请求",
+        "inputParameters": {
+          "trade_date": "str; N; 交易日期（YYYYMMDD格式，下同）",
+          "ts_code": "str; N; 股票代码",
+          "start_date": "str; N; 开始日期",
+          "end_date": "str; N; 结束日期"
+        },
+        "outputAttribution": {
+          "trade_date": "str; Y; 交易日期（YYYYMMDD）",
+          "ts_code": "str; Y; 股票代码",
+          "tenor": "str; Y; 期 限(天)",
+          "fee_rate": "float; Y; 融出费率(%)"
+        },
+        "requestExamples": "pro = ts.pro_api()\n\ndf = pro.slb_sec_detail(trade_date='20240620')"
+      },
+      "request": {
+        "candidateMode": "RANGE",
+        "legality": "DOCUMENTED_CANDIDATE",
+        "params": "{start_date=s, end_date=e}",
+        "conclusion": "可选股票与日期区间公开；既有调研记录导航标停"
+      },
+      "date": {
+        "semantic": "trade_date：交易日期",
+        "rangeSemanticDiffers": false,
+        "endpoints": "公开开始/结束标签及样例不构成当前条件下两端包含性的实测；未核实",
+        "liveVerified": false
+      },
+      "completeness": {
+        "documentedLimit": "5000",
+        "pagination": "UNCONFIRMED",
+        "gapOrConditionalCriterion": "多期限／费率记录须取全；5000及停止更新边界未确认",
+        "requiredGates": [
+          "Q",
+          "C",
+          "P",
+          "K"
+        ]
+      },
+      "recovery": {
+        "policy": "REQUEST",
+        "time": "RANGE；两端相同时DATE，重建仍用原来源日期方式",
+        "rebuild": "原公共条件+所存失败时间；NONE不加日期，RANGE不拆小；单日原生接口仍发送相等起止参数",
+        "independentRetryCandidateOrRestriction": "ts_code+同范围或 trade_date；保留同股同日所有 tenor／fee_rate",
+        "independentRecoveryVerified": false,
+        "enableGate": "R"
+      },
+      "live": {
+        "status": "NOT_RUN",
+        "owner": "T20按权限和完成设计选择，非49项全量调用承诺"
+      }
+    },
+    {
+      "apiName": "stk_limit",
+      "mode": "TRADE_DATE_RANGE",
+      "current": {
+        "path": "data-plane/tensor-plugin-tushare/src/main/resources/datasets/tushare_pro/stk_limit.yaml",
+        "sha256": "9d3e32d86e97b01603817dba0f6bc0370ac712c18e0d3d5150d3abdc68b9cf2e",
+        "parametersYaml": "parameters:\n  - { name: trade_date, label: 交易日期, type: DATE, required: true }",
+        "businessKeyYaml": "businessKey: { mode: COMPOSITE, fields: [trade_date, ts_code] }"
+      },
+      "source": {
+        "url": "https://tushare.pro/document/2?doc_id=183",
+        "rawPageSha256": "3a89e6b2b4d5ab6de1ed7f3b6c8b226ba9855957ed499aaef17eedc657d54140",
+        "status": "READABLE",
+        "introduction": "每日涨跌停价格\n接口：stk_limit\n描述：获取全市场（包含A/B股和基金）每日涨跌停价格，包括涨停价格，跌停价格等，每个交易日9点左右更新当日股票涨跌停价格。\n限量：单次最多提取5800条记录，可循环调取，总量不限制\n积分：用户积2000积分可调取，单位分钟有流控，积分越高流量越大，请自行提高积分，具体请参阅\n积分获取办法",
+        "inputParameters": {
+          "ts_code": "str; N; 股票代码",
+          "trade_date": "str; N; 交易日期",
+          "start_date": "str; N; 开始日期",
+          "end_date": "str; N; 结束日期"
+        },
+        "outputAttribution": {
+          "trade_date": "str; Y; 交易日期",
+          "ts_code": "str; Y; TS股票代码",
+          "exchange": "str; N; 交易所：SSE/SZSE/BSE"
+        },
+        "requestExamples": "pro\n=\nts\n.\npro_api\n()\n#获取单日全部股票数据涨跌停价格\ndf\n=\npro\n.\nstk_limit\n(\ntrade_date\n=\n'20190625'\n)\n#获取单个股票数据\ndf\n=\npro\n.\nstk_limit\n(\nts_code\n=\n'002149.SZ'\n,\nstart_date\n=\n'20190115'\n,\nend_date\n=\n'20190615'\n)"
+      },
+      "request": {
+        "candidateMode": "RANGE",
+        "legality": "DOCUMENTED_CANDIDATE",
+        "params": "{start_date=s, end_date=e}",
+        "conclusion": "正文覆盖全市场A/B股和基金；可选股票与区间公开"
+      },
+      "date": {
+        "semantic": "trade_date：交易日期",
+        "rangeSemanticDiffers": false,
+        "endpoints": "公开开始/结束标签及样例不构成当前条件下两端包含性的实测；未核实",
+        "liveVerified": false
+      },
+      "completeness": {
+        "documentedLimit": "5800",
+        "pagination": "UNCONFIRMED",
+        "gapOrConditionalCriterion": "单日也可能超过5800；不能只按A股宇宙证明取全",
+        "requiredGates": [
+          "Q",
+          "C",
+          "P",
+          "K"
+        ]
+      },
+      "recovery": {
+        "policy": "REQUEST",
+        "time": "RANGE；两端相同时DATE，重建仍用原来源日期方式",
+        "rebuild": "原公共条件+所存失败时间；NONE不加日期，RANGE不拆小；单日原生接口仍发送相等起止参数",
+        "independentRetryCandidateOrRestriction": "ts_code+同范围或 trade_date；基金／B股能否合法用 STOCK 编码待验证",
+        "independentRecoveryVerified": false,
+        "enableGate": "R"
+      },
+      "live": {
+        "status": "NOT_RUN",
+        "owner": "T20按权限和完成设计选择，非49项全量调用承诺"
+      }
+    },
+    {
+      "apiName": "suspend_d",
+      "mode": "TRADE_DATE_RANGE",
+      "current": {
+        "path": "data-plane/tensor-plugin-tushare/src/main/resources/datasets/tushare_pro/suspend_d.yaml",
+        "sha256": "10c3541daa72b9b275c065cb9c4003080196aad144565ece0f3e666f58ca872e",
+        "parametersYaml": "parameters:\n  - { name: trade_date, label: 交易日期, type: DATE, required: true }",
+        "businessKeyYaml": "businessKey: { mode: COMPOSITE, fields: [ts_code, trade_date] }"
+      },
+      "source": {
+        "url": "https://tushare.pro/document/2?doc_id=214",
+        "rawPageSha256": "7d9a294d1dc50c06f090b37528e4c7958e31c1797b9818ceb3639c164468b6c5",
+        "status": "READABLE",
+        "introduction": "每日停复牌信息\n接口：suspend_d\n更新时间：不定期\n描述：至少需要2000积分 可以调用，5000积分可以获得更高的频次，按日期方式获取股票每日停复牌信息",
+        "inputParameters": {
+          "ts_code": "str; N; 股票代码(可输入多值)",
+          "trade_date": "str; N; 交易日日期",
+          "start_date": "str; N; 停复牌查询开始日期",
+          "end_date": "str; N; 停复牌查询结束日期",
+          "suspend_type": "str; N; 停复牌类型：S-停牌,R-复牌"
+        },
+        "outputAttribution": {
+          "ts_code": "str; Y; TS代码",
+          "trade_date": "str; Y; 停复牌日期（覆盖从停牌到覆盖期间的连续日期）"
+        },
+        "requestExamples": ""
+      },
+      "request": {
+        "candidateMode": "RANGE",
+        "legality": "DOCUMENTED_CANDIDATE",
+        "params": "{start_date=s, end_date=e}",
+        "conclusion": "起止为停复牌查询日期；trade_date 输出说明为停复牌连续日期"
+      },
+      "date": {
+        "semantic": "trade_date：停复牌日期；连续日期含义须实测",
+        "rangeSemanticDiffers": false,
+        "endpoints": "公开开始/结束标签及样例不构成当前条件下两端包含性的实测；未核实",
+        "liveVerified": false
+      },
+      "completeness": {
+        "documentedLimit": "未明示",
+        "pagination": "UNCONFIRMED",
+        "gapOrConditionalCriterion": "需核实输出连续覆盖及 S/R 同日记录；不把停牌当市场休市",
+        "requiredGates": [
+          "Q",
+          "C",
+          "P",
+          "K"
+        ]
+      },
+      "recovery": {
+        "policy": "REQUEST",
+        "time": "RANGE；两端相同时DATE，重建仍用原来源日期方式",
+        "rebuild": "原公共条件+所存失败时间；NONE不加日期，RANGE不拆小；单日原生接口仍发送相等起止参数",
+        "independentRetryCandidateOrRestriction": "ts_code+同范围或 trade_date；证明全停复牌记录完整且键归属无冲突",
+        "independentRecoveryVerified": false,
+        "enableGate": "R"
+      },
+      "live": {
+        "status": "NOT_RUN",
+        "owner": "T20按权限和完成设计选择，非49项全量调用承诺"
+      }
+    },
+    {
+      "apiName": "top_inst",
+      "mode": "TRADE_DATE_RANGE",
+      "current": {
+        "path": "data-plane/tensor-plugin-tushare/src/main/resources/datasets/tushare_pro/top_inst.yaml",
+        "sha256": "ad36c455cf2675c02f40a07fd3a460207cb766f85d287a6d198359be40464d97",
+        "parametersYaml": "parameters:\n  - { name: trade_date, label: 交易日期, type: DATE, required: true }",
+        "businessKeyYaml": "businessKey: { mode: COMPOSITE, fields: [trade_date, ts_code, exalter, side, reason, net_buy] }"
+      },
+      "source": {
+        "url": "https://tushare.pro/document/2?doc_id=107",
+        "rawPageSha256": "bc9a51b1ba6e5c3121ef95f1e816f7f9bb4665d096df6a856f93eb01711184a2",
+        "status": "READABLE",
+        "introduction": "龙虎榜机构明细\n接口：top_inst\n描述：龙虎榜机构成交明细\n限量：单次请求最大返回10000行数据，可根据参数循环获取全部历史\n积分：用户需要至少5000积分才可以调取，具体请参阅\n积分获取办法",
+        "inputParameters": {
+          "trade_date": "str; Y; 交易日期",
+          "ts_code": "str; N; TS代码"
+        },
+        "outputAttribution": {
+          "trade_date": "str; Y; 交易日期",
+          "ts_code": "str; Y; TS代码",
+          "exalter": "str; Y; 营业部名称",
+          "side": "str; Y; 买卖类型0：买入金额最大的前5名， 1：卖出金额最大的前5名",
+          "net_buy": "float; Y; 净成交额（元）",
+          "reason": "str; Y; 上榜理由"
+        },
+        "requestExamples": ""
+      },
+      "request": {
+        "candidateMode": "DATE",
+        "legality": "DOCUMENTED_CANDIDATE",
+        "params": "{trade_date=d}",
+        "conclusion": "trade_date 必填；未列起止参数；ts_code 可选"
+      },
+      "date": {
+        "semantic": "trade_date：交易日期",
+        "rangeSemanticDiffers": false,
+        "endpoints": "单日期候选按枚举覆盖输入两端；单日筛选效果未实测",
+        "liveVerified": false
+      },
+      "completeness": {
+        "documentedLimit": "10000",
+        "pagination": "UNCONFIRMED",
+        "gapOrConditionalCriterion": "单日多机构／方向／原因行完整结束未确认",
+        "requiredGates": [
+          "Q",
+          "C",
+          "P",
+          "K"
+        ]
+      },
+      "recovery": {
+        "policy": "REQUEST",
+        "time": "DATE",
+        "rebuild": "原公共条件+所存失败时间；NONE不加日期，RANGE不拆小；单日原生接口仍发送相等起止参数",
+        "independentRetryCandidateOrRestriction": "ts_code+trade_date；同股全部机构行；ISSUE-008 排除",
+        "independentRecoveryVerified": false,
+        "enableGate": "R"
+      },
+      "live": {
+        "status": "EXCLUDED_ISSUE_008",
+        "owner": "用户后续单独处理"
+      }
+    },
+    {
+      "apiName": "top_list",
+      "mode": "TRADE_DATE_RANGE",
+      "current": {
+        "path": "data-plane/tensor-plugin-tushare/src/main/resources/datasets/tushare_pro/top_list.yaml",
+        "sha256": "568362e867d507fe89870e2cab5595650c06f73831d8dd978b77d765bc06d52f",
+        "parametersYaml": "parameters:\n  - { name: trade_date, label: 交易日期, type: DATE, required: true }",
+        "businessKeyYaml": "businessKey: { mode: COMPOSITE, fields: [trade_date, ts_code, reason] }"
+      },
+      "source": {
+        "url": "https://tushare.pro/document/2?doc_id=106",
+        "rawPageSha256": "4d4470d7d1bd285b0b8d155b8e71c01ff7cfac81389f585faca4910bffaeaf33",
+        "status": "READABLE",
+        "introduction": "龙虎榜每日明细\n接口：top_list\n描述：龙虎榜每日交易明细\n数据历史： 2005年至今\n限量：单次请求返回最大10000行数据，可通过参数循环获取全部历史\n积分：用户需要至少2000积分才可以调取，具体请参阅\n积分获取办法",
+        "inputParameters": {
+          "trade_date": "str; Y; 交易日期",
+          "ts_code": "str; N; 股票代码"
+        },
+        "outputAttribution": {
+          "trade_date": "str; Y; 交易日期",
+          "ts_code": "str; Y; TS代码",
+          "reason": "str; Y; 上榜理由"
+        },
+        "requestExamples": ""
+      },
+      "request": {
+        "candidateMode": "DATE",
+        "legality": "DOCUMENTED_CANDIDATE",
+        "params": "{trade_date=d}",
+        "conclusion": "trade_date 必填；未列起止参数；ts_code 可选"
+      },
+      "date": {
+        "semantic": "trade_date：交易日期",
+        "rangeSemanticDiffers": false,
+        "endpoints": "单日期候选按枚举覆盖输入两端；单日筛选效果未实测",
+        "liveVerified": false
+      },
+      "completeness": {
+        "documentedLimit": "10000",
+        "pagination": "UNCONFIRMED",
+        "gapOrConditionalCriterion": "单日多上榜原因行不可按每股一行判断取全",
+        "requiredGates": [
+          "Q",
+          "C",
+          "P",
+          "K"
+        ]
+      },
+      "recovery": {
+        "policy": "REQUEST",
+        "time": "DATE",
+        "rebuild": "原公共条件+所存失败时间；NONE不加日期，RANGE不拆小；单日原生接口仍发送相等起止参数",
+        "independentRetryCandidateOrRestriction": "ts_code+trade_date；同股全部 reason 行",
+        "independentRecoveryVerified": false,
+        "enableGate": "R"
+      },
+      "live": {
+        "status": "NOT_RUN",
+        "owner": "T20按权限和完成设计选择，非49项全量调用承诺"
+      }
+    },
+    {
+      "apiName": "weekly",
+      "mode": "TRADE_DATE_RANGE",
+      "current": {
+        "path": "data-plane/tensor-plugin-tushare/src/main/resources/datasets/tushare_pro/weekly.yaml",
+        "sha256": "ff182db478242a37a9fcd15224efc9eaaf87bf7441f1b5a17133c038483219b9",
+        "parametersYaml": "parameters:\n  - { name: trade_date, label: 交易日期, type: DATE, required: true }",
+        "businessKeyYaml": "businessKey: { mode: COMPOSITE, fields: [ts_code, trade_date] }"
+      },
+      "source": {
+        "url": "https://tushare.pro/document/2?doc_id=144",
+        "rawPageSha256": "2379565c72b2f1057488103daf902cbb3ace8eefa813e0c23b2baff42b43d8b3",
+        "status": "READABLE",
+        "introduction": "周线行情\n接口：weekly\n描述：获取A股周线行情，本接口每周最后一个交易日更新，如需要使用每天更新的周线数据，请使用\n日度更新的周线行情接口\n。\n限量：单次最大6000行，可使用交易日期循环提取，总量不限制\n积分：用户需要至少2000积分才可以调取，具体请参阅\n积分获取办法",
+        "inputParameters": {
+          "ts_code": "str; N; TS代码 （ts_code,trade_date两个参数任选一）",
+          "trade_date": "str; N; 交易日期 （每周最后一个交易日期，YYYYMMDD格式）",
+          "start_date": "str; N; 开始日期",
+          "end_date": "str; N; 结束日期"
+        },
+        "outputAttribution": {
+          "ts_code": "str; Y; 股票代码",
+          "trade_date": "str; Y; 交易日期"
+        },
+        "requestExamples": ""
+      },
+      "request": {
+        "candidateMode": "DATE",
+        "legality": "DOCUMENTED_CANDIDATE",
+        "params": "{trade_date=d}",
+        "conclusion": "trade_date 为每周最后交易日期；与 ts_code 任选一"
+      },
+      "date": {
+        "semantic": "trade_date：每周最后交易日期，保持周线粒度",
+        "rangeSemanticDiffers": false,
+        "endpoints": "单日期候选按枚举覆盖输入两端；单日筛选效果未实测",
+        "liveVerified": false
+      },
+      "completeness": {
+        "documentedLimit": "6000",
+        "pagination": "UNCONFIRMED",
+        "gapOrConditionalCriterion": "全市场6000上限及非周末交易日合法空需确认",
+        "requiredGates": [
+          "Q",
+          "C",
+          "P",
+          "K"
+        ]
+      },
+      "recovery": {
+        "policy": "REQUEST",
+        "time": "DATE",
+        "rebuild": "原公共条件+所存失败时间；NONE不加日期，RANGE不拆小；单日原生接口仍发送相等起止参数",
+        "independentRetryCandidateOrRestriction": "ts_code+trade_date；周线不扩到整周，不生成日线",
+        "independentRecoveryVerified": false,
+        "enableGate": "R"
+      },
+      "live": {
+        "status": "NOT_RUN",
+        "owner": "T20按权限和完成设计选择，非49项全量调用承诺"
+      }
+    },
+    {
+      "apiName": "balancesheet",
+      "mode": "ANN_DATE_RANGE",
+      "current": {
+        "path": "data-plane/tensor-plugin-tushare/src/main/resources/datasets/tushare_pro/balancesheet.yaml",
+        "sha256": "6fc6b5a0d5823b76bb0c030029cc5f4eecf4c2f689b10a56ae83366a6464746b",
+        "parametersYaml": "parameters:\n  - { name: ts_code, label: 股票代码, type: TS_CODE, required: true }\n  - { name: ann_date, label: 公告日期, type: DATE, required: true }",
+        "businessKeyYaml": "businessKey: { mode: COMPOSITE, fields: [ts_code, end_date, report_type, ann_date] }"
+      },
+      "source": {
+        "url": "https://tushare.pro/document/2?doc_id=36",
+        "rawPageSha256": "6ecd8f422b420a36c530076b093a7e812bb1ebe68b0721b635673c35bdbf0914",
+        "status": "READABLE",
+        "introduction": "资产负债表\n接口：balancesheet，可以通过\n数据工具\n调试和查看数据。\n描述：获取上市公司资产负债表\n积分：用户需要至少2000积分才可以调取，具体请参阅\n积分获取办法\n提示：当前接口只能按单只股票获取其历史数据，如果需要获取某一季度全部上市公司数据，请使用balancesheet_vip接口（参数一致），需积攒5000积分。",
+        "inputParameters": {
+          "ts_code": "str; Y; 股票代码",
+          "ann_date": "str; N; 公告日期(YYYYMMDD格式，下同)",
+          "start_date": "str; N; 公告日开始日期",
+          "end_date": "str; N; 公告日结束日期",
+          "period": "str; N; 报告期(每个季度最后一天的日期，比如20171231表示年报，20170630半年报，20170930三季报)",
+          "report_type": "str; N; 报告类型：见下方详细说明",
+          "comp_type": "str; N; 公司类型：1一般工商业 2银行 3保险 4证券"
+        },
+        "outputAttribution": {
+          "ts_code": "str; Y; TS股票代码",
+          "ann_date": "str; Y; 公告日期",
+          "f_ann_date": "str; Y; 实际公告日期",
+          "end_date": "str; Y; 报告期",
+          "report_type": "str; Y; 报表类型"
+        },
+        "requestExamples": ""
+      },
+      "request": {
+        "candidateMode": "RANGE",
+        "legality": "DOCUMENTED_CANDIDATE",
+        "params": "{ts_code=<原值>, start_date=s, end_date=e}",
+        "conclusion": "ts_code 必填且本地已有；start/end 为公告日期"
+      },
+      "date": {
+        "semantic": "ann_date（不是报告期/事件生效日）",
+        "rangeSemanticDiffers": false,
+        "endpoints": "公开开始/结束标签及样例不构成当前条件下两端包含性的实测；未核实",
+        "liveVerified": false
+      },
+      "completeness": {
+        "documentedLimit": "未明示",
+        "pagination": "UNCONFIRMED",
+        "gapOrConditionalCriterion": "同公告日多报告类型／修订版本及未明示上限，不能用行少证明完整",
+        "requiredGates": [
+          "Q",
+          "C",
+          "P"
+        ]
+      },
+      "recovery": {
+        "policy": "REQUEST",
+        "time": "RANGE；两端相同时DATE，重建仍用原来源日期方式",
+        "rebuild": "原公共条件+所存失败时间；NONE不加日期，RANGE不拆小；单日原生接口仍发送相等起止参数",
+        "independentRetryCandidateOrRestriction": "原 ts_code+ann_date 或相同公告范围；区分 ann_date 与 f_ann_date",
+        "independentRecoveryVerified": false,
+        "enableGate": "R"
+      },
+      "live": {
+        "status": "NOT_RUN",
+        "owner": "T20按权限和完成设计选择，非49项全量调用承诺"
+      }
+    },
+    {
+      "apiName": "cashflow",
+      "mode": "ANN_DATE_RANGE",
+      "current": {
+        "path": "data-plane/tensor-plugin-tushare/src/main/resources/datasets/tushare_pro/cashflow.yaml",
+        "sha256": "69697f2a3f8dfa999e598700cb79c86afabda726e5ba1a2dea54eed38e8362d9",
+        "parametersYaml": "parameters:\n  - { name: ts_code, label: 股票代码, type: TS_CODE, required: true }\n  - { name: ann_date, label: 公告日期, type: DATE, required: true }",
+        "businessKeyYaml": "businessKey: { mode: COMPOSITE, fields: [ts_code, end_date, report_type, ann_date] }"
+      },
+      "source": {
+        "url": "https://tushare.pro/document/2?doc_id=44",
+        "rawPageSha256": "87c09e29c080be4a152e94cd5e4c3c54d6122cbcec9c4942e0c2865383c23665",
+        "status": "READABLE",
+        "introduction": "现金流量表\n接口：cashflow，可以通过\n数据工具\n调试和查看数据。\n描述：获取上市公司现金流量表\n积分：用户需要至少2000积分才可以调取，具体请参阅\n积分获取办法\n提示：当前接口只能按单只股票获取其历史数据，如果需要获取某一季度全部上市公司数据，请使用cashflow_vip接口（参数一致），需积攒5000积分。",
+        "inputParameters": {
+          "ts_code": "str; Y; 股票代码",
+          "ann_date": "str; N; 公告日期（YYYYMMDD格式，下同）",
+          "f_ann_date": "str; N; 实际公告日期",
+          "start_date": "str; N; 公告日开始日期",
+          "end_date": "str; N; 公告日结束日期",
+          "period": "str; N; 报告期(每个季度最后一天的日期，比如20171231表示年报，20170630半年报，20170930三季报)",
+          "report_type": "str; N; 报告类型：见下方详细说明",
+          "comp_type": "str; N; 公司类型：1一般工商业 2银行 3保险 4证券",
+          "is_calc": "int; N; 是否计算报表"
+        },
+        "outputAttribution": {
+          "ts_code": "str; Y; TS股票代码",
+          "ann_date": "str; Y; 公告日期",
+          "f_ann_date": "str; Y; 实际公告日期",
+          "end_date": "str; Y; 报告期",
+          "report_type": "str; Y; 报表类型"
+        },
+        "requestExamples": ""
+      },
+      "request": {
+        "candidateMode": "RANGE",
+        "legality": "DOCUMENTED_CANDIDATE",
+        "params": "{ts_code=<原值>, start_date=s, end_date=e}",
+        "conclusion": "ts_code 必填且本地已有；start/end 为公告日期"
+      },
+      "date": {
+        "semantic": "ann_date（不是报告期/事件生效日）",
+        "rangeSemanticDiffers": false,
+        "endpoints": "公开开始/结束标签及样例不构成当前条件下两端包含性的实测；未核实",
+        "liveVerified": false
+      },
+      "completeness": {
+        "documentedLimit": "未明示",
+        "pagination": "UNCONFIRMED",
+        "gapOrConditionalCriterion": "同公告日多报告类型／修订与来源结束依据未确认",
+        "requiredGates": [
+          "Q",
+          "C",
+          "P"
+        ]
+      },
+      "recovery": {
+        "policy": "REQUEST",
+        "time": "RANGE；两端相同时DATE，重建仍用原来源日期方式",
+        "rebuild": "原公共条件+所存失败时间；NONE不加日期，RANGE不拆小；单日原生接口仍发送相等起止参数",
+        "independentRetryCandidateOrRestriction": "原 ts_code+ann_date 或相同公告范围；不得改用实际公告日 f_ann_date",
+        "independentRecoveryVerified": false,
+        "enableGate": "R"
+      },
+      "live": {
+        "status": "NOT_RUN",
+        "owner": "T20按权限和完成设计选择，非49项全量调用承诺"
+      }
+    },
+    {
+      "apiName": "disclosure_date",
+      "mode": "ANN_DATE_RANGE",
+      "current": {
+        "path": "data-plane/tensor-plugin-tushare/src/main/resources/datasets/tushare_pro/disclosure_date.yaml",
+        "sha256": "953e224f0444e212701c41438048d11cada3215122d5eabb02e73edab7264da3",
+        "parametersYaml": "parameters:\n  - { name: ann_date, label: 公告日期, type: DATE, required: true }",
+        "businessKeyYaml": "businessKey: { mode: COMPOSITE, fields: [ts_code, end_date] }"
+      },
+      "source": {
+        "url": "https://tushare.pro/document/2?doc_id=162",
+        "rawPageSha256": "16c4d9b28493b2179a773fd64554e4d1d1816a01fe25610df2e729dd9b103575",
+        "status": "READABLE",
+        "introduction": "财报披露计划\n接口：disclosure_date\n描述：获取财报披露计划日期\n限量：单次最大6000，总量不限制\n积分：用户需要至少2000积分才可以调取，积分越多权限越大，具体请参阅\n积分获取办法",
+        "inputParameters": {
+          "ts_code": "str; N; TS股票代码",
+          "end_date": "str; N; 财报周期（每个季度最后一天的日期，比如20181231表示2018年年报，20180630表示中报)",
+          "pre_date": "str; N; 计划披露日期",
+          "ann_date": "str; N; 最新披露公告日",
+          "actual_date": "str; N; 实际披露日期"
+        },
+        "outputAttribution": {
+          "ts_code": "str; Y; TS代码",
+          "ann_date": "str; Y; 最新披露公告日",
+          "end_date": "str; Y; 报告期"
+        },
+        "requestExamples": ""
+      },
+      "request": {
+        "candidateMode": "DATE",
+        "legality": "DOCUMENTED_CANDIDATE",
+        "params": "{ann_date=d}",
+        "conclusion": "ann_date 为最新披露公告日；end_date 是财报周期，无 start_date"
+      },
+      "date": {
+        "semantic": "ann_date：最新披露公告日；非报告期end_date或计划/实际披露日",
+        "rangeSemanticDiffers": false,
+        "endpoints": "单日期候选按枚举覆盖输入两端；单日筛选效果未实测",
+        "liveVerified": false
+      },
+      "completeness": {
+        "documentedLimit": "6000",
+        "pagination": "UNCONFIRMED",
+        "gapOrConditionalCriterion": "按最新公告日不保证保有历史每次计划；同日6000及日期筛选需核实",
+        "requiredGates": [
+          "Q",
+          "C",
+          "P"
+        ]
+      },
+      "recovery": {
+        "policy": "REQUEST",
+        "time": "DATE",
+        "rebuild": "原公共条件+所存失败时间；NONE不加日期，RANGE不拆小；单日原生接口仍发送相等起止参数",
+        "independentRetryCandidateOrRestriction": "ts_code+ann_date；同一 ts_code/end_date 可跨公告更新，须核对归属和既有键",
+        "independentRecoveryVerified": false,
+        "enableGate": "R"
+      },
+      "live": {
+        "status": "NOT_RUN",
+        "owner": "T20按权限和完成设计选择，非49项全量调用承诺"
+      }
+    },
+    {
+      "apiName": "dividend",
+      "mode": "ANN_DATE_RANGE",
+      "current": {
+        "path": "data-plane/tensor-plugin-tushare/src/main/resources/datasets/tushare_pro/dividend.yaml",
+        "sha256": "f5c708ae9d27152147fc533214f2c811c3cfa8d416d83093ea829b65ad5d6285",
+        "parametersYaml": "parameters:\n  - { name: ann_date, label: 公告日期, type: DATE, required: true }",
+        "businessKeyYaml": "businessKey: { mode: FINGERPRINT, fields: [ts_code, end_date, ann_date, div_proc] }"
+      },
+      "source": {
+        "url": "https://tushare.pro/document/2?doc_id=103",
+        "rawPageSha256": "1bd761213fc85a02573a1c5f2074a9611d335b20d68fb6800b646dfab248c546",
+        "status": "READABLE",
+        "introduction": "分红送股\n接口：dividend\n描述：分红送股数据\n权限：起始时间2000-01-01，单次查询返回2000行，每日20点~21点更新，用户需要至少2000积分才可以调取，具体请参阅\n积分获取办法",
+        "inputParameters": {
+          "ts_code": "str; N; TS代码",
+          "ann_date": "str; N; 公告日",
+          "record_date": "str; N; 股权登记日期",
+          "ex_date": "str; N; 除权除息日",
+          "imp_ann_date": "str; N; 实施公告日"
+        },
+        "outputAttribution": {
+          "ts_code": "str; Y; TS代码",
+          "end_date": "str; Y; 分红年度",
+          "ann_date": "str; Y; 公告日(预案，决案)",
+          "div_proc": "str; Y; 实施进度"
+        },
+        "requestExamples": "pro\n=\nts\n.\npro_api\n()\ndf\n=\npro\n.\ndividend\n(\nts_code\n=\n'600848.SH'\n,\nfields\n=\n'ts_code,div_proc,stk_div,record_date,ex_date'\n)"
+      },
+      "request": {
+        "candidateMode": "DATE",
+        "legality": "DOCUMENTED_CANDIDATE",
+        "params": "{ann_date=d}",
+        "conclusion": "ann_date 为预案／决案公告日；无起止参数"
+      },
+      "date": {
+        "semantic": "ann_date（不是报告期/事件生效日）",
+        "rangeSemanticDiffers": false,
+        "endpoints": "单日期候选按枚举覆盖输入两端；单日筛选效果未实测",
+        "liveVerified": false
+      },
+      "completeness": {
+        "documentedLimit": "2000",
+        "pagination": "UNCONFIRMED",
+        "gapOrConditionalCriterion": "不能拿 imp_ann_date／ex_date 替代；同日多分红方案取全未确认",
+        "requiredGates": [
+          "Q",
+          "C",
+          "P"
+        ]
+      },
+      "recovery": {
+        "policy": "REQUEST",
+        "time": "DATE",
+        "rebuild": "原公共条件+所存失败时间；NONE不加日期，RANGE不拆小；单日原生接口仍发送相等起止参数",
+        "independentRetryCandidateOrRestriction": "ts_code+ann_date；全方案及进度记录，沿用现有 FINGERPRINT 键",
+        "independentRecoveryVerified": false,
+        "enableGate": "R"
+      },
+      "live": {
+        "status": "NOT_RUN",
+        "owner": "T20按权限和完成设计选择，非49项全量调用承诺"
+      }
+    },
+    {
+      "apiName": "express",
+      "mode": "ANN_DATE_RANGE",
+      "current": {
+        "path": "data-plane/tensor-plugin-tushare/src/main/resources/datasets/tushare_pro/express.yaml",
+        "sha256": "756230fd8ac7d6363d859f806074f0eb90b4546ea20b313438c55ea9a5085ae0",
+        "parametersYaml": "parameters:\n  - { name: ann_date, label: 公告日期, type: DATE, required: true }",
+        "businessKeyYaml": "businessKey: { mode: COMPOSITE, fields: [ts_code, end_date, ann_date] }"
+      },
+      "source": {
+        "url": "https://tushare.pro/document/2?doc_id=46",
+        "rawPageSha256": "2afc0818bedb48ca6cd2d64dcb9a6ed1f650ccea4bfd1f46490459d440bb9476",
+        "status": "READABLE",
+        "introduction": "业绩快报\n接口：express\n描述：获取上市公司业绩快报\n权限：用户需要至少2000积分才可以调取，具体请参阅\n积分获取办法\n提示：当前接口只能按单只股票获取其历史数据，如果需要获取某一季度全部上市公司数据，请使用express_vip接口（参数一致），需积攒5000积分。",
+        "inputParameters": {
+          "ts_code": "str; Y; 股票代码",
+          "ann_date": "str; N; 公告日期",
+          "start_date": "str; N; 公告开始日期",
+          "end_date": "str; N; 公告结束日期",
+          "period": "str; N; 报告期(每个季度最后一天的日期,比如20171231表示年报，20170630半年报，20170930三季报)"
+        },
+        "outputAttribution": {
+          "ts_code": "str; Y; TS股票代码",
+          "ann_date": "str; Y; 公告日期",
+          "end_date": "str; Y; 报告期"
+        },
+        "requestExamples": ""
+      },
+      "request": {
+        "candidateMode": "UNCONFIRMED",
+        "legality": "UNCONFIRMED",
+        "params": "无已核实合法转换；保持原条件，拒绝猜参",
+        "conclusion": "官方 ts_code 必填、正文限单股；本地只有 ann_date，当前条件冲突"
+      },
+      "date": {
+        "semantic": "ann_date（不是报告期/事件生效日）",
+        "rangeSemanticDiffers": false,
+        "endpoints": "公开开始/结束标签及样例不构成当前条件下两端包含性的实测；未核实",
+        "liveVerified": false
+      },
+      "completeness": {
+        "documentedLimit": "未明示",
+        "pagination": "UNCONFIRMED",
+        "gapOrConditionalCriterion": "合法请求先未成立，不能用 REQUEST 绕过；不得换 express_vip",
+        "requiredGates": [
+          "Q",
+          "C",
+          "P"
+        ]
+      },
+      "recovery": {
+        "policy": "REQUEST",
+        "time": "未确定：请求合法方式未核实，不据此创建不可重建的失败单元",
+        "rebuild": "原公共条件+所存失败时间；NONE不加日期，RANGE不拆小；单日原生接口仍发送相等起止参数",
+        "independentRetryCandidateOrRestriction": "即使可按股票重试，也不能据此使当前无股票首次请求合法",
+        "independentRecoveryVerified": false,
+        "enableGate": "R"
+      },
+      "live": {
+        "status": "NOT_RUN",
+        "owner": "T20按权限和完成设计选择，非49项全量调用承诺"
+      }
+    },
+    {
+      "apiName": "fina_audit",
+      "mode": "ANN_DATE_RANGE",
+      "current": {
+        "path": "data-plane/tensor-plugin-tushare/src/main/resources/datasets/tushare_pro/fina_audit.yaml",
+        "sha256": "a8f32260a2e5e4676cc2ece0acdfc768f6d51737031c8917ea508da9ae2e7a5e",
+        "parametersYaml": "parameters:\n  - { name: ts_code, label: 股票代码, type: TS_CODE, required: true }\n  - { name: ann_date, label: 公告日期, type: DATE, required: true }",
+        "businessKeyYaml": "businessKey: { mode: COMPOSITE, fields: [ts_code, end_date, ann_date] }"
+      },
+      "source": {
+        "url": "https://tushare.pro/document/2?doc_id=80",
+        "rawPageSha256": "38d5fffb31e7ad9ace61173a6c0bc126b757a88cc5f7b83552aa5b1d50f86a90",
+        "status": "READABLE",
+        "introduction": "财务审计意见\n接口：fina_audit\n描述：获取上市公司定期财务审计意见数据\n权限：用户需要至少2000积分才可以调取，具体请参阅\n积分获取办法",
+        "inputParameters": {
+          "ts_code": "str; Y; 股票代码",
+          "ann_date": "str; N; 公告日期",
+          "start_date": "str; N; 公告开始日期",
+          "end_date": "str; N; 公告结束日期",
+          "period": "str; N; 报告期(每个季度最后一天的日期,比如20171231表示年报)"
+        },
+        "outputAttribution": {
+          "ts_code": "str; TS股票代码",
+          "ann_date": "str; 公告日期",
+          "end_date": "str; 报告期"
+        },
+        "requestExamples": ""
+      },
+      "request": {
+        "candidateMode": "RANGE",
+        "legality": "DOCUMENTED_CANDIDATE",
+        "params": "{ts_code=<原值>, start_date=s, end_date=e}",
+        "conclusion": "本地已有必填 ts_code；起止为公告日期"
+      },
+      "date": {
+        "semantic": "ann_date（不是报告期/事件生效日）",
+        "rangeSemanticDiffers": false,
+        "endpoints": "公开开始/结束标签及样例不构成当前条件下两端包含性的实测；未核实",
+        "liveVerified": false
+      },
+      "completeness": {
+        "documentedLimit": "未明示",
+        "pagination": "UNCONFIRMED",
+        "gapOrConditionalCriterion": "同公告日跨报告期及审计记录取全、未明示上限需核实",
+        "requiredGates": [
+          "Q",
+          "C",
+          "P"
+        ]
+      },
+      "recovery": {
+        "policy": "REQUEST",
+        "time": "RANGE；两端相同时DATE，重建仍用原来源日期方式",
+        "rebuild": "原公共条件+所存失败时间；NONE不加日期，RANGE不拆小；单日原生接口仍发送相等起止参数",
+        "independentRetryCandidateOrRestriction": "原 ts_code+ann_date 或相同公告范围；报告期 end_date 不是选择器日期",
+        "independentRecoveryVerified": false,
+        "enableGate": "R"
+      },
+      "live": {
+        "status": "NOT_RUN",
+        "owner": "T20按权限和完成设计选择，非49项全量调用承诺"
+      }
+    },
+    {
+      "apiName": "fina_indicator",
+      "mode": "ANN_DATE_RANGE",
+      "current": {
+        "path": "data-plane/tensor-plugin-tushare/src/main/resources/datasets/tushare_pro/fina_indicator.yaml",
+        "sha256": "d3e8d39f1d27a43d3383ac1ce97645a81dcdb6ee76e70c5723834a4ebe80dddf",
+        "parametersYaml": "parameters:\n  - { name: ts_code, label: 股票代码, type: TS_CODE, required: true }\n  - { name: ann_date, label: 公告日期, type: DATE, required: true }",
+        "businessKeyYaml": "businessKey: { mode: COMPOSITE, fields: [ts_code, end_date, ann_date] }"
+      },
+      "source": {
+        "url": "https://tushare.pro/document/2?doc_id=79",
+        "rawPageSha256": "683832ff3ab6ded8ba95dba61f0da3e2b3d39bf178db8b5f0899979fda67e590",
+        "status": "READABLE",
+        "introduction": "财务指标数据\n接口：fina_indicator，可以通过\n数据工具\n调试和查看数据。\n描述：获取上市公司财务指标数据，为避免服务器压力，现阶段每次请求最多返回100条记录，可通过设置日期多次请求获取更多数据。\n权限：用户需要至少2000积分才可以调取，具体请参阅\n积分获取办法\n提示：当前接口只能按单只股票获取其历史数据，如果需要获取某一季度全部上市公司数据，请使用fina_indicator_vip接口（参数一致），需积攒5000积分。",
+        "inputParameters": {
+          "ts_code": "str; Y; TS股票代码,e.g. 600001.SH/000001.SZ",
+          "ann_date": "str; N; 公告日期",
+          "start_date": "str; N; 报告期开始日期",
+          "end_date": "str; N; 报告期结束日期",
+          "period": "str; N; 报告期(每个季度最后一天的日期,比如20171231表示年报)"
+        },
+        "outputAttribution": {
+          "ts_code": "str; Y; TS代码",
+          "ann_date": "str; Y; 公告日期",
+          "end_date": "str; Y; 报告期"
+        },
+        "requestExamples": ""
+      },
+      "request": {
+        "candidateMode": "DATE",
+        "legality": "DOCUMENTED_CANDIDATE",
+        "params": "{ts_code=<原值>, ann_date=d}",
+        "conclusion": "保留 ts_code+ann_date；start/end 是报告期，禁止公告区间直传"
+      },
+      "date": {
+        "semantic": "ann_date（不是报告期/事件生效日）",
+        "rangeSemanticDiffers": true,
+        "endpoints": "单日期候选按枚举覆盖输入两端；单日筛选效果未实测",
+        "liveVerified": false
+      },
+      "completeness": {
+        "documentedLimit": "100",
+        "pagination": "UNCONFIRMED",
+        "gapOrConditionalCriterion": "单股单公告日也需取全；按报告期过滤后本地筛公告会遗漏",
+        "requiredGates": [
+          "Q",
+          "C",
+          "P"
+        ]
+      },
+      "recovery": {
+        "policy": "REQUEST",
+        "time": "DATE",
+        "rebuild": "原公共条件+所存失败时间；NONE不加日期，RANGE不拆小；单日原生接口仍发送相等起止参数",
+        "independentRetryCandidateOrRestriction": "原 ts_code+ann_date；包含所有报告期指标及修订，不按 end_date 分公告单元",
+        "independentRecoveryVerified": false,
+        "enableGate": "R"
+      },
+      "live": {
+        "status": "NOT_RUN",
+        "owner": "T20按权限和完成设计选择，非49项全量调用承诺"
+      }
+    },
+    {
+      "apiName": "fina_mainbz",
+      "mode": "ANN_DATE_RANGE",
+      "current": {
+        "path": "data-plane/tensor-plugin-tushare/src/main/resources/datasets/tushare_pro/fina_mainbz.yaml",
+        "sha256": "4fcd1bbff1fa27467ba23336c0ee0daf68c44a44a97719cbc4e3cd578e39af21",
+        "parametersYaml": "parameters:\n  - { name: ts_code, label: 股票代码, type: TS_CODE, required: true }\n  - { name: ann_date, label: 公告日期, type: DATE, required: true }",
+        "businessKeyYaml": "businessKey: { mode: COMPOSITE, fields: [ts_code, end_date, bz_item, curr_type] }"
+      },
+      "source": {
+        "url": "https://tushare.pro/document/2?doc_id=81",
+        "rawPageSha256": "8f2f6e7554292bd4f8737b437c375db20336e63b1e63dce0d68c07331fe77b73",
+        "status": "READABLE",
+        "introduction": "主营业务构成\n接口：fina_mainbz\n描述：获得上市公司主营业务构成，分地区/产品/行业等方式。\n权限：用户需要至少2000积分才可以调取，具体请参阅\n积分获取办法\n，单次最大提取100行，总量不限制，可循环获取。\n提示：当前接口只能按单只股票获取其历史数据，如果需要获取某一季度全部上市公司数据，请使用fina_mainbz_vip接口（参数一致），需积攒5000积分。",
+        "inputParameters": {
+          "ts_code": "str; Y; 股票代码",
+          "period": "str; N; 报告期(每个季度最后一天的日期,比如20171231表示年报)",
+          "type": "str; N; 类型：P-按产品 D-按地区 I-按行业（请输入大写字母）",
+          "start_date": "str; N; 报告期开始日期",
+          "end_date": "str; N; 报告期结束日期"
+        },
+        "outputAttribution": {
+          "ts_code": "str; TS代码",
+          "end_date": "str; 报告期",
+          "bz_item": "str; 主营业务来源",
+          "curr_type": "str; 货币代码（CNY）"
+        },
+        "requestExamples": ""
+      },
+      "request": {
+        "candidateMode": "UNCONFIRMED",
+        "legality": "UNCONFIRMED",
+        "params": "无已核实合法转换；保持原条件，拒绝猜参",
+        "conclusion": "官方既无输入 ann_date 也无输出 ann_date；只有报告期起止，不能承接公告目标"
+      },
+      "date": {
+        "semantic": "目标ann_date公告日期；公开输入输出均缺少ann_date，无已确认公告时间归属",
+        "rangeSemanticDiffers": true,
+        "endpoints": "公开开始/结束标签及样例不构成当前条件下两端包含性的实测；未核实",
+        "liveVerified": false
+      },
+      "completeness": {
+        "documentedLimit": "100",
+        "pagination": "UNCONFIRMED",
+        "gapOrConditionalCriterion": "当前公告合同无合法依据；type/period 循环与100上限不能补足公告归属",
+        "requiredGates": [
+          "Q",
+          "C",
+          "P"
+        ]
+      },
+      "recovery": {
+        "policy": "REQUEST",
+        "time": "未确定：请求合法方式未核实，不据此创建不可重建的失败单元",
+        "rebuild": "原公共条件+所存失败时间；NONE不加日期，RANGE不拆小；单日原生接口仍发送相等起止参数",
+        "independentRetryCandidateOrRestriction": "无公告时间映射；禁止猜测 ann_date 或替换 fina_mainbz_vip",
+        "independentRecoveryVerified": false,
+        "enableGate": "R"
+      },
+      "live": {
+        "status": "NOT_RUN",
+        "owner": "T20按权限和完成设计选择，非49项全量调用承诺"
+      }
+    },
+    {
+      "apiName": "forecast",
+      "mode": "ANN_DATE_RANGE",
+      "current": {
+        "path": "data-plane/tensor-plugin-tushare/src/main/resources/datasets/tushare_pro/forecast.yaml",
+        "sha256": "94ab012f39ae4e194b1d6e896c50045f5343bdb77671de9194e3941d82b55e8f",
+        "parametersYaml": "parameters:\n  - { name: ann_date, label: 公告日期, type: DATE, required: true }",
+        "businessKeyYaml": "businessKey: { mode: COMPOSITE, fields: [ts_code, end_date, ann_date, type] }"
+      },
+      "source": {
+        "url": "https://tushare.pro/document/2?doc_id=45",
+        "rawPageSha256": "446a51a015025667ec3c804e23b4a57a0ca5126a2b8245a9059e0e0368ff1202",
+        "status": "READABLE",
+        "introduction": "业绩预告\n接口：forecast，可以通过\n数据工具\n调试和查看数据。\n描述：获取业绩预告数据\n权限：用户需要至少2000积分才可以调取，每日20点~21点更新，单次3500行，具体请参阅\n积分获取办法\n提示：当前接口只能按单只股票获取其历史数据，如果需要获取某一季度全部上市公司数据，请使用forecast_vip接口（参数一致），需积攒5000积分。",
+        "inputParameters": {
+          "ts_code": "str; N; 股票代码(二选一)",
+          "ann_date": "str; N; 公告日期 (二选一)",
+          "start_date": "str; N; 公告开始日期",
+          "end_date": "str; N; 公告结束日期",
+          "period": "str; N; 报告期(每个季度最后一天的日期，比如20171231表示年报，20170630半年报，20170930三季报)",
+          "type": "str; N; 预告类型(预增/预减/扭亏/首亏/续亏/续盈/略增/略减)"
+        },
+        "outputAttribution": {
+          "ts_code": "str; Y; TS股票代码",
+          "ann_date": "str; Y; 公告日期",
+          "end_date": "str; Y; 报告期",
+          "type": "str; Y; 业绩预告类型(预增/预减/扭亏/首亏/续亏/续盈/略增/略减)"
+        },
+        "requestExamples": ""
+      },
+      "request": {
+        "candidateMode": "DATE",
+        "legality": "CONFLICT",
+        "params": "{ann_date=d}",
+        "conclusion": "参数表 ts_code／ann_date 二选一，正文却说普通接口仅单股；存在冲突"
+      },
+      "date": {
+        "semantic": "ann_date（不是报告期/事件生效日）",
+        "rangeSemanticDiffers": false,
+        "endpoints": "单日期候选按枚举覆盖输入两端；单日筛选效果未实测",
+        "liveVerified": false
+      },
+      "completeness": {
+        "documentedLimit": "3500",
+        "pagination": "UNCONFIRMED",
+        "gapOrConditionalCriterion": "需先确认不带股票的 ann_date 请求合法及整体3500边界，区间不直接启用",
+        "requiredGates": [
+          "Q",
+          "C",
+          "P"
+        ]
+      },
+      "recovery": {
+        "policy": "REQUEST",
+        "time": "DATE",
+        "rebuild": "原公共条件+所存失败时间；NONE不加日期，RANGE不拆小；单日原生接口仍发送相等起止参数",
+        "independentRetryCandidateOrRestriction": "ts_code+ann_date 虽有表项，须先解决首次全市场条件矛盾",
+        "independentRecoveryVerified": false,
+        "enableGate": "R"
+      },
+      "live": {
+        "status": "NOT_RUN",
+        "owner": "T20按权限和完成设计选择，非49项全量调用承诺"
+      }
+    },
+    {
+      "apiName": "income",
+      "mode": "ANN_DATE_RANGE",
+      "current": {
+        "path": "data-plane/tensor-plugin-tushare/src/main/resources/datasets/tushare_pro/income.yaml",
+        "sha256": "846c692a696dea2e06c8a4e4fbf38b5518d59145e6cf9ab7d51e37750a11ffba",
+        "parametersYaml": "parameters:\n  - { name: ts_code, label: 股票代码, type: TS_CODE, required: true }\n  - { name: ann_date, label: 公告日期, type: DATE, required: true }",
+        "businessKeyYaml": "businessKey: { mode: COMPOSITE, fields: [ts_code, end_date, report_type, ann_date] }"
+      },
+      "source": {
+        "url": "https://tushare.pro/document/2?doc_id=33",
+        "rawPageSha256": "40166e358dc02d6a90ded1bd7915974cfd6acd945728c828643cb86ed6451d36",
+        "status": "READABLE",
+        "introduction": "利润表\n接口：income，可以通过\n数据工具\n调试和查看数据。\n描述：获取上市公司财务利润表数据\n积分：用户需要至少2000积分才可以调取，具体请参阅\n积分获取办法\n提示：当前接口只能按单只股票获取其历史数据，如果需要获取某一季度全部上市公司数据，请使用income_vip接口（参数一致），需积攒5000积分。",
+        "inputParameters": {
+          "ts_code": "str; Y; 股票代码",
+          "ann_date": "str; N; 公告日期（YYYYMMDD格式，下同）",
+          "f_ann_date": "str; N; 实际公告日期",
+          "start_date": "str; N; 公告日开始日期",
+          "end_date": "str; N; 公告日结束日期",
+          "period": "str; N; 报告期(每个季度最后一天的日期，比如20171231表示年报，20170630半年报，20170930三季报)",
+          "report_type": "str; N; 报告类型，参考文档最下方说明",
+          "comp_type": "str; N; 公司类型（1一般工商业2银行3保险4证券）"
+        },
+        "outputAttribution": {
+          "ts_code": "str; Y; TS代码",
+          "ann_date": "str; Y; 公告日期",
+          "f_ann_date": "str; Y; 实际公告日期",
+          "end_date": "str; Y; 报告期",
+          "report_type": "str; Y; 报告类型 见底部表"
+        },
+        "requestExamples": ""
+      },
+      "request": {
+        "candidateMode": "RANGE",
+        "legality": "DOCUMENTED_CANDIDATE",
+        "params": "{ts_code=<原值>, start_date=s, end_date=e}",
+        "conclusion": "本地已有必填 ts_code；起止为公告日期，非报告期"
+      },
+      "date": {
+        "semantic": "ann_date（不是报告期/事件生效日）",
+        "rangeSemanticDiffers": false,
+        "endpoints": "公开开始/结束标签及样例不构成当前条件下两端包含性的实测；未核实",
+        "liveVerified": false
+      },
+      "completeness": {
+        "documentedLimit": "未明示",
+        "pagination": "UNCONFIRMED",
+        "gapOrConditionalCriterion": "所有 report_type／修订版本完整性与边界未确认",
+        "requiredGates": [
+          "Q",
+          "C",
+          "P"
+        ]
+      },
+      "recovery": {
+        "policy": "REQUEST",
+        "time": "RANGE；两端相同时DATE，重建仍用原来源日期方式",
+        "rebuild": "原公共条件+所存失败时间；NONE不加日期，RANGE不拆小；单日原生接口仍发送相等起止参数",
+        "independentRetryCandidateOrRestriction": "原 ts_code+ann_date 或相同公告范围；核对 ann_date／f_ann_date／end_date",
+        "independentRecoveryVerified": false,
+        "enableGate": "R"
+      },
+      "live": {
+        "status": "NOT_RUN",
+        "owner": "T20按权限和完成设计选择，非49项全量调用承诺"
+      }
+    },
+    {
+      "apiName": "repurchase",
+      "mode": "ANN_DATE_RANGE",
+      "current": {
+        "path": "data-plane/tensor-plugin-tushare/src/main/resources/datasets/tushare_pro/repurchase.yaml",
+        "sha256": "f4af53d1933a7950203a793c5da0d18870ac006cc66be59291dedcda937c2283",
+        "parametersYaml": "parameters:\n  - { name: ann_date, label: 公告日期, type: DATE, required: true }",
+        "businessKeyYaml": "businessKey: { mode: COMPOSITE, fields: [ts_code, ann_date, proc] }"
+      },
+      "source": {
+        "url": "https://tushare.pro/document/2?doc_id=124",
+        "rawPageSha256": "146d4cc19ea9d20c2687d60d5b495d6d6b16bdb9fc95376f2a216d0414a3fa31",
+        "status": "READABLE",
+        "introduction": "股票回购\n接口：repurchase\n描述：获取上市公司回购股票数据\n积分：用户需要至少2000积分才可以调取，具体请参阅\n积分获取办法",
+        "inputParameters": {
+          "ann_date": "str; N; 公告日期（任意填参数，如果都不填，单次默认返回2000条）",
+          "start_date": "str; N; 公告开始日期",
+          "end_date": "str; N; 公告结束日期"
+        },
+        "outputAttribution": {
+          "ts_code": "str; Y; TS代码",
+          "ann_date": "str; Y; 公告日期",
+          "end_date": "str; Y; 截止日期",
+          "proc": "str; Y; 进度"
+        },
+        "requestExamples": "pro\n=\nts\n.\npro_api\n()\ndf\n=\npro\n.\nrepurchase\n(\nann_date\n=\n''\n,\nstart_date\n=\n'20180101'\n,\nend_date\n=\n'20180510'\n)\n#取某日\ndf\n=\npro\n.\nrepurchase\n(\nann_date\n=\n'20181010'\n)"
+      },
+      "request": {
+        "candidateMode": "RANGE",
+        "legality": "DOCUMENTED_CANDIDATE",
+        "params": "{start_date=s, end_date=e}",
+        "conclusion": "只列 ann_date/start_date/end_date；没有 ts_code 输入"
+      },
+      "date": {
+        "semantic": "ann_date（不是报告期/事件生效日）",
+        "rangeSemanticDiffers": false,
+        "endpoints": "公开开始/结束标签及样例不构成当前条件下两端包含性的实测；未核实",
+        "liveVerified": false
+      },
+      "completeness": {
+        "documentedLimit": "仅无条件默认2000",
+        "pagination": "UNCONFIRMED",
+        "gapOrConditionalCriterion": "默认2000不是公告区间最大值；真实区间取全合同未公开",
+        "requiredGates": [
+          "Q",
+          "C",
+          "P"
+        ]
+      },
+      "recovery": {
+        "policy": "REQUEST",
+        "time": "RANGE；两端相同时DATE，重建仍用原来源日期方式",
+        "rebuild": "原公共条件+所存失败时间；NONE不加日期，RANGE不拆小；单日原生接口仍发送相等起止参数",
+        "independentRetryCandidateOrRestriction": "不支持已公开单股过滤；REQUEST，输出有 ts_code 仍不能按股重试",
+        "independentRecoveryVerified": false,
+        "enableGate": "R"
+      },
+      "live": {
+        "status": "NOT_RUN",
+        "owner": "T20按权限和完成设计选择，非49项全量调用承诺"
+      }
+    },
+    {
+      "apiName": "share_float",
+      "mode": "ANN_DATE_RANGE",
+      "current": {
+        "path": "data-plane/tensor-plugin-tushare/src/main/resources/datasets/tushare_pro/share_float.yaml",
+        "sha256": "de1001d23e9d83cc993625ff2f7fab00881d0f3723053912391e0ff3291b8993",
+        "parametersYaml": "parameters:\n  - { name: ann_date, label: 公告日期, type: DATE, required: true }",
+        "businessKeyYaml": "businessKey: { mode: COMPOSITE, fields: [ts_code, float_date, holder_name, share_type] }"
+      },
+      "source": {
+        "url": "https://tushare.pro/document/2?doc_id=160",
+        "rawPageSha256": "df89e4ee82c047af62ebd0bc607139fb8d3dfdeea027f21c16a342956792bbd1",
+        "status": "READABLE",
+        "introduction": "限售股解禁\n接口：share_float\n描述：获取限售股解禁\n限量：单次最大6000条，总量不限制\n积分：120分可调取，每分钟内限制次数，超过5000积分频次相对较高，具体请参阅\n积分获取办法",
+        "inputParameters": {
+          "ts_code": "str; N; TS股票代码",
+          "ann_date": "str; N; 公告日期（日期格式：YYYYMMDD，下同）",
+          "float_date": "str; N; 解禁日期",
+          "start_date": "str; N; 解禁开始日期",
+          "end_date": "str; N; 解禁结束日期"
+        },
+        "outputAttribution": {
+          "ts_code": "str; Y; TS代码",
+          "ann_date": "str; Y; 公告日期",
+          "float_date": "str; Y; 解禁日期",
+          "holder_name": "str; Y; 股东名称",
+          "share_type": "str; Y; 股份类型"
+        },
+        "requestExamples": ""
+      },
+      "request": {
+        "candidateMode": "DATE",
+        "legality": "DOCUMENTED_CANDIDATE",
+        "params": "{ann_date=d}",
+        "conclusion": "ann_date 合法；start/end 是解禁日期，不能承接公告区间"
+      },
+      "date": {
+        "semantic": "ann_date（不是报告期/事件生效日）",
+        "rangeSemanticDiffers": true,
+        "endpoints": "单日期候选按枚举覆盖输入两端；单日筛选效果未实测",
+        "liveVerified": false
+      },
+      "completeness": {
+        "documentedLimit": "6000",
+        "pagination": "UNCONFIRMED",
+        "gapOrConditionalCriterion": "同公告日所有 float_date／股东记录取全与6000边界未确认",
+        "requiredGates": [
+          "Q",
+          "C",
+          "P"
+        ]
+      },
+      "recovery": {
+        "policy": "REQUEST",
+        "time": "DATE",
+        "rebuild": "原公共条件+所存失败时间；NONE不加日期，RANGE不拆小；单日原生接口仍发送相等起止参数",
+        "independentRetryCandidateOrRestriction": "ts_code+ann_date；时间是 ann_date 而非 float_date；ISSUE-008 排除",
+        "independentRecoveryVerified": false,
+        "enableGate": "R"
+      },
+      "live": {
+        "status": "EXCLUDED_ISSUE_008",
+        "owner": "用户后续单独处理"
+      }
+    },
+    {
+      "apiName": "stk_holdertrade",
+      "mode": "ANN_DATE_RANGE",
+      "current": {
+        "path": "data-plane/tensor-plugin-tushare/src/main/resources/datasets/tushare_pro/stk_holdertrade.yaml",
+        "sha256": "ea135c381aa754a9d8b7f6d8e087cc1a0b02498287d4ecfe1f706b9f6d38d018",
+        "parametersYaml": "parameters:\n  - { name: ann_date, label: 公告日期, type: DATE, required: true }",
+        "businessKeyYaml": "businessKey: { mode: COMPOSITE, fields: [ts_code, ann_date, holder_name, in_de, change_vol] }"
+      },
+      "source": {
+        "url": "https://tushare.pro/document/2?doc_id=175",
+        "rawPageSha256": "e0266715fd1a0f71aec506b610b756bb6c9f374f70a1398636512efd7a433680",
+        "status": "READABLE",
+        "introduction": "股东增减持\n接口：stk_holdertrade\n描述：获取上市公司增减持数据，了解重要股东近期及历史上的股份增减变化\n限量：单次最大提取3000行记录，总量不限制\n积分：用户需要至少2000积分才可以调取。基础积分有流量控制，积分越多权限越大，5000积分以上无明显限制，请自行提高积分，具体请参阅\n积分获取办法",
+        "inputParameters": {
+          "ts_code": "str; N; TS股票代码",
+          "ann_date": "str; N; 公告日期",
+          "start_date": "str; N; 公告开始日期",
+          "end_date": "str; N; 公告结束日期",
+          "trade_type": "str; N; 交易类型IN增持DE减持",
+          "holder_type": "str; N; 股东类型C公司P个人G高管"
+        },
+        "outputAttribution": {
+          "ts_code": "str; Y; TS代码",
+          "ann_date": "str; Y; 公告日期",
+          "holder_name": "str; Y; 股东名称",
+          "in_de": "str; Y; 类型IN增持DE减持",
+          "change_vol": "float; Y; 变动数量"
+        },
+        "requestExamples": "#获取单日全部增减持数据\ndf = pro.stk_holdertrade(ann_date='20190426')\n\n#获取单个股票数据\ndf = pro.stk_holdertrade(ts_code='002149.SZ')\n\n#获取当日增持数据\ndf = pro.stk_holdertrade(ann_date='20190426', trade_type='IN')"
+      },
+      "request": {
+        "candidateMode": "RANGE",
+        "legality": "DOCUMENTED_CANDIDATE",
+        "params": "{start_date=s, end_date=e}",
+        "conclusion": "ann_date 与公告起止均公开，ts_code 可选"
+      },
+      "date": {
+        "semantic": "ann_date（不是报告期/事件生效日）",
+        "rangeSemanticDiffers": false,
+        "endpoints": "公开开始/结束标签及样例不构成当前条件下两端包含性的实测；未核实",
+        "liveVerified": false
+      },
+      "completeness": {
+        "documentedLimit": "3000",
+        "pagination": "UNCONFIRMED",
+        "gapOrConditionalCriterion": "同股多股东／方向／数量记录取全，3000截断待核实",
+        "requiredGates": [
+          "Q",
+          "C",
+          "P"
+        ]
+      },
+      "recovery": {
+        "policy": "REQUEST",
+        "time": "RANGE；两端相同时DATE，重建仍用原来源日期方式",
+        "rebuild": "原公共条件+所存失败时间；NONE不加日期，RANGE不拆小；单日原生接口仍发送相等起止参数",
+        "independentRetryCandidateOrRestriction": "ts_code+相同公告范围或 ann_date；需覆盖全部股东记录",
+        "independentRecoveryVerified": false,
+        "enableGate": "R"
+      },
+      "live": {
+        "status": "NOT_RUN",
+        "owner": "T20按权限和完成设计选择，非49项全量调用承诺"
+      }
+    },
+    {
+      "apiName": "top10_floatholders",
+      "mode": "ANN_DATE_RANGE",
+      "current": {
+        "path": "data-plane/tensor-plugin-tushare/src/main/resources/datasets/tushare_pro/top10_floatholders.yaml",
+        "sha256": "cb0b3cfe62ade874012b219f2bea4fb7a51e0938177f7b81a439f8ef4a12e740",
+        "parametersYaml": "parameters:\n  - { name: ann_date, label: 公告日期, type: DATE, required: true }",
+        "businessKeyYaml": "businessKey: { mode: COMPOSITE, fields: [ts_code, end_date, holder_name, ann_date] }"
+      },
+      "source": {
+        "url": "https://tushare.pro/document/2?doc_id=62",
+        "rawPageSha256": "5e408b20d0c13e9f33ba4ea2217a981780451156cf7234270e830fb7cc18a38c",
+        "status": "READABLE",
+        "introduction": "前十大流通股东\n接口：top10_floatholders\n描述：获取上市公司前十大流通股东数据\n积分：需2000积分以上才可以调取本接口，5000积分以上频次会更高",
+        "inputParameters": {
+          "ts_code": "str; Y; TS代码",
+          "period": "str; N; 报告期（YYYYMMDD格式，一般为每个季度最后一天）",
+          "ann_date": "str; N; 公告日期",
+          "start_date": "str; N; 报告期开始日期",
+          "end_date": "str; N; 报告期结束日期"
+        },
+        "outputAttribution": {
+          "ts_code": "str; TS股票代码",
+          "ann_date": "str; 公告日期",
+          "end_date": "str; 报告期",
+          "holder_name": "str; 股东名称"
+        },
+        "requestExamples": ""
+      },
+      "request": {
+        "candidateMode": "UNCONFIRMED",
+        "legality": "UNCONFIRMED",
+        "params": "无已核实合法转换；保持原条件，拒绝猜参",
+        "conclusion": "官方 ts_code 必填而本地未输入；起止是报告期"
+      },
+      "date": {
+        "semantic": "ann_date（不是报告期/事件生效日）",
+        "rangeSemanticDiffers": true,
+        "endpoints": "公开开始/结束标签及样例不构成当前条件下两端包含性的实测；未核实",
+        "liveVerified": false
+      },
+      "completeness": {
+        "documentedLimit": "未明示",
+        "pagination": "UNCONFIRMED",
+        "gapOrConditionalCriterion": "股票条件与公告语义两项缺口，不能以最多十人推断完整",
+        "requiredGates": [
+          "Q",
+          "C",
+          "P"
+        ]
+      },
+      "recovery": {
+        "policy": "REQUEST",
+        "time": "未确定：请求合法方式未核实，不据此创建不可重建的失败单元",
+        "rebuild": "原公共条件+所存失败时间；NONE不加日期，RANGE不拆小；单日原生接口仍发送相等起止参数",
+        "independentRetryCandidateOrRestriction": "原接口单股+ann_date 是核实候选，但不合法化无股票首次请求",
+        "independentRecoveryVerified": false,
+        "enableGate": "R"
+      },
+      "live": {
+        "status": "NOT_RUN",
+        "owner": "T20按权限和完成设计选择，非49项全量调用承诺"
+      }
+    },
+    {
+      "apiName": "top10_holders",
+      "mode": "ANN_DATE_RANGE",
+      "current": {
+        "path": "data-plane/tensor-plugin-tushare/src/main/resources/datasets/tushare_pro/top10_holders.yaml",
+        "sha256": "83229d9979f2b662c56e3033878f3eda1e7eb51f600d7ee07b49f717274f447e",
+        "parametersYaml": "parameters:\n  - { name: ann_date, label: 公告日期, type: DATE, required: true }",
+        "businessKeyYaml": "businessKey: { mode: COMPOSITE, fields: [ts_code, end_date, holder_name, ann_date] }"
+      },
+      "source": {
+        "url": "https://tushare.pro/document/2?doc_id=61",
+        "rawPageSha256": "1607349ee0dc925345215f7cf8ad334fd7fbf68d7b322aa0dde019750223ebac",
+        "status": "READABLE",
+        "introduction": "前十大股东\n接口：top10_holders\n描述：获取上市公司前十大股东数据，包括持有数量和比例等信息\n积分：需2000积分以上才可以调取本接口，5000积分以上频次会更高",
+        "inputParameters": {
+          "ts_code": "str; Y; TS代码",
+          "period": "str; N; 报告期（YYYYMMDD格式，一般为每个季度最后一天）",
+          "ann_date": "str; N; 公告日期",
+          "start_date": "str; N; 报告期开始日期",
+          "end_date": "str; N; 报告期结束日期"
+        },
+        "outputAttribution": {
+          "ts_code": "str; TS股票代码",
+          "ann_date": "str; 公告日期",
+          "end_date": "str; 报告期",
+          "holder_name": "str; 股东名称"
+        },
+        "requestExamples": ""
+      },
+      "request": {
+        "candidateMode": "UNCONFIRMED",
+        "legality": "UNCONFIRMED",
+        "params": "无已核实合法转换；保持原条件，拒绝猜参",
+        "conclusion": "官方 ts_code 必填而本地未输入；起止是报告期"
+      },
+      "date": {
+        "semantic": "ann_date（不是报告期/事件生效日）",
+        "rangeSemanticDiffers": true,
+        "endpoints": "公开开始/结束标签及样例不构成当前条件下两端包含性的实测；未核实",
+        "liveVerified": false
+      },
+      "completeness": {
+        "documentedLimit": "未明示",
+        "pagination": "UNCONFIRMED",
+        "gapOrConditionalCriterion": "股票条件与公告语义两项缺口，多个报告期可能各十人",
+        "requiredGates": [
+          "Q",
+          "C",
+          "P"
+        ]
+      },
+      "recovery": {
+        "policy": "REQUEST",
+        "time": "未确定：请求合法方式未核实，不据此创建不可重建的失败单元",
+        "rebuild": "原公共条件+所存失败时间；NONE不加日期，RANGE不拆小；单日原生接口仍发送相等起止参数",
+        "independentRetryCandidateOrRestriction": "原接口单股+ann_date 是核实候选，但不合法化无股票首次请求",
+        "independentRecoveryVerified": false,
+        "enableGate": "R"
+      },
+      "live": {
+        "status": "NOT_RUN",
+        "owner": "T20按权限和完成设计选择，非49项全量调用承诺"
+      }
+    },
+    {
+      "apiName": "broker_recommend",
+      "mode": "MONTH_RANGE",
+      "current": {
+        "path": "data-plane/tensor-plugin-tushare/src/main/resources/datasets/tushare_pro/broker_recommend.yaml",
+        "sha256": "9d0c6e68c2022ab4311a081ff06f1440d11177a40976e3b53afe6e74fe95173e",
+        "parametersYaml": "parameters:\n  - { name: month, label: 月份, type: MONTH, required: true }",
+        "businessKeyYaml": "businessKey: { mode: COMPOSITE, fields: [month, broker, ts_code] }"
+      },
+      "source": {
+        "url": "https://tushare.pro/document/2?doc_id=267",
+        "rawPageSha256": "e390590139038861089ca0c1ee6e35438d4c02ece3dcefaf12665fe08fc92ede",
+        "status": "READABLE",
+        "introduction": "券商每月荐股\n接口：broker_recommend\n描述：获取券商月度金股，一般1日~3日内更新当月数据\n限量：单次最大1000行数据，可循环提取\n积分：积分达到6000即可调用，具体请参阅\n积分获取办法",
+        "inputParameters": {
+          "month": "str; Y; 月度（YYYYMM）"
+        },
+        "outputAttribution": {
+          "month": "str; Y; 月度",
+          "broker": "str; Y; 券商",
+          "ts_code": "str; Y; 股票代码"
+        },
+        "requestExamples": "#获取查询月份券商金股\ndf = pro.broker_recommend(month='202106')"
+      },
+      "request": {
+        "candidateMode": "MONTH",
+        "legality": "DOCUMENTED_CANDIDATE",
+        "params": "{month=YYYYMM}",
+        "conclusion": "month 必填；无月份列表和起止参数；每个覆盖月份一批"
+      },
+      "date": {
+        "semantic": "month完整月份",
+        "rangeSemanticDiffers": false,
+        "endpoints": "按完整月份；单日输入也覆盖所在月，无来源起止参数",
+        "liveVerified": false
+      },
+      "completeness": {
+        "documentedLimit": "1000",
+        "pagination": "UNCONFIRMED",
+        "gapOrConditionalCriterion": "每月多券商股票推荐取全，循环一词未说明单月超过1000怎样继续",
+        "requiredGates": [
+          "Q",
+          "C",
+          "P"
+        ]
+      },
+      "recovery": {
+        "policy": "REQUEST",
+        "time": "MONTH",
+        "rebuild": "原公共条件+所存失败时间；NONE不加日期，RANGE不拆小；单日原生接口仍发送相等起止参数",
+        "independentRetryCandidateOrRestriction": "没有 ts_code 输入；REQUEST+MONTH，不能按股／券商拆重试；ISSUE-008 排除",
+        "independentRecoveryVerified": false,
+        "enableGate": "R"
+      },
+      "live": {
+        "status": "EXCLUDED_ISSUE_008",
+        "owner": "用户后续单独处理"
+      }
+    },
+    {
+      "apiName": "namechange",
+      "mode": "NATIVE_RANGE",
+      "current": {
+        "path": "data-plane/tensor-plugin-tushare/src/main/resources/datasets/tushare_pro/namechange.yaml",
+        "sha256": "a3e41568f5fa4559340d7c3e411b64d3c441d290cc4cef9b13bab8263e60b314",
+        "parametersYaml": "parameters:\n  - { name: start_date, label: 开始日期, type: DATE_RANGE_MEMBER, required: true, relatedParameter: end_date }\n  - { name: end_date, label: 结束日期, type: DATE_RANGE_MEMBER, required: true, relatedParameter: start_date }",
+        "businessKeyYaml": "businessKey: { mode: COMPOSITE, fields: [ts_code, start_date, name] }"
+      },
+      "source": {
+        "url": "https://tushare.pro/document/2?doc_id=100",
+        "rawPageSha256": "45e35e60788fd909e5d6bdb61cf29b13357373c5677ec101cee5244c07299ec6",
+        "status": "READABLE",
+        "introduction": "股票曾用名\n接口：namechange\n描述：历史名称变更记录",
+        "inputParameters": {
+          "ts_code": "str; N; TS代码",
+          "start_date": "str; N; 公告开始日期",
+          "end_date": "str; N; 公告结束日期"
+        },
+        "outputAttribution": {
+          "ts_code": "str; Y; TS代码",
+          "name": "str; Y; 证券名称",
+          "start_date": "str; Y; 开始日期",
+          "end_date": "str; Y; 结束日期",
+          "ann_date": "str; Y; 公告日期"
+        },
+        "requestExamples": "pro = ts.pro_api()\n\ndf = pro.namechange(ts_code='600848.SH', fields='ts_code,name,start_date,end_date,change_reason')"
+      },
+      "request": {
+        "candidateMode": "RANGE",
+        "legality": "DOCUMENTED_CANDIDATE",
+        "params": "{start_date=s, end_date=e}",
+        "conclusion": "官方 start/end 为公告日期；输出同名字段是名称使用日期"
+      },
+      "date": {
+        "semantic": "ann_date公告日期，非名称使用起止",
+        "rangeSemanticDiffers": false,
+        "endpoints": "公开开始/结束标签及样例不构成当前条件下两端包含性的实测；未核实",
+        "liveVerified": false
+      },
+      "completeness": {
+        "documentedLimit": "未明示",
+        "pagination": "UNCONFIRMED",
+        "gapOrConditionalCriterion": "公开文案可区分 ann_date；筛选字段与包含性未实测，完整结束未确认",
+        "requiredGates": [
+          "Q",
+          "C",
+          "P"
+        ]
+      },
+      "recovery": {
+        "policy": "REQUEST",
+        "time": "RANGE；两端相同时DATE，重建仍用原来源日期方式",
+        "rebuild": "原公共条件+所存失败时间；NONE不加日期，RANGE不拆小；单日原生接口仍发送相等起止参数",
+        "independentRetryCandidateOrRestriction": "ts_code+原起止虽列为可选，独立恢复未证；REQUEST 保持原范围；ISSUE-008 排除",
+        "independentRecoveryVerified": false,
+        "enableGate": "R"
+      },
+      "live": {
+        "status": "EXCLUDED_ISSUE_008",
+        "owner": "用户后续单独处理"
+      }
+    },
+    {
+      "apiName": "new_share",
+      "mode": "NATIVE_RANGE",
+      "current": {
+        "path": "data-plane/tensor-plugin-tushare/src/main/resources/datasets/tushare_pro/new_share.yaml",
+        "sha256": "8975ef1ad7ff8b98cfdb8904ada865cf590fdf5b2ae7fed7fe0b0dbfcde9800b",
+        "parametersYaml": "parameters:\n  - { name: start_date, label: 开始日期, type: DATE_RANGE_MEMBER, required: true, relatedParameter: end_date }\n  - { name: end_date, label: 结束日期, type: DATE_RANGE_MEMBER, required: true, relatedParameter: start_date }",
+        "businessKeyYaml": "businessKey: { mode: COMPOSITE, fields: [ts_code] }"
+      },
+      "source": {
+        "url": "https://tushare.pro/document/2?doc_id=123",
+        "rawPageSha256": "f03b9aac801f5be38f1adb9c33415983bcd93d0ea8947b8f9826c7d928c84253",
+        "status": "READABLE",
+        "introduction": "IPO新股列表\n接口：new_share\n描述：获取新股上市列表数据\n限量：单次最大2000条，总量不限制\n积分：用户需要至少120积分才可以调取，具体请参阅\n积分获取办法",
+        "inputParameters": {
+          "start_date": "str; N; 上网发行开始日期",
+          "end_date": "str; N; 上网发行结束日期"
+        },
+        "outputAttribution": {
+          "ts_code": "str; Y; TS股票代码",
+          "ipo_date": "str; Y; 上网发行日期",
+          "issue_date": "str; Y; 上市日期"
+        },
+        "requestExamples": "pro = ts.pro_api()\n\ndf = pro.new_share(start_date='20180901', end_date='20181018')"
+      },
+      "request": {
+        "candidateMode": "RANGE",
+        "legality": "DOCUMENTED_CANDIDATE",
+        "params": "{start_date=s, end_date=e}",
+        "conclusion": "官方起止为上网发行日期 ipo_date，不是上市日期 issue_date"
+      },
+      "date": {
+        "semantic": "ipo_date上网发行日期，非issue_date上市日期",
+        "rangeSemanticDiffers": false,
+        "endpoints": "公开开始/结束标签及样例不构成当前条件下两端包含性的实测；未核实",
+        "liveVerified": false
+      },
+      "completeness": {
+        "documentedLimit": "2000",
+        "pagination": "UNCONFIRMED",
+        "gapOrConditionalCriterion": "2000边界及 ipo_date／issue_date 不同样例的筛选、包含性需实测",
+        "requiredGates": [
+          "Q",
+          "C",
+          "P"
+        ]
+      },
+      "recovery": {
+        "policy": "REQUEST",
+        "time": "RANGE；两端相同时DATE，重建仍用原来源日期方式",
+        "rebuild": "原公共条件+所存失败时间；NONE不加日期，RANGE不拆小；单日原生接口仍发送相等起止参数",
+        "independentRetryCandidateOrRestriction": "没有 ts_code 输入；REQUEST+RANGE，单日仍 start_date=end_date",
+        "independentRecoveryVerified": false,
+        "enableGate": "R"
+      },
+      "live": {
+        "status": "NOT_RUN",
+        "owner": "T20按权限和完成设计选择，非49项全量调用承诺"
+      }
+    },
+    {
+      "apiName": "trade_cal",
+      "mode": "NATIVE_RANGE",
+      "current": {
+        "path": "data-plane/tensor-plugin-tushare/src/main/resources/datasets/tushare_pro/trade_cal.yaml",
+        "sha256": "784a09a00c6305d2a2cd20bd8bf47806e9f0e012b4b8098d848b8e08f8b0a4a8",
+        "parametersYaml": "parameters:\n  - { name: exchange, label: 交易所, type: ENUM, required: true, allowedValues: [SSE, SZSE, BSE] }\n  - { name: start_date, label: 开始日期, type: DATE_RANGE_MEMBER, required: true, relatedParameter: end_date }\n  - { name: end_date, label: 结束日期, type: DATE_RANGE_MEMBER, required: true, relatedParameter: start_date }",
+        "businessKeyYaml": "businessKey: { mode: COMPOSITE, fields: [exchange, cal_date] }"
+      },
+      "source": {
+        "url": "https://tushare.pro/document/2?doc_id=26",
+        "rawPageSha256": "be25c0d3391fd6715939669e9725a36815b6fb4425efbf3915b86678afee0835",
+        "status": "READABLE",
+        "introduction": "交易日历\n接口：trade_cal，可以通过\n数据工具\n调试和查看数据。\n描述：获取各大交易所交易日历数据,默认提取的是上交所\n积分：需2000积分",
+        "inputParameters": {
+          "exchange": "str; N; 交易所 SSE上交所,SZSE深交所,CFFEX 中金所,SHFE 上期所,CZCE 郑商所,DCE 大商所,INE 上能源",
+          "start_date": "str; N; 开始日期 （格式：YYYYMMDD 下同）",
+          "end_date": "str; N; 结束日期",
+          "is_open": "str; N; 是否交易 '0'休市 '1'交易"
+        },
+        "outputAttribution": {
+          "exchange": "str; Y; 交易所 SSE上交所 SZSE深交所",
+          "cal_date": "str; Y; 日历日期",
+          "is_open": "str; Y; 是否交易 0休市 1交易"
+        },
+        "requestExamples": "pro = ts.pro_api()\n\n\ndf = pro.trade_cal(exchange='', start_date='20180101', end_date='20181231')\n或者\ndf = pro.query('trade_cal', start_date='20180101', end_date='20181231')"
+      },
+      "request": {
+        "candidateMode": "RANGE",
+        "legality": "DOCUMENTED_CANDIDATE",
+        "params": "{exchange=<原值>, start_date=s, end_date=e}",
+        "conclusion": "日历日期 cal_date；输入 exchange 未列BSE，本地却允许BSE"
+      },
+      "date": {
+        "semantic": "cal_date日历日期",
+        "rangeSemanticDiffers": false,
+        "endpoints": "公开开始/结束标签及样例不构成当前条件下两端包含性的实测；未核实",
+        "liveVerified": false
+      },
+      "completeness": {
+        "documentedLimit": "未明示",
+        "pagination": "UNCONFIRMED",
+        "gapOrConditionalCriterion": "逐日全集可核对：请求交易所×每个自然日恰一有效记录，必须含两端及休市；BSE来源支持未确认",
+        "requiredGates": [
+          "Q",
+          "C",
+          "P"
+        ]
+      },
+      "recovery": {
+        "policy": "REQUEST",
+        "time": "RANGE；两端相同时DATE，重建仍用原来源日期方式",
+        "rebuild": "原公共条件+所存失败时间；NONE不加日期，RANGE不拆小；单日原生接口仍发送相等起止参数",
+        "independentRetryCandidateOrRestriction": "非股票；REQUEST+RANGE；单日仍 start_date=end_date，保留 exchange",
+        "independentRecoveryVerified": false,
+        "enableGate": "R"
+      },
+      "live": {
+        "status": "NOT_RUN",
+        "owner": "T20按权限和完成设计选择，非49项全量调用承诺"
+      }
+    },
+    {
+      "apiName": "hs_const",
+      "mode": "ORIGINAL_PARAMS",
+      "current": {
+        "path": "data-plane/tensor-plugin-tushare/src/main/resources/datasets/tushare_pro/hs_const.yaml",
+        "sha256": "5f6064d11e8e5537a31cdd9b6bca1b956ba4616f2d2b5e26f631aad2ad0a1a0f",
+        "parametersYaml": "parameters:\n  - { name: hs_type, label: 沪深港通类型, type: ENUM, required: true, allowedValues: [SH, SZ] }",
+        "businessKeyYaml": "businessKey: { mode: COMPOSITE, fields: [hs_type, ts_code, in_date] }"
+      },
+      "source": {
+        "url": "https://tushare.pro/document/2?doc_id=104",
+        "rawPageSha256": "bbf4318386ca0ea4c5072fc5e67fe0302f473ccbeba7238c45607226236dfadf",
+        "status": "MISSING_PAGE",
+        "introduction": "404, 文档不存在！",
+        "inputParameters": {},
+        "outputAttribution": {},
+        "requestExamples": ""
+      },
+      "request": {
+        "candidateMode": "UNCONFIRMED",
+        "legality": "UNCONFIRMED",
+        "params": "无已核实合法转换；保持原条件，拒绝猜参",
+        "conclusion": "旧官方页正文404；本地 hs_type=SH/SZ 原条件保留"
+      },
+      "date": {
+        "semantic": "NONE：原条件，不根据输出日期增加过滤",
+        "rangeSemanticDiffers": false,
+        "endpoints": "不适用：原条件无日期范围",
+        "liveVerified": false
+      },
+      "completeness": {
+        "documentedLimit": "无法确认",
+        "pagination": "UNCONFIRMED",
+        "gapOrConditionalCriterion": "hs_type 选择及全标的取全依据未确认",
+        "requiredGates": [
+          "Q",
+          "C",
+          "P"
+        ]
+      },
+      "recovery": {
+        "policy": "REQUEST",
+        "time": "NONE",
+        "rebuild": "原公共条件+所存失败时间；NONE不加日期，RANGE不拆小；单日原生接口仍发送相等起止参数",
+        "independentRetryCandidateOrRestriction": "REQUEST+NONE 保留 hs_type；不得替换新接口；ISSUE-008 排除",
+        "independentRecoveryVerified": false,
+        "enableGate": "R"
+      },
+      "live": {
+        "status": "EXCLUDED_ISSUE_008",
+        "owner": "用户后续单独处理"
+      }
+    },
+    {
+      "apiName": "index_classify",
+      "mode": "ORIGINAL_PARAMS",
+      "current": {
+        "path": "data-plane/tensor-plugin-tushare/src/main/resources/datasets/tushare_pro/index_classify.yaml",
+        "sha256": "b7af2b9028fd0df953addb1937516295748198b25495e20bf0b3a9bf1989edc6",
+        "parametersYaml": "parameters: []",
+        "businessKeyYaml": "businessKey: { mode: COMPOSITE, fields: [index_code] }"
+      },
+      "source": {
+        "url": "https://tushare.pro/document/2?doc_id=181",
+        "rawPageSha256": "f4b617429e3731ba0263df8739118cbd0a62c93b8ea3c0d30407a84eb851c951",
+        "status": "READABLE",
+        "introduction": "申万行业分类\n接口：index_classify\n描述：获取申万行业分类，可以获取申万2014年版本（28个一级分类，104个二级分类，227个三级分类）和2021年本版（31个一级分类，134个二级分类，346个三级分类）列表信息\n权限：用户需2000积分可以调取，具体请参阅\n积分获取办法",
+        "inputParameters": {
+          "index_code": "str; N; 指数代码",
+          "level": "str; N; 行业分级（L1/L2/L3）",
+          "parent_code": "str; N; 父级代码（一级为0）",
+          "src": "str; N; 指数来源（SW2014：申万2014年版本，SW2021：申万2021年版本）"
+        },
+        "outputAttribution": {
+          "index_code": "str; Y; 指数代码"
+        },
+        "requestExamples": "#获取申万一级行业列表\ndf\n=\npro\n.\nindex_classify\n(\nlevel\n=\n'L1'\n,\nsrc\n=\n'SW2021'\n)\n#获取申万二级行业列表\ndf\n=\npro\n.\nindex_classify\n(\nlevel\n=\n'L2'\n,\nsrc\n=\n'SW2021'\n)\n#获取申万三级级行业列表\ndf\n=\npro\n.\nindex_classify\n(\nlevel\n=\n'L3'\n,\nsrc\n=\n'SW2021'\n)"
+      },
+      "request": {
+        "candidateMode": "NONE",
+        "legality": "DOCUMENTED_CANDIDATE",
+        "params": "{}",
+        "conclusion": "参数均可选；保留空请求；例子明确指定 level/src，空请求默认集合未说明"
+      },
+      "date": {
+        "semantic": "NONE：原条件，不根据输出日期增加过滤",
+        "rangeSemanticDiffers": false,
+        "endpoints": "不适用：原条件无日期范围",
+        "liveVerified": false
+      },
+      "completeness": {
+        "documentedLimit": "未明示",
+        "pagination": "UNCONFIRMED",
+        "gapOrConditionalCriterion": "511个2021分类及359个2014分类是版本介绍，不是空请求返回数量合同",
+        "requiredGates": [
+          "Q",
+          "C",
+          "P"
+        ]
+      },
+      "recovery": {
+        "policy": "REQUEST",
+        "time": "NONE",
+        "rebuild": "原公共条件+所存失败时间；NONE不加日期，RANGE不拆小；单日原生接口仍发送相等起止参数",
+        "independentRetryCandidateOrRestriction": "非股票分类；REQUEST+NONE，不能擅加 level/src 或日期",
+        "independentRecoveryVerified": false,
+        "enableGate": "R"
+      },
+      "live": {
+        "status": "NOT_RUN",
+        "owner": "T20按权限和完成设计选择，非49项全量调用承诺"
+      }
+    },
+    {
+      "apiName": "index_member",
+      "mode": "ORIGINAL_PARAMS",
+      "current": {
+        "path": "data-plane/tensor-plugin-tushare/src/main/resources/datasets/tushare_pro/index_member.yaml",
+        "sha256": "2aefff3cd53599c2d37118f814ea8aa8c707642e43bd6f1255d937debc696bc4",
+        "parametersYaml": "parameters: []",
+        "businessKeyYaml": "businessKey: { mode: COMPOSITE, fields: [index_code, con_code, in_date] }"
+      },
+      "source": {
+        "url": "https://tushare.pro/document/2?doc_id=182",
+        "rawPageSha256": "bbf4318386ca0ea4c5072fc5e67fe0302f473ccbeba7238c45607226236dfadf",
+        "status": "MISSING_PAGE",
+        "introduction": "404, 文档不存在！",
+        "inputParameters": {},
+        "outputAttribution": {},
+        "requestExamples": ""
+      },
+      "request": {
+        "candidateMode": "UNCONFIRMED",
+        "legality": "UNCONFIRMED",
+        "params": "无已核实合法转换；保持原条件，拒绝猜参",
+        "conclusion": "旧官方页正文404；原请求为空"
+      },
+      "date": {
+        "semantic": "NONE：原条件，不根据输出日期增加过滤",
+        "rangeSemanticDiffers": false,
+        "endpoints": "不适用：原条件无日期范围",
+        "liveVerified": false
+      },
+      "completeness": {
+        "documentedLimit": "无法确认",
+        "pagination": "UNCONFIRMED",
+        "gapOrConditionalCriterion": "旧接口默认范围和取全未确认，不能换 index_member_all",
+        "requiredGates": [
+          "Q",
+          "C",
+          "P"
+        ]
+      },
+      "recovery": {
+        "policy": "REQUEST",
+        "time": "NONE",
+        "rebuild": "原公共条件+所存失败时间；NONE不加日期，RANGE不拆小；单日原生接口仍发送相等起止参数",
+        "independentRetryCandidateOrRestriction": "REQUEST+NONE；con_code 未证明为可独立重试股票；ISSUE-008 排除",
+        "independentRecoveryVerified": false,
+        "enableGate": "R"
+      },
+      "live": {
+        "status": "EXCLUDED_ISSUE_008",
+        "owner": "用户后续单独处理"
+      }
+    },
+    {
+      "apiName": "index_member_all",
+      "mode": "ORIGINAL_PARAMS",
+      "current": {
+        "path": "data-plane/tensor-plugin-tushare/src/main/resources/datasets/tushare_pro/index_member_all.yaml",
+        "sha256": "7e210124c4e674045c4e35b671d00b7663a3b7dc6cd21bcce734979b66029592",
+        "parametersYaml": "parameters: []",
+        "businessKeyYaml": "businessKey: { mode: COMPOSITE, fields: [l1_code, l2_code, l3_code, ts_code, in_date] }"
+      },
+      "source": {
+        "url": "https://tushare.pro/document/2?doc_id=335",
+        "rawPageSha256": "c48c0aa24c50164c229a9f3bb67f15d04afee38de492d5de231ccaa4a68cfb8e",
+        "status": "READABLE",
+        "introduction": "申万行业成分构成(分级)\n接口：index_member_all\n描述：按三级分类提取申万行业成分，可提供某个分类的所有成分，也可按股票代码提取所属分类，参数灵活\n限量：单次最大2000行，总量不限制\n权限：用户需2000积分可调取，积分获取方法请参阅\n积分获取办法",
+        "inputParameters": {
+          "l1_code": "str; N; 一级行业代码",
+          "l2_code": "str; N; 二级行业代码",
+          "l3_code": "str; N; 三级行业代码",
+          "ts_code": "str; N; 股票代码",
+          "is_new": "str; N; 是否最新（默认为“Y是”）"
+        },
+        "outputAttribution": {
+          "l1_code": "str; Y; 一级行业代码",
+          "l2_code": "str; Y; 二级行业代码",
+          "l3_code": "str; Y; 三级行业代码",
+          "ts_code": "str; Y; 成分股票代码",
+          "in_date": "str; Y; 纳入日期"
+        },
+        "requestExamples": "#获取黄金分类的成份股\ndf = pro.index_member_all(l3_code='850531.SI')\n\n#获取000001.SZ所属行业\ndf = pro.index_member_all(ts_code='000001.SZ')"
+      },
+      "request": {
+        "candidateMode": "NONE",
+        "legality": "DOCUMENTED_CANDIDATE",
+        "params": "{}",
+        "conclusion": "各参数可选，is_new 默认Y；当前空请求保留该默认"
+      },
+      "date": {
+        "semantic": "NONE：原条件，不根据输出日期增加过滤",
+        "rangeSemanticDiffers": false,
+        "endpoints": "不适用：原条件无日期范围",
+        "liveVerified": false
+      },
+      "completeness": {
+        "documentedLimit": "2000",
+        "pagination": "UNCONFIRMED",
+        "gapOrConditionalCriterion": "2000上限可能截断全分类成员；按行业循环还需可靠分类全集及集合等价依据",
+        "requiredGates": [
+          "Q",
+          "C",
+          "P"
+        ]
+      },
+      "recovery": {
+        "policy": "REQUEST",
+        "time": "NONE",
+        "rebuild": "原公共条件+所存失败时间；NONE不加日期，RANGE不拆小；单日原生接口仍发送相等起止参数",
+        "independentRetryCandidateOrRestriction": "原条件组固定 REQUEST+NONE；不把 ts_code 可选扩展为新股票输入",
+        "independentRecoveryVerified": false,
+        "enableGate": "R"
+      },
+      "live": {
+        "status": "NOT_RUN",
+        "owner": "T20按权限和完成设计选择，非49项全量调用承诺"
+      }
+    },
+    {
+      "apiName": "pledge_detail",
+      "mode": "ORIGINAL_PARAMS",
+      "current": {
+        "path": "data-plane/tensor-plugin-tushare/src/main/resources/datasets/tushare_pro/pledge_detail.yaml",
+        "sha256": "50b41383d509d86386ad0d9cbfcc6554aa11aec4e0aeac5c25fdae36e59a1dce",
+        "parametersYaml": "parameters: []",
+        "businessKeyYaml": "businessKey: { mode: FINGERPRINT, fields: [ts_code, ann_date, holder_name, pledge_amount, start_date, end_date, is_release, release_date, pledgor, holding_amount, pledged_amount, p_total_ratio, h_total_ratio, is_buyback] }"
+      },
+      "source": {
+        "url": "https://tushare.pro/document/2?doc_id=111",
+        "rawPageSha256": "632c2566bf3e90238c20d7c88d5fc642b0e00f18071406633667930657618604",
+        "status": "READABLE",
+        "introduction": "股权质押明细\n接口：pledge_detail\n描述：获取股票质押明细数据\n限量：单次最大1000\n积分：用户需要至少2000积分才可以调取，具体请参阅\n积分获取办法",
+        "inputParameters": {
+          "ts_code": "str; N; 股票代码",
+          "ann_date": "str; N; 公告日期",
+          "start_date": "str; N; 公告开始日期",
+          "end_date": "str; N; 公告结束日期"
+        },
+        "outputAttribution": {
+          "ts_code": "str; Y; TS股票代码",
+          "ann_date": "str; Y; 公告日期",
+          "holder_name": "str; Y; 股东名称",
+          "pledge_amount": "float; Y; 质押数量（万股）",
+          "start_date": "str; Y; 质押开始日期",
+          "end_date": "str; Y; 质押结束日期",
+          "is_release": "str; Y; 是否已解押",
+          "release_date": "str; Y; 解押日期",
+          "pledgor": "str; Y; 质押方",
+          "holding_amount": "float; Y; 持股总数（万股）",
+          "pledged_amount": "float; Y; 质押总数（万股）",
+          "p_total_ratio": "float; Y; 本次质押占总股本比例",
+          "h_total_ratio": "float; Y; 持股总数占总股本比例",
+          "is_buyback": "str; Y; 是否回购（0否 1是）"
+        },
+        "requestExamples": ""
+      },
+      "request": {
+        "candidateMode": "NONE",
+        "legality": "DOCUMENTED_CANDIDATE",
+        "params": "{}",
+        "conclusion": "各参数可选，保留空请求；有公告区间能力但不扩本期范围"
+      },
+      "date": {
+        "semantic": "NONE：原条件，不根据输出日期增加过滤",
+        "rangeSemanticDiffers": false,
+        "endpoints": "不适用：原条件无日期范围",
+        "liveVerified": false
+      },
+      "completeness": {
+        "documentedLimit": "1000",
+        "pagination": "UNCONFIRMED",
+        "gapOrConditionalCriterion": "空请求的默认时间覆盖及1000截断未确认；不能悄加日期缩小范围",
+        "requiredGates": [
+          "Q",
+          "C",
+          "P"
+        ]
+      },
+      "recovery": {
+        "policy": "REQUEST",
+        "time": "NONE",
+        "rebuild": "原公共条件+所存失败时间；NONE不加日期，RANGE不拆小；单日原生接口仍发送相等起止参数",
+        "independentRetryCandidateOrRestriction": "原条件组 REQUEST+NONE；输出质押起止日期不作请求选择器",
+        "independentRecoveryVerified": false,
+        "enableGate": "R"
+      },
+      "live": {
+        "status": "NOT_RUN",
+        "owner": "T20按权限和完成设计选择，非49项全量调用承诺"
+      }
+    },
+    {
+      "apiName": "pledge_stat",
+      "mode": "ORIGINAL_PARAMS",
+      "current": {
+        "path": "data-plane/tensor-plugin-tushare/src/main/resources/datasets/tushare_pro/pledge_stat.yaml",
+        "sha256": "1afd567f15ea542ee4db99c26f5aca1886d244dc9b22b894a608b1e17a4981ea",
+        "parametersYaml": "parameters: []",
+        "businessKeyYaml": "businessKey: { mode: COMPOSITE, fields: [ts_code, end_date] }"
+      },
+      "source": {
+        "url": "https://tushare.pro/document/2?doc_id=110",
+        "rawPageSha256": "267f2bd88dad56dc57b5100126e202d09ba7cef89dd190d0608c885a17ccf806",
+        "status": "READABLE",
+        "introduction": "股权质押统计数据\n接口：pledge_stat\n描述：获取股票质押统计数据\n限量：单次最大1000\n积分：用户需要至少2000积分才可以调取，具体请参阅\n积分获取办法",
+        "inputParameters": {
+          "ts_code": "str; N; 股票代码",
+          "end_date": "str; N; 截止日期"
+        },
+        "outputAttribution": {
+          "ts_code": "str; Y; TS代码",
+          "end_date": "str; Y; 截止日期"
+        },
+        "requestExamples": ""
+      },
+      "request": {
+        "candidateMode": "NONE",
+        "legality": "DOCUMENTED_CANDIDATE",
+        "params": "{}",
+        "conclusion": "可选 ts_code/end_date；end_date 是单个截止日，当前空请求"
+      },
+      "date": {
+        "semantic": "NONE：原条件，不根据输出日期增加过滤",
+        "rangeSemanticDiffers": false,
+        "endpoints": "不适用：原条件无日期范围",
+        "liveVerified": false
+      },
+      "completeness": {
+        "documentedLimit": "1000",
+        "pagination": "UNCONFIRMED",
+        "gapOrConditionalCriterion": "默认截止期／历史范围及1000截断未确认",
+        "requiredGates": [
+          "Q",
+          "C",
+          "P"
+        ]
+      },
+      "recovery": {
+        "policy": "REQUEST",
+        "time": "NONE",
+        "rebuild": "原公共条件+所存失败时间；NONE不加日期，RANGE不拆小；单日原生接口仍发送相等起止参数",
+        "independentRetryCandidateOrRestriction": "原条件组 REQUEST+NONE；不把 end_date 当区间或按股票拆请求",
+        "independentRecoveryVerified": false,
+        "enableGate": "R"
+      },
+      "live": {
+        "status": "NOT_RUN",
+        "owner": "T20按权限和完成设计选择，非49项全量调用承诺"
+      }
+    },
+    {
+      "apiName": "stk_holdernumber",
+      "mode": "ORIGINAL_PARAMS",
+      "current": {
+        "path": "data-plane/tensor-plugin-tushare/src/main/resources/datasets/tushare_pro/stk_holdernumber.yaml",
+        "sha256": "5649a0e09a2c6b8f690769efb8395d4d6b887f34b12664414652eac5aaf4f8f8",
+        "parametersYaml": "parameters:\n  - { name: ts_code, label: 股票代码, type: TS_CODE, required: true }",
+        "businessKeyYaml": "businessKey: { mode: COMPOSITE, fields: [ts_code, end_date, ann_date] }"
+      },
+      "source": {
+        "url": "https://tushare.pro/document/2?doc_id=166",
+        "rawPageSha256": "d37fd42a93635911d82f656b3580ea06bb8a4c58836673a8610bc97c62e57ce6",
+        "status": "READABLE",
+        "introduction": "股东人数\n接口：stk_holdernumber\n描述：获取上市公司股东户数数据，数据不定期公布\n限量：单次最大3000,总量不限制\n积分：2000积分可调取，基础积分每分钟调取200次，5000积分以上频次相对较高。具体请参阅\n积分获取办法",
+        "inputParameters": {
+          "ts_code": "str; N; TS股票代码",
+          "ann_date": "str; N; 公告日期",
+          "enddate": "str; N; 截止日期",
+          "start_date": "str; N; 公告开始日期",
+          "end_date": "str; N; 公告结束日期"
+        },
+        "outputAttribution": {
+          "ts_code": "str; Y; TS股票代码",
+          "ann_date": "str; Y; 公告日期",
+          "end_date": "str; Y; 截止日期"
+        },
+        "requestExamples": ""
+      },
+      "request": {
+        "candidateMode": "NONE",
+        "legality": "DOCUMENTED_CANDIDATE",
+        "params": "{ts_code=<原值>}",
+        "conclusion": "保留本地必填 ts_code；虽有公告起止，也不增加日期"
+      },
+      "date": {
+        "semantic": "NONE：原条件，不根据输出日期增加过滤",
+        "rangeSemanticDiffers": false,
+        "endpoints": "不适用：原条件无日期范围",
+        "liveVerified": false
+      },
+      "completeness": {
+        "documentedLimit": "3000",
+        "pagination": "UNCONFIRMED",
+        "gapOrConditionalCriterion": "单股原条件默认覆盖及3000上限；enddate 是截止条件，end_date 是公告区间结束",
+        "requiredGates": [
+          "Q",
+          "C",
+          "P"
+        ]
+      },
+      "recovery": {
+        "policy": "REQUEST",
+        "time": "NONE",
+        "rebuild": "原公共条件+所存失败时间；NONE不加日期，RANGE不拆小；单日原生接口仍发送相等起止参数",
+        "independentRetryCandidateOrRestriction": "原股票公共条件保持；REQUEST+NONE，不从返回 ann_date 自动新增日期选择器",
+        "independentRecoveryVerified": false,
+        "enableGate": "R"
+      },
+      "live": {
+        "status": "NOT_RUN",
+        "owner": "T20按权限和完成设计选择，非49项全量调用承诺"
+      }
+    },
+    {
+      "apiName": "stk_managers",
+      "mode": "ORIGINAL_PARAMS",
+      "current": {
+        "path": "data-plane/tensor-plugin-tushare/src/main/resources/datasets/tushare_pro/stk_managers.yaml",
+        "sha256": "3f58e7991439b3f0da268e317054f89dda9e69574566c5509812c460c7a89b2c",
+        "parametersYaml": "parameters: []",
+        "businessKeyYaml": "businessKey: { mode: FINGERPRINT, fields: [ts_code, ann_date, name, gender, lev, title, birthday, begin_date] }"
+      },
+      "source": {
+        "url": "https://tushare.pro/document/2?doc_id=193",
+        "rawPageSha256": "4e606df9e56d322ee95650fb0f62670f00daedf095762c0b9f43b688290c63cc",
+        "status": "READABLE",
+        "introduction": "上市公司管理层\n接口：stk_managers\n描述：获取上市公司管理层\n积分：用户需要2000积分才可以调取，5000积分以上频次相对较高，具体请参阅\n积分获取办法",
+        "inputParameters": {
+          "ts_code": "str; N; 股票代码，支持单个或多个股票输入",
+          "ann_date": "str; N; 公告日期（YYYYMMDD格式，下同）",
+          "start_date": "str; N; 公告开始日期",
+          "end_date": "str; N; 公告结束日期"
+        },
+        "outputAttribution": {
+          "ts_code": "str; Y; TS股票代码",
+          "ann_date": "str; Y; 公告日期",
+          "name": "str; Y; 姓名",
+          "gender": "str; Y; 性别",
+          "lev": "str; Y; 岗位类别",
+          "title": "str; Y; 岗位",
+          "birthday": "str; Y; 出生年月",
+          "begin_date": "str; Y; 上任日期",
+          "end_date": "str; Y; 离任日期"
+        },
+        "requestExamples": ""
+      },
+      "request": {
+        "candidateMode": "NONE",
+        "legality": "DOCUMENTED_CANDIDATE",
+        "params": "{}",
+        "conclusion": "参数可选；当前空请求；虽有公告区间，仍保留原条件"
+      },
+      "date": {
+        "semantic": "NONE：原条件，不根据输出日期增加过滤",
+        "rangeSemanticDiffers": false,
+        "endpoints": "不适用：原条件无日期范围",
+        "liveVerified": false
+      },
+      "completeness": {
+        "documentedLimit": "未明示",
+        "pagination": "UNCONFIRMED",
+        "gapOrConditionalCriterion": "默认覆盖和全管理层记录完整性未确认；输出 end_date 是离任日期",
+        "requiredGates": [
+          "Q",
+          "C",
+          "P"
+        ]
+      },
+      "recovery": {
+        "policy": "REQUEST",
+        "time": "NONE",
+        "rebuild": "原公共条件+所存失败时间；NONE不加日期，RANGE不拆小；单日原生接口仍发送相等起止参数",
+        "independentRetryCandidateOrRestriction": "原条件组 REQUEST+NONE，不因支持多代码新增股票入口",
+        "independentRecoveryVerified": false,
+        "enableGate": "R"
+      },
+      "live": {
+        "status": "NOT_RUN",
+        "owner": "T20按权限和完成设计选择，非49项全量调用承诺"
+      }
+    },
+    {
+      "apiName": "stk_rewards",
+      "mode": "ORIGINAL_PARAMS",
+      "current": {
+        "path": "data-plane/tensor-plugin-tushare/src/main/resources/datasets/tushare_pro/stk_rewards.yaml",
+        "sha256": "92042f9d9dae5098d6d14c0fe5946e793fc6563814898152409e56c5959ab499",
+        "parametersYaml": "parameters:\n  - { name: ts_code, label: 股票代码, type: TS_CODE, required: true }",
+        "businessKeyYaml": "businessKey: { mode: COMPOSITE, fields: [ts_code, ann_date, end_date, name] }"
+      },
+      "source": {
+        "url": "https://tushare.pro/document/2?doc_id=194",
+        "rawPageSha256": "d9948cc177d24d9baecdb7650a0b5aa2fb4f3fb5390b84da1cec459dd46178dd",
+        "status": "READABLE",
+        "introduction": "管理层薪酬和持股\n接口：stk_rewards\n描述：获取上市公司管理层薪酬和持股\n积分：用户需要2000积分才可以调取，5000积分以上频次相对较高，具体请参阅\n积分获取办法",
+        "inputParameters": {
+          "ts_code": "str; Y; TS股票代码，支持单个或多个代码输入",
+          "end_date": "str; N; 报告期"
+        },
+        "outputAttribution": {
+          "ts_code": "str; Y; TS股票代码",
+          "ann_date": "str; Y; 公告日期",
+          "end_date": "str; Y; 截止日期",
+          "name": "str; Y; 姓名"
+        },
+        "requestExamples": ""
+      },
+      "request": {
+        "candidateMode": "NONE",
+        "legality": "DOCUMENTED_CANDIDATE",
+        "params": "{ts_code=<原值>}",
+        "conclusion": "ts_code 必填且本地已有，可多代码但当前只保留原单股；end_date 是报告期"
+      },
+      "date": {
+        "semantic": "NONE：原条件，不根据输出日期增加过滤",
+        "rangeSemanticDiffers": false,
+        "endpoints": "不适用：原条件无日期范围",
+        "liveVerified": false
+      },
+      "completeness": {
+        "documentedLimit": "未明示",
+        "pagination": "UNCONFIRMED",
+        "gapOrConditionalCriterion": "单股所有管理层／报告期和默认历史范围取全未确认",
+        "requiredGates": [
+          "Q",
+          "C",
+          "P"
+        ]
+      },
+      "recovery": {
+        "policy": "REQUEST",
+        "time": "NONE",
+        "rebuild": "原公共条件+所存失败时间；NONE不加日期，RANGE不拆小；单日原生接口仍发送相等起止参数",
+        "independentRetryCandidateOrRestriction": "原股票公共条件保持；REQUEST+NONE，不擅加 end_date 或日期范围",
+        "independentRecoveryVerified": false,
+        "enableGate": "R"
+      },
+      "live": {
+        "status": "NOT_RUN",
+        "owner": "T20按权限和完成设计选择，非49项全量调用承诺"
+      }
+    },
+    {
+      "apiName": "stock_basic",
+      "mode": "ORIGINAL_PARAMS",
+      "current": {
+        "path": "data-plane/tensor-plugin-tushare/src/main/resources/datasets/tushare_pro/stock_basic.yaml",
+        "sha256": "d7ded381c9f31d42afd54cabb8cfb0bb78944a908285236ed6dc6b0620eb6204",
+        "parametersYaml": "parameters:\n  - { name: list_status, label: 上市状态, type: ENUM, required: true, allowedValues: [L, P, D] }",
+        "businessKeyYaml": "businessKey: { mode: COMPOSITE, fields: [ts_code] }"
+      },
+      "source": {
+        "url": "https://tushare.pro/document/2?doc_id=25",
+        "rawPageSha256": "c509bcf279b849206d3be598b7bd573fbe3e7d391430b6d810c7e8802f0ce454",
+        "status": "READABLE",
+        "introduction": "股票基础信息\n接口：stock_basic，可以通过\n数据工具\n调试和查看数据\n描述：获取基础信息数据，包括股票代码、名称、上市日期、退市日期等\n限量：每次最多返回6000行数据（覆盖全市场A股，会随股票总数增长而增加）\n权限：2000积分起，每分钟请求50次。此接口是基础信息，调取一次就可以拉取完，建议保存倒本地存储后使用",
+        "inputParameters": {
+          "ts_code": "str; N; TS股票代码( 格式说明 )",
+          "name": "str; N; 名称",
+          "market": "str; N; 市场类别 （主板/创业板/科创板/CDR/北交所）",
+          "list_status": "str; N; 上市状态 L上市 D退市 P暂停上市 G 未交易 UN未上市，默认是L",
+          "exchange": "str; N; 交易所 SSE上交所 SZSE深交所 BSE北交所",
+          "is_hs": "str; N; 是否沪深港通标的，N否 H沪股通 S深股通"
+        },
+        "outputAttribution": {
+          "ts_code": "str; Y; TS代码",
+          "exchange": "str; N; 交易所代码"
+        },
+        "requestExamples": "pro\n=\nts\n.\npro_api\n()\n#查询当前所有正常上市交易的股票列表\ndata\n=\npro\n.\nstock_basic\n(\nexchange\n=\n''\n,\nlist_status\n=\n'L'\n,\nfields\n=\n'ts_code,symbol,name,area,industry,list_date'\n)\n或者：\n#查询当前所有正常上市交易的股票列表\ndata\n=\npro\n.\nquery\n(\n'stock_basic'\n,\nexchange\n=\n''\n,\nlist_status\n=\n'L'\n,\nfields\n=\n'ts_code,symbol,name,area,industry,list_date'\n)"
+      },
+      "request": {
+        "candidateMode": "NONE",
+        "legality": "DOCUMENTED_CANDIDATE",
+        "params": "{list_status=<原值>}",
+        "conclusion": "保留 list_status=L/P/D；官方更多状态不自动扩枚举；明确一次可拉取完"
+      },
+      "date": {
+        "semantic": "NONE：原条件，不根据输出日期增加过滤",
+        "rangeSemanticDiffers": false,
+        "endpoints": "不适用：原条件无日期范围",
+        "liveVerified": false
+      },
+      "completeness": {
+        "documentedLimit": "6000",
+        "pagination": "UNCONFIRMED",
+        "gapOrConditionalCriterion": "有单次全量公开保证且说明上限随市场增长；需核实所选状态与当期边界，不能忽略异常截断",
+        "requiredGates": [
+          "Q",
+          "C",
+          "P"
+        ]
+      },
+      "recovery": {
+        "policy": "REQUEST",
+        "time": "NONE",
+        "rebuild": "原公共条件+所存失败时间；NONE不加日期，RANGE不拆小；单日原生接口仍发送相等起止参数",
+        "independentRetryCandidateOrRestriction": "原条件组 REQUEST+NONE；完整股票列表也不自动成为其他接口历史成员全集",
+        "independentRecoveryVerified": false,
+        "enableGate": "R"
+      },
+      "live": {
+        "status": "NOT_RUN",
+        "owner": "T20按权限和完成设计选择，非49项全量调用承诺"
+      }
+    },
+    {
+      "apiName": "stock_company",
+      "mode": "ORIGINAL_PARAMS",
+      "current": {
+        "path": "data-plane/tensor-plugin-tushare/src/main/resources/datasets/tushare_pro/stock_company.yaml",
+        "sha256": "c5d8ed68d039b8c7fae4da3fca6f89b0f3e052cef9f0401774bdf5310d47249a",
+        "parametersYaml": "parameters:\n  - { name: exchange, label: 交易所, type: ENUM, required: true, allowedValues: [SSE, SZSE, BSE] }",
+        "businessKeyYaml": "businessKey: { mode: COMPOSITE, fields: [ts_code] }"
+      },
+      "source": {
+        "url": "https://tushare.pro/document/2?doc_id=112",
+        "rawPageSha256": "d6dddf63599a950f7b827832ad95584058fbd607cd45d741caa4fafe2fe5ccf2",
+        "status": "READABLE",
+        "introduction": "上市公司基本信息\n接口：stock_company，可以通过\n数据工具\n调试和查看数据。\n描述：获取上市公司基础信息，单次提取4500条，可以根据交易所分批提取\n积分：用户需要至少120积分才可以调取，具体请参阅\n积分获取办法",
+        "inputParameters": {
+          "ts_code": "str; N; 股票代码",
+          "exchange": "str; N; 交易所代码 ，SSE上交所 SZSE深交所 BSE北交所"
+        },
+        "outputAttribution": {
+          "ts_code": "str; Y; 股票代码",
+          "exchange": "str; Y; 交易所代码"
+        },
+        "requestExamples": "pro = ts.pro_api()\n\n#或者\n#pro = ts.pro_api('your token')\n\ndf = pro.stock_company(exchange='SZSE', fields='ts_code,chairman,manager,secretary,reg_capital,setup_date,province')"
+      },
+      "request": {
+        "candidateMode": "NONE",
+        "legality": "DOCUMENTED_CANDIDATE",
+        "params": "{exchange=<原值>}",
+        "conclusion": "保留 exchange=SSE/SZSE/BSE；官方明确按交易所分批"
+      },
+      "date": {
+        "semantic": "NONE：原条件，不根据输出日期增加过滤",
+        "rangeSemanticDiffers": false,
+        "endpoints": "不适用：原条件无日期范围",
+        "liveVerified": false
+      },
+      "completeness": {
+        "documentedLimit": "4500",
+        "pagination": "UNCONFIRMED",
+        "gapOrConditionalCriterion": "当前已按交易所，不再扩市场；单交易所若触顶仍需取全证据",
+        "requiredGates": [
+          "Q",
+          "C",
+          "P"
+        ]
+      },
+      "recovery": {
+        "policy": "REQUEST",
+        "time": "NONE",
+        "rebuild": "原公共条件+所存失败时间；NONE不加日期，RANGE不拆小；单日原生接口仍发送相等起止参数",
+        "independentRetryCandidateOrRestriction": "原条件组 REQUEST+NONE；即使有可选股票也不改变原条件恢复合同",
+        "independentRecoveryVerified": false,
+        "enableGate": "R"
+      },
+      "live": {
+        "status": "NOT_RUN",
+        "owner": "T20按权限和完成设计选择，非49项全量调用承诺"
+      }
+    }
+  ]
+}

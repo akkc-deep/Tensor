@@ -9,6 +9,11 @@ import com.akkc.tensor.plugin.api.descriptor.PluginDescriptor;
 import com.akkc.tensor.plugin.api.descriptor.PluginReadiness;
 import com.akkc.tensor.plugin.api.download.AdaptedBatch;
 import com.akkc.tensor.plugin.api.download.DownloadEnvelope;
+import com.akkc.tensor.plugin.api.download.DownloadContext;
+import com.akkc.tensor.plugin.api.download.CalendarScope;
+import com.akkc.tensor.plugin.api.download.CalendarDecision;
+import com.akkc.tensor.plugin.api.download.FetchResult;
+import com.akkc.tensor.plugin.api.download.FetchBatch;
 import com.akkc.tensor.plugin.api.error.AdapterException;
 import com.akkc.tensor.plugin.api.error.ErrorCode;
 import com.akkc.tensor.plugin.api.error.SourceException;
@@ -40,7 +45,8 @@ class PluginApiSurfaceTest {
             ErrorCode.SOURCE_UNAVAILABLE,
             ErrorCode.SOURCE_NETWORK_ERROR,
             ErrorCode.SOURCE_TIMEOUT,
-            ErrorCode.SOURCE_PAYLOAD_INVALID);
+            ErrorCode.SOURCE_PAYLOAD_INVALID, ErrorCode.SOURCE_REQUEST_UNCONFIRMED,
+            ErrorCode.SOURCE_TRUNCATED, ErrorCode.SOURCE_COMPLETENESS_UNCONFIRMED);
     private static final Set<ErrorCode> ADAPTER_CODES = EnumSet.of(
             ErrorCode.ADAPTER_FIELD_MISSING,
             ErrorCode.ADAPTER_TYPE_INVALID);
@@ -49,19 +55,29 @@ class PluginApiSurfaceTest {
     void exposesExactDataSourcePluginMethods() throws Exception {
         assertThat(DataSourcePlugin.class.isInterface()).isTrue();
         assertThat(Modifier.isPublic(DataSourcePlugin.class.getModifiers())).isTrue();
-        assertExactInterface(DataSourcePlugin.class, "descriptor", "download", "readiness");
+        assertExactInterface(DataSourcePlugin.class, "descriptor", "download", "readiness", "confirmCalendar", "fetchBatch", "planBatch");
 
         Method descriptor = DataSourcePlugin.class.getDeclaredMethod("descriptor");
         Method readiness = DataSourcePlugin.class.getDeclaredMethod("readiness");
-        Method download = DataSourcePlugin.class.getDeclaredMethod("download", ApiName.class, Map.class);
+        Method download = DataSourcePlugin.class.getDeclaredMethod("download", ApiName.class, Map.class, DownloadContext.class);
+        Method fetchBatch = DataSourcePlugin.class.getDeclaredMethod(
+                "fetchBatch", ApiName.class, FetchBatch.class, DownloadContext.class);
 
         assertThat(descriptor.getReturnType()).isEqualTo(PluginDescriptor.class);
         assertThat(descriptor.getParameterTypes()).isEmpty();
         assertThat(readiness.getReturnType()).isEqualTo(PluginReadiness.class);
         assertThat(readiness.getParameterTypes()).isEmpty();
-        assertThat(download.getReturnType()).isEqualTo(DownloadEnvelope.class);
-        assertThat(download.getParameterTypes()).containsExactly(ApiName.class, Map.class);
+        assertThat(download.getReturnType()).isEqualTo(FetchResult.class);
+        assertThat(DataSourcePlugin.class.getDeclaredMethod("confirmCalendar", ApiName.class, CalendarScope.class, DownloadContext.class).getReturnType()).isEqualTo(CalendarDecision.class);
+        assertThat(download.getParameterTypes()).containsExactly(ApiName.class, Map.class, DownloadContext.class);
         assertMapOfStringObject(download.getGenericParameterTypes()[1]);
+        assertThat(fetchBatch.getReturnType()).isEqualTo(FetchResult.class);
+        assertThat(fetchBatch.getParameterTypes()).containsExactly(ApiName.class, FetchBatch.class, DownloadContext.class);
+        assertThat(fetchBatch.isDefault()).isTrue();
+        Method planBatch = DataSourcePlugin.class.getDeclaredMethod("planBatch", ApiName.class, FetchBatch.class, DownloadContext.class);
+        assertThat(planBatch.getReturnType()).isEqualTo(com.akkc.tensor.plugin.api.download.DownloadPolicy.BatchPlanning.class);
+        assertThat(planBatch.getParameterTypes()).containsExactly(ApiName.class, FetchBatch.class, DownloadContext.class);
+        assertThat(planBatch.isDefault()).isTrue();
     }
 
     @Test
@@ -101,10 +117,14 @@ class PluginApiSurfaceTest {
                 "ADAPTER_TYPE_INVALID",
                 "PERSISTENCE_FAILED",
                 "QUERY_FAILED",
-                "INTERNAL_ERROR");
+                "INTERNAL_ERROR", "SOURCE_REQUEST_UNCONFIRMED", "CALENDAR_UNCONFIRMED",
+                "SOURCE_TRUNCATED", "SOURCE_COMPLETENESS_UNCONFIRMED", "DATA_CONFLICT",
+                "RETRY_TASK_NOT_FOUND", "DOWNLOAD_BUSY", "RETRY_TASK_INVALID",
+                "TASK_RECORD_SAVE_UNCONFIRMED", "COMMIT_UNCONFIRMED");
         assertThat(ErrorCode.values()).extracting(ErrorCode::retryable).containsExactly(
                 false, false, false, false, false, false, true, true,
-                true, true, true, false, false, true, true, false);
+                true, true, true, false, false, true, true, false,
+                false, true, false, false, false, false, true, false, false, false);
 
         assertThat(ErrorCode.class.getDeclaredConstructors()).hasSize(1);
         assertThat(ErrorCode.class.getDeclaredMethod("retryable").getReturnType())
@@ -230,9 +250,10 @@ class PluginApiSurfaceTest {
         assertThat(type.getDeclaredMethods()).extracting(Method::getName).containsExactlyInAnyOrder(methodNames);
         assertThat(type.getDeclaredMethods()).allSatisfy(method -> {
             assertThat(Modifier.isPublic(method.getModifiers())).isTrue();
-            assertThat(Modifier.isAbstract(method.getModifiers())).isTrue();
+            assertThat(Modifier.isAbstract(method.getModifiers()))
+                    .isEqualTo(!Set.of("confirmCalendar", "fetchBatch", "planBatch").contains(method.getName()));
             assertThat(Modifier.isStatic(method.getModifiers())).isFalse();
-            assertThat(method.isDefault()).isFalse();
+            assertThat(method.isDefault()).isEqualTo(Set.of("confirmCalendar", "fetchBatch", "planBatch").contains(method.getName()));
         });
     }
 

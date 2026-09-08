@@ -17,6 +17,9 @@ import com.akkc.tensor.core.query.GenericQueryRepository;
 import com.akkc.tensor.core.registry.AdapterRegistry;
 import com.akkc.tensor.core.registry.PluginRegistry;
 import com.akkc.tensor.core.validation.ParameterValidator;
+import com.akkc.tensor.core.retry.TaskParametersJson;
+import com.akkc.tensor.core.retry.RetryTaskRepository;
+import com.akkc.tensor.core.retry.RetryTaskStorageService;
 import com.akkc.tensor.observability.OperationLogger;
 import com.akkc.tensor.observability.TensorMetrics;
 import com.akkc.tensor.plugin.api.DataSourcePlugin;
@@ -106,6 +109,22 @@ public final class ApplicationConfiguration {
             PlatformTransactionManager transactions) {
         return new PersistenceService(
                 catalog, lockManager, existingKeys, upserts, transactions);
+    }
+
+    @Bean
+    public TaskParametersJson taskParametersJson() {
+        return new TaskParametersJson();
+    }
+
+    @Bean
+    public RetryTaskRepository retryTaskRepository(JdbcTemplate jdbc, TaskParametersJson json) {
+        return new RetryTaskRepository(jdbc, json);
+    }
+
+    @Bean
+    public RetryTaskStorageService retryTaskStorageService(
+            RetryTaskRepository repository, PlatformTransactionManager transactions, Clock clock) {
+        return new RetryTaskStorageService(repository, transactions, clock);
     }
 
     @Bean

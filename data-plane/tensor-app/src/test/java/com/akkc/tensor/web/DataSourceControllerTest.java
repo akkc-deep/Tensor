@@ -73,6 +73,18 @@ class DataSourceControllerTest {
     }
 
     @Test
+    void metadataKeepsSourceFieldsAndDoesNotExposeInternalPolicy() throws Exception {
+        var source = List.of(new com.akkc.tensor.plugin.api.descriptor.ParameterDescriptor("trade_date", "交易日期", null,
+                com.akkc.tensor.plugin.api.descriptor.ParameterType.DATE, true, null, List.of(), null, null));
+        var policy = com.akkc.tensor.test.DownloadPolicies.tradeRange();
+        var api = new ApiDescriptor(ApiName.of("daily"), "Daily", "Market", QueryMode.trade_date,
+                com.akkc.tensor.plugin.api.download.DownloadParameterProjection.project(source, policy), policy, source);
+        JsonNode json = objectMapper.valueToTree(ApiDescriptorResponse.from(api));
+        assertThat(json.get("parameters").get(0).get("name").asText()).isEqualTo("trade_date");
+        assertThat(json.toString()).doesNotContain("downloadPolicy", "sourceParameters", "start_date", "evidenceRefs");
+    }
+
+    @Test
     void aggregatesOnlyTheDatasetDefinitionPath() {
         assertThat(Arrays.stream(DataSourceController.class.getDeclaredMethods())
                 .filter(method -> method.getName().equals("listPluginApis")))
@@ -369,11 +381,11 @@ class DataSourceControllerTest {
                 new ParameterDescriptor("end_date", "结束日期", null, ParameterType.DATE_RANGE_MEMBER,
                         false, null, List.of(), null, "start_date"));
         List<ApiDescriptor> apis = new ArrayList<>();
-        apis.add(new ApiDescriptor(ApiName.of("daily"), "日线行情", "market", QueryMode.trade_date, parameters));
+        apis.add(new ApiDescriptor(ApiName.of("daily"), "日线行情", "market", QueryMode.trade_date, parameters, com.akkc.tensor.test.DownloadPolicies.original(), parameters));
         apis.add(new ApiDescriptor(
-                ApiName.of("api_01"), "接口 1", "market", QueryMode.date_range, rangeParameters));
+                ApiName.of("api_01"), "接口 1", "market", QueryMode.date_range, rangeParameters, com.akkc.tensor.test.DownloadPolicies.original(), rangeParameters));
         IntStream.rangeClosed(2, 48).forEach(index -> apis.add(new ApiDescriptor(
-                ApiName.of("api_%02d".formatted(index)), "接口 " + index, "market", QueryMode.snapshot, List.of())));
+                ApiName.of("api_%02d".formatted(index)), "接口 " + index, "market", QueryMode.snapshot, List.of(), com.akkc.tensor.test.DownloadPolicies.original(), List.of())));
         return apis;
     }
 

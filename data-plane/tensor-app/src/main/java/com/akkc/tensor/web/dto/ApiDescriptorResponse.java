@@ -30,7 +30,7 @@ public record ApiDescriptorResponse(
                 descriptor.displayName(),
                 descriptor.category(),
                 descriptor.queryMode(),
-                descriptor.parameters().stream().map(ParameterResponse::from).toList());
+                descriptor.sourceParameters().stream().map(ParameterResponse::from).toList());
     }
 
     @JsonInclude(JsonInclude.Include.NON_NULL)

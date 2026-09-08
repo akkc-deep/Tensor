@@ -19,6 +19,8 @@ import com.akkc.tensor.plugin.api.descriptor.PluginDescriptor;
 import com.akkc.tensor.plugin.api.descriptor.PluginReadiness;
 import com.akkc.tensor.plugin.api.descriptor.QueryMode;
 import com.akkc.tensor.plugin.api.download.DownloadEnvelope;
+import com.akkc.tensor.plugin.api.download.FetchResult;
+import com.akkc.tensor.plugin.api.download.DownloadContext;
 import com.akkc.tensor.plugin.api.error.ErrorCode;
 import com.akkc.tensor.plugin.api.error.TensorException;
 import com.akkc.tensor.plugin.api.model.ApiName;
@@ -135,14 +137,14 @@ class MetadataQueryServiceTest {
             }
 
             @Override
-            public DownloadEnvelope download(ApiName apiName, Map<String, Object> params) {
+            public FetchResult download(ApiName apiName, Map<String, Object> params, DownloadContext context) {
                 throw new AssertionError("download must not be called");
             }
         };
     }
 
     private static ApiDescriptor api() {
-        return new ApiDescriptor(API_NAME, "Daily", "market", QueryMode.trade_date, List.of());
+        return new ApiDescriptor(API_NAME, "Daily", "market", QueryMode.trade_date, List.of(), com.akkc.tensor.test.DownloadPolicies.original(), List.of());
     }
 
     private static DatasetDefinition definition(List<String> filters) {

@@ -12,6 +12,7 @@ import com.akkc.tensor.plugin.api.descriptor.ApiDescriptor;
 import com.akkc.tensor.plugin.api.descriptor.PluginDescriptor;
 import com.akkc.tensor.plugin.api.download.AdaptedBatch;
 import com.akkc.tensor.plugin.api.download.DownloadEnvelope;
+import com.akkc.tensor.plugin.api.download.FetchResult;
 import com.akkc.tensor.plugin.api.download.DownloadOutcome;
 import com.akkc.tensor.plugin.api.download.DownloadResult;
 import com.akkc.tensor.plugin.api.download.DownloadStatus;
@@ -72,11 +73,12 @@ public final class DownloadService {
         DatasetKey key = DatasetKey.of(pluginId, apiName);
         DatasetAdapter adapter = adapterRegistry.find(key)
                 .orElseThrow(() -> access(ErrorCode.DATASET_MISCONFIGURED));
-        ValidatedParameters validated = parameterValidator.validate(api, params);
-        DownloadEnvelope envelope = plugin.download(apiName, validated.values());
-        if (envelope == null) {
+        ValidatedParameters validated = parameterValidator.validate(api.sourceParameters(), params);
+        FetchResult fetched = plugin.download(apiName, validated.values(), () -> {});
+        if (fetched == null || fetched.envelope() == null || !fetched.failures().isEmpty()) {
             throw invalidPayload();
         }
+        DownloadEnvelope envelope = fetched.envelope();
         if (envelope.status() == DownloadStatus.FAILURE) {
             throw new SourceException(ErrorCode.SOURCE_PAYLOAD_INVALID, envelope.error());
         }

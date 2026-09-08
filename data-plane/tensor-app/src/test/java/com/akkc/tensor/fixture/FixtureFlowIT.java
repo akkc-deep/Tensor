@@ -84,7 +84,7 @@ class FixtureFlowIT {
                 .dataSource(rawDataSource)
                 .locations("classpath:db/migration")
                 .load();
-        assertThat(flyway.migrate().migrationsExecuted).isEqualTo(7);
+        assertThat(flyway.migrate().migrationsExecuted).isEqualTo(8);
         assertThat(flyway.validateWithResult().validationSuccessful).isTrue();
 
         acceptanceContext = fixtureContext("acceptance");
@@ -241,7 +241,7 @@ class FixtureFlowIT {
 
     private static AdaptedBatch adapt(Flow flow, String scenario, Instant ingestedAt) {
         return flow.adapter().adapt(
-                flow.plugin().download(API_NAME, Map.of("scenario", scenario)), ingestedAt);
+                flow.plugin().download(API_NAME, Map.of("scenario", scenario), () -> {}).envelope(), ingestedAt);
     }
 
     private static DatasetPage query(Flow flow) {

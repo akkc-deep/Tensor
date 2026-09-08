@@ -49,9 +49,13 @@ class GenericDatasetAdapterTest {
         Method datasetKey = GenericDatasetAdapter.class.getDeclaredMethod("datasetKey");
         Method definition = GenericDatasetAdapter.class.getDeclaredMethod("definition");
         Method adapt = GenericDatasetAdapter.class.getDeclaredMethod("adapt", DownloadEnvelope.class, Instant.class);
+        Method adaptRows = GenericDatasetAdapter.class.getDeclaredMethod(
+                "adaptRows", DownloadEnvelope.class, Instant.class);
+        Method adaptKeyRow = GenericDatasetAdapter.class.getDeclaredMethod(
+                "adaptKeyRow", DownloadEnvelope.class, int.class);
         assertThat(GenericDatasetAdapter.class.getDeclaredMethods())
                 .filteredOn(method -> Modifier.isPublic(method.getModifiers()))
-                .containsExactlyInAnyOrder(datasetKey, definition, adapt);
+                .containsExactlyInAnyOrder(datasetKey, definition, adapt, adaptRows, adaptKeyRow);
 
         assertThat(Modifier.isFinal(FingerprintKeyCodec.class.getModifiers())).isTrue();
         assertThat(FingerprintKeyCodec.class.getConstructors()).singleElement().satisfies(constructor ->
@@ -248,6 +252,55 @@ class GenericDatasetAdapterTest {
                 () -> adapter(fingerprint).adapt(envelope(fingerprint, names(fingerprint), List.of(
                         List.of("same", "20240229", "one"), List.of("same", "20240229", "two"))), INGESTED_AT),
                 "Conflicting adapter key: api=fingerprint, row=1");
+    }
+
+    @Test
+    void preservesLegacyRowOrderWhenAConflictPrecedesALaterConversionFailure() {
+        DatasetDefinition composite = compositeDefinition();
+        assertInvalid(
+                () -> adapter(composite).adapt(envelope(composite, names(composite), List.of(
+                        List.of("same", "20240229", "7", "1.20", "one"),
+                        List.of("same", "20240229", "8", "1.20", "two"),
+                        List.of("later", "20240230", "9", "1.20", "three"))), INGESTED_AT),
+                "Conflicting adapter key: api=daily, row=1");
+    }
+
+    @Test
+    void adaptRowsPreservesDuplicateRowsAndTheirOriginalOrder() {
+        DatasetDefinition definitionValue = compositeDefinition();
+        DownloadEnvelope source = envelope(definitionValue, names(definitionValue), List.of(
+                row("same", "20240229", "7", "1.2", "first"),
+                row("same", "20240229", "7", "1.20", "first"),
+                row("other", "20240229", "8", "2.30", "second")));
+
+        AdaptedBatch batch = adapter(definitionValue).adaptRows(source, INGESTED_AT);
+
+        assertThat(batch.rows()).hasSize(3);
+        assertThat(batch.rows()).extracting(row -> row.get("code"))
+                .containsExactly("same", "same", "other");
+        assertThat(batch.rows().get(0)).isEqualTo(batch.rows().get(1));
+    }
+
+    @Test
+    void adaptKeyRowConvertsOnlyBusinessKeyColumnsAndKeepsFingerprintSemantics() {
+        DatasetDefinition composite = compositeDefinition();
+        DownloadEnvelope invalidNonKey = envelope(composite, names(composite), List.of(
+                row("  key  ", "20240229", "not-a-long", "not-a-decimal", new Object())));
+
+        assertThat(adapter(composite).adaptKeyRow(invalidNonKey, 0))
+                .containsExactlyEntriesOf(linkedRow(
+                        "code", "key", "trade_date", LocalDate.of(2024, 2, 29)));
+
+        DatasetDefinition fingerprint = fingerprintDefinition();
+        Map<String, Object> projected = adapter(fingerprint).adaptKeyRow(
+                envelope(fingerprint, names(fingerprint), List.of(List.of("a", "20240229", new Object()))), 0);
+        assertThat(projected).containsEntry("id", "a")
+                .containsEntry("trade_date", LocalDate.of(2024, 2, 29))
+                .containsEntry("business_key",
+                        "1b1a87323e7089d0327b269f94e037161f2a79c2ab170276a18864c25ebd8e83")
+                .doesNotContainKey("memo");
+        assertThatThrownBy(() -> projected.put("id", "changed"))
+                .isInstanceOf(UnsupportedOperationException.class);
     }
 
     private static GenericDatasetAdapter adapter(DatasetDefinition definitionValue) {

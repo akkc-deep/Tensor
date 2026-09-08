@@ -5,7 +5,7 @@ import com.akkc.tensor.plugin.api.dataset.DatasetDefinition;
 import com.akkc.tensor.plugin.api.descriptor.ApiDescriptor;
 import com.akkc.tensor.plugin.api.descriptor.PluginDescriptor;
 import com.akkc.tensor.plugin.api.descriptor.PluginReadiness;
-import com.akkc.tensor.plugin.api.download.DownloadEnvelope;
+import com.akkc.tensor.plugin.api.download.*;
 import com.akkc.tensor.plugin.api.model.ApiName;
 import com.akkc.tensor.plugin.api.model.DatasetKey;
 import com.akkc.tensor.plugin.api.model.PluginId;
@@ -32,7 +32,7 @@ public final class FixturePlugin implements DataSourcePlugin {
                 definition.displayName(),
                 definition.category(),
                 definition.queryMode(),
-                definition.parameters());
+                definition.parameters(), policy(), definition.parameters());
         descriptor = new PluginDescriptor(
                 DATASET_KEY.pluginId(),
                 "Fixture",
@@ -56,7 +56,7 @@ public final class FixturePlugin implements DataSourcePlugin {
     }
 
     @Override
-    public DownloadEnvelope download(ApiName apiName, Map<String, Object> params) {
+    public FetchResult download(ApiName apiName, Map<String, Object> params, DownloadContext context) {
         Objects.requireNonNull(apiName, "apiName");
         Objects.requireNonNull(params, "params");
         if (!DATASET_KEY.apiName().equals(apiName)) {
@@ -72,6 +72,20 @@ public final class FixturePlugin implements DataSourcePlugin {
         } catch (IllegalArgumentException exception) {
             throw new IllegalArgumentException("Unknown Fixture scenario");
         }
-        return envelopeFactory.create(scenario, params);
+        Objects.requireNonNull(context, "context").checkServerState();
+        DownloadEnvelope envelope = envelopeFactory.create(scenario, params);
+        context.checkServerState();
+        return new FetchResult(envelope, List.of());
+    }
+
+    private static DownloadPolicy policy() {
+        List<String> refs = List.of("data-plane/tensor-plugin-fixture/src/test/java/com/akkc/tensor/plugin/fixture/FixturePluginTest.java");
+        String completeness = "既有fixture单次响应场景，不代表真实来源取全。";
+        return new DownloadPolicy(DownloadPolicy.Mode.ORIGINAL_PARAMS, DownloadPolicy.DateSemantic.NONE,
+                "受控fixture场景，仅用于测试。", null, null, DownloadPolicy.SourceRequestMode.NONE, null,
+                DownloadPolicy.RequestEvidenceStatus.DOCUMENTED_CANDIDATE, DownloadPolicy.BatchPlanning.ORIGINAL_PARAMS,
+                new RecoveryPolicy(RecoveryPolicy.Mode.REQUEST, null, null, null, false, refs),
+                new DownloadPolicy.CompletenessPolicy(DownloadPolicy.CompletenessStatus.UNCONFIRMED,
+                        DownloadPolicy.CompletenessStatus.UNCONFIRMED, completeness, completeness), null, refs);
     }
 }

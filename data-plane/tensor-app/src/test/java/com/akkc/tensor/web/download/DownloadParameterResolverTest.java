@@ -3,6 +3,17 @@ package com.akkc.tensor.web.download;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import com.akkc.tensor.core.download.DownloadParameterConverter;
+import com.akkc.tensor.plugin.api.download.RecoverySelector;
+import com.akkc.tensor.plugin.api.download.DownloadPolicy;
+import com.akkc.tensor.plugin.api.download.DownloadParameterProjection;
+import com.akkc.tensor.plugin.api.model.DatasetKey;
+import com.akkc.tensor.plugin.api.model.PluginId;
+import com.akkc.tensor.core.adapter.GenericDatasetAdapter;
+import com.akkc.tensor.core.adapter.ValueConverter;
+import com.akkc.tensor.core.adapter.FingerprintKeyCodec;
+import com.akkc.tensor.plugin.api.error.TensorException;
+import com.akkc.tensor.plugin.api.error.SourceException;
 import com.akkc.tensor.core.registry.AdapterRegistry;
 import com.akkc.tensor.core.registry.PluginRegistry;
 import com.akkc.tensor.core.validation.ParameterValidator;
@@ -14,6 +25,8 @@ import com.akkc.tensor.plugin.api.descriptor.ParameterType;
 import com.akkc.tensor.plugin.api.descriptor.PluginDescriptor;
 import com.akkc.tensor.plugin.api.descriptor.PluginReadiness;
 import com.akkc.tensor.plugin.api.download.DownloadEnvelope;
+import com.akkc.tensor.plugin.api.download.FetchResult;
+import com.akkc.tensor.plugin.api.download.DownloadContext;
 import com.akkc.tensor.plugin.api.error.ErrorCode;
 import com.akkc.tensor.plugin.api.model.ApiName;
 import com.akkc.tensor.plugin.fixture.FixtureConfiguration;
@@ -30,6 +43,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
 class DownloadParameterResolverTest {
+    private static final Map<ApiName, DownloadPolicy> POLICIES = new TusharePluginConfiguration().tushareDownloadPolicies();
     private static final ParameterValidator VALIDATOR = new ParameterValidator();
     private static final Map<String, String> VALUES = Map.ofEntries(
             Map.entry("trade_date", "20260905"), Map.entry("ann_date", "20260905"),
@@ -43,14 +57,133 @@ class DownloadParameterResolverTest {
     @MethodSource("apis")
     void uniquelyMatchesAllFiftyApisAndRoundTripsRawValues(ApiDescriptor api) {
         var matches = ParameterCodec.supported().stream()
-                .filter(codec -> codec.shape().equals(ParameterShape.from(api))).toList();
+                .filter(codec -> codec.shape().equals(ParameterShape.from(api.sourceParameters()))).toList();
         assertThat(matches).singleElement();
         Map<String, Object> raw = new LinkedHashMap<>();
-        api.parameters().forEach(parameter -> raw.put(parameter.name(), VALUES.get(parameter.name())));
+        api.sourceParameters().forEach(parameter -> raw.put(parameter.name(), VALUES.get(parameter.name())));
         var codec = matches.getFirst();
-        DownloadParameters parameters = codec.read(new ParameterJsonReader(raw, api, VALIDATOR));
+        DownloadParameters parameters = codec.read(new ParameterJsonReader(raw, api.sourceParameters(), VALIDATOR));
         assertThat(parameters).isInstanceOf(expectedType(api.apiName().value()));
         assertThat(codec.write(parameters)).isEqualTo(raw);
+    }
+
+    @ParameterizedTest
+    @MethodSource("apis")
+    void bindsAllProjectedShapesWithNormalizedValuesAndRejectsOldMixedOrUnknownFields(ApiDescriptor api) {
+        var resolver = projectedResolver(api);
+        var key = key(api);
+        Map<String, Object> raw = new LinkedHashMap<>();
+        api.parameters().forEach(p -> raw.put(p.name(), VALUES.get(p.name())));
+        var result = resolver.resolveDownload(key, raw);
+        var expected = new LinkedHashMap<>(raw);
+        if (expected.containsKey("ts_code")) expected.put("ts_code", "000001.SZ");
+        assertThat(resolver.toRawValues(result, raw.keySet())).isEqualTo(expected);
+        Class<?> type = switch (expectedType(api.apiName().value()).getSimpleName()) {
+            case "TradeDateParameters", "AnnDateParameters", "MonthParameters" -> DateRangeParameters.class;
+            case "TsCodeAnnDateParameters" -> TsCodeDateRangeParameters.class;
+            case "ExchangeTradeDateParameters" -> ExchangeIdDateRangeParameters.class;
+            default -> expectedType(api.apiName().value());
+        };
+        assertThat(result).isInstanceOf(type);
+        assertThat(resolver.toRawValues(result, java.util.Set.of())).isEmpty();
+        var unknown = new LinkedHashMap<>(raw); unknown.put("unknown_field", "secret");
+        assertBindingCode(() -> resolver.resolveDownload(key, unknown), ErrorCode.PARAM_INVALID);
+        if (api.downloadPolicy().mode() != DownloadPolicy.Mode.ORIGINAL_PARAMS) {
+            for (String old : List.of("trade_date", "ann_date", "month")) {
+                assertBindingCode(() -> resolver.resolveDownload(key, Map.of(old, "20260905")), ErrorCode.PARAM_REQUIRED);
+                var mixed = new LinkedHashMap<>(raw); mixed.put(old, "20260905");
+                assertBindingCode(() -> resolver.resolveDownload(key, mixed), ErrorCode.PARAM_INVALID);
+            }
+            for (Object bad : List.of(20260901, "00000101", "20260229", "2026-09-01")) {
+                var invalid = new LinkedHashMap<>(raw); invalid.put("start_date", bad);
+                assertBindingCode(() -> resolver.resolveDownload(key, invalid), ErrorCode.PARAM_INVALID);
+            }
+            var longRange = new LinkedHashMap<>(raw); longRange.put("start_date", "20260131"); longRange.put("end_date", "20260303");
+            assertBindingCode(() -> resolver.resolveDownload(key, longRange), ErrorCode.PARAM_INVALID);
+            longRange.put("end_date", "20260302");
+            assertThat(resolver.toRawValues(resolver.resolveDownload(key, longRange), longRange.keySet())).containsEntry("end_date", "20260302");
+        } else {
+            var dated = new LinkedHashMap<>(raw); dated.put("start_date", "20260901"); dated.put("end_date", "20260905");
+            assertBindingCode(() -> resolver.resolveDownload(key, dated), ErrorCode.PARAM_INVALID);
+        }
+    }
+
+    @Test
+    void bindsExactly38RangeAnd11OriginalApisUsingNineProductionShapes() {
+        var production = apis().filter(api -> !api.apiName().value().equals("fixture_daily")).toList();
+        assertThat(production).hasSize(49);
+        assertThat(production.stream().filter(api -> api.parameters().stream().anyMatch(p -> p.name().equals("start_date")))).hasSize(38);
+        assertThat(production.stream().map(ParameterShape::from).distinct()).hasSize(9);
+    }
+
+    @Test
+    void actualPoliciesMapExactSourceParametersWithoutUpgradingUnconfirmedOrStockRecovery() {
+        var converter = new DownloadParameterConverter(VALIDATOR);
+        var production = apis().filter(api -> !api.apiName().value().equals("fixture_daily"))
+                .collect(java.util.stream.Collectors.toMap(api -> api.apiName().value(), api -> api));
+        Map<String, Map<String, Object>> expected = Map.ofEntries(
+                Map.entry("daily", Map.of("trade_date", "20260903")),
+                Map.entry("income", Map.of("ts_code", "000001.SZ", "start_date", "20260903", "end_date", "20260903")),
+                Map.entry("margin", Map.of("exchange_id", "SZSE", "start_date", "20260903", "end_date", "20260903")),
+                Map.entry("fina_indicator", Map.of("ts_code", "000001.SZ", "ann_date", "20260903")),
+                Map.entry("trade_cal", Map.of("exchange", "SSE", "start_date", "20260903", "end_date", "20260903")),
+                Map.entry("new_share", Map.of("start_date", "20260903", "end_date", "20260903")),
+                Map.entry("namechange", Map.of("start_date", "20260903", "end_date", "20260903")),
+                Map.entry("broker_recommend", Map.of("month", "202609")),
+                Map.entry("stock_basic", Map.of("list_status", "L")), Map.entry("index_classify", Map.of()));
+        for (var entry : production.entrySet()) {
+            var api = entry.getValue();
+            var raw = new LinkedHashMap<String, Object>();
+            api.parameters().forEach(p -> raw.put(p.name(), VALUES.get(p.name())));
+            var original = converter.bindInitial(api, raw);
+            var time = switch (api.downloadPolicy().mode()) {
+                case MONTH_RANGE -> RecoverySelector.TimeType.MONTH;
+                case ORIGINAL_PARAMS -> RecoverySelector.TimeType.NONE;
+                default -> RecoverySelector.TimeType.DATE;
+            };
+            String value = switch (time) { case MONTH -> "2026-09"; case NONE -> ""; default -> "2026-09-03"; };
+            var selector = new RecoverySelector(
+                    RecoverySelector.TargetType.REQUEST, "", time, value);
+            if (expected.containsKey(entry.getKey())) {
+                var initial = converter.mapInitial(api, original, selector);
+                assertThat(initial.sourceParams().values()).as(entry.getKey()).isEqualTo(expected.get(entry.getKey()));
+                assertThat(converter.mapRetry(api, converter.taskParameters(api, original,
+                        RecoverySelector.TargetType.REQUEST), selector)).isEqualTo(initial);
+            }
+            if (api.downloadPolicy().requestEvidenceStatus() != DownloadPolicy.RequestEvidenceStatus.DOCUMENTED_CANDIDATE) {
+                assertThatThrownBy(() -> converter.mapInitial(api, original, selector))
+                        .isInstanceOfSatisfying(SourceException.class,
+                                failure -> assertThat(failure.code()).isEqualTo(ErrorCode.SOURCE_REQUEST_UNCONFIRMED));
+            }
+            var stock = new RecoverySelector(
+                    RecoverySelector.TargetType.STOCK, "000001.SZ", time, value);
+            assertThatThrownBy(() -> converter.mapRetry(api, original.values(), stock))
+                    .isInstanceOf(TensorException.class);
+        }
+    }
+
+    private static void assertBindingCode(org.assertj.core.api.ThrowableAssert.ThrowingCallable call, ErrorCode code) {
+        assertThatThrownBy(call).isInstanceOfSatisfying(DownloadBindingException.class, failure -> assertThat(failure.code()).isEqualTo(code));
+    }
+
+    private static DatasetKey key(ApiDescriptor api) {
+        return new DatasetKey(PluginId.of(
+                api.apiName().value().equals("fixture_daily") ? "fixture" : "tushare_pro"), api.apiName());
+    }
+
+    private static DownloadParameterResolver projectedResolver(ApiDescriptor api) {
+        if (api.apiName().value().equals("fixture_daily")) return resolver(api);
+        var key = key(api);
+        var definition = new TusharePluginConfiguration().tushareDatasetDefinitions().stream()
+                .filter(d -> d.datasetKey().equals(key)).findFirst().orElseThrow();
+        DataSourcePlugin plugin = new DataSourcePlugin() {
+            public PluginDescriptor descriptor() { return new PluginDescriptor(key.pluginId(), "Test", "Test", true, true, true, null, List.of(api), List.of(key)); }
+            public PluginReadiness readiness() { return new PluginReadiness(true, true, true, null); }
+            public FetchResult download(ApiName name, Map<String, Object> params, DownloadContext context) { throw new AssertionError("Binding must not download"); }
+        };
+        var adapter = new GenericDatasetAdapter(definition,
+                new ValueConverter(), new FingerprintKeyCodec());
+        return new DownloadParameterResolver(new DownloadDescriptorResolver(new PluginRegistry(List.of(plugin)), new AdapterRegistry(List.of(adapter))), VALIDATOR);
     }
 
     static Stream<ApiDescriptor> apis() {
@@ -58,7 +191,7 @@ class DownloadParameterResolverTest {
         assertThat(definitions).hasSize(49);
         return Stream.concat(definitions.stream().map(definition -> new ApiDescriptor(
                 definition.datasetKey().apiName(), definition.displayName(), definition.category(),
-                definition.queryMode(), definition.parameters())),
+                definition.queryMode(), DownloadParameterProjection.project(definition.parameters(), POLICIES.get(definition.datasetKey().apiName())), POLICIES.get(definition.datasetKey().apiName()), definition.parameters())),
                 new FixtureConfiguration().fixturePlugin().descriptor().apis().stream());
     }
 
@@ -90,7 +223,7 @@ class DownloadParameterResolverTest {
         reversed.set(reversed.size() - 1, new ParameterDescriptor(exchange.name(), "Other label", "Other description",
                 exchange.type(), exchange.required(), exchange.defaultValue(), List.of("BSE", "SZSE", "SSE"),
                 exchange.pattern(), exchange.relatedParameter()));
-        assertThat(ParameterShape.from(withParameters(api, reversed))).isEqualTo(ParameterShape.from(api));
+        assertThat(ParameterShape.from(withParameters(api, reversed))).isEqualTo(ParameterShape.from(api.sourceParameters()));
 
         var fixture = new FixtureConfiguration();
         ApiDescriptor original = fixture.fixturePlugin().descriptor().apis().getFirst();
@@ -124,7 +257,7 @@ class DownloadParameterResolverTest {
     }
 
     private static ApiDescriptor withParameters(ApiDescriptor api, List<ParameterDescriptor> parameters) {
-        return new ApiDescriptor(api.apiName(), api.displayName(), api.category(), api.queryMode(), parameters);
+        return new ApiDescriptor(api.apiName(), api.displayName(), api.category(), api.queryMode(), parameters, com.akkc.tensor.test.DownloadPolicies.original(), parameters);
     }
 
     private static DownloadParameterResolver resolver(ApiDescriptor api) {
@@ -136,7 +269,7 @@ class DownloadParameterResolverTest {
                         List.of(api), List.of(key));
             }
             public PluginReadiness readiness() { return new PluginReadiness(true, true, true, null); }
-            public DownloadEnvelope download(ApiName name, Map<String, Object> params) {
+            public FetchResult download(ApiName name, Map<String, Object> params, DownloadContext context) {
                 throw new AssertionError("Binding must not download");
             }
         };

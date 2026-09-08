@@ -35,7 +35,7 @@ public final class OperationLogger {
         plugins.descriptors().forEach(descriptor -> descriptor.apis().forEach(api -> {
             DatasetKey key = DatasetKey.of(descriptor.pluginId(), api.apiName());
             if (descriptor.datasets().contains(key)) {
-                names.putIfAbsent(key, api.parameters().stream()
+                names.putIfAbsent(key, api.sourceParameters().stream()
                         .map(ParameterDescriptor::name)
                         .toList());
             }

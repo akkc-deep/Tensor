@@ -96,6 +96,15 @@ class GlobalExceptionHandlerTest {
                     null,
                     List.of(),
                     null,
+                    null)), com.akkc.tensor.test.DownloadPolicies.original(), List.of(new ParameterDescriptor(
+                    "trade_date",
+                    "Trade Date",
+                    null,
+                    ParameterType.DATE,
+                    true,
+                    null,
+                    List.of(),
+                    null,
                     null)));
 
     private final ObjectMapper objectMapper = new ObjectMapper();
@@ -429,6 +438,11 @@ class GlobalExceptionHandlerTest {
                     SOURCE_UNAVAILABLE,
                     SOURCE_NETWORK_ERROR,
                     SOURCE_PAYLOAD_INVALID -> 502;
+            case SOURCE_REQUEST_UNCONFIRMED, DOWNLOAD_BUSY, RETRY_TASK_INVALID -> 409;
+            case CALENDAR_UNCONFIRMED, SOURCE_TRUNCATED, SOURCE_COMPLETENESS_UNCONFIRMED -> 502;
+            case DATA_CONFLICT -> 422;
+            case RETRY_TASK_NOT_FOUND -> 404;
+            case TASK_RECORD_SAVE_UNCONFIRMED, COMMIT_UNCONFIRMED -> 500;
             case SOURCE_TIMEOUT -> 504;
         };
     }
@@ -451,6 +465,16 @@ class GlobalExceptionHandlerTest {
             case PERSISTENCE_FAILED -> "Persistence failed";
             case QUERY_FAILED -> "Query failed";
             case INTERNAL_ERROR -> "Internal server error";
+            case SOURCE_REQUEST_UNCONFIRMED -> "Source request conditions are unconfirmed";
+            case CALENDAR_UNCONFIRMED -> "Applicable calendars are unconfirmed";
+            case SOURCE_TRUNCATED -> "Source response is truncated";
+            case SOURCE_COMPLETENESS_UNCONFIRMED -> "Source response completeness is unconfirmed";
+            case DATA_CONFLICT -> "Source data contains conflicting values";
+            case RETRY_TASK_NOT_FOUND -> "Retry task was not found";
+            case DOWNLOAD_BUSY -> "A download is already running";
+            case RETRY_TASK_INVALID -> "Saved retry task is invalid";
+            case TASK_RECORD_SAVE_UNCONFIRMED -> "Failure record save is unconfirmed";
+            case COMMIT_UNCONFIRMED -> "Commit is unconfirmed";
         };
     }
 

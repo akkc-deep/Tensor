@@ -6,6 +6,11 @@ import com.akkc.tensor.plugin.tushare.config.TushareProperties;
 import com.akkc.tensor.plugin.tushare.metadata.DatasetDefinitionLoader;
 import com.akkc.tensor.plugin.api.dataset.DatasetDefinition;
 import java.util.List;
+import java.util.Map;
+import com.akkc.tensor.plugin.api.model.ApiName;
+import com.akkc.tensor.plugin.api.download.DownloadPolicy;
+import com.akkc.tensor.plugin.tushare.metadata.DownloadPolicyLoader;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -22,13 +27,19 @@ public final class TusharePluginConfiguration {
                 "classpath*:datasets/tushare_pro/*.yaml");
     }
 
+    @Bean("tushareDownloadPolicies")
+    public Map<ApiName, DownloadPolicy> tushareDownloadPolicies() {
+        return new DownloadPolicyLoader().load(new ClassPathResource("download/tushare-pro-policies.yaml"));
+    }
+
     @Bean
     public TushareProPlugin tushareProPlugin(
             TushareProperties properties,
             @Qualifier("tushareDatasetDefinitions")
-                    List<DatasetDefinition> definitions) {
+                    List<DatasetDefinition> definitions,
+            @Qualifier("tushareDownloadPolicies") Map<ApiName, DownloadPolicy> policies) {
         TushareProClient client = new TushareProClient(
                 new TushareRestClientFactory().create(properties), properties);
-        return new TushareProPlugin(properties, client, definitions);
+        return new TushareProPlugin(properties, client, definitions, policies);
     }
 }

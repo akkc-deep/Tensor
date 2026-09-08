@@ -12,6 +12,8 @@ import com.akkc.tensor.plugin.api.descriptor.PluginReadiness;
 import com.akkc.tensor.plugin.api.descriptor.QueryMode;
 import com.akkc.tensor.plugin.api.download.AdaptedBatch;
 import com.akkc.tensor.plugin.api.download.DownloadEnvelope;
+import com.akkc.tensor.plugin.api.download.FetchResult;
+import com.akkc.tensor.plugin.api.download.DownloadContext;
 import com.akkc.tensor.plugin.api.model.ApiName;
 import com.akkc.tensor.plugin.api.model.DatasetKey;
 import com.akkc.tensor.plugin.api.model.PluginId;
@@ -235,7 +237,7 @@ class RegistryTest {
         DatasetKey datasetKey = DatasetKey.of(pluginId, apiName);
         return new PluginDescriptor(pluginId, displayName, description, available, available, available,
                 available ? null : reason,
-                List.of(new ApiDescriptor(apiName, "Snapshot", "test", QueryMode.snapshot, List.of())),
+                List.of(new ApiDescriptor(apiName, "Snapshot", "test", QueryMode.snapshot, List.of(), com.akkc.tensor.test.DownloadPolicies.original(), List.of())),
                 List.of(datasetKey));
     }
 
@@ -334,7 +336,7 @@ class RegistryTest {
         }
 
         @Override
-        public DownloadEnvelope download(ApiName apiName, Map<String, Object> params) {
+        public FetchResult download(ApiName apiName, Map<String, Object> params, DownloadContext context) {
             throw new AssertionError("download must not be called");
         }
     }

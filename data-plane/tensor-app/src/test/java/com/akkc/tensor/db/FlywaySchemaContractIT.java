@@ -75,7 +75,7 @@ class FlywaySchemaContractIT {
                 .load();
         MigrateResult firstMigration = flyway.migrate();
         firstMigrationsExecuted = firstMigration.migrationsExecuted;
-        assertThat(firstMigrationsExecuted).as("first Flyway migration count").isEqualTo(7);
+        assertThat(firstMigrationsExecuted).as("first Flyway migration count").isEqualTo(8);
         ValidateResult validation = flyway.validateWithResult();
         validationSuccessful = validation.validationSuccessful;
         assertThat(validationSuccessful).as(validation.getAllErrorMessages()).isTrue();
@@ -105,15 +105,15 @@ class FlywaySchemaContractIT {
     @Test
     void migratesAndValidatesRepeatablyOnMySql846() {
         assertThat(mysqlVersion).startsWith("8.4.6");
-        assertThat(firstMigrationsExecuted).isEqualTo(7);
+        assertThat(firstMigrationsExecuted).isEqualTo(8);
         assertThat(validationSuccessful).isTrue();
         assertThat(repeatMigrationsExecuted).isZero();
-        assertThat(snapshot.tables()).hasSize(50);
-        assertThat(snapshot.columns().values().stream().mapToInt(List::size).sum()).isEqualTo(1008);
+        assertThat(snapshot.tables()).hasSize(52);
+        assertThat(snapshot.columns().values().stream().mapToInt(List::size).sum()).isEqualTo(1022);
         assertThat(snapshot.indexes().values().stream().flatMap(value -> value.values().stream())
-                .filter(value -> value.name().equals("PRIMARY"))).hasSize(50);
+                .filter(value -> value.name().equals("PRIMARY"))).hasSize(52);
         assertThat(snapshot.indexes().values().stream().flatMap(value -> value.values().stream())
-                .filter(value -> !value.name().equals("PRIMARY"))).hasSize(41);
+                .filter(value -> !value.name().equals("PRIMARY"))).hasSize(42);
 
         Set<String> productionTables = definitions.stream().map(value -> value.tableName().value())
                 .collect(java.util.stream.Collectors.toSet());
@@ -133,6 +133,63 @@ class FlywaySchemaContractIT {
     }
 
     @Test
+    void managementSchemasHaveExactColumnsKeysAndEnforcedConstraints() throws SQLException {
+        String task = "tensor_download_task";
+        String item = "tensor_download_task_item";
+        assertTable(task);
+        assertTable(item);
+        assertColumns(task, List.of(
+                column("task_id", "char", Types.CHAR, false, 36, null, null, null),
+                column("plugin_id", "varchar", Types.VARCHAR, false, 64, null, null, null),
+                column("api_name", "varchar", Types.VARCHAR, false, 64, null, null, null),
+                column("task_params", "json", Types.OTHER, false, null, null, null, null),
+                column("created_at", "datetime", Types.TIMESTAMP, false, null, null, null, 3),
+                column("updated_at", "datetime", Types.TIMESTAMP, false, null, null, null, 3)));
+        assertColumns(item, List.of(
+                column("task_id", "char", Types.CHAR, false, 36, null, null, null),
+                column("target_type", "varchar", Types.VARCHAR, false, 16, null, null, null),
+                column("target_value", "varchar", Types.VARCHAR, false, 64, null, null, null),
+                column("time_type", "varchar", Types.VARCHAR, false, 16, null, null, null),
+                column("time_value", "varchar", Types.VARCHAR, false, 64, null, null, null),
+                column("error_code", "varchar", Types.VARCHAR, false, 64, null, null, null),
+                column("error_message", "varchar", Types.VARCHAR, false, 512, null, null, null),
+                column("updated_at", "datetime", Types.TIMESTAMP, false, null, null, null, 3)));
+        assertIndexes(task, List.of("task_id"), Map.of("idx_download_task_updated", List.of("updated_at", "task_id")));
+        assertIndexes(item, List.of("task_id", "target_type", "target_value", "time_type", "time_value"), Map.of());
+        try (Connection connection = DriverManager.getConnection(
+                MYSQL.getJdbcUrl(), MYSQL.getUsername(), MYSQL.getPassword())) {
+            try (var statement = connection.createStatement(); var result = statement.executeQuery("""
+                    SELECT constraint_name, enforced FROM information_schema.table_constraints
+                    WHERE constraint_schema=DATABASE() AND constraint_type='CHECK'
+                      AND table_name IN ('tensor_download_task', 'tensor_download_task_item')
+                    ORDER BY constraint_name
+                    """)) {
+                List<String> checks = new ArrayList<>();
+                while (result.next()) {
+                    checks.add(result.getString(1));
+                    assertThat(result.getString(2)).isEqualTo("YES");
+                }
+                assertThat(checks).containsExactly("chk_download_task_item_target", "chk_download_task_item_time",
+                        "chk_download_task_params_object");
+            }
+            try (var statement = connection.createStatement(); var result = statement.executeQuery("""
+                    SELECT k.column_name, k.referenced_table_name, k.referenced_column_name,
+                           r.update_rule, r.delete_rule
+                    FROM information_schema.key_column_usage k
+                    JOIN information_schema.referential_constraints r
+                      ON k.constraint_schema=r.constraint_schema AND k.constraint_name=r.constraint_name
+                    WHERE k.constraint_schema=DATABASE() AND k.table_name='tensor_download_task_item'
+                    """)) {
+                assertThat(result.next()).isTrue();
+                assertThat(List.of(result.getString(1), result.getString(2), result.getString(3),
+                        result.getString(4), result.getString(5)))
+                        .containsExactly("task_id", task, "task_id", "RESTRICT", "RESTRICT");
+                assertThat(result.next()).isFalse();
+            }
+        }
+    }
+
+    @Test
     void keepsV6InTestOutputOnly() throws URISyntaxException, IOException {
         Path testClasses = Paths.get(FlywaySchemaContractIT.class.getProtectionDomain().getCodeSource()
                 .getLocation().toURI());
@@ -143,7 +200,8 @@ class FlywaySchemaContractIT {
                 "V3__create_connect_and_slb_tables.sql",
                 "V4__create_financial_tables.sql",
                 "V5__create_corporate_and_governance_tables.sql",
-                "V7__version_dividend_business_key.sql");
+                "V7__version_dividend_business_key.sql",
+                "V8__create_download_failure_tables.sql");
     }
 
     private static void assertProductionSchema(DatasetDefinition definition) {
@@ -218,7 +276,9 @@ class FlywaySchemaContractIT {
                     .isEqualTo(expectedColumn.name());
             assertThat(actualColumn.ordinal()).isEqualTo(index + 1);
             assertThat(actualColumn.dataType()).isEqualTo(expectedColumn.dataType());
-            assertThat(jdbcType(actualColumn.dataType())).isEqualTo(expectedColumn.jdbcType());
+            if (!actualColumn.dataType().equals("json")) {
+                assertThat(jdbcType(actualColumn.dataType())).isEqualTo(expectedColumn.jdbcType());
+            }
             assertThat(actualColumn.nullable()).isEqualTo(expectedColumn.nullable());
             assertThat(actualColumn.characterLength()).isEqualTo(expectedColumn.characterLength());
             assertThat(actualColumn.numericPrecision()).isEqualTo(expectedColumn.numericPrecision());
@@ -267,7 +327,8 @@ class FlywaySchemaContractIT {
                 columns.computeIfAbsent(result.getString("table_name"), ignored -> new ArrayList<>()).add(
                         new ColumnSnapshot(result.getString("column_name"), result.getInt("ordinal_position"),
                                 result.getString("data_type"), "YES".equals(result.getString("is_nullable")),
-                                nullableInt(result, "character_maximum_length"), nullableInt(result, "numeric_precision"),
+                                result.getString("data_type").equals("json") ? null
+                                        : nullableInt(result, "character_maximum_length"), nullableInt(result, "numeric_precision"),
                                 nullableInt(result, "numeric_scale"), nullableInt(result, "datetime_precision")));
             }
         }

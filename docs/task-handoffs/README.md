@@ -1,10 +1,11 @@
 # 任务看板与交接文档
 
-按项目归类：正式任务统一放在 `tensor-v1/`，每个后续 issue 使用独立的 `ISSUE-编号/` 目录。文件名保留原任务编号。
+按项目归类：Tensor v1 正式任务放在 `tensor-v1/`，区间下载增量放在 `tensor-range/`，每个后续 issue 使用独立的 `ISSUE-编号/` 目录。文件名保留原任务编号。
 
 | 目录 | 内容 | 任务看板 |
 | --- | --- | --- |
 | [tensor-v1/](tensor-v1/) | Tensor v1 正式任务：1 份看板、78 份任务交接 | [Tensor v1 看板](tensor-v1/tensor-v1-task-board.md) |
+| [tensor-range/](tensor-range/) | 区间下载增量：21 项任务，RANGE-T01～T10 已完成，RANGE-T11 设计与交接就绪（READY） | [区间下载看板](tensor-range/tensor-range-task-board.md) |
 | [ISSUE-004/](ISSUE-004/) | UI 改版任务；当前已有看板，后续交接放在同一目录 | [ISSUE-004 看板](ISSUE-004/ISSUE-004-task-board.md) |
 
 ```text
@@ -13,6 +14,9 @@ task-handoffs/
 ├── tensor-v1/
 │   ├── tensor-v1-task-board.md
 │   └── Mxx-Txx-handoff.md
+├── tensor-range/
+│   ├── tensor-range-task-board.md
+│   └── RANGE-Txx-handoff.md
 └── ISSUE-004/
     └── ISSUE-004-task-board.md
 ```
@@ -20,6 +24,7 @@ task-handoffs/
 新增文档沿用以下位置：
 
 - 正式任务交接：`docs/task-handoffs/tensor-v1/<任务编号>-handoff.md`。
+- 区间下载看板：`docs/task-handoffs/tensor-range/tensor-range-task-board.md`；交接：`docs/task-handoffs/tensor-range/<任务编号>-handoff.md`，任务编号为 `RANGE-Txx`。
 - Issue 看板：`docs/task-handoffs/<ISSUE-编号>/<ISSUE-编号>-task-board.md`。
 - Issue 任务交接：`docs/task-handoffs/<ISSUE-编号>/<任务编号>-handoff.md`，例如 `ISSUE-004/ISSUE-004-T01-handoff.md`。
 
