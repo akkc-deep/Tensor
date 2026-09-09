@@ -1,6 +1,7 @@
 package com.akkc.tensor.observability;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
@@ -11,15 +12,29 @@ import com.akkc.tensor.config.ApplicationConfiguration;
 import com.akkc.tensor.web.download.DownloadDescriptorResolver;
 import com.akkc.tensor.web.download.DownloadParameterResolver;
 import com.akkc.tensor.web.download.DownloadRequestDeserializer;
-import com.akkc.tensor.web.download.DownloadParameters.TradeDateParameters;
+import com.akkc.tensor.web.download.DownloadParameters.DateRangeParameters;
 import com.akkc.tensor.web.dto.DownloadRequest;
 import com.akkc.tensor.core.catalog.DatasetCatalog;
 import com.akkc.tensor.core.download.DownloadService;
+import com.akkc.tensor.core.download.BatchCommitService;
+import com.akkc.tensor.core.download.DownloadExecutionSlot;
+import com.akkc.tensor.core.download.DownloadParameterConverter;
+import com.akkc.tensor.core.download.RetryDownloadService;
+import com.akkc.tensor.core.retry.RetryTaskStorageService;
+import com.akkc.tensor.core.retry.RetryTaskRepository.Failure;
 import com.akkc.tensor.core.query.DatasetQueryService;
 import com.akkc.tensor.core.metadata.MetadataQueryService;
 import com.akkc.tensor.core.registry.AdapterRegistry;
 import com.akkc.tensor.core.registry.PluginRegistry;
+import com.akkc.tensor.core.validation.ParameterValidator;
 import com.akkc.tensor.plugin.api.DatasetAdapter;
+import com.akkc.tensor.plugin.api.download.RecoverySelector;
+import com.akkc.tensor.plugin.api.error.ErrorCode;
+import com.akkc.tensor.plugin.api.error.TensorException;
+import com.akkc.tensor.plugin.api.model.ApiName;
+import com.akkc.tensor.plugin.api.model.DatasetKey;
+import com.akkc.tensor.plugin.api.model.PluginId;
+import com.akkc.tensor.plugin.api.model.RequestId;
 import com.akkc.tensor.plugin.api.dataset.DatasetDefinition;
 import com.akkc.tensor.plugin.api.descriptor.PluginDescriptor;
 import com.akkc.tensor.web.DataSourceController;
@@ -35,6 +50,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import org.flywaydb.core.Flyway;
 import org.junit.jupiter.api.Test;
 import org.slf4j.LoggerFactory;
@@ -47,6 +63,7 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.type.classreading.MetadataReader;
 import org.springframework.core.type.classreading.MetadataReaderFactory;
 import org.springframework.web.client.RestClient;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.testcontainers.containers.MySQLContainer;
 import org.testcontainers.utility.DockerImageName;
 
@@ -93,10 +110,11 @@ class ProductionApplicationContextIT {
             captured = captureRootLog();
             second = start(mysql, SECRET);
             assertProductionGraph(second);
+            assertInitialProductionCapabilitiesRemainClosed(second);
             DownloadRequest bound = second.getBean(ObjectMapper.class).readValue(
-                    "{\"pluginId\":\"tushare_pro\",\"apiName\":\"daily\",\"params\":{\"trade_date\":\"20260905\"}}",
+                    "{\"pluginId\":\"tushare_pro\",\"apiName\":\"daily\",\"params\":{\"start_date\":\"20260905\",\"end_date\":\"20260905\"}}",
                     DownloadRequest.class);
-            assertThat(bound.params()).isEqualTo(new TradeDateParameters("20260905"));
+            assertThat(bound.params()).isEqualTo(new DateRangeParameters("20260905", "20260905"));
             HttpResponse secondHealth = get(second, "/actuator/health");
             assertHealth(second, secondHealth, 200, "UP");
             assertProbesUp(second);
@@ -105,7 +123,7 @@ class ProductionApplicationContextIT {
             assertSafeResponse(secondHealth, jdbcUrl, username);
             assertSafeResponse(secondMetadata, jdbcUrl, username);
             assertHidden(second, jdbcUrl, username);
-            assertThat(captured.text()).doesNotContain(SECRET);
+            assertThat(captured.text()).doesNotContain(SECRET, "unknown-outer-body-sentinel", "identifier-body-sentinel");
 
             mysql.stop();
             HttpResponse down = get(second, "/actuator/health");
@@ -165,11 +183,44 @@ class ProductionApplicationContextIT {
     }
 
     private static void assertProductionGraph(ConfigurableApplicationContext context) {
+        assertProductionMapper(context.getBean(ObjectMapper.class));
         assertUnique(context, ApplicationConfiguration.class);
         assertUnique(context, PluginRegistry.class);
         assertUnique(context, DatasetCatalog.class);
         assertUnique(context, AdapterRegistry.class);
         assertUnique(context, DownloadService.class);
+        assertUnique(context, DownloadExecutionSlot.class);
+        assertUnique(context, BatchCommitService.class);
+        assertUnique(context, RetryDownloadService.class);
+        assertUnique(context, com.akkc.tensor.core.retry.RetryTaskQueryService.class);
+        var queries = context.getBean(com.akkc.tensor.core.retry.RetryTaskQueryService.class);
+        var shared = Map.of("storage", RetryTaskStorageService.class, "plugins", PluginRegistry.class, "adapters", AdapterRegistry.class,
+                "validator", ParameterValidator.class, "slot", DownloadExecutionSlot.class);
+        shared.forEach((field, type) -> assertThat(org.springframework.test.util.ReflectionTestUtils.getField(queries, field)).isSameAs(context.getBean(type)));
+        DownloadService downloads = context.getBean(DownloadService.class);
+        assertThat(org.springframework.test.util.ReflectionTestUtils.getField(downloads, "slot"))
+                .isSameAs(context.getBean(DownloadExecutionSlot.class));
+        assertThat(org.springframework.test.util.ReflectionTestUtils.getField(downloads, "commits"))
+                .isSameAs(context.getBean(BatchCommitService.class));
+        assertThat(org.springframework.test.util.ReflectionTestUtils.getField(downloads, "failures"))
+                .isSameAs(context.getBean(RetryTaskStorageService.class));
+        RetryDownloadService retries = context.getBean(RetryDownloadService.class);
+        assertThat(org.springframework.test.util.ReflectionTestUtils.getField(retries, "pluginRegistry"))
+                .isSameAs(context.getBean(PluginRegistry.class));
+        assertThat(org.springframework.test.util.ReflectionTestUtils.getField(retries, "adapterRegistry"))
+                .isSameAs(context.getBean(AdapterRegistry.class));
+        Object retryConverter = org.springframework.test.util.ReflectionTestUtils.getField(retries, "converter");
+        assertThat(retryConverter).isInstanceOf(DownloadParameterConverter.class);
+        assertThat(org.springframework.test.util.ReflectionTestUtils.getField(retryConverter, "validator"))
+                .isSameAs(context.getBean(ParameterValidator.class));
+        assertThat(org.springframework.test.util.ReflectionTestUtils.getField(retries, "commits"))
+                .isSameAs(context.getBean(BatchCommitService.class));
+        assertThat(org.springframework.test.util.ReflectionTestUtils.getField(retries, "failures"))
+                .isSameAs(context.getBean(RetryTaskStorageService.class));
+        assertThat(org.springframework.test.util.ReflectionTestUtils.getField(retries, "slot"))
+                .isSameAs(context.getBean(DownloadExecutionSlot.class));
+        assertThat(org.springframework.test.util.ReflectionTestUtils.getField(retries, "clock"))
+                .isSameAs(context.getBean(java.time.Clock.class));
         assertUnique(context, DatasetQueryService.class);
         assertUnique(context, MetadataQueryService.class);
         assertUnique(context, TensorMetrics.class);
@@ -207,6 +258,132 @@ class ProductionApplicationContextIT {
             assertThat(catalog.find(definition.datasetKey())).isPresent();
             assertThat(adapterRegistry.find(definition.datasetKey())).isPresent();
         }
+    }
+
+    private static void assertProductionMapper(ObjectMapper mapper) {
+        var result = new com.akkc.tensor.web.dto.DownloadResponse("request",
+                com.akkc.tensor.core.download.DownloadExecutionResult.Outcome.UNCONFIRMED,
+                "fixture", "fixture_daily", 3000000001L, 3000000000L, 1, "Safe", 2, 0,
+                null, 0, null, null,
+                com.akkc.tensor.core.download.DownloadExecutionResult.FailureRecordStatus.UNCONFIRMED,
+                List.of(), List.of(), List.of());
+        JsonNode json = mapper.valueToTree(result);
+        assertThat(json.size()).isEqualTo(18);
+        for (String field : List.of("sourceRowCount", "insertedRows", "updatedRows", "completedUnits", "failedUnits", "skippedClosedDates")) {
+            assertThat(json.path(field).isIntegralNumber()).as(field).isTrue();
+        }
+        assertThat(json.path("insertedRows").longValue()).isEqualTo(3000000000L);
+        for (String field : List.of("notStartedUnits", "remainingFailedUnits", "taskId")) {
+            assertThat(json.path(field).isNull()).as(field).isTrue();
+        }
+        var known = new com.akkc.tensor.web.dto.DownloadResponse("request", result.outcome(),
+                "fixture", "fixture_daily", 0, 0, 0, "Safe", 0, 0, 3000000000L, 0,
+                null, 3000000001L, result.failureRecordStatus(), List.of(), List.of(), List.of());
+        JsonNode numbers = mapper.valueToTree(known);
+        for (String field : List.of("notStartedUnits", "remainingFailedUnits")) {
+            assertThat(numbers.path(field).isIntegralNumber()).as(field).isTrue();
+            assertThat(numbers.path(field).longValue()).isGreaterThan(Integer.MAX_VALUE);
+        }
+        var summary = new com.akkc.tensor.web.dto.RetryTaskResponse.Summary(UUID.randomUUID().toString(),
+                "fixture", "fixture_daily", null, null, null,
+                com.akkc.tensor.core.retry.RetryTaskQueryService.OriginalRangeStatus.UNCONFIRMED,
+                3000000000L, List.of(), "1970-01-01T00:00:00.000Z", "1970-01-01T00:00:00.123Z");
+        JsonNode page = mapper.valueToTree(new com.akkc.tensor.web.dto.RetryTaskResponse.Page(
+                "request", 1, 20, 3000000000L, 150000000L, List.of(summary)));
+        assertThat(page.path("totalElements").isIntegralNumber()).isTrue();
+        assertThat(page.path("totalPages").isIntegralNumber()).isTrue();
+        assertThat(page.path("items").get(0).path("failedItemCount").isIntegralNumber()).isTrue();
+        JsonNode records = mapper.valueToTree(Map.of("bigint", 9007199254740993L,
+                "decimal", new java.math.BigDecimal("12345678901234567890.123456789")));
+        assertThat(records.path("bigint").isTextual()).isTrue();
+        assertThat(records.path("bigint").asText()).isEqualTo("9007199254740993");
+        assertThat(records.path("decimal").isTextual()).isTrue();
+        assertThat(records.path("decimal").asText()).isEqualTo("12345678901234567890.123456789");
+    }
+
+    private static void assertInitialProductionCapabilitiesRemainClosed(ConfigurableApplicationContext context) throws Exception {
+        var downloads = context.getBean(DownloadService.class);
+        var plugin = new PluginId("tushare_pro");
+        var request = new RequestId(UUID.randomUUID());
+        assertThatThrownBy(() -> downloads.executeInitial(plugin,
+                new ApiName("daily"),
+                Map.of("start_date", "20260901", "end_date", "20260903"), request))
+                .isInstanceOfSatisfying(TensorException.class,
+                        error -> assertThat(error.code()).isEqualTo(ErrorCode.CALENDAR_UNCONFIRMED));
+        assertThatThrownBy(() -> downloads.executeInitial(plugin,
+                new ApiName("index_classify"), Map.of(), request))
+                .isInstanceOfSatisfying(TensorException.class,
+                        error -> assertThat(error.code()).isEqualTo(ErrorCode.SOURCE_COMPLETENESS_UNCONFIRMED));
+        int port = ((WebServerApplicationContext) context).getWebServer().getPort();
+        ObjectMapper mapper = context.getBean(ObjectMapper.class);
+        assertThat(mapper.isEnabled(com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)).isFalse();
+        for (boolean first : List.of(false, true)) {
+            String fields = "\"pluginId\":\"tushare_pro\",\"apiName\":\"daily\",\"params\":{\"start_date\":\"20260901\",\"end_date\":\"20260903\"}";
+            String unknown = "\"unknown\":\"unknown-outer-body-sentinel\"";
+            RestClient.create("http://127.0.0.1:" + port).post().uri("/api/v1/downloads").contentType(org.springframework.http.MediaType.APPLICATION_JSON)
+                    .body("{" + (first ? unknown + "," + fields : fields + "," + unknown) + "}")
+                    .exchange((httpRequest, response) -> {
+                        assertThat(response.getStatusCode().value()).isEqualTo(400);
+                        var body = mapper.readTree(response.getBody());
+                        assertThat(body.path("code").asText()).isEqualTo("PARAM_INVALID");
+                        assertThat(body.path("fieldErrors")).isEqualTo(mapper.readTree("[{\"field\":\"request\",\"message\":\"has invalid value\"}]"));
+                        assertThat(body.has("downloadResult")).isFalse();
+                        assertThat(body.path("requestId").asText()).isEqualTo(response.getHeaders().getFirst("X-Request-Id"));
+                        assertThat(body.toString()).doesNotContain("unknown-outer-body-sentinel", "unknown");
+                        return null;
+                    });
+        }
+        assertThat(mapper.isEnabled(com.fasterxml.jackson.databind.DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)).isFalse();
+        assertThat(mapper.convertValue(true, String.class)).isEqualTo("true");
+        for (String field : List.of("pluginId", "apiName")) {
+            for (Object value : List.of(true, false, 123, 1.5, Map.of("secret", "identifier-body-sentinel"), List.of("identifier-body-sentinel"))) {
+                var input = new LinkedHashMap<String, Object>();
+                input.put("pluginId", "tushare_pro"); input.put("apiName", "daily");
+                input.put("params", Map.of("start_date", "20260901", "end_date", "20260903")); input.put(field, value);
+                RestClient.create("http://127.0.0.1:" + port).post().uri("/api/v1/downloads").contentType(org.springframework.http.MediaType.APPLICATION_JSON)
+                        .body(mapper.writeValueAsString(input))
+                        .exchange((httpRequest, response) -> {
+                            assertThat(response.getStatusCode().value()).isEqualTo(400);
+                            var body = mapper.readTree(response.getBody());
+                            assertThat(body.path("code").asText()).isEqualTo("PARAM_INVALID");
+                            assertThat(body.path("fieldErrors")).isEqualTo(mapper.valueToTree(List.of(Map.of("field", field, "message", "has invalid value"))));
+                            assertThat(body.has("downloadResult")).isFalse();
+                            assertThat(body.path("requestId").asText()).isEqualTo(response.getHeaders().getFirst("X-Request-Id"));
+                            assertThat(body.toString()).doesNotContain("identifier-body-sentinel");
+                            return null;
+                        });
+            }
+        }
+        assertThat(mapper.convertValue(false, String.class)).isEqualTo("false");
+        for (String name : List.of("daily", "forecast", "index_classify")) {
+            String params = name.equals("index_classify") ? "{}" : "{\"start_date\":\"20260901\",\"end_date\":\"20260903\"}";
+            String expected = name.equals("daily") ? "CALENDAR_UNCONFIRMED" : name.equals("forecast") ? "SOURCE_REQUEST_UNCONFIRMED" : "SOURCE_COMPLETENESS_UNCONFIRMED";
+            RestClient.create("http://127.0.0.1:" + port).post().uri("/api/v1/downloads").contentType(org.springframework.http.MediaType.APPLICATION_JSON)
+                    .body("{\"pluginId\":\"tushare_pro\",\"apiName\":\"" + name + "\",\"params\":" + params + "}")
+                    .exchange((httpRequest, response) -> {
+                        assertThat(response.getStatusCode().value()).isEqualTo(name.equals("forecast") ? 409 : 502);
+                        var body = context.getBean(ObjectMapper.class).readTree(response.getBody());
+                        assertThat(body.path("code").asText()).isEqualTo(expected);
+                        assertThat(body.has("downloadResult")).isFalse();
+                        assertThat(body.path("requestId").asText()).isEqualTo(response.getHeaders().getFirst("X-Request-Id"));
+                        return null;
+                    });
+        }
+        var jdbc = context.getBean(JdbcTemplate.class);
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM tensor_download_task", Integer.class)).isZero();
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM tensor_download_task_item", Integer.class)).isZero();
+        var selector = new RecoverySelector(RecoverySelector.TargetType.REQUEST, "",
+                RecoverySelector.TimeType.DATE, "2026-09-02");
+        UUID taskId = context.getBean(RetryTaskStorageService.class).create(
+                DatasetKey.of(plugin, new ApiName("daily")),
+                Map.of("start_date", "20260901", "end_date", "20260903"),
+                new Failure(selector, ErrorCode.SOURCE_TIMEOUT)).key().taskId();
+        assertThatThrownBy(() -> context.getBean(RetryDownloadService.class).execute(taskId, request))
+                .isInstanceOfSatisfying(TensorException.class,
+                        error -> assertThat(error.code()).isEqualTo(ErrorCode.CALENDAR_UNCONFIRMED));
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM tensor_download_task", Integer.class)).isEqualTo(1);
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM tensor_download_task_item", Integer.class)).isEqualTo(1);
+        assertThat(context.getBean(DownloadExecutionSlot.class).busy()).isFalse();
     }
 
     private static void assertUnique(

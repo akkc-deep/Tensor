@@ -1,4 +1,4 @@
-import { ClientError } from '../api/errors.js'
+import { ApiError, ClientError } from '../api/errors.js'
 
 const api = vi.hoisted(() => ({
   listDataSources: vi.fn(),
@@ -16,6 +16,8 @@ vi.mock('../api/downloads.js', () => ({
 }))
 
 import { useDownloadFlow } from './useDownloadFlow.js'
+import results from '../test/fixtures/range-results.json'
+import rangeApis from '../test/fixtures/range-apis.json'
 
 function deferred() {
   let resolve
@@ -41,35 +43,11 @@ function source(overrides = {}) {
 }
 
 function descriptor(overrides = {}) {
-  return {
-    apiName: 'daily',
-    displayName: '日线行情',
-    category: '行情与估值',
-    queryMode: 'trade_date',
-    parameters: [
-      {
-        name: 'trade_date',
-        label: '交易日期',
-        type: 'DATE',
-        required: true,
-      },
-    ],
-    ...overrides,
-  }
+  return { ...rangeApis.apis.find((api) => api.apiName === 'daily'), ...overrides }
 }
 
 function response(overrides = {}) {
-  return {
-    requestId: 'request-1',
-    outcome: 'SUCCESS',
-    pluginId: 'fixture',
-    apiName: 'daily',
-    sourceRowCount: 1,
-    insertedRows: 1,
-    updatedRows: 0,
-    message: '下载完成',
-    ...overrides,
-  }
+  return { ...structuredClone(results[overrides.outcome ?? 'SUCCESS']), pluginId: 'fixture', ...overrides }
 }
 
 async function readyFlow({ sources = [source()], apis = [descriptor()] } = {}) {
@@ -108,7 +86,7 @@ describe('useDownloadFlow', () => {
     expect(await flow.load()).toBe(true)
     expect(await flow.selectSource('fixture')).toBe(true)
     expect(flow.selectApi('daily')).toBe(true)
-    expect(await flow.submit({ trade_date: '20260904' })).toBe(true)
+    expect(await flow.submit({ start_date: '20260904', end_date: '20260904' })).toBe(true)
     expect(flow.result.value).toBe(completed)
 
     const nextSources = [source({ pluginId: 'replacement' })]
@@ -261,9 +239,9 @@ describe('useDownloadFlow', () => {
     const flow = await readyFlow({ sources, apis: [daily, weekly] })
     api.downloadDataset.mockRejectedValueOnce(failure)
 
-    expect(await flow.submit({ trade_date: '20260904' })).toBe(false)
+    expect(await flow.submit({ start_date: '20260904', end_date: '20260904' })).toBe(false)
     expect(flow.error.value).toBe(failure)
-    expect(flow.canRetry.value).toBe(true)
+    expect(flow.canRetry.value).toBe(false)
     expect(flow.selectApi('weekly')).toBe(true)
     expect(flow.result.value).toBeNull()
     expect(flow.error.value).toBeNull()
@@ -274,7 +252,7 @@ describe('useDownloadFlow', () => {
 
     const completed = response()
     api.downloadDataset.mockResolvedValueOnce(completed)
-    expect(await flow.submit({ trade_date: '20260905' })).toBe(true)
+    expect(await flow.submit({ start_date: '20260905', end_date: '20260905' })).toBe(true)
     expect(flow.result.value).toBe(completed)
     const apiCalls = api.listApis.mock.calls.length
     expect(await flow.selectSource('')).toBe(true)
@@ -288,31 +266,57 @@ describe('useDownloadFlow', () => {
     expect(sources).toEqual(originalSources)
   })
 
+  it('clears prior result and failed retry context when parameters change', async () => {
+    const failure = new ClientError('NETWORK', 'download-request')
+    const flow = await readyFlow()
+    api.downloadDataset.mockRejectedValueOnce(failure)
+
+    expect(await flow.submit({ start_date: '20260904', end_date: '20260904' })).toBe(false)
+    expect(flow.canRetry.value).toBe(false)
+    expect(flow.parametersChanged()).toBe(true)
+    expect(flow.state.value).toBe('READY')
+    expect(flow.result.value).toBeNull()
+    expect(flow.error.value).toBeNull()
+    expect(flow.canRetry.value).toBe(false)
+    expect(await flow.retry()).toBe(false)
+    expect(api.downloadDataset).toHaveBeenCalledTimes(1)
+
+    const completed = response()
+    api.downloadDataset.mockResolvedValueOnce(completed)
+    expect(await flow.submit({ start_date: '20260905', end_date: '20260905' })).toBe(true)
+    expect(flow.result.value).toBe(completed)
+    expect(flow.parametersChanged()).toBe(true)
+    expect(flow.state.value).toBe('READY')
+    expect(flow.result.value).toBeNull()
+  })
+
   it('submits a frozen request snapshot and rejects every action while locked', async () => {
     const flow = await readyFlow()
     const pending = deferred()
     api.downloadDataset.mockReturnValueOnce(pending.promise)
-    const params = { trade_date: '20260904' }
+    const params = { start_date: '20260904', end_date: '20260904' }
     const submitting = flow.submit(params)
 
     expect(flow.state.value).toBe('SUBMITTING')
     expect(flow.locked.value).toBe(true)
+    expect(flow.executionContext.value.rangeMode).toBe(true)
+    expect(flow.parametersChanged()).toBe(false)
     expect(flow.canSubmit.value).toBe(false)
     expect(api.downloadDataset).toHaveBeenCalledWith({
       pluginId: 'fixture',
       apiName: 'daily',
-      params: { trade_date: '20260904' },
+      params: { start_date: '20260904', end_date: '20260904' },
     })
     expect(api.downloadDataset.mock.calls[0][0].params).not.toBe(params)
-    params.trade_date = 'changed'
+    params.start_date = 'changed'
     expect(api.downloadDataset.mock.calls[0][0].params).toEqual({
-      trade_date: '20260904',
+      start_date: '20260904', end_date: '20260904',
     })
 
     expect(await flow.load()).toBe(false)
     expect(await flow.selectSource('other')).toBe(false)
     expect(flow.selectApi('other')).toBe(false)
-    expect(await flow.submit({ trade_date: '20260905' })).toBe(false)
+    expect(await flow.submit({ start_date: '20260905', end_date: '20260905' })).toBe(false)
     expect(await flow.retry()).toBe(false)
     expect(flow.state.value).toBe('SUBMITTING')
     expect(flow.selectedPluginId.value).toBe('fixture')
@@ -327,77 +331,86 @@ describe('useDownloadFlow', () => {
     expect(flow.state.value).toBe('SUCCESS')
   })
 
-  it('maps successful responses only by outcome and preserves each response', async () => {
+  it.each(['SUCCESS', 'EMPTY', 'NO_OPEN_DATES', 'PARTIAL', 'FAILED'])('preserves the complete %s response without reclassifying or recounting it', async (outcome) => {
     const flow = await readyFlow()
-    const success = response({
-      sourceRowCount: 0,
-      insertedRows: 0,
-      message: '计数不参与状态判断',
-    })
-    const empty = response({
-      requestId: 'request-2',
-      outcome: 'EMPTY',
-      sourceRowCount: 2,
-      insertedRows: 2,
-      message: '结果只服从 outcome',
-    })
-    api.downloadDataset.mockResolvedValueOnce(success).mockResolvedValueOnce(empty)
-
-    expect(await flow.submit({ trade_date: '20260904' })).toBe(true)
-    expect(flow.state.value).toBe('SUCCESS')
-    expect(flow.result.value).toBe(success)
-    expect(flow.error.value).toBeNull()
-
-    expect(await flow.submit({ trade_date: '20260905' })).toBe(true)
-    expect(flow.state.value).toBe('EMPTY')
-    expect(flow.result.value).toBe(empty)
+    const completed = response({ outcome })
+    api.downloadDataset.mockResolvedValueOnce(completed)
+    expect(await flow.submit({ start_date: '20260901', end_date: '20260910' })).toBe(true)
+    expect(flow.state.value).toBe(outcome)
+    expect(flow.result.value).toBe(completed)
     expect(flow.error.value).toBeNull()
   })
 
-  it('retries download failures with frozen inputs and rejects unsafe retry paths', async () => {
-    const flow = await readyFlow({
-      apis: [descriptor(), descriptor({ apiName: 'weekly' })],
-    })
-    const retryable = new ClientError('NETWORK', 'download-request')
-    const nonRetryable = new ClientError('UNEXPECTED', 'unsafe-request')
-    const params = { trade_date: '20260904' }
-    api.downloadDataset
-      .mockRejectedValueOnce(retryable)
-      .mockResolvedValueOnce(response())
-      .mockRejectedValueOnce(nonRetryable)
-      .mockRejectedValueOnce(retryable)
-
+  it.each(['TIMEOUT', 'NETWORK', 'INVALID_RESPONSE', 'UNEXPECTED'])('leaves %s unknown, ends only the local lock and requires a new explicit submission', async (kind) => {
+    const flow = await readyFlow()
+    const failure = new ClientError(kind, 'first-request')
+    const params = { start_date: '20260901', end_date: '20260910' }
+    api.downloadDataset.mockRejectedValueOnce(failure).mockResolvedValueOnce(response({ requestId: 'new-request' }))
     expect(await flow.submit(params)).toBe(false)
-    expect(flow.state.value).toBe('FAILURE')
+    expect(flow.state.value).toBe('UNCONFIRMED')
     expect(flow.locked.value).toBe(false)
     expect(flow.canSubmit.value).toBe(true)
-    expect(flow.error.value).toBe(retryable)
-    expect(flow.canRetry.value).toBe(true)
-    expect(api.downloadDataset).toHaveBeenCalledTimes(1)
+    expect(flow.canRetry.value).toBe(false)
+    expect(flow.result.value).toBeNull()
+    expect(flow.error.value).toBe(failure)
+    expect(flow.executionContext.value).toEqual({ pluginId: 'fixture', apiName: 'daily', params, rangeMode: true })
+    params.start_date = '20260905'
+    expect(flow.executionContext.value.params.start_date).toBe('20260901')
+    expect(await flow.retry()).toBe(false)
+    expect(api.downloadDataset).toHaveBeenCalledOnce()
+    expect(await flow.submit(params)).toBe(true)
+    expect(api.downloadDataset).toHaveBeenCalledTimes(2)
+    expect(flow.result.value.requestId).toBe('new-request')
+    expect(flow.executionContext.value.params.start_date).toBe('20260905')
+  })
 
-    params.trade_date = 'changed'
-    expect(await flow.retry()).toBe(true)
-    expect(api.downloadDataset.mock.calls[1][0]).toEqual({
-      pluginId: 'fixture',
-      apiName: 'daily',
-      params: { trade_date: '20260904' },
-    })
-    expect(api.downloadDataset.mock.calls[1][0].params).not.toBe(
-      api.downloadDataset.mock.calls[0][0].params,
-    )
-    expect(flow.state.value).toBe('SUCCESS')
+  it.each(['TASK_RECORD_SAVE_UNCONFIRMED', 'COMMIT_UNCONFIRMED', 'PERSISTENCE_FAILED', 'INTERNAL_ERROR'])('preserves the confirmed snapshot for %s without a DOWNLOAD retry', async (code) => {
+    const flow = await readyFlow()
+    const failure = new ApiError({ requestId: 'range-unconfirmed', code, message: '结果未确认', retryable: code === 'PERSISTENCE_FAILED', fieldErrors: [], downloadResult: response({ outcome: 'UNCONFIRMED' }) })
+    api.downloadDataset.mockRejectedValueOnce(failure)
+    await flow.submit({ start_date: '20260901', end_date: '20260910' })
+    expect(flow.state.value).toBe('UNCONFIRMED')
+    expect(flow.result.value).toBe(failure.downloadResult)
+    expect(flow.result.value).toMatchObject({ completedUnits: 2, failedUnits: 1, notStartedUnits: null, sourceRowCount: 10, insertedRows: 7, updatedRows: 3 })
+    expect(flow.error.value).toBe(failure)
+    expect(await flow.retry()).toBe(false)
+    expect(api.downloadDataset).toHaveBeenCalledOnce()
+  })
 
-    expect(await flow.submit({ trade_date: '20260905' })).toBe(false)
-    expect(flow.error.value).toBe(nonRetryable)
+  it.each([{ pluginId: 'wrong_plugin' }, { apiName: 'wrong_api' }])('rejects a stopped snapshot with mismatched identity %j', async (mismatch) => {
+    const flow = await readyFlow()
+    api.downloadDataset.mockRejectedValueOnce(new ApiError({ requestId: 'range-unconfirmed', code: 'COMMIT_UNCONFIRMED', message: '安全错误', retryable: false, fieldErrors: [], downloadResult: response({ outcome: 'UNCONFIRMED', ...mismatch }) }))
+    await flow.submit({ start_date: '20260901', end_date: '20260910' })
+    expect(flow.state.value).toBe('UNCONFIRMED')
+    expect(flow.result.value).toBeNull()
+    expect(flow.error.value).toBeInstanceOf(ClientError)
+    expect(flow.error.value).toMatchObject({ kind: 'INVALID_RESPONSE', requestId: 'range-unconfirmed' })
+  })
+
+  it('shows a rejected busy request without a snapshot and does not retry even when retryable', async () => {
+    const flow = await readyFlow()
+    const failure = new ApiError({ requestId: 'busy-request', code: 'DOWNLOAD_BUSY', message: '已有下载正在执行', retryable: true, fieldErrors: [] })
+    api.downloadDataset.mockRejectedValueOnce(failure)
+    await flow.submit({ start_date: '20260901', end_date: '20260910' })
+    expect(flow.state.value).toBe('FAILURE')
+    expect(flow.result.value).toBeNull()
+    expect(flow.error.value).toBe(failure)
     expect(flow.canRetry.value).toBe(false)
     expect(await flow.retry()).toBe(false)
-    expect(api.downloadDataset).toHaveBeenCalledTimes(3)
+    expect(api.downloadDataset).toHaveBeenCalledOnce()
+  })
 
-    expect(await flow.submit({ trade_date: '20260906' })).toBe(false)
-    expect(flow.canRetry.value).toBe(true)
-    expect(flow.selectApi('weekly')).toBe(true)
+  it.each(['load', 'selectSource', 'selectApi', 'parametersChanged'])('clears the entire execution context through %s', async (operation) => {
+    const flow = await readyFlow()
+    api.downloadDataset.mockResolvedValueOnce(response({ outcome: 'PARTIAL' }))
+    await flow.submit({ start_date: '20260901', end_date: '20260910' })
+    expect(flow.executionContext.value).not.toBeNull()
+    api.listDataSources.mockResolvedValueOnce([])
+    await flow[operation](operation === 'selectSource' ? '' : 'daily')
+    expect(flow.executionContext.value).toBeNull()
+    expect(flow.result.value).toBeNull()
+    expect(flow.error.value).toBeNull()
     expect(flow.canRetry.value).toBe(false)
-    expect(await flow.retry()).toBe(false)
-    expect(api.downloadDataset).toHaveBeenCalledTimes(4)
+    expect(api.downloadDataset).toHaveBeenCalledOnce()
   })
 })

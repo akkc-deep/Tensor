@@ -31,6 +31,16 @@ import { http } from './http.js'
  * @property {string} category
  * @property {'trade_date'|'ann_date'|'snapshot'|'date_range'} queryMode
  * @property {ApiParameter[]} parameters
+ * @property {DownloadPolicy} downloadPolicy
+ */
+
+/**
+ * @typedef {object} DownloadPolicy
+ * @property {'TRADE_DATE_RANGE'|'ANN_DATE_RANGE'|'MONTH_RANGE'|'NATIVE_RANGE'|'ORIGINAL_PARAMS'} mode
+ * @property {string|null} dateSemantic
+ * @property {string} description
+ * @property {string|null} calendarProfile
+ * @property {{maxRangeDays: number}|null} limits
  */
 
 /** @returns {Promise<DataSourceSummary[]>} */

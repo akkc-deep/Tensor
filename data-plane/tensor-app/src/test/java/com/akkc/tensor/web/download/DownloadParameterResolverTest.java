@@ -54,6 +54,28 @@ class DownloadParameterResolverTest {
             Map.entry("scenario", "EMPTY"));
 
     @ParameterizedTest
+    @org.junit.jupiter.params.provider.ValueSource(strings={"TRADE_DATE_RANGE","ANN_DATE_RANGE","MONTH_RANGE","NATIVE_RANGE"})
+    void acceptanceFixtureRangeShapesRoundTripOptionalStockAndCommonScenario(String mode) {
+        var config = new FixtureConfiguration(mode, "REQUEST", "");
+        var plugin = config.fixturePlugin();
+        var resolver = new DownloadParameterResolver(new DownloadDescriptorResolver(
+                new PluginRegistry(List.of(plugin)), new AdapterRegistry(List.of(config.fixtureDatasetAdapter()))), VALIDATOR);
+        var key = DatasetKey.of(PluginId.of("fixture"), ApiName.of("fixture_daily"));
+        var raw = new LinkedHashMap<String,Object>(Map.of("scenario","SUCCESS","start_date","20260901","end_date","20260903"));
+        var bound = resolver.resolveDownload(key,raw);
+        assertThat(resolver.toRawValues(bound,raw.keySet())).isEqualTo(raw);
+        var invalid = new LinkedHashMap<>(raw); invalid.put("scenario","UNKNOWN");
+        assertThatThrownBy(() -> resolver.resolveDownload(key,invalid)).isInstanceOf(DownloadBindingException.class);
+        var unknown = new LinkedHashMap<>(raw); unknown.put("extra","value");
+        assertThatThrownBy(() -> resolver.resolveDownload(key,unknown)).isInstanceOf(DownloadBindingException.class);
+        if (mode.equals("TRADE_DATE_RANGE") || mode.equals("ANN_DATE_RANGE")) {
+            raw.put("ts_code","000002.SZ");
+            bound = resolver.resolveDownload(key,raw);
+            assertThat(resolver.toRawValues(bound,raw.keySet())).isEqualTo(raw);
+        }
+    }
+
+    @ParameterizedTest
     @MethodSource("apis")
     void uniquelyMatchesAllFiftyApisAndRoundTripsRawValues(ApiDescriptor api) {
         var matches = ParameterCodec.supported().stream()
@@ -90,7 +112,7 @@ class DownloadParameterResolverTest {
         assertBindingCode(() -> resolver.resolveDownload(key, unknown), ErrorCode.PARAM_INVALID);
         if (api.downloadPolicy().mode() != DownloadPolicy.Mode.ORIGINAL_PARAMS) {
             for (String old : List.of("trade_date", "ann_date", "month")) {
-                assertBindingCode(() -> resolver.resolveDownload(key, Map.of(old, "20260905")), ErrorCode.PARAM_REQUIRED);
+                assertBindingCode(() -> resolver.resolveDownload(key, Map.of(old, "20260905")), ErrorCode.PARAM_INVALID);
                 var mixed = new LinkedHashMap<>(raw); mixed.put(old, "20260905");
                 assertBindingCode(() -> resolver.resolveDownload(key, mixed), ErrorCode.PARAM_INVALID);
             }

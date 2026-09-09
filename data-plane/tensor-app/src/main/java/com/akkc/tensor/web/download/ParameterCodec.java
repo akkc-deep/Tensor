@@ -30,7 +30,16 @@ record ParameterCodec<T extends DownloadParameters>(ParameterShape shape, Class<
                 Set.of(), null, "end_date");
         var end = new ParameterShape.Field("end_date", DATE_RANGE_MEMBER, true, null,
                 Set.of(), null, "start_date");
+        var scenario = new ParameterShape.Field("scenario", ENUM, true, "SUCCESS",
+                Set.of("SUCCESS", "EMPTY", "SOURCE_FAILURE", "TYPE_FAILURE", "PERSISTENCE_FAILURE"), null, null);
+        var optionalStock = new ParameterShape.Field("ts_code", TS_CODE, false, null, Set.of(), null, null);
         return List.of(
+                new ParameterCodec<>(of(scenario, start, end), ScenarioDateRangeParameters.class,
+                        json -> new ScenarioDateRangeParameters(json.nullableText("scenario"), json.nullableText("start_date"), json.nullableText("end_date")),
+                        value -> values("scenario", value.scenario(), "start_date", value.startDate(), "end_date", value.endDate())),
+                new ParameterCodec<>(of(scenario, optionalStock, start, end), ScenarioStockDateRangeParameters.class,
+                        json -> new ScenarioStockDateRangeParameters(json.nullableText("scenario"), json.nullableText("ts_code"), json.nullableText("start_date"), json.nullableText("end_date")),
+                        value -> values("scenario", value.scenario(), "ts_code", value.tsCode(), "start_date", value.startDate(), "end_date", value.endDate())),
                 new ParameterCodec<>(of(), SnapshotParameters.class,
                         json -> new SnapshotParameters(), value -> values()),
                 new ParameterCodec<>(of(annDate), AnnDateParameters.class,

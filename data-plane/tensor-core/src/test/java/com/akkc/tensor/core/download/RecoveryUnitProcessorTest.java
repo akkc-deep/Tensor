@@ -57,6 +57,7 @@ class RecoveryUnitProcessorTest {
     @Test
     void splitsDateSourceForRangeRecoveryAndIsolatesTheBadBAmount() {
         Fixture fixture = dateSourceRangeRecoveryFixture();
+        assertThat(fixture.session().usesIndependentUnits()).isTrue();
         RecoveryUnitProcessor.PreparedBatch prepared = fixture.session().accept(fixture.result(List.of(
                 row("a-key", "000001.SZ", "20260903", "1.20"),
                 row("b-key", "600000.SH", "20260903", "bad"),
@@ -85,6 +86,7 @@ class RecoveryUnitProcessorTest {
     @Test
     void retainsTheWholeRequestWhenSourceTimeShapeCannotReconstructDateRecoveryUnits() {
         Fixture fixture = monthSourceDateRecoveryFixture();
+        assertThat(fixture.session().usesIndependentUnits()).isFalse();
 
         RecoveryUnitProcessor.PreparedBatch prepared = fixture.session().accept(fixture.result(List.of(
                 row("a-key", "000001.SZ", "20260903", "1.20"))));

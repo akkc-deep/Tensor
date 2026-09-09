@@ -1,0 +1,315 @@
+{
+  "batchRules": [
+    {
+      "apiName": "fixture_daily",
+      "params": {
+        "scenario": "SUCCESS",
+        "ann_date": "20260901"
+      },
+      "page": 1,
+      "response": {
+        "fields": [
+          "ts_code",
+          "trade_date",
+          "amount",
+          "note"
+        ],
+        "data": [
+          [
+            "000001.SZ",
+            "20260901",
+            "11.23",
+            null
+          ]
+        ],
+        "totalRows": 1,
+        "nextPage": null,
+        "complete": true
+      }
+    },
+    {
+      "apiName": "fixture_daily",
+      "params": {
+        "scenario": "SUCCESS",
+        "ann_date": "20260902"
+      },
+      "page": 1,
+      "response": {
+        "fields": [
+          "ts_code",
+          "trade_date",
+          "amount",
+          "note"
+        ],
+        "data": [
+          [
+            "000001.SZ",
+            "20260902",
+            "11.23",
+            null
+          ]
+        ],
+        "totalRows": 1,
+        "nextPage": null,
+        "complete": true
+      }
+    },
+    {
+      "apiName": "fixture_daily",
+      "params": {
+        "scenario": "SUCCESS",
+        "ann_date": "20260903"
+      },
+      "page": 1,
+      "response": {
+        "fields": [
+          "ts_code",
+          "trade_date",
+          "amount",
+          "note"
+        ],
+        "data": [
+          [
+            "000001.SZ",
+            "20260903",
+            "11.23",
+            null
+          ]
+        ],
+        "totalRows": 1,
+        "nextPage": null,
+        "complete": true
+      }
+    },
+    {
+      "apiName": "fixture_daily",
+      "params": {
+        "scenario": "SUCCESS",
+        "ann_date": "20260904"
+      },
+      "page": 1,
+      "response": {
+        "fields": [
+          "ts_code",
+          "trade_date",
+          "amount",
+          "note"
+        ],
+        "data": [
+          [
+            "000001.SZ",
+            "20260904",
+            "11.23",
+            null
+          ]
+        ],
+        "totalRows": 1,
+        "nextPage": null,
+        "complete": true
+      }
+    },
+    {
+      "apiName": "fixture_daily",
+      "params": {
+        "scenario": "SUCCESS",
+        "ann_date": "20260905"
+      },
+      "page": 1,
+      "response": {
+        "fields": [
+          "ts_code",
+          "trade_date",
+          "amount",
+          "note"
+        ],
+        "data": [
+          [
+            "000001.SZ",
+            "20260905",
+            "11.23",
+            null
+          ]
+        ],
+        "totalRows": 1,
+        "nextPage": null,
+        "complete": true
+      }
+    },
+    {
+      "apiName": "fixture_daily",
+      "params": {
+        "scenario": "SUCCESS",
+        "ann_date": "20260906"
+      },
+      "page": 1,
+      "response": {
+        "fields": [
+          "ts_code",
+          "trade_date",
+          "amount",
+          "note"
+        ],
+        "data": [
+          [
+            "000001.SZ",
+            "20260906",
+            "11.23",
+            null
+          ]
+        ],
+        "totalRows": 1,
+        "nextPage": null,
+        "complete": true
+      }
+    },
+    {
+      "apiName": "fixture_daily",
+      "params": {
+        "scenario": "SUCCESS",
+        "ann_date": "20260907"
+      },
+      "page": 1,
+      "response": {
+        "errorCode": "SOURCE_UNAVAILABLE"
+      }
+    },
+    {
+      "apiName": "fixture_daily",
+      "params": {
+        "scenario": "SUCCESS",
+        "ann_date": "20260908"
+      },
+      "page": 1,
+      "response": {
+        "fields": [
+          "ts_code",
+          "trade_date",
+          "amount",
+          "note"
+        ],
+        "data": [
+          [
+            "000001.SZ",
+            "20260908",
+            "11.23",
+            null
+          ]
+        ],
+        "totalRows": 1,
+        "nextPage": null,
+        "complete": true
+      }
+    },
+    {
+      "apiName": "fixture_daily",
+      "params": {
+        "scenario": "SUCCESS",
+        "ann_date": "20260909"
+      },
+      "page": 1,
+      "response": {
+        "fields": [
+          "ts_code",
+          "trade_date",
+          "amount",
+          "note"
+        ],
+        "data": [
+          [
+            "000001.SZ",
+            "20260909",
+            "11.23",
+            null
+          ]
+        ],
+        "totalRows": 1,
+        "nextPage": null,
+        "complete": true
+      }
+    },
+    {
+      "apiName": "fixture_daily",
+      "params": {
+        "scenario": "SUCCESS",
+        "ann_date": "20260910"
+      },
+      "page": 1,
+      "response": {
+        "fields": [
+          "ts_code",
+          "trade_date",
+          "amount",
+          "note"
+        ],
+        "data": [
+          [
+            "000001.SZ",
+            "20260910",
+            "11.23",
+            null
+          ]
+        ],
+        "totalRows": 1,
+        "nextPage": null,
+        "complete": true
+      }
+    },
+    {
+      "apiName": "fixture_daily",
+      "params": {
+        "scenario": "SUCCESS",
+        "ann_date": "20260901",
+        "ts_code": "000001.SZ"
+      },
+      "page": 1,
+      "response": {
+        "fields": [
+          "ts_code",
+          "trade_date",
+          "amount",
+          "note"
+        ],
+        "data": [
+          [
+            "000001.SZ",
+            "20260901",
+            "11.23",
+            null
+          ]
+        ],
+        "totalRows": 1,
+        "nextPage": null,
+        "complete": true
+      }
+    },
+    {
+      "apiName": "fixture_daily",
+      "params": {
+        "scenario": "SUCCESS",
+        "ann_date": "20260901",
+        "ts_code": "000002.SZ"
+      },
+      "page": 1,
+      "response": {
+        "fields": [
+          "ts_code",
+          "trade_date",
+          "amount",
+          "note"
+        ],
+        "data": [
+          [
+            "000002.SZ",
+            "20260901",
+            "bad",
+            null
+          ]
+        ],
+        "totalRows": 1,
+        "nextPage": null,
+        "complete": true
+      }
+    }
+  ],
+  "calendarRules": []
+}

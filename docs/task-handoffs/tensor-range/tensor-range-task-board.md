@@ -12,7 +12,7 @@
 
 ## Workflow
 
-- **Execution:** 用户负责串行执行安排，看板不额外实施跨任务互斥。已按用户逐次明确启动请求完成 RANGE-T01～T10；本轮T10两表存储、规定验证、真实MySQL测试及独立规格／质量／集成评审通过，先执行IN_PROGRESS -> COMPLETED并记录证据。随后按Order完成T11专属设计及独立就绪评审，先链接设计、再写并链接交接，最后执行NOT_STARTED -> READY；尚未启动T11实现。具体状态和证据见下表。
+- **Execution:** RANGE-T18已按本轮验收及最终独立评审记录COMPLETED；之后按Order完成并链接T19专属设计及交接，执行NOT_STARTED -> READY。T19尚未实施，其浏览器验收仍待明确启动后执行。
 - **Initialization:** `RANGE-T01` 为 `READY`，其他任务为 `NOT_STARTED`；全部 `Design document` 与 `Handoff` 为 `None`，首项无前驱交接。
 - **Next-task selection:** 当前任务完成后，选择 Order 更大的未完成任务中 Order 最小的一项，不根据文件名或依赖形状另选后继。
 - **Successor preparation:** 当前任务完成后，先完成并链接所选后继的专属设计，再写 `next-task` 交接和准备 `READY`；后继设计未完成不改变前项已完成事实。启动、暂停、恢复和完成时按链接完整读取设计和适用交接。
@@ -36,15 +36,15 @@
 | 8 | RANGE-T08 | 五类下载的内存批次规划 | COMPLETED | RANGE-T05, RANGE-T06, RANGE-T07 | docs/task-designs/RANGE-T08-design.md | docs/task-handoffs/tensor-range/RANGE-T08-handoff.md |
 | 9 | RANGE-T09 | 恢复单元划分、适配与同轮冲突 | COMPLETED | RANGE-T04, RANGE-T07 | docs/task-designs/RANGE-T09-design.md | docs/task-handoffs/tensor-range/RANGE-T09-handoff.md |
 | 10 | RANGE-T10 | 两张失败记录表与存储访问 | COMPLETED | RANGE-T04, RANGE-T05 | docs/task-designs/RANGE-T10-design.md | docs/task-handoffs/tensor-range/RANGE-T10-handoff.md |
-| 11 | RANGE-T11 | 恢复单元提交与失败明细原子删除 | READY | RANGE-T09, RANGE-T10 | docs/task-designs/RANGE-T11-design.md | docs/task-handoffs/tensor-range/RANGE-T11-handoff.md |
-| 12 | RANGE-T12 | 首次下载编排、执行槽位与本轮结果 | NOT_STARTED | RANGE-T08, RANGE-T09, RANGE-T10, RANGE-T11 | None | None |
-| 13 | RANGE-T13 | 原任务精确重试与中断边界 | NOT_STARTED | RANGE-T05, RANGE-T06, RANGE-T10, RANGE-T11, RANGE-T12 | None | None |
-| 14 | RANGE-T14 | 下载与失败任务 HTTP 接口 | NOT_STARTED | RANGE-T03, RANGE-T04, RANGE-T05, RANGE-T12, RANGE-T13 | None | None |
-| 15 | RANGE-T15 | 区间表单、日期说明与参数迁移 | NOT_STARTED | RANGE-T14 | None | None |
-| 16 | RANGE-T16 | 下载状态、部分结果与断连提示 | NOT_STARTED | RANGE-T14, RANGE-T15 | None | None |
-| 17 | RANGE-T17 | 失败任务列表、详情与手动重试页面 | NOT_STARTED | RANGE-T14, RANGE-T16 | None | None |
-| 18 | RANGE-T18 | 受控来源与 MySQL 故障集成验收 | NOT_STARTED | RANGE-T12, RANGE-T13, RANGE-T14 | None | None |
-| 19 | RANGE-T19 | 浏览器闭环与现有页面回归 | NOT_STARTED | RANGE-T15, RANGE-T16, RANGE-T17, RANGE-T18 | None | None |
+| 11 | RANGE-T11 | 恢复单元提交与失败明细原子删除 | COMPLETED | RANGE-T09, RANGE-T10 | docs/task-designs/RANGE-T11-design.md | docs/task-handoffs/tensor-range/RANGE-T11-handoff.md |
+| 12 | RANGE-T12 | 首次下载编排、执行槽位与本轮结果 | COMPLETED | RANGE-T08, RANGE-T09, RANGE-T10, RANGE-T11 | docs/task-designs/RANGE-T12-design.md | docs/task-handoffs/tensor-range/RANGE-T12-handoff.md |
+| 13 | RANGE-T13 | 原任务精确重试与中断边界 | COMPLETED | RANGE-T05, RANGE-T06, RANGE-T10, RANGE-T11, RANGE-T12 | docs/task-designs/RANGE-T13-design.md | docs/task-handoffs/tensor-range/RANGE-T13-handoff.md |
+| 14 | RANGE-T14 | 下载与失败任务 HTTP 接口 | COMPLETED | RANGE-T03, RANGE-T04, RANGE-T05, RANGE-T12, RANGE-T13 | docs/task-designs/RANGE-T14-design.md | docs/task-handoffs/tensor-range/RANGE-T14-handoff.md |
+| 15 | RANGE-T15 | 区间表单、日期说明与参数迁移 | COMPLETED | RANGE-T14 | docs/task-designs/RANGE-T15-design.md | docs/task-handoffs/tensor-range/RANGE-T15-handoff.md |
+| 16 | RANGE-T16 | 下载状态、部分结果与断连提示 | COMPLETED | RANGE-T14, RANGE-T15 | docs/task-designs/RANGE-T16-design.md | docs/task-handoffs/tensor-range/RANGE-T16-handoff.md |
+| 17 | RANGE-T17 | 失败任务列表、详情与手动重试页面 | COMPLETED | RANGE-T14, RANGE-T16 | docs/task-designs/RANGE-T17-design.md | docs/task-handoffs/tensor-range/RANGE-T17-handoff.md |
+| 18 | RANGE-T18 | 受控来源与 MySQL 故障集成验收 | COMPLETED | RANGE-T12, RANGE-T13, RANGE-T14 | docs/task-designs/RANGE-T18-design.md | docs/task-handoffs/tensor-range/RANGE-T18-handoff.md |
+| 19 | RANGE-T19 | 浏览器闭环与现有页面回归 | READY | RANGE-T15, RANGE-T16, RANGE-T17, RANGE-T18 | docs/task-designs/RANGE-T19-design.md | docs/task-handoffs/tensor-range/RANGE-T19-handoff.md |
 | 20 | RANGE-T20 | 代表接口真实区间与恢复验证 | NOT_STARTED | RANGE-T01, RANGE-T02, RANGE-T18, RANGE-T19 | None | None |
 | 21 | RANGE-T21 | 迁移运行说明与验收证据收尾 | NOT_STARTED | RANGE-T03, RANGE-T19, RANGE-T20 | None | None |
 
@@ -198,6 +198,10 @@
 - **First action:** 核对现有事务传播及锁释放回调，完成业务写入与任务删除同事务的服务设计和回滚用例。
 - **State evidence:** 2026-09-09 在T10完成记录之后，按Order选择本项并观察NOT_STARTED，直接依赖仍为T09／T10。使用designing-task-contracts完成并完整读取专属设计，固定一个BatchCommitService、最小索引预检、App装配、同事务／同连接及任务先锁顺序、完成观察与未知边界、空／全重复／整轮日历全闭消费规则及六类显式MySQL验证。独立规格及实施就绪评审READY／PASS；整轮日历屏障与两处测试措辞已修正，无遗留发现。最终设计SHA-256为c9dc04c5443b804b52802b05d93ecdb8e9fc92615082fa88676d39c5086b3b43。先仅回填Design document，再依模板写并链接next-task交接，最后执行NOT_STARTED -> READY；直接输入决定／约束、模板、相对链接及首个实施用例核对通过。未创建T11生产代码、测试或迁移，READY仅表示可按完成设计启动，不能视为组合事务或端到端验收通过。
 
+- **Start evidence:** 2026-09-09 用户明确要求“按照区间下载任务看板执行当前任务；先读取其设计文档和交接文件（如有），再按既定工作流完成任务”。已完整读取T11专属设计及入口交接，核对READY与交接一致后执行READY -> IN_PROGRESS；保留交接作为入口上下文。沿用feat/date-range-download，记录HEAD／原暂存及生产资源摘要；先行MySQL回滚用例、实现和本轮验证按设计执行，不调用真实来源。
+
+- **Completion evidence:** 2026-09-09 执行IN_PROGRESS -> COMPLETED。交付一个BatchCommitService、索引只读预检提取、App单bean及三类测试变化；[事务验证](../../verification/RANGE-T11-unit-commit.md)与[增量追踪](../../traceability/tensor-range-requirements.md#range-t11-单元事务层增量证据)记录AC-PRD-RANGE-07／13／15／21／24／26的本项机制。实际MySQL证明同manager／同连接、任务先锁且两锁至完成，分组／精确明细删除／主表收尾失败整单元回滚、已提交A与旧数据保留；完整键、空／同轮重复、整轮日历全闭绑定及确认提交／明确回滚／启动不可用／结果未知分类通过。T11从不确认索引或累计，确认回滚后独立保存成功才允许下一项，未知不补建失败。规定命令1～4分别22／70／16／89项通过，六类最终MySQL XML逐一读取共105项零失败／错误／跳过；verify755、acceptance758项Java及各170项前端测试／构建通过，合同8组＋4变异通过。独立首审唯一R1并发测试清理缺陷已修正，22项MySQL重跑及范围复审PASS，最终独立集成／证据评审PASS、无遗留。两次全量构建后仅改测试清理，生产版本相同。58份资源摘要、分支／HEAD、原暂存和文档链接／空白检查通过，本项新文件已加入Git；保留并行ISSUE-017成果，不提交／发布。运行下载编排、HTTP、浏览器及真实来源尚未接入或验证，生产注册表仍为空，ISSUE-008保持不依赖、未解决。此完成记录先于T12设计、交接及READY准备。
+
 ### RANGE-T12
 
 - **Goal:** 首次区间下载遍历本轮全部计划范围，并返回与真实提交一致的结果。
@@ -206,7 +210,11 @@
 - **Dependencies:** RANGE-T08、RANGE-T09、RANGE-T10、RANGE-T11；消费计划、单元校验、失败存储及事务提交结果。
 - **Sources:** ① [PRD §2、§5、§6](../../design/Tensor_区间下载_PRD_v1.0.md)；② [TRD §2、§3.2、§6.4、§8.2、§9～§10](../../design/Tensor_区间下载_TRD_v1.0.md)；③ `data-plane/tensor-core/src/main/java/com/akkc/tensor/core/download/DownloadService.java`；④ `data-plane/tensor-core/src/test/java/com/akkc/tensor/core/download/DownloadServiceTest.java`；⑤ T08～T11 的直接输入。
 - **First action:** 对照当前单调用 DownloadService 绘出本轮循环、槽位生命周期和错误分支，完成编排及计数设计。
-- **State evidence:** None。
+- **State evidence:** 2026-09-09 在T11完成记录之后，按Order选择本项，观察NOT_STARTED且Design／Handoff均None。使用designing-task-contracts完成并完整读取专属设计，核对T08～T11直接产物及实际接口；固定新executeInitial与保留旧入口、唯一构造器、共用槽位、串行事件／保存门槛、全部T11结果、S／F／N／H及R／I／U、精确文件与Core／MySQL／构建命令。独立规格／就绪及设计质量评审PASS，无实质发现；评审版本SHA-256为5996b35330df2f1bd34337d2ab495df76f85f8ac1b9366deea1c290be959c5ab。先只回填Design单元格，再按模板写入完整交接、核对四个直接输入无冲突并链接，随后执行NOT_STARTED -> READY。设计／交接模板、链接与实施起点检查通过；未实施本项、未运行T12功能测试，READY只表示后继已准备。
+
+- **Start evidence:** 2026-09-09 用户明确要求“按照区间下载任务看板执行当前任务；先读取其设计文档和交接文件（如有），再按既定工作流完成任务”。完整读取T12设计、入口交接及规定来源，核对READY及交接一致，保存分支／HEAD／原暂存与58份受保护资源摘要后执行READY -> IN_PROGRESS；原交接保留为入口上下文。按设计先行测试、最小实现、规定验证及独立评审执行，保留并行ISSUE-017内容，不提交／发布。
+
+- **Completion evidence:** 2026-09-09 执行IN_PROGRESS -> COMPLETED。交付首次executeInitial、共用进程槽位、不可变本轮结果及停止快照；十日3／7失败继续、同批STOCK A/C保留且B完整回滚、保存确认门槛、全部T11结果及S/F/N/H与R/I/U均有受控Core及真实MySQL证据。独立Service20、Core定向114、六类显式App IT62、App helper31项均零失败／错误／跳过；verify775、acceptance778项Java及各170项前端测试／构建通过。合同8组＋4变异、两差异检查、58份资源及135份生产Java摘要核对通过；独立规格／质量及最终集成评审PASS，R1同批STOCK和R2此前确认小计保留证据缺口均补齐并复审关闭。详见[本轮验证](../../verification/RANGE-T12-initial-execution.md)及[机制追踪](../../traceability/tensor-range-requirements.md#range-t12-首次编排层增量证据)。本项新增文件已加入Git暂存，原分支／HEAD和任务外原暂存保留，不提交／发布。旧HTTP仍用execute；生产来源／日历表及49项REQUEST不变，T13重试、T14新HTTP、T18真实断连及T20来源不计作本项通过。
 
 ### RANGE-T13
 
@@ -216,7 +224,11 @@
 - **Dependencies:** RANGE-T05、RANGE-T06、RANGE-T10、RANGE-T11、RANGE-T12；消费精确重建、日历、失败仓储、原子提交和共用槽位／结果规则。
 - **Sources:** ① [PRD §5.6～§5.8](../../design/Tensor_区间下载_PRD_v1.0.md)；② [TRD §3.3、§7、§8.2、§9](../../design/Tensor_区间下载_TRD_v1.0.md)；③ `data-plane/tensor-core/src/main/java/com/akkc/tensor/core/download/`；④ T05、T06、T10～T12 的直接输入。
 - **First action:** 以 REQUEST 范围、STOCK 同日两股和单日原生接口三组记录写出预期重试请求与删除结果，完成重试用例设计。
-- **State evidence:** None。
+- **State evidence:** 2026-09-09 在T12完成记录之后，按Order选择本项，观察NOT_STARTED且Design／Handoff均None。使用designing-task-contracts完成并完整读取专属设计，核对T05／T06／T10／T11／T12直接输入；固定独立七参RetryDownloadService、共用槽位内唯一读取、全部前置屏障、原项精确请求／原因更新／原子删除、全闭及混合RANGE、S/F/N/H与剩余项／最后删除未知、文件和Core／七类MySQL／构建命令。T11旧设计的全闭累计措辞已依据现行OpenAPI明确为不计S/R/I/U，T11实现无需改动，无未解决输入冲突。独立设计就绪／质量评审READY／PASS，最终设计SHA-256为3ae5e03a020bc505f40607606516e902f141754feb0711745720b1702e7efc87。先只回填Design，再按next-task模板写入完整交接；五个直接输入、模板、相对链接及三组先行测试实施起点校验PASS，先链接Handoff后执行NOT_STARTED -> READY。未实施T13、未运行其功能测试，READY只表示后继已准备。
+
+- **Start evidence:** 2026-09-09 用户明确要求“按照区间下载任务看板执行当前任务；先读取其设计文档和交接文件（如有），再按既定工作流完成任务”。已完整读取T13设计、入口交接及规定PRD／TRD来源，核对READY及交接一致后执行READY -> IN_PROGRESS，保留交接为入口上下文。保存当前分支／HEAD／原暂存与58份受保护资源摘要；按三组先行期望开展Core测试、精确重试实现与显式MySQL验证，HTTP留T14。
+
+- **Completion evidence:** 2026-09-09 执行IN_PROGRESS -> COMPLETED。交付独立七参RetryDownloadService及App共享bean：槽位内唯一读取当前原项，全部映射／Session／日历／来源规划先行；精确DATE／MONTH／RANGE／NONE与同日股票分别重取，原因更新确认后继续，业务和删除原子确认。真实MySQL验证3／7日原JSON及created_at不变、同日三股与分组回滚、最后主表删除、原因保存失败、提交丢答复及业务／全闭COMMITTED后异常；最后删除未知不给虚假存续ID，全闭S/R/I/U=0，H与N遵守冻结范围口径。最终Core130（Retry29）、七类App最新复合73（原70运行＋Retry11替换旧8）、helpers31项均零失败／错误／跳过；verify795、acceptance798项Java和各170项前端测试／构建通过。完整构建后的评审修复只补测试，最终定向覆盖，生产摘要相同。App两项和Core两P1／报告P2均复审关闭，最终规格／质量／集成与证据评审全部PASS，最后普通Committed测试增量已核对，无遗留。详见[精确重试验证](../../verification/RANGE-T13-exact-retry.md)与[机制追踪](../../traceability/tensor-range-requirements.md#range-t13-精确重试层增量证据)。合同8组＋4变异、58资源摘要、分支／HEAD、任务外原暂存及链接／两种空白检查通过；新增正式交付显式加入Git，不提交／发布。HTTP映射、真实进程／socket中断及真实来源由T14／T18／T20验收，ISSUE-008仍不依赖、未解决。此完成记录先于任何T14设计／交接创建或READY准备。
 
 ### RANGE-T14
 
@@ -226,7 +238,11 @@
 - **Dependencies:** RANGE-T03、RANGE-T04、RANGE-T05、RANGE-T12、RANGE-T13；消费对外合同、策略投影、请求绑定及两个执行用例。
 - **Sources:** ① [TRD §8、§10.3](../../design/Tensor_区间下载_TRD_v1.0.md)；② `docs/contracts/openapi-v1.yaml`、`docs/contracts/error-codes.md`；③ `data-plane/tensor-app/src/main/java/com/akkc/tensor/web/DownloadController.java`、`data-plane/tensor-app/src/main/java/com/akkc/tensor/web/dto/`；④ `data-plane/tensor-app/src/test/java/com/akkc/tensor/web/DownloadControllerIT.java`；⑤ T03～T05、T12／T13 的直接输入。
 - **First action:** 对照 T03 逐端点列出控制器、用例、DTO 与异常映射，完成 Web 层设计及合同用例。
-- **State evidence:** None。
+- **State evidence:** 2026-09-09 在T13已记录COMPLETED之后，按预定义Order选择本项，观察NOT_STARTED、Design／Handoff均None。使用designing-task-contracts完成并完整读取专属设计，核对T03／T04／T05／T12／T13直接输入及现行只读仓储：固定元数据38＋11同版迁移、四HTTP端点、18字段结果和number/null、原始日期四状态、静态blocker优先、只读slot Snapshot、UUID／零字节body、同步POST零预读、安全投影／观测、具体文件和八类MySQL等验证命令。旧日期alone错误优先、mapper先来源拒绝、全局Long字符串、不可读／空孤儿记录及全闭计数差异均有明确最小处理，无待决事实。独立就绪／规格／质量评审READY／PASS／PASS，最终设计SHA-256为e2b57c8332510c3f2a3475fe4686448e400ce59a8a22cc7739518e8f863fa2af。先仅回填Design；按next-task模板完成五组直接输入及实施起点交接，模板／相对链接校验PASS；先链接Handoff，再执行NOT_STARTED -> READY。设计和交接加入Git，未实施T14、未运行其功能测试；READY只表示后继已准备。
+
+- **Start evidence:** 2026-09-09 用户明确要求“按照区间下载任务看板执行当前任务；先读取其设计文档和交接文件（如有），再按既定工作流完成任务”。已完整读取T14专属设计和入口交接，核对READY及直接输入边界一致，记录原分支／HEAD／索引和58份受保护资源摘要后执行READY -> IN_PROGRESS；保留交接作为入口上下文。本轮按设计实施HTTP迁移、只读任务查询及规定验证，不启动T15实现。
+
+- **Completion evidence:** 2026-09-09 已按专属设计完成元数据38＋11及首次下载同版迁移、失败任务三端点、只读投影／原始日期四状态／原子槽位快照、18字段number/null结果、安全错误及观测。MySQL＋HTTP原1～10／当前3和7／精确重试／最后删除404、忙409与零字节body、保存与提交未知、同步等待者／写出失败边界均有本轮证据。独立Core／App规格与质量及最终集成／证据评审PASS；未知外层字段和标识标量强转两项Important发现均经行为RED、最小请求内修复、生产Spring mapper／servlet和全矩阵复验关闭。最终Core80、首三HTTP39、App九类236、显式MySQL八类114、verify829／acceptance832项Java及各170项前端测试和build通过，全部零失败／错误／跳过；合同8组＋4项变异、58资源摘要、780原索引、分支／HEAD和任务外内容、两种diff检查均通过。正式[验证报告](../../verification/RANGE-T14-http.md)与[增量追踪](../../traceability/tensor-range-requirements.md)已记录证据；新增八份Java和报告加入Git，未提交／发布。最终设计SHA-256为9bb3aac0ff8d72a3829336f71c8c63bbb6665fa83cf21fcca66858e10c9fe2bd。fixture正向HTTP仅为测试内包装，生产fixture能力留T18；页面、真实socket／进程中断及来源验收仍由后续任务承担。执行IN_PROGRESS -> COMPLETED；本完成记录写入时T15仍NOT_STARTED且Design／Handoff均None，后继准备仅在此记录之后进行。
 
 ### RANGE-T15
 
@@ -236,7 +252,11 @@
 - **Dependencies:** RANGE-T14；消费运行元数据及新下载请求合同。
 - **Sources:** ① [PRD §2.2、§3、§7](../../design/Tensor_区间下载_PRD_v1.0.md)；② [TRD §4.3、§8.3、§10.1](../../design/Tensor_区间下载_TRD_v1.0.md)；③ `control-plane/src/components/download/DynamicParameterForm.vue`、`control-plane/src/composables/useParameterForm.js`；④ `control-plane/src/api/downloads.js`；⑤ T14 的元数据和参数合同。
 - **First action:** 按现有动态表单逐模式列出控件、标签、摘要和精确请求示例，完成表单迁移设计。
-- **State evidence:** None。
+- **State evidence:** 2026-09-09 在T14已记录COMPLETED之后，按预定义Order选择15，观察NOT_STARTED、Design／Handoff均None。使用designing-task-contracts完成专属设计并完整读取、自审就绪：固定五类公开策略／标签／原生保守文案、服务端上限与配对校验、日期低年份／时区安全算术、31天跨三月摘要、一次POST、零参数配置守卫及修改条件清理；列明具体组件接口、49项真实资源测试输入、首错聚焦／查询隔离、精确命令和T16～T20边界，无待决产品事实。最终设计SHA-256为4c8023d6d39833bb4b5ac775e214085dbe9cf37d2ba112e0f3eeada4feff2708。先仅回填Design，按next-task模板完成T14元数据／请求和当前表单三组直接输入交接；模板、完整性及相对链接检查PASS。先链接Handoff，再执行NOT_STARTED -> READY。新增设计／交接纳入Git；本轮未实施T15、未运行T15功能测试，READY仅表示已准备。
+
+- **Start evidence:** 2026-09-09 用户明确要求“按照区间下载任务看板执行当前任务；先读取其设计文档和交接文件（如有），再按既定工作流完成任务”。已完整读取T15设计与入口交接、规定PRD／TRD来源、T14合同及当前前端，核对READY和交接一致后执行READY -> IN_PROGRESS；保留原交接。基线已保存至`.superpowers/sdd/RANGE-T15/baseline.json`，保留当前分支／HEAD、原索引及任务外工作；本轮仅实施T15表单范围，不提交／发布。
+
+- **Completion evidence:** 2026-09-09 完成五类公开策略表单、日期语义／服务端上限、自然日／完整月份摘要、一次规范化POST及条件修改清理。49真实资源fixture逐项独立核对19／15／1／3／11、38＋11、九形状，并实际mount各表单；股票／市场／原条件、31／32天／跨三月／低年份／两时区、配置错误零请求及首错聚焦通过。两处本地核对发现（原生语义键碰撞、通用关联错误清理范围）已修正，独立初审的Important测试矩阵缺口经仅测试补强关闭。最终指定组7文件96项、UTC及LA各2文件22项、全量25文件215项零失败／跳过；build1700模块、合同8组＋4变异、58生产资源／791原索引／17文件摘要、分支HEAD及任务外文件保护、两种diff检查通过。本地受控Chromium1440／390宽度一次POST／32天拒绝／清理／聚焦／无溢出观察通过，仅作表单证据。独立规格／质量复审与最终集成／证据评审均PASS，无遗留。正式[验证报告](../../verification/RANGE-T15-form.md)与[追踪](../../traceability/tensor-range-requirements.md)记录范围；三份新增前端及报告纳入Git，未提交／发布。设计SHA-256仍为4c8023d6d39833bb4b5ac775e214085dbe9cf37d2ba112e0f3eeada4feff2708。T16新结果／断连、T17失败任务页及T18～T20受控后端／完整浏览器／真实来源仍未在本项验收。执行IN_PROGRESS -> COMPLETED；本完成记录写入时T16仍NOT_STARTED且Design／Handoff均None，后继准备仅在此后进行。
 
 ### RANGE-T16
 
@@ -246,7 +266,11 @@
 - **Dependencies:** RANGE-T14、RANGE-T15；消费本轮结果合同、运行接口及区间表单。
 - **Sources:** ① [PRD §2、§5.4、§5.8](../../design/Tensor_区间下载_PRD_v1.0.md)；② [TRD §6.4、§8.3、§9](../../design/Tensor_区间下载_TRD_v1.0.md)；③ `control-plane/src/composables/useDownloadFlow.js`、`control-plane/src/components/download/DownloadResult.vue`、`control-plane/src/views/DownloadView.vue`；④ `control-plane/src/api/http.js`；⑤ T14／T15 的直接输入。
 - **First action:** 对照现有请求世代和页面状态列出新响应分支，完成结果、锁定与断连提示设计。
-- **State evidence:** None。
+- **State evidence:** 2026-09-09 在T15已记录COMPLETED之后，按预定义Order选择16，观察NOT_STARTED、Design／Handoff均None。使用designing-task-contracts完成专属设计并完整读取、自审及独立就绪评审PASS：固定18字段结果守卫、26码及四停止快照、六种结果与通信未知、S/F/N/H和R/I/U、三组范围、仅metadata重载、现有KeepAlive及本地锁定；任务入口精确query由T17消费，实际任务内容仍由T17交付。明确具体文件／接口／失败规则、真实Axios测试矩阵、命令及八项AC，没有待决产品事实。最终设计SHA-256为f3c4b9fb8e1576df1a68afa8e2ce7a4ed8c2f7458ac84d97cec6a12bdafbbb9b。先仅回填Design，再按next-task模板完成T14结果／错误、T15表单／清理及现有页面生命周期三组直接输入交接；模板、相对链接、设计摘要和输入一致性检查PASS。先链接Handoff，复核NOT_STARTED后执行NOT_STARTED -> READY。新增设计／交接纳入Git；本轮未实施T16、未运行T16功能测试，READY仅表示已准备。
+
+- **Start evidence:** 2026-09-09 用户明确要求“按照区间下载任务看板执行当前任务；先读取其设计文档和交接文件（如有），再按既定工作流完成任务”。已完整读取T16设计、入口交接及规定来源，核对READY和交接一致后执行READY -> IN_PROGRESS，保留原交接为入口上下文。开始时分支feat/date-range-download、HEAD 758f940503ded2d1185040bc8e324815c716a300、797条原索引和799份文件摘要已保存；不提交、不发布、不改任务外工作。
+
+- **Completion evidence:** 2026-09-09 完成18字段严格结果守卫、26码及四停止快照、六outcome／通信未知、本轮固定上下文、七计数及三组范围、仅metadata重载和精确taskId路由入口。137项指定／278项全量前端测试零失败／跳过，build1701模块、合同8组＋4变异、两种diff检查通过；Chromium1440／390宽度PARTIAL／UNCONFIRMED、null／小计／长范围、切页同一POST、键盘任务入口和再次主动提交新RequestId观察通过。最终评审发现四停止快照Axios证据不全，补独立真实Axios四码探针，每码一次POST、500／retryable／null／复制冻结小计通过；冻结14文件未改，复核关闭唯一Important，UI／API独立规格质量及最终集成／证据APPROVED，无遗留。58生产资源、799份开始文件中的任务外内容、797原索引、分支HEAD保护通过。正式[验证报告](../../verification/RANGE-T16-results.md)和[追踪](../../traceability/tensor-range-requirements.md)记录八项AC前端增量；五个新增正式文件纳入Git，未提交／发布。设计SHA-256保持f3c4b9fb8e1576df1a68afa8e2ce7a4ed8c2f7458ac84d97cec6a12bdafbbb9b。T17任务内容／execute、T18～T20受控后端／完整浏览器／真实来源尚未在本项验收，ISSUE-008继续不依赖、未解决。执行IN_PROGRESS -> COMPLETED；本完成记录写入时T17仍NOT_STARTED、Design／Handoff均None，后继准备仅在此后进行。
 
 ### RANGE-T17
 
@@ -256,7 +280,11 @@
 - **Dependencies:** RANGE-T14、RANGE-T16；消费失败任务 API、执行结果及任务入口。
 - **Sources:** ① [PRD §1.1、§5.5～§5.8](../../design/Tensor_区间下载_PRD_v1.0.md)；② [TRD §8](../../design/Tensor_区间下载_TRD_v1.0.md)；③ `control-plane/src/views/DownloadView.vue`、`control-plane/src/components/common/`、`control-plane/src/api/`；④ T14／T16 的直接输入。
 - **First action:** 按列表、详情、执行中、部分解决及任务消失场景列出交互与 API 消费，完成失败任务页面设计。
-- **State evidence:** None。
+- **State evidence:** 2026-09-09 在T16已记录COMPLETED后，按预定义Order选择17，观察NOT_STARTED、Design／Handoff均None。使用designing-task-contracts完成专属设计并完整读取、自审及独立就绪评审PASS：固定两个页签、三任务Axios端点、零字节execute、独立筛选与20／50／100分页、原始区间和完整当前明细、双向本地互锁、路由GET／KeepAlive及404／409／未知刷新规则；具体模块／组件接口和测试矩阵／命令齐全，无待决事实。评审纠正初稿Detail18字段为实际17（Summary11＋六字段），并核对OpenAPI／Java DTO；无遗留发现。最终设计SHA-256为93dac155c8cc2ca31eb35aee999ee32ed16ae969d34757b9ac37e76178adace3。先仅回填Design，再按next-task模板完成T14任务HTTP、T16结果／入口及现有组件生命周期三组直接输入交接；模板、字段清单、相对链接和摘要检查PASS。先链接Handoff，复核NOT_STARTED后执行NOT_STARTED -> READY。新增设计／交接加入Git，本轮未实施T17、未运行T17功能测试；READY仅表示已准备。
+
+- **Start evidence:** 2026-09-09 用户明确要求“按照区间下载任务看板执行当前任务；先读取其设计文档和交接文件（如有），再按既定工作流完成任务”。完整读取T17设计、入口交接及规定直接来源，核对READY及交接一致，执行READY -> IN_PROGRESS并保留入口交接。开始时分支 feat/date-range-download、HEAD 758f940503ded2d1185040bc8e324815c716a300；原索引及806份开始文件摘要／副本保存在`.superpowers/sdd/RANGE-T17-design/`；保留任务外工作，不提交／发布。
+
+- **Completion evidence:** 2026-09-09 完成两个保留实例页签、精确任务入口GET、独立筛选／20／50／100分页、原始1～10与当前3／7→7、同日两股、原UUID零body直接重试及六种本轮结果。双向本地互锁、在途路由身份、404／409／通信未知和显式GET恢复权限通过实际Axios／页面验证。215项指定、31文件356项全量零失败／跳过，build1708模块、合同8组＋4变异、检测与两种diff检查通过。Chromium1440／390每尺寸35次HTTP／6次零字节POST、16张截图，无横向溢出或非预期console／pageerror，served与磁盘构建摘要相等。最终评审发现多页加载使ElementPlus隐式请求第1页；旧构建真实浏览器复现[1,2,2,1]，局部两绑定修复后，真实Axios及两尺寸延迟GET序列1／2／2／3保留第2页刷新／第3页导航、执行后当前页自动刷新与失败重载，已按新源码重跑完整验收。所有规格／质量复审及最终集成／证据APPROVED，无遗留。正式[验证报告](../../verification/RANGE-T17-retry-page.md)及[追踪](../../traceability/tensor-range-requirements.md)记录六项AC前端增量；806开始文件中的任务外内容、804原索引、58生产资源、原分支HEAD保护通过，10个新增正式文件纳入Git，不提交／发布。T17设计摘要保持93dac155c8cc2ca31eb35aee999ee32ed16ae969d34757b9ac37e76178adace3。执行IN_PROGRESS -> COMPLETED；本记录先于后继设计／交接准备，T18尚未启动，T18～T20受控后端／真实中断／完整浏览器／真实来源边界不升级，ISSUE-008仍不依赖、未解决。
 
 ### RANGE-T18
 
@@ -266,7 +294,11 @@
 - **Dependencies:** RANGE-T12、RANGE-T13、RANGE-T14；消费首次／重试用例及真实 Web 入口，其内部直接输入的验证记录一并用于场景核对。
 - **Sources:** ① [PRD §9](../../design/Tensor_区间下载_PRD_v1.0.md)；② [TRD §9～§12](../../design/Tensor_区间下载_TRD_v1.0.md)；③ `data-plane/tensor-plugin-fixture/src/main/java/com/akkc/tensor/plugin/fixture/`；④ `data-plane/tensor-app/src/test/java/com/akkc/tensor/fixture/FixtureFlowIT.java`、`data-plane/tensor-core/src/test/java/com/akkc/tensor/core/persistence/PersistenceServiceIT.java`；⑤ T12～T14 的实现及验证结果。
 - **First action:** 将 TRD §12.3 逐项映射到 fixture 故障注入点、调用序列和独立 SQL 核对，完成集成验收设计。
-- **State evidence:** None。
+- **State evidence:** 2026-09-09 在T17已记录COMPLETED之后，按Order选择18并观察NOT_STARTED；消费T12／T13／T14直接输入，完成T18专属设计并全文自审、独立就绪评审PASS。两项Important已关闭：多日失败保存后同一execute继续下一多日段；真实定义宽表与runtime共用明确分页客户端接口。真实突发kill及STOCK脚本精确键已固定，设计最终SHA256为28fb6d543f4956048213e68c009287f62a018c25206e78c5af495b560d70afbd。先仅回填Design document，读取next-task模板后写完整交接并链接Handoff，最后执行NOT_STARTED -> READY。直接依赖决定／约束一致；READY仅表示设计和交接就绪，本轮未实施T18、未运行其功能验收。
+
+- **Start evidence:** 2026-09-09 用户明确要求“按照区间下载任务看板执行当前任务；先读取其设计文档和交接文件（如有），再按既定工作流完成任务”。完整读取T18专属设计及入口交接，核对READY及直接输入后执行READY -> IN_PROGRESS；保留交接为入口上下文。在原feat/date-range-download分支工作，HEAD、816份已跟踪文件、原索引／差异及58份生产资源摘要已记录于`.superpowers/sdd/RANGE-T18-design/`。Colima Docker 29.5.2只读探测成功；功能验收待执行，不提交／发布。
+
+- **Completion evidence:** 2026-09-09 完成runtime fixture五模式／完整分页、真实HTTP／MySQL／新JAR进程和socket验收，TRD §12.3的17行均有本轮来源／结果／独立业务及两失败表SQL。fixture82、Core153、显式MySQL12类216、verify891、acceptance clean verify894分别零失败／错误／跳过，两次构建各356前端及1708模块；构建后仅测试补强，HTTP27、Process7＋Load3共10、SQL46各独立通过，不拼成一次运行。三类固定18,600／10,000／5,000行各3插入＋3更新、50ms采样及schema通过；新JAR摘要626e0e840370b8b44d4f9a280444a1adb88aa9c658a16a78bf99a83d900ca0e0，207runtime文件冻结。脚本数值精度、Load失败证据/schema、HTTP三表schema及SQL cause canary等Important均修复复跑，最终独立规格／质量／集成／证据PASS，无遗留。正式[验证报告](../../verification/RANGE-T18-controlled-mysql.md)和[追踪](../../traceability/tensor-range-requirements.md)仅升级受控后端事实；四脚本／真实classpath及运行配方可供T19使用。58生产资源、fixture YAML/V6、816开始索引及任务外tracked内容、分支HEAD保护通过，13个新增正式文件加入Git，不提交／发布。执行IN_PROGRESS -> COMPLETED；此完成记录先于后继准备，T19仍NOT_STARTED、Design/Handoff均None。T19页面／T20真实来源尚未验收，ISSUE-008仍不依赖、未解决。
 
 ### RANGE-T19
 
@@ -276,7 +308,7 @@
 - **Dependencies:** RANGE-T15、RANGE-T16、RANGE-T17、RANGE-T18；消费完整页面及受控后端故障场景。
 - **Sources:** ① [PRD §2、§3、§5.6～§5.8、§9](../../design/Tensor_区间下载_PRD_v1.0.md)；② [TRD §8、§12](../../design/Tensor_区间下载_TRD_v1.0.md)；③ `control-plane/e2e/fixture-flow.spec.js`、`control-plane/e2e/download-outcomes.spec.js`；④ `control-plane/package.json`；⑤ T15～T18 的页面、场景与验证结果。
 - **First action:** 将 PRD 验收矩阵映射到页面操作、请求捕获及数据库证据，完成浏览器验收设计。
-- **State evidence:** None。
+- **State evidence:** 2026-09-09 在T18已记录COMPLETED之后，按预定义Order选择19并观察NOT_STARTED；核对T15／T16／T17／T18直接输入、决定及约束，完成T19详细设计，全文读取／自审及独立就绪评审PASS，无Important／Critical。设计明确四spec／两尺寸、真实JAR／MySQL测试桥及透明代理协议、固定SQL样例／故障、29AC分层证据及最终构建验收。评审反馈三项已关闭：真实GET安全原因映射与前端长文本分层、只验证现有查询表格／tooltip、移除旧spec固定viewport覆盖。设计最终SHA256为6ba18160fc9e8c014bc2f5579b6a759b51f664e0e767c70d186b19ea9c806e01；先仅回填Design document，再按next-task模板写完整交接并链接Handoff，确认仍NOT_STARTED后执行NOT_STARTED -> READY。READY仅表示设计和交接就绪，未实施T19、未运行其e2e。两个新设计／交接文件纳入Git，原索引保留，不提交／发布；后续从交接中的具体实施动作开始，不需补设计。
 
 ### RANGE-T20
 
@@ -306,4 +338,4 @@
 - **存储与中断：** 只保存实际明确失败，进程退出前未保存、未开始和提交未知均不保证可恢复；已有明细在原子成功提交前保留。相关实现和提示由 T10～T14、T16～T19 验证，不增补恢复账本。
 - **同步执行：** 来源错误继续后续范围可能超过客户端现有等待时间。服务端执行槽位直到真实结束才释放，页面断连不取消，不能重新引入整轮时长／累计行数等已删除的执行上限。
 - **真实验收与排除：** `top_inst`、`broker_recommend`、`share_float`、`hs_const`、`moneyflow_hsgt`、`hk_hold`、`index_member`、`namechange`、`hsgt_top10` 仅保留目标合同／策略登记及受控覆盖，真实调用继续不依赖且不执行；不关闭 ISSUE-008，不把 49－9 解释为当前区间支持数量。T20 的实际代表范围在专属设计中依据权限与证据确定，创建看板不表示这些验证已经安排或执行。
-- **设计成熟度：** RANGE-T01～T10已完成专属设计及任务验收；T10存储实现、规定MySQL与构建验证及独立评审通过。T11专属设计和独立就绪评审通过，设计／交接已链接且状态READY；组合事务尚未实施。生产日历和完整批次来源表仍为空，后续仍按Order准备专属设计，不以共享TRD替代逐项实施设计；完整区间执行及真实来源须按对应任务验证。
+- **设计成熟度：** RANGE-T01～T18已完成专属设计及任务验收；T18已交付五模式runtime fixture／完整分页、17场景来源与独立SQL、真实进程／socket、三类18轮负载及安全验证，最终独立评审PASS。随后按Order完成T19详细设计与交接并经独立就绪评审，当前READY、尚未实施。生产日历和完整来源表仍为空；完整浏览器／真实来源按T19／T20验收，受控后端通过不升级真实来源能力，后续逐项准备专属设计。

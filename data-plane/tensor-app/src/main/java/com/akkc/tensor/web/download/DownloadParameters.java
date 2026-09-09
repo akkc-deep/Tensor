@@ -19,5 +19,7 @@ public sealed interface DownloadParameters {
     record TradeDateParameters(String tradeDate) implements DownloadParameters {}
     record TsCodeParameters(String tsCode) implements DownloadParameters {}
     record TsCodeAnnDateParameters(String tsCode, String annDate) implements DownloadParameters {}
+    record ScenarioDateRangeParameters(String scenario, String startDate, String endDate) implements DownloadParameters {}
+    record ScenarioStockDateRangeParameters(String scenario, String tsCode, String startDate, String endDate) implements DownloadParameters {}
     record ScenarioParameters(String scenario) implements DownloadParameters {}
 }

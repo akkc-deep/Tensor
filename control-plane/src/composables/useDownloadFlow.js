@@ -1,7 +1,9 @@
-import { computed, ref, shallowRef } from 'vue'
+import { computed, readonly, ref, shallowRef } from 'vue'
 
 import { listApis, listDataSources } from '../api/dataSources.js'
 import { downloadDataset } from '../api/downloads.js'
+import { ApiError, ClientError } from '../api/errors.js'
+import { isRangeMode } from '../utils/downloadPolicy.js'
 
 export function useDownloadFlow() {
   const state = ref('INITIAL')
@@ -11,6 +13,7 @@ export function useDownloadFlow() {
   const selectedApiName = ref('')
   const result = shallowRef(null)
   const error = shallowRef(null)
+  const executionContext = shallowRef(null)
   let generation = 0
   let failedOperation = null
 
@@ -44,6 +47,7 @@ export function useDownloadFlow() {
     result.value = null
     error.value = null
     failedOperation = null
+    executionContext.value = null
   }
 
   async function load() {
@@ -111,6 +115,14 @@ export function useDownloadFlow() {
     return true
   }
 
+  function parametersChanged() {
+    if (locked.value) return false
+    generation += 1
+    clearDownloadState()
+    state.value = 'READY'
+    return true
+  }
+
   async function submit(params) {
     if (locked.value || !canSubmit.value) return false
 
@@ -121,6 +133,11 @@ export function useDownloadFlow() {
     }
     const currentGeneration = ++generation
     clearDownloadState()
+    executionContext.value = Object.freeze({
+      ...request,
+      params: Object.freeze({ ...request.params }),
+      rangeMode: isRangeMode(selectedApi.value.downloadPolicy?.mode),
+    })
     state.value = 'SUBMITTING'
 
     try {
@@ -131,14 +148,20 @@ export function useDownloadFlow() {
       return true
     } catch (failure) {
       if (currentGeneration !== generation) return false
-      error.value = failure
-      failedOperation = {
-        type: 'DOWNLOAD',
-        pluginId: request.pluginId,
-        apiName: request.apiName,
-        params: { ...request.params },
+      if (failure instanceof ApiError) {
+        const snapshot = failure.downloadResult
+        if (snapshot && (snapshot.pluginId !== request.pluginId || snapshot.apiName !== request.apiName)) {
+          error.value = new ClientError('INVALID_RESPONSE', failure.requestId)
+          state.value = 'UNCONFIRMED'
+        } else {
+          error.value = failure
+          result.value = snapshot ?? null
+          state.value = snapshot ? 'UNCONFIRMED' : 'FAILURE'
+        }
+      } else {
+        error.value = failure instanceof ClientError ? failure : new ClientError('UNEXPECTED')
+        state.value = 'UNCONFIRMED'
       }
-      state.value = 'FAILURE'
       return false
     }
   }
@@ -154,13 +177,6 @@ export function useDownloadFlow() {
     ) {
       return selectSource(operation.pluginId)
     }
-    if (
-      operation.type === 'DOWNLOAD' &&
-      selectedPluginId.value === operation.pluginId &&
-      selectedApiName.value === operation.apiName
-    ) {
-      return submit({ ...operation.params })
-    }
     return false
   }
 
@@ -172,6 +188,7 @@ export function useDownloadFlow() {
     selectedApiName,
     result,
     error,
+    executionContext: readonly(executionContext),
     selectedSource,
     selectedApi,
     locked,
@@ -180,6 +197,7 @@ export function useDownloadFlow() {
     load,
     selectSource,
     selectApi,
+    parametersChanged,
     submit,
     retry,
   }

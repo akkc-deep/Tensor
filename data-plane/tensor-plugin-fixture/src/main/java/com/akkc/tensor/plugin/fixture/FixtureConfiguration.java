@@ -30,26 +30,46 @@ import org.springframework.context.annotation.Profile;
         name = "enabled",
         havingValue = "true")
 public final class FixtureConfiguration {
-    private static final DatasetDefinition DEFINITION = definition();
+    private final DatasetDefinition definition;
+    private final com.akkc.tensor.plugin.api.download.DownloadPolicy.Mode mode;
+    private final com.akkc.tensor.plugin.api.download.RecoveryPolicy.Mode recovery;
+    private final java.net.URI sourceUrl;
+
+    public FixtureConfiguration() { this("ORIGINAL_PARAMS", "REQUEST", ""); }
+
+    @org.springframework.beans.factory.annotation.Autowired
+    public FixtureConfiguration(
+            @org.springframework.beans.factory.annotation.Value("${tensor.plugins.fixture.mode:ORIGINAL_PARAMS}") String mode,
+            @org.springframework.beans.factory.annotation.Value("${tensor.plugins.fixture.recovery:REQUEST}") String recovery,
+            @org.springframework.beans.factory.annotation.Value("${tensor.plugins.fixture.source-url:}") String sourceUrl) {
+        this.mode = com.akkc.tensor.plugin.api.download.DownloadPolicy.Mode.valueOf(mode);
+        this.recovery = com.akkc.tensor.plugin.api.download.RecoveryPolicy.Mode.valueOf(recovery);
+        if (this.recovery == com.akkc.tensor.plugin.api.download.RecoveryPolicy.Mode.STOCK_TIME
+                && this.mode != com.akkc.tensor.plugin.api.download.DownloadPolicy.Mode.TRADE_DATE_RANGE
+                && this.mode != com.akkc.tensor.plugin.api.download.DownloadPolicy.Mode.ANN_DATE_RANGE)
+            throw new IllegalArgumentException("Stock recovery requires fixture DATE mode");
+        this.sourceUrl = sourceUrl.isEmpty() ? null : java.net.URI.create(sourceUrl);
+        this.definition = definition(this.mode);
+    }
 
     @Bean
     public FixturePlugin fixturePlugin() {
-        return new FixturePlugin(DEFINITION, new FixtureEnvelopeFactory());
+        return new FixturePlugin(definition, new FixtureEnvelopeFactory(), mode, recovery, sourceUrl);
     }
 
     @Bean
     public DatasetAdapter fixtureDatasetAdapter() {
-        return new GenericDatasetAdapter(DEFINITION, new ValueConverter(), new FingerprintKeyCodec());
+        return new GenericDatasetAdapter(definition, new ValueConverter(), new FingerprintKeyCodec());
     }
 
-    private static DatasetDefinition definition() {
+    private static DatasetDefinition definition(com.akkc.tensor.plugin.api.download.DownloadPolicy.Mode mode) {
         DatasetKey key = DatasetKey.of(PluginId.of("fixture"), ApiName.of("fixture_daily"));
         return new DatasetDefinition(
                 key,
                 "Fixture 日线",
                 "验收",
                 QueryMode.trade_date,
-                List.of(new ParameterDescriptor(
+                parameters(mode, new ParameterDescriptor(
                         "scenario",
                         "场景",
                         "确定性验收场景",
@@ -68,6 +88,27 @@ public final class FixtureConfiguration {
                 new BusinessKeyDefinition(BusinessKeyMode.COMPOSITE, List.of("ts_code", "trade_date")),
                 List.of(new FilterDefinition("ts_code")),
                 "ts_code");
+    }
+
+    private static List<ParameterDescriptor> parameters(com.akkc.tensor.plugin.api.download.DownloadPolicy.Mode mode, ParameterDescriptor scenario) {
+        var params = new java.util.ArrayList<ParameterDescriptor>(); params.add(scenario);
+        switch (mode) {
+            case TRADE_DATE_RANGE, ANN_DATE_RANGE -> {
+                String name = mode == com.akkc.tensor.plugin.api.download.DownloadPolicy.Mode.TRADE_DATE_RANGE ? "trade_date" : "ann_date";
+                params.add(parameter(name, ParameterType.DATE, true, null));
+                params.add(parameter("ts_code", ParameterType.TS_CODE, false, null));
+            }
+            case MONTH_RANGE -> params.add(parameter("month", ParameterType.MONTH, true, null));
+            case NATIVE_RANGE -> {
+                params.add(parameter("start_date", ParameterType.DATE_RANGE_MEMBER, true, "end_date"));
+                params.add(parameter("end_date", ParameterType.DATE_RANGE_MEMBER, true, "start_date"));
+            }
+            case ORIGINAL_PARAMS -> { }
+        }
+        return List.copyOf(params);
+    }
+    private static ParameterDescriptor parameter(String name, ParameterType type, boolean required, String related) {
+        return new ParameterDescriptor(name, name, "受控 fixture 参数", type, required, null, List.of(), null, related);
     }
 
     private static ColumnDefinition column(

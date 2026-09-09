@@ -106,7 +106,7 @@ class RequestIdFilterTest {
     void errorDtosEnforceTheOpenApiShapeAndImmutableSafeValues() throws Exception {
         assertThat(Arrays.stream(ApiErrorResponse.class.getRecordComponents())
                 .map(component -> component.getName()).toList())
-                .containsExactly("requestId", "code", "message", "retryable", "fieldErrors");
+                .containsExactly("requestId", "code", "message", "retryable", "fieldErrors", "downloadResult");
         assertThat(Arrays.stream(FieldErrorResponse.class.getRecordComponents())
                 .map(component -> component.getName()).toList())
                 .containsExactly("field", "message");

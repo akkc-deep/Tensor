@@ -93,6 +93,24 @@ public final class OperationLogger {
         }
     }
 
+    public void recordDownloadExecution(com.akkc.tensor.core.download.DownloadExecutionResult result, Duration duration) {
+        try {
+            var key = DatasetKey.of(result.pluginId(), result.apiName());
+            var outcome = switch (result.outcome()) {
+                case SUCCESS -> TensorMetrics.Outcome.SUCCESS;
+                case EMPTY, NO_OPEN_DATES -> TensorMetrics.Outcome.EMPTY;
+                case PARTIAL, FAILED, UNCONFIRMED -> TensorMetrics.Outcome.FAILURE;
+            };
+            try {
+                metrics.recordDownload(key, outcome, duration, result.sourceRowCount(), result.insertedRows(), result.updatedRows());
+            } catch (RuntimeException ignored) { observationFailed("download"); }
+            LOGGER.info("tensor.operation.completed requestId={} taskId={} operation=download pluginId={} apiName={} outcome={} completedUnits={} failedUnits={} notStartedUnits={} skippedClosedDates={} sourceRowCount={} insertedRows={} updatedRows={} remainingFailedUnits={} failureRecordStatus={} durationMs={}",
+                    result.requestId().value(), result.taskId(), result.pluginId().value(), result.apiName().value(), result.outcome(),
+                    result.completedUnits(), result.failedUnits(), result.notStartedUnits(), result.skippedClosedDates(),
+                    result.sourceRowCount(), result.insertedRows(), result.updatedRows(), result.remainingFailedUnits(), result.failureRecordStatus(), duration.toMillis());
+        } catch (RuntimeException ignored) { observationFailed("download"); }
+    }
+
     private void recordDownloadMetrics(
             DatasetKey key,
             TensorMetrics.Outcome outcome,

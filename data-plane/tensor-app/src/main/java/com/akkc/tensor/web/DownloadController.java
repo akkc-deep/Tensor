@@ -2,7 +2,7 @@ package com.akkc.tensor.web;
 
 import com.akkc.tensor.core.download.DownloadService;
 import com.akkc.tensor.observability.OperationLogger;
-import com.akkc.tensor.plugin.api.download.DownloadResult;
+import com.akkc.tensor.core.download.DownloadExecutionException;
 import com.akkc.tensor.plugin.api.model.DatasetKey;
 import com.akkc.tensor.plugin.api.model.RequestId;
 import com.akkc.tensor.web.download.DownloadParameterResolver;
@@ -46,11 +46,14 @@ public final class DownloadController {
         Map<String, Object> parameters = parameterResolver.toRawValues(request.params(), request.suppliedFields());
         RequestId requestId = new RequestId(UUID.fromString(value));
         long started = System.nanoTime();
-        DownloadResult result = downloadService.execute(
-                key.pluginId(), key.apiName(), parameters, requestId);
-        Duration duration = Duration.ofNanos(System.nanoTime() - started);
-        DownloadResponse response = DownloadResponse.from(result);
-        operationLogger.recordDownloadSuccess(requestId, key, parameters, result, duration);
-        return response;
+        try {
+            var result = downloadService.executeInitial(key.pluginId(), key.apiName(), parameters, requestId);
+            DownloadResponse response = DownloadResponse.from(result);
+            operationLogger.recordDownloadExecution(result, Duration.ofNanos(System.nanoTime() - started));
+            return response;
+        } catch (DownloadExecutionException failure) {
+            operationLogger.recordDownloadExecution(failure.downloadResult(), Duration.ofNanos(System.nanoTime() - started));
+            throw failure;
+        }
     }
 }

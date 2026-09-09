@@ -14,6 +14,19 @@ import org.junit.jupiter.api.Test;
 
 class CommittedKeyIndexTest {
     @Test
+    void preflightDoesNotConsumeTicketOrPublishPendingKeys() {
+        var fixture = RecoveryUnitProcessorTest.fixture(false);
+        var ready = ready(fixture, List.of(RecoveryUnitProcessorTest.row("new", "000001.SZ", "20260903", "1")));
+        fixture.index().checkConfirmable(ready);
+        fixture.index().checkConfirmable(ready);
+        assertThat(fixture.index().size()).isZero();
+        assertThat(ready.confirmed()).isFalse();
+        fixture.index().confirmCommitted(ready);
+        assertThat(fixture.index().size()).isOne();
+        assertThatThrownBy(() -> fixture.index().checkConfirmable(ready)).isInstanceOf(IllegalStateException.class);
+    }
+
+    @Test
     void serialCommitDriverKeepsRollbacksUnconfirmedAndStopsAfterUnknownBeforeC() {
         RecoveryUnitProcessorTest.Fixture rollback = RecoveryUnitProcessorTest.fixture(false);
         RecoveryUnitProcessor.PreparedBatch rollbackBatch = rollback.session().accept(rollback.result(List.of(

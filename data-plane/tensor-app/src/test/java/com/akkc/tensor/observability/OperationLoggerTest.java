@@ -68,6 +68,53 @@ class OperationLoggerTest {
             List.of("ts_code"), List.of(), 1, 20, 0, 0);
 
     @Test
+    void executionObservationsKeepEveryOutcomeAndConfirmedSubtotalWithoutSensitiveDetails() {
+        for (var outcome : com.akkc.tensor.core.download.DownloadExecutionResult.Outcome.values()) {
+            var subjects = subjects();
+            var result = execution(outcome);
+            try (CapturedLog log = capturedLog()) {
+                subjects.logger().recordDownloadExecution(result, Duration.ofMillis(13));
+                assertThat(completionEvents(log)).singleElement().satisfies(event -> {
+                    assertThat(event.getFormattedMessage()).contains("outcome=" + outcome, "requestId=" + REQUEST_ID,
+                            "completedUnits=" + result.completedUnits(), "insertedRows=" + result.insertedRows(), "failureRecordStatus=" + result.failureRecordStatus());
+                    assertThat(event.getFormattedMessage()).doesNotContain(SECRET, "failure-message-secret", "outcome=success", "taskParams");
+                    assertThat(event.getThrowableProxy()).isNull();
+                });
+            }
+            String metric = switch (outcome) { case SUCCESS -> "success"; case EMPTY, NO_OPEN_DATES -> "empty"; default -> "failure"; };
+            assertThat(subjects.registry().get("tensor_download_total").tags("outcome", metric).counter().count()).isEqualTo(1);
+            assertThat(subjects.registry().getMeters()).allSatisfy(meter -> assertThat(meter.getId().getTags()).noneMatch(tag -> tag.getKey().equals("taskId") || tag.getKey().equals("requestId")));
+            if (metric.equals("failure")) assertThat(subjects.registry().find("tensor_download_rows_total").counters()).isEmpty();
+        }
+    }
+
+    @Test
+    void failedMetricsCannotPreventSafeExecutionLogOrChangeReturnedBusinessFacts() {
+        var plugins = new PluginRegistry(List.of());
+        var metrics = mock(TensorMetrics.class);
+        doThrow(new IllegalStateException(SECRET)).when(metrics).recordDownload(org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.anyLong(), org.mockito.ArgumentMatchers.anyLong(), org.mockito.ArgumentMatchers.anyLong());
+        var logger = new OperationLogger(plugins, metrics);
+        try (CapturedLog log = capturedLog()) {
+            assertThatNoException().isThrownBy(() -> logger.recordDownloadExecution(execution(com.akkc.tensor.core.download.DownloadExecutionResult.Outcome.PARTIAL), Duration.ZERO));
+            assertThat(completionEvents(log)).hasSize(1);
+            assertThat(log.appender.list).allSatisfy(event -> assertThat(event.getFormattedMessage()).doesNotContain(SECRET));
+        }
+    }
+
+    private static com.akkc.tensor.core.download.DownloadExecutionResult execution(com.akkc.tensor.core.download.DownloadExecutionResult.Outcome outcome) {
+        boolean failed = outcome == com.akkc.tensor.core.download.DownloadExecutionResult.Outcome.PARTIAL || outcome == com.akkc.tensor.core.download.DownloadExecutionResult.Outcome.FAILED;
+        long completed = outcome == com.akkc.tensor.core.download.DownloadExecutionResult.Outcome.FAILED || outcome == com.akkc.tensor.core.download.DownloadExecutionResult.Outcome.NO_OPEN_DATES ? 0 : 1;
+        long rows = completed == 0 || outcome == com.akkc.tensor.core.download.DownloadExecutionResult.Outcome.EMPTY ? 0 : 3;
+        var scope = new com.akkc.tensor.plugin.api.download.RecoverySelector(com.akkc.tensor.plugin.api.download.RecoverySelector.TargetType.REQUEST, "", com.akkc.tensor.plugin.api.download.RecoverySelector.TimeType.DATE, "2026-09-03");
+        return new com.akkc.tensor.core.download.DownloadExecutionResult(REQUEST, outcome, KNOWN.pluginId(), KNOWN.apiName(), rows, rows == 0 ? 0 : 2, rows == 0 ? 0 : 1,
+                SECRET, completed, failed ? 1 : 0, 0L, outcome == com.akkc.tensor.core.download.DownloadExecutionResult.Outcome.NO_OPEN_DATES ? 1 : 0,
+                failed ? UUID.randomUUID() : null, failed ? 1L : 0L,
+                outcome == com.akkc.tensor.core.download.DownloadExecutionResult.Outcome.UNCONFIRMED ? com.akkc.tensor.core.download.DownloadExecutionResult.FailureRecordStatus.UNCONFIRMED
+                        : failed ? com.akkc.tensor.core.download.DownloadExecutionResult.FailureRecordStatus.CONFIRMED : com.akkc.tensor.core.download.DownloadExecutionResult.FailureRecordStatus.NOT_REQUIRED,
+                failed ? List.of(new com.akkc.tensor.core.download.RecoveryUnitProcessor.Failure(scope, com.akkc.tensor.plugin.api.error.ErrorCode.SOURCE_TIMEOUT, "failure-message-secret")) : List.of(), List.of(), List.of());
+    }
+
+    @Test
     void recordsDownloadSuccessOnce() {
         Subjects subjects = subjects();
         try (CapturedLog log = capturedLog()) {
@@ -339,14 +386,14 @@ class OperationLoggerTest {
     }
 
     private static List<ILoggingEvent> completionEvents(CapturedLog log) {
-        return log.appender().list.stream()
+        return log.appender.list.stream()
                 .filter(event -> event.getLevel() == Level.INFO)
                 .filter(event -> event.getFormattedMessage().startsWith("tensor.operation.completed"))
                 .toList();
     }
 
     private static List<ILoggingEvent> observationFailures(CapturedLog log) {
-        return log.appender().list.stream()
+        return log.appender.list.stream()
                 .filter(event -> event.getLevel() == Level.WARN)
                 .filter(event -> event.getFormattedMessage().startsWith("tensor.observation.failed"))
                 .toList();

@@ -1,0 +1,1444 @@
+{
+  "source": "docs/contracts/openapi-v1.yaml#x-tensor-range-targets + datasets/tushare_pro/*.yaml + download/tushare-pro-policies.yaml",
+  "apis": [
+    {
+      "apiName": "adj_factor",
+      "displayName": "复权因子",
+      "category": "行情与估值",
+      "queryMode": "trade_date",
+      "parameters": [
+        {
+          "name": "start_date",
+          "label": "开始日期",
+          "type": "DATE_RANGE_MEMBER",
+          "required": true,
+          "relatedParameter": "end_date"
+        },
+        {
+          "name": "end_date",
+          "label": "结束日期",
+          "type": "DATE_RANGE_MEMBER",
+          "required": true,
+          "relatedParameter": "start_date"
+        }
+      ],
+      "downloadPolicy": {
+        "mode": "TRADE_DATE_RANGE",
+        "dateSemantic": "TRADE_DATE",
+        "description": "按区间内已确认的适用交易日期下载；来源请求与完整性仍需核实。",
+        "calendarProfile": "C-A",
+        "limits": {
+          "maxRangeDays": 31
+        }
+      }
+    },
+    {
+      "apiName": "block_trade",
+      "displayName": "大宗交易",
+      "category": "交易与资金",
+      "queryMode": "trade_date",
+      "parameters": [
+        {
+          "name": "start_date",
+          "label": "开始日期",
+          "type": "DATE_RANGE_MEMBER",
+          "required": true,
+          "relatedParameter": "end_date"
+        },
+        {
+          "name": "end_date",
+          "label": "结束日期",
+          "type": "DATE_RANGE_MEMBER",
+          "required": true,
+          "relatedParameter": "start_date"
+        }
+      ],
+      "downloadPolicy": {
+        "mode": "TRADE_DATE_RANGE",
+        "dateSemantic": "TRADE_DATE",
+        "description": "按区间内已确认的适用交易日期下载；来源请求与完整性仍需核实。",
+        "calendarProfile": "C-A",
+        "limits": {
+          "maxRangeDays": 31
+        }
+      }
+    },
+    {
+      "apiName": "daily",
+      "displayName": "日线行情",
+      "category": "行情与估值",
+      "queryMode": "trade_date",
+      "parameters": [
+        {
+          "name": "start_date",
+          "label": "开始日期",
+          "type": "DATE_RANGE_MEMBER",
+          "required": true,
+          "relatedParameter": "end_date"
+        },
+        {
+          "name": "end_date",
+          "label": "结束日期",
+          "type": "DATE_RANGE_MEMBER",
+          "required": true,
+          "relatedParameter": "start_date"
+        }
+      ],
+      "downloadPolicy": {
+        "mode": "TRADE_DATE_RANGE",
+        "dateSemantic": "TRADE_DATE",
+        "description": "按区间内已确认的适用交易日期下载；来源请求与完整性仍需核实。",
+        "calendarProfile": "C-A",
+        "limits": {
+          "maxRangeDays": 31
+        }
+      }
+    },
+    {
+      "apiName": "daily_basic",
+      "displayName": "每日估值与市场指标",
+      "category": "行情与估值",
+      "queryMode": "trade_date",
+      "parameters": [
+        {
+          "name": "start_date",
+          "label": "开始日期",
+          "type": "DATE_RANGE_MEMBER",
+          "required": true,
+          "relatedParameter": "end_date"
+        },
+        {
+          "name": "end_date",
+          "label": "结束日期",
+          "type": "DATE_RANGE_MEMBER",
+          "required": true,
+          "relatedParameter": "start_date"
+        }
+      ],
+      "downloadPolicy": {
+        "mode": "TRADE_DATE_RANGE",
+        "dateSemantic": "TRADE_DATE",
+        "description": "按区间内已确认的适用交易日期下载；来源请求与完整性仍需核实。",
+        "calendarProfile": "C-A",
+        "limits": {
+          "maxRangeDays": 31
+        }
+      }
+    },
+    {
+      "apiName": "hk_hold",
+      "displayName": "沪深港股通持股明细",
+      "category": "互联互通与转融通",
+      "queryMode": "trade_date",
+      "parameters": [
+        {
+          "name": "start_date",
+          "label": "开始日期",
+          "type": "DATE_RANGE_MEMBER",
+          "required": true,
+          "relatedParameter": "end_date"
+        },
+        {
+          "name": "end_date",
+          "label": "结束日期",
+          "type": "DATE_RANGE_MEMBER",
+          "required": true,
+          "relatedParameter": "start_date"
+        }
+      ],
+      "downloadPolicy": {
+        "mode": "TRADE_DATE_RANGE",
+        "dateSemantic": "TRADE_DATE",
+        "description": "按区间内已确认的适用交易日期下载；来源请求与完整性仍需核实。",
+        "calendarProfile": "C-N",
+        "limits": {
+          "maxRangeDays": 31
+        }
+      }
+    },
+    {
+      "apiName": "hsgt_top10",
+      "displayName": "沪深港通十大成交股",
+      "category": "互联互通与转融通",
+      "queryMode": "trade_date",
+      "parameters": [
+        {
+          "name": "start_date",
+          "label": "开始日期",
+          "type": "DATE_RANGE_MEMBER",
+          "required": true,
+          "relatedParameter": "end_date"
+        },
+        {
+          "name": "end_date",
+          "label": "结束日期",
+          "type": "DATE_RANGE_MEMBER",
+          "required": true,
+          "relatedParameter": "start_date"
+        }
+      ],
+      "downloadPolicy": {
+        "mode": "TRADE_DATE_RANGE",
+        "dateSemantic": "TRADE_DATE",
+        "description": "按区间内已确认的适用交易日期下载；来源请求与完整性仍需核实。",
+        "calendarProfile": "C-N",
+        "limits": {
+          "maxRangeDays": 31
+        }
+      }
+    },
+    {
+      "apiName": "margin",
+      "displayName": "融资融券汇总",
+      "category": "交易与资金",
+      "queryMode": "trade_date",
+      "parameters": [
+        {
+          "name": "exchange_id",
+          "label": "交易所",
+          "type": "ENUM",
+          "required": true,
+          "allowedValues": [
+            "SSE",
+            "SZSE",
+            "BSE"
+          ]
+        },
+        {
+          "name": "start_date",
+          "label": "开始日期",
+          "type": "DATE_RANGE_MEMBER",
+          "required": true,
+          "relatedParameter": "end_date"
+        },
+        {
+          "name": "end_date",
+          "label": "结束日期",
+          "type": "DATE_RANGE_MEMBER",
+          "required": true,
+          "relatedParameter": "start_date"
+        }
+      ],
+      "downloadPolicy": {
+        "mode": "TRADE_DATE_RANGE",
+        "dateSemantic": "TRADE_DATE",
+        "description": "按区间内已确认的适用交易日期下载；来源请求与完整性仍需核实。",
+        "calendarProfile": "C-M",
+        "limits": {
+          "maxRangeDays": 31
+        }
+      }
+    },
+    {
+      "apiName": "margin_detail",
+      "displayName": "融资融券交易明细",
+      "category": "交易与资金",
+      "queryMode": "trade_date",
+      "parameters": [
+        {
+          "name": "start_date",
+          "label": "开始日期",
+          "type": "DATE_RANGE_MEMBER",
+          "required": true,
+          "relatedParameter": "end_date"
+        },
+        {
+          "name": "end_date",
+          "label": "结束日期",
+          "type": "DATE_RANGE_MEMBER",
+          "required": true,
+          "relatedParameter": "start_date"
+        }
+      ],
+      "downloadPolicy": {
+        "mode": "TRADE_DATE_RANGE",
+        "dateSemantic": "TRADE_DATE",
+        "description": "按区间内已确认的适用交易日期下载；来源请求与完整性仍需核实。",
+        "calendarProfile": "C-A",
+        "limits": {
+          "maxRangeDays": 31
+        }
+      }
+    },
+    {
+      "apiName": "moneyflow",
+      "displayName": "个股资金流向",
+      "category": "交易与资金",
+      "queryMode": "trade_date",
+      "parameters": [
+        {
+          "name": "start_date",
+          "label": "开始日期",
+          "type": "DATE_RANGE_MEMBER",
+          "required": true,
+          "relatedParameter": "end_date"
+        },
+        {
+          "name": "end_date",
+          "label": "结束日期",
+          "type": "DATE_RANGE_MEMBER",
+          "required": true,
+          "relatedParameter": "start_date"
+        }
+      ],
+      "downloadPolicy": {
+        "mode": "TRADE_DATE_RANGE",
+        "dateSemantic": "TRADE_DATE",
+        "description": "按区间内已确认的适用交易日期下载；来源请求与完整性仍需核实。",
+        "calendarProfile": "C-A",
+        "limits": {
+          "maxRangeDays": 31
+        }
+      }
+    },
+    {
+      "apiName": "moneyflow_hsgt",
+      "displayName": "沪深港通资金流向",
+      "category": "互联互通与转融通",
+      "queryMode": "trade_date",
+      "parameters": [
+        {
+          "name": "start_date",
+          "label": "开始日期",
+          "type": "DATE_RANGE_MEMBER",
+          "required": true,
+          "relatedParameter": "end_date"
+        },
+        {
+          "name": "end_date",
+          "label": "结束日期",
+          "type": "DATE_RANGE_MEMBER",
+          "required": true,
+          "relatedParameter": "start_date"
+        }
+      ],
+      "downloadPolicy": {
+        "mode": "TRADE_DATE_RANGE",
+        "dateSemantic": "TRADE_DATE",
+        "description": "按区间内已确认的适用交易日期下载；来源请求与完整性仍需核实。",
+        "calendarProfile": "C-X",
+        "limits": {
+          "maxRangeDays": 31
+        }
+      }
+    },
+    {
+      "apiName": "monthly",
+      "displayName": "月线行情",
+      "category": "行情与估值",
+      "queryMode": "trade_date",
+      "parameters": [
+        {
+          "name": "start_date",
+          "label": "开始日期",
+          "type": "DATE_RANGE_MEMBER",
+          "required": true,
+          "relatedParameter": "end_date"
+        },
+        {
+          "name": "end_date",
+          "label": "结束日期",
+          "type": "DATE_RANGE_MEMBER",
+          "required": true,
+          "relatedParameter": "start_date"
+        }
+      ],
+      "downloadPolicy": {
+        "mode": "TRADE_DATE_RANGE",
+        "dateSemantic": "TRADE_DATE",
+        "description": "按区间内已确认的适用交易日期下载；来源请求与完整性仍需核实。保留月线记录，不扩大输入区间。",
+        "calendarProfile": "C-A",
+        "limits": {
+          "maxRangeDays": 31
+        }
+      }
+    },
+    {
+      "apiName": "slb_len",
+      "displayName": "转融通期限与规模",
+      "category": "互联互通与转融通",
+      "queryMode": "trade_date",
+      "parameters": [
+        {
+          "name": "start_date",
+          "label": "开始日期",
+          "type": "DATE_RANGE_MEMBER",
+          "required": true,
+          "relatedParameter": "end_date"
+        },
+        {
+          "name": "end_date",
+          "label": "结束日期",
+          "type": "DATE_RANGE_MEMBER",
+          "required": true,
+          "relatedParameter": "start_date"
+        }
+      ],
+      "downloadPolicy": {
+        "mode": "TRADE_DATE_RANGE",
+        "dateSemantic": "TRADE_DATE",
+        "description": "按区间内已确认的适用交易日期下载；来源请求与完整性仍需核实。",
+        "calendarProfile": "C-S",
+        "limits": {
+          "maxRangeDays": 31
+        }
+      }
+    },
+    {
+      "apiName": "slb_sec",
+      "displayName": "转融通证券汇总",
+      "category": "互联互通与转融通",
+      "queryMode": "trade_date",
+      "parameters": [
+        {
+          "name": "start_date",
+          "label": "开始日期",
+          "type": "DATE_RANGE_MEMBER",
+          "required": true,
+          "relatedParameter": "end_date"
+        },
+        {
+          "name": "end_date",
+          "label": "结束日期",
+          "type": "DATE_RANGE_MEMBER",
+          "required": true,
+          "relatedParameter": "start_date"
+        }
+      ],
+      "downloadPolicy": {
+        "mode": "TRADE_DATE_RANGE",
+        "dateSemantic": "TRADE_DATE",
+        "description": "按区间内已确认的适用交易日期下载；来源请求与完整性仍需核实。",
+        "calendarProfile": "C-S",
+        "limits": {
+          "maxRangeDays": 31
+        }
+      }
+    },
+    {
+      "apiName": "slb_sec_detail",
+      "displayName": "转融通证券明细",
+      "category": "互联互通与转融通",
+      "queryMode": "trade_date",
+      "parameters": [
+        {
+          "name": "start_date",
+          "label": "开始日期",
+          "type": "DATE_RANGE_MEMBER",
+          "required": true,
+          "relatedParameter": "end_date"
+        },
+        {
+          "name": "end_date",
+          "label": "结束日期",
+          "type": "DATE_RANGE_MEMBER",
+          "required": true,
+          "relatedParameter": "start_date"
+        }
+      ],
+      "downloadPolicy": {
+        "mode": "TRADE_DATE_RANGE",
+        "dateSemantic": "TRADE_DATE",
+        "description": "按区间内已确认的适用交易日期下载；来源请求与完整性仍需核实。",
+        "calendarProfile": "C-S",
+        "limits": {
+          "maxRangeDays": 31
+        }
+      }
+    },
+    {
+      "apiName": "stk_limit",
+      "displayName": "每日涨跌停价格",
+      "category": "行情与估值",
+      "queryMode": "trade_date",
+      "parameters": [
+        {
+          "name": "start_date",
+          "label": "开始日期",
+          "type": "DATE_RANGE_MEMBER",
+          "required": true,
+          "relatedParameter": "end_date"
+        },
+        {
+          "name": "end_date",
+          "label": "结束日期",
+          "type": "DATE_RANGE_MEMBER",
+          "required": true,
+          "relatedParameter": "start_date"
+        }
+      ],
+      "downloadPolicy": {
+        "mode": "TRADE_DATE_RANGE",
+        "dateSemantic": "TRADE_DATE",
+        "description": "按区间内已确认的适用交易日期下载；来源请求与完整性仍需核实。",
+        "calendarProfile": "C-A",
+        "limits": {
+          "maxRangeDays": 31
+        }
+      }
+    },
+    {
+      "apiName": "suspend_d",
+      "displayName": "每日停复牌信息",
+      "category": "行情与估值",
+      "queryMode": "trade_date",
+      "parameters": [
+        {
+          "name": "start_date",
+          "label": "开始日期",
+          "type": "DATE_RANGE_MEMBER",
+          "required": true,
+          "relatedParameter": "end_date"
+        },
+        {
+          "name": "end_date",
+          "label": "结束日期",
+          "type": "DATE_RANGE_MEMBER",
+          "required": true,
+          "relatedParameter": "start_date"
+        }
+      ],
+      "downloadPolicy": {
+        "mode": "TRADE_DATE_RANGE",
+        "dateSemantic": "TRADE_DATE",
+        "description": "按区间内已确认的适用交易日期下载；来源请求与完整性仍需核实。",
+        "calendarProfile": "C-A",
+        "limits": {
+          "maxRangeDays": 31
+        }
+      }
+    },
+    {
+      "apiName": "top_inst",
+      "displayName": "龙虎榜机构明细",
+      "category": "交易与资金",
+      "queryMode": "trade_date",
+      "parameters": [
+        {
+          "name": "start_date",
+          "label": "开始日期",
+          "type": "DATE_RANGE_MEMBER",
+          "required": true,
+          "relatedParameter": "end_date"
+        },
+        {
+          "name": "end_date",
+          "label": "结束日期",
+          "type": "DATE_RANGE_MEMBER",
+          "required": true,
+          "relatedParameter": "start_date"
+        }
+      ],
+      "downloadPolicy": {
+        "mode": "TRADE_DATE_RANGE",
+        "dateSemantic": "TRADE_DATE",
+        "description": "按区间内已确认的适用交易日期下载；来源请求与完整性仍需核实。",
+        "calendarProfile": "C-A",
+        "limits": {
+          "maxRangeDays": 31
+        }
+      }
+    },
+    {
+      "apiName": "top_list",
+      "displayName": "龙虎榜每日明细",
+      "category": "交易与资金",
+      "queryMode": "trade_date",
+      "parameters": [
+        {
+          "name": "start_date",
+          "label": "开始日期",
+          "type": "DATE_RANGE_MEMBER",
+          "required": true,
+          "relatedParameter": "end_date"
+        },
+        {
+          "name": "end_date",
+          "label": "结束日期",
+          "type": "DATE_RANGE_MEMBER",
+          "required": true,
+          "relatedParameter": "start_date"
+        }
+      ],
+      "downloadPolicy": {
+        "mode": "TRADE_DATE_RANGE",
+        "dateSemantic": "TRADE_DATE",
+        "description": "按区间内已确认的适用交易日期下载；来源请求与完整性仍需核实。",
+        "calendarProfile": "C-A",
+        "limits": {
+          "maxRangeDays": 31
+        }
+      }
+    },
+    {
+      "apiName": "weekly",
+      "displayName": "周线行情",
+      "category": "行情与估值",
+      "queryMode": "trade_date",
+      "parameters": [
+        {
+          "name": "start_date",
+          "label": "开始日期",
+          "type": "DATE_RANGE_MEMBER",
+          "required": true,
+          "relatedParameter": "end_date"
+        },
+        {
+          "name": "end_date",
+          "label": "结束日期",
+          "type": "DATE_RANGE_MEMBER",
+          "required": true,
+          "relatedParameter": "start_date"
+        }
+      ],
+      "downloadPolicy": {
+        "mode": "TRADE_DATE_RANGE",
+        "dateSemantic": "TRADE_DATE",
+        "description": "按区间内已确认的适用交易日期下载；来源请求与完整性仍需核实。保留周线记录，不扩大输入区间。",
+        "calendarProfile": "C-A",
+        "limits": {
+          "maxRangeDays": 31
+        }
+      }
+    },
+    {
+      "apiName": "balancesheet",
+      "displayName": "资产负债表",
+      "category": "财务与披露",
+      "queryMode": "ann_date",
+      "parameters": [
+        {
+          "name": "ts_code",
+          "label": "股票代码",
+          "type": "TS_CODE",
+          "required": true
+        },
+        {
+          "name": "start_date",
+          "label": "开始日期",
+          "type": "DATE_RANGE_MEMBER",
+          "required": true,
+          "relatedParameter": "end_date"
+        },
+        {
+          "name": "end_date",
+          "label": "结束日期",
+          "type": "DATE_RANGE_MEMBER",
+          "required": true,
+          "relatedParameter": "start_date"
+        }
+      ],
+      "downloadPolicy": {
+        "mode": "ANN_DATE_RANGE",
+        "dateSemantic": "ANN_DATE",
+        "description": "按公告日期范围下载，公告日期不等于报告期；来源请求与完整性仍需核实。",
+        "calendarProfile": null,
+        "limits": {
+          "maxRangeDays": 31
+        }
+      }
+    },
+    {
+      "apiName": "cashflow",
+      "displayName": "现金流量表",
+      "category": "财务与披露",
+      "queryMode": "ann_date",
+      "parameters": [
+        {
+          "name": "ts_code",
+          "label": "股票代码",
+          "type": "TS_CODE",
+          "required": true
+        },
+        {
+          "name": "start_date",
+          "label": "开始日期",
+          "type": "DATE_RANGE_MEMBER",
+          "required": true,
+          "relatedParameter": "end_date"
+        },
+        {
+          "name": "end_date",
+          "label": "结束日期",
+          "type": "DATE_RANGE_MEMBER",
+          "required": true,
+          "relatedParameter": "start_date"
+        }
+      ],
+      "downloadPolicy": {
+        "mode": "ANN_DATE_RANGE",
+        "dateSemantic": "ANN_DATE",
+        "description": "按公告日期范围下载，公告日期不等于报告期；来源请求与完整性仍需核实。",
+        "calendarProfile": null,
+        "limits": {
+          "maxRangeDays": 31
+        }
+      }
+    },
+    {
+      "apiName": "disclosure_date",
+      "displayName": "财报披露计划",
+      "category": "财务与披露",
+      "queryMode": "ann_date",
+      "parameters": [
+        {
+          "name": "start_date",
+          "label": "开始日期",
+          "type": "DATE_RANGE_MEMBER",
+          "required": true,
+          "relatedParameter": "end_date"
+        },
+        {
+          "name": "end_date",
+          "label": "结束日期",
+          "type": "DATE_RANGE_MEMBER",
+          "required": true,
+          "relatedParameter": "start_date"
+        }
+      ],
+      "downloadPolicy": {
+        "mode": "ANN_DATE_RANGE",
+        "dateSemantic": "ANN_DATE",
+        "description": "按公告日期范围下载，公告日期不等于报告期；来源请求与完整性仍需核实。",
+        "calendarProfile": null,
+        "limits": {
+          "maxRangeDays": 31
+        }
+      }
+    },
+    {
+      "apiName": "dividend",
+      "displayName": "分红送股",
+      "category": "公司行动",
+      "queryMode": "ann_date",
+      "parameters": [
+        {
+          "name": "start_date",
+          "label": "开始日期",
+          "type": "DATE_RANGE_MEMBER",
+          "required": true,
+          "relatedParameter": "end_date"
+        },
+        {
+          "name": "end_date",
+          "label": "结束日期",
+          "type": "DATE_RANGE_MEMBER",
+          "required": true,
+          "relatedParameter": "start_date"
+        }
+      ],
+      "downloadPolicy": {
+        "mode": "ANN_DATE_RANGE",
+        "dateSemantic": "ANN_DATE",
+        "description": "按公告日期范围下载，公告日期不等于报告期；来源请求与完整性仍需核实。",
+        "calendarProfile": null,
+        "limits": {
+          "maxRangeDays": 31
+        }
+      }
+    },
+    {
+      "apiName": "express",
+      "displayName": "业绩快报",
+      "category": "财务与披露",
+      "queryMode": "ann_date",
+      "parameters": [
+        {
+          "name": "start_date",
+          "label": "开始日期",
+          "type": "DATE_RANGE_MEMBER",
+          "required": true,
+          "relatedParameter": "end_date"
+        },
+        {
+          "name": "end_date",
+          "label": "结束日期",
+          "type": "DATE_RANGE_MEMBER",
+          "required": true,
+          "relatedParameter": "start_date"
+        }
+      ],
+      "downloadPolicy": {
+        "mode": "ANN_DATE_RANGE",
+        "dateSemantic": "ANN_DATE",
+        "description": "按公告日期范围下载，公告日期不等于报告期；来源请求与完整性仍需核实。",
+        "calendarProfile": null,
+        "limits": {
+          "maxRangeDays": 31
+        }
+      }
+    },
+    {
+      "apiName": "fina_audit",
+      "displayName": "财务审计意见",
+      "category": "财务与披露",
+      "queryMode": "ann_date",
+      "parameters": [
+        {
+          "name": "ts_code",
+          "label": "股票代码",
+          "type": "TS_CODE",
+          "required": true
+        },
+        {
+          "name": "start_date",
+          "label": "开始日期",
+          "type": "DATE_RANGE_MEMBER",
+          "required": true,
+          "relatedParameter": "end_date"
+        },
+        {
+          "name": "end_date",
+          "label": "结束日期",
+          "type": "DATE_RANGE_MEMBER",
+          "required": true,
+          "relatedParameter": "start_date"
+        }
+      ],
+      "downloadPolicy": {
+        "mode": "ANN_DATE_RANGE",
+        "dateSemantic": "ANN_DATE",
+        "description": "按公告日期范围下载，公告日期不等于报告期；来源请求与完整性仍需核实。",
+        "calendarProfile": null,
+        "limits": {
+          "maxRangeDays": 31
+        }
+      }
+    },
+    {
+      "apiName": "fina_indicator",
+      "displayName": "财务指标",
+      "category": "财务与披露",
+      "queryMode": "ann_date",
+      "parameters": [
+        {
+          "name": "ts_code",
+          "label": "股票代码",
+          "type": "TS_CODE",
+          "required": true
+        },
+        {
+          "name": "start_date",
+          "label": "开始日期",
+          "type": "DATE_RANGE_MEMBER",
+          "required": true,
+          "relatedParameter": "end_date"
+        },
+        {
+          "name": "end_date",
+          "label": "结束日期",
+          "type": "DATE_RANGE_MEMBER",
+          "required": true,
+          "relatedParameter": "start_date"
+        }
+      ],
+      "downloadPolicy": {
+        "mode": "ANN_DATE_RANGE",
+        "dateSemantic": "ANN_DATE",
+        "description": "按公告日期范围下载，公告日期不等于报告期；来源请求与完整性仍需核实。",
+        "calendarProfile": null,
+        "limits": {
+          "maxRangeDays": 31
+        }
+      }
+    },
+    {
+      "apiName": "fina_mainbz",
+      "displayName": "主营业务构成",
+      "category": "财务与披露",
+      "queryMode": "ann_date",
+      "parameters": [
+        {
+          "name": "ts_code",
+          "label": "股票代码",
+          "type": "TS_CODE",
+          "required": true
+        },
+        {
+          "name": "start_date",
+          "label": "开始日期",
+          "type": "DATE_RANGE_MEMBER",
+          "required": true,
+          "relatedParameter": "end_date"
+        },
+        {
+          "name": "end_date",
+          "label": "结束日期",
+          "type": "DATE_RANGE_MEMBER",
+          "required": true,
+          "relatedParameter": "start_date"
+        }
+      ],
+      "downloadPolicy": {
+        "mode": "ANN_DATE_RANGE",
+        "dateSemantic": "ANN_DATE",
+        "description": "按公告日期范围下载，公告日期不等于报告期；来源请求与完整性仍需核实。",
+        "calendarProfile": null,
+        "limits": {
+          "maxRangeDays": 31
+        }
+      }
+    },
+    {
+      "apiName": "forecast",
+      "displayName": "业绩预告",
+      "category": "财务与披露",
+      "queryMode": "ann_date",
+      "parameters": [
+        {
+          "name": "start_date",
+          "label": "开始日期",
+          "type": "DATE_RANGE_MEMBER",
+          "required": true,
+          "relatedParameter": "end_date"
+        },
+        {
+          "name": "end_date",
+          "label": "结束日期",
+          "type": "DATE_RANGE_MEMBER",
+          "required": true,
+          "relatedParameter": "start_date"
+        }
+      ],
+      "downloadPolicy": {
+        "mode": "ANN_DATE_RANGE",
+        "dateSemantic": "ANN_DATE",
+        "description": "按公告日期范围下载，公告日期不等于报告期；来源请求与完整性仍需核实。",
+        "calendarProfile": null,
+        "limits": {
+          "maxRangeDays": 31
+        }
+      }
+    },
+    {
+      "apiName": "income",
+      "displayName": "利润表",
+      "category": "财务与披露",
+      "queryMode": "ann_date",
+      "parameters": [
+        {
+          "name": "ts_code",
+          "label": "股票代码",
+          "type": "TS_CODE",
+          "required": true
+        },
+        {
+          "name": "start_date",
+          "label": "开始日期",
+          "type": "DATE_RANGE_MEMBER",
+          "required": true,
+          "relatedParameter": "end_date"
+        },
+        {
+          "name": "end_date",
+          "label": "结束日期",
+          "type": "DATE_RANGE_MEMBER",
+          "required": true,
+          "relatedParameter": "start_date"
+        }
+      ],
+      "downloadPolicy": {
+        "mode": "ANN_DATE_RANGE",
+        "dateSemantic": "ANN_DATE",
+        "description": "按公告日期范围下载，公告日期不等于报告期；来源请求与完整性仍需核实。",
+        "calendarProfile": null,
+        "limits": {
+          "maxRangeDays": 31
+        }
+      }
+    },
+    {
+      "apiName": "repurchase",
+      "displayName": "股票回购",
+      "category": "公司行动",
+      "queryMode": "ann_date",
+      "parameters": [
+        {
+          "name": "start_date",
+          "label": "开始日期",
+          "type": "DATE_RANGE_MEMBER",
+          "required": true,
+          "relatedParameter": "end_date"
+        },
+        {
+          "name": "end_date",
+          "label": "结束日期",
+          "type": "DATE_RANGE_MEMBER",
+          "required": true,
+          "relatedParameter": "start_date"
+        }
+      ],
+      "downloadPolicy": {
+        "mode": "ANN_DATE_RANGE",
+        "dateSemantic": "ANN_DATE",
+        "description": "按公告日期范围下载，公告日期不等于报告期；来源请求与完整性仍需核实。",
+        "calendarProfile": null,
+        "limits": {
+          "maxRangeDays": 31
+        }
+      }
+    },
+    {
+      "apiName": "share_float",
+      "displayName": "限售股解禁",
+      "category": "公司行动",
+      "queryMode": "ann_date",
+      "parameters": [
+        {
+          "name": "start_date",
+          "label": "开始日期",
+          "type": "DATE_RANGE_MEMBER",
+          "required": true,
+          "relatedParameter": "end_date"
+        },
+        {
+          "name": "end_date",
+          "label": "结束日期",
+          "type": "DATE_RANGE_MEMBER",
+          "required": true,
+          "relatedParameter": "start_date"
+        }
+      ],
+      "downloadPolicy": {
+        "mode": "ANN_DATE_RANGE",
+        "dateSemantic": "ANN_DATE",
+        "description": "按公告日期范围下载，公告日期不等于报告期；来源请求与完整性仍需核实。",
+        "calendarProfile": null,
+        "limits": {
+          "maxRangeDays": 31
+        }
+      }
+    },
+    {
+      "apiName": "stk_holdertrade",
+      "displayName": "股东增减持",
+      "category": "股东与治理",
+      "queryMode": "ann_date",
+      "parameters": [
+        {
+          "name": "start_date",
+          "label": "开始日期",
+          "type": "DATE_RANGE_MEMBER",
+          "required": true,
+          "relatedParameter": "end_date"
+        },
+        {
+          "name": "end_date",
+          "label": "结束日期",
+          "type": "DATE_RANGE_MEMBER",
+          "required": true,
+          "relatedParameter": "start_date"
+        }
+      ],
+      "downloadPolicy": {
+        "mode": "ANN_DATE_RANGE",
+        "dateSemantic": "ANN_DATE",
+        "description": "按公告日期范围下载，公告日期不等于报告期；来源请求与完整性仍需核实。",
+        "calendarProfile": null,
+        "limits": {
+          "maxRangeDays": 31
+        }
+      }
+    },
+    {
+      "apiName": "top10_floatholders",
+      "displayName": "前十大流通股东",
+      "category": "股东与治理",
+      "queryMode": "ann_date",
+      "parameters": [
+        {
+          "name": "start_date",
+          "label": "开始日期",
+          "type": "DATE_RANGE_MEMBER",
+          "required": true,
+          "relatedParameter": "end_date"
+        },
+        {
+          "name": "end_date",
+          "label": "结束日期",
+          "type": "DATE_RANGE_MEMBER",
+          "required": true,
+          "relatedParameter": "start_date"
+        }
+      ],
+      "downloadPolicy": {
+        "mode": "ANN_DATE_RANGE",
+        "dateSemantic": "ANN_DATE",
+        "description": "按公告日期范围下载，公告日期不等于报告期；来源请求与完整性仍需核实。",
+        "calendarProfile": null,
+        "limits": {
+          "maxRangeDays": 31
+        }
+      }
+    },
+    {
+      "apiName": "top10_holders",
+      "displayName": "前十大股东",
+      "category": "股东与治理",
+      "queryMode": "ann_date",
+      "parameters": [
+        {
+          "name": "start_date",
+          "label": "开始日期",
+          "type": "DATE_RANGE_MEMBER",
+          "required": true,
+          "relatedParameter": "end_date"
+        },
+        {
+          "name": "end_date",
+          "label": "结束日期",
+          "type": "DATE_RANGE_MEMBER",
+          "required": true,
+          "relatedParameter": "start_date"
+        }
+      ],
+      "downloadPolicy": {
+        "mode": "ANN_DATE_RANGE",
+        "dateSemantic": "ANN_DATE",
+        "description": "按公告日期范围下载，公告日期不等于报告期；来源请求与完整性仍需核实。",
+        "calendarProfile": null,
+        "limits": {
+          "maxRangeDays": 31
+        }
+      }
+    },
+    {
+      "apiName": "broker_recommend",
+      "displayName": "券商月度推荐",
+      "category": "basic_organization",
+      "queryMode": "snapshot",
+      "parameters": [
+        {
+          "name": "start_date",
+          "label": "开始日期",
+          "type": "DATE_RANGE_MEMBER",
+          "required": true,
+          "relatedParameter": "end_date"
+        },
+        {
+          "name": "end_date",
+          "label": "结束日期",
+          "type": "DATE_RANGE_MEMBER",
+          "required": true,
+          "relatedParameter": "start_date"
+        }
+      ],
+      "downloadPolicy": {
+        "mode": "MONTH_RANGE",
+        "dateSemantic": "COVERED_MONTH",
+        "description": "下载区间覆盖的完整自然月；来源请求与完整性仍需核实。",
+        "calendarProfile": null,
+        "limits": {
+          "maxRangeDays": 31
+        }
+      }
+    },
+    {
+      "apiName": "namechange",
+      "displayName": "证券名称变更记录",
+      "category": "basic_organization",
+      "queryMode": "date_range",
+      "parameters": [
+        {
+          "name": "start_date",
+          "label": "开始日期",
+          "type": "DATE_RANGE_MEMBER",
+          "required": true,
+          "relatedParameter": "end_date"
+        },
+        {
+          "name": "end_date",
+          "label": "结束日期",
+          "type": "DATE_RANGE_MEMBER",
+          "required": true,
+          "relatedParameter": "start_date"
+        }
+      ],
+      "downloadPolicy": {
+        "mode": "NATIVE_RANGE",
+        "dateSemantic": "ANN_DATE",
+        "description": "按公告日期范围下载；实际筛选与完整性仍需来源核实。",
+        "calendarProfile": null,
+        "limits": {
+          "maxRangeDays": 31
+        }
+      }
+    },
+    {
+      "apiName": "new_share",
+      "displayName": "IPO 新股发行信息",
+      "category": "basic_organization",
+      "queryMode": "date_range",
+      "parameters": [
+        {
+          "name": "start_date",
+          "label": "开始日期",
+          "type": "DATE_RANGE_MEMBER",
+          "required": true,
+          "relatedParameter": "end_date"
+        },
+        {
+          "name": "end_date",
+          "label": "结束日期",
+          "type": "DATE_RANGE_MEMBER",
+          "required": true,
+          "relatedParameter": "start_date"
+        }
+      ],
+      "downloadPolicy": {
+        "mode": "NATIVE_RANGE",
+        "dateSemantic": "IPO_DATE",
+        "description": "按IPO申购日期范围下载；实际筛选与完整性仍需来源核实。",
+        "calendarProfile": null,
+        "limits": {
+          "maxRangeDays": 31
+        }
+      }
+    },
+    {
+      "apiName": "trade_cal",
+      "displayName": "交易日历",
+      "category": "basic_organization",
+      "queryMode": "date_range",
+      "parameters": [
+        {
+          "name": "exchange",
+          "label": "交易所",
+          "type": "ENUM",
+          "required": true,
+          "allowedValues": [
+            "SSE",
+            "SZSE",
+            "BSE"
+          ]
+        },
+        {
+          "name": "start_date",
+          "label": "开始日期",
+          "type": "DATE_RANGE_MEMBER",
+          "required": true,
+          "relatedParameter": "end_date"
+        },
+        {
+          "name": "end_date",
+          "label": "结束日期",
+          "type": "DATE_RANGE_MEMBER",
+          "required": true,
+          "relatedParameter": "start_date"
+        }
+      ],
+      "downloadPolicy": {
+        "mode": "NATIVE_RANGE",
+        "dateSemantic": "CALENDAR_DATE",
+        "description": "按日历日期范围下载；实际筛选与完整性仍需来源核实。",
+        "calendarProfile": null,
+        "limits": {
+          "maxRangeDays": 31
+        }
+      }
+    },
+    {
+      "apiName": "hs_const",
+      "displayName": "沪深港通标的范围",
+      "category": "basic_organization",
+      "queryMode": "snapshot",
+      "parameters": [
+        {
+          "name": "hs_type",
+          "label": "沪深港通类型",
+          "type": "ENUM",
+          "required": true,
+          "allowedValues": [
+            "SH",
+            "SZ"
+          ]
+        }
+      ],
+      "downloadPolicy": {
+        "mode": "ORIGINAL_PARAMS",
+        "dateSemantic": "NONE",
+        "description": "按原有条件下载，不增加日期筛选，也不承诺仅返回最新数据。",
+        "calendarProfile": null,
+        "limits": null
+      }
+    },
+    {
+      "apiName": "index_classify",
+      "displayName": "行业指数分类",
+      "category": "basic_organization",
+      "queryMode": "snapshot",
+      "parameters": [],
+      "downloadPolicy": {
+        "mode": "ORIGINAL_PARAMS",
+        "dateSemantic": "NONE",
+        "description": "按原有条件下载，不增加日期筛选，也不承诺仅返回最新数据。",
+        "calendarProfile": null,
+        "limits": null
+      }
+    },
+    {
+      "apiName": "index_member",
+      "displayName": "行业指数成分",
+      "category": "basic_organization",
+      "queryMode": "snapshot",
+      "parameters": [],
+      "downloadPolicy": {
+        "mode": "ORIGINAL_PARAMS",
+        "dateSemantic": "NONE",
+        "description": "按原有条件下载，不增加日期筛选，也不承诺仅返回最新数据。",
+        "calendarProfile": null,
+        "limits": null
+      }
+    },
+    {
+      "apiName": "index_member_all",
+      "displayName": "行业分级与完整成分",
+      "category": "basic_organization",
+      "queryMode": "snapshot",
+      "parameters": [],
+      "downloadPolicy": {
+        "mode": "ORIGINAL_PARAMS",
+        "dateSemantic": "NONE",
+        "description": "按原有条件下载，不增加日期筛选，也不承诺仅返回最新数据。",
+        "calendarProfile": null,
+        "limits": null
+      }
+    },
+    {
+      "apiName": "pledge_detail",
+      "displayName": "股权质押明细",
+      "category": "股东与治理",
+      "queryMode": "snapshot",
+      "parameters": [],
+      "downloadPolicy": {
+        "mode": "ORIGINAL_PARAMS",
+        "dateSemantic": "NONE",
+        "description": "按原有条件下载，不增加日期筛选，也不承诺仅返回最新数据。",
+        "calendarProfile": null,
+        "limits": null
+      }
+    },
+    {
+      "apiName": "pledge_stat",
+      "displayName": "股权质押统计",
+      "category": "股东与治理",
+      "queryMode": "snapshot",
+      "parameters": [],
+      "downloadPolicy": {
+        "mode": "ORIGINAL_PARAMS",
+        "dateSemantic": "NONE",
+        "description": "按原有条件下载，不增加日期筛选，也不承诺仅返回最新数据。",
+        "calendarProfile": null,
+        "limits": null
+      }
+    },
+    {
+      "apiName": "stk_holdernumber",
+      "displayName": "股东户数",
+      "category": "股东与治理",
+      "queryMode": "snapshot",
+      "parameters": [
+        {
+          "name": "ts_code",
+          "label": "股票代码",
+          "type": "TS_CODE",
+          "required": true
+        }
+      ],
+      "downloadPolicy": {
+        "mode": "ORIGINAL_PARAMS",
+        "dateSemantic": "NONE",
+        "description": "按原有条件下载，不增加日期筛选，也不承诺仅返回最新数据。",
+        "calendarProfile": null,
+        "limits": null
+      }
+    },
+    {
+      "apiName": "stk_managers",
+      "displayName": "上市公司管理层信息",
+      "category": "basic_organization",
+      "queryMode": "snapshot",
+      "parameters": [],
+      "downloadPolicy": {
+        "mode": "ORIGINAL_PARAMS",
+        "dateSemantic": "NONE",
+        "description": "按原有条件下载，不增加日期筛选，也不承诺仅返回最新数据。",
+        "calendarProfile": null,
+        "limits": null
+      }
+    },
+    {
+      "apiName": "stk_rewards",
+      "displayName": "管理层薪酬与持股",
+      "category": "股东与治理",
+      "queryMode": "snapshot",
+      "parameters": [
+        {
+          "name": "ts_code",
+          "label": "股票代码",
+          "type": "TS_CODE",
+          "required": true
+        }
+      ],
+      "downloadPolicy": {
+        "mode": "ORIGINAL_PARAMS",
+        "dateSemantic": "NONE",
+        "description": "按原有条件下载，不增加日期筛选，也不承诺仅返回最新数据。",
+        "calendarProfile": null,
+        "limits": null
+      }
+    },
+    {
+      "apiName": "stock_basic",
+      "displayName": "股票基础信息",
+      "category": "basic_organization",
+      "queryMode": "snapshot",
+      "parameters": [
+        {
+          "name": "list_status",
+          "label": "上市状态",
+          "type": "ENUM",
+          "required": true,
+          "allowedValues": [
+            "L",
+            "P",
+            "D"
+          ]
+        }
+      ],
+      "downloadPolicy": {
+        "mode": "ORIGINAL_PARAMS",
+        "dateSemantic": "NONE",
+        "description": "按原有条件下载，不增加日期筛选，也不承诺仅返回最新数据。",
+        "calendarProfile": null,
+        "limits": null
+      }
+    },
+    {
+      "apiName": "stock_company",
+      "displayName": "上市公司基本信息",
+      "category": "basic_organization",
+      "queryMode": "snapshot",
+      "parameters": [
+        {
+          "name": "exchange",
+          "label": "交易所",
+          "type": "ENUM",
+          "required": true,
+          "allowedValues": [
+            "SSE",
+            "SZSE",
+            "BSE"
+          ]
+        }
+      ],
+      "downloadPolicy": {
+        "mode": "ORIGINAL_PARAMS",
+        "dateSemantic": "NONE",
+        "description": "按原有条件下载，不增加日期筛选，也不承诺仅返回最新数据。",
+        "calendarProfile": null,
+        "limits": null
+      }
+    }
+  ]
+}

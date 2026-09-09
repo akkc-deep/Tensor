@@ -10,7 +10,12 @@ public record ApiErrorResponse(
         ErrorCode code,
         String message,
         boolean retryable,
-        List<FieldErrorResponse> fieldErrors) {
+        List<FieldErrorResponse> fieldErrors,
+        @com.fasterxml.jackson.annotation.JsonInclude(com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL)
+        DownloadResponse downloadResult) {
+    public ApiErrorResponse(String requestId, ErrorCode code, String message, boolean retryable, List<FieldErrorResponse> fieldErrors) {
+        this(requestId, code, message, retryable, fieldErrors, null);
+    }
     public ApiErrorResponse {
         Objects.requireNonNull(requestId, "requestId");
         Objects.requireNonNull(code, "code");

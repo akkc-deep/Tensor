@@ -19,6 +19,12 @@ public final class CommittedKeyIndex {
     }
 
     public void confirmCommitted(RecoveryUnitProcessor.ReadyUnit ready) {
+        checkConfirmable(ready);
+        values.putAll(ready.pending());
+        ready.markConfirmed();
+    }
+
+    void checkConfirmable(RecoveryUnitProcessor.ReadyUnit ready) {
         checkThread();
         Objects.requireNonNull(ready, "ready");
         if (ready.index() != this) throw new IllegalArgumentException("ready unit belongs to another committed index");
@@ -33,8 +39,6 @@ public final class CommittedKeyIndex {
                 throw new IllegalStateException("committed index changed after validation");
             }
         }
-        values.putAll(ready.pending());
-        ready.markConfirmed();
     }
 
     DatasetKey datasetKey() {

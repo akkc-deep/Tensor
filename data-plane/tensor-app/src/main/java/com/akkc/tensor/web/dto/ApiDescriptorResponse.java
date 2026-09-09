@@ -13,7 +13,7 @@ public record ApiDescriptorResponse(
         String displayName,
         String category,
         QueryMode queryMode,
-        List<ParameterResponse> parameters) {
+        List<ParameterResponse> parameters, DownloadPolicyResponse downloadPolicy) {
 
     public ApiDescriptorResponse {
         Objects.requireNonNull(apiName, "apiName");
@@ -30,8 +30,21 @@ public record ApiDescriptorResponse(
                 descriptor.displayName(),
                 descriptor.category(),
                 descriptor.queryMode(),
-                descriptor.sourceParameters().stream().map(ParameterResponse::from).toList());
+                descriptor.parameters().stream().map(ParameterResponse::from).toList(),
+                DownloadPolicyResponse.from(descriptor.downloadPolicy()));
     }
+
+    public record DownloadPolicyResponse(
+            com.akkc.tensor.plugin.api.download.DownloadPolicy.Mode mode,
+            com.akkc.tensor.plugin.api.download.DownloadPolicy.DateSemantic dateSemantic,
+            String description, String calendarProfile, LimitsResponse limits) {
+        static DownloadPolicyResponse from(com.akkc.tensor.plugin.api.download.DownloadPolicy policy) {
+            return new DownloadPolicyResponse(policy.mode(), policy.dateSemantic(), policy.description(),
+                    policy.calendarProfile() == null ? null : policy.calendarProfile().value(),
+                    policy.limits() == null ? null : new LimitsResponse(policy.limits().maxRangeDays()));
+        }
+    }
+    public record LimitsResponse(int maxRangeDays) {}
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
     public record ParameterResponse(

@@ -5,6 +5,7 @@ import { getDataset, listDatasets, queryDataset } from './datasets.js'
 import { downloadDataset } from './downloads.js'
 import { ApiError, ClientError } from './errors.js'
 import { configureHttp, http } from './http.js'
+import rangeResults from '../test/fixtures/range-results.json'
 
 const DEFAULT_ADAPTER = http.defaults.adapter
 const DEFAULT_BASE_URL = '/api/v1'
@@ -27,6 +28,16 @@ const API_RULES = {
   PERSISTENCE_FAILED: [500, true],
   QUERY_FAILED: [500, true],
   INTERNAL_ERROR: [500, false],
+  SOURCE_REQUEST_UNCONFIRMED: [409, false],
+  CALENDAR_UNCONFIRMED: [502, true],
+  SOURCE_TRUNCATED: [502, false],
+  SOURCE_COMPLETENESS_UNCONFIRMED: [502, false],
+  DATA_CONFLICT: [422, false],
+  RETRY_TASK_NOT_FOUND: [404, false],
+  DOWNLOAD_BUSY: [409, true],
+  RETRY_TASK_INVALID: [409, false],
+  TASK_RECORD_SAVE_UNCONFIRMED: [500, false],
+  COMMIT_UNCONFIRMED: [500, false],
 }
 
 let requests
@@ -35,21 +46,23 @@ function requestId(config) {
   return config.headers.get('X-Request-Id')
 }
 
-function response(config, data) {
+function response(config, data, headers = { 'X-Request-Id': requestId(config) }) {
   return {
     data,
     status: 200,
     statusText: 'OK',
-    headers: { 'X-Request-Id': requestId(config) },
+    headers,
     config,
     request: {},
   }
 }
 
-function respondWith(data) {
+function respondWith(data, headers) {
   http.defaults.adapter = async (config) => {
     requests.push(config)
-    return response(config, data)
+    const body = typeof data === 'function' ? data(config) : data
+    const responseHeaders = typeof headers === 'function' ? headers(config) : headers
+    return response(config, body, responseHeaders)
   }
 }
 
@@ -148,22 +161,68 @@ describe('API boundary', () => {
   it('posts only the three download fields without changing dynamic params', async () => {
     const request = {
       pluginId: 'tushare_pro',
-      apiName: 'daily',
-      params: { trade_date: '20260904', ts_code: '000001.SZ' },
+      apiName: 'broker_recommend',
+      params: { start_date: '20260131', end_date: '20260302' },
       ignored: 'page-state',
     }
     const snapshot = structuredClone(request)
+    let responseBody
+    respondWith((config) => {
+      responseBody = {
+        ...structuredClone(rangeResults.SUCCESS),
+        requestId: requestId(config),
+        apiName: request.apiName,
+      }
+      return responseBody
+    })
 
-    await downloadDataset(request)
+    const result = await downloadDataset(request)
+    expect(result).toBe(responseBody)
 
     expect(requests[0].method).toBe('post')
     expect(requests[0].url).toBe('/downloads')
     expect(JSON.parse(requests[0].data)).toEqual({
       pluginId: 'tushare_pro',
-      apiName: 'daily',
-      params: { trade_date: '20260904', ts_code: '000001.SZ' },
+      apiName: 'broker_recommend',
+      params: { start_date: '20260131', end_date: '20260302' },
     })
     expect(request).toEqual(snapshot)
+  })
+
+  it('rejects download responses that do not match the request and response header', async () => {
+    const request = {
+      pluginId: 'tushare_pro',
+      apiName: 'daily',
+      params: { start_date: '20260901', end_date: '20260902' },
+    }
+    const cases = [
+      {
+        body: (config) => ({ ...structuredClone(rangeResults.SUCCESS), requestId: `${requestId(config)}-body` }),
+      },
+      {
+        body: (config) => ({ ...structuredClone(rangeResults.SUCCESS), requestId: requestId(config), pluginId: 'fixture' }),
+      },
+      {
+        body: (config) => ({ ...structuredClone(rangeResults.SUCCESS), requestId: requestId(config), apiName: 'weekly' }),
+      },
+      {
+        body: (config) => ({ ...structuredClone(rangeResults.UNCONFIRMED), requestId: requestId(config) }),
+      },
+      {
+        body: (config) => ({ ...structuredClone(rangeResults.SUCCESS), requestId: requestId(config) }),
+        headers: (config) => ({ 'X-Request-Id': `${requestId(config)}-header` }),
+      },
+    ]
+
+    for (const current of cases) {
+      respondWith(current.body, current.headers)
+      const error = await capture(downloadDataset(request))
+      expect(error).toBeInstanceOf(ClientError)
+      expect(error).toMatchObject({
+        kind: 'INVALID_RESPONSE',
+        requestId: requestId(requests.at(-1)),
+      })
+    }
   })
 
   it('lists datasets with one encoded plugin path segment', async () => {
@@ -267,6 +326,57 @@ describe('API boundary', () => {
       expect(error.config).toBeUndefined()
       expect(error.response).toBeUndefined()
     }
+  })
+
+  it('preserves a validated unconfirmed result from an Axios 500 response', async () => {
+    let sourceSnapshot
+    rejectWith((id) => {
+      sourceSnapshot = structuredClone(rangeResults.UNCONFIRMED)
+      sourceSnapshot.requestId = id
+      return {
+        code: 'ERR_BAD_RESPONSE',
+        status: 500,
+        body: {
+          requestId: id,
+          code: 'TASK_RECORD_SAVE_UNCONFIRMED',
+          message: '失败记录保存未确认',
+          retryable: false,
+          fieldErrors: [],
+          downloadResult: sourceSnapshot,
+        },
+      }
+    })
+
+    const error = await capture(downloadDataset({
+      pluginId: 'tushare_pro',
+      apiName: 'daily',
+      params: { start_date: '20260901', end_date: '20260907' },
+    }))
+
+    expect(error).toBeInstanceOf(ApiError)
+    expect(error).toMatchObject({
+      code: 'TASK_RECORD_SAVE_UNCONFIRMED',
+      retryable: false,
+      downloadResult: {
+        outcome: 'UNCONFIRMED',
+        completedUnits: 2,
+        failedUnits: 1,
+        notStartedUnits: null,
+        sourceRowCount: 10,
+        insertedRows: 7,
+        updatedRows: 3,
+        remainingFailedUnits: null,
+      },
+    })
+    expect(Object.isFrozen(error.downloadResult)).toBe(true)
+    expect(Object.isFrozen(error.downloadResult.failures)).toBe(true)
+    expect(Object.isFrozen(error.downloadResult.failures[0])).toBe(true)
+    expect(Object.isFrozen(error.downloadResult.notStartedScopes[0])).toBe(true)
+    sourceSnapshot.failures[0].errorMessage = 'changed after rejection'
+    expect(error.downloadResult.failures[0].errorMessage).toBe('字段类型不符合要求。')
+    expect(error.cause).toBeUndefined()
+    expect(error.config).toBeUndefined()
+    expect(error.response).toBeUndefined()
   })
 
   it('rejects malformed server envelopes without leaking response data', async () => {

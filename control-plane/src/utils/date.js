@@ -44,3 +44,30 @@ export function formatDate(value) {
     ? `${compact.slice(0, 4)}-${compact.slice(4, 6)}-${compact.slice(6)}`
     : value
 }
+
+function utcDay(match) {
+  const date = new Date(0)
+  date.setUTCHours(0, 0, 0, 0)
+  date.setUTCFullYear(+match[1], +match[2] - 1, +match[3])
+  return date.getTime()
+}
+
+export function inclusiveDateDays(start, end) {
+  const startMatch = parseDate(start)
+  const endMatch = parseDate(end)
+  if (!startMatch || !endMatch) return null
+  const days = (utcDay(endMatch) - utcDay(startMatch)) / 86_400_000 + 1
+  return days > 0 ? days : null
+}
+
+export function coveredMonths(start, end) {
+  if (inclusiveDateDays(start, end) === null) return []
+  const first = parseDate(start)
+  const last = parseDate(end)
+  const from = +first[1] * 12 + +first[2] - 1
+  const to = +last[1] * 12 + +last[2] - 1
+  return Array.from({ length: to - from + 1 }, (_, offset) => {
+    const value = from + offset
+    return `${String(Math.floor(value / 12)).padStart(4, '0')}-${String(value % 12 + 1).padStart(2, '0')}`
+  })
+}

@@ -2,11 +2,15 @@ package com.akkc.tensor.config;
 
 import com.akkc.tensor.core.adapter.FingerprintKeyCodec;
 import com.akkc.tensor.core.adapter.GenericDatasetAdapter;
+import com.akkc.tensor.core.download.BatchCommitService;
+import com.akkc.tensor.core.download.DownloadExecutionSlot;
+import com.akkc.tensor.core.download.DownloadParameterConverter;
 import com.akkc.tensor.core.adapter.ValueConverter;
 import com.akkc.tensor.core.catalog.DatasetCatalog;
 import com.akkc.tensor.core.catalog.DatasetStartupValidator;
 import com.akkc.tensor.core.catalog.SchemaInspector;
 import com.akkc.tensor.core.download.DownloadService;
+import com.akkc.tensor.core.download.RetryDownloadService;
 import com.akkc.tensor.core.metadata.MetadataQueryService;
 import com.akkc.tensor.core.persistence.DatasetLockManager;
 import com.akkc.tensor.core.persistence.ExistingKeyRepository;
@@ -128,9 +132,18 @@ public final class ApplicationConfiguration {
     }
 
     @Bean
+    public BatchCommitService batchCommitService(PersistenceService persistence, RetryTaskRepository repository,
+            ParameterValidator validator, PlatformTransactionManager transactions, Clock clock) {
+        return new BatchCommitService(persistence, repository, new DownloadParameterConverter(validator), transactions, clock);
+    }
+
+    @Bean
     public Clock clock() {
         return Clock.systemUTC();
     }
+
+    @Bean
+    public DownloadExecutionSlot downloadExecutionSlot() { return new DownloadExecutionSlot(); }
 
     @Bean
     public DownloadService downloadService(
@@ -138,9 +151,31 @@ public final class ApplicationConfiguration {
             AdapterRegistry adapters,
             ParameterValidator validator,
             PersistenceService persistence,
+            BatchCommitService commits,
+            RetryTaskStorageService failures,
+            DownloadExecutionSlot slot,
             Clock clock) {
         return new DownloadService(
-                plugins, adapters, validator, persistence, clock);
+                plugins, adapters, validator, persistence, commits, failures, slot, clock);
+    }
+
+    @Bean
+    public com.akkc.tensor.core.retry.RetryTaskQueryService retryTaskQueryService(
+            RetryTaskStorageService storage, PluginRegistry plugins, AdapterRegistry adapters,
+            ParameterValidator validator, DownloadExecutionSlot slot) {
+        return new com.akkc.tensor.core.retry.RetryTaskQueryService(storage, plugins, adapters, validator, slot);
+    }
+
+    @Bean
+    public RetryDownloadService retryDownloadService(
+            PluginRegistry plugins,
+            AdapterRegistry adapters,
+            ParameterValidator validator,
+            BatchCommitService commits,
+            RetryTaskStorageService failures,
+            DownloadExecutionSlot slot,
+            Clock clock) {
+        return new RetryDownloadService(plugins, adapters, validator, commits, failures, slot, clock);
     }
 
     @Bean

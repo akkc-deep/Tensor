@@ -1,6 +1,6 @@
 import { reactive, ref, watch } from 'vue'
 
-import { toApiDate, toApiMonth } from '../utils/date.js'
+import { inclusiveDateDays, toApiDate, toApiMonth } from '../utils/date.js'
 import {
   hasValue,
   isRangeOrdered,
@@ -59,7 +59,7 @@ function typeError(parameter, value) {
   }
 }
 
-export function useParameterForm(parameters) {
+export function useParameterForm(parameters, { maxRangeDays } = {}) {
   const values = reactive({})
   const errors = reactive(Object.create(null))
   const firstError = ref(null)
@@ -78,6 +78,11 @@ export function useParameterForm(parameters) {
   function setValue(name, value) {
     values[name] = value
     delete errors[name]
+    const related = parameters.value.find(({ name: field }) => field === name)?.relatedParameter
+    if (
+      maxRangeDays?.value !== undefined && related &&
+      (errors[related] === '开始日期不得晚于结束日期' || errors[related]?.startsWith('单次最多支持 '))
+    ) delete errors[related]
     firstError.value =
       parameters.value.find(({ name: field }) => errors[field])?.name ?? null
     snapshot = null
@@ -132,6 +137,14 @@ export function useParameterForm(parameters) {
         errors[parameter.name] = '开始日期不得晚于结束日期'
       }
     })
+
+    const limit = maxRangeDays?.value
+    if (!errors.start_date && !errors.end_date && Number.isInteger(limit)) {
+      const days = inclusiveDateDays(values.start_date, values.end_date)
+      if (days !== null && days > limit) {
+        errors.start_date = `单次最多支持 ${limit} 个自然日（含起止日期），请缩小区间`
+      }
+    }
 
     firstError.value =
       parameters.value.find(({ name }) => errors[name])?.name ?? null

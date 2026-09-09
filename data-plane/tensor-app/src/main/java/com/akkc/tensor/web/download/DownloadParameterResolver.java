@@ -39,6 +39,13 @@ public final class DownloadParameterResolver {
     public DownloadParameters resolveDownload(DatasetKey dataset, Map<String, Object> values) {
         try {
             ApiDescriptor api = descriptors.requireApi(dataset);
+            if (api.downloadPolicy().mode() != com.akkc.tensor.plugin.api.download.DownloadPolicy.Mode.ORIGINAL_PARAMS) {
+                for (String old : List.of("trade_date", "ann_date", "month")) {
+                    if (values.containsKey(old)) throw new DownloadBindingException(
+                            com.akkc.tensor.plugin.api.error.ErrorCode.PARAM_INVALID,
+                            List.of(new com.akkc.tensor.web.dto.FieldErrorResponse(old, "is no longer accepted")));
+                }
+            }
             return bind(api.parameters(), validator.validate(api, values).values());
         } catch (TensorException failure) {
             throw DownloadBindingException.from(failure);

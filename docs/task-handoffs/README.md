@@ -5,7 +5,7 @@
 | 目录 | 内容 | 任务看板 |
 | --- | --- | --- |
 | [tensor-v1/](tensor-v1/) | Tensor v1 正式任务：1 份看板、78 份任务交接 | [Tensor v1 看板](tensor-v1/tensor-v1-task-board.md) |
-| [tensor-range/](tensor-range/) | 区间下载增量：21 项任务，RANGE-T01～T10 已完成，RANGE-T11 设计与交接就绪（READY） | [区间下载看板](tensor-range/tensor-range-task-board.md) |
+| [tensor-range/](tensor-range/) | 区间下载增量：21 项任务，RANGE-T01～T18 已完成，RANGE-T19 设计与交接已就绪，状态 READY、尚未实施 | [区间下载看板](tensor-range/tensor-range-task-board.md) |
 | [ISSUE-004/](ISSUE-004/) | UI 改版任务；当前已有看板，后续交接放在同一目录 | [ISSUE-004 看板](ISSUE-004/ISSUE-004-task-board.md) |
 
 ```text

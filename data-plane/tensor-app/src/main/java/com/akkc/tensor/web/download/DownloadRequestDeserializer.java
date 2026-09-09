@@ -6,6 +6,7 @@ import com.akkc.tensor.plugin.api.model.DatasetKey;
 import com.akkc.tensor.plugin.api.model.PluginId;
 import com.akkc.tensor.web.dto.DownloadRequest;
 import com.akkc.tensor.web.dto.FieldErrorResponse;
+import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
@@ -23,10 +24,11 @@ public final class DownloadRequestDeserializer extends JsonDeserializer<Download
 
     @Override
     public DownloadRequest deserialize(JsonParser parser, DeserializationContext context) throws IOException {
-        // Retain Jackson record binding, including errors in earlier duplicate fields.
+        // This parser belongs to one download request; reject duplicate fields at both object levels.
+        parser.enable(JsonParser.Feature.STRICT_DUPLICATE_DETECTION);
         WireValues input = context.readValue(parser, WireValues.class);
-        String pluginId = input.pluginId();
-        String apiName = input.apiName();
+        Object pluginId = input.pluginId();
+        Object apiName = input.apiName();
         Map<String, Boolean> errors = new TreeMap<>();
         identifier("pluginId", pluginId, errors);
         identifier("apiName", apiName, errors);
@@ -40,18 +42,24 @@ public final class DownloadRequestDeserializer extends JsonDeserializer<Download
                             entry.getValue() ? "has invalid value" : "is required")).toList();
             throw new DownloadBindingException(code, fields);
         }
-        DatasetKey dataset = DatasetKey.of(PluginId.of(pluginId), ApiName.of(apiName));
+        DatasetKey dataset = DatasetKey.of(PluginId.of((String) pluginId), ApiName.of((String) apiName));
         Map<String, Object> values = input.params();
-        return new DownloadRequest(dataset, resolver.resolve(dataset, values), values.keySet());
+        return new DownloadRequest(dataset, resolver.resolveDownload(dataset, values), values.keySet());
     }
 
     // Transient wire values only; Controller requests always contain a concrete parameter type.
-    private record WireValues(String pluginId, String apiName, Map<String, Object> params) {}
+    private record WireValues(Object pluginId, Object apiName, Map<String, Object> params) {
+        @JsonAnySetter
+        void rejectUnknown(String name, Object value) {
+            throw new DownloadBindingException(ErrorCode.PARAM_INVALID,
+                    List.of(new FieldErrorResponse("request", "has invalid value")));
+        }
+    }
 
-    private static void identifier(String name, String value, Map<String, Boolean> errors) {
+    private static void identifier(String name, Object value, Map<String, Boolean> errors) {
         if (value == null) {
             errors.put(name, false);
-        } else if (!value.matches("^[a-z][a-z0-9_]{1,63}$")) {
+        } else if (!(value instanceof String text) || !text.matches("^[a-z][a-z0-9_]{1,63}$")) {
             errors.put(name, true);
         }
     }

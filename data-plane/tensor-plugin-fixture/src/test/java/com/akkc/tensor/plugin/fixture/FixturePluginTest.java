@@ -60,6 +60,78 @@ class FixturePluginTest {
             fixedColumn: ts_code
             """;
 
+    @org.junit.jupiter.params.ParameterizedTest
+    @org.junit.jupiter.params.provider.CsvSource({"ORIGINAL_PARAMS,REQUEST", "TRADE_DATE_RANGE,REQUEST", "TRADE_DATE_RANGE,STOCK_TIME", "ANN_DATE_RANGE,REQUEST", "ANN_DATE_RANGE,STOCK_TIME", "MONTH_RANGE,REQUEST", "NATIVE_RANGE,REQUEST"})
+    void modesShareDefinitionAndExposeExecutableExactBatches(String mode, String recovery) {
+        try (var context = new AnnotationConfigApplicationContext()) {
+            context.getEnvironment().setActiveProfiles("acceptance");
+            context.getEnvironment().getPropertySources().addFirst(new MapPropertySource("modes", Map.of(
+                    "tensor.plugins.fixture.enabled", "true", "tensor.plugins.fixture.mode", mode,
+                    "tensor.plugins.fixture.recovery", recovery)));
+            context.register(FixtureConfiguration.class); context.refresh();
+            var plugin = context.getBean(FixturePlugin.class);
+            var adapter = context.getBean(DatasetAdapter.class);
+            var api = plugin.descriptor().apis().getFirst();
+            assertThat(api.sourceParameters()).isEqualTo(adapter.definition().parameters());
+            assertThat(api.downloadPolicy().mode().name()).isEqualTo(mode);
+            assertThat(api.downloadPolicy().recoveryPolicy().mode().name()).isEqualTo(recovery);
+            var params = new java.util.HashMap<String,Object>(); params.put("scenario", "SUCCESS");
+            switch (mode) {
+                case "TRADE_DATE_RANGE" -> params.put("trade_date", "20260903");
+                case "ANN_DATE_RANGE" -> params.put("ann_date", "20260903");
+                case "MONTH_RANGE" -> params.put("month", "202609");
+                case "NATIVE_RANGE" -> { params.put("start_date", "20260902"); params.put("end_date", "20260903"); }
+            }
+            var batch = new com.akkc.tensor.plugin.api.download.FetchBatch(params, api.downloadPolicy().recoveryPolicy());
+            assertThat(plugin.planBatch(API_NAME, batch, () -> {})).isEqualTo(api.downloadPolicy().batchPlanning());
+            var fetched = plugin.fetchBatch(API_NAME, batch, () -> {});
+            assertThat(fetched.envelope().params()).isEqualTo(params);
+            assertThat(fetched.envelope().data()).hasSize(mode.equals("NATIVE_RANGE") ? 2 : 1);
+            if (!mode.equals("ORIGINAL_PARAMS")) {
+                assertThat(api.parameters()).extracting(ParameterDescriptor::name).contains("start_date", "end_date");
+                assertThat(fetched.envelope().data().getFirst().get(1)).isEqualTo(mode.equals("NATIVE_RANGE") ? "20260902" : mode.equals("MONTH_RANGE") ? "20260901" : "20260903");
+            }
+        }
+    }
+
+    @org.junit.jupiter.params.ParameterizedTest
+    @org.junit.jupiter.params.provider.CsvSource({"ORIGINAL_PARAMS,STOCK_TIME", "MONTH_RANGE,STOCK_TIME", "NATIVE_RANGE,STOCK_TIME", "INVALID,REQUEST", "ANN_DATE_RANGE,INVALID"})
+    void invalidModeRecoveryCombinationsFailAtConfiguration(String mode, String recovery) {
+        assertThatThrownBy(() -> new FixtureConfiguration(mode,recovery,"")).isInstanceOf(IllegalArgumentException.class);
+    }
+    @org.junit.jupiter.params.ParameterizedTest
+    @org.junit.jupiter.params.provider.ValueSource(strings={"ORIGINAL_PARAMS","ANN_DATE_RANGE"})
+    void checksStateAfterLocalSourceFailureAsWellAsSuccess(String mode) {
+        var plugin = new FixtureConfiguration(mode,"REQUEST","").fixturePlugin();
+        var params = new java.util.HashMap<String,Object>(); params.put("scenario","SOURCE_FAILURE");
+        if (mode.equals("ANN_DATE_RANGE")) params.put("ann_date","20260901");
+        var batch = new com.akkc.tensor.plugin.api.download.FetchBatch(params,plugin.descriptor().apis().getFirst().downloadPolicy().recoveryPolicy());
+        var checks = new java.util.concurrent.atomic.AtomicInteger();
+        assertThatThrownBy(() -> plugin.fetchBatch(API_NAME,batch,checks::incrementAndGet)).isInstanceOf(SourceException.class);
+        assertThat(checks).hasValue(2);
+    }
+
+    @Test void rejectsMismatchedBatchPolicyUnknownApiAndParameters() {
+        var plugin = new FixtureConfiguration("ANN_DATE_RANGE","REQUEST","").fixturePlugin();
+        var api = plugin.descriptor().apis().getFirst();
+        var batch = new com.akkc.tensor.plugin.api.download.FetchBatch(Map.of("scenario","SUCCESS","ann_date","20260901"),api.downloadPolicy().recoveryPolicy());
+        assertThatThrownBy(() -> plugin.planBatch(ApiName.of("other_api"),batch,()->{})).isInstanceOf(IllegalArgumentException.class);
+        var unknown = new com.akkc.tensor.plugin.api.download.FetchBatch(Map.of("scenario","SUCCESS","ann_date","20260901","extra","value"),batch.recoveryPolicy());
+        assertThatThrownBy(() -> plugin.fetchBatch(API_NAME,unknown,()->{})).isInstanceOf(IllegalArgumentException.class);
+        var wrong = new com.akkc.tensor.plugin.api.download.FetchBatch(batch.sourceParams(),
+                new FixtureConfiguration("ANN_DATE_RANGE","STOCK_TIME","").fixturePlugin().descriptor().apis().getFirst().downloadPolicy().recoveryPolicy());
+        assertThatThrownBy(() -> plugin.fetchBatch(API_NAME,wrong,()->{})).isInstanceOf(IllegalArgumentException.class);
+    }
+    @Test void localTradeCalendarIsExplicitlyControlledAndCoversAllRequestedDates() {
+        var plugin = new FixtureConfiguration("TRADE_DATE_RANGE","REQUEST","").fixturePlugin();
+        var scope = new com.akkc.tensor.plugin.api.download.CalendarScope(Map.of("scenario","SUCCESS"),java.util.Set.of(java.time.LocalDate.of(2026,9,1),java.time.LocalDate.of(2026,9,2)));
+        var checks = new java.util.concurrent.atomic.AtomicInteger();
+        var result = plugin.confirmCalendar(API_NAME,scope,checks::incrementAndGet);
+        assertThat(result.openDates()).isEqualTo(scope.dates());
+        assertThat(result.calendars()).containsOnlyKeys("fixture-controlled-all-open");
+        assertThat(checks).hasValue(2);
+    }
+
     @Test
     void checksServerAroundFixtureResponseAndRefusesUnconfirmedCalendar() {
         var factory = org.mockito.Mockito.mock(FixtureEnvelopeFactory.class);

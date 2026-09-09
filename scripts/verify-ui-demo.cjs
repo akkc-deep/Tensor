@@ -23,6 +23,16 @@ fs.mkdirSync(shots, { recursive: true });
     await page.locator(`a[href="#${view}"]`).filter({ hasNot: page.locator('.brand-mark') }).click();
     await expect(page.locator(`.${view === 'datasets' ? 'dataset' : view === 'downloads' ? 'download' : 'settings'}-page`)).toBeVisible();
   };
+  const checkFilterAlignment = async () => {
+    for (const [top, bottom] of [['#query-source', '#query-code'], ['#query-dataset', '.date-range']]) {
+      const a = await page.locator(top).boundingBox(), b = await page.locator(bottom).boundingBox();
+      assert.ok(Math.abs(a.x - b.x) <= 1 && Math.abs(a.width - b.width) <= 1, `${top} and ${bottom} share both column edges at ${page.viewportSize().width}px`);
+    }
+  };
+  const checkDownloadAlignment = async () => {
+    const source = await page.locator('#download-source').boundingBox(), date = await page.locator('#download-date').boundingBox();
+    assert.ok(Math.abs(source.x - date.x) <= 1 && Math.abs(source.width - date.width) <= 1, `Download source and date share both column edges at ${page.viewportSize().width}px`);
+  };
   const picker = async (id, label) => {
     await page.locator('#' + id).click();
     await page.locator('#' + id + '-options').getByRole('option').filter({ hasText: label }).click();
@@ -30,13 +40,42 @@ fs.mkdirSync(shots, { recursive: true });
   try {
     await page.goto(url);
     await expect(page.locator('h1')).toHaveText('数据查看');
-    await page.evaluate(() => document.fonts.ready);
+    await expect(page.locator('#app')).toHaveClass(/system-font/);
+    await page.evaluate(() => document.fonts.load('400 14px "Tensor Sans"', '证券数据'));
     assert.equal(await page.evaluate(() => document.fonts.check('400 14px "Tensor Sans"', '证券数据')), true);
     assert.equal(await page.locator('tbody tr').count(), 50);
     await expect(page.locator('.record-count')).toHaveText('120 条');
+    await checkFilterAlignment();
     const firstTable = await page.locator('thead').boundingBox();
     await page.screenshot({ path: path.join(shots, 'datasets-desktop.png'), fullPage: true, animations: 'disabled' });
     assert.ok(firstTable.y <= 320, `table header starts at ${firstTable.y}px`);
+    assert.equal(await page.locator('select').count(), 0, 'All option menus use consistent custom controls');
+    assert.equal(await page.locator('.column-code').count(), 0);
+    await page.getByRole('button', { name: '字段名', exact: true }).click();
+    await expect(page.locator('.column-code')).toHaveCount(14);
+    await page.getByRole('button', { name: '字段名', exact: true }).click();
+    const cellAlignment = await page.locator('table').evaluate(table => {
+      const heads = [...table.querySelectorAll('th')], cells = [...table.querySelector('tbody tr').cells];
+      return heads.every((head, i) => {
+        const a = head.getBoundingClientRect(), b = cells[i].getBoundingClientRect();
+        return Math.abs(a.x - b.x) <= 1 && Math.abs(a.width - b.width) <= 1 && getComputedStyle(head).textAlign === getComputedStyle(cells[i]).textAlign;
+      });
+    });
+    assert.ok(cellAlignment, 'All table headers share width and alignment with body cells');
+    await page.locator('#page-size').click();
+    const pageSizeTrigger = await page.locator('#page-size').boundingBox();
+    await expect(page.locator('.picker-popover')).not.toHaveClass(/popover-enter-active/);
+    const pageSizeMenu = await page.locator('.picker-popover').boundingBox();
+    assert.ok(Math.abs(pageSizeMenu.width - pageSizeTrigger.width) <= 1, 'Page-size popup matches its trigger width');
+    assert.ok(pageSizeMenu.y + pageSizeMenu.height <= pageSizeTrigger.y, 'Page-size popup opens above trigger');
+    await page.screenshot({ path: path.join(shots, 'page-size-menu.png'), fullPage: false, animations: 'disabled' });
+    await page.keyboard.press('Escape');
+    await expect(page.locator('#page-size')).toBeFocused();
+    await page.locator('#query-dataset').click();
+    await page.getByRole('combobox', { name: '搜索选项' }).fill('nothing-matches');
+    await expect(page.locator('.picker-no-results')).toBeVisible();
+    await page.keyboard.press('Escape');
+    await expect(page.locator('#query-dataset')).toBeFocused();
 
     await page.locator('#query-code').fill('000001.SZ');
     await page.getByRole('button', { name: '查询', exact: true }).click();
@@ -47,7 +86,7 @@ fs.mkdirSync(shots, { recursive: true });
     await page.getByRole('button', { name: '下一页' }).click();
     await expect(page.locator('.page-number')).toContainText('2');
     await expect(page.locator('.pagination-summary')).toHaveText('51–100 / 120 条');
-    await page.locator('#page-size').selectOption('20');
+    await picker('page-size', '20 条');
     await expect(page.locator('tbody tr')).toHaveCount(20);
     await page.locator('#query-start').fill('2026-09-09');
     await page.locator('#query-end').fill('2026-08-07');
@@ -56,6 +95,19 @@ fs.mkdirSync(shots, { recursive: true });
     await page.getByRole('button', { name: '重置', exact: true }).click();
 
     await picker('query-dataset', '高精度与长文本样例');
+    const decimalOffsets = await page.locator('table').evaluate(table => {
+      return [...table.querySelectorAll('th')].map((_, i) => {
+        const points = [...table.querySelectorAll('tbody tr')].map(row => {
+          const text = row.cells[i].querySelector('.decimal-value')?.firstChild;
+          if (!text || !text.textContent.includes('.')) return null;
+          const range = document.createRange(), point = text.textContent.indexOf('.');
+          range.setStart(text, point); range.setEnd(text, point + 1);
+          return range.getBoundingClientRect().x;
+        }).filter(x => x !== null);
+        return points.length ? Math.max(...points) - Math.min(...points) : 0;
+      });
+    });
+    assert.ok(decimalOffsets.every(offset => offset <= 1), `Decimal points align within 1px: ${decimalOffsets}`);
     const copiedNumber = await page.locator('tbody tr').first().locator('td').nth(3).evaluate(td => { const range = document.createRange(); range.selectNodeContents(td); const selection = getSelection(); selection.removeAllRanges(); selection.addRange(range); const value = selection.toString(); selection.removeAllRanges(); return value; });
     assert.equal(copiedNumber, '12345678901234567890.123456789012345678', 'Selecting a numeric cell preserves exact copy text');
     const precision = await page.locator('tbody tr').first().innerText();
@@ -72,27 +124,40 @@ fs.mkdirSync(shots, { recursive: true });
     const fixedHead = await page.locator('th').first().boundingBox();
     assert.ok(Math.abs(fixed.x - fixedHead.x) <= 1, 'Fixed header/body align while scrolled');
     await picker('query-dataset', '上市公司基本信息');
-    await page.locator('tbody .text-cell').first().click();
+    const fullText = page.locator('tbody .text-cell').filter({ hasText: /.{40}/ }).first();
+    const originalText = await fullText.textContent();
+    await fullText.click();
     await expect(page.locator('dialog')).toBeVisible();
-    assert.ok((await page.locator('dialog p').textContent()).length > 30);
+    assert.equal(await page.locator('dialog p').textContent(), originalText);
     await page.keyboard.press('Escape');
     await expect(page.locator('dialog')).not.toBeVisible();
 
     await navigate('downloads');
+    await checkDownloadAlignment();
+    await page.locator('#download-api').click();
+    const apiTrigger = await page.locator('#download-api').boundingBox();
+    await expect(page.locator('.picker-popover')).not.toHaveClass(/popover-enter-active/);
+    const apiMenu = await page.locator('.picker-popover').boundingBox();
+    assert.ok(Math.abs(apiMenu.width - apiTrigger.width) <= 1, 'API popup matches its trigger width');
+    await page.screenshot({ path: path.join(shots, 'api-menu-desktop.png'), fullPage: true, animations: 'disabled' });
+    await page.getByRole('combobox', { name: '搜索选项' }).fill('stock_company');
+    await page.keyboard.press('Enter');
+    await expect(page.locator('#download-api')).toHaveText('上市公司基本信息');
+    await picker('download-api', '日线行情');
     await page.getByRole('button', { name: '开始下载', exact: true }).click();
     await expect(page.locator('.receipt.success')).toBeVisible();
     await page.screenshot({ path: path.join(shots, 'downloads-desktop.png'), fullPage: true, animations: 'disabled' });
-    await page.locator('.download-page .scenario-control select').selectOption('error');
+    await picker('download-scenario', '请求失败');
     await page.getByRole('button', { name: '开始下载', exact: true }).click();
     await expect(page.locator('.receipt.error')).toBeVisible();
     await page.locator('#download-date').fill('2026-09-09');
     await page.getByRole('button', { name: '使用原参数重试', exact: true }).click();
     await expect(page.locator('.receipt.success')).toBeVisible();
     await expect(page.locator('.receipt.success')).toContainText('2026-08-07');
-    await page.locator('.download-page .scenario-control select').selectOption('empty');
+    await picker('download-scenario', '空结果');
     await page.getByRole('button', { name: '开始下载', exact: true }).click();
     await expect(page.locator('.receipt.empty')).toBeVisible();
-    await page.locator('.download-page .scenario-control select').selectOption('success');
+    await picker('download-scenario', '正常返回');
 
     await navigate('settings');
     const before = await page.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue('--nav'));
@@ -101,17 +166,26 @@ fs.mkdirSync(shots, { recursive: true });
     await page.locator('#theme-hex').fill('bad');
     await page.getByRole('button', { name: '应用', exact: true }).click();
     await expect(page.getByRole('alert')).toContainText('#RRGGBB');
+    await page.getByRole('button', { name: 'Noto Sans SC', exact: true }).click();
+    await expect(page.locator('#app')).not.toHaveClass(/system-font/);
+    await page.getByRole('button', { name: '系统字体', exact: true }).click();
+    await expect(page.locator('#app')).toHaveClass(/system-font/);
     await page.getByRole('button', { name: '减少动画', exact: true }).click();
     await expect(page.locator('#app')).toHaveClass(/reduce-motion/);
     await page.reload();
     await expect(page.locator('#app')).toHaveClass(/reduce-motion/);
     await expect(page.locator('#theme-hex')).toHaveValue('#20766B');
     await page.getByRole('button', { name: '恢复默认外观', exact: true }).click();
+    await page.evaluate(() => window.scrollTo(0, 0));
     await page.screenshot({ path: path.join(shots, 'settings-desktop.png'), fullPage: true, animations: 'disabled' });
+    await navigate('datasets');
+    await picker('query-dataset', '日线行情');
     for (const viewport of [{ width: 1440, height: 900 }, { width: 1024, height: 768 }, { width: 768, height: 1024 }, { width: 390, height: 844 }, { width: 360, height: 800 }]) {
       await page.setViewportSize(viewport);
       for (const view of ['datasets', 'downloads', 'settings']) {
         await navigate(view);
+        if (view === 'datasets') await checkFilterAlignment();
+        if (view === 'downloads') await checkDownloadAlignment();
         const overflow = await page.evaluate(() => document.documentElement.scrollWidth - innerWidth);
         assert.ok(overflow <= 1, `${view} overflows at ${viewport.width}px by ${overflow}px`);
         if (viewport.width === 390) await page.screenshot({ path: path.join(shots, `${view}-mobile.png`), fullPage: true, animations: 'disabled' });

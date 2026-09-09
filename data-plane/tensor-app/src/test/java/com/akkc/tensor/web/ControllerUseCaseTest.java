@@ -14,7 +14,7 @@ import com.akkc.tensor.core.query.DatasetPage;
 import com.akkc.tensor.core.query.DatasetQueryService;
 import com.akkc.tensor.core.query.QueryCriteria;
 import com.akkc.tensor.observability.OperationLogger;
-import com.akkc.tensor.plugin.api.download.DownloadOutcome;
+import com.akkc.tensor.core.download.DownloadExecutionResult;
 import com.akkc.tensor.plugin.api.download.DownloadResult;
 import com.akkc.tensor.plugin.api.model.ApiName;
 import com.akkc.tensor.plugin.api.model.DatasetKey;
@@ -103,21 +103,21 @@ class ControllerUseCaseTest {
     @Test
     void convertsDownloadInputAndLogsTheCoreResultAfterProjection() {
         DownloadRequest request = downloadRequest();
-        Map<String, Object> raw = Map.of("trade_date", "20260907");
+        Map<String, Object> raw = Map.of("start_date", "20260907", "end_date", "20260907");
         when(parameters.toRawValues(request.params(), request.suppliedFields())).thenReturn(raw);
-        DownloadResult result = new DownloadResult(REQUEST_ID, DownloadOutcome.SUCCESS,
-                KEY.pluginId(), KEY.apiName(), 3, 2, 1, "下载成功");
-        when(downloads.execute(KEY.pluginId(), KEY.apiName(), raw, REQUEST_ID)).thenReturn(result);
+        DownloadExecutionResult result = new DownloadExecutionResult(REQUEST_ID, DownloadExecutionResult.Outcome.SUCCESS,
+                KEY.pluginId(), KEY.apiName(), 3, 2, 1, "下载成功", 1, 0, 0L, 0, null, 0L, DownloadExecutionResult.FailureRecordStatus.NOT_REQUIRED, List.of(), List.of(), List.of());
+        when(downloads.executeInitial(KEY.pluginId(), KEY.apiName(), raw, REQUEST_ID)).thenReturn(result);
 
         var response = new DownloadController(downloads, operations, parameters).download(request);
 
         assertThat(response.requestId()).isEqualTo(REQUEST_ID.value().toString());
-        assertThat(response.outcome()).isEqualTo(DownloadOutcome.SUCCESS);
+        assertThat(response.outcome()).isEqualTo(DownloadExecutionResult.Outcome.SUCCESS);
         assertThat(response.sourceRowCount()).isEqualTo(3);
         assertThat(response.insertedRows()).isEqualTo(2);
         assertThat(response.updatedRows()).isEqualTo(1);
         ArgumentCaptor<Duration> duration = ArgumentCaptor.forClass(Duration.class);
-        verify(operations).recordDownloadSuccess(eq(REQUEST_ID), eq(KEY), eq(raw), eq(result), duration.capture());
+        verify(operations).recordDownloadExecution(eq(result), duration.capture());
         assertThat(duration.getValue().isNegative()).isFalse();
     }
 
@@ -125,14 +125,14 @@ class ControllerUseCaseTest {
     @ValueSource(booleans = {false, true})
     void neverLogsDownloadSuccessWhenServiceOrProjectionFails(boolean projectionFailure) {
         DownloadRequest request = downloadRequest();
-        Map<String, Object> raw = Map.of("trade_date", "20260907");
+        Map<String, Object> raw = Map.of("start_date", "20260907", "end_date", "20260907");
         when(parameters.toRawValues(request.params(), request.suppliedFields())).thenReturn(raw);
         RuntimeException failure = new IllegalStateException("download failure");
         if (projectionFailure) {
-            when(downloads.execute(KEY.pluginId(), KEY.apiName(), raw, REQUEST_ID))
-                    .thenReturn(mock(DownloadResult.class));
+            when(downloads.executeInitial(KEY.pluginId(), KEY.apiName(), raw, REQUEST_ID))
+                    .thenReturn(mock(DownloadExecutionResult.class));
         } else {
-            when(downloads.execute(KEY.pluginId(), KEY.apiName(), raw, REQUEST_ID)).thenThrow(failure);
+            when(downloads.executeInitial(KEY.pluginId(), KEY.apiName(), raw, REQUEST_ID)).thenThrow(failure);
         }
 
         var thrown = assertThatThrownBy(() -> new DownloadController(downloads, operations, parameters)
@@ -152,6 +152,6 @@ class ControllerUseCaseTest {
     }
 
     private static DownloadRequest downloadRequest() {
-        return new DownloadRequest(KEY, new TradeDateParameters("20260907"), Set.of("trade_date"));
+        return new DownloadRequest(KEY, new com.akkc.tensor.web.download.DownloadParameters.DateRangeParameters("20260907", "20260907"), Set.of("start_date", "end_date"));
     }
 }

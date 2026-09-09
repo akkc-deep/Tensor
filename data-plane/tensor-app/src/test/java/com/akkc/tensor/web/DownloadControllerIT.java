@@ -26,6 +26,10 @@ import com.akkc.tensor.core.catalog.DatasetCatalog;
 import com.akkc.tensor.core.catalog.DatasetStartupValidator;
 import com.akkc.tensor.core.catalog.SchemaInspector;
 import com.akkc.tensor.core.download.DownloadService;
+import com.akkc.tensor.core.download.BatchCommitService;
+import com.akkc.tensor.core.download.DownloadExecutionResult;
+import com.akkc.tensor.core.download.DownloadExecutionSlot;
+import com.akkc.tensor.core.retry.RetryTaskStorageService;
 import com.akkc.tensor.core.persistence.DatasetLockManager;
 import com.akkc.tensor.core.persistence.ExistingKeyRepository;
 import com.akkc.tensor.core.persistence.GenericUpsertRepository;
@@ -177,15 +181,19 @@ class DownloadControllerIT {
                         AdapterRegistry.class,
                         ParameterValidator.class,
                         PersistenceService.class,
+                        BatchCommitService.class,
+                        RetryTaskStorageService.class,
+                        DownloadExecutionSlot.class,
                         Clock.class));
         assertThat(Arrays.stream(DownloadService.class.getDeclaredMethods())
                 .filter(method -> Modifier.isPublic(method.getModifiers())))
-                .singleElement()
-                .satisfies(method -> {
-                    assertThat(method.getName()).isEqualTo("execute");
+                .hasSize(2)
+                .allSatisfy(method -> {
+                    assertThat(method.getName()).isIn("execute", "executeInitial");
                     assertThat(method.getParameterTypes()).containsExactly(
                             PluginId.class, ApiName.class, Map.class, RequestId.class);
-                    assertThat(method.getReturnType()).isEqualTo(DownloadResult.class);
+                    assertThat(method.getReturnType()).isEqualTo(method.getName().equals("execute")
+                            ? DownloadResult.class : DownloadExecutionResult.class);
                 });
 
         assertThat(Modifier.isFinal(DownloadController.class.getModifiers())).isTrue();
@@ -211,30 +219,18 @@ class DownloadControllerIT {
                 .isInstanceOf(UnsupportedOperationException.class);
 
         RequestId requestId = requestId();
-        DownloadResponse empty = DownloadResponse.from(new DownloadResult(
-                requestId, DownloadOutcome.EMPTY, PLUGIN_ID, API_NAME, 0, 0, 0,
-                "下载成功，0 条数据"));
-        DownloadResponse success = DownloadResponse.from(new DownloadResult(
-                requestId, DownloadOutcome.SUCCESS, PLUGIN_ID, API_NAME, 1, 1, 0,
-                "下载成功"));
-        assertThat(Arrays.stream(DownloadResponse.class.getRecordComponents())
-                .map(component -> component.getName()))
-                .containsExactly("requestId", "outcome", "pluginId", "apiName", "sourceRowCount",
-                        "insertedRows", "updatedRows", "message");
-        assertThat(empty.outcome()).isEqualTo(DownloadOutcome.EMPTY);
+        DownloadResponse empty = DownloadResponse.from(new DownloadExecutionResult(
+                requestId, DownloadExecutionResult.Outcome.EMPTY, PLUGIN_ID, API_NAME, 0, 0, 0,
+                "下载成功，0 条数据", 1, 0, 0L, 0, null, 0L, DownloadExecutionResult.FailureRecordStatus.NOT_REQUIRED, List.of(), List.of(), List.of()));
+        DownloadResponse success = DownloadResponse.from(new DownloadExecutionResult(
+                requestId, DownloadExecutionResult.Outcome.SUCCESS, PLUGIN_ID, API_NAME, 1, 1, 0,
+                "下载成功", 1, 0, 0L, 0, null, 0L, DownloadExecutionResult.FailureRecordStatus.NOT_REQUIRED, List.of(), List.of(), List.of()));
+        assertThat(Arrays.stream(DownloadResponse.class.getRecordComponents()).map(component -> component.getName()))
+                .containsExactly("requestId", "outcome", "pluginId", "apiName", "sourceRowCount", "insertedRows", "updatedRows", "message",
+                        "completedUnits", "failedUnits", "notStartedUnits", "skippedClosedDates", "taskId", "remainingFailedUnits", "failureRecordStatus", "failures", "notStartedScopes", "unconfirmedScopes");
+        assertThat(empty.outcome()).isEqualTo(DownloadExecutionResult.Outcome.EMPTY);
         assertThat(success.sourceRowCount()).isEqualTo(1);
-        assertThatThrownBy(() -> new DownloadResponse(
-                " ", DownloadOutcome.EMPTY, "fixture", "fixture_daily", 0, 0, 0, "ok"))
-                .isInstanceOf(IllegalArgumentException.class);
-        assertThatThrownBy(() -> new DownloadResponse(
-                REQUEST_ID, DownloadOutcome.SUCCESS, "fixture", "fixture_daily", -1, 0, 0, "ok"))
-                .isInstanceOf(IllegalArgumentException.class);
-        assertThatThrownBy(() -> new DownloadResponse(
-                REQUEST_ID, DownloadOutcome.EMPTY, "fixture", "fixture_daily", 1, 0, 0, "ok"))
-                .isInstanceOf(IllegalArgumentException.class);
-        assertThatThrownBy(() -> new DownloadResponse(
-                REQUEST_ID, DownloadOutcome.SUCCESS, "fixture", "fixture_daily", 0, 0, 0, "ok"))
-                .isInstanceOf(IllegalArgumentException.class);
+        assertThatThrownBy(() -> empty.failures().clear()).isInstanceOf(UnsupportedOperationException.class);
         assertThatThrownBy(() -> DownloadResponse.from(null))
                 .isInstanceOf(NullPointerException.class)
                 .hasMessage("result");
@@ -294,6 +290,7 @@ class DownloadControllerIT {
                 new AdapterRegistry(List.of(fixtureAdapter)),
                 new ParameterValidator(),
                 mock(PersistenceService.class),
+                unused(BatchCommitService.class), unused(RetryTaskStorageService.class), new DownloadExecutionSlot(),
                 FIXED_CLOCK);
         assertThatThrownBy(() -> unavailableService.execute(
                         PLUGIN_ID, API_NAME, Map.of("scenario", "SUCCESS"), requestId()))
@@ -323,6 +320,7 @@ class DownloadControllerIT {
                 new AdapterRegistry(List.of()),
                 new ParameterValidator(),
                 mock(PersistenceService.class),
+                unused(BatchCommitService.class), unused(RetryTaskStorageService.class), new DownloadExecutionSlot(),
                 FIXED_CLOCK);
         assertThatThrownBy(() -> missingAdapterService.execute(
                         PLUGIN_ID, API_NAME, Map.of("scenario", "SUCCESS"), requestId()))
@@ -360,30 +358,30 @@ class DownloadControllerIT {
     }
 
     @Test
-    void returnsEmptyResponseWithoutClockAdaptationOrPersistence() throws Exception {
-        CountingPlugin plugin = new CountingPlugin(fixturePlugin);
-        CountingAdapter adapter = new CountingAdapter(fixtureAdapter);
-        Clock clock = mock(Clock.class);
-        PersistenceService persistence = mock(PersistenceService.class);
-        DownloadService service = service(plugin, adapter, persistence, clock);
-
-        MvcResult result = mockMvc(service).perform(post("/api/v1/downloads")
-                        .header(RequestIdFilter.HEADER_NAME, REQUEST_ID)
-                        .contentType(APPLICATION_JSON)
-                        .content(downloadJson("EMPTY")))
-                .andExpect(status().isOk())
-                .andExpect(header().string(RequestIdFilter.HEADER_NAME, REQUEST_ID))
-                .andReturn();
-
-        assertThat(result.getResponse().getContentAsString()).isEqualTo(
-                "{\"requestId\":\"" + REQUEST_ID
-                        + "\",\"outcome\":\"EMPTY\",\"pluginId\":\"fixture\",\"apiName\":\"fixture_daily\""
-                        + ",\"sourceRowCount\":0,\"insertedRows\":0,\"updatedRows\":0"
-                        + ",\"message\":\"下载成功，0 条数据\"}");
-        assertThat(plugin.downloads).isEqualTo(1);
-        assertThat(adapter.adaptations).isZero();
-        verifyNoInteractions(clock, persistence);
+    void returnsConfirmedEmptyUnitWithoutBusinessRowsOrFailureTask() throws Exception {
+        var service = realService(fixturePlugin, fixtureAdapter, FIXED_CLOCK);
+        var result = mockMvc(service).perform(post("/api/v1/downloads").header(RequestIdFilter.HEADER_NAME, REQUEST_ID)
+                .contentType(APPLICATION_JSON).content(downloadJson("EMPTY"))).andExpect(status().isOk()).andReturn();
+        var json = new ObjectMapper().readTree(result.getResponse().getContentAsString());
+        assertThat(json.path("outcome").asText()).isEqualTo("EMPTY");
+        assertThat(json.path("completedUnits").longValue()).isEqualTo(1);
+        assertThat(json.path("sourceRowCount").longValue()).isZero();
+        assertThat(json.path("remainingFailedUnits").longValue()).isZero();
+        assertThat(json.path("taskId").isNull()).isTrue();
         assertThat(rowCount()).isZero();
+        assertThat(jdbc().queryForObject("SELECT COUNT(*) FROM tensor_download_task", Integer.class)).isZero();
+    }
+
+    @Test
+    void unwrappedFixtureExecutesNewHttpWithRealBatchCapability() throws Exception {
+        var service = realService(fixturePlugin, fixtureAdapter, FIXED_CLOCK);
+        var response = mockMvc(service).perform(post("/api/v1/downloads").contentType(APPLICATION_JSON).content(downloadJson("SUCCESS")))
+                .andExpect(status().isOk()).andReturn().getResponse();
+        var json = new ObjectMapper().readTree(response.getContentAsString());
+        assertThat(json.path("completedUnits").asLong()).isEqualTo(1);
+        assertThat(json.path("insertedRows").asLong()).isEqualTo(1);
+        assertThat(rowCount()).isEqualTo(1);
+        assertThat(jdbc().queryForObject("SELECT COUNT(*) FROM tensor_download_task", Integer.class)).isZero();
     }
 
     @Test
@@ -402,7 +400,7 @@ class DownloadControllerIT {
                 "{\"requestId\":\"" + REQUEST_ID
                         + "\",\"outcome\":\"SUCCESS\",\"pluginId\":\"fixture\",\"apiName\":\"fixture_daily\""
                         + ",\"sourceRowCount\":1,\"insertedRows\":1,\"updatedRows\":0"
-                        + ",\"message\":\"下载成功\"}");
+                        + ",\"message\":\"下载成功\",\"completedUnits\":1,\"failedUnits\":0,\"notStartedUnits\":0,\"skippedClosedDates\":0,\"taskId\":null,\"remainingFailedUnits\":0,\"failureRecordStatus\":\"NOT_REQUIRED\",\"failures\":[],\"notStartedScopes\":[],\"unconfirmedScopes\":[]}");
         assertThat(row()).isEqualTo(new StoredRow(
                 "000001.SZ",
                 LocalDate.of(2026, 8, 7),
@@ -497,17 +495,13 @@ class DownloadControllerIT {
         DatasetCatalog catalog = new DatasetStartupValidator(
                 List.of(adapter.definition()), new SchemaInspector(dataSource)).validate();
         JdbcTemplate jdbc = jdbc();
-        return new DownloadService(
-                new PluginRegistry(List.of(plugin)),
-                new AdapterRegistry(List.of(adapter)),
-                new ParameterValidator(),
-                new PersistenceService(
-                        catalog,
-                        new DatasetLockManager(),
-                        new ExistingKeyRepository(jdbc),
-                        new GenericUpsertRepository(jdbc),
-                        new DataSourceTransactionManager(dataSource)),
-                clock);
+        var transactions = new DataSourceTransactionManager(dataSource);
+        var persistence = new PersistenceService(catalog, new DatasetLockManager(), new ExistingKeyRepository(jdbc), new GenericUpsertRepository(jdbc), transactions);
+        var validator = new ParameterValidator();
+        var repository = new com.akkc.tensor.core.retry.RetryTaskRepository(jdbc, new com.akkc.tensor.core.retry.TaskParametersJson());
+        var storage = new RetryTaskStorageService(repository, transactions, clock);
+        return new DownloadService(new PluginRegistry(List.of(plugin)), new AdapterRegistry(List.of(adapter)), validator, persistence,
+                new BatchCommitService(persistence, repository, new com.akkc.tensor.core.download.DownloadParameterConverter(validator), transactions, clock), storage, new DownloadExecutionSlot(), clock);
     }
 
     private static DownloadService service(
@@ -520,7 +514,14 @@ class DownloadControllerIT {
                 new AdapterRegistry(List.of(adapter)),
                 new ParameterValidator(),
                 persistence,
+                unused(BatchCommitService.class), unused(RetryTaskStorageService.class), new DownloadExecutionSlot(),
                 clock);
+    }
+
+    private static <T> T unused(Class<T> type) {
+        return mock(type, invocation -> {
+            throw new AssertionError("Legacy download must not call " + type.getSimpleName());
+        });
     }
 
     private static MockMvc mockMvc(DownloadService service) {

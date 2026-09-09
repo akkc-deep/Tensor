@@ -124,7 +124,9 @@ public final class GlobalExceptionHandler {
         HttpStatus status = status(code);
         log(status, requestId, code, exception);
         return ResponseEntity.status(status).body(new ApiErrorResponse(
-                requestId, code, message(code), code.retryable(), fields));
+                requestId, code, message(code), code.retryable(), fields,
+                exception instanceof com.akkc.tensor.core.download.DownloadExecutionException execution
+                        ? com.akkc.tensor.web.dto.DownloadResponse.from(execution.downloadResult()) : null));
     }
 
     private static void log(

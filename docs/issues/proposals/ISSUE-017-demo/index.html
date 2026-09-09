@@ -12,7 +12,8 @@
   <script src="app.js" defer></script>
 </head>
 <body>
-<div id="app" v-cloak :class="{ 'reduce-motion': motion === 'reduce', 'system-font': font === 'system' }">
+<div id="demo" v-cloak>
+<div id="app" :class="{ 'reduce-motion': motion === 'reduce', 'system-font': font === 'system' }">
   <a class="skip" href="#main">跳转到工作区</a>
   <aside class="sidebar">
     <a class="brand" href="#datasets" aria-label="Tensor 数据工作台">
@@ -37,7 +38,7 @@
 
     <section v-show="route === 'datasets'" class="page dataset-page" aria-label="数据查看">
       <div class="context-bar">
-        <div class="source-field"><label for="query-source">数据源</label><demo-picker id="query-source" v-model="source" :options="sources"></demo-picker></div>
+        <div class="source-field"><label for="query-source">数据源</label><demo-picker id="query-source" v-model="source" :disabled="queryState === 'loading'" :options="sources"></demo-picker></div>
         <div class="dataset-field"><label for="query-dataset">数据集</label><demo-picker id="query-dataset" :model-value="datasetKey" :options="datasetOptions" @update:model-value="selectDataset" searchable></demo-picker></div>
         <div class="context-description"><span class="source-square">T</span><span>{{ dataset.category }}<small>{{ datasetKey === 'precision' || datasetKey === 'balancesheet' ? '合成排版样例' : '仓库数据样例 · 2026-08-07' }}</small></span></div>
       </div>
@@ -49,23 +50,23 @@
       <p v-if="queryError" class="field-error" role="alert">{{ queryError }}</p>
 
       <div class="data-surface" :aria-busy="queryState === 'loading'">
-        <div class="table-toolbar"><div class="table-title"><ui-icon name="table"></ui-icon><h2>{{ dataset.label }}</h2><span class="record-count">{{ filtered.length }} 条</span></div><div class="table-tools"><span class="field-count">{{ dataset.columns.length }} 个字段</span><div class="density-control" aria-label="表格行高"><button v-for="item in densities" :key="item.value" :class="{ selected: density === item.value }" :aria-pressed="density === item.value" @click="setPreference('density', item.value)" :title="item.label"><ui-icon :name="item.icon"></ui-icon><span>{{ item.label }}</span></button></div></div></div>
+        <div class="table-toolbar"><div class="table-title"><ui-icon name="table"></ui-icon><h2>{{ dataset.label }}</h2><span class="record-count">{{ filtered.length }} 条</span></div><div class="table-tools"><button class="field-toggle" :aria-pressed="showFieldCodes" @click="showFieldCodes = !showFieldCodes">字段名</button><span class="field-count">{{ dataset.columns.length }} 个字段</span><div class="density-control" aria-label="表格行高"><button v-for="item in densities" :key="item.value" :class="{ selected: density === item.value }" :aria-pressed="density === item.value" @click="setPreference('density', item.value)" :title="item.label"><ui-icon :name="item.icon"></ui-icon><span>{{ item.label }}</span></button></div></div></div>
         <div v-if="queryState === 'error'" class="empty-state" role="alert"><span class="state-icon error"><ui-icon name="alert"></ui-icon></span><h3>查询暂未完成</h3><p>这是错误状态演示。可以保留当前筛选条件重新查询。</p><button class="button secondary" @click="query(true)"><ui-icon name="retry"></ui-icon>重新查询</button></div>
         <div v-else-if="queryState !== 'loading' && filtered.length === 0" class="empty-state" role="status"><span class="state-icon"><ui-icon name="search"></ui-icon></span><h3>没有找到匹配的数据</h3><p>试试其他证券代码或日期，或者重置筛选查看全部样例。</p><button class="button secondary" @click="resetQuery">重置筛选</button></div>
         <div v-else class="table-scroll" :class="['density-' + density, { loading: queryState === 'loading' }]" ref="tableScroller" tabindex="0" role="region" aria-label="数据表格，可横向和纵向滚动">
           <table :style="{ width: tableWidth + 'px' }"><caption class="sr-only">{{ dataset.label }}，{{ filtered.length }} 条样例记录</caption><colgroup><col v-for="col in displayColumns" :key="col.key" :style="{ width: col.width + 'px' }"></colgroup>
-            <thead><tr><th v-for="(col, index) in displayColumns" :key="col.key" scope="col" :class="{ numeric: col.numeric, pinned: index === 0 }"><span class="column-label">{{ col.label }}</span><span class="column-code">{{ col.key !== col.label ? col.key : '\u00a0' }}</span></th></tr></thead>
+            <thead><tr><th v-for="(col, index) in displayColumns" :key="col.key" scope="col" :class="{ numeric: col.numeric, pinned: index === 0, 'date-heading': col.kind === 'DATE' }"><span class="column-label" :title="col.label + ' · ' + col.key">{{ col.label }}</span><span v-if="showFieldCodes" class="column-code">{{ col.key !== col.label ? col.key : '\u00a0' }}</span></th></tr></thead>
             <tbody><tr v-for="(row, rowIndex) in pageRows" :key="rowIndex"><td v-for="(col, colIndex) in displayColumns" :key="col.key" :class="[{ numeric: col.numeric, pinned: colIndex === 0, 'code-cell': col.key === 'ts_code', 'date-cell': col.kind === 'DATE', 'null-cell': row[col.key] == null }, marketClass(row[col.key], col.key)]">
-              <template v-if="col.numeric && row[col.key] != null"><span class="decimal-value" :style="{ '--fraction-width': col.fraction + 'ch' }"><span>{{ numberParts(row[col.key], col.key).integer }}</span><span class="decimal-point" :class="{ invisible: !numberParts(row[col.key], col.key).hasPoint }">{{ numberParts(row[col.key], col.key).hasPoint ? '.' : '' }}</span><span class="fraction">{{ numberParts(row[col.key], col.key).fraction }}</span></span></template>
+              <template v-if="col.numeric && row[col.key] != null"><span class="decimal-value" :style="numberStyle(row[col.key], col)">{{ numberText(row[col.key], col.key) }}</span></template>
               <button v-else-if="col.long && row[col.key]" class="text-cell" @click="openText(col.label, row[col.key])" :aria-label="'查看完整' + col.label">{{ row[col.key] }}</button>
               <span v-else>{{ row[col.key] == null || row[col.key] === '' ? '—' : row[col.key] }}</span>
             </td></tr></tbody>
           </table>
         </div>
           <div v-if="queryState === 'loading'" class="loading-overlay" role="status"><ui-icon name="spinner"></ui-icon><span>正在查询样例数据</span></div>
-        <footer class="pagination"><span class="pagination-summary">{{ filtered.length ? (page - 1) * pageSize + 1 : 0 }}–{{ Math.min(page * pageSize, filtered.length) }}<span> / {{ filtered.length }} 条</span></span><div class="pagination-actions"><label for="page-size">每页</label><select id="page-size" :disabled="queryState === 'loading'" :value="pageSize" @change="resizePage(Number($event.target.value))"><option v-for="size in [20, 50, 100]" :value="size">{{ size }} 条</option></select><button class="icon-button" aria-label="上一页" :disabled="page <= 1 || queryState === 'loading'" @click="changePage(page - 1)"><ui-icon name="left"></ui-icon></button><span class="page-number">{{ page }}<span> / {{ pageCount }}</span></span><button class="icon-button" aria-label="下一页" :disabled="page >= pageCount || queryState === 'loading'" @click="changePage(page + 1)"><ui-icon name="right"></ui-icon></button></div></footer>
+        <footer class="pagination"><span class="pagination-summary">{{ filtered.length ? (page - 1) * pageSize + 1 : 0 }}–{{ Math.min(page * pageSize, filtered.length) }}<span> / {{ filtered.length }} 条</span></span><div class="pagination-actions"><label for="page-size">每页</label><demo-picker id="page-size" :disabled="queryState === 'loading'" :model-value="String(pageSize)" :options="pageSizes" @update:model-value="resizePage(Number($event))" compact></demo-picker><button class="icon-button" aria-label="上一页" :disabled="page <= 1 || queryState === 'loading'" @click="changePage(page - 1)"><ui-icon name="left"></ui-icon></button><span class="page-number">{{ page }}<span> / {{ pageCount }}</span></span><button class="icon-button" aria-label="下一页" :disabled="page >= pageCount || queryState === 'loading'" @click="changePage(page + 1)"><ui-icon name="right"></ui-icon></button></div></footer>
       </div>
-      <div class="table-bottom"><span><ui-icon name="info"></ui-icon>{{ datasetKey === 'precision' ? '高精度值按原始字符串展示，保留末尾零与负零。' : datasetKey === 'balancesheet' ? '155 列财务表使用合成数据，可横向滚动检查固定列与对齐。' : '全部字段均可横向浏览；长文本可点击查看。' }}</span><label class="scenario-control">反馈预览<select v-model="scenario"><option value="success">正常返回</option><option value="empty">空结果</option><option value="error">请求失败</option><option value="slow">慢速响应</option></select></label></div>
+      <div class="table-bottom"><span><ui-icon name="info"></ui-icon>{{ datasetKey === 'precision' ? '高精度值按原始字符串展示，保留末尾零与负零。' : datasetKey === 'balancesheet' ? '155 列财务表使用合成数据，可横向滚动检查固定列与对齐。' : '全部字段均可横向浏览；长文本可点击查看。' }}</span><div class="scenario-control"><label for="query-scenario">反馈预览</label><demo-picker id="query-scenario" v-model="scenario" :options="scenarios" compact></demo-picker></div></div>
     </section>
 
     <section v-show="route === 'downloads'" class="page download-page" aria-label="数据下载">
@@ -91,7 +92,7 @@
           </div></transition>
         </div>
       </div>
-      <div class="download-footnote"><span><ui-icon name="flask"></ui-icon>本地模拟下载，不写入业务数据。</span><label class="scenario-control">反馈预览<select v-model="scenario"><option value="success">正常返回</option><option value="empty">空结果</option><option value="error">请求失败</option><option value="slow">慢速响应</option></select></label></div>
+      <div class="download-footnote"><span><ui-icon name="flask"></ui-icon>本地模拟下载，不写入业务数据。</span><div class="scenario-control"><label for="download-scenario">反馈预览</label><demo-picker id="download-scenario" v-model="scenario" :options="scenarios" compact></demo-picker></div></div>
     </section>
 
     <section v-show="route === 'settings'" class="page settings-page" aria-label="外观与设置">
@@ -110,6 +111,7 @@
     </section>
   </main>
   <dialog ref="textDialog" class="text-dialog" @click="closeOnBackdrop"><header><h2>{{ detailTitle }}</h2><button class="icon-button" aria-label="关闭全文" @click="textDialog.close()"><ui-icon name="close"></ui-icon></button></header><p>{{ detailText }}</p></dialog>
+</div>
 </div>
 <noscript>此交互 Demo 需要启用 JavaScript。</noscript>
 </body>

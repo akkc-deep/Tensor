@@ -1,4 +1,4 @@
-import { formatDate, toApiDate, toApiMonth } from './date.js'
+import { coveredMonths, formatDate, inclusiveDateDays, toApiDate, toApiMonth } from './date.js'
 import { decimalSign, formatCell, formatIngestedAt } from './format.js'
 import { hasValue, isRangeOrdered, matchesPattern } from './validation.js'
 
@@ -35,6 +35,23 @@ describe('date utilities', () => {
     expect(formatDate('2026-09-04')).toBe('2026-09-04')
     expect(formatDate('2026-02-29')).toBe('2026-02-29')
     expect(formatDate(20260904)).toBe(20260904)
+  })
+
+  it('counts inclusive Gregorian days without remapping early years', () => {
+    expect(inclusiveDateDays('2026-01-31', '2026-03-02')).toBe(31)
+    expect(inclusiveDateDays('2024-02-29', '2024-02-29')).toBe(1)
+    expect(inclusiveDateDays('0001-01-01', '0001-01-02')).toBe(2)
+    expect(inclusiveDateDays('0099-12-31', '0100-01-01')).toBe(2)
+    for (const pair of [['0000-01-01', '0001-01-01'], ['2026-04-31', '2026-05-01'], ['2026-03-02', '2026-01-31'], [null, '2026-01-01']]) {
+      expect(inclusiveDateDays(...pair)).toBeNull()
+    }
+  })
+
+  it('enumerates unique covered months across years', () => {
+    expect(coveredMonths('2026-01-31', '2026-03-02')).toEqual(['2026-01', '2026-02', '2026-03'])
+    expect(coveredMonths('2025-12-20', '2026-01-10')).toEqual(['2025-12', '2026-01'])
+    expect(coveredMonths('9999-12-31', '9999-12-31')).toEqual(['9999-12'])
+    expect(coveredMonths('2026-02-29', '2026-03-01')).toEqual([])
   })
 })
 

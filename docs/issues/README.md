@@ -31,4 +31,4 @@
 | ISSUE-014 | 安全 Maven 门禁未完成 | 已解决 | 原命令重跑：HEAD 七类 81 项、当前源码七类 118 项通过；六模块 Enforcer 通过 | [详情](problems/ISSUE-014-security-maven-verification.md) · [验收记录](../verification/ISSUE-014-security-maven-verification.md) |
 | ISSUE-015 | 后端漏洞扫描未形成有效报告 | 已完成 | 扫描脚本已修复；27 个高阈值 CVE 与四类分析缺口按用户决定标记为不需要处理，接受剩余风险并关闭 | [详情](problems/ISSUE-015-backend-dependency-audit.md) · [验证记录](../verification/ISSUE-015-backend-dependency-audit.md) |
 | ISSUE-016 | UI 测试 YAML 解析器缺少严格字段校验 | 新增 | 从 ISSUE-004 延期项拆出，已登记，待解决方案 | [详情](problems/ISSUE-016-ui-fixture-yaml-validation.md) |
-| ISSUE-017 | 前端 UI 第二版：重做视觉、字体、动效与表格排版 | 新增 | 布局、字体、动效及表格尺寸／对齐提案已记录，待视觉与交互评审 | [详情](problems/ISSUE-017-ui-redesign-v2.md) · [第二版提案](proposals/ISSUE-017-ui-redesign-v2.md) |
+| ISSUE-017 | 前端 UI 第二版：重做视觉、字体、动效与表格排版 | 方案已锁定 | 当前 Demo 已获确认，待正式前端实施与验收 | [详情](problems/ISSUE-017-ui-redesign-v2.md) · [提案](proposals/ISSUE-017-ui-redesign-v2.md) · [Demo](proposals/ISSUE-017-demo/index.html) |

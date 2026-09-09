@@ -29,7 +29,7 @@ vi.mock('../api/datasets.js', () => ({
   queryDataset: datasetApi.queryDataset,
 }))
 
-import { ClientError } from '../api/errors.js'
+import { ApiError, ClientError } from '../api/errors.js'
 import DownloadAction from '../components/download/DownloadAction.vue'
 import ApiSelect from '../components/download/ApiSelect.vue'
 import DownloadResult from '../components/download/DownloadResult.vue'
@@ -41,6 +41,7 @@ import DynamicFilterForm from '../components/dataset/DynamicFilterForm.vue'
 import { createThemeState, THEME_KEY } from '../composables/useTheme.js'
 import { createAppRouter } from '../router/index.js'
 import AppLayout from './AppLayout.vue'
+import results from '../test/fixtures/range-results.json'
 
 const styles = readFileSync('src/style.css', 'utf8')
 
@@ -80,13 +81,16 @@ function descriptor() {
     category: '行情与估值',
     queryMode: 'trade_date',
     parameters: [
-      {
-        name: 'trade_date',
-        label: '交易日期',
-        type: 'DATE',
-        required: true,
-      },
+      { name: 'start_date', label: '开始日期', type: 'DATE_RANGE_MEMBER', required: true, relatedParameter: 'end_date' },
+      { name: 'end_date', label: '结束日期', type: 'DATE_RANGE_MEMBER', required: true, relatedParameter: 'start_date' },
     ],
+    downloadPolicy: {
+      mode: 'TRADE_DATE_RANGE',
+      dateSemantic: 'TRADE_DATE',
+      description: '来源请求与完整性仍需核实。',
+      calendarProfile: 'C-A',
+      limits: { maxRangeDays: 31 },
+    },
   }
 }
 
@@ -331,10 +335,8 @@ describe('AppLayout', () => {
     try {
       wrapper.getComponent(ApiSelect).vm.$emit('update:modelValue', 'daily')
       await nextTick()
-      wrapper
-        .getComponent(DynamicParameterForm)
-        .getComponent(ElDatePicker)
-        .vm.$emit('update:modelValue', '2026-09-04')
+      wrapper.getComponent(DynamicParameterForm).findAllComponents(ElDatePicker)
+        .forEach((picker) => picker.vm.$emit('update:modelValue', '2026-09-04'))
       await nextTick()
 
       await router.push('/settings')
@@ -357,7 +359,7 @@ describe('AppLayout', () => {
     }
   })
 
-  it('keeps a pending download active while settings is open and shows its single response on return', async () => {
+  it.each([['/settings', 'PARTIAL'], ['/datasets', 'PARTIAL'], ['/settings', 'UNCONFIRMED'], ['/datasets', 'UNCONFIRMED']])('keeps the same pending request through %s and displays its late %s response', async (destination, outcome) => {
     const pending = deferred()
     metadataApi.listDataSources.mockResolvedValueOnce([source()])
     metadataApi.listApis.mockResolvedValueOnce([descriptor()])
@@ -367,40 +369,33 @@ describe('AppLayout', () => {
     try {
       wrapper.getComponent(ApiSelect).vm.$emit('update:modelValue', 'daily')
       await nextTick()
-      wrapper
-        .getComponent(DynamicParameterForm)
-        .getComponent(ElDatePicker)
-        .vm.$emit('update:modelValue', '2026-09-04')
+      wrapper.getComponent(DynamicParameterForm).findAllComponents(ElDatePicker)
+        .forEach((picker) => picker.vm.$emit('update:modelValue', '2026-09-04'))
       await nextTick()
       await wrapper.getComponent(DownloadAction).get('button').trigger('click')
       await nextTick()
 
       expect(downloadApi.downloadDataset).toHaveBeenCalledOnce()
-      await router.push('/settings')
+      await router.push(destination)
       await flushPromises()
-      pending.resolve({
-        requestId: 'download-request',
-        outcome: 'SUCCESS',
-        pluginId: 'fixture',
-        apiName: 'daily',
-        sourceRowCount: 12,
-        insertedRows: 7,
-        updatedRows: 5,
-        message: '下载完成',
-      })
+      const result = { ...structuredClone(results[outcome]), pluginId: 'fixture', requestId: 'download-request' }
+      if (outcome === 'PARTIAL') pending.resolve(result)
+      else pending.reject(new ApiError({ requestId: result.requestId, code: 'COMMIT_UNCONFIRMED', message: '提交结果未确认', retryable: false, fieldErrors: [], downloadResult: result }))
       await flushPromises()
 
       await router.push('/downloads')
       await flushPromises()
 
       expect(wrapper.getComponent(DownloadResult).props('state')).toBe(
-        'SUCCESS',
+        outcome,
       )
       expect(
         wrapper.getComponent(DownloadResult).props('result').requestId,
       ).toBe('download-request')
       expect(downloadApi.downloadDataset).toHaveBeenCalledOnce()
-      expect(metadataApi.listDataSources).toHaveBeenCalledOnce()
+      expect(wrapper.getComponent(DownloadResult).props('context')).toEqual({ pluginId: 'fixture', apiName: 'daily', params: { start_date: '20260904', end_date: '20260904' }, rangeMode: true })
+      expect(wrapper.getComponent(DownloadResult).text()).toContain(outcome === 'PARTIAL' ? '部分完成' : '结果未确认')
+      expect(metadataApi.listDataSources).toHaveBeenCalledTimes(destination === '/datasets' ? 2 : 1)
       expect(metadataApi.listApis).toHaveBeenCalledOnce()
     } finally {
       wrapper.unmount()
@@ -582,5 +577,45 @@ describe('AppLayout', () => {
     } finally {
       wrapper.unmount()
     }
+  })
+})
+
+import { http } from '../api/http.js'
+import tasks from '../test/fixtures/retry-tasks.json'
+
+describe('retry KeepAlive lifecycle', () => {
+  const adapter = http.defaults.adapter
+  afterEach(() => { http.defaults.adapter = adapter })
+  it('preserves one pending retry across settings and data routes, while a full remount only reads current records', async () => {
+    const pending = deferred()
+    const requests = []
+    http.defaults.adapter = async config => {
+      requests.push([config.method, config.url])
+      const data = config.method === 'post' ? await pending.promise : config.url === '/retry-tasks' ? tasks.page : tasks.detail
+      const requestId = config.headers.get('X-Request-Id')
+      return { config, status: 200, statusText: 'OK', headers: { 'X-Request-Id': requestId }, data: { ...structuredClone(data), requestId } }
+    }
+    const router = createAppRouter(createMemoryHistory())
+    await router.push({ name: 'downloads', query: { tab: 'retry-tasks', taskId: tasks.detail.taskId } })
+    await router.isReady()
+    const wrapper = mount(AppLayout, { global: { plugins: [router], provide: { [THEME_KEY]: createThemeState() } } })
+    await flushPromises()
+    await action(wrapper, '重试一次').trigger('click'); await flushPromises()
+    await router.push('/settings'); await flushPromises()
+    await router.push('/datasets'); await flushPromises()
+    await router.push({ name: 'downloads', query: { tab: 'retry-tasks', taskId: tasks.detail.taskId } }); await flushPromises()
+    expect(wrapper.text()).toContain('区间下载已开始，不可终止，请等待结果。')
+    expect(requests).toHaveLength(3)
+    pending.resolve({ ...results.PARTIAL, taskId: tasks.detail.taskId }); await flushPromises()
+    expect(wrapper.getComponent(DownloadResult).props('state')).toBe('PARTIAL')
+    expect(requests.filter(([method]) => method === 'post')).toHaveLength(1)
+    wrapper.unmount()
+    const fresh = mount(AppLayout, { global: { plugins: [router], provide: { [THEME_KEY]: createThemeState() } } })
+    await flushPromises()
+    expect(fresh.findComponent(DownloadResult).exists()).toBe(false)
+    expect(fresh.text()).toContain('2026-09-01 至 2026-09-10')
+    expect(requests.filter(([method]) => method === 'post')).toHaveLength(1)
+    expect(requests.slice(-2)).toEqual([['get', '/retry-tasks'], ['get', `/retry-tasks/${tasks.detail.taskId}`]])
+    fresh.unmount()
   })
 })

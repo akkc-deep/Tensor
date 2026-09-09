@@ -1,3 +1,5 @@
+import { isDownloadResult } from './downloadResult.js'
+
 const API_ERROR_KEYS = [
   'requestId',
   'code',
@@ -5,9 +7,10 @@ const API_ERROR_KEYS = [
   'retryable',
   'fieldErrors',
 ]
+const API_ERROR_WITH_RESULT_KEYS = [...API_ERROR_KEYS, 'downloadResult']
 const FIELD_ERROR_KEYS = ['field', 'message']
 
-/** @typedef {'PARAM_REQUIRED'|'PARAM_INVALID'|'PLUGIN_DISABLED'|'DATASET_MISCONFIGURED'|'SOURCE_AUTH_FAILED'|'SOURCE_PERMISSION_DENIED'|'SOURCE_RATE_LIMITED'|'SOURCE_UNAVAILABLE'|'SOURCE_NETWORK_ERROR'|'SOURCE_TIMEOUT'|'SOURCE_PAYLOAD_INVALID'|'ADAPTER_FIELD_MISSING'|'ADAPTER_TYPE_INVALID'|'PERSISTENCE_FAILED'|'QUERY_FAILED'|'INTERNAL_ERROR'} ApiErrorCode */
+/** @typedef {'PARAM_REQUIRED'|'PARAM_INVALID'|'PLUGIN_DISABLED'|'DATASET_MISCONFIGURED'|'SOURCE_AUTH_FAILED'|'SOURCE_PERMISSION_DENIED'|'SOURCE_RATE_LIMITED'|'SOURCE_UNAVAILABLE'|'SOURCE_NETWORK_ERROR'|'SOURCE_TIMEOUT'|'SOURCE_PAYLOAD_INVALID'|'ADAPTER_FIELD_MISSING'|'ADAPTER_TYPE_INVALID'|'PERSISTENCE_FAILED'|'QUERY_FAILED'|'INTERNAL_ERROR'|'SOURCE_REQUEST_UNCONFIRMED'|'CALENDAR_UNCONFIRMED'|'SOURCE_TRUNCATED'|'SOURCE_COMPLETENESS_UNCONFIRMED'|'DATA_CONFLICT'|'RETRY_TASK_NOT_FOUND'|'DOWNLOAD_BUSY'|'RETRY_TASK_INVALID'|'TASK_RECORD_SAVE_UNCONFIRMED'|'COMMIT_UNCONFIRMED'} ApiErrorCode */
 /** @typedef {'TIMEOUT'|'NETWORK'|'INVALID_RESPONSE'|'UNEXPECTED'} ClientErrorKind */
 
 /**
@@ -23,6 +26,7 @@ const FIELD_ERROR_KEYS = ['field', 'message']
  * @property {string} message
  * @property {boolean} retryable
  * @property {FieldError[]} fieldErrors
+ * @property {object} [downloadResult]
  */
 
 const API_RULES = Object.freeze({
@@ -42,7 +46,23 @@ const API_RULES = Object.freeze({
   PERSISTENCE_FAILED: [500, true],
   QUERY_FAILED: [500, true],
   INTERNAL_ERROR: [500, false],
+  SOURCE_REQUEST_UNCONFIRMED: [409, false],
+  CALENDAR_UNCONFIRMED: [502, true],
+  SOURCE_TRUNCATED: [502, false],
+  SOURCE_COMPLETENESS_UNCONFIRMED: [502, false],
+  DATA_CONFLICT: [422, false],
+  RETRY_TASK_NOT_FOUND: [404, false],
+  DOWNLOAD_BUSY: [409, true],
+  RETRY_TASK_INVALID: [409, false],
+  TASK_RECORD_SAVE_UNCONFIRMED: [500, false],
+  COMMIT_UNCONFIRMED: [500, false],
 })
+const RESULT_ERROR_CODES = new Set([
+  'TASK_RECORD_SAVE_UNCONFIRMED',
+  'COMMIT_UNCONFIRMED',
+  'PERSISTENCE_FAILED',
+  'INTERNAL_ERROR',
+])
 
 const CLIENT_RULES = Object.freeze({
   TIMEOUT: ['请求超时，请稍后重试。', true],
@@ -89,11 +109,22 @@ function outgoingRequestId(error) {
   return header(error?.config?.headers, 'X-Request-Id')
 }
 
+function freezeDownloadResult(result) {
+  if (result === undefined) return null
+  const freezeItems = (items) => Object.freeze(items.map((item) => Object.freeze({ ...item })))
+  return Object.freeze({
+    ...result,
+    failures: freezeItems(result.failures),
+    notStartedScopes: freezeItems(result.notStartedScopes),
+    unconfirmedScopes: freezeItems(result.unconfirmedScopes),
+  })
+}
+
 /** A validated OpenAPI FieldError snapshot. */
 export class ApiError extends Error {
   /** @param {ApiErrorBody} error */
   constructor(error) {
-    const { requestId, code, message, retryable, fieldErrors } = error
+    const { requestId, code, message, retryable, fieldErrors, downloadResult } = error
     super(message)
     this.name = 'ApiError'
     /** @type {string} */
@@ -108,6 +139,8 @@ export class ApiError extends Error {
         Object.freeze({ field, message: fieldMessage }),
       ),
     )
+    /** @type {Readonly<object>|null} */
+    this.downloadResult = freezeDownloadResult(downloadResult)
   }
 }
 
@@ -133,7 +166,9 @@ export class ClientError extends Error {
 
 function apiError(response) {
   const body = response.data
-  if (!isObjectWithExactKeys(body, API_ERROR_KEYS)) return null
+  const hasDownloadResult =
+    isObjectWithExactKeys(body, API_ERROR_WITH_RESULT_KEYS)
+  if (!hasDownloadResult && !isObjectWithExactKeys(body, API_ERROR_KEYS)) return null
 
   const rule =
     typeof body.code === 'string' && Object.hasOwn(API_RULES, body.code)
@@ -147,7 +182,13 @@ function apiError(response) {
     !isNonBlankString(body.requestId) ||
     !isNonBlankString(body.message) ||
     !validFieldErrors(body.fieldErrors) ||
-    responseRequestId !== body.requestId
+    responseRequestId !== body.requestId ||
+    (hasDownloadResult && (
+      !RESULT_ERROR_CODES.has(body.code) ||
+      !isDownloadResult(body.downloadResult, { allowUnconfirmed: true }) ||
+      body.downloadResult.outcome !== 'UNCONFIRMED' ||
+      body.downloadResult.requestId !== body.requestId
+    ))
   ) {
     return null
   }

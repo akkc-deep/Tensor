@@ -340,6 +340,8 @@ public final class RecoveryUnitProcessor {
             this.knownMembers = knownMembers;
         }
 
+        public boolean usesIndependentUnits() { return split; }
+
         public PreparedBatch accept(FetchResult completeResult) {
             finish();
             context.checkServerState();

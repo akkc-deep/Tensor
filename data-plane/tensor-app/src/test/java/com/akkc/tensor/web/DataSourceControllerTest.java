@@ -73,15 +73,18 @@ class DataSourceControllerTest {
     }
 
     @Test
-    void metadataKeepsSourceFieldsAndDoesNotExposeInternalPolicy() throws Exception {
+    void metadataProjectsRangeFieldsAndOnlyPublicPolicy() throws Exception {
         var source = List.of(new com.akkc.tensor.plugin.api.descriptor.ParameterDescriptor("trade_date", "交易日期", null,
                 com.akkc.tensor.plugin.api.descriptor.ParameterType.DATE, true, null, List.of(), null, null));
         var policy = com.akkc.tensor.test.DownloadPolicies.tradeRange();
         var api = new ApiDescriptor(ApiName.of("daily"), "Daily", "Market", QueryMode.trade_date,
                 com.akkc.tensor.plugin.api.download.DownloadParameterProjection.project(source, policy), policy, source);
         JsonNode json = objectMapper.valueToTree(ApiDescriptorResponse.from(api));
-        assertThat(json.get("parameters").get(0).get("name").asText()).isEqualTo("trade_date");
-        assertThat(json.toString()).doesNotContain("downloadPolicy", "sourceParameters", "start_date", "evidenceRefs");
+        assertThat(json.get("parameters").get(0).get("name").asText()).isEqualTo("start_date");
+        assertThat(fieldNames(json.path("downloadPolicy"))).containsExactly("mode", "dateSemantic", "description", "calendarProfile", "limits");
+        assertThat(json.path("downloadPolicy").path("calendarProfile").asText()).isEqualTo("C-A");
+        assertThat(json.path("downloadPolicy").path("limits").path("maxRangeDays").intValue()).isEqualTo(31);
+        assertThat(json.toString()).doesNotContain("sourceParameters", "evidenceRefs", "sourceRequestMode");
     }
 
     @Test
@@ -152,7 +155,7 @@ class DataSourceControllerTest {
         assertThat(body.get(48).get("apiName").asText()).isEqualTo("api_48");
         assertThat(body.get(0).get("queryMode").asText()).isEqualTo("trade_date");
         assertThat(fieldNames(body.get(0))).containsExactly(
-                "apiName", "displayName", "category", "queryMode", "parameters");
+                "apiName", "displayName", "category", "queryMode", "parameters", "downloadPolicy");
         JsonNode enumParameter = body.get(0).get("parameters").get(0);
         assertThat(fieldNames(enumParameter)).containsExactly(
                 "name", "label", "type", "required", "description", "defaultValue", "allowedValues", "pattern");
@@ -171,7 +174,7 @@ class DataSourceControllerTest {
                 .isInstanceOf(UnsupportedOperationException.class);
         List<ApiDescriptorResponse.ParameterResponse> source = new ArrayList<>(response.parameters());
         ApiDescriptorResponse copy = new ApiDescriptorResponse(
-                "daily", "日线行情", "market", QueryMode.trade_date, source);
+                "daily", "日线行情", "market", QueryMode.trade_date, source, response.downloadPolicy());
         source.clear();
         assertThat(copy.parameters()).hasSize(2);
     }
