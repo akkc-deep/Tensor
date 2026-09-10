@@ -90,7 +90,7 @@ java -jar tensor-app-1.0-SNAPSHOT-acceptance.jar \
   --server.address=127.0.0.1 --server.port=8080
 ```
 
-必须两个运行条件同时满足才注册 fixture。验收包内 V6 对 Flyway 始终可见，首次启动自动执行 V1～V7 共七次迁移，建立 49 张 Tushare 表和一张 `fixture__fixture_daily`，另有 history 表；即使禁用 fixture，V6 仍可能执行。
+必须两个运行条件同时满足才注册 fixture。验收包支持 40 个 Tushare 数据集并额外注册 fixture。验收包内 V6 对 Flyway 始终可见，首次启动自动执行 V1～V7 共七次迁移，建立 49 张 Tushare 表和一张 `fixture__fixture_daily`，另有 history 表。历史迁移保持不变，因此 Tushare 表中包含 9 张已下线接口的遗留表，应用不提供其下载或查询入口；即使禁用 fixture，V6 仍可能执行。
 
 等待根 `/actuator/health` 达到 HTTP 200、`status=UP`，再从新终端进入同一目录运行：
 

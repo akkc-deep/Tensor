@@ -1,5 +1,7 @@
 # Tensor v1 Project Task Board
 
+> 2026-09-11 支持范围更新：用户明确要求永久移除 ISSUE-008 中的 9 个接口，后续不再支持。当前仅支持 `docs/data-template/manifest.json` 中的 40 项；ISSUE-008 按取消支持范围关闭，原 M14-T05 补齐 49 项的剩余工作取消。下文任务状态、设计及验收结果保留为历史记录，其中“9 项后续处理”和“49 项当前支持”的要求已被本条取代。ISSUE-009 不受此次调整影响。
+
 ## Project
 
 - **Project ID:** `tensor-v1`.

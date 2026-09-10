@@ -31,6 +31,8 @@ mvn -f data-plane/pom.xml clean verify
 
 构建通过后，分发 `data-plane/tensor-app/target/tensor-app-1.0-SNAPSHOT.jar` 及上述说明、脚本。运行不需要独立前端服务器，也不要求容器、Redis、消息队列或 Nginx。
 
+构建者在 `main` 分支且生产源码和数据模板无未提交修改时，可运行 `sh scripts/verify-contracts.sh` 验证 40 个受支持接口的元数据、schema 和打包合同。该脚本从当前提交创建独立快照，要求 Java 21、Maven、Docker，以及已有的 Maven 缓存目录（默认 `/private/tmp/tensor-m2`，可用 `M14_MAVEN_REPO` 指定绝对路径）；数据库验证使用自有 Testcontainers 实例。
+
 ## 2. 创建 schema 和应用账号
 
 由管理员连接目标 MySQL。下例使用本地服务器，远程部署应替换为实际数据库主机；`--password` 不带值，会交互询问管理员密码。禁用 SQL 历史保存：
@@ -96,7 +98,7 @@ trap 会在失败、正常 shell 退出或信号中断时恢复终端状态；�
 java -jar tensor-app-1.0-SNAPSHOT.jar --server.address=127.0.0.1 --server.port=8080
 ```
 
-这两个 Boot 参数是非秘密运行参数，首跑只绑定回环地址。观察启动结果：Flyway 自动执行 V1～V5、V7 共六次迁移，建立 49 张业务表（851 业务列、1001 物理列、41 个二级索引），另有一张 `flyway_schema_history`；应用随后自动检查数据集元数据和表结构。不要手工执行 migration，不启用 fixture 或 acceptance profile，不执行测试 V6，也不另起前端进程。
+这两个 Boot 参数是非秘密运行参数，首跑只绑定回环地址。观察启动结果：Flyway 自动执行 V1～V5、V7 共六次迁移，建立 49 张业务表（851 业务列、1001 物理列、41 个二级索引），另有一张 `flyway_schema_history`；应用随后自动检查 40 个受支持数据集的元数据和表结构。历史迁移保持不变，因此 49 张表中包含 9 张已下线接口的遗留表，应用不再注册这些接口，也不提供其下载或查询入口。不要手工执行 migration，不启用 fixture 或 acceptance profile，不执行测试 V6，也不另起前端进程。
 
 组织已有网关可承担 TLS 和访问控制；本地首跑不要求网关。公开访问前应按组织部署入口要求配置访问边界。
 
