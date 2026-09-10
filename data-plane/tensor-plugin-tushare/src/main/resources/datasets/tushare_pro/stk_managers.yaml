@@ -4,7 +4,8 @@ tableName: tushare_pro__stk_managers
 category: basic_organization
 displayName: 上市公司管理层信息
 queryMode: snapshot
-parameters: []
+parameters:
+  - { name: ts_code, label: 股票代码, type: TS_CODE, required: true }
 columns:
   - { name: ts_code, label: ts_code, logicalType: STRING, nullable: true, displayOrder: 0, length: 64 }
   - { name: ann_date, label: ann_date, logicalType: DATE, nullable: true, displayOrder: 1 }

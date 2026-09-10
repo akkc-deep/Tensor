@@ -94,9 +94,9 @@ class ProductionApplicationContextIT {
             second = start(mysql, SECRET);
             assertProductionGraph(second);
             DownloadRequest bound = second.getBean(ObjectMapper.class).readValue(
-                    "{\"pluginId\":\"tushare_pro\",\"apiName\":\"daily\",\"params\":{\"trade_date\":\"20260905\"}}",
+                    "{\"pluginId\":\"tushare_pro\",\"apiName\":\"daily\",\"params\":{\"ts_code\":\"000001.SZ\",\"trade_date\":\"20260905\"}}",
                     DownloadRequest.class);
-            assertThat(bound.params()).isEqualTo(new TradeDateParameters("20260905"));
+            assertThat(bound.params()).isEqualTo(new TradeDateParameters("000001.SZ", "20260905"));
             HttpResponse secondHealth = get(second, "/actuator/health");
             assertHealth(second, secondHealth, 200, "UP");
             assertProbesUp(second);

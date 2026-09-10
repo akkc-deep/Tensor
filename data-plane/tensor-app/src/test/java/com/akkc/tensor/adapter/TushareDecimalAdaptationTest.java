@@ -45,7 +45,7 @@ class TushareDecimalAdaptationTest {
                 new TushareProperties.Credential("synthetic-test-token"),
                 Duration.ofSeconds(5), Duration.ofSeconds(5), 1_048_576);
         var envelope = new TushareProClient(builder.build(), properties)
-                .execute(definition, Map.of("exchange", "SSE"));
+                .execute(definition, Map.of("ts_code", "SYNTHETIC.SH", "exchange", "SSE"));
 
         var batch = new GenericDatasetAdapter(definition, new ValueConverter(), new FingerprintKeyCodec())
                 .adapt(envelope, Instant.parse("2026-09-06T00:00:00Z"));

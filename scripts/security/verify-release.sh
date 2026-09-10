@@ -246,7 +246,7 @@ def completion_verdict(line):
     summary = 'paramSummary' if operation == 'download' else 'filterNames'
     require(set(fields) == common | counts | {summary},'completion-fields-not-exact')
     require(bool(re.fullmatch('[A-Za-z0-9-]{1,100}',fields['requestId'])) and fields['pluginId'] == 'tushare_pro' and fields['apiName'] == 'stock_company','completion-identity-invalid')
-    allowed_summary = ('[exchange]',) if operation == 'download' else ('[]','[ts_code]')
+    allowed_summary = ('[ts_code, exchange]',) if operation == 'download' else ('[]','[ts_code]')
     require(fields[summary] in allowed_summary,'completion-summary-discloses-values')
     require(fields['durationMs'].isdigit() and all(re.fullmatch(r'(?:[0-9]+|unavailable)',fields[key]) for key in counts),'completion-counters-invalid')
     require(fields['outcome'] in ('success','failure','empty') and fields['failureStage'] in ('none','parameter','registration','source','adapter','persistence','query') and re.fullmatch(r'(?:none|[A-Z][A-Z0-9_]*)',fields['errorCode']),'completion-outcome-invalid')
@@ -437,7 +437,7 @@ def now():
 class Runtime:
     def __init__(self, directory):
         self.directory, self.root = directory, Path.cwd()
-        self.inputs = {name:os.environ.get(name, '') for name in ('PATH','JAVA_HOME','HOME','DOCKER_HOST','TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE','M14_SECURITY_JAR','M14_MAVEN_REPO','M14_SECURITY_NVD_API_KEY')}
+        self.inputs = {name:os.environ.get(name, '') for name in ('PATH','JAVA_HOME','HOME','DOCKER_HOST','TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE','M14_SECURITY_JAR','M14_SECURITY_JAR_SHA256','M14_MAVEN_REPO','M14_SECURITY_NVD_API_KEY')}
         self.node = node_tool()
         self.real_home = Path.home()
         os.environ.clear()
@@ -586,7 +586,9 @@ class Runtime:
         require(stat.S_ISREG(info.st_mode) and info.st_mode & 0o444 and info.st_uid == os.getuid(), 'jar-file-invalid')
         self.jar = jar
         digest = hashlib.sha256(jar.read_bytes()).hexdigest()
-        require(digest == 'acbba3d2d0f240a31b526560e80d217f274d432518f96a07459ba9d44d3467ef', 'jar-identity-mismatch')
+        expected_digest = self.inputs['M14_SECURITY_JAR_SHA256']
+        require(bool(re.fullmatch('[a-f0-9]{64}', expected_digest)), 'jar-identity-required')
+        require(digest == expected_digest, 'jar-identity-mismatch')
         self.report['identities'] = {'jarSha256':digest, 'scriptSha256':hashlib.sha256((self.root/'scripts/security/verify-release.sh').read_bytes()).hexdigest(), 'lockSha256':hashlib.sha256((self.root/'control-plane/package-lock.json').read_bytes()).hexdigest()}
         head = self.success('source-head', ['git','rev-parse','HEAD']).decode().strip()
         require(bool(re.fullmatch('[a-f0-9]{40}', head)), 'source-head-invalid')
@@ -804,7 +806,7 @@ class Runtime:
                     length = int(self.headers.get('Content-Length','0'))
                     require(0 < length < 65536 and self.path == '/', 'stub-request-invalid')
                     body = json.loads(self.rfile.read(length))
-                    valid = isinstance(body, dict) and set(body) == {'api_name','token','params','fields'} and body['api_name'] == 'stock_company' and body['token'] == runtime.token and body['params'] == {'exchange':'SZSE'} and body['fields'] == ','.join(runtime.fields) and runtime.stub_count <= 2
+                    valid = isinstance(body, dict) and set(body) == {'api_name','token','params','fields'} and body['api_name'] == 'stock_company' and body['token'] == runtime.token and body['params'] == {'ts_code':'000001.SZ','exchange':'SZSE'} and body['fields'] == ','.join(runtime.fields) and runtime.stub_count <= 2
                 except Exception:
                     valid = False
                 if not valid:
@@ -1548,7 +1550,7 @@ def review_cases(directory, check, selected=None):
         request_id = '11111111-1111-1111-1111-111111111111'
         common = 'tensor.operation.completed requestId=' + request_id + ' operation='
         query = common + 'query pluginId=tushare_pro apiName=stock_company filterNames=[ts_code] page=1 pageSize=50 resultCount=1 totalElements=1 durationMs=2 outcome=success failureStage=none errorCode=none'
-        download = common + 'download pluginId=tushare_pro apiName=stock_company paramSummary=[exchange] sourceRowCount=1 insertedRows=1 updatedRows=0 durationMs=2 outcome=success failureStage=none errorCode=none'
+        download = common + 'download pluginId=tushare_pro apiName=stock_company paramSummary=[ts_code, exchange] sourceRowCount=1 insertedRows=1 updatedRows=0 durationMs=2 outcome=success failureStage=none errorCode=none'
         def log_case(text, operation='query'):
             runtime = Runtime.__new__(Runtime)
             runtime.fatal, runtime.secret_patterns = False, patterns(['M14_T07_TOKEN_log_probe'])
@@ -1563,7 +1565,7 @@ def review_cases(directory, check, selected=None):
         check('completion-full-sql',lambda:log_case(query + ' sql=SELECT introduction FROM tushare_pro__stock_company'),True)
         check('ordinary-log-full-sql',lambda:log_case('SELECT introduction FROM tushare_pro__stock_company\n' + query),True)
         check('completion-filter-value',lambda:log_case(query.replace('[ts_code]','[ts_code=000001.SZ]')),True)
-        check('completion-download-value',lambda:log_case(download.replace('[exchange]','[exchange=SZSE]'),'download'),True)
+        check('completion-download-value',lambda:log_case(download.replace('[ts_code, exchange]','[ts_code, exchange=SZSE]'),'download'),True)
         check('completion-duplicate-field',lambda:log_case(query + ' page=1'),True)
         jdbc = 'INFO FlywayExecutor Database: jdbc:mysql://127.0.0.1:3306/synthetic (MySQL 8.4)\n'
         check('ordinary-log-jdbc-metadata',lambda:log_case(jdbc + query))
@@ -1924,6 +1926,7 @@ if (config.mode === 'preflight') {
     await expect(page.getByRole('heading', { name:'数据下载', level:1 })).toBeVisible()
     await select(page, '数据源', 'Tushare Pro')
     await select(page, '数据接口', /^上市公司基本信息stock_company$/)
+    await page.getByLabel('股票代码', { exact:true }).fill('000001.SZ')
     await select(page, '交易所', 'SZSE')
     await expect(page.getByRole('button', { name:'开始下载', exact:true })).toBeEnabled()
     await scanPage(page)
@@ -1934,7 +1937,7 @@ if (config.mode === 'preflight') {
     await page.getByRole('button', { name:'开始下载', exact:true }).click()
     const success = await first, successful = await bodyOf(success)
     check(success.status() === 200 && successful.outcome === 'SUCCESS' && successful.sourceRowCount === 1 && successful.insertedRows === 1 && successful.updatedRows === 0)
-    check(JSON.stringify(success.request().postDataJSON()) === JSON.stringify({pluginId:'tushare_pro',apiName:'stock_company',params:{exchange:'SZSE'}}))
+    check(JSON.stringify(success.request().postDataJSON()) === JSON.stringify({pluginId:'tushare_pro',apiName:'stock_company',params:{ts_code:'000001.SZ',exchange:'SZSE'}}))
     const successId = await remember(success, successful, 'download')
     await expect(page.getByRole('heading', { name:/^下载成功/ })).toBeVisible()
     await scanPage(page)

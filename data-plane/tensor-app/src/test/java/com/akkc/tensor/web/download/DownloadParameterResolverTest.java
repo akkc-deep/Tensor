@@ -64,14 +64,17 @@ class DownloadParameterResolverTest {
 
     private static Class<?> expectedType(String api) {
         return switch (api) {
-            case "index_classify", "index_member_all", "pledge_detail", "pledge_stat", "stk_managers" -> SnapshotParameters.class;
-            case "disclosure_date", "dividend", "express", "forecast", "repurchase", "stk_holdertrade", "top10_floatholders", "top10_holders" -> AnnDateParameters.class;
+            case "index_classify" -> SnapshotParameters.class;
+            case "index_member_all", "pledge_detail", "pledge_stat", "stk_managers" -> TsCodeParameters.class;
+            case "repurchase" -> AnnDateParameters.class;
+            case "disclosure_date", "dividend", "express", "forecast", "stk_holdertrade", "top10_floatholders", "top10_holders" -> TsCodeAnnDateParameters.class;
             case "stock_company" -> ExchangeParameters.class;
             case "trade_cal" -> ExchangeDateRangeParameters.class;
             case "margin" -> ExchangeTradeDateParameters.class;
             case "stock_basic" -> ListStatusParameters.class;
             case "new_share" -> DateRangeParameters.class;
-            case "adj_factor", "block_trade", "daily", "daily_basic", "margin_detail", "moneyflow", "monthly", "slb_len", "slb_sec", "slb_sec_detail", "stk_limit", "suspend_d", "top_list", "weekly" -> TradeDateParameters.class;
+            case "slb_len" -> TradeDateOnlyParameters.class;
+            case "adj_factor", "block_trade", "daily", "daily_basic", "margin_detail", "moneyflow", "monthly", "slb_sec", "slb_sec_detail", "stk_limit", "suspend_d", "top_list", "weekly" -> TradeDateParameters.class;
             case "stk_holdernumber", "stk_rewards" -> TsCodeParameters.class;
             case "balancesheet", "cashflow", "fina_audit", "fina_indicator", "fina_mainbz", "income" -> TsCodeAnnDateParameters.class;
             case "fixture_daily" -> ScenarioParameters.class;
@@ -119,6 +122,28 @@ class DownloadParameterResolverTest {
             assertThat(parameters).isInstanceOf(ScenarioParameters.class);
             assertThat(resolver.toRawValues(parameters, raw.keySet())).isEqualTo(raw);
         }
+    }
+
+    @ParameterizedTest
+    @MethodSource("stockApis")
+    void preservesSuppliedStockFieldsUntilServiceValidation(ApiDescriptor api) {
+        var key = new FixtureConfiguration().fixtureDatasetAdapter().datasetKey();
+        var bindingApi = new ApiDescriptor(key.apiName(), api.displayName(), api.category(),
+                api.queryMode(), api.parameters());
+        DownloadParameterResolver resolver = resolver(bindingApi);
+        for (int variant = 0; variant < 3; variant++) {
+            Map<String, Object> raw = new LinkedHashMap<>();
+            api.parameters().forEach(parameter -> raw.put(parameter.name(), VALUES.get(parameter.name())));
+            if (variant == 0) raw.remove("ts_code");
+            else raw.put("ts_code", variant == 1 ? null : " ");
+            var parameters = resolver.resolve(key, raw);
+            assertThat(resolver.toRawValues(parameters, raw.keySet())).isEqualTo(raw);
+        }
+    }
+
+    static Stream<ApiDescriptor> stockApis() {
+        return apis().filter(api -> api.parameters().stream().anyMatch(parameter ->
+                parameter.name().equals("ts_code") && parameter.type() == ParameterType.TS_CODE));
     }
 
     private static ApiDescriptor withParameters(ApiDescriptor api, List<ParameterDescriptor> parameters) {
