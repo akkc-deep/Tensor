@@ -1,5 +1,7 @@
 # Tensor v1 发布证据清单
 
+> 2026-09-10 支持范围已调整为 40 项，ISSUE-008 九项永久移除。本文保留旧版本验收记录及当时的 49 项范围，不代表当前代码已完成发布验收。当前支持与迁移说明见 [README](../../README.md) 和 [首次运行](../runbook/first-run.md#v8-永久移除九个数据集)。
+
 归档日期：2026-09-07。任务：[M14-T08](../task-handoffs/tensor-v1/tensor-v1-task-board.md#m14-t08)；依据：[收窄设计](../task-designs/M14-T08-designs.md)和[进入交接](../task-handoffs/tensor-v1/M14-T08-handoff.md)。另见 [AC 与需求映射](ac-001-018.md)及[发布摘要](release-summary.md)。
 
 ## 范围与结论

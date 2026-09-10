@@ -34,14 +34,14 @@ class DownloadParameterResolverTest {
     private static final Map<String, String> VALUES = Map.ofEntries(
             Map.entry("trade_date", "20260905"), Map.entry("ann_date", "20260905"),
             Map.entry("ts_code", " 000001.sz "), Map.entry("exchange", "SSE"),
-            Map.entry("exchange_id", "SZSE"), Map.entry("hs_type", "SH"),
-            Map.entry("list_status", "L"), Map.entry("month", "202609"),
+            Map.entry("exchange_id", "SZSE"),
+            Map.entry("list_status", "L"),
             Map.entry("start_date", "20260901"), Map.entry("end_date", "20260905"),
             Map.entry("scenario", "EMPTY"));
 
     @ParameterizedTest
     @MethodSource("apis")
-    void uniquelyMatchesAllFiftyApisAndRoundTripsRawValues(ApiDescriptor api) {
+    void uniquelyMatchesAllSupportedApisAndRoundTripsRawValues(ApiDescriptor api) {
         var matches = ParameterCodec.supported().stream()
                 .filter(codec -> codec.shape().equals(ParameterShape.from(api))).toList();
         assertThat(matches).singleElement();
@@ -55,7 +55,7 @@ class DownloadParameterResolverTest {
 
     static Stream<ApiDescriptor> apis() {
         List<DatasetDefinition> definitions = new TusharePluginConfiguration().tushareDatasetDefinitions();
-        assertThat(definitions).hasSize(49);
+        assertThat(definitions).hasSize(40);
         return Stream.concat(definitions.stream().map(definition -> new ApiDescriptor(
                 definition.datasetKey().apiName(), definition.displayName(), definition.category(),
                 definition.queryMode(), definition.parameters())),
@@ -64,16 +64,14 @@ class DownloadParameterResolverTest {
 
     private static Class<?> expectedType(String api) {
         return switch (api) {
-            case "index_classify", "index_member", "index_member_all", "pledge_detail", "pledge_stat", "stk_managers" -> SnapshotParameters.class;
-            case "disclosure_date", "dividend", "express", "forecast", "repurchase", "share_float", "stk_holdertrade", "top10_floatholders", "top10_holders" -> AnnDateParameters.class;
+            case "index_classify", "index_member_all", "pledge_detail", "pledge_stat", "stk_managers" -> SnapshotParameters.class;
+            case "disclosure_date", "dividend", "express", "forecast", "repurchase", "stk_holdertrade", "top10_floatholders", "top10_holders" -> AnnDateParameters.class;
             case "stock_company" -> ExchangeParameters.class;
             case "trade_cal" -> ExchangeDateRangeParameters.class;
             case "margin" -> ExchangeTradeDateParameters.class;
-            case "hs_const" -> HsTypeParameters.class;
             case "stock_basic" -> ListStatusParameters.class;
-            case "broker_recommend" -> MonthParameters.class;
-            case "namechange", "new_share" -> DateRangeParameters.class;
-            case "adj_factor", "block_trade", "daily", "daily_basic", "hk_hold", "hsgt_top10", "margin_detail", "moneyflow", "moneyflow_hsgt", "monthly", "slb_len", "slb_sec", "slb_sec_detail", "stk_limit", "suspend_d", "top_inst", "top_list", "weekly" -> TradeDateParameters.class;
+            case "new_share" -> DateRangeParameters.class;
+            case "adj_factor", "block_trade", "daily", "daily_basic", "margin_detail", "moneyflow", "monthly", "slb_len", "slb_sec", "slb_sec_detail", "stk_limit", "suspend_d", "top_list", "weekly" -> TradeDateParameters.class;
             case "stk_holdernumber", "stk_rewards" -> TsCodeParameters.class;
             case "balancesheet", "cashflow", "fina_audit", "fina_indicator", "fina_mainbz", "income" -> TsCodeAnnDateParameters.class;
             case "fixture_daily" -> ScenarioParameters.class;

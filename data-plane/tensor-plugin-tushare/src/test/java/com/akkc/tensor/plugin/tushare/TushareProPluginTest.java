@@ -42,14 +42,14 @@ import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 class TushareProPluginTest {
     private static final String SECRET = "m07-t04-secret-sentinel";
     private static final List<String> API_NAMES = List.of(
-            "adj_factor", "balancesheet", "block_trade", "broker_recommend", "cashflow", "daily",
+            "adj_factor", "balancesheet", "block_trade", "cashflow", "daily",
             "daily_basic", "disclosure_date", "dividend", "express", "fina_audit", "fina_indicator",
-            "fina_mainbz", "forecast", "hk_hold", "hs_const", "hsgt_top10", "income", "index_classify",
-            "index_member", "index_member_all", "margin", "margin_detail", "moneyflow", "moneyflow_hsgt",
-            "monthly", "namechange", "new_share", "pledge_detail", "pledge_stat", "repurchase", "share_float",
+            "fina_mainbz", "forecast", "income", "index_classify",
+            "index_member_all", "margin", "margin_detail", "moneyflow",
+            "monthly", "new_share", "pledge_detail", "pledge_stat", "repurchase",
             "slb_len", "slb_sec", "slb_sec_detail", "stk_holdernumber", "stk_holdertrade", "stk_limit",
             "stk_managers", "stk_rewards", "stock_basic", "stock_company", "suspend_d", "top10_floatholders",
-            "top10_holders", "top_inst", "top_list", "trade_cal", "weekly");
+            "top10_holders", "top_list", "trade_cal", "weekly");
 
     @Test
     void exposesOnlyTheApprovedPluginConfigurationAndUnavailableFailureSurface() {
@@ -115,8 +115,8 @@ class TushareProPluginTest {
         assertThat(descriptor.displayName()).isEqualTo("Tushare Pro");
         assertThat(descriptor.description()).isEqualTo("Tushare Pro 证券数据源");
         assertDescriptorReadiness(descriptor, readiness);
-        assertThat(descriptor.apis()).hasSize(49);
-        assertThat(descriptor.datasets()).hasSize(49);
+        assertThat(descriptor.apis()).hasSize(40);
+        assertThat(descriptor.datasets()).hasSize(40);
 
         for (int index = 0; index < definitions.size(); index++) {
             DatasetDefinition definition = definitions.get(index);
@@ -132,7 +132,7 @@ class TushareProPluginTest {
     }
 
     @Test
-    void requiresExactlyTheIndependentOrderedSetOfFortyNineApis() {
+    void requiresExactlyTheIndependentOrderedSetOfFortyApis() {
         List<DatasetDefinition> definitions = definitions();
         TushareProPlugin plugin = plugin(properties(true, SECRET), mock(TushareProClient.class), definitions);
 
@@ -147,14 +147,26 @@ class TushareProPluginTest {
         assertThat(reversed.descriptor().datasets()).extracting(key -> key.apiName().value())
                 .containsExactlyElementsOf(API_NAMES.reversed());
         assertThatThrownBy(() -> plugin(properties(true, SECRET), mock(TushareProClient.class),
-                definitions.subList(0, 48)))
+                definitions.subList(0, 39)))
                 .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("definitions must contain exactly 49 datasets");
-        List<DatasetDefinition> fiftyDefinitions = new ArrayList<>(definitions);
-        fiftyDefinitions.add(definitions.getFirst());
-        assertThatThrownBy(() -> plugin(properties(true, SECRET), mock(TushareProClient.class), fiftyDefinitions))
+                .hasMessage("definitions must contain exactly 40 datasets");
+        List<DatasetDefinition> extraDefinitions = new ArrayList<>(definitions);
+        extraDefinitions.add(definitions.getFirst());
+        assertThatThrownBy(() -> plugin(properties(true, SECRET), mock(TushareProClient.class), extraDefinitions))
                 .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("definitions must contain exactly 49 datasets");
+                .hasMessage("definitions must contain exactly 40 datasets");
+    }
+
+    @Test
+    void rejectsRetiredApisBeforeCallingTheSource() {
+        TushareProClient client = mock(TushareProClient.class);
+        TushareProPlugin plugin = plugin(properties(true, SECRET), client, definitions());
+        for (String api : List.of("top_inst", "broker_recommend", "share_float", "hs_const",
+                "moneyflow_hsgt", "hk_hold", "index_member", "hsgt_top10", "namechange")) {
+            assertThatThrownBy(() -> plugin.download(ApiName.of(api), Map.of()))
+                    .isInstanceOf(IllegalArgumentException.class).hasMessage("Unknown Tushare API");
+        }
+        verifyNoInteractions(client);
     }
 
     @Test
@@ -319,7 +331,7 @@ class TushareProPluginTest {
             assertThat(context.getBeansOfType(DataSourcePlugin.class)).hasSize(1);
             assertThat(context.getBeansOfType(TushareProPlugin.class)).hasSize(1);
             List<?> definitions = context.getBean("tushareDatasetDefinitions", List.class);
-            assertThat(definitions).hasSize(49).allSatisfy(
+            assertThat(definitions).hasSize(40).allSatisfy(
                     definition -> assertThat(definition).isInstanceOf(DatasetDefinition.class));
             TushareProPlugin plugin = context.getBean(TushareProPlugin.class);
             assertThat(definitions).extracting(definition ->

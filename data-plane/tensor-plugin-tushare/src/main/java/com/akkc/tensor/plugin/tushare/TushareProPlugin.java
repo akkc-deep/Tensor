@@ -31,8 +31,8 @@ public final class TushareProPlugin implements DataSourcePlugin {
         this.properties = Objects.requireNonNull(properties, "properties");
         this.client = Objects.requireNonNull(client, "client");
         definitions = List.copyOf(Objects.requireNonNull(definitions, "definitions"));
-        if (definitions.size() != 49) {
-            throw new IllegalArgumentException("definitions must contain exactly 49 datasets");
+        if (definitions.size() != 40) {
+            throw new IllegalArgumentException("definitions must contain exactly 40 datasets");
         }
         definitionsByApi = definitions.stream().collect(Collectors.toUnmodifiableMap(
                 definition -> definition.datasetKey().apiName(), Function.identity()));

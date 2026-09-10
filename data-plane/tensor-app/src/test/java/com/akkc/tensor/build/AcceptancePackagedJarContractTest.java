@@ -97,6 +97,9 @@ class AcceptancePackagedJarContractTest {
                     FIXTURE_ENTRY,
                     V6_ENTRY);
             assertThat(entries).doesNotContain(CLASSPATH_INDEX, LAYERS_INDEX);
+            assertThat(entries.stream().filter(name -> name.startsWith("BOOT-INF/classes/db/migration/")
+                    && name.endsWith(".sql"))).hasSize(8)
+                    .contains("BOOT-INF/classes/db/migration/V8__remove_retired_datasets.sql");
 
             List<JarEntry> libraries = jar.stream()
                     .filter(entry -> !entry.isDirectory())

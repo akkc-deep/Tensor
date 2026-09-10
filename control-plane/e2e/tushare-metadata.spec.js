@@ -12,8 +12,10 @@ import { setTimeout as delay } from 'node:timers/promises'
 
 const execFileAsync = promisify(execFile)
 const BASE_URL = 'http://127.0.0.1:8080'
-const MANIFEST_SHA = '37a317f6a2bc3e5113be5f127976d16d8349414c6476c7f6a194b084a5b0f7c2'
-const ACCEPTANCE_JAR_SHA = 'a69874afa6ce783d4ef4e16a678ddb0ff457f2948b68f509a8e4a2c00440bcac'
+const MANIFEST_SHA = '386f46a99b6605e203129836d7a744b96b65304307f52991dd8bba6fd1870984'
+// Supply the hash of a build containing the current catalog; historical
+// acceptance JARs contain retired datasets and cannot validate this suite.
+const ACCEPTANCE_JAR_SHA = process.env.ACCEPTANCE_JAR_SHA256
 const HEALTH_TIMEOUT_MS = 90_000
 const STOP_TIMEOUT_MS = 150_000
 const DB_VARIABLES = ['TENSOR_DB_URL', 'TENSOR_DB_USERNAME', 'TENSOR_DB_PASSWORD']
@@ -37,17 +39,16 @@ const QUERY_MODE_LABELS = {
   date_range: '日期范围',
 }
 const CATEGORY_COUNTS = {
-  basic_organization: 11,
+  basic_organization: 7,
   行情与估值: 7,
-  交易与资金: 6,
-  互联互通与转融通: 6,
+  交易与资金: 5,
+  互联互通与转融通: 3,
   财务与披露: 9,
-  公司行动: 3,
+  公司行动: 2,
   股东与治理: 7,
 }
 const DOWNLOAD_SCREENSHOTS = new Set([
-  'stock_basic', 'trade_cal', 'broker_recommend', 'daily', 'income', 'stk_managers',
-  'moneyflow_hsgt', 'pledge_detail',
+  'stock_basic', 'trade_cal', 'daily', 'income', 'stk_managers', 'pledge_detail',
 ])
 const DATASET_SCREENSHOTS = new Set([
   'index_classify', 'stock_company', 'margin', 'daily', 'balancesheet',
@@ -62,10 +63,8 @@ const PARAMETER = {
   list_status: { name: 'list_status', label: '上市状态', type: 'ENUM', required: true, allowedValues: ['L', 'P', 'D'] },
   exchange: { name: 'exchange', label: '交易所', type: 'ENUM', required: true, allowedValues: ['SSE', 'SZSE', 'BSE'] },
   exchange_id: { name: 'exchange_id', label: '交易所', type: 'ENUM', required: true, allowedValues: ['SSE', 'SZSE', 'BSE'] },
-  hs_type: { name: 'hs_type', label: '沪深港通类型', type: 'ENUM', required: true, allowedValues: ['SH', 'SZ'] },
   start_date: { name: 'start_date', label: '开始日期', type: 'DATE_RANGE_MEMBER', required: true, relatedParameter: 'end_date' },
   end_date: { name: 'end_date', label: '结束日期', type: 'DATE_RANGE_MEMBER', required: true, relatedParameter: 'start_date' },
-  month: { name: 'month', label: '月份', type: 'MONTH', required: true },
   trade_date: { name: 'trade_date', label: '交易日期', type: 'DATE', required: true },
   ann_date: { name: 'ann_date', label: '公告日期', type: 'DATE', required: true },
   ts_code: { name: 'ts_code', label: '股票代码', type: 'TS_CODE', required: true },
@@ -74,7 +73,6 @@ const PARAMETER = {
 const EXPECTED_ROWS = [
   ['stock_basic', '股票基础信息', 'basic_organization', 'snapshot', ['list_status'], 10],
   ['stock_company', '上市公司基本信息', 'basic_organization', 'snapshot', ['exchange'], 18],
-  ['hs_const', '沪深港通标的范围', 'basic_organization', 'snapshot', ['hs_type'], 5],
   ['income', '利润表', '财务与披露', 'ann_date', ['ts_code', 'ann_date'], 85],
   ['balancesheet', '资产负债表', '财务与披露', 'ann_date', ['ts_code', 'ann_date'], 152],
   ['cashflow', '现金流量表', '财务与披露', 'ann_date', ['ts_code', 'ann_date'], 97],
@@ -83,7 +81,6 @@ const EXPECTED_ROWS = [
   ['fina_mainbz', '主营业务构成', '财务与披露', 'ann_date', ['ts_code', 'ann_date'], 8],
   ['stk_rewards', '管理层薪酬与持股', '股东与治理', 'snapshot', ['ts_code'], 7],
   ['stk_holdernumber', '股东户数', '股东与治理', 'snapshot', ['ts_code'], 4],
-  ['broker_recommend', '券商月度推荐', 'basic_organization', 'snapshot', ['month'], 4],
   ['trade_cal', '交易日历', 'basic_organization', 'date_range', ['exchange', 'start_date', 'end_date'], 4],
   ['margin', '融资融券汇总', '交易与资金', 'trade_date', ['exchange_id', 'trade_date'], 9],
   ['daily', '日线行情', '行情与估值', 'trade_date', ['trade_date'], 11],
@@ -94,11 +91,7 @@ const EXPECTED_ROWS = [
   ['daily_basic', '每日估值与市场指标', '行情与估值', 'trade_date', ['trade_date'], 18],
   ['moneyflow', '个股资金流向', '交易与资金', 'trade_date', ['trade_date'], 20],
   ['stk_limit', '每日涨跌停价格', '行情与估值', 'trade_date', ['trade_date'], 4],
-  ['moneyflow_hsgt', '沪深港通资金流向', '互联互通与转融通', 'trade_date', ['trade_date'], 7],
-  ['hsgt_top10', '沪深港通十大成交股', '互联互通与转融通', 'trade_date', ['trade_date'], 11],
-  ['hk_hold', '沪深港股通持股明细', '互联互通与转融通', 'trade_date', ['trade_date'], 7],
   ['top_list', '龙虎榜每日明细', '交易与资金', 'trade_date', ['trade_date'], 15],
-  ['top_inst', '龙虎榜机构明细', '交易与资金', 'trade_date', ['trade_date'], 10],
   ['margin_detail', '融资融券交易明细', '交易与资金', 'trade_date', ['trade_date'], 10],
   ['block_trade', '大宗交易', '交易与资金', 'trade_date', ['trade_date'], 7],
   ['slb_len', '转融通期限与规模', '互联互通与转融通', 'trade_date', ['trade_date'], 6],
@@ -109,17 +102,14 @@ const EXPECTED_ROWS = [
   ['dividend', '分红送股', '公司行动', 'ann_date', ['ann_date'], 14],
   ['disclosure_date', '财报披露计划', '财务与披露', 'ann_date', ['ann_date'], 5],
   ['repurchase', '股票回购', '公司行动', 'ann_date', ['ann_date'], 9],
-  ['share_float', '限售股解禁', '公司行动', 'ann_date', ['ann_date'], 7],
   ['stk_holdertrade', '股东增减持', '股东与治理', 'ann_date', ['ann_date'], 11],
   ['top10_holders', '前十大股东', '股东与治理', 'ann_date', ['ann_date'], 9],
   ['top10_floatholders', '前十大流通股东', '股东与治理', 'ann_date', ['ann_date'], 9],
   ['new_share', 'IPO 新股发行信息', 'basic_organization', 'date_range', ['start_date', 'end_date'], 12],
-  ['namechange', '证券名称变更记录', 'basic_organization', 'date_range', ['start_date', 'end_date'], 6],
   ['stk_managers', '上市公司管理层信息', 'basic_organization', 'snapshot', [], 11],
   ['pledge_stat', '股权质押统计', '股东与治理', 'snapshot', [], 7],
   ['pledge_detail', '股权质押明细', '股东与治理', 'snapshot', [], 14],
   ['index_classify', '行业指数分类', 'basic_organization', 'snapshot', [], 7],
-  ['index_member', '行业指数成分', 'basic_organization', 'snapshot', [], 5],
   ['index_member_all', '行业分级与完整成分', 'basic_organization', 'snapshot', [], 11],
 ]
 
@@ -140,11 +130,11 @@ function filterDescriptor(field) {
 
 function expectedFilters() {
   const groups = [
-    [[], 'trade_cal index_classify index_member'],
-    [['ts_code'], 'stock_basic stock_company hs_const new_share broker_recommend index_member_all fina_mainbz pledge_stat'],
-    [['trade_date'], 'margin moneyflow_hsgt slb_len'],
-    [['ts_code', 'trade_date'], 'daily weekly monthly adj_factor suspend_d daily_basic stk_limit moneyflow margin_detail top_list top_inst block_trade hsgt_top10 hk_hold slb_sec slb_sec_detail'],
-    [['ts_code', 'ann_date'], 'namechange stk_managers income balancesheet cashflow fina_indicator fina_audit express forecast disclosure_date dividend repurchase share_float stk_rewards stk_holdernumber stk_holdertrade top10_holders top10_floatholders pledge_detail'],
+    [[], 'trade_cal index_classify'],
+    [['ts_code'], 'stock_basic stock_company new_share index_member_all fina_mainbz pledge_stat'],
+    [['trade_date'], 'margin slb_len'],
+    [['ts_code', 'trade_date'], 'daily weekly monthly adj_factor suspend_d daily_basic stk_limit moneyflow margin_detail top_list block_trade slb_sec slb_sec_detail'],
+    [['ts_code', 'ann_date'], 'stk_managers income balancesheet cashflow fina_indicator fina_audit express forecast disclosure_date dividend repurchase stk_rewards stk_holdernumber stk_holdertrade top10_holders top10_floatholders pledge_detail'],
   ]
   const result = new Map()
   for (const [fields, names] of groups) {
@@ -174,7 +164,7 @@ const manifestPath = new URL('../../docs/data-template/manifest.json', import.me
 const manifestBytes = readFileSync(manifestPath)
 safeCheck(createHash('sha256').update(manifestBytes).digest('hex') === MANIFEST_SHA, 'manifest hash')
 const manifest = JSON.parse(manifestBytes)
-safeCheck(Array.isArray(manifest.interfaces) && manifest.interfaces.length === 49, 'manifest count')
+safeCheck(Array.isArray(manifest.interfaces) && manifest.interfaces.length === 40, 'manifest count')
 const manifestNames = []
 for (const entry of manifest.interfaces) {
   safeCheck(/^[a-z][a-z0-9_]{1,63}$/.test(entry.api_name), 'manifest API name')
@@ -190,7 +180,7 @@ for (const entry of manifest.interfaces) {
   expect(entry.query_mode === 'range' ? 'date_range' : entry.query_mode).toBe(contract.queryMode)
   manifestNames.push(entry.api_name)
 }
-safeCheck(new Set(manifestNames).size === 49 && EXPECTED.size === 49 && FILTERS.size === 49, 'independent coverage')
+safeCheck(new Set(manifestNames).size === 40 && EXPECTED.size === 40 && FILTERS.size === 40, 'independent coverage')
 expect(new Set(manifestNames)).toEqual(new Set(EXPECTED.keys()))
 const CONTRACTS = manifestNames.map((name) => EXPECTED.get(name))
 
@@ -209,7 +199,7 @@ const evidence = {
   startedAt: undefined,
   finishedAt: undefined,
   environment: {},
-  manifest: { sha256: MANIFEST_SHA, count: 49 },
+  manifest: { sha256: MANIFEST_SHA, count: 40 },
   results: [],
   screenshots: [],
   totals: {},
@@ -498,7 +488,7 @@ function monitorPage(page) {
 }
 
 function uniqueByApi(items, name) {
-  safeCheck(Array.isArray(items) && items.length === 49, `${name} count`)
+  safeCheck(Array.isArray(items) && items.length === 40, `${name} count`)
   const result = new Map()
   for (const item of items) {
     safeCheck(!result.has(item.apiName), `${name} unique API`)
@@ -604,7 +594,7 @@ async function openDownloads(page, contract) {
   const combobox = page.getByRole('combobox', { name: '数据接口', exact: true })
   await combobox.focus()
   await combobox.press('Enter')
-  await expect(page.getByRole('option')).toHaveCount(49)
+  await expect(page.getByRole('option')).toHaveCount(40)
   for (const expected of CONTRACTS) {
     await expect(page.getByRole('option', { name: optionName(expected) })).toHaveCount(1)
   }
@@ -698,13 +688,6 @@ async function validateParameters(page, contract, testInfo) {
   await doubleAnimationFrame(page)
 
   if (contract.apiName === 'trade_cal') await screenshot(page, testInfo, 'download-trade_cal.png')
-  if (contract.apiName === 'broker_recommend') {
-    await controls[0].click()
-    await expect(controls[0]).toHaveAttribute('aria-expanded', 'true')
-    await doubleAnimationFrame(page)
-    await screenshot(page, testInfo, 'download-broker_recommend.png')
-    await controls[0].press('Escape')
-  }
 
   for (let index = 0; index < contract.parameters.length; index += 1) {
     const parameter = contract.parameters[index]
@@ -714,7 +697,7 @@ async function validateParameters(page, contract, testInfo) {
     } else {
       const values = {
         trade_date: '2026-08-07', ann_date: '2026-08-07', start_date: '2026-08-01',
-        end_date: '2026-08-07', month: '2026-08', ts_code: '000001.SZ',
+        end_date: '2026-08-07', ts_code: '000001.SZ',
       }
       if (['DATE', 'DATE_RANGE_MEMBER', 'MONTH'].includes(parameter.type)) {
         await openAndClosePicker(page, control)
@@ -727,7 +710,7 @@ async function validateParameters(page, contract, testInfo) {
     await expect(control).not.toHaveAttribute('aria-invalid', 'true')
     await expect(page.getByText('此项为必填项', { exact: true })).toHaveCount(contract.parameters.length - index - 1)
   }
-  if (DOWNLOAD_SCREENSHOTS.has(contract.apiName) && !['trade_cal', 'broker_recommend'].includes(contract.apiName)) {
+  if (DOWNLOAD_SCREENSHOTS.has(contract.apiName) && contract.apiName !== 'trade_cal') {
     await screenshot(page, testInfo, `download-${contract.apiName}.png`)
   }
   return { requiredBlocked: true, parameterless: false }
@@ -799,12 +782,13 @@ test.use({
   screenshot: 'off',
 })
 
-test.describe('Tushare 49 metadata contracts', () => {
+test.describe('Tushare 40 metadata contracts', () => {
   test.describe.configure({ mode: 'serial', retries: 0, timeout: 120_000 })
 
   test.beforeAll(async () => {
     test.setTimeout(180_000)
     evidence.startedAt = new Date().toISOString()
+    safeCheck(/^[a-f0-9]{64}$/.test(ACCEPTANCE_JAR_SHA ?? ''), 'ACCEPTANCE_JAR_SHA256 supplied')
     safeCheck(path.isAbsolute(process.env.ACCEPTANCE_JAR ?? ''), 'acceptance JAR absolute path')
     const jarState = await lstat(process.env.ACCEPTANCE_JAR)
     safeCheck(jarState.isFile() && !jarState.isSymbolicLink(), 'acceptance JAR ordinary file')
@@ -867,10 +851,10 @@ test.describe('Tushare 49 metadata contracts', () => {
         screenshots: evidence.screenshots.length,
       }
       const expectedTotals = {
-        cases: 49, apiPassed: 49, datasetsPassed: 49, requiredBlocked: 43,
-        parameterless: 6, downloadPosts: 0, recordsGets: 0, upstreamCalls: 0, screenshots: 13,
+        cases: 40, apiPassed: 40, datasetsPassed: 40, requiredBlocked: 35,
+        parameterless: 5, downloadPosts: 0, recordsGets: 0, upstreamCalls: 0, screenshots: 11,
       }
-      if (evidence.results.length === 49) expect(evidence.totals).toEqual(expectedTotals)
+      if (evidence.results.length === 40) expect(evidence.totals).toEqual(expectedTotals)
       else expect(sentinelCalls, 'failed run must still make zero upstream calls').toBe(0)
       const serialized = `${JSON.stringify(evidence, null, 2)}\n`
       assertPublicSurface(serialized, 'evidence JSON')

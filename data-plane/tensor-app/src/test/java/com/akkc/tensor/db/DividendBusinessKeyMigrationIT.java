@@ -216,7 +216,7 @@ class DividendBusinessKeyMigrationIT {
     }
 
     private static Flyway flyway(DataSource dataSource) {
-        return Flyway.configure().dataSource(dataSource).locations("classpath:db/migration").load();
+        return Flyway.configure().dataSource(dataSource).locations("classpath:db/migration").target("7").load();
     }
 
     private static DatasetDefinition dividendDefinition() {

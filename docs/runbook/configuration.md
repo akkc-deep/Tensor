@@ -70,6 +70,6 @@ smoke 只检查指定敏感键/头、JDBC 标记及调用者提供的两个非�
 
 ## 数据库权限与版本维护
 
-首次运行创建 `utf8mb4` / `utf8mb4_0900_as_cs` 的 `tensor` schema，并仅向匹配实际 JDBC 客户端来源的应用账号授予 `tensor.*` 上 CREATE、SELECT、INSERT、UPDATE、ALTER、INDEX；管理员通过 `SHOW GRANTS` 检查。当前生产自动迁移为 V1～V5、V7，共六次、49 张业务表，Flyway history 另计，不启用 fixture 或测试 V6。ALTER、INDEX 用于 V7 分红指纹回填及主键切换，不授予 DROP、DELETE 或全局权限。已有库须先停止所有写入者并验证备份；新包迁移、schema 校验和 health 通过前保持停写。旧包不兼容 V7 schema，失败或回退按[升级说明](first-run.md#v7-分红身份升级)处理，不自动 repair 或只回退 JAR。
+首次运行创建 `utf8mb4` / `utf8mb4_0900_as_cs` 的 `tensor` schema。应用账号仅在该 schema 拥有 CREATE、SELECT、INSERT、UPDATE、ALTER、INDEX；执行 V8 时临时增加 DROP，成功后停止应用、撤销 DROP，再启动以刷新连接池权限。当前生产迁移为 V1～V5、V7、V8，共七次，最终保留 40 张业务表，Flyway history 另计；不启用 fixture 或测试 V6。V7 回填分红指纹并切换主键，V8 物理删除九张退役表及其中数据。已有库升级前须停止全部写入者并验证备份；迁移、schema 校验和 health 通过前保持停写。迁移和回退规则见 [升级说明](first-run.md#v8-永久移除九个数据集)。
 
 发布前使用管理员或备份账号，将交互密码的 `mysqldump --single-transaction --no-tablespaces --set-gtid-purged=OFF` 备份写入新建的权限受限唯一目录，避免覆盖，并在独立环境验证恢复。完整示例见 [备份与回退](first-run.md#7-备份与回退)。Flyway 只前向，不运行 clean、不删 history、不执行逆向/破坏性 DDL。上一应用版本必须兼容当前 schema 才能回退；删除/缩窄字段先兼容再清理，误写恢复依赖已验证备份。

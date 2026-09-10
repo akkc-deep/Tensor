@@ -39,21 +39,6 @@
       "status": "ok"
     },
     {
-      "api_name": "hs_const",
-      "filename": "hs_const.json",
-      "query_mode": "snapshot",
-      "params": [
-        {
-          "hs_type": "SH"
-        },
-        {
-          "hs_type": "SZ"
-        }
-      ],
-      "row_count": 823,
-      "status": "ok"
-    },
-    {
       "api_name": "income",
       "filename": "income.json",
       "query_mode": "ann_date",
@@ -153,18 +138,6 @@
         }
       ],
       "row_count": 149,
-      "status": "ok"
-    },
-    {
-      "api_name": "broker_recommend",
-      "filename": "broker_recommend.json",
-      "query_mode": "snapshot",
-      "params": [
-        {
-          "month": "202608"
-        }
-      ],
-      "row_count": 236,
       "status": "ok"
     },
     {
@@ -309,42 +282,6 @@
       "status": "ok"
     },
     {
-      "api_name": "moneyflow_hsgt",
-      "filename": "moneyflow_hsgt.json",
-      "query_mode": "trade_date",
-      "params": [
-        {
-          "trade_date": "20260807"
-        }
-      ],
-      "row_count": 1,
-      "status": "ok"
-    },
-    {
-      "api_name": "hsgt_top10",
-      "filename": "hsgt_top10.json",
-      "query_mode": "trade_date",
-      "params": [
-        {
-          "trade_date": "20260807"
-        }
-      ],
-      "row_count": 20,
-      "status": "ok"
-    },
-    {
-      "api_name": "hk_hold",
-      "filename": "hk_hold.json",
-      "query_mode": "trade_date",
-      "params": [
-        {
-          "trade_date": "20260807"
-        }
-      ],
-      "row_count": 955,
-      "status": "ok"
-    },
-    {
       "api_name": "top_list",
       "filename": "top_list.json",
       "query_mode": "trade_date",
@@ -354,18 +291,6 @@
         }
       ],
       "row_count": 67,
-      "status": "ok"
-    },
-    {
-      "api_name": "top_inst",
-      "filename": "top_inst.json",
-      "query_mode": "trade_date",
-      "params": [
-        {
-          "trade_date": "20260807"
-        }
-      ],
-      "row_count": 680,
       "status": "ok"
     },
     {
@@ -489,18 +414,6 @@
       "status": "ok"
     },
     {
-      "api_name": "share_float",
-      "filename": "share_float.json",
-      "query_mode": "ann_date",
-      "params": [
-        {
-          "ann_date": "20260807"
-        }
-      ],
-      "row_count": 115,
-      "status": "ok"
-    },
-    {
       "api_name": "stk_holdertrade",
       "filename": "stk_holdertrade.json",
       "query_mode": "ann_date",
@@ -550,19 +463,6 @@
       "status": "ok"
     },
     {
-      "api_name": "namechange",
-      "filename": "namechange.json",
-      "query_mode": "range",
-      "params": [
-        {
-          "start_date": "20260807",
-          "end_date": "20260807"
-        }
-      ],
-      "row_count": 1,
-      "status": "ok"
-    },
-    {
       "api_name": "stk_managers",
       "filename": "stk_managers.json",
       "query_mode": "snapshot",
@@ -600,16 +500,6 @@
         {}
       ],
       "row_count": 359,
-      "status": "ok"
-    },
-    {
-      "api_name": "index_member",
-      "filename": "index_member.json",
-      "query_mode": "snapshot",
-      "params": [
-        {}
-      ],
-      "row_count": 3000,
       "status": "ok"
     },
     {

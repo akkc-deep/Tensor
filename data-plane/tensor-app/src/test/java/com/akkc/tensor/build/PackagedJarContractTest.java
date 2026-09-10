@@ -38,7 +38,8 @@ class PackagedJarContractTest {
             "BOOT-INF/classes/db/migration/V3__create_connect_and_slb_tables.sql",
             "BOOT-INF/classes/db/migration/V4__create_financial_tables.sql",
             "BOOT-INF/classes/db/migration/V5__create_corporate_and_governance_tables.sql",
-            "BOOT-INF/classes/db/migration/V7__version_dividend_business_key.sql");
+            "BOOT-INF/classes/db/migration/V7__version_dividend_business_key.sql",
+            "BOOT-INF/classes/db/migration/V8__remove_retired_datasets.sql");
     private static final List<String> TENSOR_MODULE_JARS = List.of(
             "BOOT-INF/lib/tensor-plugin-api-1.0-SNAPSHOT.jar",
             "BOOT-INF/lib/tensor-core-1.0-SNAPSHOT.jar",
@@ -46,7 +47,16 @@ class PackagedJarContractTest {
     private static final List<String> FORBIDDEN_ENTRIES = List.of(
             "datasets/fixture/fixture_daily.yaml",
             "datasets/invalid-duplicate-column.yaml",
-            "datasets/valid-daily.yaml");
+            "datasets/valid-daily.yaml",
+            "datasets/tushare_pro/top_inst.yaml",
+            "datasets/tushare_pro/broker_recommend.yaml",
+            "datasets/tushare_pro/share_float.yaml",
+            "datasets/tushare_pro/hs_const.yaml",
+            "datasets/tushare_pro/moneyflow_hsgt.yaml",
+            "datasets/tushare_pro/hk_hold.yaml",
+            "datasets/tushare_pro/index_member.yaml",
+            "datasets/tushare_pro/hsgt_top10.yaml",
+            "datasets/tushare_pro/namechange.yaml");
 
     @Test
     void rejectsNestedTushareYamlPaths() {
@@ -154,8 +164,8 @@ class PackagedJarContractTest {
                 TUSHARE_PREFIX);
 
         assertThat(outerTushare).isEmpty();
-        assertThat(tushareEntries).hasSize(49);
-        assertThat(new HashSet<>(tushareEntries)).hasSize(49);
+        assertThat(tushareEntries).hasSize(40);
+        assertThat(new HashSet<>(tushareEntries)).hasSize(40);
         assertThat(directTushareYamlEntries(
                 tensorEntriesByJar.get("BOOT-INF/lib/tensor-plugin-api-1.0-SNAPSHOT.jar"),
                 TUSHARE_PREFIX)).isEmpty();

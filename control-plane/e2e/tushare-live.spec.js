@@ -19,8 +19,10 @@ import { setTimeout as delay } from 'node:timers/promises'
 
 const execFileAsync = promisify(execFile)
 const BASE_URL = 'http://127.0.0.1:8080'
-const MANIFEST_SHA = '37a317f6a2bc3e5113be5f127976d16d8349414c6476c7f6a194b084a5b0f7c2'
-const JAR_SHA = '81adba0dd6500f4aa43b4fa06b18c2c8e7b7454d9e6d4d6c734772cdaef1d002'
+const MANIFEST_SHA = '386f46a99b6605e203129836d7a744b96b65304307f52991dd8bba6fd1870984'
+// Supply the hash of a build containing the current catalog; historical
+// acceptance JARs contain retired datasets and cannot validate this suite.
+const JAR_SHA = process.env.ACCEPTANCE_JAR_SHA256
 const DOWNLOAD_KEYS = [
   'requestId', 'outcome', 'pluginId', 'apiName', 'sourceRowCount', 'insertedRows',
   'updatedRows', 'message',
@@ -46,7 +48,7 @@ const FIXTURE_OPTION = /^Fixture 日线\s*fixture_daily$/
 const MAX_LOG_LINE = 1024 * 1024
 const ENV_ALLOWLIST = ['PATH', 'HOME', 'JAVA_HOME', 'TMPDIR', 'LANG', 'LC_ALL']
 const DB_ENV = ['TENSOR_DB_URL', 'TENSOR_DB_USERNAME', 'TENSOR_DB_PASSWORD']
-const SELECTED_API_NAMES = [
+const API_NAMES = [
   'stock_basic', 'stock_company', 'income', 'balancesheet', 'cashflow',
   'fina_indicator', 'fina_audit', 'fina_mainbz', 'stk_rewards',
   'stk_holdernumber', 'trade_cal', 'margin', 'daily', 'weekly', 'monthly',
@@ -57,26 +59,13 @@ const SELECTED_API_NAMES = [
   'new_share', 'stk_managers', 'pledge_stat', 'pledge_detail',
   'index_classify', 'index_member_all',
 ]
-const EXCLUDED_INTERFACES = [
-  { apiName: 'top_inst', reason: 'higher_points' },
-  { apiName: 'broker_recommend', reason: 'higher_points' },
-  { apiName: 'share_float', reason: 'permission_unverified' },
-  { apiName: 'hs_const', reason: 'permission_unverified' },
-  { apiName: 'moneyflow_hsgt', reason: 'permission_unverified' },
-  { apiName: 'hk_hold', reason: 'permission_unverified' },
-  { apiName: 'index_member', reason: 'permission_unverified' },
-  { apiName: 'hsgt_top10', reason: 'permission_unverified' },
-  { apiName: 'namechange', reason: 'permission_unverified' },
-]
 
 const PARAMETERS = {
   list_status: { label: '上市状态', type: 'ENUM' },
   exchange: { label: '交易所', type: 'ENUM' },
   exchange_id: { label: '交易所', type: 'ENUM' },
-  hs_type: { label: '沪深港通类型', type: 'ENUM' },
   start_date: { label: '开始日期', type: 'DATE_RANGE_MEMBER' },
   end_date: { label: '结束日期', type: 'DATE_RANGE_MEMBER' },
-  month: { label: '月份', type: 'MONTH' },
   trade_date: { label: '交易日期', type: 'DATE' },
   ann_date: { label: '公告日期', type: 'DATE' },
   ts_code: { label: '股票代码', type: 'TS_CODE' },
@@ -89,11 +78,11 @@ const FILTER_LABELS = {
 
 function buildFilters() {
   const groups = [
-    [[], 'trade_cal index_classify index_member'],
-    [['ts_code'], 'stock_basic stock_company hs_const new_share broker_recommend index_member_all fina_mainbz pledge_stat'],
-    [['trade_date'], 'margin moneyflow_hsgt slb_len'],
-    [['ts_code', 'trade_date'], 'daily weekly monthly adj_factor suspend_d daily_basic stk_limit moneyflow margin_detail top_list top_inst block_trade hsgt_top10 hk_hold slb_sec slb_sec_detail'],
-    [['ts_code', 'ann_date'], 'namechange stk_managers income balancesheet cashflow fina_indicator fina_audit express forecast disclosure_date dividend repurchase share_float stk_rewards stk_holdernumber stk_holdertrade top10_holders top10_floatholders pledge_detail'],
+    [[], 'trade_cal index_classify'],
+    [['ts_code'], 'stock_basic stock_company new_share index_member_all fina_mainbz pledge_stat'],
+    [['trade_date'], 'margin slb_len'],
+    [['ts_code', 'trade_date'], 'daily weekly monthly adj_factor suspend_d daily_basic stk_limit moneyflow margin_detail top_list block_trade slb_sec slb_sec_detail'],
+    [['ts_code', 'ann_date'], 'stk_managers income balancesheet cashflow fina_indicator fina_audit express forecast disclosure_date dividend repurchase stk_rewards stk_holdernumber stk_holdertrade top10_holders top10_floatholders pledge_detail'],
   ]
   const filters = new Map()
   for (const [fields, names] of groups) {
@@ -106,7 +95,6 @@ const FILTERS = buildFilters()
 const CONTRACT_ROWS = [
   ['stock_basic', '股票基础信息', ['list_status'], 10],
   ['stock_company', '上市公司基本信息', ['exchange'], 18],
-  ['hs_const', '沪深港通标的范围', ['hs_type'], 5],
   ['income', '利润表', ['ts_code', 'ann_date'], 85],
   ['balancesheet', '资产负债表', ['ts_code', 'ann_date'], 152],
   ['cashflow', '现金流量表', ['ts_code', 'ann_date'], 97],
@@ -115,7 +103,6 @@ const CONTRACT_ROWS = [
   ['fina_mainbz', '主营业务构成', ['ts_code', 'ann_date'], 8],
   ['stk_rewards', '管理层薪酬与持股', ['ts_code'], 7],
   ['stk_holdernumber', '股东户数', ['ts_code'], 4],
-  ['broker_recommend', '券商月度推荐', ['month'], 4],
   ['trade_cal', '交易日历', ['exchange', 'start_date', 'end_date'], 4],
   ['margin', '融资融券汇总', ['exchange_id', 'trade_date'], 9],
   ['daily', '日线行情', ['trade_date'], 11],
@@ -126,11 +113,7 @@ const CONTRACT_ROWS = [
   ['daily_basic', '每日估值与市场指标', ['trade_date'], 18],
   ['moneyflow', '个股资金流向', ['trade_date'], 20],
   ['stk_limit', '每日涨跌停价格', ['trade_date'], 4],
-  ['moneyflow_hsgt', '沪深港通资金流向', ['trade_date'], 7],
-  ['hsgt_top10', '沪深港通十大成交股', ['trade_date'], 11],
-  ['hk_hold', '沪深港股通持股明细', ['trade_date'], 7],
   ['top_list', '龙虎榜每日明细', ['trade_date'], 15],
-  ['top_inst', '龙虎榜机构明细', ['trade_date'], 10],
   ['margin_detail', '融资融券交易明细', ['trade_date'], 10],
   ['block_trade', '大宗交易', ['trade_date'], 7],
   ['slb_len', '转融通期限与规模', ['trade_date'], 6],
@@ -141,24 +124,21 @@ const CONTRACT_ROWS = [
   ['dividend', '分红送股', ['ann_date'], 14],
   ['disclosure_date', '财报披露计划', ['ann_date'], 5],
   ['repurchase', '股票回购', ['ann_date'], 9],
-  ['share_float', '限售股解禁', ['ann_date'], 7],
   ['stk_holdertrade', '股东增减持', ['ann_date'], 11],
   ['top10_holders', '前十大股东', ['ann_date'], 9],
   ['top10_floatholders', '前十大流通股东', ['ann_date'], 9],
   ['new_share', 'IPO 新股发行信息', ['start_date', 'end_date'], 12],
-  ['namechange', '证券名称变更记录', ['start_date', 'end_date'], 6],
   ['stk_managers', '上市公司管理层信息', [], 11],
   ['pledge_stat', '股权质押统计', [], 7],
   ['pledge_detail', '股权质押明细', [], 14],
   ['index_classify', '行业指数分类', [], 7],
-  ['index_member', '行业指数成分', [], 5],
   ['index_member_all', '行业分级与完整成分', [], 11],
 ]
 const CONTRACTS = new Map(CONTRACT_ROWS.map(([apiName, displayName, parameters, columns]) => [
   apiName,
   { apiName, displayName, parameters, columns, filters: FILTERS.get(apiName) },
 ]))
-safeCheck(FILTERS.size === 49, 'filter contract count')
+safeCheck(FILTERS.size === 40, 'filter contract count')
 
 function safeCheck(condition, name) {
   if (!condition) throw new Error(`Safe check failed: ${name}`)
@@ -184,7 +164,7 @@ export function validateManifest(bytes, expectedHash = MANIFEST_SHA) {
   } catch {
     throw new Error('Safe check failed: manifest JSON')
   }
-  safeCheck(Array.isArray(manifest.interfaces) && manifest.interfaces.length === 49, 'manifest interface count')
+  safeCheck(Array.isArray(manifest.interfaces) && manifest.interfaces.length === 40, 'manifest interface count')
   const names = new Set()
   let sampleCount = 0
   let okCount = 0
@@ -213,34 +193,29 @@ export function validateManifest(bytes, expectedHash = MANIFEST_SHA) {
     okCount += Number(entry.status === 'ok')
   }
   safeCheck(names.size === CONTRACTS.size, 'manifest API set')
-  safeCheck(sampleCount === 58, 'manifest sample count')
-  safeCheck(okCount === 37, 'manifest status counts')
-  return { manifest, sampleCount, okCount, emptyCount: 49 - okCount }
+  safeCheck(sampleCount === 48, 'manifest sample count')
+  safeCheck(okCount === 28, 'manifest status counts')
+  return { manifest, sampleCount, okCount, emptyCount: 40 - okCount }
 }
 
 export function selectLiveInterfaces(interfaces) {
-  safeCheck(Array.isArray(interfaces) && interfaces.length === 49, 'live scope input count')
+  safeCheck(Array.isArray(interfaces) && interfaces.length === 40, 'live scope input count')
   const names = interfaces.map((entry) => entry?.api_name)
   safeCheck(names.every((name) => typeof name === 'string'), 'live scope API names')
   safeCheck(new Set(names).size === names.length, 'live scope unique API names')
-  const excludedNames = new Set(EXCLUDED_INTERFACES.map(({ apiName }) => apiName))
-  safeCheck(excludedNames.size === 9, 'live scope exclusion count')
-  safeCheck([...excludedNames].every((name) => names.includes(name)), 'live scope exclusions present')
-  const selected = interfaces.filter(({ api_name: apiName }) => !excludedNames.has(apiName))
   safeCheck(
-    JSON.stringify(selected.map(({ api_name: apiName }) => apiName)) ===
-      JSON.stringify(SELECTED_API_NAMES),
-    'live scope selected API order',
+    JSON.stringify(names) === JSON.stringify(API_NAMES),
+    'live scope API order',
   )
-  const sampleCount = selected.reduce((sum, entry) => {
+  const sampleCount = interfaces.reduce((sum, entry) => {
     safeCheck(Array.isArray(entry.params), 'live scope params')
     return sum + entry.params.length
   }, 0)
-  const okCount = selected.filter(({ status }) => status === 'ok').length
-  const emptyCount = selected.filter(({ status }) => status === 'empty').length
+  const okCount = interfaces.filter(({ status }) => status === 'ok').length
+  const emptyCount = interfaces.filter(({ status }) => status === 'empty').length
   safeCheck(sampleCount === 48, 'live scope sample count')
   safeCheck(okCount === 28 && emptyCount === 12, 'live scope status counts')
-  const acceptanceInterfaces = selected.map((entry) => ({
+  const acceptanceInterfaces = interfaces.map((entry) => ({
     ...entry, acceptanceStatus: ['dividend', 'top10_holders', 'top10_floatholders'].includes(entry.api_name) ? 'ok' : entry.status,
   }))
   const acceptanceOkCount = acceptanceInterfaces.filter(({ acceptanceStatus }) => acceptanceStatus === 'ok').length
@@ -249,7 +224,6 @@ export function selectLiveInterfaces(interfaces) {
     interfaces: acceptanceInterfaces,
     acceptanceOkCount,
     acceptanceEmptyCount: acceptanceInterfaces.length - acceptanceOkCount,
-    excludedInterfaces: EXCLUDED_INTERFACES.map((entry) => ({ ...entry })),
     sampleCount,
     okCount,
     emptyCount,
@@ -607,7 +581,7 @@ const evidence = {
   task: 'M14-T09',
   sourceTask: 'M14-T05',
   scope: {
-    id: 'points-2000',
+    id: 'current-catalog',
     manifestCases: manifest.interfaces.length,
     manifestSamples: manifestSampleCount,
     selectedCases: INTERFACES.length,
@@ -617,7 +591,6 @@ const evidence = {
     interfaceStatuses: INTERFACES.map(({ api_name, status, acceptanceStatus }) => ({
       apiName: api_name, manifestStatus: status, acceptanceStatus,
     })),
-    excludedInterfaces: liveScope.excludedInterfaces,
   },
   startedAt: undefined,
   finishedAt: undefined,
@@ -746,6 +719,7 @@ async function validatePreconditions(testInfo) {
   intervalMs = Number(process.env.M14_T05_CALL_INTERVAL_MS)
   safeCheck(Number.isSafeInteger(intervalMs) && intervalMs >= 2_000 && intervalMs <= 3_600_000, 'call interval range')
 
+  safeCheck(/^[a-f0-9]{64}$/.test(JAR_SHA ?? ''), 'ACCEPTANCE_JAR_SHA256 supplied')
   safeCheck(path.isAbsolute(process.env.ACCEPTANCE_JAR ?? ''), 'acceptance JAR absolute path')
   const jarState = await lstat(process.env.ACCEPTANCE_JAR)
   safeCheck(jarState.isFile() && !jarState.isSymbolicLink(), 'acceptance JAR ordinary file')

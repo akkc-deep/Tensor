@@ -5,12 +5,12 @@ import { nextTick } from 'vue'
 import ApiSelect from './ApiSelect.vue'
 
 const CATEGORY_COUNTS = [
-  ['basic_organization', 11],
+  ['basic_organization', 7],
   ['行情与估值', 7],
-  ['交易与资金', 6],
-  ['互联互通与转融通', 6],
+  ['交易与资金', 5],
+  ['互联互通与转融通', 3],
   ['财务与披露', 9],
-  ['公司行动', 3],
+  ['公司行动', 2],
   ['股东与治理', 7],
 ]
 
@@ -42,7 +42,7 @@ function filter(wrapper, query) {
 }
 
 describe('ApiSelect', () => {
-  it('groups all 49 options by the current seven metadata categories', () => {
+  it('groups all 40 options by the current seven metadata categories', () => {
     const apis = currentApis()
     const wrapper = mount(ApiSelect, {
       props: { modelValue: '', apis },
@@ -54,12 +54,12 @@ describe('ApiSelect', () => {
       ),
     ).toEqual(CATEGORY_COUNTS.map(([category]) => category))
     const options = wrapper.findAllComponents(ElOption)
-    expect(options).toHaveLength(49)
+    expect(options).toHaveLength(40)
     expect(options.map((option) => option.props('value'))).toEqual(
       apis.map(({ apiName }) => apiName),
     )
     expect(new Set(options.map((option) => option.props('value'))).size).toBe(
-      49,
+      40,
     )
   })
 
@@ -101,7 +101,7 @@ describe('ApiSelect', () => {
     await filter(wrapper, 'weekly')
     await filter(wrapper, '')
 
-    expect(wrapper.findAllComponents(ElOption)).toHaveLength(49)
+    expect(wrapper.findAllComponents(ElOption)).toHaveLength(40)
     expect(wrapper.getComponent(ElSelect).props('modelValue')).toBe('daily')
     expect(wrapper.emitted('update:modelValue')).toBeUndefined()
     expect(apis).toEqual(snapshot)

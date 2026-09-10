@@ -44,6 +44,18 @@ def require(value, label):
     if not value:
         raise GateError(label)
 
+def jar_identity_verdict(digest, expected):
+    require(isinstance(expected, str) and re.fullmatch('[a-f0-9]{64}', expected), 'jar-sha256-required')
+    require(digest == expected, 'jar-identity-mismatch')
+
+def mysql_grants_verdict(grants, schema, *, migration=False):
+    lines = grants.splitlines()
+    require(len(lines) == 2 and not any(value in grants for value in ('GRANT OPTION','ALL PRIVILEGES','DELETE')), 'mysql-grants-excessive')
+    scope = [line for line in lines if ' ON `' + schema + '`.* TO ' in line]
+    expected = {'CREATE','SELECT','INSERT','UPDATE','ALTER','INDEX'} | ({'DROP'} if migration else set())
+    require(len(scope) == 1 and set(scope[0].split(' ON ')[0].removeprefix('GRANT ').replace(' ','').split(',')) == expected, 'mysql-grants-invalid')
+    require(any(line.startswith('GRANT USAGE ON *.* TO ') for line in lines), 'mysql-global-grants-invalid')
+
 def docker_absence_verdict(exit_code, output, kind, identifier):
     prefix,suffix = {
         'container':(rb'(?i:error: no such object: |error response from daemon: no such container: )',b''),
@@ -358,7 +370,7 @@ def final_verdict(report):
 def render_report(report, secret_patterns, directory):
     data = json.dumps(report, ensure_ascii=False, indent=2).encode()
     scan_bytes(data, secret_patterns)
-    lines = ['# M14-T07 security verification', '', 'This document is generated from this run; failed and not-run checks prevent acceptance.', '', 'Invocation: `sh scripts/security/verify-release.sh`. `M14_SECURITY_JAR` selects the frozen input whose SHA-256 is recorded in `identities`; `PATH` and `JAVA_HOME` select the reported tool versions.', '', '```json', data.decode(), '```', '', 'Local loopback controls were measured only where marked pass. Remote HTTPS, an internal network or identity proxy, database TLS, a proxy response budget of at least 130 seconds, and a shutdown window covering all phases remain deployment requirements. M14-T08 release readiness is a separate decision.', '']
+    lines = ['# M14-T07 security verification', '', 'This document is generated from this run; failed and not-run checks prevent acceptance.', '', 'Invocation: `sh scripts/security/verify-release.sh`. `M14_SECURITY_JAR` selects the frozen input and required `M14_SECURITY_JAR_SHA256` pins its SHA-256, recorded in `identities`; `PATH` and `JAVA_HOME` select the reported tool versions.', '', '```json', data.decode(), '```', '', 'Local loopback controls were measured only where marked pass. Remote HTTPS, an internal network or identity proxy, database TLS, a proxy response budget of at least 130 seconds, and a shutdown window covering all phases remain deployment requirements. M14-T08 release readiness is a separate decision.', '']
     markdown = '\n'.join(lines).encode()
     scan_bytes(markdown, secret_patterns)
     for name, content in [('outcome.json', data), ('evidence.md', markdown)]:
@@ -437,7 +449,7 @@ def now():
 class Runtime:
     def __init__(self, directory):
         self.directory, self.root = directory, Path.cwd()
-        self.inputs = {name:os.environ.get(name, '') for name in ('PATH','JAVA_HOME','HOME','DOCKER_HOST','TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE','M14_SECURITY_JAR','M14_MAVEN_REPO','M14_SECURITY_NVD_API_KEY')}
+        self.inputs = {name:os.environ.get(name, '') for name in ('PATH','JAVA_HOME','HOME','DOCKER_HOST','TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE','M14_SECURITY_JAR','M14_SECURITY_JAR_SHA256','M14_MAVEN_REPO','M14_SECURITY_NVD_API_KEY')}
         self.node = node_tool()
         self.real_home = Path.home()
         os.environ.clear()
@@ -586,7 +598,7 @@ class Runtime:
         require(stat.S_ISREG(info.st_mode) and info.st_mode & 0o444 and info.st_uid == os.getuid(), 'jar-file-invalid')
         self.jar = jar
         digest = hashlib.sha256(jar.read_bytes()).hexdigest()
-        require(digest == 'acbba3d2d0f240a31b526560e80d217f274d432518f96a07459ba9d44d3467ef', 'jar-identity-mismatch')
+        jar_identity_verdict(digest, self.inputs['M14_SECURITY_JAR_SHA256'])
         self.report['identities'] = {'jarSha256':digest, 'scriptSha256':hashlib.sha256((self.root/'scripts/security/verify-release.sh').read_bytes()).hexdigest(), 'lockSha256':hashlib.sha256((self.root/'control-plane/package-lock.json').read_bytes()).hexdigest()}
         head = self.success('source-head', ['git','rev-parse','HEAD']).decode().strip()
         require(bool(re.fullmatch('[a-f0-9]{40}', head)), 'source-head-invalid')
@@ -620,7 +632,7 @@ class Runtime:
         self.schema = 'tensor_m14_t07_' + self.owner[:16]
         self.username = 'm14t07_' + self.owner[:16]
         self.fields = top_fields(self.root/'docs/data-template/stock_company.json')
-        self.report['environment'].update(profile='default', bind='loopback', productionDatasets=49)
+        self.report['environment'].update(profile='default', bind='loopback', productionDatasets=40)
         return {'port8080InitiallyFree':True, 'sanitizedChildEnvironment':True}
 
     def scan_source(self):
@@ -675,10 +687,10 @@ class Runtime:
                 pom = response.read()
             scan_bytes(pom, self.secret_patterns)
             (self.packaged_libraries / (filename.removesuffix('.jar') + '.pom')).write_bytes(pom)
-        require(sorted(re.match(r'V(\d+)__', name).group(1) for name in migrations) == ['1','2','3','4','5','7'], 'jar-migrations-invalid')
+        require(sorted(re.match(r'V(\d+)__', name).group(1) for name in migrations) == ['1','2','3','4','5','7','8'], 'jar-migrations-invalid')
         require(sorted(modules) == ['tensor-core-1.0-SNAPSHOT.jar','tensor-plugin-api-1.0-SNAPSHOT.jar','tensor-plugin-tushare-1.0-SNAPSHOT.jar'], 'jar-modules-invalid')
         resources = [name for name in names if 'datasets/tushare_pro/' in name and name.endswith(('.yml','.yaml'))]
-        require(len(resources) == 49 and not any('fixture' in name.lower() or '/test-classes/' in name or 'application-acceptance' in name for name in names), 'jar-resources-invalid')
+        require(len(resources) == 40 and not any('fixture' in name.lower() or '/test-classes/' in name or 'application-acceptance' in name for name in names), 'jar-resources-invalid')
         self.report['scanCoverage']['jar_entries_recursive'] = count
         return {'entries':count, 'thirdPartyJars':len(self.inventory), 'migrations':sorted(migrations), 'productionModules':modules, 'datasetResources':len(resources)}
 
@@ -774,20 +786,16 @@ class Runtime:
             time.sleep(2)
         require(source is not None and re.fullmatch('[A-Za-z0-9.:-]+', source) and '%' not in source, 'mysql-source-host-invalid')
         self.source_host = source
-        self.mysql_query("CREATE DATABASE `" + self.schema + "` CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_as_cs; CREATE USER '" + self.username + "'@'" + source + "' IDENTIFIED BY '" + self.password + "'; GRANT CREATE,SELECT,INSERT,UPDATE,ALTER,INDEX ON `" + self.schema + "`.* TO '" + self.username + "'@'" + source + "';", admin=True, label='mysql-least-privilege')
+        self.mysql_query("CREATE DATABASE `" + self.schema + "` CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_as_cs; CREATE USER '" + self.username + "'@'" + source + "' IDENTIFIED BY '" + self.password + "'; GRANT CREATE,SELECT,INSERT,UPDATE,ALTER,INDEX,DROP ON `" + self.schema + "`.* TO '" + self.username + "'@'" + source + "';", admin=True, label='mysql-least-privilege')
         self.app_defaults = self.private_file('app.defaults', '[client]\nhost=127.0.0.1\nport=' + str(self.mysql_port) + '\nuser=' + self.username + '\npassword=' + self.password + '\nprotocol=TCP\n')
         _, grants = self.mysql_query('SHOW GRANTS;', label='mysql-grant-verification')
-        lines = grants.splitlines()
-        require(len(lines) == 2 and not any(value in grants for value in ('GRANT OPTION','ALL PRIVILEGES','DELETE','DROP')), 'mysql-grants-excessive')
-        scope = [line for line in lines if ' ON `' + self.schema + '`.* TO ' in line]
-        require(len(scope) == 1 and set(scope[0].split(' ON ')[0].removeprefix('GRANT ').replace(' ','').split(',')) == {'CREATE','SELECT','INSERT','UPDATE','ALTER','INDEX'}, 'mysql-grants-invalid')
-        require(any(line.startswith('GRANT USAGE ON *.* TO ') for line in lines), 'mysql-global-grants-invalid')
+        mysql_grants_verdict(grants, self.schema, migration=True)
         _, identity = self.mysql_query("SELECT USER(),CURRENT_USER(),DEFAULT_CHARACTER_SET_NAME,DEFAULT_COLLATION_NAME FROM information_schema.SCHEMATA WHERE SCHEMA_NAME=DATABASE();", label='mysql-account-verification')
         require(identity.split('\t') == [self.username + '@' + source, self.username + '@' + source,'utf8mb4','utf8mb4_0900_as_cs'], 'mysql-account-source-mismatch')
         _, count = self.mysql_query('SELECT COUNT(*) FROM information_schema.TABLES WHERE TABLE_SCHEMA=DATABASE();', label='mysql-empty-schema')
         require(count == '0', 'mysql-schema-not-empty')
         self.report['environment']['mysqlServer'] = '8.4.6'
-        return {'sourceHostSha256':hashlib.sha256(source.encode()).hexdigest(), 'privileges':['CREATE','SELECT','INSERT','UPDATE','ALTER','INDEX'], 'charset':'utf8mb4', 'collation':'utf8mb4_0900_as_cs', 'isolatedSchemaInitiallyEmpty':True}
+        return {'sourceHostSha256':hashlib.sha256(source.encode()).hexdigest(), 'privileges':['CREATE','SELECT','INSERT','UPDATE','ALTER','INDEX','DROP'], 'charset':'utf8mb4', 'collation':'utf8mb4_0900_as_cs', 'isolatedSchemaInitiallyEmpty':True}
 
     def start_stub(self):
         runtime = self
@@ -869,41 +877,53 @@ class Runtime:
 
     def startup(self):
         self.start_stub()
-        # Recheck immediately before launch; never terminate an unrelated port owner.
-        with socket.socket() as listener:
-            try:
-                listener.setsockopt(socket.SOL_SOCKET,socket.SO_REUSEADDR,1)
-                listener.bind(('127.0.0.1',8080))
-            except OSError:
-                raise GateError('port-8080-occupied-before-launch') from None
         environment = {**self.env,'TENSOR_DB_URL':'jdbc:mysql://127.0.0.1:' + str(self.mysql_port) + '/' + self.schema,'TENSOR_DB_USERNAME':self.username,'TENSOR_DB_PASSWORD':self.password,'TENSOR_TUSHARE_TOKEN':self.token,'TENSOR_TUSHARE_BASE_URL':'http://127.0.0.1:' + str(self.stub.server_port) + '/'}
         self.jvm_log = self.directory/'application.log'
         self.known_artifacts.add(self.jvm_log)
-        self.jvm_stream = self.jvm_log.open('wb')
-        self.jvm = subprocess.Popen([self.java,'-jar',str(self.jar),'--server.address=127.0.0.1','--server.port=8080'],env=environment,stdin=subprocess.DEVNULL,stdout=self.jvm_stream,stderr=self.jvm_stream)
-        self.jvm_pid = self.jvm.pid
-        started, ready = time.monotonic(), False
-        while time.monotonic() - started < 90:
-            require(self.jvm.poll() is None, 'jvm-exited-before-ready')
-            scan_file(self.jvm_log, self.secret_patterns)
-            try:
-                status, _, body = self.http('/actuator/health', observe=False)
-                if status == 200 and json.loads(body).get('status') == 'UP':
-                    ready = True; break
-            except GateError:
-                if self.fatal:
-                    raise
-            except ValueError:
-                pass
-            time.sleep(1)
-        require(ready, 'root-health-deadline')
-        _, migrations = self.mysql_query("SELECT version,success FROM flyway_schema_history WHERE version IS NOT NULL ORDER BY installed_rank;", label='migration-verification')
-        require(migrations.splitlines() == [str(v) + '\t1' for v in (1,2,3,4,5,7)], 'production-migrations-invalid')
+        # Restart after revocation so pooled connections cannot retain migration privileges.
+        for migration in (True, False):
+            with socket.socket() as listener:
+                try:
+                    listener.setsockopt(socket.SOL_SOCKET,socket.SO_REUSEADDR,1)
+                    listener.bind(('127.0.0.1',8080))
+                except OSError:
+                    raise GateError('port-8080-occupied-before-launch') from None
+            self.jvm_stream = self.jvm_log.open('wb' if migration else 'ab')
+            self.jvm = subprocess.Popen([self.java,'-jar',str(self.jar),'--server.address=127.0.0.1','--server.port=8080'],env=environment,stdin=subprocess.DEVNULL,stdout=self.jvm_stream,stderr=self.jvm_stream)
+            self.jvm_pid = self.jvm.pid
+            started, ready = time.monotonic(), False
+            while time.monotonic() - started < 90:
+                require(self.jvm.poll() is None, 'jvm-exited-before-ready')
+                scan_file(self.jvm_log, self.secret_patterns)
+                try:
+                    status, _, body = self.http('/actuator/health', observe=False)
+                    if status == 200 and json.loads(body).get('status') == 'UP':
+                        ready = True; break
+                except GateError:
+                    if self.fatal:
+                        raise
+                except ValueError:
+                    pass
+                time.sleep(1)
+            require(ready, 'root-health-deadline')
+            _, migrations = self.mysql_query("SELECT version,success FROM flyway_schema_history WHERE version IS NOT NULL ORDER BY installed_rank;", label='migration-verification')
+            require(migrations.splitlines() == [str(v) + '\t1' for v in (1,2,3,4,5,7,8)], 'production-migrations-invalid')
+            if migration:
+                self.jvm.terminate()
+                try:
+                    self.jvm.wait(timeout=30)
+                except subprocess.TimeoutExpired:
+                    raise GateError('migration-jvm-stop-timeout') from None
+                require(self.jvm.poll() in (0,143,-signal.SIGTERM), 'migration-jvm-stop-failed')
+                self.jvm_stream.close()
+                self.mysql_query("REVOKE DROP ON `" + self.schema + "`.* FROM '" + self.username + "'@'" + self.source_host + "';", admin=True, label='mysql-revoke-migration-drop')
+            _, grants = self.mysql_query('SHOW GRANTS;', label='mysql-runtime-grant-verification')
+            mysql_grants_verdict(grants, self.schema)
         _, tables = self.mysql_query("SELECT TABLE_NAME FROM information_schema.TABLES WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME<>'flyway_schema_history' ORDER BY TABLE_NAME;", label='business-table-inventory')
         self.business_tables = tables.splitlines()
-        require(len(self.business_tables) == 49 and all(re.fullmatch('tushare_pro__[a-z][a-z0-9_]*', table) for table in self.business_tables), 'business-table-inventory-invalid')
+        require(len(self.business_tables) == 40 and all(re.fullmatch('tushare_pro__[a-z][a-z0-9_]*', table) for table in self.business_tables), 'business-table-inventory-invalid')
         require(all(row['rows'] == 0 for row in self.database_fingerprint()), 'business-tables-not-empty')
-        return {'rootHealthReady':True, 'successfulMigrations':6, 'emptyBusinessTables':49}
+        return {'rootHealthReady':True, 'successfulMigrations':7, 'migrationDropRevoked':True, 'runtimeConnectionsRenewed':True, 'emptyBusinessTables':40}
 
     def database_fingerprint(self):
         _, columns = self.mysql_query("SELECT TABLE_NAME,COLUMN_NAME FROM information_schema.COLUMNS WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME<>'flyway_schema_history' ORDER BY TABLE_NAME,ORDINAL_POSITION;", label='business-column-inventory')
@@ -924,7 +944,7 @@ class Runtime:
             index, count, digest = line.split('\t')
             require(index.isdigit() and count.isdigit() and (digest == 'empty' or re.fullmatch('[a-f0-9]{64}',digest)), 'business-fingerprint-invalid')
             results.append({'tableId':int(index),'rows':int(count),'sha256':digest})
-        require(len(results) == 49, 'business-fingerprint-incomplete')
+        require(len(results) == 40, 'business-fingerprint-incomplete')
         return results
 
     def remember(self, body, headers, operation):
@@ -998,7 +1018,7 @@ class Runtime:
             require(status == 200 and isinstance(body,list) and len(body) == 1 and body[0].get('pluginId') == 'tushare_pro' and all(body[0].get(key) is True for key in ('enabled','credentialConfigured','downloadAvailable')), 'production-source-descriptor-invalid')
         def datasets(status, body, data):
             descriptor_safety(body)
-            require(status == 200 and isinstance(body,list) and len(body) == 49 and len({item.get('apiName') for item in body}) == 49 and all(item.get('pluginId','tushare_pro') == 'tushare_pro' for item in body), 'production-dataset-descriptors-invalid')
+            require(status == 200 and isinstance(body,list) and len(body) == 40 and len({item.get('apiName') for item in body}) == 40 and all(item.get('pluginId','tushare_pro') == 'tushare_pro' for item in body), 'production-dataset-descriptors-invalid')
         def definition(status, body, data):
             descriptor_safety(body)
             require(status == 200 and isinstance(body,dict) and body.get('pluginId') == 'tushare_pro' and body.get('apiName') == 'stock_company' and [column.get('name') for column in body.get('columns',[])] == self.fields, 'production-definition-invalid')
@@ -1125,7 +1145,7 @@ class Runtime:
         return summary
 
     def database_scan(self):
-        require(len(self.business_tables) == 49, 'business-scan-incomplete')
+        require(len(self.business_tables) == 40, 'business-scan-incomplete')
         self.database_fingerprint()
         statements = []
         for index, table in enumerate(self.business_tables):
@@ -1134,11 +1154,11 @@ class Runtime:
             statements.append('SELECT ' + str(index) + ',COUNT(*) FROM `' + table + '` WHERE ' + ' OR '.join(terms) + ';')
         _, output = self.mysql_query('\n'.join(statements),label='business-credential-scan')
         rows = [line.split('\t') for line in output.splitlines()]
-        require(len(rows) == 49 and all(index.isdigit() and count.isdigit() for index,count in rows), 'business-scan-invalid')
+        require(len(rows) == 40 and all(index.isdigit() and count.isdigit() for index,count in rows), 'business-scan-invalid')
         hits = sum(int(count) for _,count in rows)
         require(hits == 0, 'business-credential-persisted')
-        self.report['scanCoverage']['business_tables'] = 49
-        return {'tables':49,'credentialMatches':hits}
+        self.report['scanCoverage']['business_tables'] = 40
+        return {'tables':40,'credentialMatches':hits}
 
     def scan_logs(self):
         require(hasattr(self,'jvm_log'), 'application-log-missing')
@@ -1613,6 +1633,18 @@ def self_test(directory):
                 failures.append(label + ':clean-control-rejected')
         except Exception:
             failures.append(label + ':unexpected-exception')
+    check('jar-identity-clean', lambda: jar_identity_verdict('a' * 64, 'a' * 64))
+    check('jar-identity-mismatch', lambda: jar_identity_verdict('a' * 64, 'b' * 64), True)
+    check('jar-identity-missing', lambda: jar_identity_verdict('a' * 64, ''), True)
+    grants = 'GRANT USAGE ON *.* TO `synthetic`@`127.0.0.1`\nGRANT CREATE,SELECT,INSERT,UPDATE,ALTER,INDEX ON `synthetic_schema`.* TO `synthetic`@`127.0.0.1`'
+    migration_grants = grants.replace('ALTER,INDEX', 'ALTER,INDEX,DROP')
+    check('mysql-runtime-grants-clean', lambda: mysql_grants_verdict(grants, 'synthetic_schema'))
+    check('mysql-migration-grants-clean', lambda: mysql_grants_verdict(migration_grants, 'synthetic_schema', migration=True))
+    check('mysql-migration-drop-missing', lambda: mysql_grants_verdict(grants, 'synthetic_schema', migration=True), True)
+    check('mysql-runtime-drop-retained', lambda: mysql_grants_verdict(migration_grants, 'synthetic_schema'), True)
+    check('mysql-migration-delete-excessive', lambda: mysql_grants_verdict(migration_grants.replace('INDEX,DROP', 'INDEX,DROP,DELETE'), 'synthetic_schema', migration=True), True)
+    check('mysql-migration-global-excessive', lambda: mysql_grants_verdict(migration_grants.replace('USAGE ON *.*', 'ALL PRIVILEGES ON *.*'), 'synthetic_schema', migration=True), True)
+    check('mysql-migration-schema-mismatch', lambda: mysql_grants_verdict(migration_grants, 'other_schema', migration=True), True)
     for category in ('source', 'http', 'log', 'artifact'):
         check(category + '-clean', lambda: scan_bytes(b'ordinary safe output', secrets))
         for number, secret in enumerate(secrets):

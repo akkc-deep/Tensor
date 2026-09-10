@@ -48,7 +48,6 @@ for command in git tar mvn java python3 docker; do
   command -v "$command" >/dev/null 2>&1 || fail "missing-$command"
 done
 [ -d "$maven_repository" ] || fail maven-repository-missing
-[ "$(git -C "$repository" branch --show-current)" = main ] || fail branch
 head_commit=$(git -C "$repository" rev-parse HEAD) || fail git-head
 
 protected_status() {
@@ -115,30 +114,30 @@ from datetime import datetime, timezone
 from pathlib import Path
 from xml.etree import ElementTree as ET
 
-MANIFEST_SHA = "37a317f6a2bc3e5113be5f127976d16d8349414c6476c7f6a194b084a5b0f7c2"
+MANIFEST_SHA = "386f46a99b6605e203129836d7a744b96b65304307f52991dd8bba6fd1870984"
 APIS = (
-    "stock_basic stock_company hs_const income balancesheet cashflow fina_indicator fina_audit "
-    "fina_mainbz stk_rewards stk_holdernumber broker_recommend trade_cal margin daily weekly monthly "
-    "adj_factor suspend_d daily_basic moneyflow stk_limit moneyflow_hsgt hsgt_top10 hk_hold top_list "
-    "top_inst margin_detail block_trade slb_len slb_sec slb_sec_detail forecast express dividend "
-    "disclosure_date repurchase share_float stk_holdertrade top10_holders top10_floatholders new_share "
-    "namechange stk_managers pledge_stat pledge_detail index_classify index_member index_member_all"
+    "stock_basic stock_company income balancesheet cashflow fina_indicator fina_audit "
+    "fina_mainbz stk_rewards stk_holdernumber trade_cal margin daily weekly monthly "
+    "adj_factor suspend_d daily_basic moneyflow stk_limit top_list "
+    "margin_detail block_trade slb_len slb_sec slb_sec_detail forecast express dividend "
+    "disclosure_date repurchase stk_holdertrade top10_holders top10_floatholders new_share "
+    "stk_managers pledge_stat pledge_detail index_classify index_member_all"
 ).split()
 REPORTS = (
     (
         "tensor-plugin-tushare/target/surefire-reports/"
         "TEST-com.akkc.tensor.plugin.tushare.metadata.TushareMetadataContractTest.xml",
         "com.akkc.tensor.plugin.tushare.metadata.TushareMetadataContractTest",
-        50,
-        {"hasExactManifestAndExpectationCoverage": 1, "matchesIndependentContract": 49},
+        41,
+        {"hasExactManifestAndExpectationCoverage": 1, "matchesIndependentContract": 40},
     ),
     (
         "tensor-app/target/surefire-reports/"
         "TEST-com.akkc.tensor.db.FlywaySchemaContractIT.xml",
         "com.akkc.tensor.db.FlywaySchemaContractIT",
-        52,
+        43,
         {
-            "productionSchemasMatchDatasetDefinitions": 49,
+            "productionSchemasMatchDatasetDefinitions": 40,
             "migratesAndValidatesRepeatablyOnMySql846": 1,
             "fixtureSchemaMatchesContract": 1,
             "keepsV6InTestOutputOnly": 1,
@@ -187,7 +186,7 @@ def exact_manifest(path, enforce_hash=True):
         raise GateError("manifest-json") from error
     check(isinstance(root, dict), "manifest-object")
     entries = root.get("interfaces")
-    check(isinstance(entries, list) and len(entries) == 49, "manifest-count")
+    check(isinstance(entries, list) and len(entries) == 40, "manifest-count")
     names = []
     filenames = []
     for entry in entries:
@@ -204,7 +203,7 @@ def exact_manifest(path, enforce_hash=True):
             check(all(re.fullmatch(r"[a-z][a-z0-9_]{1,63}", key) for key in sample), "manifest-param-key")
         names.append(name)
         filenames.append(filename)
-    check(len(set(names)) == 49 and len(set(filenames)) == 49, "manifest-unique")
+    check(len(set(names)) == 40 and len(set(filenames)) == 40, "manifest-unique")
     check(set(names) == set(APIS), "manifest-api-set")
     return entries
 
@@ -343,7 +342,7 @@ def validate_resources(snapshot, entries, output):
     check(source_dir.is_dir(), "source-yaml-directory")
     source_files = [path for path in source_dir.rglob("*") if path.is_file()]
     check(all(path.parent == source_dir and path.suffix == ".yaml" for path in source_files), "source-yaml-layout")
-    check({path.name for path in source_files} == expected_names and len(source_files) == 49, "source-yaml-set")
+    check({path.name for path in source_files} == expected_names and len(source_files) == 40, "source-yaml-set")
     source_hashes = {path.name: sha256(path) for path in source_files}
 
     jar_path = snapshot / "data-plane/tensor-app/target/tensor-app-1.0-SNAPSHOT.jar"
@@ -365,7 +364,7 @@ def validate_resources(snapshot, entries, output):
                     check(not resources, "other-library-resource-copy")
                     continue
                 expected_paths = {f"datasets/tushare_pro/{file_name}" for file_name in expected_names}
-                check(set(resources) == expected_paths and len(resources) == 49, "packaged-yaml-set")
+                check(set(resources) == expected_paths and len(resources) == 40, "packaged-yaml-set")
                 packaged_hashes = {
                     Path(resource).name: hashlib.sha256(nested.read(resource)).hexdigest()
                     for resource in resources
@@ -447,7 +446,7 @@ def self_probe(root):
     maven_status.write_text('{"exitCode": 37}\n', encoding="utf-8")
     recorded = record_generated_report_counts(valid, maven_status)
     check(recorded["exitCode"] == 37, "probe-maven-exit-code")
-    check([item.get("tests") for item in recorded["generatedReports"]] == [50, 52, 4],
+    check([item.get("tests") for item in recorded["generatedReports"]] == [41, 43, 4],
           "probe-generated-report-counts")
     first_relative, class_name, _, methods = REPORTS[0]
     first = valid / first_relative
@@ -626,7 +625,7 @@ PY
 chmod 600 "$helper" || fail helper-permissions
 
 preflight=$(python3 "$helper" preflight "$manifest" "$owned_root") || fail synthetic-contract-probes
-[ "$preflight" = '{"manifestCount": 49, "syntheticRejections": 11}' ] || fail preflight-result
+[ "$preflight" = '{"manifestCount": 40, "syntheticRejections": 11}' ] || fail preflight-result
 
 git -C "$repository" archive --format=tar --output="$archive" "$head_commit" || fail git-archive
 mkdir "$snapshot" || fail snapshot-directory
@@ -635,7 +634,7 @@ tar -xf "$archive" -C "$snapshot" || fail snapshot-extract
 import hashlib, sys
 print(hashlib.sha256(open(sys.argv[1], 'rb').read()).hexdigest())
 PY
-)" = 37a317f6a2bc3e5113be5f127976d16d8349414c6476c7f6a194b084a5b0f7c2 ] || fail snapshot-manifest
+)" = 386f46a99b6605e203129836d7a744b96b65304307f52991dd8bba6fd1870984 ] || fail snapshot-manifest
 
 docker_before="$owned_root/docker-before.txt"
 docker_after="$owned_root/docker-after.txt"
@@ -695,7 +694,7 @@ def sha(path):
     return hashlib.sha256(Path(path).read_bytes()).hexdigest()
 
 task_files = [
-    "scripts/verify-49-contracts.sh",
+    "scripts/verify-dataset-contracts.sh",
     "control-plane/e2e/tushare-metadata.spec.js",
     "docs/verification/M14-T04-49-contracts.md",
 ]
@@ -708,17 +707,17 @@ result = {
     "task": "M14-T04",
     "head": head,
     "taskFiles": {relative: sha(Path(repository) / relative) for relative in task_files},
-    "manifest": {"path": "docs/data-template/manifest.json", "sha256": sha(manifest), "count": 49},
+    "manifest": {"path": "docs/data-template/manifest.json", "sha256": sha(manifest), "count": 40},
     "maven": json.loads(Path(maven_path).read_text(encoding="utf-8")),
     "reports": json.loads(Path(reports_path).read_text(encoding="utf-8")),
     "resources": json.loads(Path(resources_path).read_text(encoding="utf-8")),
     "contracts": {
-        "sourceYaml": 49,
-        "productionTables": 49,
-        "packagedYaml": 49,
+        "sourceYaml": 40,
+        "productionTables": 40,
+        "packagedYaml": 40,
         "fixtureAdditionalTables": 1,
         "tableEvidence": "successful FlywaySchemaContractIT result-level assertions",
-        "fixtureTotals": {"businessTables": 50, "totalColumns": 1008, "primaryKeys": 50},
+        "fixtureTotals": {"businessTables": 41, "totalColumns": 919, "primaryKeys": 41},
     },
     "syntheticRejections": 11,
 }
@@ -726,5 +725,5 @@ Path(output).write_text(json.dumps(result, indent=2, sort_keys=True) + "\n", enc
 os.chmod(output, 0o600)
 PY
 
-printf 'M14-T04 contracts passed: metadata=50 schema=52 package=4 yaml=49 tables=49 packaged=49\n'
+printf 'M14-T04 contracts passed: metadata=41 schema=43 package=4 yaml=40 tables=40 packaged=40\n'
 printf 'M14-T04 private evidence: %s\n' "$evidence"

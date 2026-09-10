@@ -88,12 +88,12 @@ function response(overrides = {}) {
 
 function currentApis() {
   const categories = [
-    ['basic_organization', 11],
+    ['basic_organization', 7],
     ['行情与估值', 7],
-    ['交易与资金', 6],
-    ['互联互通与转融通', 6],
+    ['交易与资金', 5],
+    ['互联互通与转融通', 3],
     ['财务与披露', 9],
-    ['公司行动', 3],
+    ['公司行动', 2],
     ['股东与治理', 7],
   ]
   let index = 0
@@ -208,7 +208,7 @@ describe('DownloadView', () => {
     expect(wrapper.findComponent(DownloadResult).exists()).toBe(false)
   })
 
-  it('defaults one available source and passes all 49 descriptors to the API selector', async () => {
+  it('defaults one available source and passes all 40 descriptors to the API selector', async () => {
     const sources = [source()]
     const apis = currentApis()
     const wrapper = await mountReady({ sources, apis })
@@ -219,6 +219,7 @@ describe('DownloadView', () => {
       disabled: false,
     })
     expect(api.listApis.mock.calls).toEqual([['fixture']])
+    expect(wrapper.getComponent(ApiSelect).props('apis')).toHaveLength(40)
     expect(wrapper.getComponent(ApiSelect).props('apis')).toEqual(apis)
     expect(wrapper.getComponent(ApiSelect).props('modelValue')).toBe('')
     expect(wrapper.getComponent(DownloadAction).props('disabled')).toBe(true)

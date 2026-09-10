@@ -1,15 +1,13 @@
 import { readFileSync } from 'node:fs'
 
-// Contract copied from tushare-metadata.spec.js:61-159. It intentionally stays
+// Contract matches the current catalog in tushare-metadata.spec.js. It stays
 // independent from the production metadata files consumed below.
 export const PARAMETER = {
   list_status: { name: 'list_status', label: '上市状态', type: 'ENUM', required: true, allowedValues: ['L', 'P', 'D'] },
   exchange: { name: 'exchange', label: '交易所', type: 'ENUM', required: true, allowedValues: ['SSE', 'SZSE', 'BSE'] },
   exchange_id: { name: 'exchange_id', label: '交易所', type: 'ENUM', required: true, allowedValues: ['SSE', 'SZSE', 'BSE'] },
-  hs_type: { name: 'hs_type', label: '沪深港通类型', type: 'ENUM', required: true, allowedValues: ['SH', 'SZ'] },
   start_date: { name: 'start_date', label: '开始日期', type: 'DATE_RANGE_MEMBER', required: true, relatedParameter: 'end_date' },
   end_date: { name: 'end_date', label: '结束日期', type: 'DATE_RANGE_MEMBER', required: true, relatedParameter: 'start_date' },
-  month: { name: 'month', label: '月份', type: 'MONTH', required: true },
   trade_date: { name: 'trade_date', label: '交易日期', type: 'DATE', required: true },
   ann_date: { name: 'ann_date', label: '公告日期', type: 'DATE', required: true },
   ts_code: { name: 'ts_code', label: '股票代码', type: 'TS_CODE', required: true },
@@ -18,7 +16,6 @@ export const PARAMETER = {
 export const EXPECTED_ROWS = [
   ['stock_basic', '股票基础信息', 'basic_organization', 'snapshot', ['list_status'], 10],
   ['stock_company', '上市公司基本信息', 'basic_organization', 'snapshot', ['exchange'], 18],
-  ['hs_const', '沪深港通标的范围', 'basic_organization', 'snapshot', ['hs_type'], 5],
   ['income', '利润表', '财务与披露', 'ann_date', ['ts_code', 'ann_date'], 85],
   ['balancesheet', '资产负债表', '财务与披露', 'ann_date', ['ts_code', 'ann_date'], 152],
   ['cashflow', '现金流量表', '财务与披露', 'ann_date', ['ts_code', 'ann_date'], 97],
@@ -27,7 +24,6 @@ export const EXPECTED_ROWS = [
   ['fina_mainbz', '主营业务构成', '财务与披露', 'ann_date', ['ts_code', 'ann_date'], 8],
   ['stk_rewards', '管理层薪酬与持股', '股东与治理', 'snapshot', ['ts_code'], 7],
   ['stk_holdernumber', '股东户数', '股东与治理', 'snapshot', ['ts_code'], 4],
-  ['broker_recommend', '券商月度推荐', 'basic_organization', 'snapshot', ['month'], 4],
   ['trade_cal', '交易日历', 'basic_organization', 'date_range', ['exchange', 'start_date', 'end_date'], 4],
   ['margin', '融资融券汇总', '交易与资金', 'trade_date', ['exchange_id', 'trade_date'], 9],
   ['daily', '日线行情', '行情与估值', 'trade_date', ['trade_date'], 11],
@@ -38,11 +34,7 @@ export const EXPECTED_ROWS = [
   ['daily_basic', '每日估值与市场指标', '行情与估值', 'trade_date', ['trade_date'], 18],
   ['moneyflow', '个股资金流向', '交易与资金', 'trade_date', ['trade_date'], 20],
   ['stk_limit', '每日涨跌停价格', '行情与估值', 'trade_date', ['trade_date'], 4],
-  ['moneyflow_hsgt', '沪深港通资金流向', '互联互通与转融通', 'trade_date', ['trade_date'], 7],
-  ['hsgt_top10', '沪深港通十大成交股', '互联互通与转融通', 'trade_date', ['trade_date'], 11],
-  ['hk_hold', '沪深港股通持股明细', '互联互通与转融通', 'trade_date', ['trade_date'], 7],
   ['top_list', '龙虎榜每日明细', '交易与资金', 'trade_date', ['trade_date'], 15],
-  ['top_inst', '龙虎榜机构明细', '交易与资金', 'trade_date', ['trade_date'], 10],
   ['margin_detail', '融资融券交易明细', '交易与资金', 'trade_date', ['trade_date'], 10],
   ['block_trade', '大宗交易', '交易与资金', 'trade_date', ['trade_date'], 7],
   ['slb_len', '转融通期限与规模', '互联互通与转融通', 'trade_date', ['trade_date'], 6],
@@ -53,17 +45,14 @@ export const EXPECTED_ROWS = [
   ['dividend', '分红送股', '公司行动', 'ann_date', ['ann_date'], 14],
   ['disclosure_date', '财报披露计划', '财务与披露', 'ann_date', ['ann_date'], 5],
   ['repurchase', '股票回购', '公司行动', 'ann_date', ['ann_date'], 9],
-  ['share_float', '限售股解禁', '公司行动', 'ann_date', ['ann_date'], 7],
   ['stk_holdertrade', '股东增减持', '股东与治理', 'ann_date', ['ann_date'], 11],
   ['top10_holders', '前十大股东', '股东与治理', 'ann_date', ['ann_date'], 9],
   ['top10_floatholders', '前十大流通股东', '股东与治理', 'ann_date', ['ann_date'], 9],
   ['new_share', 'IPO 新股发行信息', 'basic_organization', 'date_range', ['start_date', 'end_date'], 12],
-  ['namechange', '证券名称变更记录', 'basic_organization', 'date_range', ['start_date', 'end_date'], 6],
   ['stk_managers', '上市公司管理层信息', 'basic_organization', 'snapshot', [], 11],
   ['pledge_stat', '股权质押统计', '股东与治理', 'snapshot', [], 7],
   ['pledge_detail', '股权质押明细', '股东与治理', 'snapshot', [], 14],
   ['index_classify', '行业指数分类', 'basic_organization', 'snapshot', [], 7],
-  ['index_member', '行业指数成分', 'basic_organization', 'snapshot', [], 5],
   ['index_member_all', '行业分级与完整成分', 'basic_organization', 'snapshot', [], 11],
 ]
 
@@ -75,11 +64,11 @@ export function filterDescriptor(field) {
 
 export function expectedFilters() {
   const groups = [
-    [[], 'trade_cal index_classify index_member'],
-    [['ts_code'], 'stock_basic stock_company hs_const new_share broker_recommend index_member_all fina_mainbz pledge_stat'],
-    [['trade_date'], 'margin moneyflow_hsgt slb_len'],
-    [['ts_code', 'trade_date'], 'daily weekly monthly adj_factor suspend_d daily_basic stk_limit moneyflow margin_detail top_list top_inst block_trade hsgt_top10 hk_hold slb_sec slb_sec_detail'],
-    [['ts_code', 'ann_date'], 'namechange stk_managers income balancesheet cashflow fina_indicator fina_audit express forecast disclosure_date dividend repurchase share_float stk_rewards stk_holdernumber stk_holdertrade top10_holders top10_floatholders pledge_detail'],
+    [[], 'trade_cal index_classify'],
+    [['ts_code'], 'stock_basic stock_company new_share index_member_all fina_mainbz pledge_stat'],
+    [['trade_date'], 'margin slb_len'],
+    [['ts_code', 'trade_date'], 'daily weekly monthly adj_factor suspend_d daily_basic stk_limit moneyflow margin_detail top_list block_trade slb_sec slb_sec_detail'],
+    [['ts_code', 'ann_date'], 'stk_managers income balancesheet cashflow fina_indicator fina_audit express forecast disclosure_date dividend repurchase stk_rewards stk_holdernumber stk_holdertrade top10_holders top10_floatholders pledge_detail'],
   ]
   const result = new Map()
   for (const [fields, names] of groups) {
@@ -144,10 +133,10 @@ function loadColumns(apiName, filename, expectedCount) {
 
 const FILTERS = expectedFilters()
 const manifest = JSON.parse(readFileSync(new URL('../../docs/data-template/manifest.json', import.meta.url), 'utf8'))
-requireFixture(Array.isArray(manifest.interfaces) && manifest.interfaces.length === 49, 'manifest has 49 interfaces')
+requireFixture(Array.isArray(manifest.interfaces) && manifest.interfaces.length === 40, 'manifest has 40 interfaces')
 const manifestByName = new Map(manifest.interfaces.map((entry) => [entry.api_name, entry]))
-requireFixture(manifestByName.size === 49, 'manifest API names are unique')
-requireFixture(EXPECTED_ROWS.length === 49, 'literal matrix has 49 interfaces')
+requireFixture(manifestByName.size === 40, 'manifest API names are unique')
+requireFixture(EXPECTED_ROWS.length === 40, 'literal matrix has 40 interfaces')
 
 export const EXPECTED = new Map(EXPECTED_ROWS.map(([apiName, displayName, category, queryMode, parameterNames, columnCount]) => {
   const entry = manifestByName.get(apiName)

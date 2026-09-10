@@ -35,8 +35,8 @@ import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class TushareMetadataContractTest {
     private static final String DATASET_PATTERN = "classpath*:datasets/tushare_pro/*.yaml";
-    private static final int EXPECTED_DATASETS = 49;
-    private static final int EXPECTED_COLUMNS = 851;
+    private static final int EXPECTED_DATASETS = 40;
+    private static final int EXPECTED_COLUMNS = 789;
     private static final ObjectMapper JSON = new ObjectMapper(JsonFactory.builder()
             .enable(StreamReadFeature.STRICT_DUPLICATE_DETECTION)
             .build()).enable(DeserializationFeature.FAIL_ON_TRAILING_TOKENS);
@@ -258,21 +258,16 @@ class TushareMetadataContractTest {
                 parameter("list_status", "上市状态", ParameterType.ENUM, List.of("L", "P", "D"), null));
         addParameters(expected, List.of("stock_company"),
                 parameter("exchange", "交易所", ParameterType.ENUM, List.of("SSE", "SZSE", "BSE"), null));
-        addParameters(expected, List.of("hs_const"),
-                parameter("hs_type", "沪深港通类型", ParameterType.ENUM, List.of("SH", "SZ"), null));
         addParameters(expected, List.of("trade_cal"),
                 parameter("exchange", "交易所", ParameterType.ENUM, List.of("SSE", "SZSE", "BSE"), null),
                 parameter("start_date", "开始日期", ParameterType.DATE_RANGE_MEMBER, List.of(), "end_date"),
                 parameter("end_date", "结束日期", ParameterType.DATE_RANGE_MEMBER, List.of(), "start_date"));
-        addParameters(expected, List.of("new_share", "namechange"),
+        addParameters(expected, List.of("new_share"),
                 parameter("start_date", "开始日期", ParameterType.DATE_RANGE_MEMBER, List.of(), "end_date"),
                 parameter("end_date", "结束日期", ParameterType.DATE_RANGE_MEMBER, List.of(), "start_date"));
-        addParameters(expected, List.of("broker_recommend"),
-                parameter("month", "月份", ParameterType.MONTH, List.of(), null));
         addParameters(expected, List.of(
                         "daily", "weekly", "monthly", "adj_factor", "suspend_d", "daily_basic", "stk_limit",
-                        "moneyflow", "margin_detail", "top_list", "top_inst", "block_trade", "moneyflow_hsgt",
-                        "hsgt_top10", "hk_hold", "slb_len", "slb_sec", "slb_sec_detail"),
+                        "moneyflow", "margin_detail", "top_list", "block_trade", "slb_len", "slb_sec", "slb_sec_detail"),
                 parameter("trade_date", "交易日期", ParameterType.DATE, List.of(), null));
         addParameters(expected, List.of("margin"),
                 parameter("exchange_id", "交易所", ParameterType.ENUM, List.of("SSE", "SZSE", "BSE"), null),
@@ -282,13 +277,12 @@ class TushareMetadataContractTest {
                 parameter("ts_code", "股票代码", ParameterType.TS_CODE, List.of(), null),
                 parameter("ann_date", "公告日期", ParameterType.DATE, List.of(), null));
         addParameters(expected, List.of(
-                        "express", "forecast", "disclosure_date", "dividend", "repurchase", "share_float",
-                        "stk_holdertrade", "top10_holders", "top10_floatholders"),
+                        "express", "forecast", "disclosure_date", "dividend", "repurchase", "stk_holdertrade", "top10_holders", "top10_floatholders"),
                 parameter("ann_date", "公告日期", ParameterType.DATE, List.of(), null));
         addParameters(expected, List.of("stk_rewards", "stk_holdernumber"),
                 parameter("ts_code", "股票代码", ParameterType.TS_CODE, List.of(), null));
         addParameters(expected, List.of(
-                "stk_managers", "index_classify", "index_member", "index_member_all", "pledge_stat", "pledge_detail"));
+                "stk_managers", "index_classify", "index_member_all", "pledge_stat", "pledge_detail"));
         return Map.copyOf(expected);
     }
 
@@ -309,15 +303,11 @@ class TushareMetadataContractTest {
         Map<String, ExpectedBusinessKey> expected = new LinkedHashMap<>();
         addBusinessKey(expected, "stock_basic", BusinessKeyMode.COMPOSITE, "ts_code");
         addBusinessKey(expected, "stock_company", BusinessKeyMode.COMPOSITE, "ts_code");
-        addBusinessKey(expected, "hs_const", BusinessKeyMode.COMPOSITE, "hs_type", "ts_code", "in_date");
         addBusinessKey(expected, "trade_cal", BusinessKeyMode.COMPOSITE, "exchange", "cal_date");
         addBusinessKey(expected, "new_share", BusinessKeyMode.COMPOSITE, "ts_code");
-        addBusinessKey(expected, "namechange", BusinessKeyMode.COMPOSITE, "ts_code", "start_date", "name");
         addBusinessKey(expected, "stk_managers", BusinessKeyMode.FINGERPRINT,
                 "ts_code", "ann_date", "name", "gender", "lev", "title", "birthday", "begin_date");
-        addBusinessKey(expected, "broker_recommend", BusinessKeyMode.COMPOSITE, "month", "broker", "ts_code");
         addBusinessKey(expected, "index_classify", BusinessKeyMode.COMPOSITE, "index_code");
-        addBusinessKey(expected, "index_member", BusinessKeyMode.COMPOSITE, "index_code", "con_code", "in_date");
         addBusinessKey(expected, "index_member_all", BusinessKeyMode.COMPOSITE,
                 "l1_code", "l2_code", "l3_code", "ts_code", "in_date");
         addBusinessKey(expected, "daily", BusinessKeyMode.COMPOSITE, "ts_code", "trade_date");
@@ -331,13 +321,8 @@ class TushareMetadataContractTest {
         addBusinessKey(expected, "margin", BusinessKeyMode.COMPOSITE, "trade_date", "exchange_id");
         addBusinessKey(expected, "margin_detail", BusinessKeyMode.COMPOSITE, "trade_date", "ts_code");
         addBusinessKey(expected, "top_list", BusinessKeyMode.COMPOSITE, "trade_date", "ts_code", "reason");
-        addBusinessKey(expected, "top_inst", BusinessKeyMode.COMPOSITE,
-                "trade_date", "ts_code", "exalter", "side", "reason", "net_buy");
         addBusinessKey(expected, "block_trade", BusinessKeyMode.COMPOSITE,
                 "trade_date", "ts_code", "buyer", "seller", "price", "vol");
-        addBusinessKey(expected, "moneyflow_hsgt", BusinessKeyMode.COMPOSITE, "trade_date");
-        addBusinessKey(expected, "hsgt_top10", BusinessKeyMode.COMPOSITE, "trade_date", "ts_code", "market_type");
-        addBusinessKey(expected, "hk_hold", BusinessKeyMode.COMPOSITE, "trade_date", "code", "exchange");
         addBusinessKey(expected, "slb_len", BusinessKeyMode.COMPOSITE, "trade_date", "ob");
         addBusinessKey(expected, "slb_sec", BusinessKeyMode.COMPOSITE, "trade_date", "ts_code");
         addBusinessKey(expected, "slb_sec_detail", BusinessKeyMode.COMPOSITE,
@@ -359,8 +344,6 @@ class TushareMetadataContractTest {
         addBusinessKey(expected, "dividend", BusinessKeyMode.FINGERPRINT,
                 "ts_code", "end_date", "ann_date", "div_proc");
         addBusinessKey(expected, "repurchase", BusinessKeyMode.COMPOSITE, "ts_code", "ann_date", "proc");
-        addBusinessKey(expected, "share_float", BusinessKeyMode.COMPOSITE,
-                "ts_code", "float_date", "holder_name", "share_type");
         addBusinessKey(expected, "stk_rewards", BusinessKeyMode.COMPOSITE,
                 "ts_code", "ann_date", "end_date", "name");
         addBusinessKey(expected, "stk_holdernumber", BusinessKeyMode.COMPOSITE, "ts_code", "end_date", "ann_date");
@@ -387,18 +370,18 @@ class TushareMetadataContractTest {
 
     private static Map<String, List<String>> expectedFilters() {
         Map<String, List<String>> expected = new LinkedHashMap<>();
-        addFilters(expected, List.of("trade_cal", "index_classify", "index_member"), List.of());
+        addFilters(expected, List.of("trade_cal", "index_classify"), List.of());
         addFilters(expected, List.of(
-                "stock_basic", "stock_company", "hs_const", "new_share", "broker_recommend", "index_member_all",
+                "stock_basic", "stock_company", "new_share", "index_member_all",
                 "fina_mainbz", "pledge_stat"), List.of("ts_code"));
-        addFilters(expected, List.of("margin", "moneyflow_hsgt", "slb_len"), List.of("trade_date"));
+        addFilters(expected, List.of("margin", "slb_len"), List.of("trade_date"));
         addFilters(expected, List.of(
                 "daily", "weekly", "monthly", "adj_factor", "suspend_d", "daily_basic", "stk_limit", "moneyflow",
-                "margin_detail", "top_list", "top_inst", "block_trade", "hsgt_top10", "hk_hold", "slb_sec",
+                "margin_detail", "top_list", "block_trade", "slb_sec",
                 "slb_sec_detail"), List.of("ts_code", "trade_date"));
         addFilters(expected, List.of(
-                "namechange", "stk_managers", "income", "balancesheet", "cashflow", "fina_indicator", "fina_audit",
-                "express", "forecast", "disclosure_date", "dividend", "repurchase", "share_float", "stk_rewards",
+                "stk_managers", "income", "balancesheet", "cashflow", "fina_indicator", "fina_audit",
+                "express", "forecast", "disclosure_date", "dividend", "repurchase", "stk_rewards",
                 "stk_holdernumber", "stk_holdertrade", "top10_holders", "top10_floatholders", "pledge_detail"),
                 List.of("ts_code", "ann_date"));
         return Map.copyOf(expected);

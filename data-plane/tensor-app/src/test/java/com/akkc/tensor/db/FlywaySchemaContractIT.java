@@ -57,13 +57,13 @@ class FlywaySchemaContractIT {
     static void prepareSchema() throws SQLException {
         definitions = new DatasetDefinitionLoader().loadAll(
                 new PathMatchingResourcePatternResolver(), "classpath*:datasets/tushare_pro/*.yaml");
-        assertThat(definitions).hasSize(49);
+        assertThat(definitions).hasSize(40);
         assertThat(definitions).isSortedAccordingTo(Comparator.comparing(
                 value -> value.datasetKey().apiName().value()));
         assertThat(definitions.stream().map(value -> value.datasetKey().apiName().value())).doesNotHaveDuplicates();
         assertThat(definitions.stream().map(value -> value.tableName().value())).doesNotHaveDuplicates();
-        assertThat(definitions.stream().mapToInt(value -> value.columns().size()).sum()).isEqualTo(851);
-        assertThat(definitions.stream().filter(value -> value.businessKey().mode() == BusinessKeyMode.COMPOSITE)).hasSize(46);
+        assertThat(definitions.stream().mapToInt(value -> value.columns().size()).sum()).isEqualTo(789);
+        assertThat(definitions.stream().filter(value -> value.businessKey().mode() == BusinessKeyMode.COMPOSITE)).hasSize(37);
         assertThat(definitions.stream().filter(value -> value.businessKey().mode() == BusinessKeyMode.FINGERPRINT)
                 .map(value -> value.datasetKey().apiName().value()))
                 .containsExactly("dividend", "pledge_detail", "stk_managers");
@@ -75,7 +75,7 @@ class FlywaySchemaContractIT {
                 .load();
         MigrateResult firstMigration = flyway.migrate();
         firstMigrationsExecuted = firstMigration.migrationsExecuted;
-        assertThat(firstMigrationsExecuted).as("first Flyway migration count").isEqualTo(7);
+        assertThat(firstMigrationsExecuted).as("first Flyway migration count").isEqualTo(8);
         ValidateResult validation = flyway.validateWithResult();
         validationSuccessful = validation.validationSuccessful;
         assertThat(validationSuccessful).as(validation.getAllErrorMessages()).isTrue();
@@ -105,24 +105,24 @@ class FlywaySchemaContractIT {
     @Test
     void migratesAndValidatesRepeatablyOnMySql846() {
         assertThat(mysqlVersion).startsWith("8.4.6");
-        assertThat(firstMigrationsExecuted).isEqualTo(7);
+        assertThat(firstMigrationsExecuted).isEqualTo(8);
         assertThat(validationSuccessful).isTrue();
         assertThat(repeatMigrationsExecuted).isZero();
-        assertThat(snapshot.tables()).hasSize(50);
-        assertThat(snapshot.columns().values().stream().mapToInt(List::size).sum()).isEqualTo(1008);
+        assertThat(snapshot.tables()).hasSize(41);
+        assertThat(snapshot.columns().values().stream().mapToInt(List::size).sum()).isEqualTo(919);
         assertThat(snapshot.indexes().values().stream().flatMap(value -> value.values().stream())
-                .filter(value -> value.name().equals("PRIMARY"))).hasSize(50);
+                .filter(value -> value.name().equals("PRIMARY"))).hasSize(41);
         assertThat(snapshot.indexes().values().stream().flatMap(value -> value.values().stream())
-                .filter(value -> !value.name().equals("PRIMARY"))).hasSize(41);
+                .filter(value -> !value.name().equals("PRIMARY"))).hasSize(34);
 
         Set<String> productionTables = definitions.stream().map(value -> value.tableName().value())
                 .collect(java.util.stream.Collectors.toSet());
         assertThat(snapshot.tables().keySet()).containsAll(productionTables).contains(FIXTURE_TABLE);
-        assertThat(productionTables).hasSize(49);
-        assertThat(productionTables.stream().mapToInt(table -> snapshot.columns().get(table).size()).sum()).isEqualTo(1001);
-        assertThat(productionTables.stream().map(table -> snapshot.indexes().get(table).get("PRIMARY"))).hasSize(49);
+        assertThat(productionTables).hasSize(40);
+        assertThat(productionTables.stream().mapToInt(table -> snapshot.columns().get(table).size()).sum()).isEqualTo(912);
+        assertThat(productionTables.stream().map(table -> snapshot.indexes().get(table).get("PRIMARY"))).hasSize(40);
         assertThat(productionTables.stream().flatMap(table -> snapshot.indexes().get(table).values().stream())
-                .filter(value -> !value.name().equals("PRIMARY"))).hasSize(41);
+                .filter(value -> !value.name().equals("PRIMARY"))).hasSize(34);
     }
 
     @Test
@@ -143,7 +143,8 @@ class FlywaySchemaContractIT {
                 "V3__create_connect_and_slb_tables.sql",
                 "V4__create_financial_tables.sql",
                 "V5__create_corporate_and_governance_tables.sql",
-                "V7__version_dividend_business_key.sql");
+                "V7__version_dividend_business_key.sql",
+                "V8__remove_retired_datasets.sql");
     }
 
     private static void assertProductionSchema(DatasetDefinition definition) {

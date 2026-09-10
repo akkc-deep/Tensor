@@ -1,6 +1,8 @@
 # Tensor 多源证券数据平台 TRD
 
-> 首期技术范围：以模块化单体方式实现 Tushare Pro 49 类证券数据的插件化下载、适配、MySQL 持久化和 Vue 只读查询。
+> 首期技术范围：以模块化单体方式实现 Tushare Pro 40 类证券数据的插件化下载、适配、MySQL 持久化和 Vue 只读查询。
+
+> 2026-09-10 范围修订：永久移除 ISSUE-008 的九个接口；当前清单以 [manifest](../data-template/manifest.json) 为准，移除项不再安排接入或验收。历史报告保留当时范围。
 
 | 文档信息 | 内容 |
 |---|---|
@@ -28,7 +30,7 @@
 
 ### 1.2 设计目标
 
-1. 完成 Tushare Pro 49 个接口从页面请求到数据库查询的端到端闭环。
+1. 完成 Tushare Pro 40 个接口从页面请求到数据库查询的端到端闭环。
 2. 核心流程仅依赖统一插件和适配器接口，不依赖 Tushare Pro 的具体实现。
 3. 通过固定元数据、固定迁移脚本和数据库唯一约束保证字段完整、写入原子和重复下载幂等。
 4. 以最少的运行组件满足单一受信内部用户需求，同时保留新增数据源插件的结构性扩展点。
@@ -58,7 +60,7 @@
 | ADR-001 | 系统形态 | 模块化单体 | 首期单用户、流程线性，降低部署和事务复杂度 |
 | ADR-002 | 前后端交付 | 分离开发、单 JAR 交付 | 保留前端开发体验，生产仅运行一个应用进程 |
 | ADR-003 | 插件发现 | Spring Bean 编译期注册 | 满足核心解耦，避免热加载与供应链风险 |
-| ADR-004 | 持久化 | Spring JDBC + 元数据驱动 SQL | 49 张异构宽表不适合维护等量 JPA 实体 |
+| ADR-004 | 持久化 | Spring JDBC + 元数据驱动 SQL | 40 张异构宽表不适合维护等量 JPA 实体 |
 | ADR-005 | 数据表 | 每个 `plugin_id + api_name` 一张表 | 满足来源隔离并避免跨来源语义混合 |
 | ADR-006 | 表结构管理 | Flyway 固定迁移 | 禁止运行时猜测字段和自动改表 |
 | ADR-007 | 写入方式 | 单事务批量 Upsert | 满足幂等与单次请求原子性 |
@@ -101,7 +103,7 @@ flowchart TB
     DL --> AR[AdapterRegistry]
     PR --> TP[TushareProPlugin]
     TP --> TS[Tushare Pro]
-    AR --> AD[49 个 DatasetAdapter 定义]
+    AR --> AD[40 个 DatasetAdapter 定义]
     DL --> PERSIST[通用 Upsert 持久化器]
     QRY --> META[DatasetCatalog]
     QRY --> READ[通用只读查询器]
@@ -160,7 +162,7 @@ control-plane/src/
 | HTTP 客户端 | Spring `RestClient` | 随 Boot BOM | Tushare Pro 同步 HTTPS 调用 |
 | JSON | Jackson | 随 Boot BOM | JSON 与 `BigDecimal` 精确解析 |
 | 数据访问 | Spring JDBC | 随 Boot BOM | 元数据驱动查询和批量 Upsert |
-| 数据库 | MySQL | 8.4 LTS | 49 张来源表及唯一约束 |
+| 数据库 | MySQL | 8.4 LTS | 40 张来源表及唯一约束 |
 | 数据库迁移 | Flyway | 随 Boot 兼容版本 | 版本化 DDL |
 | 连接池 | HikariCP | 随 Boot BOM | JDBC 连接管理 |
 | 可观测性 | Actuator + Micrometer | 随 Boot BOM | 健康检查和指标 |
@@ -173,7 +175,7 @@ control-plane/src/
 | 后端测试 | JUnit 5、AssertJ、Testcontainers、WireMock | 由 BOM/构建锁定 | 单元、MySQL 集成和上游契约测试 |
 | 前端测试 | Vitest、Vue Test Utils、Playwright | 构建锁定 | 组件与端到端测试 |
 
-补丁版本通过构建文件和 lockfile 固定；生产升级先通过 49 接口回归，不在运行时自动升级依赖。
+补丁版本通过构建文件和 lockfile 固定；生产升级先通过 40 接口回归，不在运行时自动升级依赖。
 
 ## 5. 核心领域模型
 
@@ -476,9 +478,9 @@ CREATE TABLE tushare_pro__daily (
 
 真实 Flyway SQL 必须与数据集 YAML 的列类型逐列一致。SQL 中遇到 MySQL 保留字时显式使用反引号；运行时 SQL 仍只使用已校验元数据。
 
-### 9.4 首期 49 个业务键
+### 9.4 首期 40 个业务键
 
-2026-09-06 M14-T09/ISSUE-007 已批准后续修订：dividend 当前采用 `FINGERPRINT [ts_code, end_date, ann_date, div_proc]`，保留不同实施进度，合法空进度使用显式空标记，同阶段跨批更新；通过新增 V7 保留现有行并切换唯一约束。当前 46 个 COMPOSITE、3 个 FINGERPRINT；详细迁移及回退规则见 [ISSUE-007](../issues/proposals/ISSUE-007-dividend-business-key.md)。下表保留 v1.0 历史三字段键，不作为当前 dividend 的执行规则。
+2026-09-06 M14-T09/ISSUE-007 已批准后续修订：dividend 当前采用 `FINGERPRINT [ts_code, end_date, ann_date, div_proc]`，保留不同实施进度，合法空进度使用显式空标记，同阶段跨批更新；通过新增 V7 保留现有行并切换唯一约束。当前 37 个 COMPOSITE、3 个 FINGERPRINT；详细迁移及回退规则见 [ISSUE-007](../issues/proposals/ISSUE-007-dividend-business-key.md)。下表保留 v1.0 历史三字段键，不作为当前 dividend 的执行规则。
 
 下表是 v1.0 固定业务键基线。`COMPOSITE` 直接建立复合主键；`FINGERPRINT` 对指定身份字段进行长度前缀化、UTF-8、固定字段顺序和显式空值标记的规范化序列化，再用 SHA-256 生成 `business_key CHAR(64)` 主键。该摘要只用于数据库幂等，不涉及 Git 或仓库能力。
 
@@ -486,14 +488,10 @@ CREATE TABLE tushare_pro__daily (
 |---|---|---|---|
 | 基础与组织 | `stock_basic` | COMPOSITE | `ts_code` |
 | 基础与组织 | `stock_company` | COMPOSITE | `ts_code` |
-| 基础与组织 | `hs_const` | COMPOSITE | `hs_type, ts_code, in_date` |
 | 基础与组织 | `trade_cal` | COMPOSITE | `exchange, cal_date` |
 | 基础与组织 | `new_share` | COMPOSITE | `ts_code` |
-| 基础与组织 | `namechange` | COMPOSITE | `ts_code, start_date, name` |
 | 基础与组织 | `stk_managers` | FINGERPRINT | `ts_code, ann_date, name, gender, lev, title, birthday, begin_date` |
-| 基础与组织 | `broker_recommend` | COMPOSITE | `month, broker, ts_code` |
 | 基础与组织 | `index_classify` | COMPOSITE | `index_code` |
-| 基础与组织 | `index_member` | COMPOSITE | `index_code, con_code, in_date` |
 | 基础与组织 | `index_member_all` | COMPOSITE | `l1_code, l2_code, l3_code, ts_code, in_date` |
 | 行情与估值 | `daily` | COMPOSITE | `ts_code, trade_date` |
 | 行情与估值 | `weekly` | COMPOSITE | `ts_code, trade_date` |
@@ -506,11 +504,7 @@ CREATE TABLE tushare_pro__daily (
 | 交易与资金 | `margin` | COMPOSITE | `trade_date, exchange_id` |
 | 交易与资金 | `margin_detail` | COMPOSITE | `trade_date, ts_code` |
 | 交易与资金 | `top_list` | COMPOSITE | `trade_date, ts_code, reason` |
-| 交易与资金 | `top_inst` | COMPOSITE | `trade_date, ts_code, exalter, side, reason, net_buy` |
 | 交易与资金 | `block_trade` | COMPOSITE | `trade_date, ts_code, buyer, seller, price, vol` |
-| 互联互通 | `moneyflow_hsgt` | COMPOSITE | `trade_date` |
-| 互联互通 | `hsgt_top10` | COMPOSITE | `trade_date, ts_code, market_type` |
-| 互联互通 | `hk_hold` | COMPOSITE | `trade_date, code, exchange` |
 | 转融通 | `slb_len` | COMPOSITE | `trade_date, ob` |
 | 转融通 | `slb_sec` | COMPOSITE | `trade_date, ts_code` |
 | 转融通 | `slb_sec_detail` | COMPOSITE | `trade_date, ts_code, tenor, fee_rate` |
@@ -525,7 +519,6 @@ CREATE TABLE tushare_pro__daily (
 | 财务与披露 | `disclosure_date` | COMPOSITE | `ts_code, end_date` |
 | 公司行动 | `dividend` | COMPOSITE | `ts_code, end_date, ann_date` |
 | 公司行动 | `repurchase` | COMPOSITE | `ts_code, ann_date, proc` |
-| 公司行动 | `share_float` | COMPOSITE | `ts_code, float_date, holder_name, share_type` |
 | 股东与治理 | `stk_rewards` | COMPOSITE | `ts_code, ann_date, end_date, name` |
 | 股东与治理 | `stk_holdernumber` | COMPOSITE | `ts_code, end_date, ann_date` |
 | 股东与治理 | `stk_holdertrade` | COMPOSITE | `ts_code, ann_date, holder_name, in_de, change_vol` |
@@ -860,7 +853,7 @@ GET /api/v1/data-sources/tushare_pro/datasets/daily/records
 | 组件 | 职责 |
 |---|---|
 | `DataSourceSelect` | 展示注册数据源、配置状态和不可用原因 |
-| `ApiSelect` | 按八类分组并按接口名/中文说明搜索 |
+| `ApiSelect` | 按七类分组并按接口名/中文说明搜索 |
 | `ApiDescription` | 展示接口中文说明和查询方式 |
 | `DynamicParameterForm` | 按参数元数据生成日期、月份、文本和枚举控件 |
 | `DownloadAction` | 执行提交、防重复点击和控件锁定 |
@@ -1058,7 +1051,7 @@ page, pageSize, resultCount, totalElements, durationMs, outcome, errorCode
 
 健康检查覆盖应用存活和 MySQL 可用性。Tushare Token 缺失只使插件下载不可用，不使整个应用健康检查失败；真实 Tushare 网络不纳入周期健康探测，避免消耗接口或放大故障。
 
-指标的 `api` 仅允许 49 个固定值，禁止把证券代码、请求标识或错误文本作为指标标签。
+指标的 `api` 仅允许 40 个固定值，禁止把证券代码、请求标识或错误文本作为指标标签。
 
 ## 18. 性能与容量
 
@@ -1093,7 +1086,7 @@ page, pageSize, resultCount, totalElements, durationMs, outcome, errorCode
 2. 将 `control-plane/dist` 复制到 `tensor-app` 的生成静态资源目录；
 3. 后端编译、架构测试、单元测试和 MySQL 集成测试；
 4. Spring Boot 打包单个可执行 JAR；
-5. 验证 JAR 中包含前端入口、哈希资源、49 个数据集 YAML 和 Flyway SQL。
+5. 验证 JAR 中包含前端入口、哈希资源、40 个数据集 YAML 和 Flyway SQL。
 
 构建不访问 Git，不读取分支、提交号或仓库状态。版本来自 Maven 项目版本和显式构建参数。
 
@@ -1113,7 +1106,7 @@ flowchart LR
 1. 创建 MySQL schema 和最小权限账号；
 2. 注入数据库连接、Tushare Token 和显示时区；
 3. 启动 JAR；
-4. Flyway 验证并迁移 49 张表；
+4. Flyway 验证并迁移 40 张表；
 5. 注册插件和适配器并完成元数据/表结构校验；
 6. `/actuator/health` 就绪后开放流量；
 7. 用户打开 `/downloads` 或 `/datasets`。
@@ -1137,14 +1130,14 @@ flowchart LR
 | 层级 | 重点 | 工具/环境 |
 |---|---|---|
 | 后端单元 | 参数校验、错误分类、字段转换、业务键、计数 | JUnit 5、AssertJ、Mockito |
-| 元数据契约 | 49 YAML 与模板字段/顺序、表名、参数、键引用 | JUnit 5 + Jackson/YAML |
+| 元数据契约 | 40 YAML 与模板字段/顺序、表名、参数、键引用 | JUnit 5 + Jackson/YAML |
 | 架构 | 模块依赖、核心不依赖具体插件、禁止 Git 相关依赖 | ArchUnit、Maven Enforcer |
 | 上游契约 | Tushare 成功、空、鉴权、权限、限流、超时、畸形响应 | WireMock |
-| 数据库集成 | Flyway、49 表结构、Upsert、回滚、分页、索引 | Testcontainers MySQL 8.4 |
+| 数据库集成 | Flyway、40 表结构、Upsert、回滚、分页、索引 | Testcontainers MySQL 8.4 |
 | API 集成 | HTTP 状态、DTO、错误包络、Token 不泄露 | Spring Boot Test |
 | 前端组件 | 动态控件、状态、表格格式、竞态保护 | Vitest、Vue Test Utils |
 | 端到端 | 两页面用户闭环和可访问性 | Playwright + 完整服务 |
-| 手工验收 | 真实 Token、真实 Tushare 权限与 49 接口 | 受控验收环境 |
+| 手工验收 | 真实 Token、真实 Tushare 权限与 40 接口 | 受控验收环境 |
 
 禁止使用 H2 代替 MySQL 验证 Upsert、排序规则、精度或迁移。
 
@@ -1161,11 +1154,11 @@ flowchart LR
 9. `ingested_at` 在同一批次内完全一致；
 10. 数值超精度或需要舍入时整批失败。
 
-### 20.3 49 接口契约测试
+### 20.3 40 接口契约测试
 
 每个数据集必须自动验证：
 
-- API 名与 `manifest.json` 完全一致，数量为 49；
+- API 名与 `manifest.json` 完全一致，数量为 40；
 - YAML 字段名与对应模板 `fields` 完全一致；
 - 参数集合与 PRD 附录 A 一致；
 - 业务键字段存在且满足键策略；
@@ -1192,7 +1185,7 @@ flowchart LR
 
 - 后端、前端、集成和 E2E 测试全部通过；
 - PRD AC-001～AC-018 全部通过；
-- 49/49 接口元数据契约通过；
+- 40/40 接口元数据契约通过；
 - 不存在 Token 泄露、部分写入、重复业务键或字段缺失；
 - 查询 P95 达标；
 - 依赖漏洞扫描无未接受的高危问题；
@@ -1206,7 +1199,7 @@ flowchart LR
 | PRD-F-006～010 | 7、12、13 | 参数元数据、API、前端状态/E2E |
 | PRD-F-011～014 | 10、12、15 | 计数、空结果、错误和重试测试 |
 | PRD-F-015～018 | 5、6、8 | 适配契约、转换失败零写入 |
-| PRD-F-019～023 | 9、10 | 49 表、业务键、事务和来源字段测试 |
+| PRD-F-019～023 | 9、10 | 40 表、业务键、事务和来源字段测试 |
 | PRD-F-024～030 | 11～13 | 动态筛选、分页、宽表和只读 E2E |
 | PRD-F-031 | 19、20 | 全新环境启动与 AC-001～AC-018 |
 | 性能 10.1 | 9.5、11、18 | 索引、执行计划和 P95 测试 |
@@ -1235,13 +1228,13 @@ flowchart LR
 
 1. 生产产物为包含 Vue 静态资源的单个 Spring Boot JAR，外部只依赖 MySQL 和 Tushare Pro。
 2. 核心模块不依赖具体插件，fixture 插件可在不改核心流程和页面的情况下启停。
-3. 49 个数据集元数据、表、字段、键、适配和查询契约全部通过自动验证。
+3. 40 个数据集元数据、表、字段、键、适配和查询契约全部通过自动验证。
 4. 下载执行严格遵守“下载 → 适配 → 单事务 Upsert”，失败无部分写入。
 5. 页面能区分成功、合法空数据和失败，并展示本次实际返回、插入和更新数。
 6. 查询仅使用服务端分页和白名单筛选，完整展示业务字段及三个来源字段。
 7. Token 不出现在前端、数据库、普通日志、错误或诊断端点。
 8. 代码和运行过程不使用任何 Git 相关 API、命令或仓库能力。
-9. AC-001～AC-018、49 接口回归和非功能质量门槛全部通过。
+9. AC-001～AC-018、40 接口回归和非功能质量门槛全部通过。
 
 ## 附录 A：关键类职责
 

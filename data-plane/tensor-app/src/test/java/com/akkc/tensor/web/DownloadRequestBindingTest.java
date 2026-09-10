@@ -93,6 +93,22 @@ class DownloadRequestBindingTest {
         }
     }
 
+    @ParameterizedTest
+    @org.junit.jupiter.params.provider.ValueSource(strings = {"top_inst", "broker_recommend", "share_float",
+            "hs_const", "moneyflow_hsgt", "hk_hold", "index_member", "hsgt_top10", "namechange"})
+    void rejectsRetiredDownloadsAtTheHttpBoundary(String api) throws Exception {
+        try (Flow flow = flow(true, true)) {
+            var response = flow.mvc().perform(post("/api/v1/downloads")
+                    .contentType(MediaType.APPLICATION_JSON).content(request(api, "{}")))
+                    .andReturn().getResponse();
+            assertThat(response.getStatus()).isEqualTo(409);
+            assertThat(flow.mapper().readTree(response.getContentAsString()).path("code").asText())
+                    .isEqualTo("DATASET_MISCONFIGURED");
+            assertThat(flow.completed()).isEmpty();
+            assertThat(flow.registry().getMeters()).isEmpty();
+        }
+    }
+
     static Stream<Arguments> invalidRequests() {
         return Stream.of(
                 invalid("{\"params\":[],\"pluginId\":\"tushare_pro\",\"apiName\":\"daily\",\"params\":{\"trade_date\":\"20260905\"}}",
@@ -111,7 +127,7 @@ class DownloadRequestBindingTest {
                 invalid(request("daily", "{\"trade_date\":{}}"), "PARAM_INVALID", "trade_date:has invalid value", true, true),
                 invalid(request("daily", "{\"trade_date\":null,\"unknown\":1}"), "PARAM_REQUIRED", "trade_date:is required", true, true),
                 invalid(request("daily", "{\"trade_date\":\"20260230\",\"bad-field\":1}"), "PARAM_INVALID", "params:contains an invalid field name,trade_date:has invalid value", true, true),
-                invalid(request("namechange", "{\"start_date\":\"20260907\",\"end_date\":\"20260906\"}"), "PARAM_INVALID", "start_date:must not be after end_date", true, true),
+                invalid(request("new_share", "{\"start_date\":\"20260907\",\"end_date\":\"20260906\"}"), "PARAM_INVALID", "start_date:must not be after end_date", true, true),
                 invalid(request("daily", "{\"trade_date\":123}"), "PLUGIN_DISABLED", "", false, true),
                 invalid(request("missing_api", "{\"trade_date\":123}"), "DATASET_MISCONFIGURED", "", true, true),
                 invalid(request("daily", "{\"trade_date\":123}"), "DATASET_MISCONFIGURED", "", true, false));

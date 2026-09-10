@@ -214,7 +214,7 @@ async function submitDataset(page, definition) {
   return criteria
 }
 
-test.describe('49 项 UI 元数据矩阵', () => {
+test.describe('40 项 UI 元数据矩阵', () => {
   for (const [apiName] of EXPECTED_ROWS) {
     test(`${apiName}：参数、筛选、原列顺序与一次请求`, async ({ page }) => {
       const definition = EXPECTED.get(apiName)

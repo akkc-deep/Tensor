@@ -128,16 +128,16 @@ class DataSourceControllerTest {
     }
 
     @Test
-    void listsFortyNineApisInDescriptorOrderWithExactOptionalParameterFields() throws Exception {
+    void listsFortyApisInDescriptorOrderWithExactOptionalParameterFields() throws Exception {
         List<ApiDescriptor> apis = apiDescriptors();
         org.mockito.Mockito.when(pluginRegistry.descriptors()).thenReturn(List.of(
                 descriptor("tushare_pro", true, true, true, null, apis, List.of())));
 
         JsonNode body = body("/api/v1/data-sources/tushare_pro/apis");
 
-        assertThat(body).hasSize(49);
+        assertThat(body).hasSize(40);
         assertThat(body.get(0).get("apiName").asText()).isEqualTo("daily");
-        assertThat(body.get(48).get("apiName").asText()).isEqualTo("api_48");
+        assertThat(body.get(39).get("apiName").asText()).isEqualTo("api_39");
         assertThat(body.get(0).get("queryMode").asText()).isEqualTo("trade_date");
         assertThat(fieldNames(body.get(0))).containsExactly(
                 "apiName", "displayName", "category", "queryMode", "parameters");
@@ -372,7 +372,7 @@ class DataSourceControllerTest {
         apis.add(new ApiDescriptor(ApiName.of("daily"), "日线行情", "market", QueryMode.trade_date, parameters));
         apis.add(new ApiDescriptor(
                 ApiName.of("api_01"), "接口 1", "market", QueryMode.date_range, rangeParameters));
-        IntStream.rangeClosed(2, 48).forEach(index -> apis.add(new ApiDescriptor(
+        IntStream.rangeClosed(2, 39).forEach(index -> apis.add(new ApiDescriptor(
                 ApiName.of("api_%02d".formatted(index)), "接口 " + index, "market", QueryMode.snapshot, List.of())));
         return apis;
     }

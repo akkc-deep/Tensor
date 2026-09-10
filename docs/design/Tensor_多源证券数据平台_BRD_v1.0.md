@@ -1,6 +1,8 @@
 # Tensor 多数据源证券数据下载与查看 BRD
 
-> 首期范围：下载 Tushare Pro 49 类数据、持久化到数据库、查看已入库数据
+> 首期范围：下载 Tushare Pro 40 类数据、持久化到数据库、查看已入库数据
+
+> 2026-09-10 范围修订：永久移除 ISSUE-008 的九个接口；当前清单以 [manifest](../data-template/manifest.json) 为准，移除项不再安排接入或验收。历史报告保留当时范围。
 
 | 文档信息 | 内容 |
 |---|---|
@@ -17,7 +19,7 @@
 
 1. 建立统一的数据源插件接口；
 2. 建立统一的数据适配接口，将不同数据源的数据转换为各自适用的持久化结构；
-3. 将 Tushare Pro 作为首个数据源插件接入，支持下载和适配 49 类数据；
+3. 将 Tushare Pro 作为首个数据源插件接入，支持下载和适配 40 类数据；
 4. 不同数据源的数据经过适配后写入各自独立的数据表；
 5. 支持查看已经入库的数据。
 
@@ -31,10 +33,10 @@
 - 提供统一的数据源插件接口和插件注册机制；
 - 提供统一的数据适配接口和适配器注册机制；
 - Tushare Pro 必须通过数据源插件接口接入，不得硬编码在核心下载流程中；
-- Tushare Pro 的 49 类数据必须通过适配层转换后再写入数据库；
+- Tushare Pro 的 40 类数据必须通过适配层转换后再写入数据库；
 - 选择数据接口并填写该接口所需的查询参数；
 - 手动触发数据下载；
-- 支持 `docs/data-template/` 中的全部 49 个 Tushare Pro 接口；
+- 支持 `docs/data-template/` 中的全部 40 个 Tushare Pro 接口；
 - 将下载结果写入数据库；
 - 在页面中选择数据集并查看已入库数据；
 - 支持按证券代码、交易日期或公告日期等核心字段进行简单筛选；
@@ -107,7 +109,7 @@ plugin_id, api_name, params, fields, row_count, data, status, error
 ### FR-02 Tushare Pro 插件
 
 - Tushare Pro 必须实现统一数据源插件接口；
-- Tushare Pro 插件必须声明并实现首期 49 个数据接口；
+- Tushare Pro 插件必须声明并实现首期 40 个数据接口；
 - 插件必须能够读取 Tushare Pro Token；
 - Token 可以通过插件配置文件或环境变量提供；
 - 首期不要求提供独立的凭证管理页面。
@@ -129,7 +131,7 @@ plugin_id, api_name, params, fields, row_count, data, status, error
 source_plugin, source_api, table_name, columns, rows
 ```
 
-- Tushare Pro 必须为首期 49 个接口提供对应适配配置；
+- Tushare Pro 必须为首期 40 个接口提供对应适配配置；
 - 首期 Tushare Pro 表字段以 `docs/data-template/<api_name>.json` 中的 `fields` 为基线；
 - 不要求不同数据源的相同逻辑数据集使用相同字段名、字段数量或数据类型；
 - 后续新增数据源时，由该数据源自己的适配器和表结构承接其全部字段；
@@ -138,7 +140,7 @@ source_plugin, source_api, table_name, columns, rows
 ### FR-04 数据接口选择
 
 - 系统必须展示已注册的数据源插件；
-- 选择 Tushare Pro 插件后，展示其支持的 49 个数据接口；
+- 选择 Tushare Pro 插件后，展示其支持的 40 个数据接口；
 - 每个接口展示接口名、中文说明和需要填写的查询参数；
 - 用户可以选择一个接口发起下载。
 
@@ -148,10 +150,10 @@ source_plugin, source_api, table_name, columns, rows
 
 | 查询类型 | 主要参数 | 接口数量 |
 |---|---|---:|
-| 交易日 | `trade_date` | 19 |
-| 公告日 | `ann_date`，部分接口同时需要 `ts_code` | 15 |
-| 快照 | `ts_code`、`month`、`exchange` 或无参数 | 12 |
-| 日期范围 | `start_date`、`end_date` | 3 |
+| 交易日 | `trade_date` | 15 |
+| 公告日 | `ann_date`，部分接口同时需要 `ts_code` | 14 |
+| 快照 | `ts_code`、`exchange`、`list_status` 或无参数 | 9 |
+| 日期范围 | `start_date`、`end_date`，部分接口同时需要 `exchange` | 2 |
 
 - 页面应根据所选接口显示对应参数；
 - 用户未填写必要参数时，不允许发起下载；
@@ -161,7 +163,7 @@ source_plugin, source_api, table_name, columns, rows
 
 - 核心程序必须调用用户所选的数据源插件；
 - Tushare Pro 插件必须调用用户所选的 Tushare Pro 接口；
-- 49 个接口的返回字段以对应 JSON 文件中的 `fields` 为准；
+- 40 个接口的返回字段以对应 JSON 文件中的 `fields` 为准；
 - 下载成功后显示本次返回的记录数；
 - 下载失败时显示 Tushare Pro 返回的错误信息或系统错误信息；
 - 首期不要求自动重试，用户可以修正参数后重新发起下载。
@@ -180,7 +182,7 @@ source_plugin, source_api, table_name, columns, rows
 
 - 不同数据源的数据必须保存到不同的数据表；
 - 每个数据源按照 `plugin_id + api_name` 建立对应的数据表；
-- 首期只设计并创建 Tushare Pro 的 49 张数据表；
+- 首期只设计并创建 Tushare Pro 的 40 张数据表；
 - Tushare Pro 表字段覆盖对应 JSON 模板中的全部 `fields`；
 - 写入数据时保存来源插件、来源接口名和入库时间；
 - 同一来源、同一接口的数据写入同一张表；
@@ -236,7 +238,7 @@ source_plugin, source_api, table_name, columns, rows
 - 每个数据源插件按照来源接口分别建立数据表；
 - 数据表使用 `<plugin_id>__<api_name>` 命名；
 - Tushare Pro 日线行情表命名为 `tushare_pro__daily`；
-- 首期仅设计 `tushare_pro__*` 的 49 张表；
+- 首期仅设计 `tushare_pro__*` 的 40 张表；
 - 后续新增数据源时，按照该数据源的接口和字段特征单独设计表结构；
 - 即使两个数据源提供相同逻辑数据，也不要求它们的表结构一致；
 - 数据源插件及来源接口先通过适配器确定目标表和字段映射；
@@ -266,7 +268,7 @@ source_plugin, source_api, table_name, columns, rows
 
 ### 7.2 数据适配验收
 
-- Tushare Pro 的 49 个接口均具有对应的适配配置；
+- Tushare Pro 的 40 个接口均具有对应的适配配置；
 - 每个接口的适配结果字段覆盖对应模板中的全部 `fields`；
 - Tushare Pro 来源字段能够转换为其目标表需要的字段类型和格式；
 - Tushare Pro 日线数据经过适配后写入 `tushare_pro__daily`；
@@ -275,7 +277,7 @@ source_plugin, source_api, table_name, columns, rows
 ### 7.3 数据下载验收
 
 - 页面可以选择 Tushare Pro 数据源插件；
-- 页面可以选择全部 49 个接口；
+- 页面可以选择全部 40 个接口；
 - 每个接口可以填写所需参数并发起 Tushare Pro 请求；
 - 调用成功时显示返回记录数；
 - 合法空结果显示“下载成功，0 条数据”；
@@ -286,8 +288,8 @@ source_plugin, source_api, table_name, columns, rows
 - 有数据的下载结果能够写入对应数据库表；
 - 数据库字段覆盖对应模板中的全部 `fields`；
 - 数据表名称符合 `<plugin_id>__<api_name>` 规则；
-- 首期只创建 Tushare Pro 的 49 张来源表；
-- Tushare Pro 的 49 个接口各自具备对应的数据表；
+- 首期只创建 Tushare Pro 的 40 张来源表；
+- Tushare Pro 的 40 个接口各自具备对应的数据表；
 - 相同数据重复下载不会产生重复记录；
 - 每条记录包含来源插件、来源接口名和入库时间。
 
@@ -299,24 +301,20 @@ source_plugin, source_api, table_name, columns, rows
 - 查询结果与数据库记录一致；
 - 页面不能编辑或删除数据。
 
-## 附录 A：首期 49 类数据清单
+## 附录 A：首期 40 类数据清单
 
-数据清单来自 `docs/data-template/manifest.json`。这些模板作为首期 Tushare Pro 49 张数据表的结构基线，不作为其他数据源的统一字段标准。样例状态仅表示样例查询是否返回业务记录，不代表接口是否支持。
+数据清单来自 `docs/data-template/manifest.json`。这些模板作为首期 Tushare Pro 40 张数据表的结构基线，不作为其他数据源的统一字段标准。样例状态仅表示样例查询是否返回业务记录，不代表接口是否支持。
 
-### A.1 基础与组织（11 类）
+### A.1 基础与组织（7 类）
 
 | 接口名 | 数据说明 | 查询方式 | 字段数 | 样例 |
 |---|---|---|---:|---|
 | `stock_basic` | 股票基础信息 | 快照 | 10 | 有数据 |
 | `stock_company` | 上市公司基本信息 | 快照 | 18 | 有数据 |
-| `hs_const` | 沪深港通标的范围 | 快照 | 5 | 有数据 |
 | `trade_cal` | 交易日历 | 日期范围 | 4 | 有数据 |
 | `new_share` | IPO 新股发行信息 | 日期范围 | 12 | 有数据 |
-| `namechange` | 证券名称变更记录 | 日期范围 | 6 | 有数据 |
 | `stk_managers` | 上市公司管理层信息 | 快照 | 11 | 有数据 |
-| `broker_recommend` | 券商月度推荐 | 快照 | 4 | 有数据 |
 | `index_classify` | 行业指数分类 | 快照 | 7 | 有数据 |
-| `index_member` | 行业指数成分 | 快照 | 5 | 有数据 |
 | `index_member_all` | 行业分级与完整成分 | 快照 | 11 | 有数据 |
 
 ### A.2 行情与估值（7 类）
@@ -331,7 +329,7 @@ source_plugin, source_api, table_name, columns, rows
 | `daily_basic` | 每日估值与市场指标 | 交易日 | 18 | 有数据 |
 | `stk_limit` | 每日涨跌停价格 | 交易日 | 4 | 有数据 |
 
-### A.3 交易与资金（6 类）
+### A.3 交易与资金（5 类）
 
 | 接口名 | 数据说明 | 查询方式 | 字段数 | 样例 |
 |---|---|---|---:|---|
@@ -339,18 +337,9 @@ source_plugin, source_api, table_name, columns, rows
 | `margin` | 融资融券汇总 | 交易日 | 9 | 有数据 |
 | `margin_detail` | 融资融券交易明细 | 交易日 | 10 | 有数据 |
 | `top_list` | 龙虎榜每日明细 | 交易日 | 15 | 有数据 |
-| `top_inst` | 龙虎榜机构明细 | 交易日 | 10 | 有数据 |
 | `block_trade` | 大宗交易 | 交易日 | 7 | 有数据 |
 
-### A.4 互联互通（3 类）
-
-| 接口名 | 数据说明 | 查询方式 | 字段数 | 样例 |
-|---|---|---|---:|---|
-| `moneyflow_hsgt` | 沪深港通资金流向 | 交易日 | 7 | 有数据 |
-| `hsgt_top10` | 沪深港通十大成交股 | 交易日 | 11 | 有数据 |
-| `hk_hold` | 沪深港股通持股明细 | 交易日 | 7 | 有数据 |
-
-### A.5 转融通（3 类）
+### A.4 转融通（3 类）
 
 | 接口名 | 数据说明 | 查询方式 | 字段数 | 样例 |
 |---|---|---|---:|---|
@@ -358,7 +347,7 @@ source_plugin, source_api, table_name, columns, rows
 | `slb_sec` | 转融通证券汇总 | 交易日 | 7 | 空数据 |
 | `slb_sec_detail` | 转融通证券明细 | 交易日 | 6 | 空数据 |
 
-### A.6 财务与披露（9 类）
+### A.5 财务与披露（9 类）
 
 | 接口名 | 数据说明 | 查询方式 | 字段数 | 样例 |
 |---|---|---|---:|---|
@@ -372,15 +361,14 @@ source_plugin, source_api, table_name, columns, rows
 | `forecast` | 业绩预告 | 公告日 | 13 | 有数据 |
 | `disclosure_date` | 财报披露计划 | 公告日 | 5 | 有数据 |
 
-### A.7 公司行动（3 类）
+### A.6 公司行动（2 类）
 
 | 接口名 | 数据说明 | 查询方式 | 字段数 | 样例 |
 |---|---|---|---:|---|
 | `dividend` | 分红送股 | 公告日 | 14 | 空数据 |
 | `repurchase` | 股票回购 | 公告日 | 9 | 有数据 |
-| `share_float` | 限售股解禁 | 公告日 | 7 | 有数据 |
 
-### A.8 股东与治理（7 类）
+### A.7 股东与治理（7 类）
 
 | 接口名 | 数据说明 | 查询方式 | 字段数 | 样例 |
 |---|---|---|---:|---|

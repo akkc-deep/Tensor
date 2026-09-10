@@ -1,0 +1,9 @@
+DROP TABLE IF EXISTS `tushare_pro__top_inst`;
+DROP TABLE IF EXISTS `tushare_pro__broker_recommend`;
+DROP TABLE IF EXISTS `tushare_pro__share_float`;
+DROP TABLE IF EXISTS `tushare_pro__hs_const`;
+DROP TABLE IF EXISTS `tushare_pro__moneyflow_hsgt`;
+DROP TABLE IF EXISTS `tushare_pro__hk_hold`;
+DROP TABLE IF EXISTS `tushare_pro__index_member`;
+DROP TABLE IF EXISTS `tushare_pro__hsgt_top10`;
+DROP TABLE IF EXISTS `tushare_pro__namechange`;
