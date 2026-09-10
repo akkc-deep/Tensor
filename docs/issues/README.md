@@ -22,7 +22,7 @@
 | ISSUE-005 | Tushare 小数解析导致适配失败 | 已解决 | 已解决，stock_company 真实三样例通过 | [详情](problems/ISSUE-005-tushare-decimal-decoding.md) · [设计与计划](proposals/ISSUE-005-tushare-decimal-decoding.md) |
 | ISSUE-006 | 股东户数公告日期混入日期时间格式 | 已解决 | 已解决，真实150行适配/入库/查看通过 | [详情与设计](problems/ISSUE-006-holdernumber-announcement-date.md) |
 | ISSUE-007 | dividend 业务键未区分实施进度 | 已关闭 | 已关闭：修复及真实分红38行闭环通过（M14-T09） | [诊断详情](problems/ISSUE-007-dividend-adapter-diagnosis.md) · [修复设计](proposals/ISSUE-007-dividend-business-key.md) |
-| ISSUE-008 | 真实 Tushare 验收尚缺 9 个接口 | 新增 | 不依赖：移出 M14-T08/本轮发布前置条件；未解决，用户后续单独处理 | [详情](problems/ISSUE-008-tushare-live-coverage-gap.md) |
+| ISSUE-008 | 真实 Tushare 验收尚缺 9 个接口 | 已关闭 | 2026-09-11 永久移除这 9 个接口，取消后续支持与验收 | [详情](problems/ISSUE-008-tushare-live-coverage-gap.md) |
 | ISSUE-009 | daily 与 balancesheet 性能尚未验证 | 新增 | 不依赖：移出 M14-T08/本轮发布前置条件；未实测，用户后续单独处理 | [详情](problems/ISSUE-009-query-performance-verification.md) |
 | ISSUE-010 | 根 health 公开组件与分组结构 | 已解决 | 三端点仅公开状态；数据库故障回归及新生产包 S01 11/11 通过 | [详情](problems/ISSUE-010-health-component-exposure.md) · [验收记录](../verification/ISSUE-010-health.md) |
 | ISSUE-011 | 数据集非只读方法返回 500 | 已解决 | 专用 405 处理；新生产包 S05 12/12 通过，数据与上游调用数不变 | [详情](problems/ISSUE-011-dataset-method-status.md) · [验收记录](../verification/ISSUE-011-dataset-method-status.md) |

@@ -131,20 +131,16 @@ async function fillMetadataField(page, wrapper, parameter) {
     await page.locator(`#${listboxId}`).getByRole('option', { name: parameter.allowedValues[0], exact: true }).click()
     return parameter.allowedValues[0]
   }
-  const displayValue = parameter.type === 'MONTH'
-    ? '2026-08'
-    : ['DATE', 'DATE_RANGE_MEMBER'].includes(parameter.type)
-      ? parameter.name === 'start_date' ? '2026-08-03' : '2026-08-07'
-      : '000001.SZ'
+  const displayValue = ['DATE', 'DATE_RANGE_MEMBER'].includes(parameter.type)
+    ? parameter.name === 'start_date' ? '2026-08-03' : '2026-08-07'
+    : '000001.SZ'
   await input.fill(displayValue)
   await input.press('Enter')
   await input.blur()
   await expect(input).toHaveValue(displayValue)
-  return parameter.type === 'MONTH'
-    ? '202608'
-    : ['DATE', 'DATE_RANGE_MEMBER'].includes(parameter.type)
-      ? displayValue.replaceAll('-', '')
-      : displayValue
+  return ['DATE', 'DATE_RANGE_MEMBER'].includes(parameter.type)
+    ? displayValue.replaceAll('-', '')
+    : displayValue
 }
 
 async function submitDownload(page, definition) {
@@ -158,7 +154,7 @@ async function submitDownload(page, definition) {
     await expect(wrapper.locator('label')).toContainText(parameter.label)
     await expect(wrapper.locator('input')).toHaveAttribute('aria-required', parameter.required ? 'true' : 'false')
     if (parameter.type === 'ENUM') await expect(wrapper.locator('.el-select')).toBeVisible()
-    else if (['DATE', 'DATE_RANGE_MEMBER', 'MONTH'].includes(parameter.type)) await expect(wrapper.locator('.el-date-editor')).toBeVisible()
+    else if (['DATE', 'DATE_RANGE_MEMBER'].includes(parameter.type)) await expect(wrapper.locator('.el-date-editor')).toBeVisible()
     params[parameter.name] = await fillMetadataField(page, wrapper, parameter)
   }
   await page.getByRole('button', { name: '开始下载' }).click()
@@ -214,7 +210,7 @@ async function submitDataset(page, definition) {
   return criteria
 }
 
-test.describe('49 项 UI 元数据矩阵', () => {
+test.describe('40 项 UI 元数据矩阵', () => {
   for (const [apiName] of EXPECTED_ROWS) {
     test(`${apiName}：参数、筛选、原列顺序与一次请求`, async ({ page }) => {
       const definition = EXPECTED.get(apiName)

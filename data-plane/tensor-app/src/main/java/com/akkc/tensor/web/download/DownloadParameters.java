@@ -8,9 +8,7 @@ public sealed interface DownloadParameters {
     record ExchangeDateRangeParameters(String exchange, String startDate, String endDate)
             implements DownloadParameters {}
     record ExchangeTradeDateParameters(String exchangeId, String tradeDate) implements DownloadParameters {}
-    record HsTypeParameters(String hsType) implements DownloadParameters {}
     record ListStatusParameters(String listStatus) implements DownloadParameters {}
-    record MonthParameters(String month) implements DownloadParameters {}
     record DateRangeParameters(String startDate, String endDate) implements DownloadParameters {}
     record TradeDateParameters(String tradeDate) implements DownloadParameters {}
     record TsCodeParameters(String tsCode) implements DownloadParameters {}

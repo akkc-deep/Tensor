@@ -154,8 +154,8 @@ class PackagedJarContractTest {
                 TUSHARE_PREFIX);
 
         assertThat(outerTushare).isEmpty();
-        assertThat(tushareEntries).hasSize(49);
-        assertThat(new HashSet<>(tushareEntries)).hasSize(49);
+        assertThat(tushareEntries).hasSize(40);
+        assertThat(new HashSet<>(tushareEntries)).hasSize(40);
         assertThat(directTushareYamlEntries(
                 tensorEntriesByJar.get("BOOT-INF/lib/tensor-plugin-api-1.0-SNAPSHOT.jar"),
                 TUSHARE_PREFIX)).isEmpty();

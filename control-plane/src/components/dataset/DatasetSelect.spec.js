@@ -5,12 +5,12 @@ import { nextTick } from 'vue'
 import DatasetSelect from './DatasetSelect.vue'
 
 const CATEGORY_COUNTS = [
-  ['basic_organization', 11],
+  ['basic_organization', 7],
   ['行情与估值', 7],
-  ['交易与资金', 6],
-  ['互联互通与转融通', 6],
+  ['交易与资金', 5],
+  ['互联互通与转融通', 3],
   ['财务与披露', 9],
-  ['公司行动', 3],
+  ['公司行动', 2],
   ['股东与治理', 7],
 ]
 
@@ -36,7 +36,7 @@ function filter(wrapper, query) {
 }
 
 describe('DatasetSelect', () => {
-  it('groups all 49 current-source datasets in metadata order with apiName values', () => {
+  it('groups all 40 current-source datasets in metadata order with apiName values', () => {
     const datasets = currentDatasets()
     const wrapper = mount(DatasetSelect, { props: { modelValue: '', datasets } })
 
@@ -44,11 +44,11 @@ describe('DatasetSelect', () => {
       CATEGORY_COUNTS.map(([category]) => category),
     )
     const options = wrapper.findAllComponents(ElOption)
-    expect(options).toHaveLength(49)
+    expect(options).toHaveLength(40)
     expect(options.map((option) => option.props('value'))).toEqual(
       datasets.map(({ apiName }) => apiName),
     )
-    expect(new Set(options.map((option) => option.props('value'))).size).toBe(49)
+    expect(new Set(options.map((option) => option.props('value'))).size).toBe(40)
   })
 
   it('searches api and display names while preserving selection, source order, and descriptors', async () => {

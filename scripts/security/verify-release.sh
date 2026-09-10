@@ -620,7 +620,7 @@ class Runtime:
         self.schema = 'tensor_m14_t07_' + self.owner[:16]
         self.username = 'm14t07_' + self.owner[:16]
         self.fields = top_fields(self.root/'docs/data-template/stock_company.json')
-        self.report['environment'].update(profile='default', bind='loopback', productionDatasets=49)
+        self.report['environment'].update(profile='default', bind='loopback', productionDatasets=40)
         return {'port8080InitiallyFree':True, 'sanitizedChildEnvironment':True}
 
     def scan_source(self):
@@ -678,7 +678,7 @@ class Runtime:
         require(sorted(re.match(r'V(\d+)__', name).group(1) for name in migrations) == ['1','2','3','4','5','7'], 'jar-migrations-invalid')
         require(sorted(modules) == ['tensor-core-1.0-SNAPSHOT.jar','tensor-plugin-api-1.0-SNAPSHOT.jar','tensor-plugin-tushare-1.0-SNAPSHOT.jar'], 'jar-modules-invalid')
         resources = [name for name in names if 'datasets/tushare_pro/' in name and name.endswith(('.yml','.yaml'))]
-        require(len(resources) == 49 and not any('fixture' in name.lower() or '/test-classes/' in name or 'application-acceptance' in name for name in names), 'jar-resources-invalid')
+        require(len(resources) == 40 and not any('fixture' in name.lower() or '/test-classes/' in name or 'application-acceptance' in name for name in names), 'jar-resources-invalid')
         self.report['scanCoverage']['jar_entries_recursive'] = count
         return {'entries':count, 'thirdPartyJars':len(self.inventory), 'migrations':sorted(migrations), 'productionModules':modules, 'datasetResources':len(resources)}
 
@@ -998,7 +998,7 @@ class Runtime:
             require(status == 200 and isinstance(body,list) and len(body) == 1 and body[0].get('pluginId') == 'tushare_pro' and all(body[0].get(key) is True for key in ('enabled','credentialConfigured','downloadAvailable')), 'production-source-descriptor-invalid')
         def datasets(status, body, data):
             descriptor_safety(body)
-            require(status == 200 and isinstance(body,list) and len(body) == 49 and len({item.get('apiName') for item in body}) == 49 and all(item.get('pluginId','tushare_pro') == 'tushare_pro' for item in body), 'production-dataset-descriptors-invalid')
+            require(status == 200 and isinstance(body,list) and len(body) == 40 and len({item.get('apiName') for item in body}) == 40 and all(item.get('pluginId','tushare_pro') == 'tushare_pro' for item in body), 'production-dataset-descriptors-invalid')
         def definition(status, body, data):
             descriptor_safety(body)
             require(status == 200 and isinstance(body,dict) and body.get('pluginId') == 'tushare_pro' and body.get('apiName') == 'stock_company' and [column.get('name') for column in body.get('columns',[])] == self.fields, 'production-definition-invalid')

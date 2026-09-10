@@ -57,13 +57,13 @@ class FlywaySchemaContractIT {
     static void prepareSchema() throws SQLException {
         definitions = new DatasetDefinitionLoader().loadAll(
                 new PathMatchingResourcePatternResolver(), "classpath*:datasets/tushare_pro/*.yaml");
-        assertThat(definitions).hasSize(49);
+        assertThat(definitions).hasSize(40);
         assertThat(definitions).isSortedAccordingTo(Comparator.comparing(
                 value -> value.datasetKey().apiName().value()));
         assertThat(definitions.stream().map(value -> value.datasetKey().apiName().value())).doesNotHaveDuplicates();
         assertThat(definitions.stream().map(value -> value.tableName().value())).doesNotHaveDuplicates();
-        assertThat(definitions.stream().mapToInt(value -> value.columns().size()).sum()).isEqualTo(851);
-        assertThat(definitions.stream().filter(value -> value.businessKey().mode() == BusinessKeyMode.COMPOSITE)).hasSize(46);
+        assertThat(definitions.stream().mapToInt(value -> value.columns().size()).sum()).isEqualTo(789);
+        assertThat(definitions.stream().filter(value -> value.businessKey().mode() == BusinessKeyMode.COMPOSITE)).hasSize(37);
         assertThat(definitions.stream().filter(value -> value.businessKey().mode() == BusinessKeyMode.FINGERPRINT)
                 .map(value -> value.datasetKey().apiName().value()))
                 .containsExactly("dividend", "pledge_detail", "stk_managers");
@@ -118,11 +118,11 @@ class FlywaySchemaContractIT {
         Set<String> productionTables = definitions.stream().map(value -> value.tableName().value())
                 .collect(java.util.stream.Collectors.toSet());
         assertThat(snapshot.tables().keySet()).containsAll(productionTables).contains(FIXTURE_TABLE);
-        assertThat(productionTables).hasSize(49);
-        assertThat(productionTables.stream().mapToInt(table -> snapshot.columns().get(table).size()).sum()).isEqualTo(1001);
-        assertThat(productionTables.stream().map(table -> snapshot.indexes().get(table).get("PRIMARY"))).hasSize(49);
+        assertThat(productionTables).hasSize(40);
+        assertThat(productionTables.stream().mapToInt(table -> snapshot.columns().get(table).size()).sum()).isEqualTo(912);
+        assertThat(productionTables.stream().map(table -> snapshot.indexes().get(table).get("PRIMARY"))).hasSize(40);
         assertThat(productionTables.stream().flatMap(table -> snapshot.indexes().get(table).values().stream())
-                .filter(value -> !value.name().equals("PRIMARY"))).hasSize(41);
+                .filter(value -> !value.name().equals("PRIMARY"))).hasSize(34);
     }
 
     @Test
