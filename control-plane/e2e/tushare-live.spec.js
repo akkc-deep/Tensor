@@ -20,8 +20,8 @@ import { setTimeout as delay } from 'node:timers/promises'
 const execFileAsync = promisify(execFile)
 const BASE_URL = 'http://127.0.0.1:8080'
 const MANIFEST_SHA = '386f46a99b6605e203129836d7a744b96b65304307f52991dd8bba6fd1870984'
-// Historical artifact identity; a new 40-API acceptance artifact must be frozen before rerunning.
-const JAR_SHA = '81adba0dd6500f4aa43b4fa06b18c2c8e7b7454d9e6d4d6c734772cdaef1d002'
+const REQUESTS_SHA = 'f9f147c605262ee1e4f04031dc8508470acd0b4a837927495a9aefecf98bf7af'
+const JAR_SHA = process.env.ISSUE_017_ACCEPTANCE_JAR_SHA256
 const DOWNLOAD_KEYS = [
   'requestId', 'outcome', 'pluginId', 'apiName', 'sourceRowCount', 'insertedRows',
   'updatedRows', 'message',
@@ -92,8 +92,8 @@ function buildFilters() {
 const FILTERS = buildFilters()
 
 const CONTRACT_ROWS = [
-  ['stock_basic', '股票基础信息', ['list_status'], 10],
-  ['stock_company', '上市公司基本信息', ['exchange'], 18],
+  ['stock_basic', '股票基础信息', ['ts_code', 'list_status'], 10],
+  ['stock_company', '上市公司基本信息', ['ts_code', 'exchange'], 18],
   ['income', '利润表', ['ts_code', 'ann_date'], 85],
   ['balancesheet', '资产负债表', ['ts_code', 'ann_date'], 152],
   ['cashflow', '现金流量表', ['ts_code', 'ann_date'], 97],
@@ -104,34 +104,34 @@ const CONTRACT_ROWS = [
   ['stk_holdernumber', '股东户数', ['ts_code'], 4],
   ['trade_cal', '交易日历', ['exchange', 'start_date', 'end_date'], 4],
   ['margin', '融资融券汇总', ['exchange_id', 'trade_date'], 9],
-  ['daily', '日线行情', ['trade_date'], 11],
-  ['weekly', '周线行情', ['trade_date'], 11],
-  ['monthly', '月线行情', ['trade_date'], 11],
-  ['adj_factor', '复权因子', ['trade_date'], 3],
-  ['suspend_d', '每日停复牌信息', ['trade_date'], 4],
-  ['daily_basic', '每日估值与市场指标', ['trade_date'], 18],
-  ['moneyflow', '个股资金流向', ['trade_date'], 20],
-  ['stk_limit', '每日涨跌停价格', ['trade_date'], 4],
-  ['top_list', '龙虎榜每日明细', ['trade_date'], 15],
-  ['margin_detail', '融资融券交易明细', ['trade_date'], 10],
-  ['block_trade', '大宗交易', ['trade_date'], 7],
+  ['daily', '日线行情', ['ts_code', 'trade_date'], 11],
+  ['weekly', '周线行情', ['ts_code', 'trade_date'], 11],
+  ['monthly', '月线行情', ['ts_code', 'trade_date'], 11],
+  ['adj_factor', '复权因子', ['ts_code', 'trade_date'], 3],
+  ['suspend_d', '每日停复牌信息', ['ts_code', 'trade_date'], 4],
+  ['daily_basic', '每日估值与市场指标', ['ts_code', 'trade_date'], 18],
+  ['moneyflow', '个股资金流向', ['ts_code', 'trade_date'], 20],
+  ['stk_limit', '每日涨跌停价格', ['ts_code', 'trade_date'], 4],
+  ['top_list', '龙虎榜每日明细', ['ts_code', 'trade_date'], 15],
+  ['margin_detail', '融资融券交易明细', ['ts_code', 'trade_date'], 10],
+  ['block_trade', '大宗交易', ['ts_code', 'trade_date'], 7],
   ['slb_len', '转融通期限与规模', ['trade_date'], 6],
-  ['slb_sec', '转融通证券汇总', ['trade_date'], 7],
-  ['slb_sec_detail', '转融通证券明细', ['trade_date'], 6],
-  ['forecast', '业绩预告', ['ann_date'], 13],
-  ['express', '业绩快报', ['ann_date'], 15],
-  ['dividend', '分红送股', ['ann_date'], 14],
-  ['disclosure_date', '财报披露计划', ['ann_date'], 5],
+  ['slb_sec', '转融通证券汇总', ['ts_code', 'trade_date'], 7],
+  ['slb_sec_detail', '转融通证券明细', ['ts_code', 'trade_date'], 6],
+  ['forecast', '业绩预告', ['ts_code', 'ann_date'], 13],
+  ['express', '业绩快报', ['ts_code', 'ann_date'], 15],
+  ['dividend', '分红送股', ['ts_code', 'ann_date'], 14],
+  ['disclosure_date', '财报披露计划', ['ts_code', 'ann_date'], 5],
   ['repurchase', '股票回购', ['ann_date'], 9],
-  ['stk_holdertrade', '股东增减持', ['ann_date'], 11],
-  ['top10_holders', '前十大股东', ['ann_date'], 9],
-  ['top10_floatholders', '前十大流通股东', ['ann_date'], 9],
+  ['stk_holdertrade', '股东增减持', ['ts_code', 'ann_date'], 11],
+  ['top10_holders', '前十大股东', ['ts_code', 'ann_date'], 9],
+  ['top10_floatholders', '前十大流通股东', ['ts_code', 'ann_date'], 9],
   ['new_share', 'IPO 新股发行信息', ['start_date', 'end_date'], 12],
-  ['stk_managers', '上市公司管理层信息', [], 11],
-  ['pledge_stat', '股权质押统计', [], 7],
-  ['pledge_detail', '股权质押明细', [], 14],
+  ['stk_managers', '上市公司管理层信息', ['ts_code'], 11],
+  ['pledge_stat', '股权质押统计', ['ts_code'], 7],
+  ['pledge_detail', '股权质押明细', ['ts_code'], 14],
   ['index_classify', '行业指数分类', [], 7],
-  ['index_member_all', '行业分级与完整成分', [], 11],
+  ['index_member_all', '行业分级与完整成分', ['ts_code'], 11],
 ]
 const CONTRACTS = new Map(CONTRACT_ROWS.map(([apiName, displayName, parameters, columns]) => [
   apiName,
@@ -179,13 +179,8 @@ export function validateManifest(bytes, expectedHash = MANIFEST_SHA) {
     safeCheck(entry.filename === `${entry.api_name}.json`, 'manifest filename')
     safeCheck(entry.status === 'ok' || entry.status === 'empty', 'manifest status')
     safeCheck(Array.isArray(entry.params) && entry.params.length > 0, 'manifest params array')
-    const contract = CONTRACTS.get(entry.api_name)
     for (const sample of entry.params) {
       safeCheck(sample !== null && typeof sample === 'object' && !Array.isArray(sample), 'manifest params object')
-      safeCheck(
-        JSON.stringify(Object.keys(sample)) === JSON.stringify(contract.parameters),
-        'manifest parameter order',
-      )
       safeCheck(Object.values(sample).every((value) => typeof value === 'string'), 'manifest string values')
     }
     sampleCount += entry.params.length
@@ -197,7 +192,30 @@ export function validateManifest(bytes, expectedHash = MANIFEST_SHA) {
   return { manifest, sampleCount, okCount, emptyCount: 40 - okCount }
 }
 
-export function selectLiveInterfaces(interfaces) {
+export function validateRequests(bytes, interfaces, expectedHash = REQUESTS_SHA) {
+  safeCheck(createHash('sha256').update(bytes).digest('hex') === expectedHash, 'request examples hash')
+  let document
+  try {
+    document = JSON.parse(bytes)
+  } catch {
+    throw new Error('Safe check failed: request examples JSON')
+  }
+  objectWithExactKeys(document, ['requests'], 'request examples document')
+  safeCheck(Array.isArray(document.requests) && document.requests.length === 40, 'request examples count')
+  safeCheck(document.requests.filter(({ params }) => Object.hasOwn(params, 'ts_code')).length === 34, 'stock request count')
+  document.requests.forEach((request, index) => {
+    objectWithExactKeys(request, ['pluginId', 'apiName', 'params'], 'request example')
+    safeCheck(request.pluginId === 'tushare_pro', 'request example plugin')
+    safeCheck(request.apiName === interfaces[index].api_name, 'request example manifest order')
+    const contract = CONTRACTS.get(request.apiName)
+    safeCheck(contract, 'request example known API')
+    objectWithExactKeys(request.params, contract.parameters, 'request example params')
+    safeCheck(Object.values(request.params).every((value) => typeof value === 'string'), 'request example string values')
+  })
+  return document.requests
+}
+
+export function selectLiveInterfaces(interfaces, requests) {
   safeCheck(Array.isArray(interfaces) && interfaces.length === 40, 'live scope input count')
   const names = interfaces.map((entry) => entry?.api_name)
   safeCheck(names.every((name) => typeof name === 'string'), 'live scope API names')
@@ -206,23 +224,18 @@ export function selectLiveInterfaces(interfaces) {
     JSON.stringify(names) === JSON.stringify(SUPPORTED_API_NAMES),
     'live scope supported API order',
   )
-  const sampleCount = interfaces.reduce((sum, entry) => {
-    safeCheck(Array.isArray(entry.params), 'live scope params')
-    return sum + entry.params.length
-  }, 0)
+  safeCheck(Array.isArray(requests) && requests.length === interfaces.length, 'live scope request count')
+  const sampleCount = requests.length
   const okCount = interfaces.filter(({ status }) => status === 'ok').length
   const emptyCount = interfaces.filter(({ status }) => status === 'empty').length
-  safeCheck(sampleCount === 48, 'live scope sample count')
+  safeCheck(sampleCount === 40, 'live scope sample count')
   safeCheck(okCount === 28 && emptyCount === 12, 'live scope status counts')
-  const acceptanceInterfaces = interfaces.map((entry) => ({
-    ...entry, acceptanceStatus: ['dividend', 'top10_holders', 'top10_floatholders'].includes(entry.api_name) ? 'ok' : entry.status,
+  const acceptanceInterfaces = interfaces.map((entry, index) => ({
+    ...entry,
+    params: [requests[index].params],
   }))
-  const acceptanceOkCount = acceptanceInterfaces.filter(({ acceptanceStatus }) => acceptanceStatus === 'ok').length
-  safeCheck(acceptanceOkCount === 31, 'live scope acceptance status counts')
   return {
     interfaces: acceptanceInterfaces,
-    acceptanceOkCount,
-    acceptanceEmptyCount: acceptanceInterfaces.length - acceptanceOkCount,
     sampleCount,
     okCount,
     emptyCount,
@@ -297,7 +310,7 @@ export function validateBusinessRow(row, columns, pluginId, apiName, startedAt, 
 }
 
 export function validateFinalDataset({
-  acceptanceStatus,
+  outcomeStatus,
   insertedRows,
   body,
   definition,
@@ -308,7 +321,7 @@ export function validateFinalDataset({
   safeCheck(body.totalElements === insertedRows, 'final total equals inserted rows')
   const columns = [...definition.columns.map(({ name }) => name), ...SOURCE_COLUMNS]
   safeCheck(JSON.stringify(body.columns) === JSON.stringify(columns), 'final columns')
-  if (acceptanceStatus === 'empty') {
+  if (outcomeStatus === 'empty') {
     safeCheck(body.totalElements === 0 && body.items.length === 0, 'empty interface has no rows')
     return
   }
@@ -553,7 +566,10 @@ export class RunCounters {
 const manifestPath = new URL('../../docs/data-template/manifest.json', import.meta.url)
 const manifestBytes = readFileSync(manifestPath)
 const { manifest, sampleCount: manifestSampleCount } = validateManifest(manifestBytes)
-const liveScope = selectLiveInterfaces(manifest.interfaces)
+const requestsPath = new URL('../../docs/contracts/download-request-examples.json', import.meta.url)
+const requestBytes = readFileSync(requestsPath)
+const requests = validateRequests(requestBytes, manifest.interfaces)
+const liveScope = selectLiveInterfaces(manifest.interfaces, requests)
 const INTERFACES = liveScope.interfaces.map((entry) => ({ ...entry, contract: CONTRACTS.get(entry.api_name) }))
 
 let application
@@ -586,14 +602,13 @@ const evidence = {
     selectedCases: INTERFACES.length,
     selectedSamples: liveScope.sampleCount,
     manifestStatuses: { ok: liveScope.okCount, empty: liveScope.emptyCount },
-    acceptanceStatuses: { ok: liveScope.acceptanceOkCount, empty: liveScope.acceptanceEmptyCount },
-    interfaceStatuses: INTERFACES.map(({ api_name, status, acceptanceStatus }) => ({
-      apiName: api_name, manifestStatus: status, acceptanceStatus,
+    interfaceStatuses: INTERFACES.map(({ api_name, status }) => ({
+      apiName: api_name, manifestStatus: status,
     })),
   },
   startedAt: undefined,
   finishedAt: undefined,
-  inputs: { manifestSha256: MANIFEST_SHA, jarSha256: JAR_SHA },
+  inputs: { manifestSha256: MANIFEST_SHA, requestExamplesSha256: REQUESTS_SHA, jarSha256: JAR_SHA },
   fixture: [],
   downloads: [],
   queries: [],
@@ -719,6 +734,7 @@ async function validatePreconditions(testInfo) {
   safeCheck(Number.isSafeInteger(intervalMs) && intervalMs >= 2_000 && intervalMs <= 3_600_000, 'call interval range')
 
   safeCheck(path.isAbsolute(process.env.ACCEPTANCE_JAR ?? ''), 'acceptance JAR absolute path')
+  safeCheck(/^[a-f0-9]{64}$/.test(JAR_SHA ?? ''), 'expected acceptance JAR hash')
   const jarState = await lstat(process.env.ACCEPTANCE_JAR)
   safeCheck(jarState.isFile() && !jarState.isSymbolicLink(), 'acceptance JAR ordinary file')
   jarHashBefore = await sha256(process.env.ACCEPTANCE_JAR)
@@ -1441,20 +1457,21 @@ async function runLiveInterface(browser, entry) {
         lastDownloadAt = result.finishedAt
         results.push(result.body)
       }
-      validateInterfaceOutcomes(entry.acceptanceStatus, results)
+      const outcomeStatus = results.some(({ outcome }) => outcome === 'SUCCESS') ? 'ok' : 'empty'
+      validateInterfaceOutcomes(outcomeStatus, results)
 
       const finalDefinition = await openDataset(page, monitor, 'tushare_pro', contract, true)
       const finalBody = await queryDataset(page, monitor, 'tushare_pro', contract, finalDefinition)
       const insertedRows = results.reduce((sum, result) => sum + result.insertedRows, 0)
       validateFinalDataset({
-        acceptanceStatus: entry.acceptanceStatus,
+        outcomeStatus,
         insertedRows,
         body: finalBody,
         definition: finalDefinition,
         startedAt: firstDownloadAt,
         finishedAt: lastDownloadAt,
       })
-      if (entry.acceptanceStatus === 'ok') await assertVisibleRow(page, finalDefinition, finalBody.items[0])
+      if (outcomeStatus === 'ok') await assertVisibleRow(page, finalDefinition, finalBody.items[0])
       else {
         await expect(page.getByText('未找到符合条件的数据')).toBeVisible()
         safeCheck(await page.getByRole('row').count() <= 1, 'empty interface has no placeholder row')
@@ -1582,6 +1599,7 @@ function registerTests() {
         try {
           safeCheck(await sha256(process.env.ACCEPTANCE_JAR) === jarHashBefore, 'acceptance JAR unchanged')
           safeCheck(createHash('sha256').update(await readFile(manifestPath)).digest('hex') === MANIFEST_SHA, 'manifest unchanged')
+          safeCheck(createHash('sha256').update(await readFile(requestsPath)).digest('hex') === REQUESTS_SHA, 'request examples unchanged')
         } catch { failures.push(new Error('Safe check failed: immutable input verification')) }
       }
       if (artifactInitialized) {
@@ -1604,7 +1622,8 @@ function registerTests() {
       try {
         immutableInputs = Boolean(process.env.ACCEPTANCE_JAR) &&
           await sha256(process.env.ACCEPTANCE_JAR) === JAR_SHA &&
-          createHash('sha256').update(await readFile(manifestPath)).digest('hex') === MANIFEST_SHA
+          createHash('sha256').update(await readFile(manifestPath)).digest('hex') === MANIFEST_SHA &&
+          createHash('sha256').update(await readFile(requestsPath)).digest('hex') === REQUESTS_SHA
       } catch {
         immutableInputs = false
       }

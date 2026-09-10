@@ -16,9 +16,12 @@ import path from 'node:path'
 import { setTimeout as delay } from 'node:timers/promises'
 
 const BASE_URL = 'http://127.0.0.1:8080'
+const ACCEPTANCE_JAR_SHA = process.env.ISSUE_017_ACCEPTANCE_JAR_SHA256
 const HEALTH_TIMEOUT_MS = 90_000
 const STOP_TIMEOUT_MS = 150_000
 const MYSQL_TIMEOUT_MS = 15_000
+const INITIAL_DOWNLOAD_COUNT = 252
+const TOTAL_DOWNLOAD_COUNT = 375
 const LONG_TEXT = `M14_T03_TEXT_${'查询说明'.repeat(80)}`
 const SOURCE_COLUMNS = ['source_plugin', 'source_api', 'ingested_at']
 const PAGE_KEYS = [
@@ -408,7 +411,8 @@ async function syntheticProbes() {
       ['balance', {}],
     ]
     for (const [mode, value] of cases) {
-      malformedUpstream.setMode(mode)
+      const stockCode = modeDefinition(mode).stockScoped ? '000001.SZ' : undefined
+      malformedUpstream.setMode(mode, stockCode)
       const response = await fetch(`http://127.0.0.1:${address.port}/`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -418,7 +422,7 @@ async function syntheticProbes() {
       safeCheck(response.status === 500 && body.code === -1, 'malformed upstream envelope fails closed')
       for (const check of ['keys', 'api', 'token', 'params', 'fields']) {
         safeCheck(
-          malformedUpstream.failures.includes(`${mode}:${check}`),
+          malformedUpstream.failures.includes(`${mode}:${stockCode ?? ''}:${check}`),
           'malformed upstream envelope records every field failure',
         )
       }
@@ -624,11 +628,11 @@ async function verifyMigratedDatabase() {
     'migrated read-only evidence',
   )
   expect(output.split(/\r?\n/)).toEqual([
-    'migrations\t1:1,2:1,3:1,4:1,5:1,6:1',
+    'migrations\t1:1,2:1,3:1,4:1,5:1,6:1,7:1',
     'tables\t50',
     'rows\t0\t0\t0\t0\t0',
   ])
-  evidence.database.migrated = { migrations: 6, businessTables: 50, targetRows: [0, 0, 0, 0, 0] }
+  evidence.database.migrated = { migrations: 7, businessTables: 50, targetRows: [0, 0, 0, 0, 0] }
 }
 
 async function verifyFinalDatabase() {
@@ -638,12 +642,12 @@ async function verifyFinalDatabase() {
     'final read-only evidence',
   )
   expect(output.split(/\r?\n/)).toEqual([
-    'migrations\t1:1,2:1,3:1,4:1,5:1,6:1',
+    'migrations\t1:1,2:1,3:1,4:1,5:1,6:1,7:1',
     'tables\t50',
     'rows\t126\t1\t1\t1\t123\t1\t122',
   ])
   evidence.database.final = {
-    migrations: 6,
+    migrations: 7,
     businessTables: 50,
     daily: 126,
     company: 1,
@@ -690,17 +694,25 @@ function disclosureItems(corrected) {
   })
 }
 
-function modeDefinition(mode) {
+function filterStockItems(fields, items, tsCode) {
+  const stockIndex = fields.indexOf('ts_code')
+  safeCheck(stockIndex >= 0, 'stock response has ts_code field')
+  return items.filter((item) => item[stockIndex] === tsCode)
+}
+
+function modeDefinition(mode, tsCode) {
   const modes = {
     'daily-main': {
       api: 'daily',
       params: { trade_date: '20260807' },
       items: () => dailyItems('20260807', 123),
+      stockScoped: true,
     },
     'daily-earlier': {
       api: 'daily',
       params: { trade_date: '20260806' },
       items: () => dailyItems('20260806', 3),
+      stockScoped: true,
     },
     company: {
       api: 'stock_company',
@@ -715,6 +727,7 @@ function modeDefinition(mode) {
         business_scope: '',
         main_business: null,
       })],
+      stockScoped: true,
     },
     index: {
       api: 'index_classify',
@@ -731,7 +744,7 @@ function modeDefinition(mode) {
     },
     balance: {
       api: 'balancesheet',
-      params: { ts_code: '000001.SZ', ann_date: '20260807' },
+      params: { ann_date: '20260807' },
       items: () => [project(fieldsByApi.balancesheet, {
         ts_code: '000001.SZ',
         ann_date: '20260807',
@@ -740,31 +753,58 @@ function modeDefinition(mode) {
         total_share: '9007199254740993.123456789012345678',
         cap_rese: '0',
       })],
+      stockScoped: true,
     },
     'disclosure-initial': {
       api: 'disclosure_date',
       params: { ann_date: '20260807' },
       items: () => disclosureItems(false),
+      stockScoped: true,
     },
     'disclosure-corrected': {
       api: 'disclosure_date',
       params: { ann_date: '20260807' },
       items: () => disclosureItems(true),
+      stockScoped: true,
     },
   }
-  return modes[mode]
+  const definition = modes[mode]
+  if (!definition?.stockScoped || tsCode === undefined) return definition
+  const items = definition.items
+  return {
+    ...definition,
+    params: { ts_code: tsCode, ...definition.params },
+    items: () => filterStockItems(fieldsByApi[definition.api], items(), tsCode),
+  }
 }
+
+const STOCK_MODES = [
+  'daily-main', 'daily-earlier', 'company', 'balance',
+  'disclosure-initial', 'disclosure-corrected',
+]
+for (const mode of STOCK_MODES) {
+  const definition = modeDefinition(mode, '000001.SZ')
+  safeCheck(Object.keys(definition.params)[0] === 'ts_code', `${mode} requires stock input first`)
+}
+safeCheck(
+  JSON.stringify(filterStockItems(['ts_code'], [['000001.SZ'], ['000002.SZ']], '000002.SZ')) ===
+    JSON.stringify([['000002.SZ']]),
+  'stock response filtering is exact',
+)
 
 function createUpstream(token) {
   const sockets = new Set()
   const failures = []
   const counts = new Map()
   let mode = 'unset'
+  let stockCode
   let received
   let resolveReceived
   const server = createServer((request, response) => {
     const currentMode = mode
-    counts.set(currentMode, (counts.get(currentMode) ?? 0) + 1)
+    const currentStockCode = stockCode
+    const requestKey = `${currentMode}:${currentStockCode ?? ''}`
+    counts.set(requestKey, (counts.get(requestKey) ?? 0) + 1)
     resolveReceived?.()
     let size = 0
     const chunks = []
@@ -774,10 +814,10 @@ function createUpstream(token) {
       else chunks.push(chunk)
     })
     request.on('end', () => {
-      const definition = modeDefinition(currentMode)
+      const definition = modeDefinition(currentMode, currentStockCode)
       const checks = {
         mode: Boolean(definition),
-        count: counts.get(currentMode) === 1,
+        count: counts.get(requestKey) === 1,
         method: request.method === 'POST',
         path: request.url === '/',
         size: size <= 64 * 1024,
@@ -811,7 +851,7 @@ function createUpstream(token) {
         Boolean(definition) &&
         body.fields === fieldsByApi[definition.api].join(',')
       for (const [name, passed] of Object.entries(checks)) {
-        if (!passed) failures.push(`${currentMode}:${name}`)
+        if (!passed) failures.push(`${requestKey}:${name}`)
       }
       const valid = Boolean(definition) && Object.values(checks).every(Boolean)
       response.writeHead(valid ? 200 : 500, { 'Content-Type': 'application/json' })
@@ -831,14 +871,17 @@ function createUpstream(token) {
     sockets,
     failures,
     counts,
-    setMode(next) {
-      safeCheck(Boolean(modeDefinition(next)), 'upstream mode is declared')
+    setMode(next, nextStockCode) {
+      const template = modeDefinition(next)
+      safeCheck(Boolean(template), 'upstream mode is declared')
+      safeCheck(!template.stockScoped || typeof nextStockCode === 'string', 'stock-scoped mode has stock input')
       mode = next
+      stockCode = nextStockCode
       received = new Promise((resolve) => { resolveReceived = resolve })
       return received
     },
-    assertMode(next) {
-      expect(counts.get(next) ?? 0).toBe(1)
+    assertMode(next, expectedStockCode) {
+      expect(counts.get(`${next}:${expectedStockCode ?? ''}`) ?? 0).toBe(1)
       expect(failures).toEqual([])
     },
   }
@@ -1378,12 +1421,14 @@ async function fillDownloadParameters(page, api, params) {
   void api
 }
 
-async function performDownload(page, mode, expectedCounts) {
-  const definition = modeDefinition(mode)
-  await openRoute(page, '/downloads', '数据下载')
-  await chooseTushareDownload(page, definition.api)
+async function performDownload(page, mode, expectedCounts, tsCode, reuseForm = false) {
+  const definition = modeDefinition(mode, tsCode)
+  if (!reuseForm) {
+    await openRoute(page, '/downloads', '数据下载')
+    await chooseTushareDownload(page, definition.api)
+  }
   await fillDownloadParameters(page, definition.api, definition.params)
-  const received = upstream.setMode(mode)
+  const received = upstream.setMode(mode, tsCode)
   const responsePromise = page.waitForResponse(downloadRequest)
   await page.getByRole('button', { name: '开始下载', exact: true }).click()
   const response = await responsePromise
@@ -1415,7 +1460,7 @@ async function performDownload(page, mode, expectedCounts) {
   await expect(status.getByRole('heading', { name: '下载成功' })).toBeVisible()
   await expect(status.getByRole('term')).toHaveText(['上游返回数', '插入数', '更新数'])
   await expect(status.getByRole('definition')).toHaveText(expectedCounts.map(String))
-  upstream.assertMode(mode)
+  upstream.assertMode(mode, tsCode)
   expectedEvents.push({
     requestId,
     operation: 'download',
@@ -1429,7 +1474,37 @@ async function performDownload(page, mode, expectedCounts) {
     failureStage: 'none',
     errorCode: 'none',
   })
-  evidence.requests.push({ api: definition.api, operation: 'download', mode, counts: expectedCounts, requestId })
+  evidence.requests.push({ api: definition.api, operation: 'download', mode, tsCode, counts: expectedCounts, requestId })
+  return body
+}
+
+function modeStockCodes(mode) {
+  const definition = modeDefinition(mode)
+  if (!definition.stockScoped) return [undefined]
+  const fields = fieldsByApi[definition.api]
+  const stockIndex = fields.indexOf('ts_code')
+  safeCheck(stockIndex >= 0, `${mode} stock field`)
+  const items = definition.items()
+  const stockCodes = [...new Set(items.map((item) => item[stockIndex]))]
+  safeCheck(
+    stockCodes.length === items.length && stockCodes.every((value) => typeof value === 'string'),
+    `${mode} unique stock rows`,
+  )
+  return stockCodes
+}
+
+async function performModeDownloads(page, mode, expectedTotals) {
+  const stockCodes = modeStockCodes(mode)
+  const totals = [0, 0, 0]
+  for (let index = 0; index < stockCodes.length; index += 1) {
+    const expectedCounts = mode === 'disclosure-corrected' ? [1, 0, 1] : [1, 1, 0]
+    const body = await performDownload(page, mode, expectedCounts, stockCodes[index], index > 0)
+    totals[0] += body.sourceRowCount
+    totals[1] += body.insertedRows
+    totals[2] += body.updatedRows
+  }
+  expect(totals).toEqual(expectedTotals)
+  return stockCodes.length
 }
 
 function parseCompletedEvent(line) {
@@ -1533,6 +1608,7 @@ test.describe('dataset query UX', () => {
     await syntheticProbes()
     for (const name of DB_VARIABLES) safeCheck((process.env[name]?.length ?? 0) > 0, `${name} is present`)
     safeCheck(path.isAbsolute(process.env.ACCEPTANCE_JAR ?? ''), 'acceptance JAR path is absolute')
+    safeCheck(/^[a-f0-9]{64}$/.test(ACCEPTANCE_JAR_SHA ?? ''), 'expected acceptance JAR hash')
     safeCheck((await stat(process.env.ACCEPTANCE_JAR)).isFile(), 'acceptance JAR is a file')
     safeCheck((process.env.PLAYWRIGHT_BASE_URL ?? BASE_URL) === BASE_URL, 'Playwright base URL is isolated')
     mysqlConfig = await parseMysqlInputs()
@@ -1554,7 +1630,7 @@ test.describe('dataset query UX', () => {
       jarSha256: createHash('sha256').update(await readFile(process.env.ACCEPTANCE_JAR)).digest('hex'),
     }
     safeCheck(
-      evidence.environment.jarSha256 === 'a69874afa6ce783d4ef4e16a678ddb0ff457f2948b68f509a8e4a2c00440bcac',
+      evidence.environment.jarSha256 === ACCEPTANCE_JAR_SHA,
       'acceptance JAR hash matches approved artifact',
     )
     try {
@@ -1576,7 +1652,7 @@ test.describe('dataset query UX', () => {
   })
 
   test.afterAll(async () => {
-    test.setTimeout(180_000)
+    test.setTimeout(300_000)
     const failures = []
     try {
       await stopApplication()
@@ -1585,10 +1661,14 @@ test.describe('dataset query UX', () => {
     try { await verifyFinalDatabase() } catch (error) { failures.push(error) }
     try { await verifyEventsAndLog() } catch (error) { failures.push(error) }
     try {
-      expect(downloadPostCount).toBe(7)
-      expect([...upstream.counts.values()].reduce((sum, count) => sum + count, 0)).toBe(7)
+      expect(downloadPostCount).toBe(TOTAL_DOWNLOAD_COUNT)
+      expect([...upstream.counts.values()].reduce((sum, count) => sum + count, 0)).toBe(TOTAL_DOWNLOAD_COUNT)
       expect(upstream.failures).toEqual([])
-      evidence.counters = { downloads: downloadPostCount, upstreamCalls: 7, recordsResponses: recordsResponseCount }
+      evidence.counters = {
+        downloads: downloadPostCount,
+        upstreamCalls: TOTAL_DOWNLOAD_COUNT,
+        recordsResponses: recordsResponseCount,
+      }
     } catch (error) { failures.push(error) }
     try {
       await stopUpstream()
@@ -1606,6 +1686,7 @@ test.describe('dataset query UX', () => {
   })
 
   test('seedsQueryDatasetsThroughDownloadPages', async ({ page }) => {
+    test.setTimeout(600_000)
     const monitor = monitorPage(page)
     await openRoute(page, '/downloads', '数据下载')
     await page.getByRole('link', { name: '数据查看', exact: true }).click()
@@ -1613,6 +1694,7 @@ test.describe('dataset query UX', () => {
     await page.getByRole('link', { name: '数据下载', exact: true }).click()
     await expect(page.getByRole('heading', { level: 1, name: '数据下载' })).toBeVisible()
 
+    let seedDownloads = 0
     for (const [mode, counts] of [
       ['daily-main', [123, 123, 0]],
       ['daily-earlier', [3, 3, 0]],
@@ -1621,11 +1703,12 @@ test.describe('dataset query UX', () => {
       ['balance', [1, 1, 0]],
       ['disclosure-initial', [123, 123, 0]],
     ]) {
-      await performDownload(page, mode, counts)
+      seedDownloads += await performModeDownloads(page, mode, counts)
     }
-    expect(downloadPostCount).toBe(6)
-    expect([...upstream.counts.values()].reduce((sum, count) => sum + count, 0)).toBe(6)
-    await monitor.assertClean(Array(6).fill('POST /api/v1/downloads'))
+    expect(seedDownloads).toBe(INITIAL_DOWNLOAD_COUNT)
+    expect(downloadPostCount).toBe(INITIAL_DOWNLOAD_COUNT)
+    expect([...upstream.counts.values()].reduce((sum, count) => sum + count, 0)).toBe(INITIAL_DOWNLOAD_COUNT)
+    await monitor.assertClean(Array(INITIAL_DOWNLOAD_COUNT).fill('POST /api/v1/downloads'))
   })
 
   test('showsOnlyDeclaredFiltersWithoutAutoQuery', async ({ page }) => {
@@ -1875,6 +1958,7 @@ test.describe('dataset query UX', () => {
   })
 
   test('normalizesLastPageAfterAnnDateCorrection', async ({ page, context }, testInfo) => {
+    test.setTimeout(600_000)
     const monitor = monitorPage(page)
     await openRoute(page, '/datasets', '数据查看')
     const definition = await chooseDataset(page, 'disclosure_date')
@@ -1897,8 +1981,9 @@ test.describe('dataset query UX', () => {
     const updaterMonitor = monitorPage(updater)
     await runWithCleanup(
       async () => {
-        await performDownload(updater, 'disclosure-corrected', [123, 0, 123])
-        await updaterMonitor.assertClean(['POST /api/v1/downloads'])
+        const updateDownloads = await performModeDownloads(updater, 'disclosure-corrected', [123, 0, 123])
+        expect(updateDownloads).toBe(123)
+        await updaterMonitor.assertClean(Array(updateDownloads).fill('POST /api/v1/downloads'))
       },
       () => updater.close(),
       'disclosure update and page cleanup failed',

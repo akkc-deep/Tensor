@@ -21,7 +21,7 @@ import com.akkc.tensor.plugin.api.model.DatasetKey;
 import com.akkc.tensor.plugin.api.model.PluginId;
 import com.akkc.tensor.plugin.api.model.RequestId;
 import com.akkc.tensor.web.download.DownloadParameterResolver;
-import com.akkc.tensor.web.download.DownloadParameters.TradeDateParameters;
+import com.akkc.tensor.web.download.DownloadParameters.TradeDateOnlyParameters;
 import com.akkc.tensor.web.dto.DatasetPath;
 import com.akkc.tensor.web.dto.DatasetRecordsRequest;
 import com.akkc.tensor.web.dto.DatasetRecordsRequest.DateRange;
@@ -152,6 +152,6 @@ class ControllerUseCaseTest {
     }
 
     private static DownloadRequest downloadRequest() {
-        return new DownloadRequest(KEY, new TradeDateParameters("20260907"), Set.of("trade_date"));
+        return new DownloadRequest(KEY, new TradeDateOnlyParameters("20260907"), Set.of("trade_date"));
     }
 }

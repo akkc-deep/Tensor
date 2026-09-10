@@ -8,6 +8,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import com.akkc.tensor.plugin.api.dataset.BusinessKeyDefinition;
+import com.akkc.tensor.plugin.api.dataset.BusinessKeyMode;
 import com.akkc.tensor.plugin.api.dataset.DatasetDefinition;
 import com.akkc.tensor.plugin.api.download.DownloadEnvelope;
 import com.akkc.tensor.plugin.api.download.DownloadStatus;
@@ -35,6 +37,7 @@ import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -55,7 +58,7 @@ class TushareProClientTest {
             "ts_code", "trade_date", "open", "high", "low", "close",
             "pre_close", "change", "pct_chg", "vol", "amount");
     private static final String SUCCESS_JSON = """
-            {"code":0,"msg":null,"request_id":"ignored","data":{"fields":["ts_code","trade_date","open","high","low","close","pre_close","change","pct_chg","vol","amount"],"items":[["000001.SZ","20260902",1,2,3,4,5,6,7,8,9],["000002.SZ","20260902",10,11,12,13,14,15,16,17,18]]}}
+            {"code":0,"msg":null,"request_id":"ignored","data":{"fields":["ts_code","trade_date","open","high","low","close","pre_close","change","pct_chg","vol","amount"],"items":[["000001.SZ","20260902",1,2,3,4,5,6,7,8,9],["000001.SZ","20260902",10,11,12,13,14,15,16,17,18]]}}
             """.strip();
     private static final String EMPTY_JSON = """
             {"code":0,"msg":null,"data":{"fields":["ts_code","trade_date","open","high","low","close","pre_close","change","pct_chg","vol","amount"],"items":[]}}
@@ -140,7 +143,7 @@ class TushareProClientTest {
     void sendsExactRequestAndReturnsSuccessfulEnvelope() {
         stub(HttpStatus.OK.value(), SUCCESS_JSON);
         DatasetDefinition definition = dailyDefinition();
-        Map<String, Object> params = Map.of("trade_date", "20260902");
+        Map<String, Object> params = dailyParams("000001.SZ", "20260902");
 
         DownloadEnvelope envelope = client(1_024 * 1_024).execute(definition, params);
 
@@ -150,7 +153,7 @@ class TushareProClientTest {
         assertThat(envelope.fields()).containsExactlyElementsOf(DAILY_FIELDS);
         assertThat(envelope.data()).containsExactly(
                 List.of("000001.SZ", "20260902", 1, 2, 3, 4, 5, 6, 7, 8, 9),
-                List.of("000002.SZ", "20260902", 10, 11, 12, 13, 14, 15, 16, 17, 18));
+                List.of("000001.SZ", "20260902", 10, 11, 12, 13, 14, 15, 16, 17, 18));
         assertThat(envelope.rowCount()).isEqualTo(2);
         assertThat(envelope.status()).isEqualTo(DownloadStatus.SUCCESS);
         assertThat(envelope.error()).isNull();
@@ -175,13 +178,114 @@ class TushareProClientTest {
     }
 
     @Test
+    void sendsAllStockScopedRequestsWithEitherRequestedCodeAndKeepsSixLegacyShapes() throws Exception {
+        Map<String, DatasetDefinition> definitions = definitionsByApi();
+        Map<String, Map<String, Object>> firstRequests = expectedRequestParameters("000001.SZ");
+        Map<String, Map<String, Object>> secondRequests = expectedRequestParameters("600000.SH");
+
+        assertThat(definitions).hasSize(40);
+        assertThat(firstRequests).hasSize(40);
+        assertThat(secondRequests).hasSize(40);
+        assertThat(firstRequests.keySet()).containsExactlyInAnyOrderElementsOf(definitions.keySet());
+        assertThat(firstRequests.values()).filteredOn(params -> params.containsKey("ts_code")).hasSize(34);
+        assertThat(firstRequests.values()).filteredOn(params -> !params.containsKey("ts_code")).hasSize(6);
+
+        for (String apiName : firstRequests.keySet()) {
+            DatasetDefinition definition = definitions.get(apiName);
+            List<Map<String, Object>> requests = firstRequests.get(apiName).containsKey("ts_code")
+                    ? List.of(firstRequests.get(apiName), secondRequests.get(apiName))
+                    : List.of(firstRequests.get(apiName));
+            for (Map<String, Object> expectedParams : requests) {
+                stub(HttpStatus.OK.value(), successWith(
+                        definition.columns().stream().map(column -> column.name()).toList(), "[]"));
+
+                DownloadEnvelope envelope = client(1_024 * 1_024).execute(definition, expectedParams);
+
+                assertThat(envelope.rowCount()).as("%s empty response", apiName).isZero();
+                assertThat(wireMock.getAllServeEvents()).as("%s upstream calls", apiName).singleElement()
+                        .satisfies(event -> {
+                            try {
+                                JsonNode body = JSON.readTree(event.getRequest().getBody());
+                                assertThat(body.path("api_name").textValue()).isEqualTo(apiName);
+                                assertThat(body.path("params"))
+                                        .isEqualTo(JSON.valueToTree(expectedParams));
+                            } catch (IOException exception) {
+                                throw new AssertionError("request body must be valid JSON", exception);
+                            }
+                        });
+            }
+        }
+    }
+
+    @Test
+    void rejectsMissingNullMalformedOrUnnormalizedStockRequirements() {
+        DatasetDefinition definition = dailyDefinition();
+        TushareResponse empty = new TushareResponse(
+                0, null, new TushareData(new ArrayList<>(DAILY_FIELDS), List.of()));
+        List<Map<String, Object>> invalidRequests = new ArrayList<>();
+        invalidRequests.add(Map.of("trade_date", "20260902"));
+        invalidRequests.add(new LinkedHashMap<>(Map.of("trade_date", "20260902")));
+        invalidRequests.getLast().put("ts_code", null);
+        invalidRequests.add(Map.of("ts_code", 1, "trade_date", "20260902"));
+        invalidRequests.add(Map.of("ts_code", "not-a-code", "trade_date", "20260902"));
+        invalidRequests.add(Map.of("ts_code", " 000001.sz ", "trade_date", "20260902"));
+
+        invalidRequests.forEach(params -> assertPayloadFailure(catchThrowable(
+                () -> TushareResponseValidator.validate(definition, params, empty))));
+    }
+
+    @Test
+    void rejectsStockScopedRowsWhenTheCodeColumnIsMissingNullOrDoesNotMatch() {
+        Map<String, Object> params = Map.of("ts_code", "000001.SZ", "trade_date", "20260902");
+        DatasetDefinition daily = dailyDefinition();
+        assertPayloadFailure(catchThrowable(() -> TushareResponseValidator.validate(
+                scopedDefinitionWithoutCodeColumn(),
+                params,
+                new TushareResponse(0, null, new TushareData(new ArrayList<>(List.of("trade_date")),
+                        List.of(List.of("20260902")))))));
+        assertPayloadFailure(catchThrowable(() -> TushareResponseValidator.validate(
+                daily,
+                params,
+                new TushareResponse(0, null, new TushareData(new ArrayList<>(DAILY_FIELDS),
+                        List.of(rowWithDailyCode(null)))))));
+        assertPayloadFailure(catchThrowable(() -> TushareResponseValidator.validate(
+                daily,
+                params,
+                new TushareResponse(0, null, new TushareData(new ArrayList<>(DAILY_FIELDS),
+                        List.of(rowWithDailyCode("000002.SZ")))))));
+    }
+
+    @Test
+    void acceptsEmptyStockResultsAndMultiStockRowsForNewShareAndRepurchase() {
+        DatasetDefinition daily = dailyDefinition();
+        DownloadEnvelope empty = TushareResponseValidator.validate(
+                daily,
+                Map.of("ts_code", "000001.SZ", "trade_date", "20260902"),
+                new TushareResponse(0, null, new TushareData(new ArrayList<>(DAILY_FIELDS), List.of())));
+        assertThat(empty.rowCount()).isZero();
+
+        Map<String, DatasetDefinition> definitions = definitionsByApi();
+        for (String apiName : List.of("new_share", "repurchase")) {
+            DatasetDefinition definition = definitions.get(apiName);
+            List<String> fields = new ArrayList<>(
+                    definition.columns().stream().map(column -> column.name()).toList());
+            DownloadEnvelope envelope = TushareResponseValidator.validate(
+                    definition,
+                    expectedRequestParameters("000001.SZ").get(apiName),
+                    new TushareResponse(0, null, new TushareData(fields, List.of(
+                            rowWithCode(fields, "000001.SZ"), rowWithCode(fields, "600000.SH")))));
+            assertThat(envelope.rowCount()).as(apiName).isEqualTo(2);
+        }
+    }
+
+    @Test
     void preservesJsonDecimalPrecisionBeforeAdaptation() {
         stub(HttpStatus.OK.value(), """
                 {"code":0,"msg":null,"data":{"fields":["ts_code","trade_date","open","high","low","close","pre_close","change","pct_chg","vol","amount"],"items":[["SYNTHETIC.SZ","20260807",0.1,12345.123456789012345678,1e-18,1.2300,2,null,0,3,4]]}}
                 """);
 
         List<Object> row = client(1_024 * 1_024)
-                .execute(dailyDefinition(), Map.of("trade_date", "20260807")).data().getFirst();
+                .execute(dailyDefinition(), dailyParams("SYNTHETIC.SZ", "20260807")).data().getFirst();
 
         assertThat(row.subList(2, 6)).containsExactly(
                 new BigDecimal("0.1"), new BigDecimal("12345.123456789012345678"),
@@ -211,7 +315,7 @@ class TushareProClientTest {
         stub(HttpStatus.OK.value(), EMPTY_JSON);
 
         DownloadEnvelope envelope = client(1_024 * 1_024)
-                .execute(dailyDefinition(), Map.of("trade_date", "20260902"));
+                .execute(dailyDefinition(), dailyParams("000001.SZ", "20260902"));
 
         assertThat(envelope.fields()).containsExactlyElementsOf(DAILY_FIELDS);
         assertThat(envelope.data()).isEmpty();
@@ -225,7 +329,7 @@ class TushareProClientTest {
         stub(HttpStatus.SERVICE_UNAVAILABLE.value(), "{" + SECRET);
 
         Throwable failure = catchThrowable(() -> client(1_024 * 1_024)
-                .execute(dailyDefinition(), Map.of("trade_date", "20260902")));
+                .execute(dailyDefinition(), dailyParams("000001.SZ", "20260902")));
 
         assertSourceFailure(failure, ErrorCode.SOURCE_UNAVAILABLE, "Tushare service is unavailable");
         assertTrue(!String.valueOf(failure).contains(SECRET), "HTTP failure omits the response body and credential");
@@ -240,7 +344,7 @@ class TushareProClientTest {
                 })
                 .build();
         Throwable networkFailure = catchThrowable(() -> client(unreachable, 1_024 * 1_024)
-                .execute(dailyDefinition(), Map.of("trade_date", "20260902")));
+                .execute(dailyDefinition(), dailyParams("000001.SZ", "20260902")));
         assertSourceFailure(networkFailure, ErrorCode.SOURCE_NETWORK_ERROR,
                 "Tushare could not be reached");
         assertTrue(!String.valueOf(networkFailure).contains(SECRET)
@@ -254,7 +358,7 @@ class TushareProClientTest {
             }
         };
         Throwable timeoutFailure = catchThrowable(() -> client(restClientReturning(timedOutBody), 1_024 * 1_024)
-                .execute(dailyDefinition(), Map.of("trade_date", "20260902")));
+                .execute(dailyDefinition(), dailyParams("000001.SZ", "20260902")));
         assertSourceFailure(timeoutFailure, ErrorCode.SOURCE_TIMEOUT, "Tushare response timed out");
         assertTrue(!String.valueOf(timeoutFailure).contains(SECRET),
                 "response read timeout omits the transport message");
@@ -341,7 +445,7 @@ class TushareProClientTest {
         stub(HttpStatus.OK.value(), successWith(DAILY_FIELDS,
                 "[[\"000001.SZ\",\"20260902\",null,2,3,4,5,6,7,8,9]]"));
         DownloadEnvelope envelope = client(1_024 * 1_024)
-                .execute(dailyDefinition(), Map.of("trade_date", "20260902"));
+                .execute(dailyDefinition(), dailyParams("000001.SZ", "20260902"));
         assertTrue(envelope.rowCount() == 1 && envelope.data().getFirst().get(2) == null,
                 "legal null cells are preserved in the successful envelope");
     }
@@ -351,12 +455,12 @@ class TushareProClientTest {
         int exactBytes = EMPTY_JSON.getBytes(StandardCharsets.UTF_8).length;
         stub(HttpStatus.OK.value(), EMPTY_JSON);
         DownloadEnvelope exact = client(exactBytes)
-                .execute(dailyDefinition(), Map.of("trade_date", "20260902"));
+                .execute(dailyDefinition(), dailyParams("000001.SZ", "20260902"));
         assertThat(exact.rowCount()).isZero();
 
         stub(HttpStatus.OK.value(), EMPTY_JSON + " ");
         Throwable oversized = catchThrowable(() -> client(exactBytes)
-                .execute(dailyDefinition(), Map.of("trade_date", "20260902")));
+                .execute(dailyDefinition(), dailyParams("000001.SZ", "20260902")));
         assertPayloadFailure(oversized);
     }
 
@@ -382,7 +486,8 @@ class TushareProClientTest {
                     && root.size() == 4
                     && "daily".equals(root.path("api_name").textValue())
                     && SECRET.equals(root.path("token").textValue())
-                    && root.path("params").size() == 1
+                    && root.path("params").size() == 2
+                    && "000001.SZ".equals(root.path("params").path("ts_code").textValue())
                     && "20260902".equals(root.path("params").path("trade_date").textValue())
                     && String.join(",", DAILY_FIELDS).equals(root.path("fields").textValue());
         } catch (Exception ignored) {
@@ -393,7 +498,7 @@ class TushareProClientTest {
     private Throwable executeFailure(int status, String body) {
         stub(status, body);
         return catchThrowable(() -> client(1_024 * 1_024)
-                .execute(dailyDefinition(), Map.of("trade_date", "20260902")));
+                .execute(dailyDefinition(), dailyParams("000001.SZ", "20260902")));
     }
 
     private void assertPayloadFailure(Throwable failure) {
@@ -503,11 +608,82 @@ class TushareProClientTest {
     }
 
     private DatasetDefinition dailyDefinition() {
-        return new DatasetDefinitionLoader()
+        return definitionsByApi().get("daily");
+    }
+
+    private Map<String, DatasetDefinition> definitionsByApi() {
+        Map<String, DatasetDefinition> definitions = new LinkedHashMap<>();
+        new DatasetDefinitionLoader()
                 .loadAll(new PathMatchingResourcePatternResolver(), "classpath*:datasets/tushare_pro/*.yaml")
-                .stream()
-                .filter(definition -> "daily".equals(definition.datasetKey().apiName().value()))
+                .forEach(definition -> definitions.put(definition.datasetKey().apiName().value(), definition));
+        return definitions;
+    }
+
+    private Map<String, Map<String, Object>> expectedRequestParameters(String tsCode) {
+        Map<String, Map<String, Object>> expected = new LinkedHashMap<>();
+        putRequests(expected, List.of(
+                        "adj_factor", "block_trade", "daily", "daily_basic", "margin_detail", "moneyflow",
+                        "monthly", "slb_sec", "slb_sec_detail", "stk_limit", "suspend_d", "top_list", "weekly"),
+                Map.of("ts_code", tsCode, "trade_date", "20260902"));
+        putRequests(expected, List.of(
+                        "disclosure_date", "dividend", "express", "forecast", "stk_holdertrade",
+                        "top10_floatholders", "top10_holders", "balancesheet", "cashflow", "fina_audit",
+                        "fina_indicator", "fina_mainbz", "income"),
+                Map.of("ts_code", tsCode, "ann_date", "20260902"));
+        putRequests(expected, List.of(
+                        "index_member_all", "pledge_detail", "pledge_stat", "stk_managers",
+                        "stk_holdernumber", "stk_rewards"),
+                Map.of("ts_code", tsCode));
+        expected.put("stock_company", Map.of(
+                "ts_code", tsCode, "exchange", tsCode.endsWith(".SH") ? "SSE" : "SZSE"));
+        expected.put("stock_basic", Map.of("ts_code", tsCode, "list_status", "L"));
+        expected.put("trade_cal", Map.of(
+                "exchange", "SSE", "start_date", "20260901", "end_date", "20260902"));
+        expected.put("new_share", Map.of("start_date", "20260901", "end_date", "20260902"));
+        expected.put("repurchase", Map.of("ann_date", "20260902"));
+        expected.put("margin", Map.of("exchange_id", "SSE", "trade_date", "20260902"));
+        expected.put("slb_len", Map.of("trade_date", "20260902"));
+        expected.put("index_classify", Map.of());
+        return expected;
+    }
+
+    private Map<String, Object> dailyParams(String tsCode, String tradeDate) {
+        return Map.of("ts_code", tsCode, "trade_date", tradeDate);
+    }
+
+    private void putRequests(
+            Map<String, Map<String, Object>> requests,
+            List<String> apiNames,
+            Map<String, Object> params) {
+        apiNames.forEach(apiName -> {
+            if (requests.put(apiName, params) != null) {
+                throw new AssertionError("duplicate expected request for " + apiName);
+            }
+        });
+    }
+
+    private DatasetDefinition scopedDefinitionWithoutCodeColumn() {
+        DatasetDefinition daily = dailyDefinition();
+        var tradeDate = daily.columns().stream()
+                .filter(column -> column.name().equals("trade_date"))
                 .findFirst()
-                .orElseThrow(() -> new AssertionError("daily dataset definition is available"));
+                .orElseThrow();
+        return new DatasetDefinition(
+                daily.datasetKey(), daily.displayName(), daily.category(), daily.queryMode(), daily.parameters(),
+                daily.tableName(), List.of(tradeDate),
+                new BusinessKeyDefinition(BusinessKeyMode.COMPOSITE, List.of("trade_date")),
+                List.of(), null, daily.batchSize());
+    }
+
+    private List<Object> rowWithDailyCode(Object code) {
+        List<Object> row = new ArrayList<>(Collections.nCopies(DAILY_FIELDS.size(), null));
+        row.set(0, code);
+        return row;
+    }
+
+    private List<Object> rowWithCode(List<String> fields, String code) {
+        List<Object> row = new ArrayList<>(Collections.nCopies(fields.size(), null));
+        row.set(fields.indexOf("ts_code"), code);
+        return row;
     }
 }

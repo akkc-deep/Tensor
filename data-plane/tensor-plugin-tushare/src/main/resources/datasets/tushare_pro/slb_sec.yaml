@@ -5,6 +5,7 @@ category: 互联互通与转融通
 displayName: 转融通证券汇总
 queryMode: trade_date
 parameters:
+  - { name: ts_code, label: 股票代码, type: TS_CODE, required: true }
   - { name: trade_date, label: 交易日期, type: DATE, required: true }
 columns:
   - { name: trade_date, label: trade_date, logicalType: DATE, nullable: false, displayOrder: 0 }

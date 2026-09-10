@@ -5,6 +5,10 @@ category: market
 displayName: 日线行情
 queryMode: trade_date
 parameters:
+  - name: ts_code
+    label: 股票代码
+    type: TS_CODE
+    required: true
   - name: trade_date
     label: 交易日期
     type: DATE

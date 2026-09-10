@@ -46,6 +46,16 @@ paths:
   /api/v1/downloads:
     post:
       operationId: downloadDataset
+      description: >-
+        Download using the selected API's declared parameters. For Tushare Pro, the 34 APIs
+        that support stock input require one params.ts_code, including the 26 newly stock-scoped
+        APIs. Existing date, exchange and listing-status requirements still apply.
+        trade_cal, new_share, repurchase, margin, slb_len and index_classify retain their
+        original parameters without ts_code. See download-request-examples.json for all 40 requests.
+        Missing or blank required stock codes fail with PARAM_REQUIRED; invalid or multiple codes
+        fail with PARAM_INVALID before any upstream call. Codes are trimmed and uppercased.
+        A nonempty stock-scoped response containing missing or different stock codes fails with
+        SOURCE_PAYLOAD_INVALID (502) and is not persisted.
       requestBody:
         required: true
         content:
@@ -53,7 +63,11 @@ paths:
             schema: {$ref: '#/components/schemas/DownloadRequest'}
             examples:
               dailyDownload:
-                value: {pluginId: tushare_pro, apiName: daily, params: {trade_date: '20260807'}}
+                value: {pluginId: tushare_pro, apiName: daily, params: {ts_code: '000001.SZ', trade_date: '20260807'}}
+              dateOnlyDownload:
+                value: {pluginId: tushare_pro, apiName: slb_len, params: {trade_date: '20260807'}}
+              parameterlessDownload:
+                value: {pluginId: tushare_pro, apiName: index_classify, params: {}}
       responses:
         '200':
           description: A committed successful or valid empty download.
@@ -68,7 +82,7 @@ paths:
               schema: {$ref: '#/components/schemas/DownloadResponse'}
               examples:
                 success:
-                  value: {requestId: c52bce3d-5aa5-4c8e-ae64-e73cb76d8f33, outcome: SUCCESS, pluginId: tushare_pro, apiName: daily, sourceRowCount: 5535, insertedRows: 5535, updatedRows: 0, message: 下载成功}
+                  value: {requestId: c52bce3d-5aa5-4c8e-ae64-e73cb76d8f33, outcome: SUCCESS, pluginId: tushare_pro, apiName: daily, sourceRowCount: 1, insertedRows: 1, updatedRows: 0, message: 下载成功}
                 empty:
                   value: {requestId: c52bce3d-5aa5-4c8e-ae64-e73cb76d8f33, outcome: EMPTY, pluginId: tushare_pro, apiName: monthly, sourceRowCount: 0, insertedRows: 0, updatedRows: 0, message: 下载成功，0 条数据}
         '400': &parameterInvalid
@@ -352,6 +366,7 @@ components:
         pluginId: {type: string, pattern: '^[a-z][a-z0-9_]{1,63}$'}
         apiName: {type: string, pattern: '^[a-z][a-z0-9_]{1,63}$'}
         params:
+          description: Parameters and required fields are defined by the selected API descriptor; stock-scoped APIs require a single ts_code without a default.
           type: object
           propertyNames: {pattern: '^[a-z][a-z0-9_]{1,63}$'}
           additionalProperties: {type: string}

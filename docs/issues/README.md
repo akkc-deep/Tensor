@@ -31,3 +31,4 @@
 | ISSUE-014 | 安全 Maven 门禁未完成 | 已解决 | 原命令重跑：HEAD 七类 81 项、当前源码七类 118 项通过；六模块 Enforcer 通过 | [详情](problems/ISSUE-014-security-maven-verification.md) · [验收记录](../verification/ISSUE-014-security-maven-verification.md) |
 | ISSUE-015 | 后端漏洞扫描未形成有效报告 | 已完成 | 扫描脚本已修复；27 个高阈值 CVE 与四类分析缺口按用户决定标记为不需要处理，接受剩余风险并关闭 | [详情](problems/ISSUE-015-backend-dependency-audit.md) · [验证记录](../verification/ISSUE-015-backend-dependency-audit.md) |
 | ISSUE-016 | UI 测试 YAML 解析器缺少严格字段校验 | 新增 | 从 ISSUE-004 延期项拆出，已登记，待解决方案 | [详情](problems/ISSUE-016-ui-fixture-yaml-validation.md) |
+| ISSUE-017 | 支持股票参数的接口必填股票，其余保留原下载方式 | 处理中 | 34 项股票必填、6 项原方式已实施并通过自动化验证；待 fina_mainbz 参数纠正及真实下载验收 | [详情](problems/ISSUE-017-stock-scoped-downloads.md) · [方案](proposals/ISSUE-017-required-stock-parameters.md) · [实施与验证](../verification/ISSUE-017-stock-scoped-downloads.md) |

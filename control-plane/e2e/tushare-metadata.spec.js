@@ -13,8 +13,8 @@ import { setTimeout as delay } from 'node:timers/promises'
 const execFileAsync = promisify(execFile)
 const BASE_URL = 'http://127.0.0.1:8080'
 const MANIFEST_SHA = '386f46a99b6605e203129836d7a744b96b65304307f52991dd8bba6fd1870984'
-// Historical artifact identity; a new 40-API acceptance artifact must be frozen before rerunning.
-const ACCEPTANCE_JAR_SHA = 'a69874afa6ce783d4ef4e16a678ddb0ff457f2948b68f509a8e4a2c00440bcac'
+const REQUESTS_SHA = 'f9f147c605262ee1e4f04031dc8508470acd0b4a837927495a9aefecf98bf7af'
+const ACCEPTANCE_JAR_SHA = process.env.ISSUE_017_ACCEPTANCE_JAR_SHA256
 const HEALTH_TIMEOUT_MS = 90_000
 const STOP_TIMEOUT_MS = 150_000
 const DB_VARIABLES = ['TENSOR_DB_URL', 'TENSOR_DB_USERNAME', 'TENSOR_DB_PASSWORD']
@@ -70,8 +70,8 @@ const PARAMETER = {
 }
 
 const EXPECTED_ROWS = [
-  ['stock_basic', '股票基础信息', 'basic_organization', 'snapshot', ['list_status'], 10],
-  ['stock_company', '上市公司基本信息', 'basic_organization', 'snapshot', ['exchange'], 18],
+  ['stock_basic', '股票基础信息', 'basic_organization', 'snapshot', ['ts_code', 'list_status'], 10],
+  ['stock_company', '上市公司基本信息', 'basic_organization', 'snapshot', ['ts_code', 'exchange'], 18],
   ['income', '利润表', '财务与披露', 'ann_date', ['ts_code', 'ann_date'], 85],
   ['balancesheet', '资产负债表', '财务与披露', 'ann_date', ['ts_code', 'ann_date'], 152],
   ['cashflow', '现金流量表', '财务与披露', 'ann_date', ['ts_code', 'ann_date'], 97],
@@ -82,34 +82,34 @@ const EXPECTED_ROWS = [
   ['stk_holdernumber', '股东户数', '股东与治理', 'snapshot', ['ts_code'], 4],
   ['trade_cal', '交易日历', 'basic_organization', 'date_range', ['exchange', 'start_date', 'end_date'], 4],
   ['margin', '融资融券汇总', '交易与资金', 'trade_date', ['exchange_id', 'trade_date'], 9],
-  ['daily', '日线行情', '行情与估值', 'trade_date', ['trade_date'], 11],
-  ['weekly', '周线行情', '行情与估值', 'trade_date', ['trade_date'], 11],
-  ['monthly', '月线行情', '行情与估值', 'trade_date', ['trade_date'], 11],
-  ['adj_factor', '复权因子', '行情与估值', 'trade_date', ['trade_date'], 3],
-  ['suspend_d', '每日停复牌信息', '行情与估值', 'trade_date', ['trade_date'], 4],
-  ['daily_basic', '每日估值与市场指标', '行情与估值', 'trade_date', ['trade_date'], 18],
-  ['moneyflow', '个股资金流向', '交易与资金', 'trade_date', ['trade_date'], 20],
-  ['stk_limit', '每日涨跌停价格', '行情与估值', 'trade_date', ['trade_date'], 4],
-  ['top_list', '龙虎榜每日明细', '交易与资金', 'trade_date', ['trade_date'], 15],
-  ['margin_detail', '融资融券交易明细', '交易与资金', 'trade_date', ['trade_date'], 10],
-  ['block_trade', '大宗交易', '交易与资金', 'trade_date', ['trade_date'], 7],
+  ['daily', '日线行情', '行情与估值', 'trade_date', ['ts_code', 'trade_date'], 11],
+  ['weekly', '周线行情', '行情与估值', 'trade_date', ['ts_code', 'trade_date'], 11],
+  ['monthly', '月线行情', '行情与估值', 'trade_date', ['ts_code', 'trade_date'], 11],
+  ['adj_factor', '复权因子', '行情与估值', 'trade_date', ['ts_code', 'trade_date'], 3],
+  ['suspend_d', '每日停复牌信息', '行情与估值', 'trade_date', ['ts_code', 'trade_date'], 4],
+  ['daily_basic', '每日估值与市场指标', '行情与估值', 'trade_date', ['ts_code', 'trade_date'], 18],
+  ['moneyflow', '个股资金流向', '交易与资金', 'trade_date', ['ts_code', 'trade_date'], 20],
+  ['stk_limit', '每日涨跌停价格', '行情与估值', 'trade_date', ['ts_code', 'trade_date'], 4],
+  ['top_list', '龙虎榜每日明细', '交易与资金', 'trade_date', ['ts_code', 'trade_date'], 15],
+  ['margin_detail', '融资融券交易明细', '交易与资金', 'trade_date', ['ts_code', 'trade_date'], 10],
+  ['block_trade', '大宗交易', '交易与资金', 'trade_date', ['ts_code', 'trade_date'], 7],
   ['slb_len', '转融通期限与规模', '互联互通与转融通', 'trade_date', ['trade_date'], 6],
-  ['slb_sec', '转融通证券汇总', '互联互通与转融通', 'trade_date', ['trade_date'], 7],
-  ['slb_sec_detail', '转融通证券明细', '互联互通与转融通', 'trade_date', ['trade_date'], 6],
-  ['forecast', '业绩预告', '财务与披露', 'ann_date', ['ann_date'], 13],
-  ['express', '业绩快报', '财务与披露', 'ann_date', ['ann_date'], 15],
-  ['dividend', '分红送股', '公司行动', 'ann_date', ['ann_date'], 14],
-  ['disclosure_date', '财报披露计划', '财务与披露', 'ann_date', ['ann_date'], 5],
+  ['slb_sec', '转融通证券汇总', '互联互通与转融通', 'trade_date', ['ts_code', 'trade_date'], 7],
+  ['slb_sec_detail', '转融通证券明细', '互联互通与转融通', 'trade_date', ['ts_code', 'trade_date'], 6],
+  ['forecast', '业绩预告', '财务与披露', 'ann_date', ['ts_code', 'ann_date'], 13],
+  ['express', '业绩快报', '财务与披露', 'ann_date', ['ts_code', 'ann_date'], 15],
+  ['dividend', '分红送股', '公司行动', 'ann_date', ['ts_code', 'ann_date'], 14],
+  ['disclosure_date', '财报披露计划', '财务与披露', 'ann_date', ['ts_code', 'ann_date'], 5],
   ['repurchase', '股票回购', '公司行动', 'ann_date', ['ann_date'], 9],
-  ['stk_holdertrade', '股东增减持', '股东与治理', 'ann_date', ['ann_date'], 11],
-  ['top10_holders', '前十大股东', '股东与治理', 'ann_date', ['ann_date'], 9],
-  ['top10_floatholders', '前十大流通股东', '股东与治理', 'ann_date', ['ann_date'], 9],
+  ['stk_holdertrade', '股东增减持', '股东与治理', 'ann_date', ['ts_code', 'ann_date'], 11],
+  ['top10_holders', '前十大股东', '股东与治理', 'ann_date', ['ts_code', 'ann_date'], 9],
+  ['top10_floatholders', '前十大流通股东', '股东与治理', 'ann_date', ['ts_code', 'ann_date'], 9],
   ['new_share', 'IPO 新股发行信息', 'basic_organization', 'date_range', ['start_date', 'end_date'], 12],
-  ['stk_managers', '上市公司管理层信息', 'basic_organization', 'snapshot', [], 11],
-  ['pledge_stat', '股权质押统计', '股东与治理', 'snapshot', [], 7],
-  ['pledge_detail', '股权质押明细', '股东与治理', 'snapshot', [], 14],
+  ['stk_managers', '上市公司管理层信息', 'basic_organization', 'snapshot', ['ts_code'], 11],
+  ['pledge_stat', '股权质押统计', '股东与治理', 'snapshot', ['ts_code'], 7],
+  ['pledge_detail', '股权质押明细', '股东与治理', 'snapshot', ['ts_code'], 14],
   ['index_classify', '行业指数分类', 'basic_organization', 'snapshot', [], 7],
-  ['index_member_all', '行业分级与完整成分', 'basic_organization', 'snapshot', [], 11],
+  ['index_member_all', '行业分级与完整成分', 'basic_organization', 'snapshot', ['ts_code'], 11],
 ]
 
 function safeCheck(condition, name) {
@@ -170,17 +170,26 @@ for (const entry of manifest.interfaces) {
   safeCheck(entry.filename === `${entry.api_name}.json`, 'manifest filename')
   const contract = EXPECTED.get(entry.api_name)
   safeCheck(Boolean(contract), 'manifest API set')
-  const names = []
   for (const sample of entry.params ?? []) {
     safeCheck(sample !== null && typeof sample === 'object' && !Array.isArray(sample), 'manifest params object')
-    for (const name of Object.keys(sample)) if (!names.includes(name)) names.push(name)
   }
-  expect(names).toEqual(contract.parameters.map(({ name }) => name))
   expect(entry.query_mode === 'range' ? 'date_range' : entry.query_mode).toBe(contract.queryMode)
   manifestNames.push(entry.api_name)
 }
 safeCheck(new Set(manifestNames).size === 40 && EXPECTED.size === 40 && FILTERS.size === 40, 'independent coverage')
 expect(new Set(manifestNames)).toEqual(new Set(EXPECTED.keys()))
+const requestsBytes = readFileSync(new URL('../../docs/contracts/download-request-examples.json', import.meta.url))
+safeCheck(createHash('sha256').update(requestsBytes).digest('hex') === REQUESTS_SHA, 'request examples hash')
+const requestDocument = JSON.parse(requestsBytes)
+exactKeys(requestDocument, ['requests'], 'request examples document')
+expect(requestDocument.requests).toHaveLength(40)
+expect(requestDocument.requests.filter(({ params }) => Object.hasOwn(params, 'ts_code'))).toHaveLength(34)
+requestDocument.requests.forEach((request, index) => {
+  exactKeys(request, ['pluginId', 'apiName', 'params'], 'request example')
+  expect(request.pluginId).toBe('tushare_pro')
+  expect(request.apiName).toBe(manifestNames[index])
+  expect(Object.keys(request.params)).toEqual(EXPECTED.get(request.apiName).parameters.map(({ name }) => name))
+})
 const CONTRACTS = manifestNames.map((name) => EXPECTED.get(name))
 
 let application
@@ -199,6 +208,7 @@ const evidence = {
   finishedAt: undefined,
   environment: {},
   manifest: { sha256: MANIFEST_SHA, count: 40 },
+  requestExamples: { sha256: REQUESTS_SHA, count: 40 },
   results: [],
   screenshots: [],
   totals: {},
@@ -788,6 +798,7 @@ test.describe('Tushare 40 metadata contracts', () => {
     test.setTimeout(180_000)
     evidence.startedAt = new Date().toISOString()
     safeCheck(path.isAbsolute(process.env.ACCEPTANCE_JAR ?? ''), 'acceptance JAR absolute path')
+    safeCheck(/^[a-f0-9]{64}$/.test(ACCEPTANCE_JAR_SHA ?? ''), 'expected acceptance JAR hash')
     const jarState = await lstat(process.env.ACCEPTANCE_JAR)
     safeCheck(jarState.isFile() && !jarState.isSymbolicLink(), 'acceptance JAR ordinary file')
     for (const name of DB_VARIABLES) safeCheck(Boolean(process.env[name]), `${name} supplied`)
@@ -849,8 +860,8 @@ test.describe('Tushare 40 metadata contracts', () => {
         screenshots: evidence.screenshots.length,
       }
       const expectedTotals = {
-        cases: 40, apiPassed: 40, datasetsPassed: 40, requiredBlocked: 35,
-        parameterless: 5, downloadPosts: 0, recordsGets: 0, upstreamCalls: 0, screenshots: 11,
+        cases: 40, apiPassed: 40, datasetsPassed: 40, requiredBlocked: 39,
+        parameterless: 1, downloadPosts: 0, recordsGets: 0, upstreamCalls: 0, screenshots: 11,
       }
       if (evidence.results.length === 40) expect(evidence.totals).toEqual(expectedTotals)
       else expect(sentinelCalls, 'failed run must still make zero upstream calls').toBe(0)

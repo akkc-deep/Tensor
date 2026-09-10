@@ -14,8 +14,8 @@ export const PARAMETER = {
 }
 
 export const EXPECTED_ROWS = [
-  ['stock_basic', '股票基础信息', 'basic_organization', 'snapshot', ['list_status'], 10],
-  ['stock_company', '上市公司基本信息', 'basic_organization', 'snapshot', ['exchange'], 18],
+  ['stock_basic', '股票基础信息', 'basic_organization', 'snapshot', ['ts_code', 'list_status'], 10],
+  ['stock_company', '上市公司基本信息', 'basic_organization', 'snapshot', ['ts_code', 'exchange'], 18],
   ['income', '利润表', '财务与披露', 'ann_date', ['ts_code', 'ann_date'], 85],
   ['balancesheet', '资产负债表', '财务与披露', 'ann_date', ['ts_code', 'ann_date'], 152],
   ['cashflow', '现金流量表', '财务与披露', 'ann_date', ['ts_code', 'ann_date'], 97],
@@ -26,34 +26,34 @@ export const EXPECTED_ROWS = [
   ['stk_holdernumber', '股东户数', '股东与治理', 'snapshot', ['ts_code'], 4],
   ['trade_cal', '交易日历', 'basic_organization', 'date_range', ['exchange', 'start_date', 'end_date'], 4],
   ['margin', '融资融券汇总', '交易与资金', 'trade_date', ['exchange_id', 'trade_date'], 9],
-  ['daily', '日线行情', '行情与估值', 'trade_date', ['trade_date'], 11],
-  ['weekly', '周线行情', '行情与估值', 'trade_date', ['trade_date'], 11],
-  ['monthly', '月线行情', '行情与估值', 'trade_date', ['trade_date'], 11],
-  ['adj_factor', '复权因子', '行情与估值', 'trade_date', ['trade_date'], 3],
-  ['suspend_d', '每日停复牌信息', '行情与估值', 'trade_date', ['trade_date'], 4],
-  ['daily_basic', '每日估值与市场指标', '行情与估值', 'trade_date', ['trade_date'], 18],
-  ['moneyflow', '个股资金流向', '交易与资金', 'trade_date', ['trade_date'], 20],
-  ['stk_limit', '每日涨跌停价格', '行情与估值', 'trade_date', ['trade_date'], 4],
-  ['top_list', '龙虎榜每日明细', '交易与资金', 'trade_date', ['trade_date'], 15],
-  ['margin_detail', '融资融券交易明细', '交易与资金', 'trade_date', ['trade_date'], 10],
-  ['block_trade', '大宗交易', '交易与资金', 'trade_date', ['trade_date'], 7],
+  ['daily', '日线行情', '行情与估值', 'trade_date', ['ts_code', 'trade_date'], 11],
+  ['weekly', '周线行情', '行情与估值', 'trade_date', ['ts_code', 'trade_date'], 11],
+  ['monthly', '月线行情', '行情与估值', 'trade_date', ['ts_code', 'trade_date'], 11],
+  ['adj_factor', '复权因子', '行情与估值', 'trade_date', ['ts_code', 'trade_date'], 3],
+  ['suspend_d', '每日停复牌信息', '行情与估值', 'trade_date', ['ts_code', 'trade_date'], 4],
+  ['daily_basic', '每日估值与市场指标', '行情与估值', 'trade_date', ['ts_code', 'trade_date'], 18],
+  ['moneyflow', '个股资金流向', '交易与资金', 'trade_date', ['ts_code', 'trade_date'], 20],
+  ['stk_limit', '每日涨跌停价格', '行情与估值', 'trade_date', ['ts_code', 'trade_date'], 4],
+  ['top_list', '龙虎榜每日明细', '交易与资金', 'trade_date', ['ts_code', 'trade_date'], 15],
+  ['margin_detail', '融资融券交易明细', '交易与资金', 'trade_date', ['ts_code', 'trade_date'], 10],
+  ['block_trade', '大宗交易', '交易与资金', 'trade_date', ['ts_code', 'trade_date'], 7],
   ['slb_len', '转融通期限与规模', '互联互通与转融通', 'trade_date', ['trade_date'], 6],
-  ['slb_sec', '转融通证券汇总', '互联互通与转融通', 'trade_date', ['trade_date'], 7],
-  ['slb_sec_detail', '转融通证券明细', '互联互通与转融通', 'trade_date', ['trade_date'], 6],
-  ['forecast', '业绩预告', '财务与披露', 'ann_date', ['ann_date'], 13],
-  ['express', '业绩快报', '财务与披露', 'ann_date', ['ann_date'], 15],
-  ['dividend', '分红送股', '公司行动', 'ann_date', ['ann_date'], 14],
-  ['disclosure_date', '财报披露计划', '财务与披露', 'ann_date', ['ann_date'], 5],
+  ['slb_sec', '转融通证券汇总', '互联互通与转融通', 'trade_date', ['ts_code', 'trade_date'], 7],
+  ['slb_sec_detail', '转融通证券明细', '互联互通与转融通', 'trade_date', ['ts_code', 'trade_date'], 6],
+  ['forecast', '业绩预告', '财务与披露', 'ann_date', ['ts_code', 'ann_date'], 13],
+  ['express', '业绩快报', '财务与披露', 'ann_date', ['ts_code', 'ann_date'], 15],
+  ['dividend', '分红送股', '公司行动', 'ann_date', ['ts_code', 'ann_date'], 14],
+  ['disclosure_date', '财报披露计划', '财务与披露', 'ann_date', ['ts_code', 'ann_date'], 5],
   ['repurchase', '股票回购', '公司行动', 'ann_date', ['ann_date'], 9],
-  ['stk_holdertrade', '股东增减持', '股东与治理', 'ann_date', ['ann_date'], 11],
-  ['top10_holders', '前十大股东', '股东与治理', 'ann_date', ['ann_date'], 9],
-  ['top10_floatholders', '前十大流通股东', '股东与治理', 'ann_date', ['ann_date'], 9],
+  ['stk_holdertrade', '股东增减持', '股东与治理', 'ann_date', ['ts_code', 'ann_date'], 11],
+  ['top10_holders', '前十大股东', '股东与治理', 'ann_date', ['ts_code', 'ann_date'], 9],
+  ['top10_floatholders', '前十大流通股东', '股东与治理', 'ann_date', ['ts_code', 'ann_date'], 9],
   ['new_share', 'IPO 新股发行信息', 'basic_organization', 'date_range', ['start_date', 'end_date'], 12],
-  ['stk_managers', '上市公司管理层信息', 'basic_organization', 'snapshot', [], 11],
-  ['pledge_stat', '股权质押统计', '股东与治理', 'snapshot', [], 7],
-  ['pledge_detail', '股权质押明细', '股东与治理', 'snapshot', [], 14],
+  ['stk_managers', '上市公司管理层信息', 'basic_organization', 'snapshot', ['ts_code'], 11],
+  ['pledge_stat', '股权质押统计', '股东与治理', 'snapshot', ['ts_code'], 7],
+  ['pledge_detail', '股权质押明细', '股东与治理', 'snapshot', ['ts_code'], 14],
   ['index_classify', '行业指数分类', 'basic_organization', 'snapshot', [], 7],
-  ['index_member_all', '行业分级与完整成分', 'basic_organization', 'snapshot', [], 11],
+  ['index_member_all', '行业分级与完整成分', 'basic_organization', 'snapshot', ['ts_code'], 11],
 ]
 
 export function filterDescriptor(field) {
@@ -264,7 +264,7 @@ export async function installApi(page, overrides = {}) {
   const requests = []
   const unexpected = []
 
-  await page.route('**/api/**', async (route) => {
+  await page.route('**/api/v1/**', async (route) => {
     const request = route.request()
     const method = request.method()
     const url = new URL(request.url())

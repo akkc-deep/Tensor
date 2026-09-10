@@ -255,8 +255,10 @@ class TushareMetadataContractTest {
     private static Map<String, List<ExpectedParameter>> expectedParameters() {
         Map<String, List<ExpectedParameter>> expected = new LinkedHashMap<>();
         addParameters(expected, List.of("stock_basic"),
+                parameter("ts_code", "股票代码", ParameterType.TS_CODE, List.of(), null),
                 parameter("list_status", "上市状态", ParameterType.ENUM, List.of("L", "P", "D"), null));
         addParameters(expected, List.of("stock_company"),
+                parameter("ts_code", "股票代码", ParameterType.TS_CODE, List.of(), null),
                 parameter("exchange", "交易所", ParameterType.ENUM, List.of("SSE", "SZSE", "BSE"), null));
         addParameters(expected, List.of("trade_cal"),
                 parameter("exchange", "交易所", ParameterType.ENUM, List.of("SSE", "SZSE", "BSE"), null),
@@ -268,7 +270,10 @@ class TushareMetadataContractTest {
         addParameters(expected, List.of(
                         "daily", "weekly", "monthly", "adj_factor", "suspend_d", "daily_basic", "stk_limit",
                         "moneyflow", "margin_detail", "top_list", "block_trade",
-                        "slb_len", "slb_sec", "slb_sec_detail"),
+                        "slb_sec", "slb_sec_detail"),
+                parameter("ts_code", "股票代码", ParameterType.TS_CODE, List.of(), null),
+                parameter("trade_date", "交易日期", ParameterType.DATE, List.of(), null));
+        addParameters(expected, List.of("slb_len"),
                 parameter("trade_date", "交易日期", ParameterType.DATE, List.of(), null));
         addParameters(expected, List.of("margin"),
                 parameter("exchange_id", "交易所", ParameterType.ENUM, List.of("SSE", "SZSE", "BSE"), null),
@@ -278,13 +283,17 @@ class TushareMetadataContractTest {
                 parameter("ts_code", "股票代码", ParameterType.TS_CODE, List.of(), null),
                 parameter("ann_date", "公告日期", ParameterType.DATE, List.of(), null));
         addParameters(expected, List.of(
-                        "express", "forecast", "disclosure_date", "dividend", "repurchase",
+                        "express", "forecast", "disclosure_date", "dividend",
                         "stk_holdertrade", "top10_holders", "top10_floatholders"),
+                parameter("ts_code", "股票代码", ParameterType.TS_CODE, List.of(), null),
+                parameter("ann_date", "公告日期", ParameterType.DATE, List.of(), null));
+        addParameters(expected, List.of("repurchase"),
                 parameter("ann_date", "公告日期", ParameterType.DATE, List.of(), null));
         addParameters(expected, List.of("stk_rewards", "stk_holdernumber"),
                 parameter("ts_code", "股票代码", ParameterType.TS_CODE, List.of(), null));
-        addParameters(expected, List.of(
-                "stk_managers", "index_classify", "index_member_all", "pledge_stat", "pledge_detail"));
+        addParameters(expected, List.of("stk_managers", "index_member_all", "pledge_stat", "pledge_detail"),
+                parameter("ts_code", "股票代码", ParameterType.TS_CODE, List.of(), null));
+        addParameters(expected, List.of("index_classify"));
         return Map.copyOf(expected);
     }
 

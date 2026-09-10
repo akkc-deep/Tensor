@@ -2,6 +2,7 @@ package com.akkc.tensor.plugin.tushare.client;
 
 import com.akkc.tensor.plugin.api.dataset.ColumnDefinition;
 import com.akkc.tensor.plugin.api.dataset.DatasetDefinition;
+import com.akkc.tensor.plugin.api.descriptor.ParameterType;
 import com.akkc.tensor.plugin.api.download.DownloadEnvelope;
 import com.akkc.tensor.plugin.api.download.DownloadStatus;
 import java.time.DateTimeException;
@@ -19,6 +20,7 @@ import java.util.regex.Pattern;
 final class TushareResponseValidator {
     private static final Pattern ANNOUNCEMENT_DATE_TIME =
             Pattern.compile("[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}");
+    private static final Pattern TS_CODE = Pattern.compile("[A-Z0-9]+\\.[A-Z0-9]+");
     private static final DateTimeFormatter ANNOUNCEMENT_FORMATTER =
             DateTimeFormatter.ofPattern("uuuu-MM-dd HH:mm:ss", Locale.ROOT)
                     .withResolverStyle(ResolverStyle.STRICT);
@@ -66,6 +68,7 @@ final class TushareResponseValidator {
                 throw TushareErrorClassifier.invalidPayload();
             }
         }
+        validateStockScope(definition, params, fields, items);
 
         if (definition.datasetKey().apiName().value().equals("stk_holdernumber")) {
             items = normalizeAnnouncementDates(items, fields.indexOf("ann_date"));
@@ -80,6 +83,32 @@ final class TushareResponseValidator {
                 items,
                 DownloadStatus.SUCCESS,
                 null);
+    }
+
+    private static void validateStockScope(
+            DatasetDefinition definition,
+            Map<String, Object> params,
+            List<String> fields,
+            List<List<Object>> items) {
+        boolean stockScoped = definition.parameters().stream().anyMatch(parameter ->
+                parameter.name().equals("ts_code")
+                        && parameter.type() == ParameterType.TS_CODE
+                        && parameter.required());
+        if (!stockScoped) {
+            return;
+        }
+
+        Object value = params.get("ts_code");
+        if (!(value instanceof String requested)
+                || !requested.equals(requested.strip().toUpperCase(Locale.ROOT))
+                || !TS_CODE.matcher(requested).matches()) {
+            throw TushareErrorClassifier.invalidPayload();
+        }
+        int columnIndex = fields.indexOf("ts_code");
+        if (columnIndex < 0
+                || items.stream().anyMatch(row -> !requested.equals(row.get(columnIndex)))) {
+            throw TushareErrorClassifier.invalidPayload();
+        }
     }
 
     private static List<List<Object>> normalizeAnnouncementDates(List<List<Object>> items, int columnIndex) {

@@ -368,7 +368,7 @@ async function verifyMigratedSchema() {
     `SELECT GROUP_CONCAT(CONCAT(version, ':', success) ORDER BY installed_rank SEPARATOR ',') FROM \`${mysqlConfig.schema}\`.flyway_schema_history;\n`,
     'read migration history',
   )
-  expect(migrations).toBe('1:1,2:1,3:1,4:1,5:1,6:1')
+  expect(migrations).toBe('1:1,2:1,3:1,4:1,5:1,6:1,7:1')
   const tables = await mysql(
     `SELECT COUNT(*) FROM information_schema.TABLES WHERE TABLE_SCHEMA = '${mysqlConfig.schema}' AND TABLE_NAME <> 'flyway_schema_history';\n`,
     'count business tables',
@@ -456,7 +456,7 @@ function createUpstreamStub(token) {
         checks.api = body.api_name === 'daily'
         checks.token = body.token === token
         checks.params =
-          JSON.stringify(body.params) === JSON.stringify({ trade_date: '20260807' })
+          JSON.stringify(body.params) === JSON.stringify({ ts_code: '000001.SZ', trade_date: '20260807' })
         checks.fields = body.fields === DAILY_FIELDS.join(',')
       }
       for (const [name, passed] of Object.entries(checks)) {
@@ -1592,7 +1592,9 @@ test.describe('download outcome matrix', () => {
     expect(body).toMatchObject({ totalElements: 0, totalPages: 0, items: [] })
     await openRoute(page, '/downloads', '数据下载')
     await chooseTushareDownload(page)
+    const stockCode = page.getByLabel('股票代码', { exact: false })
     const tradeDate = page.getByLabel('交易日期', { exact: false })
+    await stockCode.fill('000001.SZ')
     await tradeDate.fill('2026-08-07')
     await tradeDate.press('Tab')
     await expect(tradeDate).toHaveValue('2026-08-07')
@@ -1602,7 +1604,7 @@ test.describe('download outcome matrix', () => {
       requestBody: {
         pluginId: 'tushare_pro',
         apiName: 'daily',
-        params: { trade_date: '20260807' },
+        params: { ts_code: '000001.SZ', trade_date: '20260807' },
       },
       status: 200,
       success: {
@@ -1691,7 +1693,9 @@ test.describe('download outcome matrix', () => {
       const monitor = monitorPage(page)
       await openRoute(page, '/downloads', '数据下载')
       await chooseTushareDownload(page)
+      const stockCode = page.getByLabel('股票代码', { exact: false })
       const tradeDate = page.getByLabel('交易日期', { exact: false })
+      await stockCode.fill('000001.SZ')
       await tradeDate.fill('2026-08-07')
       await tradeDate.press('Tab')
       await expect(tradeDate).toHaveValue('2026-08-07')
@@ -1710,6 +1714,7 @@ test.describe('download outcome matrix', () => {
         await expect(button).toHaveAttribute('aria-busy', 'true')
         await expect(page.getByRole('combobox', { name: '数据源', exact: true })).toBeDisabled()
         await expect(page.getByRole('combobox', { name: '数据接口', exact: true })).toBeDisabled()
+        await expect(stockCode).toBeDisabled()
         await expect(tradeDate).toBeDisabled()
         await assertNoExtraFeatures(page)
       }
@@ -1719,7 +1724,7 @@ test.describe('download outcome matrix', () => {
       expect(await response.request().postDataJSON()).toEqual({
         pluginId: 'tushare_pro',
         apiName: 'daily',
-        params: { trade_date: '20260807' },
+        params: { ts_code: '000001.SZ', trade_date: '20260807' },
       })
       const requestId = rememberRequest(response, body)
       await assertPageSafety(page, 'download result')
@@ -1745,7 +1750,7 @@ test.describe('download outcome matrix', () => {
         operation: 'download',
         pluginId: 'tushare_pro',
         apiName: 'daily',
-        paramSummary: '[trade_date]',
+        paramSummary: '[ts_code, trade_date]',
         outcome: 'failure',
         failureStage: 'source',
         errorCode: scenario.code,

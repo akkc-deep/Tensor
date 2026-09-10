@@ -1,0 +1,314 @@
+{
+  "requests": [
+    {
+      "pluginId": "tushare_pro",
+      "apiName": "stock_basic",
+      "params": {
+        "ts_code": "000001.SZ",
+        "list_status": "L"
+      }
+    },
+    {
+      "pluginId": "tushare_pro",
+      "apiName": "stock_company",
+      "params": {
+        "ts_code": "000001.SZ",
+        "exchange": "SZSE"
+      }
+    },
+    {
+      "pluginId": "tushare_pro",
+      "apiName": "income",
+      "params": {
+        "ts_code": "000001.SZ",
+        "ann_date": "20260807"
+      }
+    },
+    {
+      "pluginId": "tushare_pro",
+      "apiName": "balancesheet",
+      "params": {
+        "ts_code": "000001.SZ",
+        "ann_date": "20260807"
+      }
+    },
+    {
+      "pluginId": "tushare_pro",
+      "apiName": "cashflow",
+      "params": {
+        "ts_code": "000001.SZ",
+        "ann_date": "20260807"
+      }
+    },
+    {
+      "pluginId": "tushare_pro",
+      "apiName": "fina_indicator",
+      "params": {
+        "ts_code": "000001.SZ",
+        "ann_date": "20260807"
+      }
+    },
+    {
+      "pluginId": "tushare_pro",
+      "apiName": "fina_audit",
+      "params": {
+        "ts_code": "000001.SZ",
+        "ann_date": "20260807"
+      }
+    },
+    {
+      "pluginId": "tushare_pro",
+      "apiName": "fina_mainbz",
+      "params": {
+        "ts_code": "000001.SZ",
+        "ann_date": "20260807"
+      }
+    },
+    {
+      "pluginId": "tushare_pro",
+      "apiName": "stk_rewards",
+      "params": {
+        "ts_code": "000001.SZ"
+      }
+    },
+    {
+      "pluginId": "tushare_pro",
+      "apiName": "stk_holdernumber",
+      "params": {
+        "ts_code": "000001.SZ"
+      }
+    },
+    {
+      "pluginId": "tushare_pro",
+      "apiName": "trade_cal",
+      "params": {
+        "exchange": "SSE",
+        "start_date": "20260807",
+        "end_date": "20260807"
+      }
+    },
+    {
+      "pluginId": "tushare_pro",
+      "apiName": "margin",
+      "params": {
+        "exchange_id": "SSE",
+        "trade_date": "20260807"
+      }
+    },
+    {
+      "pluginId": "tushare_pro",
+      "apiName": "daily",
+      "params": {
+        "ts_code": "000001.SZ",
+        "trade_date": "20260807"
+      }
+    },
+    {
+      "pluginId": "tushare_pro",
+      "apiName": "weekly",
+      "params": {
+        "ts_code": "000001.SZ",
+        "trade_date": "20260807"
+      }
+    },
+    {
+      "pluginId": "tushare_pro",
+      "apiName": "monthly",
+      "params": {
+        "ts_code": "000001.SZ",
+        "trade_date": "20260807"
+      }
+    },
+    {
+      "pluginId": "tushare_pro",
+      "apiName": "adj_factor",
+      "params": {
+        "ts_code": "000001.SZ",
+        "trade_date": "20260807"
+      }
+    },
+    {
+      "pluginId": "tushare_pro",
+      "apiName": "suspend_d",
+      "params": {
+        "ts_code": "000001.SZ",
+        "trade_date": "20260807"
+      }
+    },
+    {
+      "pluginId": "tushare_pro",
+      "apiName": "daily_basic",
+      "params": {
+        "ts_code": "000001.SZ",
+        "trade_date": "20260807"
+      }
+    },
+    {
+      "pluginId": "tushare_pro",
+      "apiName": "moneyflow",
+      "params": {
+        "ts_code": "000001.SZ",
+        "trade_date": "20260807"
+      }
+    },
+    {
+      "pluginId": "tushare_pro",
+      "apiName": "stk_limit",
+      "params": {
+        "ts_code": "000001.SZ",
+        "trade_date": "20260807"
+      }
+    },
+    {
+      "pluginId": "tushare_pro",
+      "apiName": "top_list",
+      "params": {
+        "ts_code": "000001.SZ",
+        "trade_date": "20260807"
+      }
+    },
+    {
+      "pluginId": "tushare_pro",
+      "apiName": "margin_detail",
+      "params": {
+        "ts_code": "000001.SZ",
+        "trade_date": "20260807"
+      }
+    },
+    {
+      "pluginId": "tushare_pro",
+      "apiName": "block_trade",
+      "params": {
+        "ts_code": "000001.SZ",
+        "trade_date": "20260807"
+      }
+    },
+    {
+      "pluginId": "tushare_pro",
+      "apiName": "slb_len",
+      "params": {
+        "trade_date": "20260807"
+      }
+    },
+    {
+      "pluginId": "tushare_pro",
+      "apiName": "slb_sec",
+      "params": {
+        "ts_code": "000001.SZ",
+        "trade_date": "20260807"
+      }
+    },
+    {
+      "pluginId": "tushare_pro",
+      "apiName": "slb_sec_detail",
+      "params": {
+        "ts_code": "000001.SZ",
+        "trade_date": "20260807"
+      }
+    },
+    {
+      "pluginId": "tushare_pro",
+      "apiName": "forecast",
+      "params": {
+        "ts_code": "000001.SZ",
+        "ann_date": "20260807"
+      }
+    },
+    {
+      "pluginId": "tushare_pro",
+      "apiName": "express",
+      "params": {
+        "ts_code": "000001.SZ",
+        "ann_date": "20260807"
+      }
+    },
+    {
+      "pluginId": "tushare_pro",
+      "apiName": "dividend",
+      "params": {
+        "ts_code": "000001.SZ",
+        "ann_date": "20260807"
+      }
+    },
+    {
+      "pluginId": "tushare_pro",
+      "apiName": "disclosure_date",
+      "params": {
+        "ts_code": "000001.SZ",
+        "ann_date": "20260807"
+      }
+    },
+    {
+      "pluginId": "tushare_pro",
+      "apiName": "repurchase",
+      "params": {
+        "ann_date": "20260807"
+      }
+    },
+    {
+      "pluginId": "tushare_pro",
+      "apiName": "stk_holdertrade",
+      "params": {
+        "ts_code": "000001.SZ",
+        "ann_date": "20260807"
+      }
+    },
+    {
+      "pluginId": "tushare_pro",
+      "apiName": "top10_holders",
+      "params": {
+        "ts_code": "000001.SZ",
+        "ann_date": "20260807"
+      }
+    },
+    {
+      "pluginId": "tushare_pro",
+      "apiName": "top10_floatholders",
+      "params": {
+        "ts_code": "000001.SZ",
+        "ann_date": "20260807"
+      }
+    },
+    {
+      "pluginId": "tushare_pro",
+      "apiName": "new_share",
+      "params": {
+        "start_date": "20260807",
+        "end_date": "20260807"
+      }
+    },
+    {
+      "pluginId": "tushare_pro",
+      "apiName": "stk_managers",
+      "params": {
+        "ts_code": "000001.SZ"
+      }
+    },
+    {
+      "pluginId": "tushare_pro",
+      "apiName": "pledge_stat",
+      "params": {
+        "ts_code": "000001.SZ"
+      }
+    },
+    {
+      "pluginId": "tushare_pro",
+      "apiName": "pledge_detail",
+      "params": {
+        "ts_code": "000001.SZ"
+      }
+    },
+    {
+      "pluginId": "tushare_pro",
+      "apiName": "index_classify",
+      "params": {}
+    },
+    {
+      "pluginId": "tushare_pro",
+      "apiName": "index_member_all",
+      "params": {
+        "ts_code": "000001.SZ"
+      }
+    }
+  ]
+}
