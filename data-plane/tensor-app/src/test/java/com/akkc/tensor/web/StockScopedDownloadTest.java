@@ -175,6 +175,24 @@ class StockScopedDownloadTest {
         flow.upstream().verify();
     }
 
+    @Test
+    void downloadsMainBusinessWithOnlyStockAndPersistsItsOriginalCompositeKey() {
+        Flow flow = flow();
+        var definition = definition("fina_mainbz");
+        Map<String, Object> params = Map.of("ts_code", "000001.SZ");
+        expect(flow, definition, params, response(definition, List.of(List.of(
+                "000001.SZ", "20260630", "产品", "01", 100, 30, 70, "CNY"))));
+        assertThat(flow.service().execute(PLUGIN_ID, ApiName.of("fina_mainbz"), params,
+                RequestId.newId()).outcome()).isEqualTo(DownloadOutcome.SUCCESS);
+        ArgumentCaptor<AdaptedBatch> batch = ArgumentCaptor.forClass(AdaptedBatch.class);
+        verify(flow.persistence()).persist(batch.capture());
+        assertThat(batch.getValue().rows()).singleElement().satisfies(row -> assertThat(row)
+                .containsEntry("ts_code", "000001.SZ")
+                .containsEntry("end_date", java.time.LocalDate.of(2026, 6, 30))
+                .containsEntry("bz_item", "产品").containsEntry("curr_type", "CNY"));
+        flow.upstream().verify();
+    }
+
     private static void assertSourcePayloadRejected(
             Flow flow,
             DatasetDefinition definition,

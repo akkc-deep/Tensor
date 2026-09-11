@@ -6,6 +6,7 @@ import com.akkc.tensor.core.registry.PluginRegistry;
 import com.akkc.tensor.core.validation.ParameterValidator;
 import com.akkc.tensor.plugin.api.BatchDownloadSupport;
 import com.akkc.tensor.plugin.api.DataSourcePlugin;
+import com.akkc.tensor.plugin.api.DatasetAdapter;
 import com.akkc.tensor.plugin.api.dataset.DatasetDefinition;
 import com.akkc.tensor.plugin.api.descriptor.ApiDescriptor;
 import com.akkc.tensor.plugin.api.descriptor.QueryMode;
@@ -168,12 +169,26 @@ public final class DownloadTaskService {
     }
 
     public void validateReplay(DownloadTask task) {
+        validatedCurrent(task);
+    }
+
+    ExecutionDefinition executionDefinition(DownloadTask task) {
+        Current current = validatedCurrent(task);
+        return new ExecutionDefinition(current.plugin(), adapters.find(task.datasetKey()).orElseThrow(),
+                current.dataset(), current.range());
+    }
+
+    record ExecutionDefinition(DataSourcePlugin plugin, DatasetAdapter adapter,
+            DatasetDefinition dataset, BatchDownloadDescriptor range) {}
+
+    private Current validatedCurrent(DownloadTask task) {
         outsideTransaction();
         if (task == null) throw new TaskException(ErrorCode.PARAM_INVALID);
         Current current = current(task.datasetKey(), task.mode());
         if (!definitionHash(current).equals(task.definitionHash()))
             throw new TaskException(ErrorCode.TASK_DEFINITION_CHANGED);
         normalize(current, task.params());
+        return current;
     }
 
     private SubmissionResult replay(Submission request, DownloadTask task) {

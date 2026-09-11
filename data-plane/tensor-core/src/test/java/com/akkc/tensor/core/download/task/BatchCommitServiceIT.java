@@ -262,6 +262,17 @@ class BatchCommitServiceIT {
     }
 
     @Test
+    void refusesCommitWhenStopWasAlreadyRequested() {
+        var run = running();
+
+        code(ErrorCode.EXECUTION_INTERRUPTED,
+                () -> service.commit(run.permit(), run.batchId(), batch(row("AA", "10")), 1, () -> true));
+
+        assertThat(prices()).isEmpty();
+        assertRunningWithZeroCounts(run);
+    }
+
+    @Test
     void locksCurrentTaskAfterStalePrecheckSnapshotAndCannotOverwriteNewWorker() throws Exception {
         var run = running();
         var entered = new CountDownLatch(1);
@@ -338,6 +349,33 @@ class BatchCommitServiceIT {
     }
 
     @Test
+    void rechecksStopAfterWaitingForDatasetLock() throws Exception {
+        var run = running();
+        var checked = new CountDownLatch(1);
+        var stopped = new AtomicBoolean();
+        try (var executor = Executors.newSingleThreadExecutor()) {
+            var lock = locks.acquire(KEY);
+            Future<ErrorCode> result;
+            try {
+                result = executor.submit(() -> failureCode(() -> service.commit(
+                        run.permit(), run.batchId(), batch(row("AA", "10")), 1,
+                        () -> {
+                            checked.countDown();
+                            return stopped.get();
+                        })));
+                assertThat(checked.await(5, TimeUnit.SECONDS)).isTrue();
+                assertThat(result.isDone()).isFalse();
+                stopped.set(true);
+            } finally {
+                lock.unlock();
+            }
+            assertThat(result.get(5, TimeUnit.SECONDS)).isEqualTo(ErrorCode.EXECUTION_INTERRUPTED);
+        }
+        assertThat(prices()).isEmpty();
+        assertRunningWithZeroCounts(run);
+    }
+
+    @Test
     void permittedTransactionCanCommitAfterTaskDeadline() throws Exception {
         var run = running();
         var advancingJdbc = new JdbcTemplate(dataSource) {
@@ -356,6 +394,30 @@ class BatchCommitServiceIT {
         assertThat(prices()).containsExactly(new BigDecimal("10.00"));
         assertThat(storedBatch(run).status()).isEqualTo(DownloadBatch.Status.SUCCEEDED);
         assertThat(storedBatch(run).finishedAt()).isEqualTo(NOW.plusSeconds(61));
+    }
+
+    @Test
+    void permittedTransactionCanCommitAfterStopIsRequested() throws Exception {
+        var run = running();
+        var stopped = new AtomicBoolean();
+        var stoppingJdbc = new JdbcTemplate(dataSource) {
+            @Override
+            public <T> int[][] batchUpdate(String sql, Collection<T> args, int size,
+                    ParameterizedPreparedStatementSetter<T> setter) {
+                stopped.set(true);
+                return super.batchUpdate(sql, args, size, setter);
+            }
+        };
+        var stoppingPersistence = new PersistenceService(catalog(), locks, new ExistingKeyRepository(jdbc),
+                new GenericUpsertRepository(stoppingJdbc), transactions);
+        var permitted = new BatchCommitService(stoppingPersistence, repository, clock);
+
+        assertThat(permitted.commit(run.permit(), run.batchId(), batch(row("AA", "10")), 1, stopped::get))
+                .isEqualTo(new WriteCounts(1, 0));
+
+        assertThat(stopped).isTrue();
+        assertThat(prices()).containsExactly(new BigDecimal("10.00"));
+        assertThat(storedBatch(run).status()).isEqualTo(DownloadBatch.Status.SUCCEEDED);
     }
 
     @Test

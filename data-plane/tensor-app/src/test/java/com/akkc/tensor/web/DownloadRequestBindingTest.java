@@ -151,7 +151,8 @@ class DownloadRequestBindingTest {
     static Stream<Arguments> validRequests() {
         return Stream.of(
                 Arguments.of("daily", "{\"ts_code\":\"000001.SZ\",\"trade_date\":\"20260905\"}", "[ts_code, trade_date]"),
-                Arguments.of("index_classify", "{}", "[]"));
+                Arguments.of("index_classify", "{}", "[]"),
+                Arguments.of("fina_mainbz", "{\"ts_code\":\"000001.SZ\"}", "[ts_code]"));
     }
 
     @ParameterizedTest(name = "current request: {0}")
@@ -214,6 +215,27 @@ class DownloadRequestBindingTest {
             assertThat(error.path("code").asText()).isEqualTo("PARAM_INVALID");
             assertThat(error.path("fieldErrors")).isEqualTo(flow.mapper().readTree(
                     "[{\"field\":\"ts_code\",\"message\":\"is not declared\"}]"));
+            assertThat(flow.upstream()).isEmpty();
+            verifyNoInteractions(flow.persistence());
+        }
+    }
+
+    @ParameterizedTest
+    @org.junit.jupiter.params.provider.ValueSource(strings = {
+        "ann_date", "type", "period", "start_date", "end_date"
+    })
+    void rejectsUnsupportedMainBusinessSingleParametersBeforeUpstreamOrPersistence(String extra) throws Exception {
+        try (Flow flow = flow(true, true)) {
+            String params = flow.mapper().writeValueAsString(Map.of("ts_code", "000001.SZ", extra,
+                    extra.equals("type") ? "P" : "20260905"));
+            var response = flow.mvc().perform(post("/api/v1/downloads")
+                    .contentType(MediaType.APPLICATION_JSON).content(request("fina_mainbz", params)))
+                    .andReturn().getResponse();
+            assertThat(response.getStatus()).isEqualTo(400);
+            var error = flow.mapper().readTree(response.getContentAsString());
+            assertThat(error.path("code").asText()).isEqualTo("PARAM_INVALID");
+            assertThat(error.path("fieldErrors")).isEqualTo(flow.mapper().valueToTree(
+                    List.of(Map.of("field", extra, "message", "is not declared"))));
             assertThat(flow.upstream()).isEmpty();
             verifyNoInteractions(flow.persistence());
         }

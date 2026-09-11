@@ -2,7 +2,7 @@
 
 ## 当前状态
 
-处理中（2026-09-11）。[26 项必填股票参数方案](../proposals/ISSUE-017-required-stock-parameters.md)已实施：34 项必须指定股票，6 项保留原下载方式；参数绑定、响应归属、前后端回归及生产构建已通过，见[实施与验证记录](../../verification/ISSUE-017-stock-scoped-downloads.md)。母 issue 暂不关闭：`fina_mainbz` 参数纠正和新请求的真实下载验收仍待完成。
+处理中（2026-09-11）。[26 项必填股票参数方案](../proposals/ISSUE-017-required-stock-parameters.md)已实施：34 项必须指定股票，6 项保留原下载方式；参数绑定、响应归属、前后端回归及生产构建已通过，见[实施与验证记录](../../verification/ISSUE-017-stock-scoped-downloads.md)。`fina_mainbz` 的 SINGLE 参数已由 [ISSUE-018-T06](../../task-handoffs/ISSUE-018/ISSUE-018-task-board.md#issue-018-t06) 纠正为仅 `ts_code`，自动化验证通过。母 issue 暂不关闭：新请求的真实下载验收和默认 type 语义仍待完成。
 
 用户最新要求：**支持股票输入的 34 个接口下载时必须指定股票；不支持股票输入的 6 个接口保留现有下载入口及参数方式。** 对支持股票输入的接口，股票条件必须传入上游请求，不能下载全市场后在本地筛选，也不能只在数据查看页面筛选。当前 40 个接口均继续提供下载，不新增全局股票必填规则。
 

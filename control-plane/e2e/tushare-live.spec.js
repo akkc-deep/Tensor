@@ -20,7 +20,7 @@ import { setTimeout as delay } from 'node:timers/promises'
 const execFileAsync = promisify(execFile)
 const BASE_URL = 'http://127.0.0.1:8080'
 const MANIFEST_SHA = '386f46a99b6605e203129836d7a744b96b65304307f52991dd8bba6fd1870984'
-const REQUESTS_SHA = 'f9f147c605262ee1e4f04031dc8508470acd0b4a837927495a9aefecf98bf7af'
+const REQUESTS_SHA = '6d4c74a1a539b59ac20fb0cbd3ba1fba0954c40ef1209b652f7dcc2192ec932f'
 const JAR_SHA = process.env.ISSUE_017_ACCEPTANCE_JAR_SHA256
 const DOWNLOAD_KEYS = [
   'requestId', 'outcome', 'pluginId', 'apiName', 'sourceRowCount', 'insertedRows',
@@ -99,7 +99,7 @@ const CONTRACT_ROWS = [
   ['cashflow', '现金流量表', ['ts_code', 'ann_date'], 97],
   ['fina_indicator', '财务指标', ['ts_code', 'ann_date'], 108],
   ['fina_audit', '财务审计意见', ['ts_code', 'ann_date'], 7],
-  ['fina_mainbz', '主营业务构成', ['ts_code', 'ann_date'], 8],
+  ['fina_mainbz', '主营业务构成', ['ts_code'], 8],
   ['stk_rewards', '管理层薪酬与持股', ['ts_code'], 7],
   ['stk_holdernumber', '股东户数', ['ts_code'], 4],
   ['trade_cal', '交易日历', ['exchange', 'start_date', 'end_date'], 4],

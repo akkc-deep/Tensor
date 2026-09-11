@@ -11,11 +11,15 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import com.akkc.tensor.plugin.api.DataSourcePlugin;
+import com.akkc.tensor.plugin.api.BatchDownloadSupport;
 import com.akkc.tensor.plugin.api.dataset.DatasetDefinition;
 import com.akkc.tensor.plugin.api.descriptor.ApiDescriptor;
 import com.akkc.tensor.plugin.api.descriptor.PluginDescriptor;
 import com.akkc.tensor.plugin.api.descriptor.PluginReadiness;
 import com.akkc.tensor.plugin.api.download.DownloadEnvelope;
+import com.akkc.tensor.plugin.api.download.batch.BatchCallContext;
+import com.akkc.tensor.plugin.api.download.batch.BatchDownloadDescriptor;
+import com.akkc.tensor.plugin.api.download.batch.DateRange;
 import com.akkc.tensor.plugin.api.error.ErrorCode;
 import com.akkc.tensor.plugin.api.error.SourceException;
 import com.akkc.tensor.plugin.api.error.TensorException;
@@ -27,6 +31,8 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.net.URI;
 import java.time.Duration;
+import java.time.Instant;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -55,12 +61,13 @@ class TushareProPluginTest {
     void exposesOnlyTheApprovedPluginConfigurationAndUnavailableFailureSurface() {
         assertThat(Modifier.isPublic(TushareProPlugin.class.getModifiers())).isTrue();
         assertThat(Modifier.isFinal(TushareProPlugin.class.getModifiers())).isTrue();
-        assertThat(TushareProPlugin.class.getInterfaces()).containsExactly(DataSourcePlugin.class);
+        assertThat(TushareProPlugin.class.getInterfaces()).containsExactly(BatchDownloadSupport.class);
         assertThat(TushareProPlugin.class.getConstructors()).singleElement()
                 .satisfies(constructor -> assertThat(constructor.getParameterTypes()).containsExactly(
                         TushareProperties.class, TushareProClient.class, List.class));
         assertThat(publicDeclaredMethods(TushareProPlugin.class)).extracting(Method::getName)
-                .containsExactlyInAnyOrder("descriptor", "readiness", "download");
+                .containsExactlyInAnyOrder("descriptor", "readiness", "download", "batchDescriptor", "plan",
+                        "sourceParameters", "downloadBatch", "assess");
 
         assertThat(Modifier.isPublic(TusharePluginConfiguration.class.getModifiers())).isTrue();
         assertThat(Modifier.isFinal(TusharePluginConfiguration.class.getModifiers())).isTrue();
@@ -283,6 +290,79 @@ class TushareProPluginTest {
                 .download(ApiName.of("daily"), params)).isSameAs(sourceFailure);
         verify(failureClient).execute(same(daily), same(params));
         verifyNoMoreInteractions(failureClient);
+    }
+
+    @Test
+    void keepsProductionRangesGatedEvenWithCredentialsAndDelegatesPureSourceParameters() {
+        var client = mock(TushareProClient.class);
+        BatchDownloadSupport batch = plugin(properties(true, SECRET), client, definitions());
+        var day = LocalDate.of(2026, 9, 3);
+        var range = new DateRange(day, day);
+        var params = Map.<String, Object>of("ts_code", "000001.SZ", "start_date", "20260903", "end_date", "20260903");
+        var descriptor = batch.batchDescriptor(ApiName.of("daily")).orElseThrow();
+        assertThat(descriptor.availability()).isEqualTo(BatchDownloadDescriptor.Availability.NEEDS_VERIFICATION);
+        assertThat(batch.sourceParameters(ApiName.of("daily"), params, range)).isEqualTo(params);
+        assertThatThrownBy(() -> batch.plan(ApiName.of("daily"), params, context()))
+                .isInstanceOfSatisfying(TensorException.class,
+                        error -> assertThat(error.code()).isEqualTo(ErrorCode.BATCH_DOWNLOAD_UNAVAILABLE));
+        assertThat(batch.assess(ApiName.of("daily"), range, new DownloadEnvelope(
+                com.akkc.tensor.plugin.api.model.PluginId.of("tushare_pro"), ApiName.of("daily"), params,
+                definitions().stream().filter(d -> d.datasetKey().apiName().value().equals("daily"))
+                        .findFirst().orElseThrow().columns().stream().map(c -> c.name()).toList(),
+                0, List.of(), com.akkc.tensor.plugin.api.download.DownloadStatus.SUCCESS, null)))
+                .isEqualTo(com.akkc.tensor.plugin.api.download.batch.BatchAssessment.UNKNOWN);
+        verifyNoInteractions(client);
+    }
+
+    @Test
+    void passesTheSameContextToAllFortyBackgroundSingleDownloadsWithoutRangeAdmission() {
+        var definitions = definitions();
+        var client = mock(TushareProClient.class);
+        BatchDownloadSupport batch = plugin(properties(true, SECRET), client, definitions);
+        BatchCallContext context = context();
+        Map<String, Object> params = Map.of("ts_code", "000001.SZ");
+        for (var definition : definitions) {
+            DownloadEnvelope envelope = new DownloadEnvelope(definition.datasetKey().pluginId(),
+                    definition.datasetKey().apiName(), params, List.of("ts_code"), 0, List.of(),
+                    com.akkc.tensor.plugin.api.download.DownloadStatus.SUCCESS, null);
+            when(client.execute(same(definition), same(params), same(context))).thenReturn(envelope);
+            assertThat(batch.downloadBatch(definition.datasetKey().apiName(), params, context)).isSameAs(envelope);
+            verify(client).execute(same(definition), same(params), same(context));
+        }
+        verifyNoMoreInteractions(client);
+    }
+
+    @Test
+    void preservesBackgroundFailureIdentityAndReadinessBeforeAnyUnknownApiLookup() {
+        var definitions = definitions();
+        var definition = definitions.getFirst();
+        var params = Map.<String, Object>of("ts_code", "000001.SZ");
+        var context = context();
+        var client = mock(TushareProClient.class);
+        var failure = new SourceException(ErrorCode.SOURCE_RATE_LIMITED, "Tushare request rate limited");
+        when(client.execute(same(definition), same(params), same(context))).thenThrow(failure);
+        BatchDownloadSupport batch = plugin(properties(true, SECRET), client, definitions);
+        assertThatThrownBy(() -> batch.downloadBatch(definition.datasetKey().apiName(), params, context)).isSameAs(failure);
+        verify(client).execute(same(definition), same(params), same(context));
+        assertThatThrownBy(() -> batch.downloadBatch(ApiName.of("unknown_api"), params, context))
+                .isInstanceOf(IllegalArgumentException.class).hasMessage("Unknown Tushare API");
+        verifyNoMoreInteractions(client);
+        for (var properties : List.of(properties(false, SECRET), properties(true, ""))) {
+            var disabledClient = mock(TushareProClient.class);
+            BatchDownloadSupport disabled = plugin(properties, disabledClient, definitions);
+            assertThatThrownBy(() -> disabled.downloadBatch(ApiName.of("unknown_api"), params, context))
+                    .isInstanceOfSatisfying(TensorException.class,
+                            error -> assertThat(error.code()).isEqualTo(ErrorCode.PLUGIN_DISABLED));
+            verifyNoInteractions(disabledClient);
+        }
+    }
+
+    private static BatchCallContext context() {
+        return new BatchCallContext() {
+            public Instant deadline() { return Instant.MAX; }
+            public boolean stopRequested() { return false; }
+            public void beforeRequest() { throw new AssertionError("Plugin must delegate reservation to client"); }
+        };
     }
 
     private static TushareProPlugin plugin(

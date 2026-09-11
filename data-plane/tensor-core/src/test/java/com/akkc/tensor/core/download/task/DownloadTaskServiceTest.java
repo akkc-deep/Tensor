@@ -422,6 +422,31 @@ class DownloadTaskServiceTest {
         assertThat(empty.service().submit(single(SUBMISSION_ID, "000001.SZ")).created()).isTrue();
     }
 
+    @Test
+    void executionDefinitionReusesValidatedObjectsAndRejectsChangedMeaningBeforeNormalization() {
+        Harness h = new Harness();
+        DownloadTaskService service = h.service();
+        DownloadTask single = service.submit(single(SUBMISSION_ID, "000001.SZ")).task();
+        var execution = service.executionDefinition(single);
+        assertThat(execution.plugin()).isSameAs(h.plugin);
+        assertThat(execution.adapter()).isSameAs(h.plugin);
+        assertThat(execution.dataset()).isSameAs(h.definition);
+        assertThat(execution.range()).isNull();
+        DownloadTask range = h.synthetic(Map.of("symbol", "000001.SZ", "from", "20280228", "to", "20280301"),
+                DownloadMode.RANGE, new ApiDescriptor(API_NAME, "Daily", "market", QueryMode.date_range,
+                        h.plugin.range.parameters()), h.plugin.range);
+        assertThat(service.executionDefinition(range).range()).isEqualTo(h.plugin.range);
+        h.plugin.range = policy(BatchDownloadDescriptor.Availability.AVAILABLE, null, "v2");
+        h.plugin.sourceFailure = new DownloadTaskService.TaskException(ErrorCode.PARAM_INVALID);
+        code(ErrorCode.TASK_DEFINITION_CHANGED, () -> service.executionDefinition(range));
+        TransactionSynchronizationManager.setActualTransactionActive(true);
+        try {
+            assertThatThrownBy(() -> service.executionDefinition(single)).isInstanceOf(IllegalStateException.class);
+        } finally {
+            TransactionSynchronizationManager.clear();
+        }
+    }
+
     private static DownloadTaskService.Submission single(UUID id, String symbol) {
         return new DownloadTaskService.Submission(id, KEY, DownloadMode.SINGLE, Map.of("symbol", symbol));
     }

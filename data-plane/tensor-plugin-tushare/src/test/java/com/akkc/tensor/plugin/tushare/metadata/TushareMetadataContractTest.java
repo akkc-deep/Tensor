@@ -47,6 +47,17 @@ class TushareMetadataContractTest {
     private final ContractData contracts = loadContracts();
 
     @Test
+    void mainBusinessSingleIsOnlyAStockSnapshot() {
+        var definition = new DatasetDefinitionLoader().loadAll(
+                new org.springframework.core.io.support.PathMatchingResourcePatternResolver(),
+                "classpath*:datasets/tushare_pro/*.yaml").stream()
+                .filter(item -> item.datasetKey().apiName().value().equals("fina_mainbz"))
+                .findFirst().orElseThrow();
+        assertThat(definition.queryMode()).isEqualTo(com.akkc.tensor.plugin.api.descriptor.QueryMode.snapshot);
+        assertThat(definition.parameters()).extracting(ParameterDescriptor::name).containsExactly("ts_code");
+    }
+
+    @Test
     void hasExactManifestAndExpectationCoverage() {
         List<String> manifestApis = contracts.manifestEntries().stream().map(ManifestEntry::apiName).toList();
         List<String> manifestFilenames = contracts.manifestEntries().stream().map(ManifestEntry::filename).toList();
@@ -279,7 +290,7 @@ class TushareMetadataContractTest {
                 parameter("exchange_id", "交易所", ParameterType.ENUM, List.of("SSE", "SZSE", "BSE"), null),
                 parameter("trade_date", "交易日期", ParameterType.DATE, List.of(), null));
         addParameters(expected, List.of(
-                        "income", "balancesheet", "cashflow", "fina_indicator", "fina_audit", "fina_mainbz"),
+                        "income", "balancesheet", "cashflow", "fina_indicator", "fina_audit"),
                 parameter("ts_code", "股票代码", ParameterType.TS_CODE, List.of(), null),
                 parameter("ann_date", "公告日期", ParameterType.DATE, List.of(), null));
         addParameters(expected, List.of(
@@ -289,7 +300,7 @@ class TushareMetadataContractTest {
                 parameter("ann_date", "公告日期", ParameterType.DATE, List.of(), null));
         addParameters(expected, List.of("repurchase"),
                 parameter("ann_date", "公告日期", ParameterType.DATE, List.of(), null));
-        addParameters(expected, List.of("stk_rewards", "stk_holdernumber"),
+        addParameters(expected, List.of("stk_rewards", "stk_holdernumber", "fina_mainbz"),
                 parameter("ts_code", "股票代码", ParameterType.TS_CODE, List.of(), null));
         addParameters(expected, List.of("stk_managers", "index_member_all", "pledge_stat", "pledge_detail"),
                 parameter("ts_code", "股票代码", ParameterType.TS_CODE, List.of(), null));

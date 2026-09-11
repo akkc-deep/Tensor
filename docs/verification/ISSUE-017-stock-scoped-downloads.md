@@ -68,3 +68,7 @@ TDD 证据：元数据测试先复现 26 项缺少股票字段；YAML 增加字�
 - `fina_mainbz` 仍沿用已有参数，官网未支持的 `ann_date` 纠正由母 issue 单独跟踪，本轮方案明确排除该行为变更。
 - 当前应用耦合的 metadata、download-outcomes、dataset-query、live 浏览器验收未正式运行；本轮浏览器通过证据来自独立模拟用例。当前执行器更新经过语法/用例发现检查，不能等同正式下载验收。
 - `scripts/verify-contracts.sh` 要求已经提交到 `main` 且生产源码无未提交改动，并从 HEAD 创建快照。本次在当前功能分支保留可审阅改动，未运行该脚本；已直接执行当前工作区的元数据、schema 和生产包合同测试，未将旧 HEAD 快照当作新实现验证。
+
+## ISSUE-018-T06 后续纠正（2026-09-11）
+
+[T06 完成证据](../task-handoffs/ISSUE-018/ISSUE-018-task-board.md#issue-018-t06)已将 `fina_mainbz` SINGLE 改为 `snapshot` + 必填 `ts_code`，原业务键和字段不变。合法单股票请求200；旧 `ann_date` 及未声明 `type/period/start_date/end_date` 返回400、零上游/写入；40示例、34股票/6非股票及受控浏览器回归均通过。此为后续任务的纠正，不改写上文原始实施基线和测试数量。真实默认类型及真实下载仍由 T13 验证，母 issue 未关闭。

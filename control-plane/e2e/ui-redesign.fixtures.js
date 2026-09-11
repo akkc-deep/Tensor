@@ -21,7 +21,7 @@ export const EXPECTED_ROWS = [
   ['cashflow', '现金流量表', '财务与披露', 'ann_date', ['ts_code', 'ann_date'], 97],
   ['fina_indicator', '财务指标', '财务与披露', 'ann_date', ['ts_code', 'ann_date'], 108],
   ['fina_audit', '财务审计意见', '财务与披露', 'ann_date', ['ts_code', 'ann_date'], 7],
-  ['fina_mainbz', '主营业务构成', '财务与披露', 'ann_date', ['ts_code', 'ann_date'], 8],
+  ['fina_mainbz', '主营业务构成', '财务与披露', 'snapshot', ['ts_code'], 8],
   ['stk_rewards', '管理层薪酬与持股', '股东与治理', 'snapshot', ['ts_code'], 7],
   ['stk_holdernumber', '股东户数', '股东与治理', 'snapshot', ['ts_code'], 4],
   ['trade_cal', '交易日历', 'basic_organization', 'date_range', ['exchange', 'start_date', 'end_date'], 4],

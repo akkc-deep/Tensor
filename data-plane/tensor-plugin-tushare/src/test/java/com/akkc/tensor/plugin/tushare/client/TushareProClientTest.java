@@ -644,11 +644,11 @@ class TushareProClientTest {
         putRequests(expected, List.of(
                         "disclosure_date", "dividend", "express", "forecast", "stk_holdertrade",
                         "top10_floatholders", "top10_holders", "balancesheet", "cashflow", "fina_audit",
-                        "fina_indicator", "fina_mainbz", "income"),
+                        "fina_indicator", "income"),
                 Map.of("ts_code", tsCode, "ann_date", "20260902"));
         putRequests(expected, List.of(
                         "index_member_all", "pledge_detail", "pledge_stat", "stk_managers",
-                        "stk_holdernumber", "stk_rewards"),
+                        "stk_holdernumber", "stk_rewards", "fina_mainbz"),
                 Map.of("ts_code", tsCode));
         expected.put("stock_company", Map.of(
                 "ts_code", tsCode, "exchange", tsCode.endsWith(".SH") ? "SSE" : "SZSE"));

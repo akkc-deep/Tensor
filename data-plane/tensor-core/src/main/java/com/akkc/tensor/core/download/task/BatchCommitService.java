@@ -10,6 +10,7 @@ import com.akkc.tensor.plugin.api.error.TensorException;
 import java.time.Clock;
 import java.util.Objects;
 import java.util.UUID;
+import java.util.function.BooleanSupplier;
 import org.springframework.dao.DataAccessException;
 import org.springframework.transaction.TransactionException;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
@@ -26,12 +27,18 @@ public final class BatchCommitService {
     }
 
     public WriteCounts commit(ExecutionPermit permit, UUID batchId, AdaptedBatch batch, long sourceRows) {
+        return commit(permit, batchId, batch, sourceRows, () -> false);
+    }
+
+    public WriteCounts commit(ExecutionPermit permit, UUID batchId, AdaptedBatch batch, long sourceRows,
+            BooleanSupplier stopRequested) {
         if (TransactionSynchronizationManager.isActualTransactionActive()) {
             throw new IllegalStateException("Batch commit must own its transaction");
         }
         Objects.requireNonNull(permit, "permit");
         Objects.requireNonNull(batchId, "batchId");
         Objects.requireNonNull(batch, "batch");
+        Objects.requireNonNull(stopRequested, "stopRequested");
         if (sourceRows < 0) throw new IllegalArgumentException("sourceRows must be non-negative");
 
         DownloadTask task = repository.findTask(permit.taskId())
@@ -42,6 +49,7 @@ public final class BatchCommitService {
             throw new CommitException(ErrorCode.TASK_STATE_CONFLICT);
         }
         validateWrite(task, batch);
+        validateStop(stopRequested);
         try {
             return persistence.persist(batch, new PersistenceParticipant() {
                 @Override
@@ -49,6 +57,7 @@ public final class BatchCommitService {
                     DownloadTask lockedTask = repository.lockTask(permit);
                     repository.lockBatch(permit, batchId);
                     validateWrite(lockedTask, batch);
+                    validateStop(stopRequested);
                 }
 
                 @Override
@@ -61,6 +70,12 @@ public final class BatchCommitService {
             throw new CommitException(ErrorCode.PERSISTENCE_FAILED);
         } catch (IllegalArgumentException failure) {
             throw new CommitException(ErrorCode.DATASET_MISCONFIGURED);
+        }
+    }
+
+    private static void validateStop(BooleanSupplier stopRequested) {
+        if (stopRequested.getAsBoolean()) {
+            throw new CommitException(ErrorCode.EXECUTION_INTERRUPTED);
         }
     }
 
