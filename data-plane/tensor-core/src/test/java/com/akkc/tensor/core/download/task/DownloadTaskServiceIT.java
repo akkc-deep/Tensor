@@ -230,6 +230,8 @@ class DownloadTaskServiceIT {
             for (org.assertj.core.api.ThrowableAssert.ThrowingCallable action : List.<org.assertj.core.api.ThrowableAssert.ThrowingCallable>of(
                     () -> service.submit(single(UUID.randomUUID(), "000002.SZ")),
                     () -> service.capabilities(KEY), () -> service.validateReplay(task),
+                    () -> service.retry(task.taskId(), task.version()),
+                    () -> service.resume(task.taskId(), task.version()), () -> service.controls(task),
                     () -> query.tasks(null, 1, 20), () -> query.findSubmission(task.submissionId()),
                     () -> query.detail(task.taskId()), () -> query.batches(task.taskId(), null, 1, 20))) {
                 assertThatThrownBy(action).isInstanceOf(IllegalStateException.class);

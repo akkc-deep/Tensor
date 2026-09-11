@@ -9,6 +9,7 @@ import com.akkc.tensor.plugin.api.DataSourcePlugin;
 import com.akkc.tensor.plugin.api.DatasetAdapter;
 import com.akkc.tensor.plugin.api.dataset.DatasetDefinition;
 import com.akkc.tensor.plugin.api.descriptor.ApiDescriptor;
+import com.akkc.tensor.plugin.api.descriptor.PluginReadiness;
 import com.akkc.tensor.plugin.api.descriptor.QueryMode;
 import com.akkc.tensor.plugin.api.download.batch.BatchDownloadDescriptor;
 import com.akkc.tensor.plugin.api.download.batch.DateRange;
@@ -48,6 +49,7 @@ public final class DownloadTaskService {
     private final UUID activeRunId;
     private final Settings settings;
     private final ReentrantLock admissionLock = new ReentrantLock();
+    private DownloadTaskCoordinator coordinator;
 
     public DownloadTaskService(
             PluginRegistry plugins,
@@ -142,6 +144,7 @@ public final class DownloadTaskService {
         try {
             Optional<DownloadTask> existing = repository.findSubmission(request.submissionId());
             if (existing.isPresent()) return replay(request, existing.get());
+            if (coordinator != null) coordinator.checkAdmission();
             Current current = current(request.datasetKey(), request.mode());
             Map<String, Object> normalized = normalize(current, request.params());
             try {
@@ -170,6 +173,86 @@ public final class DownloadTaskService {
 
     public void validateReplay(DownloadTask task) {
         validatedCurrent(task);
+    }
+
+    public DownloadTask retry(UUID taskId, long expectedVersion) {
+        return requeue(taskId, expectedVersion, DownloadTaskRepository.RequeueMode.RETRY);
+    }
+
+    public DownloadTask resume(UUID taskId, long expectedVersion) {
+        return requeue(taskId, expectedVersion, DownloadTaskRepository.RequeueMode.RESUME);
+    }
+
+    public record ControlAvailability(boolean canRetry, boolean canResume) {}
+
+    public ControlAvailability controls(DownloadTask task) {
+        outsideTransaction();
+        if (task == null) throw new TaskException(ErrorCode.PARAM_INVALID);
+        admissionLock.lock();
+        try {
+            boolean allowed = settings.enabled() && coordinator != null && coordinator.controlAllowed();
+            return new ControlAvailability(allowed && retryable(task),
+                    allowed && task.status() == DownloadTask.Status.INTERRUPTED);
+        } finally {
+            admissionLock.unlock();
+        }
+    }
+
+    private DownloadTask requeue(UUID taskId, long expectedVersion, DownloadTaskRepository.RequeueMode mode) {
+        outsideTransaction();
+        if (taskId == null || expectedVersion < 1) throw new TaskException(ErrorCode.PARAM_INVALID);
+        admissionLock.lock();
+        try {
+            DownloadTask task = repository.findTask(taskId)
+                    .orElseThrow(() -> new TaskException(ErrorCode.TASK_NOT_FOUND));
+            boolean statusAllowed = mode == DownloadTaskRepository.RequeueMode.RETRY
+                    ? retryable(task) : task.status() == DownloadTask.Status.INTERRUPTED;
+            if (task.version() != expectedVersion || !statusAllowed
+                    || coordinator == null || !coordinator.controlAllowed())
+                throw new TaskException(ErrorCode.TASK_STATE_CONFLICT);
+            ExecutionDefinition definition = executionDefinition(task);
+            PluginReadiness readiness;
+            try {
+                readiness = Objects.requireNonNull(definition.plugin().readiness());
+            } catch (RuntimeException invalid) {
+                throw new TaskException(ErrorCode.DATASET_MISCONFIGURED);
+            }
+            if (!readiness.downloadAvailable()) throw new TaskException(ErrorCode.PLUGIN_DISABLED);
+            if (repository.queuedCount() >= settings.maxQueuedTasks())
+                throw new TaskException(ErrorCode.TASK_QUEUE_FULL);
+            coordinator.requeueValidated(taskId);
+            repository.requeue(taskId, expectedVersion, activeRunId, mode, clock.instant());
+            return repository.findTask(taskId).orElseThrow(() -> new TaskException(ErrorCode.PERSISTENCE_FAILED));
+        } finally {
+            admissionLock.unlock();
+        }
+    }
+
+    private static boolean retryable(DownloadTask task) {
+        return task.status() == DownloadTask.Status.FAILED || task.status() == DownloadTask.Status.PARTIAL_FAILED;
+    }
+
+    ReentrantLock coordinationLock() {
+        return admissionLock;
+    }
+
+    UUID activeRunId() {
+        return activeRunId;
+    }
+
+    Settings settings() {
+        return settings;
+    }
+
+    void bindCoordinator(DownloadTaskCoordinator value) {
+        Objects.requireNonNull(value, "coordinator");
+        admissionLock.lock();
+        try {
+            if (coordinator != null) throw new IllegalStateException("Download task coordinator is already bound");
+            coordinator = value;
+        } finally {
+            admissionLock.unlock();
+        }
     }
 
     ExecutionDefinition executionDefinition(DownloadTask task) {

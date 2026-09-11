@@ -6,7 +6,7 @@
 | --- | --- | --- |
 | [tensor-v1/](tensor-v1/) | Tensor v1 正式任务：1 份看板、78 份任务交接 | [Tensor v1 看板](tensor-v1/tensor-v1-task-board.md) |
 | [ISSUE-004/](ISSUE-004/) | UI 改版任务；当前已有看板，后续交接放在同一目录 | [ISSUE-004 看板](ISSUE-004/ISSUE-004-task-board.md) |
-| [ISSUE-018/](ISSUE-018/) | 日期区间批量下载：T01–T07 已完成，T08 设计与交接就绪、状态 READY | [ISSUE-018 看板](ISSUE-018/ISSUE-018-task-board.md) |
+| [ISSUE-018/](ISSUE-018/) | 日期区间批量下载：T01–T08 已完成，T09 设计与交接就绪、状态 READY | [ISSUE-018 看板](ISSUE-018/ISSUE-018-task-board.md) |
 
 ```text
 task-handoffs/

@@ -32,8 +32,8 @@
 | 5 | ISSUE-018-T05 | Tushare 请求上下文与共享节流 | COMPLETED | ISSUE-018-T01 | docs/task-designs/ISSUE-018-T05-design.md | docs/task-handoffs/ISSUE-018/ISSUE-018-T05-handoff.md |
 | 6 | ISSUE-018-T06 | Tushare 区间策略、日期规划与参数纠正 | COMPLETED | ISSUE-018-T01, ISSUE-018-T05 | docs/task-designs/ISSUE-018-T06-design.md | docs/task-handoffs/ISSUE-018/ISSUE-018-T06-handoff.md |
 | 7 | ISSUE-018-T07 | 通用批次执行、拆分与资源预算 | COMPLETED | ISSUE-018-T03, ISSUE-018-T04, ISSUE-018-T06 | docs/task-designs/ISSUE-018-T07-design.md | docs/task-handoffs/ISSUE-018/ISSUE-018-T07-handoff.md |
-| 8 | ISSUE-018-T08 | 手动重试、恢复与后台生命周期 | READY | ISSUE-018-T07 | docs/task-designs/ISSUE-018-T08-design.md | docs/task-handoffs/ISSUE-018/ISSUE-018-T08-handoff.md |
-| 9 | ISSUE-018-T09 | 任务 HTTP 合同、应用装配与日志 | NOT_STARTED | ISSUE-018-T03, ISSUE-018-T08 | None | None |
+| 8 | ISSUE-018-T08 | 手动重试、恢复与后台生命周期 | COMPLETED | ISSUE-018-T07 | docs/task-designs/ISSUE-018-T08-design.md | docs/task-handoffs/ISSUE-018/ISSUE-018-T08-handoff.md |
+| 9 | ISSUE-018-T09 | 任务 HTTP 合同、应用装配与日志 | READY | ISSUE-018-T03, ISSUE-018-T08 | docs/task-designs/ISSUE-018-T09-design.md | docs/task-handoffs/ISSUE-018/ISSUE-018-T09-handoff.md |
 | 10 | ISSUE-018-T10 | 前端模式表单、任务提交与近期列表 | NOT_STARTED | ISSUE-018-T09 | None | None |
 | 11 | ISSUE-018-T11 | 任务详情、轮询与手动操作 | NOT_STARTED | ISSUE-018-T09, ISSUE-018-T10 | None | None |
 | 12 | ISSUE-018-T12 | 跨模块故障验证、浏览器闭环与交付门禁 | NOT_STARTED | ISSUE-018-T08, ISSUE-018-T09, ISSUE-018-T11 | None | None |
@@ -165,6 +165,14 @@
 - **First action:** 全文读取已链接专属设计与交接，新增 DownloadTaskRecoveryIT 的真实三批重试失败用例：第二批 SOURCE_NETWORK_ERROR、第一和第三批已提交，调用 service.retry(taskId, expectedVersion) 先观察缺少入口失败，再实现最小控制路径并证明仅第二批再次执行、计数与尝试数不重复；不重复设计。
 - **State evidence:** 2026-09-12 在 T07 COMPLETED、四条 Maven 门禁及独立审查证据记录后，按预定义 Order 选中本项，观察源状态 NOT_STARTED。完成并全文复核 `docs/task-designs/ISSUE-018-T08-design.md`；独立就绪评审提出的生命周期故障状态和控制前动态 readiness 两项缺口已修正并复核关闭，无开放问题。固定共用 admissionLock、提交前租约及实际退出释放、版本与定义校验、数据库事实恢复、FAULTED 隔离、关闭时当前启动全部未完成任务恢复，以及 T08 lite 生命周期配置 / T09 生产导入边界。T07 直接输入无未解决冲突；先仅回填 Design document，再写入并链接 `docs/task-handoffs/ISSUE-018/ISSUE-018-T08-handoff.md`，核对模板、18 项既有文件路径及设计链接后执行 `NOT_STARTED -> READY`。仅完成后继准备，尚未启动 T08 实现。
 
+- **Start evidence:** 2026-09-12 用户明确要求按 issue18 看板执行当前任务；全文读取 T08 专属设计与交接，核对总体设计、T07 输入及应用装配后执行 `READY -> IN_PROGRESS`。保留 T08 交接为入口上下文及现有 `feat/download-by-date-range` 分支；开始时工作区干净。实施计划：`docs/superpowers/plans/2026-09-12-issue-018-t08.md`。
+
+
+- **Completion evidence:** 2026-09-12 `IN_PROGRESS -> COMPLETED`。服务新增 retry/resume/controls，版本、终态、动态 readiness、定义与容量按固定顺序复验；重排及回读失败不盲目重试。三批仅再次下载第二批，累计成功从2增至3，尝试数为1/2/1；resume保留普通失败，SUCCEEDED/SPLIT及已存计划不反转。单协调锁覆盖接收、控制、派发和恢复；提交runnable前登记租约，实际退出finally后释放。启动只恢复旧任务事实，数据库不确定时暂停并仅探测/恢复；executor拒绝及无可靠返回的异常进入不可自动解除的FAULTED。关闭等待实际worker退出，保留已获准事务和最终SUCCEEDED，并恢复当前启动未领取QUEUED。新增显式导入lite配置，真实初始化/catalog先于共享runId及启动；生产导入留T09。
+- **Verification evidence:** 2026-09-12 专属设计四条Maven命令全部退出0：显式专项 `DownloadTaskCoordinatorTest,DownloadTaskRecoveryIT,DownloadTaskConfigurationTest,DownloadTaskConfigurationIT,DownloadTaskServiceTest,DownloadTaskServiceIT,DownloadTaskRunnerTest,DownloadTaskRunnerIT,DownloadTaskRepositoryIT,BatchCommitServiceIT,PersistenceServiceIT,FixtureDownloadTaskRunnerTest` 共184项（core173/fixture4/app7），含真实MySQL8.4.6 RecoveryIT16、RunnerIT8、RepositoryIT17、ServiceIT11、CommitIT18、PersistenceIT16、ConfigurationIT4；全单元947项（plugin-api87/core203/Tushare269/fixture16/app372）；生产 `clean verify` 为947+4包合同，验收 `-Pacceptance clean verify` 为947+4+3包合同。全部失败/错误/跳过0，四个生命周期前端24文件/170项及Vite构建均通过。完整日志：`/tmp/issue018-t08-focused-final.log`、`/tmp/issue018-t08-units-final.log`、`/tmp/issue018-t08-production-final.log`、`/tmp/issue018-t08-acceptance-final.log`。Java21，构建内Node24.15.0/npm11.12.1，既有Colima连接；正常本机权限解决Mockito附加及Docker沙箱限制，未清理用户容器。
+- **Review evidence:** 独立最终只读审查通过，无开放重要问题。启动恢复失败保留尚未启动门禁且禁止同实例重新start；新控制已在共享锁内确认终态后清除旧PERMIT_LOST排除记录，真实retry/resume提交成功但回执丢失回归证明关闭仍恢复新QUEUED。配置测试初始不合法策略种子已修正并完整重跑；首个TDD红灯为真实三批测试调用缺失retry，后续专项通过。`git diff --check`及暂存差异检查通过；新建实现/测试/计划已加入Git，未创建提交。
+- **Boundary evidence:** 本项保持T07 runner公开合同、Repository/V8、40项注册及34项生产RANGE门禁不变；历史查询不依赖协调器。尚未导入生产任务装配、暴露HTTP、完成T12进程/浏览器或T13真实来源验收。要求main/干净HEAD的发布脚本未运行，继续由T12及既有发布流程跟踪；本项完成不关闭母issue。
+
 ### ISSUE-018-T09
 
 - **Goal:** 页面与调用方获得完整任务 HTTP 合同，提交立即接收、查询如实返回后台结果，旧同步接口保持兼容。
@@ -172,8 +180,8 @@
 - **Acceptance:** §3.11 七类路由及形状完整；首次创建和操作成功为 202，带规定 Location / ID / version，幂等重放为 200，未知任务 404、版本 / 提交冲突 409、队列满 429。非法字段 / 参数 / 分页和模式描述错配严格拒绝，提交失败零任务 / 零上游；受控上游阻塞时仍先返回接收结果。后台批次失败的 GET 仍为 200 + 状态 / 错误，意外异常兜底映射覆盖新增枚举，旧同步合同与股票规则通过回归。关闭任务功能后停接收 / 领取但历史可查；HTTP 202 不记下载成功，批次事件在状态提交后记录，MDC finally 清理且错误信息脱敏。
 - **Dependencies:** ISSUE-018-T03、ISSUE-018-T08；分别消费能力 / 提交 / 查询用例、重试 / 恢复与生命周期服务。
 - **Sources:** ① `docs/task-designs/ISSUE-018-design.md` §3.3、§3.11、§3.13、§4、§5.1；② T03 / T08 已链接设计与服务；③ `data-plane/tensor-app/src/main/java/com/akkc/tensor/web/`、`data-plane/tensor-app/src/main/java/com/akkc/tensor/config/ApplicationConfiguration.java`、`data-plane/tensor-app/src/main/resources/application.yml`；④ `data-plane/tensor-plugin-api/src/main/java/com/akkc/tensor/plugin/api/error/ErrorCode.java`、`control-plane/src/api/errors.js`；⑤ `docs/contracts/error-codes.md`、`data-plane/tensor-app/src/test/java/com/akkc/tensor/web/DownloadControllerIT.java`。
-- **First action:** 完成本任务专属设计，逐路由固定请求 / 响应 / 错误映射、依赖装配和接收与完成事件区别，并回填本行。
-- **State evidence:** None。
+- **First action:** 全文读取已链接专属设计与交接，新增 DownloadTaskRequestBindingTest：通过生产绑定配置与 precisionModule，把合法 SINGLE 提交读成尚不存在的 DownloadTaskRequest，观察缺失类型/模块红灯；再实现最小绑定并补插件停用后的同 submissionId 重放用例，不重复设计。
+- **State evidence:** 2026-09-12 在 T08 COMPLETED、四条Maven门禁及独立最终审查证据记录后，按预定义Order选中本项，源状态NOT_STARTED。使用 designing-task-contracts 完成并全文复核 `docs/task-designs/ISSUE-018-T09-design.md`；独立就绪审查通过，无开放实质问题。固定七路由/严格绑定、历史重放优先级、数字DTO与快照分页、同runId生产接线、兼容afterCommit观察与脱敏日志；枚举/数值serializer/测试依赖已按真实代码核对，运行手册保留T12。T03/T08直接输入无冲突；先仅回填Design document，再写入、核对并链接 `docs/task-handoffs/ISSUE-018/ISSUE-018-T09-handoff.md`，最后执行 `NOT_STARTED -> READY`。仅完成后继准备，尚未启动T09实现。
 
 ### ISSUE-018-T10
 

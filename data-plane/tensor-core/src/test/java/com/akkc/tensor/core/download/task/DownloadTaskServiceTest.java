@@ -381,6 +381,9 @@ class DownloadTaskServiceTest {
             for (org.assertj.core.api.ThrowableAssert.ThrowingCallable action
                     : List.<org.assertj.core.api.ThrowableAssert.ThrowingCallable>of(
                     () -> service.capabilities(KEY),
+                    () -> service.retry(UUID.randomUUID(), 1),
+                    () -> service.resume(UUID.randomUUID(), 1),
+                    () -> service.controls(null),
                     () -> service.submit(single(SUBMISSION_ID, "000001.SZ")),
                     () -> service.validateReplay(h.synthetic(Map.of("symbol", "000001.SZ", "kind", "basic"),
                             DownloadMode.SINGLE, h.plugin.single, null)))) {
@@ -445,6 +448,74 @@ class DownloadTaskServiceTest {
         } finally {
             TransactionSynchronizationManager.clear();
         }
+    }
+
+    @Test
+    void controlValidationClassifiesInvalidMissingVersionAndStateBeforeCoordinator() {
+        Harness h = new Harness();
+        DownloadTaskService service = h.service();
+        DownloadTask queued = service.submit(single(SUBMISSION_ID, "000001.SZ")).task();
+        for (boolean retry : List.of(true, false)) {
+            code(ErrorCode.PARAM_INVALID, () -> control(service, retry, null, 1));
+            code(ErrorCode.PARAM_INVALID, () -> control(service, retry, queued.taskId(), 0));
+            code(ErrorCode.TASK_NOT_FOUND, () -> control(service, retry, UUID.randomUUID(), 1));
+            code(ErrorCode.TASK_STATE_CONFLICT, () -> control(service, retry, queued.taskId(), 1));
+            h.stored.set(withStatus(queued, retry ? DownloadTask.Status.FAILED : DownloadTask.Status.INTERRUPTED));
+            code(ErrorCode.TASK_STATE_CONFLICT, () -> control(service, retry, queued.taskId(), 2));
+            code(ErrorCode.TASK_STATE_CONFLICT, () -> control(service, retry, queued.taskId(), 1));
+            h.stored.set(queued);
+        }
+        code(ErrorCode.PARAM_INVALID, () -> service.controls(null));
+        assertThat(service.controls(withStatus(queued, DownloadTask.Status.FAILED)))
+                .isEqualTo(new DownloadTaskService.ControlAvailability(false, false));
+    }
+
+    @Test
+    void controlsArePureHintsAndReadinessFailuresAreSanitizedForBothOperations() {
+        for (boolean retry : List.of(true, false)) {
+            Harness h = new Harness();
+            DownloadTaskService service = h.service();
+            DownloadTask accepted = service.submit(single(SUBMISSION_ID, "000001.SZ")).task();
+            DownloadTask terminal = withStatus(accepted,
+                    retry ? DownloadTask.Status.FAILED : DownloadTask.Status.INTERRUPTED);
+            h.stored.set(terminal);
+            DownloadTaskCoordinator coordinator = mock(DownloadTaskCoordinator.class);
+            when(coordinator.controlAllowed()).thenReturn(true);
+            service.bindCoordinator(coordinator);
+            assertThatThrownBy(() -> service.bindCoordinator(mock(DownloadTaskCoordinator.class)))
+                    .isInstanceOf(IllegalStateException.class);
+            h.plugin.readinessFailure = new IllegalStateException("private-readiness");
+            org.mockito.Mockito.clearInvocations(h.repository);
+            assertThat(service.controls(terminal))
+                    .isEqualTo(new DownloadTaskService.ControlAvailability(retry, !retry));
+            org.mockito.Mockito.verifyNoInteractions(h.repository);
+            code(ErrorCode.DATASET_MISCONFIGURED,
+                    () -> control(service, retry, terminal.taskId(), terminal.version()));
+            h.plugin.readinessFailure = null;
+            h.plugin.nullReadiness = true;
+            code(ErrorCode.DATASET_MISCONFIGURED,
+                    () -> control(service, retry, terminal.taskId(), terminal.version()));
+            h.plugin.nullReadiness = false;
+            h.plugin.available = false;
+            code(ErrorCode.PLUGIN_DISABLED,
+                    () -> control(service, retry, terminal.taskId(), terminal.version()));
+            h.plugin.available = true;
+            DownloadTaskService disabled = h.service(new DownloadTaskService.Settings(false, 100, 36600));
+            disabled.bindCoordinator(coordinator);
+            code(ErrorCode.PLUGIN_DISABLED,
+                    () -> control(disabled, retry, terminal.taskId(), terminal.version()));
+            assertThat(disabled.controls(terminal))
+                    .isEqualTo(new DownloadTaskService.ControlAvailability(false, false));
+            assertThat(h.stored.get()).isEqualTo(terminal);
+            assertThat(h.plugin.executions.get()).isZero();
+            when(coordinator.controlAllowed()).thenReturn(false);
+            assertThat(service.controls(terminal))
+                    .isEqualTo(new DownloadTaskService.ControlAvailability(false, false));
+        }
+    }
+
+    private static DownloadTask control(DownloadTaskService service, boolean retry, UUID id, long version) {
+        return retry ? service.retry(id, version) : service.resume(id, version);
     }
 
     private static DownloadTaskService.Submission single(UUID id, String symbol) {
@@ -532,6 +603,11 @@ class DownloadTaskServiceTest {
                         ? Optional.of(task) : Optional.empty();
             });
             when(repository.queuedCount()).thenAnswer(ignored -> queued);
+            when(repository.findTask(any())).thenAnswer(invocation -> {
+                DownloadTask task = stored.get();
+                return task != null && task.taskId().equals(invocation.getArgument(0))
+                        ? Optional.of(task) : Optional.empty();
+            });
             when(repository.insert(any())).thenAnswer(invocation -> {
                 if (insertFailure != null) throw insertFailure;
                 DownloadTask task = task(invocation.getArgument(0));
@@ -575,6 +651,8 @@ class DownloadTaskServiceTest {
         BatchDownloadDescriptor range = policy(BatchDownloadDescriptor.Availability.AVAILABLE, null, "v1");
         boolean available = true;
         boolean nullDescriptor;
+        boolean nullReadiness;
+        RuntimeException readinessFailure;
         RuntimeException descriptorFailure;
         RuntimeException sourceFailure;
         Map<String, Object> sourceResult;
@@ -587,6 +665,8 @@ class DownloadTaskServiceTest {
                     available ? null : "disabled", List.of(single), List.of(KEY));
         }
         @Override public PluginReadiness readiness() {
+            if (readinessFailure != null) throw readinessFailure;
+            if (nullReadiness) return null;
             return new PluginReadiness(available, available, available, available ? null : "disabled");
         }
         @Override public Optional<BatchDownloadDescriptor> batchDescriptor(ApiName apiName) {
