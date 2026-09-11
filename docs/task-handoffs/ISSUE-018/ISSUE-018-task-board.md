@@ -33,8 +33,8 @@
 | 6 | ISSUE-018-T06 | Tushare 区间策略、日期规划与参数纠正 | COMPLETED | ISSUE-018-T01, ISSUE-018-T05 | docs/task-designs/ISSUE-018-T06-design.md | docs/task-handoffs/ISSUE-018/ISSUE-018-T06-handoff.md |
 | 7 | ISSUE-018-T07 | 通用批次执行、拆分与资源预算 | COMPLETED | ISSUE-018-T03, ISSUE-018-T04, ISSUE-018-T06 | docs/task-designs/ISSUE-018-T07-design.md | docs/task-handoffs/ISSUE-018/ISSUE-018-T07-handoff.md |
 | 8 | ISSUE-018-T08 | 手动重试、恢复与后台生命周期 | COMPLETED | ISSUE-018-T07 | docs/task-designs/ISSUE-018-T08-design.md | docs/task-handoffs/ISSUE-018/ISSUE-018-T08-handoff.md |
-| 9 | ISSUE-018-T09 | 任务 HTTP 合同、应用装配与日志 | READY | ISSUE-018-T03, ISSUE-018-T08 | docs/task-designs/ISSUE-018-T09-design.md | docs/task-handoffs/ISSUE-018/ISSUE-018-T09-handoff.md |
-| 10 | ISSUE-018-T10 | 前端模式表单、任务提交与近期列表 | NOT_STARTED | ISSUE-018-T09 | None | None |
+| 9 | ISSUE-018-T09 | 任务 HTTP 合同、应用装配与日志 | COMPLETED | ISSUE-018-T03, ISSUE-018-T08 | docs/task-designs/ISSUE-018-T09-design.md | docs/task-handoffs/ISSUE-018/ISSUE-018-T09-handoff.md |
+| 10 | ISSUE-018-T10 | 前端模式表单、任务提交与近期列表 | READY | ISSUE-018-T09 | docs/task-designs/ISSUE-018-T10-design.md | docs/task-handoffs/ISSUE-018/ISSUE-018-T10-handoff.md |
 | 11 | ISSUE-018-T11 | 任务详情、轮询与手动操作 | NOT_STARTED | ISSUE-018-T09, ISSUE-018-T10 | None | None |
 | 12 | ISSUE-018-T12 | 跨模块故障验证、浏览器闭环与交付门禁 | NOT_STARTED | ISSUE-018-T08, ISSUE-018-T09, ISSUE-018-T11 | None | None |
 | 13 | ISSUE-018-T13 | 真实接口完整性验收与逐项开放 | NOT_STARTED | ISSUE-018-T06, ISSUE-018-T12 | None | None |
@@ -183,6 +183,12 @@
 - **First action:** 全文读取已链接专属设计与交接，新增 DownloadTaskRequestBindingTest：通过生产绑定配置与 precisionModule，把合法 SINGLE 提交读成尚不存在的 DownloadTaskRequest，观察缺失类型/模块红灯；再实现最小绑定并补插件停用后的同 submissionId 重放用例，不重复设计。
 - **State evidence:** 2026-09-12 在 T08 COMPLETED、四条Maven门禁及独立最终审查证据记录后，按预定义Order选中本项，源状态NOT_STARTED。使用 designing-task-contracts 完成并全文复核 `docs/task-designs/ISSUE-018-T09-design.md`；独立就绪审查通过，无开放实质问题。固定七路由/严格绑定、历史重放优先级、数字DTO与快照分页、同runId生产接线、兼容afterCommit观察与脱敏日志；枚举/数值serializer/测试依赖已按真实代码核对，运行手册保留T12。T03/T08直接输入无冲突；先仅回填Design document，再写入、核对并链接 `docs/task-handoffs/ISSUE-018/ISSUE-018-T09-handoff.md`，最后执行 `NOT_STARTED -> READY`。仅完成后继准备，尚未启动T09实现。
 
+- **Start evidence:** 2026-09-12 用户明确要求按 issue18 看板执行当前任务；全文读取 T09 专属设计和交接，并核对总体设计及 T03/T08 直接输入，执行 `READY -> IN_PROGRESS`，保留 T09 交接作为入口上下文。实施计划：`docs/superpowers/plans/2026-09-12-issue-018-t09.md`。
+- **Completion evidence:** 2026-09-12 全文复核专属设计及 IN_PROGRESS 源状态后执行 `IN_PROGRESS -> COMPLETED`。七类 HTTP 路由、严格提交/控制/查询绑定、白名单数值 DTO、稳定成员及逐项一致性快照、同 runId/settings 的生产生命周期装配、提交后脱敏观察日志及外部 schema/35 个示例均已实现。真实 MySQL HTTP 证明来源阻塞前返回已提交 202，历史重放在满队列/恢复/FAULTED/元数据移除后可找回；三批仅失败批重试、并发控制一 202 一 409、resume 保留普通失败、真实提交回执丢失后 GET 找回及 stale 409 均通过。拒绝请求不污染持久行；disabled 保留历史；202 不增加旧同步成功指标，观察器异常隔离及 MDC 清理已验证。
+- **Verification evidence:** 四条设计门禁最终均退出 0：专属设计完整专项 selector 另加 `DownloadTaskControllerTest`，602 项/33 类；`mvn -f data-plane/pom.xml -Dtest='*Test,!PackagedJarContractTest,!AcceptancePackagedJarContractTest' -Dsurefire.failIfNoSpecifiedTests=false test`，1019 项/63 类；`mvn -f data-plane/pom.xml clean verify`，1019 单元 + 4 生产包合同；`mvn -f data-plane/pom.xml -Pacceptance clean verify`，1019 单元 + 4 生产包 + 3 验收包合同。全部失败/错误/跳过为 0，各生命周期前端 24 文件/170 测试及 Vite 构建通过。Java 21、MySQL 8.4.6、Node 24.15.0/npm 11.12.1；专项使用 `DOCKER_HOST=unix:///Users/qiangzhiwei/.colima/default/docker.sock TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE=/var/run/docker.sock`。最终日志 `/tmp/issue018-t09-focused-final.log`、`/tmp/issue018-t09-units-final.log`、`/tmp/issue018-t09-production-final.log`、`/tmp/issue018-t09-acceptance-final.log`；前期夹具失败已由以上最终证据替代。
+- **Review evidence:** core 与 app/合同独立规格及质量审查通过，无开放问题；app 最初指出的 HTTP 故障/重试证据缺口已补齐并独立复核关闭。生产上下文明确使用编译后的生产迁移，仅 V1–V5/V7/V8；旧测试上下文完整类路径包含 V6，八项迁移断言与实际一致。`git diff --check` 和暂存差异检查通过，新实现/测试/合同/计划已加入 Git；保留 `feat/download-by-date-range`，未创建提交。
+- **Boundary evidence:** V1–V8、40 项注册与股票规则、34 项生产 RANGE 的 NEEDS_VERIFICATION 门禁、单 worker 及旧同步接口保持。本项不实现前端，不声称 T12 进程/浏览器/发布门禁或 T13 真实 API 验收通过；母 issue 尚未完成。接续仅准备 Order 10 的 T10 专属设计和交接。
+
 ### ISSUE-018-T10
 
 - **Goal:** 下载页按能力选择 SINGLE / RANGE，通过后台任务提交并从服务端近期列表找回任务。
@@ -190,8 +196,8 @@
 - **Acceptance:** AVAILABLE 默认 RANGE，否则默认 SINGLE 并展示原因；模式切换重建参数，日期轴准确且旧单日参数不残留。SINGLE 明示单次不代表完整历史；收到 ID 仅提示任务已接收并释放提交禁用，支持继续选择其他接口。响应不明时同键重放或按 submissionId 找回，刷新优先恢复未确认提交，重复操作不创建第二任务。列表以数据库分页为准，展示参数 / 范围、状态、动态批数、新增 / 更新记录次数与时间；页面可见每 5 秒刷新，请求不重叠并隔离旧响应。旧单次前端 API 方法保留兼容测试；相关组件与提交测试通过。
 - **Dependencies:** ISSUE-018-T09；消费能力、提交、任务列表 / submissionId 查询合同与错误映射。
 - **Sources:** ① `docs/task-designs/ISSUE-018-design.md` §3.3、§3.11–3.12、§5.1–5.2；② T09 已链接设计、HTTP 实现与新外部合同；③ `control-plane/src/api/downloads.js`、`control-plane/src/composables/useDownloadFlow.js`、`control-plane/src/views/DownloadView.vue`；④ `control-plane/src/components/download/DynamicParameterForm.vue`、`control-plane/src/composables/useDownloadFlow.spec.js`、`control-plane/src/views/DownloadView.spec.js`。
-- **First action:** 完成本任务专属设计，固定模式切换参数清理、提交幂等恢复状态和列表刷新生命周期，并回填本行。
-- **State evidence:** None。
+- **First action:** 全文读取已链接专属设计与交接，先新增 downloadTasks.spec.js，通过真实 Axios adapter 返回原始 JSON/202/请求头/Location，断言尚不存在的 submitDownloadTask 发送一次完整提交并返回 bigint version Receipt；观察 RED 后实现最小传输，再补未确认提交与同键恢复，不重复设计。
+- **State evidence:** 2026-09-12 在 T09 COMPLETED、四条门禁及独立审查关闭证据记录后，按预定义 Order 选中本项，观察源状态 NOT_STARTED。使用 designing-task-contracts 检查实际 Axios/表单/路由和 T09 合同，完成并全文复核 `docs/task-designs/ISSUE-018-T10-design.md`；独立就绪审查通过，无开放问题。固定能力模式与干净表单、不可变 sessionStorage 提交恢复、服务端列表分页/可见性/退避/互斥、全部数值原 token 校验及 bigint；小数舍入和卸载后异步续体边界已明确，T11/T12 范围保持。T09 直接输入无冲突；先仅回填 Design document，再写入、核对模板及 30 项既有产物路径并链接 `docs/task-handoffs/ISSUE-018/ISSUE-018-T10-handoff.md`，最后执行 `NOT_STARTED -> READY`。仅完成后继准备，尚未启动 T10 实现。
 
 ### ISSUE-018-T11
 

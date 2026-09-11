@@ -8,6 +8,11 @@ import ch.qos.logback.classic.spi.IThrowableProxy;
 import ch.qos.logback.core.read.ListAppender;
 import com.akkc.tensor.TensorApplication;
 import com.akkc.tensor.config.ApplicationConfiguration;
+import com.akkc.tensor.config.DownloadTaskProperties;
+import com.akkc.tensor.core.download.task.DownloadTaskCoordinator;
+import com.akkc.tensor.core.download.task.DownloadTaskQueryService;
+import com.akkc.tensor.core.download.task.DownloadTaskService;
+import com.akkc.tensor.core.download.task.DownloadTaskRunner;
 import com.akkc.tensor.web.download.DownloadDescriptorResolver;
 import com.akkc.tensor.web.download.DownloadParameterResolver;
 import com.akkc.tensor.web.download.DownloadRequestDeserializer;
@@ -30,7 +35,9 @@ import com.akkc.tensor.web.RequestIdFilter;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
+import java.net.URI;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -46,6 +53,7 @@ import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.core.type.classreading.MetadataReader;
 import org.springframework.core.type.classreading.MetadataReaderFactory;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.web.client.RestClient;
 import org.testcontainers.containers.MySQLContainer;
 import org.testcontainers.utility.DockerImageName;
@@ -130,6 +138,9 @@ class ProductionApplicationContextIT {
 
     private static ConfigurableApplicationContext start(
             MySQLContainer<?> mysql, String token) {
+        // The test classpath also contains acceptance-only V6; inspect the production resource output.
+        Path migrations = Path.of(URI.create(ApplicationConfiguration.class.getProtectionDomain()
+                .getCodeSource().getLocation().toExternalForm())).resolve("db/migration");
         return new SpringApplicationBuilder(TensorApplication.class)
                 .web(WebApplicationType.SERVLET)
                 .initializers(context -> context.getBeanFactory().registerSingleton(
@@ -137,6 +148,7 @@ class ProductionApplicationContextIT {
                 .properties(
                         "server.port=0",
                         "spring.profiles.active=production",
+                        "spring.flyway.locations=filesystem:" + migrations,
                         "spring.datasource.hikari.connection-timeout=250",
                         "TENSOR_DB_URL=" + mysql.getJdbcUrl(),
                         "TENSOR_DB_USERNAME=" + mysql.getUsername(),
@@ -174,6 +186,13 @@ class ProductionApplicationContextIT {
         assertUnique(context, MetadataQueryService.class);
         assertUnique(context, TensorMetrics.class);
         assertUnique(context, OperationLogger.class);
+        assertUnique(context, DownloadTaskOperationLogger.class);
+        assertUnique(context, DownloadTaskProperties.class);
+        assertUnique(context, DownloadTaskService.class);
+        assertUnique(context, DownloadTaskQueryService.class);
+        assertUnique(context, DownloadTaskRunner.class);
+        assertUnique(context, DownloadTaskCoordinator.class);
+        assertThat(context.getBean(DownloadTaskCoordinator.class).isRunning()).isTrue();
         assertUnique(context, DataSourceController.class);
         assertUnique(context, DownloadController.class);
         assertUnique(context, DownloadDescriptorResolver.class);
@@ -188,7 +207,11 @@ class ProductionApplicationContextIT {
                 .containsKey("securityHeadersFilter");
 
         Flyway flyway = context.getBean(Flyway.class);
-        assertThat(flyway.info().applied()).hasSize(7);
+        assertThat(flyway.info().applied()).extracting(info -> info.getVersion().toString())
+                .containsExactly("1", "2", "3", "4", "5", "7", "8");
+        assertThat(context.getBean(JdbcTemplate.class).queryForObject(
+                "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = DATABASE() AND table_name = 'fixture__fixture_daily'",
+                Integer.class)).isZero();
         List<?> definitions = context.getBean("tushareDatasetDefinitions", List.class);
         List<?> adapters = context.getBean("tensorDatasetAdapters", List.class);
         assertThat(definitions).hasSize(40).allSatisfy(

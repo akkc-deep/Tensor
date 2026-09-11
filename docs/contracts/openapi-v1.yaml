@@ -2,7 +2,14 @@ openapi: 3.1.0
 info:
   title: Tensor v1 REST API
   version: v1
-  description: Shared REST contract for Tensor v1 metadata, downloads, and read-only dataset queries.
+  description: >-
+    Shared REST contract for Tensor v1 metadata, downloads, persistent download tasks,
+    and read-only dataset queries. Task versions, counts, totals and rowLimit are int64
+    JSON numbers up to 9223372036854775807. JavaScript Number is exact only through
+    9007199254740991: use lossless JSON parsing and preserve exact decimal digits when
+    displaying larger values or sending expectedVersion. Never round or truncate.
+    Historical securities LONG and DECIMAL values retain their existing string format.
+    Task examples are in download-task-examples.json; error semantics are in error-codes.md.
 paths:
   /api/v1/data-sources:
     get:
@@ -108,7 +115,7 @@ paths:
             application/json:
               schema: {$ref: '#/components/schemas/ApiError'}
         '500': &persistenceFailed
-          description: The persistence transaction failed and was rolled back; no committed download was formed.
+          description: Persistence failed; the database may have committed before its receipt was lost. A rollback is not guaranteed.
           headers:
             X-Request-Id: {required: true, schema: {type: string, minLength: 1}}
           content:
@@ -223,8 +230,233 @@ paths:
           content:
             application/json:
               schema: {$ref: '#/components/schemas/ApiError'}
+  /api/v1/download-tasks:
+    post:
+      operationId: submitDownloadTask
+      description: >-
+        Durably accept a SINGLE or RANGE task. A new submission returns 202 after the
+        acceptance transaction, without waiting for the source or worker. The receipt
+        is not download success. An equivalent submissionId replay returns 200 with
+        the original task, version and createdAt, even when new admission is disabled.
+        A changed request with the same submissionId is SUBMISSION_CONFLICT.
+        No query parameters are accepted. The JSON body must contain exactly the five
+        required fields; params is a string-valued object. Duplicate JSON members,
+        unknown fields and trailing JSON values are rejected. Invalid present top-level
+        values take precedence over missing required fields. UUIDs require the full
+        8-4-4-4-12 hexadecimal form; either case is accepted and normalized to lowercase.
+        Production Tushare RANGE remains NEEDS_VERIFICATION for 34 APIs; the remaining
+        six APIs are SINGLE-only. AVAILABLE RANGE examples are controlled fixtures.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/DownloadTaskSubmissionRequest'}
+      responses:
+        '202':
+          description: New task durably accepted; GET may already show a later worker status.
+          headers:
+            X-Request-Id: {$ref: '#/components/headers/TaskRequestId'}
+            Location: {$ref: '#/components/headers/DownloadTaskLocation'}
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/DownloadTaskReceipt'}
+        '200':
+          description: Equivalent replay found the original task; no new work was accepted.
+          headers:
+            X-Request-Id: {$ref: '#/components/headers/TaskRequestId'}
+            Location: {$ref: '#/components/headers/DownloadTaskLocation'}
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/DownloadTaskReceipt'}
+        '400': {$ref: '#/components/responses/DownloadTaskBadRequest'}
+        '409': {$ref: '#/components/responses/DownloadTaskConflict'}
+        '429': {$ref: '#/components/responses/DownloadTaskQueueFull'}
+        '500': {$ref: '#/components/responses/DownloadTaskFailure'}
+        '422': {$ref: '#/components/responses/DownloadTaskAdapterFailure'}
+        '502': {$ref: '#/components/responses/DownloadTaskSourceFailure'}
+        '504': {$ref: '#/components/responses/DownloadTaskSourceTimeout'}
+    get:
+      operationId: listDownloadTasks
+      description: >-
+        Filters combine with AND; pluginId and apiName can be used independently and
+        need not identify a currently installed plugin. Unknown submissionId is an empty
+        page, not 404. Only the listed query parameters are accepted; unknown, duplicate,
+        empty or whitespace values are PARAM_INVALID. Status is case-sensitive.
+        The initial query fixes total, member IDs and ordering; each item then comes
+        from one task/counts snapshot. Rows may reflect different instants or changed
+        statuses; members are not re-filtered, re-sorted or filled in. Any detail read
+        failure fails the entire response. A page beyond the end stays unchanged.
+        Stored task or batch failures, including SOURCE_TIMEOUT and PERSISTENCE_FAILED,
+        remain HTTP 200; 500 means this query itself failed. Controls are current hints.
+      parameters:
+        - {$ref: '#/components/parameters/DownloadTaskPage'}
+        - {$ref: '#/components/parameters/DownloadTaskPageSize'}
+        - {name: pluginId, in: query, schema: {type: string, pattern: '^[a-z][a-z0-9_]{1,63}$'}}
+        - {name: apiName, in: query, schema: {type: string, pattern: '^[a-z][a-z0-9_]{1,63}$'}}
+        - {name: status, in: query, schema: {$ref: './download-task.schema.json#/$defs/TaskStatus'}}
+        - {name: submissionId, in: query, schema: {$ref: './download-task.schema.json#/$defs/UUID'}}
+      responses:
+        '200':
+          description: Task page with a fixed initial membership and per-row snapshot consistency.
+          headers:
+            X-Request-Id: {$ref: '#/components/headers/TaskRequestId'}
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/DownloadTaskPage'}
+        '400': {$ref: '#/components/responses/DownloadTaskBadRequest'}
+        '500': {$ref: '#/components/responses/DownloadTaskFailure'}
+  /api/v1/download-tasks/{taskId}:
+    parameters:
+      - {$ref: '#/components/parameters/DownloadTaskId'}
+    get:
+      operationId: getDownloadTask
+      description: >-
+        Return one consistent task/counts snapshot with current canRetry/canResume hints.
+        No query parameters are accepted. Failed or interrupted tasks are HTTP 200;
+        a missing task is 404. Internal permission, hash, policy and run fields are omitted.
+      responses:
+        '200':
+          description: Current task snapshot, including any safely classified stored failure.
+          headers:
+            X-Request-Id: {$ref: '#/components/headers/TaskRequestId'}
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/DownloadTaskResponse'}
+        '400': {$ref: '#/components/responses/DownloadTaskBadRequest'}
+        '404': {$ref: '#/components/responses/DownloadTaskNotFound'}
+        '500': {$ref: '#/components/responses/DownloadTaskFailure'}
+  /api/v1/download-tasks/{taskId}/batches:
+    parameters:
+      - {$ref: '#/components/parameters/DownloadTaskId'}
+    get:
+      operationId: listDownloadTaskBatches
+      description: >-
+        Only page, pageSize, status and includeSplit are accepted. Unknown, duplicate,
+        empty or whitespace query values are rejected. includeSplit accepts only the
+        lowercase literal true or false, default false. SPLIT parents are excluded
+        unless includeSplit=true; status=SPLIT&includeSplit=false is a valid empty page.
+        Status is case-sensitive. Batch ranges are YYYY-MM-DD; SINGLE ranges are null.
+        Stored batch failures remain HTTP 200. An out-of-range page is returned unchanged.
+      parameters:
+        - {$ref: '#/components/parameters/DownloadTaskPage'}
+        - {$ref: '#/components/parameters/DownloadTaskPageSize'}
+        - {name: status, in: query, schema: {$ref: './download-task.schema.json#/$defs/BatchStatus'}}
+        - {name: includeSplit, in: query, schema: {type: boolean, default: false}}
+      responses:
+        '200':
+          description: Persisted batch page; total and records come from the query service.
+          headers:
+            X-Request-Id: {$ref: '#/components/headers/TaskRequestId'}
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/DownloadBatchPage'}
+        '400': {$ref: '#/components/responses/DownloadTaskBadRequest'}
+        '404': {$ref: '#/components/responses/DownloadTaskNotFound'}
+        '500': {$ref: '#/components/responses/DownloadTaskFailure'}
+  /api/v1/download-tasks/{taskId}/retry:
+    parameters:
+      - {$ref: '#/components/parameters/DownloadTaskId'}
+    post:
+      operationId: retryDownloadTask
+      description: >-
+        Explicitly retry FAILED or PARTIAL_FAILED, resetting only failed leaves. Body
+        contains only the client's expectedVersion as a positive int64 JSON integer
+        token. Strings, fractions, exponent spellings, duplicates and extra fields
+        are rejected; no query parameters are accepted. State/version, lifecycle,
+        active lease, current definition, readiness and queue capacity are revalidated.
+        A receipt failure may follow a committed requeue: query before trying again.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/DownloadTaskControlRequest'}
+      responses:
+        '202':
+          description: Retry accepted for the same task; createdAt is the original creation time.
+          headers:
+            X-Request-Id: {$ref: '#/components/headers/TaskRequestId'}
+            Location: {$ref: '#/components/headers/DownloadTaskLocation'}
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/DownloadTaskReceipt'}
+        '400': {$ref: '#/components/responses/DownloadTaskBadRequest'}
+        '404': {$ref: '#/components/responses/DownloadTaskNotFound'}
+        '409': {$ref: '#/components/responses/DownloadTaskConflict'}
+        '429': {$ref: '#/components/responses/DownloadTaskQueueFull'}
+        '500': {$ref: '#/components/responses/DownloadTaskFailure'}
+  /api/v1/download-tasks/{taskId}/resume:
+    parameters:
+      - {$ref: '#/components/parameters/DownloadTaskId'}
+    post:
+      operationId: resumeDownloadTask
+      description: >-
+        Explicitly resume INTERRUPTED while preserving successful leaves and ordinary
+        failed batches. Uses the exact client expectedVersion with the same strict
+        body and revalidation rules as retry. No query parameters are accepted.
+        No automatic retry or resume occurs after restart or an ambiguous receipt.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: {$ref: '#/components/schemas/DownloadTaskControlRequest'}
+      responses:
+        '202':
+          description: Resume accepted for the same task; createdAt is the original creation time.
+          headers:
+            X-Request-Id: {$ref: '#/components/headers/TaskRequestId'}
+            Location: {$ref: '#/components/headers/DownloadTaskLocation'}
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/DownloadTaskReceipt'}
+        '400': {$ref: '#/components/responses/DownloadTaskBadRequest'}
+        '404': {$ref: '#/components/responses/DownloadTaskNotFound'}
+        '409': {$ref: '#/components/responses/DownloadTaskConflict'}
+        '429': {$ref: '#/components/responses/DownloadTaskQueueFull'}
+        '500': {$ref: '#/components/responses/DownloadTaskFailure'}
+  /api/v1/data-sources/{pluginId}/apis/{apiName}/download-capabilities:
+    parameters:
+      - {name: pluginId, in: path, required: true, schema: {type: string, pattern: '^[a-z][a-z0-9_]{1,63}$'}}
+      - {name: apiName, in: path, required: true, schema: {type: string, pattern: '^[a-z][a-z0-9_]{1,63}$'}}
+    get:
+      operationId: getDownloadCapabilities
+      description: >-
+        Return SINGLE and RANGE capability metadata without metadata-list downloadability
+        filtering. Known disabled sources remain queryable with single.available=false
+        and an unavailable RANGE. Unknown identity is DATASET_MISCONFIGURED (409).
+        No query parameters are accepted. Capabilities are not an acceptance promise;
+        disabling task admission does not remove metadata. The production 34 Tushare
+        ranges remain NEEDS_VERIFICATION and six APIs remain SINGLE-only.
+      responses:
+        '200':
+          description: Current metadata and readiness, with explicit nullable range semantics.
+          headers:
+            X-Request-Id: {$ref: '#/components/headers/TaskRequestId'}
+          content:
+            application/json:
+              schema: {$ref: '#/components/schemas/DownloadCapabilitiesResponse'}
+        '400': {$ref: '#/components/responses/DownloadTaskBadRequest'}
+        '409': {$ref: '#/components/responses/DownloadTaskConflict'}
+        '500': {$ref: '#/components/responses/DownloadTaskFailure'}
 components:
   schemas:
+    DownloadTaskSubmissionRequest:
+      $ref: './download-task.schema.json#/$defs/SubmissionRequest'
+    DownloadTaskControlRequest:
+      $ref: './download-task.schema.json#/$defs/ControlRequest'
+    DownloadTaskReceipt:
+      $ref: './download-task.schema.json#/$defs/Receipt'
+    DownloadTaskResponse:
+      $ref: './download-task.schema.json#/$defs/TaskResponse'
+    DownloadBatchResponse:
+      $ref: './download-task.schema.json#/$defs/BatchResponse'
+    DownloadTaskPage:
+      $ref: './download-task.schema.json#/$defs/TaskPage'
+    DownloadBatchPage:
+      $ref: './download-task.schema.json#/$defs/BatchPage'
+    DownloadCapabilitiesResponse:
+      $ref: './download-task.schema.json#/$defs/CapabilitiesResponse'
+    DownloadTaskError:
+      $ref: './download-task.schema.json#/$defs/Error'
     DataSourceSummary:
       type: object
       additionalProperties: false
@@ -435,3 +667,90 @@ components:
       properties:
         field: {type: string, minLength: 1}
         message: {type: string, minLength: 1}
+  headers:
+    TaskRequestId:
+      required: true
+      description: Matches requestId when the response body contains it; RequestIdFilter supplies this header for every response.
+      schema: {$ref: './download-task.schema.json#/$defs/UUID'}
+    DownloadTaskLocation:
+      required: true
+      description: Relative URL for the original task's detail resource, also returned on replay, retry and resume.
+      schema: {type: string, pattern: '^/api/v1/download-tasks/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$'}
+  parameters:
+    DownloadTaskId:
+      name: taskId
+      in: path
+      required: true
+      description: Full 36-character UUID; uppercase hexadecimal is accepted and normalized to lowercase. Shortened UUID syntax is invalid.
+      schema: {$ref: './download-task.schema.json#/$defs/UUID'}
+    DownloadTaskPage:
+      name: page
+      in: query
+      description: One-based decimal integer. No signs, spaces, fractions, exponents, overflow or duplicates. A page beyond the end is returned unchanged.
+      schema: {type: integer, format: int32, minimum: 1, maximum: 2147483647, default: 1}
+    DownloadTaskPageSize:
+      name: pageSize
+      in: query
+      description: Decimal integer token with no signs, spaces, fractions, exponents or duplicates.
+      schema: {type: integer, enum: [20, 50, 100], default: 20}
+  responses:
+    DownloadTaskBadRequest:
+      description: PARAM_REQUIRED or PARAM_INVALID. Invalid present top-level values take precedence over missing values; field names are fixed and never echo raw input.
+      headers:
+        X-Request-Id: {$ref: '#/components/headers/TaskRequestId'}
+      content:
+        application/json:
+          schema: {$ref: '#/components/schemas/DownloadTaskError'}
+    DownloadTaskNotFound:
+      description: TASK_NOT_FOUND for an unknown well-formed task UUID.
+      headers:
+        X-Request-Id: {$ref: '#/components/headers/TaskRequestId'}
+      content:
+        application/json:
+          schema: {$ref: '#/components/schemas/DownloadTaskError'}
+    DownloadTaskConflict:
+      description: PLUGIN_DISABLED, DATASET_MISCONFIGURED, SUBMISSION_CONFLICT, TASK_STATE_CONFLICT, TASK_DEFINITION_CHANGED or BATCH_DOWNLOAD_UNAVAILABLE. Unexpected BATCH_COMPLETENESS_UNCONFIRMED, TASK_LIMIT_EXCEEDED or EXECUTION_INTERRUPTED also map to 409 at the HTTP error boundary.
+      headers:
+        X-Request-Id: {$ref: '#/components/headers/TaskRequestId'}
+      content:
+        application/json:
+          schema: {$ref: '#/components/schemas/DownloadTaskError'}
+    DownloadTaskQueueFull:
+      description: TASK_QUEUE_FULL; no new acceptance was committed by this attempt.
+      headers:
+        X-Request-Id: {$ref: '#/components/headers/TaskRequestId'}
+      content:
+        application/json:
+          schema: {$ref: '#/components/schemas/DownloadTaskError'}
+    DownloadTaskFailure:
+      description: >-
+        PERSISTENCE_FAILED, QUERY_FAILED or INTERNAL_ERROR. A database commit may have
+        succeeded before its receipt was lost. Query by taskId or submissionId;
+        rollback is not guaranteed. Do not blindly change submissionId or resend a
+        control request. An HTTP query failure does not alter stored task status.
+      headers:
+        X-Request-Id: {$ref: '#/components/headers/TaskRequestId'}
+      content:
+        application/json:
+          schema: {$ref: '#/components/schemas/DownloadTaskError'}
+    DownloadTaskAdapterFailure:
+      description: ADAPTER_FIELD_MISSING or ADAPTER_TYPE_INVALID unexpectedly reached the HTTP boundary. Stored failures are still queried with HTTP 200.
+      headers:
+        X-Request-Id: {$ref: '#/components/headers/TaskRequestId'}
+      content:
+        application/json:
+          schema: {$ref: '#/components/schemas/DownloadTaskError'}
+    DownloadTaskSourceFailure:
+      description: SOURCE_AUTH_FAILED, SOURCE_PERMISSION_DENIED, SOURCE_RATE_LIMITED, SOURCE_UNAVAILABLE, SOURCE_NETWORK_ERROR, SOURCE_PAYLOAD_INVALID or SOURCE_RANGE_MISMATCH unexpectedly reached the HTTP boundary. Stored failures are still queried with HTTP 200.
+      headers:
+        X-Request-Id: {$ref: '#/components/headers/TaskRequestId'}
+      content:
+        application/json:
+          schema: {$ref: '#/components/schemas/DownloadTaskError'}
+    DownloadTaskSourceTimeout:
+      description: SOURCE_TIMEOUT unexpectedly reached the HTTP boundary. A stored timeout is still queried with HTTP 200.
+      headers:
+        X-Request-Id: {$ref: '#/components/headers/TaskRequestId'}
+      content:
+        application/json:
+          schema: {$ref: '#/components/schemas/DownloadTaskError'}

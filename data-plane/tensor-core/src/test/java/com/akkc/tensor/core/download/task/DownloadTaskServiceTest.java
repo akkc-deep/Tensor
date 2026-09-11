@@ -41,6 +41,74 @@ class DownloadTaskServiceTest {
             "kind", "Kind", null, ParameterType.TEXT, false, "basic", List.of(), null, null);
 
     @Test
+    void preparesNormalizedSubmissionWithoutAdmissionOrCapacityMutation() {
+        Harness h = new Harness();
+        h.queued = Long.MAX_VALUE;
+        var binding = h.service().prepareSubmission(single(SUBMISSION_ID, " 000001.sz "));
+        assertThat(binding.replay()).isFalse();
+        assertThat(binding.api()).isEqualTo(h.plugin.single);
+        assertThat(binding.submission().params()).containsExactlyInAnyOrderEntriesOf(
+                Map.of("symbol", "000001.SZ", "kind", "basic"));
+        assertThat(h.stored.get()).isNull();
+        assertThat(h.plugin.executions.get()).isZero();
+        org.mockito.Mockito.verify(h.repository, org.mockito.Mockito.never()).queuedCount();
+    }
+
+    @Test
+    void preparedReplayUsesStoredValuesBeforeCurrentAvailabilityAndKeepsConflictsStable() {
+        Harness h = new Harness();
+        var original = h.service().submit(single(SUBMISSION_ID, "000001.SZ")).task();
+        h.plugin.available = false;
+        h.queued = Long.MAX_VALUE;
+        var service = h.service(new DownloadTaskService.Settings(false, 1, 1));
+        var binding = service.prepareSubmission(single(SUBMISSION_ID, " 000001.sz "));
+        assertThat(binding.replay()).isTrue();
+        assertThat(binding.api()).isNull();
+        assertThat(binding.submission()).isEqualTo(new DownloadTaskService.Submission(
+                SUBMISSION_ID, KEY, DownloadMode.SINGLE, original.params()));
+        code(ErrorCode.SUBMISSION_CONFLICT,
+                () -> service.prepareSubmission(single(SUBMISSION_ID, "000002.SZ")));
+        assertThat(h.stored.get()).isEqualTo(original);
+    }
+
+    @Test
+    void preparationIsNotAuthorizationAndFinalSubmitRevalidates() {
+        Harness h = new Harness();
+        var service = h.service();
+        var binding = service.prepareSubmission(single(SUBMISSION_ID, "000001.SZ"));
+        h.queued = Long.MAX_VALUE;
+        code(ErrorCode.TASK_QUEUE_FULL, () -> service.submit(binding.submission()));
+        assertThat(h.stored.get()).isNull();
+        code(ErrorCode.PARAM_INVALID, () -> service.prepareSubmission(null));
+        assertThatThrownBy(() -> new DownloadTaskService.SubmissionBinding(binding.submission(), null, false))
+                .isInstanceOf(IllegalArgumentException.class);
+        assertThatThrownBy(() -> new DownloadTaskService.SubmissionBinding(binding.submission(), binding.api(), true))
+                .isInstanceOf(IllegalArgumentException.class);
+        assertThatThrownBy(() -> new DownloadTaskService.SubmissionBinding(null, binding.api(), false))
+                .isInstanceOf(NullPointerException.class);
+    }
+
+    @Test
+    void preparationHonorsCoordinatorAdmissionForNewKeysButKeepsHistoricalReplayAndQueryErrors() {
+        Harness h = new Harness();
+        var service = h.service();
+        var original = service.submit(single(SUBMISSION_ID, "000001.SZ")).task();
+        var coordinator = mock(DownloadTaskCoordinator.class);
+        doThrow(new DownloadTaskService.TaskException(ErrorCode.TASK_STATE_CONFLICT))
+                .when(coordinator).checkAdmission();
+        service.bindCoordinator(coordinator);
+        code(ErrorCode.TASK_STATE_CONFLICT,
+                () -> service.prepareSubmission(single(UUID.randomUUID(), "000001.SZ")));
+        assertThat(service.prepareSubmission(single(SUBMISSION_ID, " 000001.sz ")).submission().params())
+                .isEqualTo(original.params());
+        var unreadable = UUID.randomUUID();
+        when(h.repository.findSubmission(unreadable)).thenThrow(
+                new DownloadTaskService.TaskException(ErrorCode.QUERY_FAILED));
+        code(ErrorCode.QUERY_FAILED, () -> service.prepareSubmission(single(unreadable, "000001.SZ")));
+        assertThat(h.stored.get()).isEqualTo(original);
+    }
+
+    @Test
     void createsSingleSubmissionAndReturnsSameTaskForNormalizedEquivalentReplay() {
         Harness h = new Harness();
         var created = h.service().submit(single(SUBMISSION_ID, " 000001.sz "));
@@ -219,8 +287,12 @@ class DownloadTaskServiceTest {
             raw.put("start_date", "20280228");
             raw.put("end_date", "20280301");
 
-            DownloadTask task = h.service().submit(new DownloadTaskService.Submission(
-                    UUID.randomUUID(), KEY, DownloadMode.RANGE, raw)).task();
+            var request = new DownloadTaskService.Submission(UUID.randomUUID(), KEY, DownloadMode.RANGE, raw);
+            var prepared = h.service().prepareSubmission(request);
+            assertThat(prepared.replay()).isFalse();
+            assertThat(prepared.api().queryMode()).isEqualTo(QueryMode.date_range);
+            assertThat(prepared.api().parameters()).isEqualTo(h.plugin.range.parameters());
+            DownloadTask task = h.service().submit(prepared.submission()).task();
 
             assertThat(task.params()).containsEntry("start_date", "20280228").containsEntry("end_date", "20280301");
             if (prefix != null) assertThat(task.params()).containsEntry(
@@ -244,6 +316,8 @@ class DownloadTaskServiceTest {
         oversized.plugin.single = h.plugin.single;
         oversized.definition = h.definition;
         code(ErrorCode.PARAM_INVALID, () -> oversized.service().submit(new DownloadTaskService.Submission(
+                UUID.randomUUID(), KEY, DownloadMode.SINGLE, Map.of("payload", "p".repeat(8_179)))));
+        code(ErrorCode.PARAM_INVALID, () -> oversized.service().prepareSubmission(new DownloadTaskService.Submission(
                 UUID.randomUUID(), KEY, DownloadMode.SINGLE, Map.of("payload", "p".repeat(8_179)))));
         assertThat(oversized.stored.get()).isNull();
     }
@@ -384,6 +458,7 @@ class DownloadTaskServiceTest {
                     () -> service.retry(UUID.randomUUID(), 1),
                     () -> service.resume(UUID.randomUUID(), 1),
                     () -> service.controls(null),
+                    () -> service.prepareSubmission(single(SUBMISSION_ID, "000001.SZ")),
                     () -> service.submit(single(SUBMISSION_ID, "000001.SZ")),
                     () -> service.validateReplay(h.synthetic(Map.of("symbol", "000001.SZ", "kind", "basic"),
                             DownloadMode.SINGLE, h.plugin.single, null)))) {

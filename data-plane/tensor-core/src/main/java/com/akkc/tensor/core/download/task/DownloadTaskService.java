@@ -105,6 +105,13 @@ public final class DownloadTaskService {
         }
     }
 
+    public record SubmissionBinding(Submission submission, ApiDescriptor api, boolean replay) {
+        public SubmissionBinding {
+            Objects.requireNonNull(submission, "submission");
+            if (replay != (api == null)) throw new IllegalArgumentException("Invalid submission binding");
+        }
+    }
+
     public record SingleCapability(boolean available, ApiDescriptor api) {
         public SingleCapability {
             Objects.requireNonNull(api, "api");
@@ -137,6 +144,27 @@ public final class DownloadTaskService {
         return new DownloadCapabilities(new SingleCapability(inputsAvailable, single), range);
     }
 
+    /** Resolves binding metadata without accepting work; submit must revalidate the returned request. */
+    public SubmissionBinding prepareSubmission(Submission request) {
+        outsideTransaction();
+        if (request == null) throw new TaskException(ErrorCode.PARAM_INVALID);
+        admissionLock.lock();
+        try {
+            Optional<DownloadTask> existing = repository.findSubmission(request.submissionId());
+            if (existing.isPresent()) {
+                DownloadTask task = replay(request, existing.get()).task();
+                return new SubmissionBinding(new Submission(task.submissionId(), task.datasetKey(),
+                        task.mode(), task.params()), null, true);
+            }
+            if (coordinator != null) coordinator.checkAdmission();
+            Current current = current(request.datasetKey(), request.mode());
+            return new SubmissionBinding(new Submission(request.submissionId(), request.datasetKey(),
+                    request.mode(), submissionParams(current, request.params())), current.api(), false);
+        } finally {
+            admissionLock.unlock();
+        }
+    }
+
     public SubmissionResult submit(Submission request) {
         outsideTransaction();
         if (request == null) throw new TaskException(ErrorCode.PARAM_INVALID);
@@ -146,12 +174,7 @@ public final class DownloadTaskService {
             if (existing.isPresent()) return replay(request, existing.get());
             if (coordinator != null) coordinator.checkAdmission();
             Current current = current(request.datasetKey(), request.mode());
-            Map<String, Object> normalized = normalize(current, request.params());
-            try {
-                json.writeTaskParams(normalized);
-            } catch (IllegalArgumentException invalid) {
-                throw new TaskException(ErrorCode.PARAM_INVALID);
-            }
+            Map<String, Object> normalized = submissionParams(current, request.params());
             String definition = definitionHash(current);
             String policy = policySnapshot(current);
             if (repository.queuedCount() >= settings.maxQueuedTasks())
@@ -341,6 +364,16 @@ public final class DownloadTaskService {
             throw classified;
         } catch (RuntimeException invalid) {
             throw new TaskException(ErrorCode.DATASET_MISCONFIGURED);
+        }
+        return normalized;
+    }
+
+    private Map<String, Object> submissionParams(Current current, Map<String, Object> raw) {
+        Map<String, Object> normalized = normalize(current, raw);
+        try {
+            json.writeTaskParams(normalized);
+        } catch (IllegalArgumentException invalid) {
+            throw new TaskException(ErrorCode.PARAM_INVALID);
         }
         return normalized;
     }

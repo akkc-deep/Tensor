@@ -14,6 +14,7 @@ import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
+import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
@@ -42,11 +43,18 @@ public final class DownloadTaskRepository {
     private final DownloadTaskJson json;
     private final TransactionTemplate write;
     private final TransactionTemplate read;
+    private final DownloadTaskObserver observer;
 
     public DownloadTaskRepository(
             JdbcTemplate jdbc, PlatformTransactionManager transactions, DownloadTaskJson json) {
+        this(jdbc, transactions, json, DownloadTaskObserver.NOOP);
+    }
+
+    public DownloadTaskRepository(JdbcTemplate jdbc, PlatformTransactionManager transactions,
+            DownloadTaskJson json, DownloadTaskObserver observer) {
         this.jdbc = Objects.requireNonNull(jdbc);
         this.json = Objects.requireNonNull(json);
+        this.observer = Objects.requireNonNull(observer);
         write = new TransactionTemplate(transactions);
         write.setTimeout(60);
         read = new TransactionTemplate(transactions);
@@ -297,6 +305,8 @@ public final class DownloadTaskRepository {
                             time(deadline),
                             time(now),
                             id);
+                    var event = new DownloadTaskObserver.TaskStarted(id, t.datasetKey(), t.runGeneration() + 1);
+                    observe(() -> observer.taskStarted(event));
                     return Optional.of(requiredTask(id));
                 });
     }
@@ -411,6 +421,7 @@ public final class DownloadTaskRepository {
                             parentId);
                     insertBatch(p.taskId(), parentId, left, now);
                     insertBatch(p.taskId(), parentId, right, now);
+                    batchFinished(t, parent, DownloadBatch.Status.SPLIT, 0, 0, 0, null, now);
                     return null;
                 });
     }
@@ -419,10 +430,11 @@ public final class DownloadTaskRepository {
         tx(
                 false,
                 () -> {
-                    lockedTask(p);
-                    lockedBatch(p, id);
+                    var t = lockedTask(p);
+                    var b = lockedBatch(p, id);
                     require(error != null);
                     batchResult(id, "FAILED", error, 0, 0, 0, now);
+                    batchFinished(t, b, DownloadBatch.Status.FAILED, 0, 0, 0, error, now);
                     return null;
                 });
     }
@@ -447,6 +459,7 @@ public final class DownloadTaskRepository {
                                         default -> false;
                                     });
                     endTask(t, target, error, now);
+                    taskFinished(t, target, false, c, error, now);
                     return null;
                 });
     }
@@ -500,10 +513,11 @@ public final class DownloadTaskRepository {
                                     && (t.status() == DownloadTask.Status.QUEUED
                                             || t.status() == DownloadTask.Status.RUNNING));
                     var batches = lockedBatches(id);
-                    boolean success = complete(t, countRows(id));
+                    var counts = countRows(id);
+                    boolean success = complete(t, counts);
                     if (!success)
                         for (var b : batches)
-                            if (b.status() == DownloadBatch.Status.RUNNING)
+                            if (b.status() == DownloadBatch.Status.RUNNING) {
                                 batchResult(
                                         b.batchId(),
                                         "FAILED",
@@ -512,13 +526,16 @@ public final class DownloadTaskRepository {
                                         0,
                                         0,
                                         now);
-                    endTask(
-                            t,
-                            success
-                                    ? DownloadTask.Status.SUCCEEDED
-                                    : DownloadTask.Status.INTERRUPTED,
-                            success ? null : ErrorCode.EXECUTION_INTERRUPTED,
-                            now);
+                                batchFinished(t, b, DownloadBatch.Status.FAILED, 0, 0, 0,
+                                        ErrorCode.EXECUTION_INTERRUPTED, now);
+                            }
+                    var target = success ? DownloadTask.Status.SUCCEEDED : DownloadTask.Status.INTERRUPTED;
+                    var error = success ? null : ErrorCode.EXECUTION_INTERRUPTED;
+                    endTask(t, target, error, now);
+                    var recoveredCounts = success ? counts : new Counts(counts.totalBatches(), counts.pending(),
+                            0, counts.succeeded(), counts.failed() + counts.running(), counts.splitBatches(),
+                            counts.sourceRows(), counts.insertedRows(), counts.updatedRows());
+                    taskFinished(t, target, true, recoveredCounts, error, now);
                     return requiredTask(id);
                 });
     }
@@ -548,8 +565,8 @@ public final class DownloadTaskRepository {
         writeOperation(
                 () -> {
                     require(sourceRows >= 0 && insertedRows >= 0 && updatedRows >= 0);
-                    lockedTask(p);
-                    lockedBatch(p, id);
+                    var t = lockedTask(p);
+                    var b = lockedBatch(p, id);
                     // T04 may already have a repeatable-read snapshot: use current locking reads.
                     long remainingSource = Long.MAX_VALUE - sourceRows;
                     long remainingInserted = Long.MAX_VALUE - insertedRows;
@@ -565,8 +582,43 @@ public final class DownloadTaskRepository {
                         remainingUpdated -= batch.updatedRows();
                     }
                     batchResult(id, "SUCCEEDED", null, sourceRows, insertedRows, updatedRows, now);
+                    batchFinished(t, b, DownloadBatch.Status.SUCCEEDED,
+                            sourceRows, insertedRows, updatedRows, null, now);
                     return null;
                 });
+    }
+
+    private void batchFinished(DownloadTask task, DownloadBatch batch, DownloadBatch.Status status,
+            long sourceRows, long insertedRows, long updatedRows, ErrorCode error, Instant now) {
+        var event = new DownloadTaskObserver.BatchFinished(task.taskId(), task.datasetKey(), task.runGeneration(),
+                batch.batchId(), status, batch.attemptCount(), duration(batch.startedAt(), now),
+                sourceRows, insertedRows, updatedRows, error);
+        observe(() -> observer.batchFinished(event));
+    }
+
+    private void taskFinished(DownloadTask task, DownloadTask.Status status, boolean recovered,
+            Counts counts, ErrorCode error, Instant now) {
+        var event = new DownloadTaskObserver.TaskFinished(task.taskId(), task.datasetKey(), task.runGeneration(),
+                status, recovered, duration(task.startedAt(), now), task.requestCount(), task.runRequestCount(),
+                counts, error);
+        observe(() -> observer.taskFinished(event));
+    }
+
+    private void observe(Runnable callback) {
+        if (observer == DownloadTaskObserver.NOOP) return;
+        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+            @Override public void afterCommit() {
+                try {
+                    callback.run();
+                } catch (RuntimeException ignored) {
+                    // Observation must never turn a confirmed commit into a retryable business failure.
+                }
+            }
+        });
+    }
+
+    private static long duration(Instant startedAt, Instant now) {
+        return startedAt == null ? 0 : Math.max(0, ChronoUnit.MILLIS.between(startedAt, now));
     }
 
     private DownloadTask lockedTask(ExecutionPermit p) {

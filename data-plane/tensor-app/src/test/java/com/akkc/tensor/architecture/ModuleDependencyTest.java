@@ -39,9 +39,14 @@ class ModuleDependencyTest {
 
         noClasses().that().resideInAPackage("..core..")
                 .or().haveFullyQualifiedName("com.akkc.tensor.observability.OperationLogger")
+                .or().haveFullyQualifiedName("com.akkc.tensor.observability.DownloadTaskOperationLogger")
                 .should().dependOnClassesThat().resideInAnyPackage(
                         "com.akkc.tensor.web..", "org.springframework.web..",
                         "org.springframework.http..", "jakarta.servlet..")
+                .check(classes);
+        noClasses().that().haveNameMatching("com\\.akkc\\.tensor\\.core\\.download\\.task\\.DownloadTaskObserver(\\$.*)?")
+                .should().dependOnClassesThat().resideInAnyPackage(
+                        "org.slf4j..", "io.micrometer..", "com.akkc.tensor.observability..")
                 .check(classes);
     }
 

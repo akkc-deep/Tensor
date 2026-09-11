@@ -1,0 +1,1054 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://tensor.local/contracts/download-task.schema.json",
+  "title": "Tensor persistent download task HTTP contract",
+  "$comment": "Reference the appropriate $defs entry for the route. JSON Schema cannot detect duplicate object members, repeated/unknown HTTP query parameters or integer token spelling; strict runtime binding enforces those constraints. Version, counts, total and rowLimit are int64 JSON numbers, up to 9223372036854775807. JavaScript Number is exact only up to 9007199254740991; clients must use lossless JSON parsing and preserve exact decimal digits when displaying counts or sending expectedVersion above that boundary. Do not round, truncate, convert response numbers to strings on the server, or change historical securities LONG/DECIMAL string serialization.",
+  "$ref": "#/$defs/SubmissionRequest",
+  "$defs": {
+    "UUID": {
+      "type": "string",
+      "format": "uuid",
+      "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
+    },
+    "Identifier": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_]{1,63}$"
+    },
+    "UtcInstant": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d{1,9})?Z$"
+    },
+    "Date": {
+      "type": "string",
+      "format": "date",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+    },
+    "PositiveInt64": {
+      "type": "integer",
+      "format": "int64",
+      "minimum": 1,
+      "maximum": 9223372036854775807
+    },
+    "NonNegativeInt64": {
+      "type": "integer",
+      "format": "int64",
+      "minimum": 0,
+      "maximum": 9223372036854775807
+    },
+    "TaskStatus": {
+      "enum": [
+        "QUEUED",
+        "RUNNING",
+        "SUCCEEDED",
+        "PARTIAL_FAILED",
+        "FAILED",
+        "INTERRUPTED"
+      ]
+    },
+    "BatchStatus": {
+      "enum": [
+        "PENDING",
+        "RUNNING",
+        "SUCCEEDED",
+        "FAILED",
+        "SPLIT"
+      ]
+    },
+    "Mode": {
+      "enum": [
+        "SINGLE",
+        "RANGE"
+      ]
+    },
+    "ErrorCode": {
+      "enum": [
+        "PARAM_REQUIRED",
+        "PARAM_INVALID",
+        "PLUGIN_DISABLED",
+        "DATASET_MISCONFIGURED",
+        "SOURCE_AUTH_FAILED",
+        "SOURCE_PERMISSION_DENIED",
+        "SOURCE_RATE_LIMITED",
+        "SOURCE_UNAVAILABLE",
+        "SOURCE_NETWORK_ERROR",
+        "SOURCE_TIMEOUT",
+        "SOURCE_PAYLOAD_INVALID",
+        "ADAPTER_FIELD_MISSING",
+        "ADAPTER_TYPE_INVALID",
+        "PERSISTENCE_FAILED",
+        "QUERY_FAILED",
+        "INTERNAL_ERROR",
+        "TASK_NOT_FOUND",
+        "SUBMISSION_CONFLICT",
+        "TASK_STATE_CONFLICT",
+        "TASK_DEFINITION_CHANGED",
+        "BATCH_DOWNLOAD_UNAVAILABLE",
+        "TASK_QUEUE_FULL",
+        "BATCH_COMPLETENESS_UNCONFIRMED",
+        "SOURCE_RANGE_MISMATCH",
+        "TASK_LIMIT_EXCEEDED",
+        "EXECUTION_INTERRUPTED"
+      ]
+    },
+    "Parameters": {
+      "type": "object",
+      "propertyNames": {
+        "type": "string",
+        "pattern": "^[a-z][a-z0-9_]{1,63}$"
+      },
+      "additionalProperties": {
+        "type": "string"
+      },
+      "description": "String-valued business parameters; exact fields and YYYYMMDD date rules come from capabilities and the selected Codec. Normalized stored parameters are at most 8 KiB UTF-8 JSON; runtime enforces this byte limit."
+    },
+    "SubmissionRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "submissionId",
+        "pluginId",
+        "apiName",
+        "mode",
+        "params"
+      ],
+      "properties": {
+        "submissionId": {
+          "$ref": "#/$defs/UUID"
+        },
+        "pluginId": {
+          "$ref": "#/$defs/Identifier"
+        },
+        "apiName": {
+          "$ref": "#/$defs/Identifier"
+        },
+        "mode": {
+          "$ref": "#/$defs/Mode"
+        },
+        "params": {
+          "$ref": "#/$defs/Parameters"
+        }
+      }
+    },
+    "ControlRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "expectedVersion"
+      ],
+      "properties": {
+        "expectedVersion": {
+          "$ref": "#/$defs/PositiveInt64"
+        }
+      },
+      "description": "Only a JSON integer token is accepted; strings, fractional and exponent spellings are rejected at runtime even when mathematically integral. JSON Schema cannot express lexical token spelling or duplicate JSON members."
+    },
+    "Receipt": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "requestId",
+        "taskId",
+        "status",
+        "version",
+        "createdAt"
+      ],
+      "properties": {
+        "requestId": {
+          "$ref": "#/$defs/UUID"
+        },
+        "taskId": {
+          "$ref": "#/$defs/UUID"
+        },
+        "status": {
+          "$ref": "#/$defs/TaskStatus"
+        },
+        "version": {
+          "$ref": "#/$defs/PositiveInt64"
+        },
+        "createdAt": {
+          "$ref": "#/$defs/UtcInstant"
+        }
+      },
+      "description": "202 confirms durable acceptance, never download success. A 200 equivalent submission replay returns the original task and may have any current status. createdAt is the original creation time; GET is authoritative if the worker has advanced since this receipt."
+    },
+    "TaskCounts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "totalBatches",
+        "pendingBatches",
+        "runningBatches",
+        "succeededBatches",
+        "failedBatches",
+        "splitBatches",
+        "sourceRows",
+        "insertedRows",
+        "updatedRows"
+      ],
+      "properties": {
+        "totalBatches": {
+          "$ref": "#/$defs/NonNegativeInt64"
+        },
+        "pendingBatches": {
+          "$ref": "#/$defs/NonNegativeInt64"
+        },
+        "runningBatches": {
+          "$ref": "#/$defs/NonNegativeInt64"
+        },
+        "succeededBatches": {
+          "$ref": "#/$defs/NonNegativeInt64"
+        },
+        "failedBatches": {
+          "$ref": "#/$defs/NonNegativeInt64"
+        },
+        "splitBatches": {
+          "$ref": "#/$defs/NonNegativeInt64"
+        },
+        "sourceRows": {
+          "$ref": "#/$defs/NonNegativeInt64"
+        },
+        "insertedRows": {
+          "$ref": "#/$defs/NonNegativeInt64"
+        },
+        "updatedRows": {
+          "$ref": "#/$defs/NonNegativeInt64"
+        }
+      },
+      "description": "totalBatches is pending + running + succeeded + failed leaf batches; splitBatches counts parent nodes separately. Unplanned zero batches do not imply success. Inserted/updated rows count committed writes across attempts."
+    },
+    "StoredErrorResponse": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "code",
+        "message"
+      ],
+      "properties": {
+        "code": {
+          "$ref": "#/$defs/ErrorCode"
+        },
+        "message": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "description": "StoredError.message() fixed classification text only; no raw cause, stack trace, upstream payload, parameters or retryable flag."
+    },
+    "TaskResponse": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "taskId",
+        "submissionId",
+        "pluginId",
+        "apiName",
+        "mode",
+        "params",
+        "status",
+        "version",
+        "planReady",
+        "counts",
+        "lastError",
+        "canRetry",
+        "canResume",
+        "requestCount",
+        "runRequestCount",
+        "createdAt",
+        "updatedAt",
+        "queuedAt",
+        "startedAt",
+        "finishedAt",
+        "deadlineAt"
+      ],
+      "properties": {
+        "taskId": {
+          "$ref": "#/$defs/UUID"
+        },
+        "submissionId": {
+          "$ref": "#/$defs/UUID"
+        },
+        "pluginId": {
+          "$ref": "#/$defs/Identifier"
+        },
+        "apiName": {
+          "$ref": "#/$defs/Identifier"
+        },
+        "mode": {
+          "$ref": "#/$defs/Mode"
+        },
+        "params": {
+          "$ref": "#/$defs/Parameters"
+        },
+        "status": {
+          "$ref": "#/$defs/TaskStatus"
+        },
+        "version": {
+          "$ref": "#/$defs/PositiveInt64"
+        },
+        "planReady": {
+          "type": "boolean"
+        },
+        "counts": {
+          "$ref": "#/$defs/TaskCounts"
+        },
+        "lastError": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/StoredErrorResponse"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "canRetry": {
+          "type": "boolean"
+        },
+        "canResume": {
+          "type": "boolean"
+        },
+        "requestCount": {
+          "$ref": "#/$defs/NonNegativeInt64"
+        },
+        "runRequestCount": {
+          "$ref": "#/$defs/NonNegativeInt64"
+        },
+        "createdAt": {
+          "$ref": "#/$defs/UtcInstant"
+        },
+        "updatedAt": {
+          "$ref": "#/$defs/UtcInstant"
+        },
+        "queuedAt": {
+          "$ref": "#/$defs/UtcInstant"
+        },
+        "startedAt": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/UtcInstant"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "finishedAt": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/UtcInstant"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "deadlineAt": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/UtcInstant"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "description": "List and detail share this whitelist. Each row uses one task/counts snapshot; controls are transient hints and retry/resume revalidate state, version, lifecycle, definition and capacity."
+    },
+    "BatchResponse": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "batchId",
+        "parentBatchId",
+        "batchKey",
+        "rangeStart",
+        "rangeEnd",
+        "sourceParams",
+        "status",
+        "attemptCount",
+        "sourceRows",
+        "insertedRows",
+        "updatedRows",
+        "error",
+        "startedAt",
+        "finishedAt",
+        "createdAt",
+        "updatedAt"
+      ],
+      "properties": {
+        "batchId": {
+          "$ref": "#/$defs/UUID"
+        },
+        "parentBatchId": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/UUID"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "batchKey": {
+          "type": "string",
+          "pattern": "^[0-9]{6}(?:/[01])*$",
+          "maxLength": 128
+        },
+        "rangeStart": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Date"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "rangeEnd": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Date"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "sourceParams": {
+          "$ref": "#/$defs/Parameters"
+        },
+        "status": {
+          "$ref": "#/$defs/BatchStatus"
+        },
+        "attemptCount": {
+          "type": "integer",
+          "format": "int32",
+          "minimum": 0,
+          "maximum": 2147483647
+        },
+        "sourceRows": {
+          "$ref": "#/$defs/NonNegativeInt64"
+        },
+        "insertedRows": {
+          "$ref": "#/$defs/NonNegativeInt64"
+        },
+        "updatedRows": {
+          "$ref": "#/$defs/NonNegativeInt64"
+        },
+        "error": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/StoredErrorResponse"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "startedAt": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/UtcInstant"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "finishedAt": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/UtcInstant"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "createdAt": {
+          "$ref": "#/$defs/UtcInstant"
+        },
+        "updatedAt": {
+          "$ref": "#/$defs/UtcInstant"
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "rangeStart": {
+                "type": "null"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "rangeEnd": {
+                "type": "null"
+              }
+            }
+          },
+          "else": {
+            "properties": {
+              "rangeEnd": {
+                "$ref": "#/$defs/Date"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "TaskPage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "page",
+        "pageSize",
+        "total",
+        "items"
+      ],
+      "properties": {
+        "page": {
+          "type": "integer",
+          "format": "int32",
+          "minimum": 1,
+          "maximum": 2147483647
+        },
+        "pageSize": {
+          "type": "integer",
+          "enum": [
+            20,
+            50,
+            100
+          ]
+        },
+        "total": {
+          "$ref": "#/$defs/NonNegativeInt64"
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/TaskResponse"
+          }
+        }
+      },
+      "description": "One-based page, default 1; pageSize defaults to 20. An out-of-range page is returned unchanged with empty items. No deletion or implicit page normalization. total, member IDs and ordering are fixed by the initial filtered query. Each item is then read as one snapshot; rows may reflect different instants and updated statuses. A failed detail read fails the entire response."
+    },
+    "BatchPage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "page",
+        "pageSize",
+        "total",
+        "items"
+      ],
+      "properties": {
+        "page": {
+          "type": "integer",
+          "format": "int32",
+          "minimum": 1,
+          "maximum": 2147483647
+        },
+        "pageSize": {
+          "type": "integer",
+          "enum": [
+            20,
+            50,
+            100
+          ]
+        },
+        "total": {
+          "$ref": "#/$defs/NonNegativeInt64"
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/BatchResponse"
+          }
+        }
+      },
+      "description": "One-based page, default 1; pageSize defaults to 20. An out-of-range page is returned unchanged with empty items. No deletion or implicit page normalization."
+    },
+    "ParameterResponse": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "label",
+        "type",
+        "required"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]{1,63}$"
+        },
+        "label": {
+          "type": "string",
+          "minLength": 1
+        },
+        "type": {
+          "enum": [
+            "DATE",
+            "DATE_RANGE_MEMBER",
+            "MONTH",
+            "TS_CODE",
+            "ENUM",
+            "TEXT"
+          ]
+        },
+        "required": {
+          "type": "boolean"
+        },
+        "description": {
+          "type": "string",
+          "minLength": 1
+        },
+        "defaultValue": {
+          "type": "string"
+        },
+        "allowedValues": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "type": "string"
+          }
+        },
+        "pattern": {
+          "type": "string"
+        },
+        "relatedParameter": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]{1,63}$"
+        }
+      },
+      "description": "Existing ApiDescriptorResponse.ParameterResponse shape. Optional null values are omitted, including empty allowedValues; all other nullable task fields remain explicit null.",
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "ENUM"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "allowedValues"
+            ]
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "type": {
+                "const": "DATE_RANGE_MEMBER"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "relatedParameter"
+            ]
+          }
+        }
+      ]
+    },
+    "CompletenessRule": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind",
+        "rowLimit",
+        "evidence"
+      ],
+      "properties": {
+        "kind": {
+          "enum": [
+            "UNKNOWN",
+            "CONFIRMED_ROW_LIMIT",
+            "VERIFIED_RULE"
+          ]
+        },
+        "rowLimit": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/PositiveInt64"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "evidence": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "UNKNOWN"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "rowLimit": {
+                "type": "null"
+              },
+              "evidence": {
+                "type": "null"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "CONFIRMED_ROW_LIMIT"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "rowLimit": {
+                "$ref": "#/$defs/PositiveInt64"
+              },
+              "evidence": {
+                "type": "string",
+                "minLength": 1
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "VERIFIED_RULE"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "rowLimit": {
+                "type": "null"
+              },
+              "evidence": {
+                "type": "string",
+                "minLength": 1
+              }
+            }
+          }
+        }
+      ]
+    },
+    "SingleCapability": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "available",
+        "parameters"
+      ],
+      "properties": {
+        "available": {
+          "type": "boolean"
+        },
+        "parameters": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ParameterResponse"
+          }
+        }
+      }
+    },
+    "RangeCapability": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "availability",
+        "unavailableReason",
+        "dateAxis",
+        "dateLabel",
+        "startParameter",
+        "endParameter",
+        "parameters",
+        "planningMode",
+        "splittable",
+        "policyVersion",
+        "completenessRule"
+      ],
+      "properties": {
+        "availability": {
+          "enum": [
+            "AVAILABLE",
+            "NEEDS_VERIFICATION",
+            "UNSUPPORTED"
+          ]
+        },
+        "unavailableReason": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "dateAxis": {
+          "enum": [
+            "TRADE_DATE",
+            "ANNOUNCEMENT_DATE",
+            "REPORT_PERIOD",
+            "CALENDAR_DATE",
+            "ISSUE_DATE",
+            null
+          ]
+        },
+        "dateLabel": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "minLength": 1
+        },
+        "startParameter": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Identifier"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "endParameter": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Identifier"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "parameters": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ParameterResponse"
+          }
+        },
+        "planningMode": {
+          "enum": [
+            "NATIVE_RANGE",
+            "CALENDAR_DAYS",
+            "TRADING_DAYS",
+            null
+          ]
+        },
+        "splittable": {
+          "type": "boolean"
+        },
+        "policyVersion": {
+          "type": "string",
+          "minLength": 1
+        },
+        "completenessRule": {
+          "$ref": "#/$defs/CompletenessRule"
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "availability": {
+                "const": "AVAILABLE"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "unavailableReason": {
+                "type": "null"
+              },
+              "completenessRule": {
+                "properties": {
+                  "kind": {
+                    "enum": [
+                      "CONFIRMED_ROW_LIMIT",
+                      "VERIFIED_RULE"
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "else": {
+            "properties": {
+              "unavailableReason": {
+                "type": "string",
+                "minLength": 1
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "availability": {
+                "const": "UNSUPPORTED"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "dateAxis": {
+                "type": "null"
+              },
+              "dateLabel": {
+                "type": "null"
+              },
+              "startParameter": {
+                "type": "null"
+              },
+              "endParameter": {
+                "type": "null"
+              },
+              "planningMode": {
+                "type": "null"
+              },
+              "parameters": {
+                "maxItems": 0
+              },
+              "splittable": {
+                "const": false
+              },
+              "completenessRule": {
+                "properties": {
+                  "kind": {
+                    "const": "UNKNOWN"
+                  }
+                }
+              }
+            }
+          },
+          "else": {
+            "properties": {
+              "dateAxis": {
+                "type": "string"
+              },
+              "dateLabel": {
+                "type": "string"
+              },
+              "startParameter": {
+                "type": "string"
+              },
+              "endParameter": {
+                "type": "string"
+              },
+              "planningMode": {
+                "type": "string"
+              },
+              "parameters": {
+                "minItems": 2
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "splittable": {
+                "const": true
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "planningMode": {
+                "const": "NATIVE_RANGE"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "CapabilitiesResponse": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "single",
+        "range"
+      ],
+      "properties": {
+        "single": {
+          "$ref": "#/$defs/SingleCapability"
+        },
+        "range": {
+          "$ref": "#/$defs/RangeCapability"
+        }
+      },
+      "description": "Capabilities describe metadata and current source readiness, not an acceptance promise. Known disabled sources remain queryable. Production Tushare has 34 NEEDS_VERIFICATION ranges and six SINGLE-only APIs; AVAILABLE examples are controlled fixtures only."
+    },
+    "FieldError": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "field",
+        "message"
+      ],
+      "properties": {
+        "field": {
+          "type": "string",
+          "minLength": 1
+        },
+        "message": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "Error": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "requestId",
+        "code",
+        "message",
+        "retryable",
+        "fieldErrors"
+      ],
+      "properties": {
+        "requestId": {
+          "$ref": "#/$defs/UUID"
+        },
+        "code": {
+          "$ref": "#/$defs/ErrorCode"
+        },
+        "message": {
+          "type": "string",
+          "minLength": 1
+        },
+        "retryable": {
+          "type": "boolean"
+        },
+        "fieldErrors": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/FieldError"
+          }
+        }
+      },
+      "description": "Shared ApiErrorResponse, with requestId equal to X-Request-Id. retryable is the ErrorCode classification; only canRetry/canResume describe available task controls. Stored task failures remain HTTP 200 when querying succeeds."
+    }
+  }
+}

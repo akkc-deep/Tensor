@@ -1,0 +1,1183 @@
+{
+  "description": "Independent HTTP contract scenarios, not one shared timeline. All AVAILABLE RANGE cases are controlled fixtures and are not production acceptance evidence. ErrorCode.retryable is classification, while canRetry/canResume are current control hints. Counts, versions, totals and rowLimit are int64 JSON numbers; clients must preserve exact values above JavaScript Number.MAX_SAFE_INTEGER (9007199254740991).",
+  "examples": [
+    {
+      "name": "singleSubmission",
+      "schema": "SubmissionRequest",
+      "description": "SINGLE retains existing stock/date requirements; submitting never waits for a source response.",
+      "method": "POST",
+      "path": "/api/v1/download-tasks",
+      "value": {
+        "submissionId": "44444444-4444-4444-8444-444444444444",
+        "pluginId": "tushare_pro",
+        "apiName": "daily",
+        "mode": "SINGLE",
+        "params": {
+          "ts_code": "000001.SZ",
+          "trade_date": "20260803"
+        }
+      }
+    },
+    {
+      "name": "rangeSubmission",
+      "schema": "SubmissionRequest",
+      "description": "Controlled AVAILABLE contract example only. contract_fixture is not a production plugin. All 34 production Tushare RANGE APIs remain NEEDS_VERIFICATION and cannot currently accept this mode.",
+      "method": "POST",
+      "path": "/api/v1/download-tasks",
+      "value": {
+        "submissionId": "33333333-3333-4333-8333-333333333333",
+        "pluginId": "contract_fixture",
+        "apiName": "daily",
+        "mode": "RANGE",
+        "params": {
+          "ts_code": "000001.SZ",
+          "start_date": "20260803",
+          "end_date": "20260805"
+        }
+      }
+    },
+    {
+      "name": "createdReceipt",
+      "schema": "Receipt",
+      "description": "Receipt for rangeSubmission immediately after durable acceptance; this 202 is not download success. The worker may advance before the client receives it.",
+      "method": "POST",
+      "path": "/api/v1/download-tasks",
+      "httpStatus": 202,
+      "headers": {
+        "Location": "/api/v1/download-tasks/22222222-2222-4222-8222-222222222222",
+        "X-Request-Id": "11111111-1111-4111-8111-111111111111"
+      },
+      "value": {
+        "requestId": "11111111-1111-4111-8111-111111111111",
+        "taskId": "22222222-2222-4222-8222-222222222222",
+        "status": "QUEUED",
+        "version": 1,
+        "createdAt": "2026-09-12T00:00:00Z"
+      }
+    },
+    {
+      "name": "queuedTask",
+      "schema": "TaskResponse",
+      "description": "Unplanned accepted task with explicit null timestamps and zero counts.",
+      "method": "GET",
+      "path": "/api/v1/download-tasks/22222222-2222-4222-8222-222222222222",
+      "httpStatus": 200,
+      "value": {
+        "taskId": "22222222-2222-4222-8222-222222222222",
+        "submissionId": "33333333-3333-4333-8333-333333333333",
+        "pluginId": "contract_fixture",
+        "apiName": "daily",
+        "mode": "RANGE",
+        "params": {
+          "ts_code": "000001.SZ",
+          "start_date": "20260803",
+          "end_date": "20260805"
+        },
+        "status": "QUEUED",
+        "version": 1,
+        "planReady": false,
+        "counts": {
+          "totalBatches": 0,
+          "pendingBatches": 0,
+          "runningBatches": 0,
+          "succeededBatches": 0,
+          "failedBatches": 0,
+          "splitBatches": 0,
+          "sourceRows": 0,
+          "insertedRows": 0,
+          "updatedRows": 0
+        },
+        "lastError": null,
+        "canRetry": false,
+        "canResume": false,
+        "requestCount": 0,
+        "runRequestCount": 0,
+        "createdAt": "2026-09-12T00:00:00Z",
+        "updatedAt": "2026-09-12T00:00:00Z",
+        "queuedAt": "2026-09-12T00:00:00Z",
+        "startedAt": null,
+        "finishedAt": null,
+        "deadlineAt": null
+      }
+    },
+    {
+      "name": "runningTask",
+      "schema": "TaskResponse",
+      "description": "Three leaf batches: one running and two pending. Counts are one snapshot.",
+      "method": "GET",
+      "path": "/api/v1/download-tasks/22222222-2222-4222-8222-222222222222",
+      "httpStatus": 200,
+      "value": {
+        "taskId": "22222222-2222-4222-8222-222222222222",
+        "submissionId": "33333333-3333-4333-8333-333333333333",
+        "pluginId": "contract_fixture",
+        "apiName": "daily",
+        "mode": "RANGE",
+        "params": {
+          "ts_code": "000001.SZ",
+          "start_date": "20260803",
+          "end_date": "20260805"
+        },
+        "status": "RUNNING",
+        "version": 3,
+        "planReady": true,
+        "counts": {
+          "totalBatches": 3,
+          "pendingBatches": 2,
+          "runningBatches": 1,
+          "succeededBatches": 0,
+          "failedBatches": 0,
+          "splitBatches": 0,
+          "sourceRows": 0,
+          "insertedRows": 0,
+          "updatedRows": 0
+        },
+        "lastError": null,
+        "canRetry": false,
+        "canResume": false,
+        "requestCount": 1,
+        "runRequestCount": 1,
+        "createdAt": "2026-09-12T00:00:00Z",
+        "updatedAt": "2026-09-12T00:00:01Z",
+        "queuedAt": "2026-09-12T00:00:00Z",
+        "startedAt": "2026-09-12T00:00:01Z",
+        "finishedAt": null,
+        "deadlineAt": "2026-09-12T00:30:01Z"
+      }
+    },
+    {
+      "name": "partialFailedTask",
+      "schema": "TaskResponse",
+      "description": "Three batches: batch 1 and 3 succeeded, batch 2 timed out. Two committed rows, one failed leaf, no split parents. A stored timeout is response data, so GET is 200.",
+      "method": "GET",
+      "path": "/api/v1/download-tasks/22222222-2222-4222-8222-222222222222",
+      "httpStatus": 200,
+      "value": {
+        "taskId": "22222222-2222-4222-8222-222222222222",
+        "submissionId": "33333333-3333-4333-8333-333333333333",
+        "pluginId": "contract_fixture",
+        "apiName": "daily",
+        "mode": "RANGE",
+        "params": {
+          "ts_code": "000001.SZ",
+          "start_date": "20260803",
+          "end_date": "20260805"
+        },
+        "status": "PARTIAL_FAILED",
+        "version": 4,
+        "planReady": true,
+        "counts": {
+          "totalBatches": 3,
+          "pendingBatches": 0,
+          "runningBatches": 0,
+          "succeededBatches": 2,
+          "failedBatches": 1,
+          "splitBatches": 0,
+          "sourceRows": 2,
+          "insertedRows": 2,
+          "updatedRows": 0
+        },
+        "lastError": {
+          "code": "SOURCE_TIMEOUT",
+          "message": "Source request timed out"
+        },
+        "canRetry": true,
+        "canResume": false,
+        "requestCount": 3,
+        "runRequestCount": 3,
+        "createdAt": "2026-09-12T00:00:00Z",
+        "updatedAt": "2026-09-12T00:00:04.123Z",
+        "queuedAt": "2026-09-12T00:00:00Z",
+        "startedAt": "2026-09-12T00:00:01Z",
+        "finishedAt": "2026-09-12T00:00:04.123Z",
+        "deadlineAt": "2026-09-12T00:30:01Z"
+      }
+    },
+    {
+      "name": "replayedReceipt",
+      "schema": "Receipt",
+      "description": "Same normalized submissionId and request find the original task even after source disablement or shutdown. Replay preserves version and createdAt and does not enqueue or download again.",
+      "method": "POST",
+      "path": "/api/v1/download-tasks",
+      "httpStatus": 200,
+      "headers": {
+        "Location": "/api/v1/download-tasks/22222222-2222-4222-8222-222222222222",
+        "X-Request-Id": "11111111-1111-4111-8111-111111111111"
+      },
+      "value": {
+        "requestId": "11111111-1111-4111-8111-111111111111",
+        "taskId": "22222222-2222-4222-8222-222222222222",
+        "status": "PARTIAL_FAILED",
+        "version": 4,
+        "createdAt": "2026-09-12T00:00:00Z"
+      }
+    },
+    {
+      "name": "retryRequest",
+      "schema": "ControlRequest",
+      "description": "Retry only FAILED/PARTIAL_FAILED, using exactly the last observed client version. Only failed leaves are reset.",
+      "method": "POST",
+      "path": "/api/v1/download-tasks/22222222-2222-4222-8222-222222222222/retry",
+      "value": {
+        "expectedVersion": 4
+      }
+    },
+    {
+      "name": "retryReceipt",
+      "schema": "Receipt",
+      "description": "Accepted retry of the same task; original createdAt is retained and success is not yet claimed.",
+      "method": "POST",
+      "path": "/api/v1/download-tasks/22222222-2222-4222-8222-222222222222/retry",
+      "httpStatus": 202,
+      "headers": {
+        "Location": "/api/v1/download-tasks/22222222-2222-4222-8222-222222222222",
+        "X-Request-Id": "11111111-1111-4111-8111-111111111111"
+      },
+      "value": {
+        "requestId": "11111111-1111-4111-8111-111111111111",
+        "taskId": "22222222-2222-4222-8222-222222222222",
+        "status": "QUEUED",
+        "version": 5,
+        "createdAt": "2026-09-12T00:00:00Z"
+      }
+    },
+    {
+      "name": "succeededTask",
+      "schema": "TaskResponse",
+      "description": "After retry only batch 2 was downloaded: attempts are 1/2/1, committed row count increased from two to three, cumulative source requests from three to four.",
+      "method": "GET",
+      "path": "/api/v1/download-tasks/22222222-2222-4222-8222-222222222222",
+      "httpStatus": 200,
+      "value": {
+        "taskId": "22222222-2222-4222-8222-222222222222",
+        "submissionId": "33333333-3333-4333-8333-333333333333",
+        "pluginId": "contract_fixture",
+        "apiName": "daily",
+        "mode": "RANGE",
+        "params": {
+          "ts_code": "000001.SZ",
+          "start_date": "20260803",
+          "end_date": "20260805"
+        },
+        "status": "SUCCEEDED",
+        "version": 8,
+        "planReady": true,
+        "counts": {
+          "totalBatches": 3,
+          "pendingBatches": 0,
+          "runningBatches": 0,
+          "succeededBatches": 3,
+          "failedBatches": 0,
+          "splitBatches": 0,
+          "sourceRows": 3,
+          "insertedRows": 3,
+          "updatedRows": 0
+        },
+        "lastError": null,
+        "canRetry": false,
+        "canResume": false,
+        "requestCount": 4,
+        "runRequestCount": 1,
+        "createdAt": "2026-09-12T00:00:00Z",
+        "updatedAt": "2026-09-12T00:01:02Z",
+        "queuedAt": "2026-09-12T00:01:00Z",
+        "startedAt": "2026-09-12T00:01:01Z",
+        "finishedAt": "2026-09-12T00:01:02Z",
+        "deadlineAt": "2026-09-12T00:31:01Z"
+      }
+    },
+    {
+      "name": "interruptedTask",
+      "schema": "TaskResponse",
+      "description": "Recovered interrupted task. Resume preserves successful leaves and ordinary failures; eligible interrupted work continues only after an explicit control request.",
+      "method": "GET",
+      "path": "/api/v1/download-tasks/22222222-2222-4222-8222-222222222222",
+      "httpStatus": 200,
+      "value": {
+        "taskId": "22222222-2222-4222-8222-222222222222",
+        "submissionId": "33333333-3333-4333-8333-333333333333",
+        "pluginId": "contract_fixture",
+        "apiName": "daily",
+        "mode": "RANGE",
+        "params": {
+          "ts_code": "000001.SZ",
+          "start_date": "20260803",
+          "end_date": "20260805"
+        },
+        "status": "INTERRUPTED",
+        "version": 4,
+        "planReady": true,
+        "counts": {
+          "totalBatches": 3,
+          "pendingBatches": 1,
+          "runningBatches": 0,
+          "succeededBatches": 1,
+          "failedBatches": 1,
+          "splitBatches": 0,
+          "sourceRows": 1,
+          "insertedRows": 1,
+          "updatedRows": 0
+        },
+        "lastError": {
+          "code": "EXECUTION_INTERRUPTED",
+          "message": "Download task execution was interrupted"
+        },
+        "canRetry": false,
+        "canResume": true,
+        "requestCount": 2,
+        "runRequestCount": 2,
+        "createdAt": "2026-09-12T00:00:00Z",
+        "updatedAt": "2026-09-12T00:00:04.123Z",
+        "queuedAt": "2026-09-12T00:00:00Z",
+        "startedAt": "2026-09-12T00:00:01Z",
+        "finishedAt": "2026-09-12T00:00:04.123Z",
+        "deadlineAt": "2026-09-12T00:30:01Z"
+      }
+    },
+    {
+      "name": "resumeRequest",
+      "schema": "ControlRequest",
+      "description": "Alternative interrupted timeline; only INTERRUPTED permits resume. Do not substitute a newly queried version for this client value.",
+      "method": "POST",
+      "path": "/api/v1/download-tasks/22222222-2222-4222-8222-222222222222/resume",
+      "value": {
+        "expectedVersion": 4
+      }
+    },
+    {
+      "name": "resumeReceipt",
+      "schema": "Receipt",
+      "description": "Explicit resume requeues the original task with original createdAt.",
+      "method": "POST",
+      "path": "/api/v1/download-tasks/22222222-2222-4222-8222-222222222222/resume",
+      "httpStatus": 202,
+      "headers": {
+        "Location": "/api/v1/download-tasks/22222222-2222-4222-8222-222222222222",
+        "X-Request-Id": "11111111-1111-4111-8111-111111111111"
+      },
+      "value": {
+        "requestId": "11111111-1111-4111-8111-111111111111",
+        "taskId": "22222222-2222-4222-8222-222222222222",
+        "status": "QUEUED",
+        "version": 5,
+        "createdAt": "2026-09-12T00:00:00Z"
+      }
+    },
+    {
+      "name": "unplannedFailedTask",
+      "schema": "TaskResponse",
+      "description": "Planning failed before any batch or source request. planReady=false and zero batches do not imply SUCCEEDED.",
+      "method": "GET",
+      "path": "/api/v1/download-tasks/22222222-2222-4222-8222-222222222222",
+      "httpStatus": 200,
+      "value": {
+        "taskId": "22222222-2222-4222-8222-222222222222",
+        "submissionId": "33333333-3333-4333-8333-333333333333",
+        "pluginId": "contract_fixture",
+        "apiName": "daily",
+        "mode": "RANGE",
+        "params": {
+          "ts_code": "000001.SZ",
+          "start_date": "20260803",
+          "end_date": "20260805"
+        },
+        "status": "FAILED",
+        "version": 3,
+        "planReady": false,
+        "counts": {
+          "totalBatches": 0,
+          "pendingBatches": 0,
+          "runningBatches": 0,
+          "succeededBatches": 0,
+          "failedBatches": 0,
+          "splitBatches": 0,
+          "sourceRows": 0,
+          "insertedRows": 0,
+          "updatedRows": 0
+        },
+        "lastError": {
+          "code": "SOURCE_UNAVAILABLE",
+          "message": "Source is unavailable"
+        },
+        "canRetry": true,
+        "canResume": false,
+        "requestCount": 0,
+        "runRequestCount": 0,
+        "createdAt": "2026-09-12T00:00:00Z",
+        "updatedAt": "2026-09-12T00:00:04.123Z",
+        "queuedAt": "2026-09-12T00:00:00Z",
+        "startedAt": "2026-09-12T00:00:01Z",
+        "finishedAt": "2026-09-12T00:00:04.123Z",
+        "deadlineAt": "2026-09-12T00:30:01Z"
+      }
+    },
+    {
+      "name": "partialFailedBatches",
+      "schema": "BatchPage",
+      "description": "Same partial-failure snapshot: two successes and one timeout, attempts 1/1/1. SPLIT nodes are excluded by default.",
+      "method": "GET",
+      "path": "/api/v1/download-tasks/22222222-2222-4222-8222-222222222222/batches",
+      "httpStatus": 200,
+      "value": {
+        "page": 1,
+        "pageSize": 20,
+        "total": 3,
+        "items": [
+          {
+            "batchId": "55555555-5555-4555-8555-000000000001",
+            "parentBatchId": null,
+            "batchKey": "000001",
+            "rangeStart": "2026-08-03",
+            "rangeEnd": "2026-08-03",
+            "sourceParams": {
+              "ts_code": "000001.SZ",
+              "trade_date": "20260803"
+            },
+            "status": "SUCCEEDED",
+            "attemptCount": 1,
+            "sourceRows": 1,
+            "insertedRows": 1,
+            "updatedRows": 0,
+            "error": null,
+            "startedAt": "2026-09-12T00:00:01Z",
+            "finishedAt": "2026-09-12T00:00:04.123Z",
+            "createdAt": "2026-09-12T00:00:01Z",
+            "updatedAt": "2026-09-12T00:00:04.123Z"
+          },
+          {
+            "batchId": "55555555-5555-4555-8555-000000000002",
+            "parentBatchId": null,
+            "batchKey": "000002",
+            "rangeStart": "2026-08-04",
+            "rangeEnd": "2026-08-04",
+            "sourceParams": {
+              "ts_code": "000001.SZ",
+              "trade_date": "20260804"
+            },
+            "status": "FAILED",
+            "attemptCount": 1,
+            "sourceRows": 0,
+            "insertedRows": 0,
+            "updatedRows": 0,
+            "error": {
+              "code": "SOURCE_TIMEOUT",
+              "message": "Source request timed out"
+            },
+            "startedAt": "2026-09-12T00:00:01Z",
+            "finishedAt": "2026-09-12T00:00:04.123Z",
+            "createdAt": "2026-09-12T00:00:01Z",
+            "updatedAt": "2026-09-12T00:00:04.123Z"
+          },
+          {
+            "batchId": "55555555-5555-4555-8555-000000000003",
+            "parentBatchId": null,
+            "batchKey": "000003",
+            "rangeStart": "2026-08-05",
+            "rangeEnd": "2026-08-05",
+            "sourceParams": {
+              "ts_code": "000001.SZ",
+              "trade_date": "20260805"
+            },
+            "status": "SUCCEEDED",
+            "attemptCount": 1,
+            "sourceRows": 1,
+            "insertedRows": 1,
+            "updatedRows": 0,
+            "error": null,
+            "startedAt": "2026-09-12T00:00:01Z",
+            "finishedAt": "2026-09-12T00:00:04.123Z",
+            "createdAt": "2026-09-12T00:00:01Z",
+            "updatedAt": "2026-09-12T00:00:04.123Z"
+          }
+        ]
+      }
+    },
+    {
+      "name": "succeededBatches",
+      "schema": "BatchPage",
+      "description": "Retry leaves batch 1 and 3 unchanged; batch 2 now succeeded with attemptCount=2.",
+      "method": "GET",
+      "path": "/api/v1/download-tasks/22222222-2222-4222-8222-222222222222/batches",
+      "httpStatus": 200,
+      "value": {
+        "page": 1,
+        "pageSize": 20,
+        "total": 3,
+        "items": [
+          {
+            "batchId": "55555555-5555-4555-8555-000000000001",
+            "parentBatchId": null,
+            "batchKey": "000001",
+            "rangeStart": "2026-08-03",
+            "rangeEnd": "2026-08-03",
+            "sourceParams": {
+              "ts_code": "000001.SZ",
+              "trade_date": "20260803"
+            },
+            "status": "SUCCEEDED",
+            "attemptCount": 1,
+            "sourceRows": 1,
+            "insertedRows": 1,
+            "updatedRows": 0,
+            "error": null,
+            "startedAt": "2026-09-12T00:00:01Z",
+            "finishedAt": "2026-09-12T00:00:04.123Z",
+            "createdAt": "2026-09-12T00:00:01Z",
+            "updatedAt": "2026-09-12T00:00:04.123Z"
+          },
+          {
+            "batchId": "55555555-5555-4555-8555-000000000002",
+            "parentBatchId": null,
+            "batchKey": "000002",
+            "rangeStart": "2026-08-04",
+            "rangeEnd": "2026-08-04",
+            "sourceParams": {
+              "ts_code": "000001.SZ",
+              "trade_date": "20260804"
+            },
+            "status": "SUCCEEDED",
+            "attemptCount": 2,
+            "sourceRows": 1,
+            "insertedRows": 1,
+            "updatedRows": 0,
+            "error": null,
+            "startedAt": "2026-09-12T00:01:01Z",
+            "finishedAt": "2026-09-12T00:01:02Z",
+            "createdAt": "2026-09-12T00:00:01Z",
+            "updatedAt": "2026-09-12T00:01:02Z"
+          },
+          {
+            "batchId": "55555555-5555-4555-8555-000000000003",
+            "parentBatchId": null,
+            "batchKey": "000003",
+            "rangeStart": "2026-08-05",
+            "rangeEnd": "2026-08-05",
+            "sourceParams": {
+              "ts_code": "000001.SZ",
+              "trade_date": "20260805"
+            },
+            "status": "SUCCEEDED",
+            "attemptCount": 1,
+            "sourceRows": 1,
+            "insertedRows": 1,
+            "updatedRows": 0,
+            "error": null,
+            "startedAt": "2026-09-12T00:00:01Z",
+            "finishedAt": "2026-09-12T00:00:04.123Z",
+            "createdAt": "2026-09-12T00:00:01Z",
+            "updatedAt": "2026-09-12T00:00:04.123Z"
+          }
+        ]
+      }
+    },
+    {
+      "name": "splitParent",
+      "schema": "BatchResponse",
+      "description": "Alternative NATIVE_RANGE split scenario. Parent counts only in splitBatches and is shown only when includeSplit=true. It has no committed row counts.",
+      "httpStatus": 200,
+      "value": {
+        "batchId": "55555555-5555-4555-8555-000000000001",
+        "parentBatchId": null,
+        "batchKey": "000001",
+        "rangeStart": "2026-08-03",
+        "rangeEnd": "2026-08-05",
+        "sourceParams": {
+          "ts_code": "000001.SZ",
+          "start_date": "20260803",
+          "end_date": "20260805"
+        },
+        "status": "SPLIT",
+        "attemptCount": 1,
+        "sourceRows": 0,
+        "insertedRows": 0,
+        "updatedRows": 0,
+        "error": null,
+        "startedAt": "2026-09-12T00:00:01Z",
+        "finishedAt": "2026-09-12T00:00:04.123Z",
+        "createdAt": "2026-09-12T00:00:01Z",
+        "updatedAt": "2026-09-12T00:00:04.123Z"
+      }
+    },
+    {
+      "name": "splitChild",
+      "schema": "BatchResponse",
+      "description": "First child is a leaf, with independently bounded sourceParams; the sibling covers 2026-08-05.",
+      "httpStatus": 200,
+      "value": {
+        "batchId": "66666666-6666-4666-8666-666666666666",
+        "parentBatchId": "55555555-5555-4555-8555-000000000001",
+        "batchKey": "000001/0",
+        "rangeStart": "2026-08-03",
+        "rangeEnd": "2026-08-04",
+        "sourceParams": {
+          "ts_code": "000001.SZ",
+          "start_date": "20260803",
+          "end_date": "20260804"
+        },
+        "status": "PENDING",
+        "attemptCount": 0,
+        "sourceRows": 0,
+        "insertedRows": 0,
+        "updatedRows": 0,
+        "error": null,
+        "startedAt": null,
+        "finishedAt": null,
+        "createdAt": "2026-09-12T00:00:01Z",
+        "updatedAt": "2026-09-12T00:00:04.123Z"
+      }
+    },
+    {
+      "name": "splitBatchPage",
+      "schema": "BatchPage",
+      "description": "includeSplit=true shows one parent plus two leaves. status=SPLIT&includeSplit=false is a valid empty page.",
+      "method": "GET",
+      "path": "/api/v1/download-tasks/22222222-2222-4222-8222-222222222222/batches?includeSplit=true",
+      "httpStatus": 200,
+      "value": {
+        "page": 1,
+        "pageSize": 20,
+        "total": 3,
+        "items": [
+          {
+            "batchId": "55555555-5555-4555-8555-000000000001",
+            "parentBatchId": null,
+            "batchKey": "000001",
+            "rangeStart": "2026-08-03",
+            "rangeEnd": "2026-08-05",
+            "sourceParams": {
+              "ts_code": "000001.SZ",
+              "start_date": "20260803",
+              "end_date": "20260805"
+            },
+            "status": "SPLIT",
+            "attemptCount": 1,
+            "sourceRows": 0,
+            "insertedRows": 0,
+            "updatedRows": 0,
+            "error": null,
+            "startedAt": "2026-09-12T00:00:01Z",
+            "finishedAt": "2026-09-12T00:00:04.123Z",
+            "createdAt": "2026-09-12T00:00:01Z",
+            "updatedAt": "2026-09-12T00:00:04.123Z"
+          },
+          {
+            "batchId": "66666666-6666-4666-8666-666666666666",
+            "parentBatchId": "55555555-5555-4555-8555-000000000001",
+            "batchKey": "000001/0",
+            "rangeStart": "2026-08-03",
+            "rangeEnd": "2026-08-04",
+            "sourceParams": {
+              "ts_code": "000001.SZ",
+              "start_date": "20260803",
+              "end_date": "20260804"
+            },
+            "status": "PENDING",
+            "attemptCount": 0,
+            "sourceRows": 0,
+            "insertedRows": 0,
+            "updatedRows": 0,
+            "error": null,
+            "startedAt": null,
+            "finishedAt": null,
+            "createdAt": "2026-09-12T00:00:01Z",
+            "updatedAt": "2026-09-12T00:00:04.123Z"
+          },
+          {
+            "batchId": "77777777-7777-4777-8777-777777777777",
+            "parentBatchId": "55555555-5555-4555-8555-000000000001",
+            "batchKey": "000001/1",
+            "rangeStart": "2026-08-05",
+            "rangeEnd": "2026-08-05",
+            "sourceParams": {
+              "ts_code": "000001.SZ",
+              "start_date": "20260805",
+              "end_date": "20260805"
+            },
+            "status": "PENDING",
+            "attemptCount": 0,
+            "sourceRows": 0,
+            "insertedRows": 0,
+            "updatedRows": 0,
+            "error": null,
+            "startedAt": null,
+            "finishedAt": null,
+            "createdAt": "2026-09-12T00:00:01Z",
+            "updatedAt": "2026-09-12T00:00:04.123Z"
+          }
+        ]
+      }
+    },
+    {
+      "name": "singleBatch",
+      "schema": "BatchResponse",
+      "description": "A SINGLE batch explicitly returns both range fields as null.",
+      "httpStatus": 200,
+      "value": {
+        "batchId": "55555555-5555-4555-8555-000000000001",
+        "parentBatchId": null,
+        "batchKey": "000001",
+        "rangeStart": null,
+        "rangeEnd": null,
+        "sourceParams": {
+          "ts_code": "000001.SZ",
+          "trade_date": "20260803"
+        },
+        "status": "SUCCEEDED",
+        "attemptCount": 1,
+        "sourceRows": 1,
+        "insertedRows": 1,
+        "updatedRows": 0,
+        "error": null,
+        "startedAt": "2026-09-12T00:00:01Z",
+        "finishedAt": "2026-09-12T00:00:04.123Z",
+        "createdAt": "2026-09-12T00:00:01Z",
+        "updatedAt": "2026-09-12T00:00:04.123Z"
+      }
+    },
+    {
+      "name": "emptyTaskPage",
+      "schema": "TaskPage",
+      "description": "Unknown submissionId combined with all other filters uses AND and returns an empty page, not 404; requested page 7 is unchanged.",
+      "method": "GET",
+      "path": "/api/v1/download-tasks?page=7&submissionId=99999999-9999-4999-8999-999999999999",
+      "httpStatus": 200,
+      "value": {
+        "page": 7,
+        "pageSize": 20,
+        "total": 0,
+        "items": []
+      }
+    },
+    {
+      "name": "emptyBatchPage",
+      "schema": "BatchPage",
+      "description": "Existing task queried with status=SPLIT and default includeSplit=false yields a valid empty page.",
+      "method": "GET",
+      "path": "/api/v1/download-tasks/22222222-2222-4222-8222-222222222222/batches?status=SPLIT",
+      "httpStatus": 200,
+      "value": {
+        "page": 1,
+        "pageSize": 20,
+        "total": 0,
+        "items": []
+      }
+    },
+    {
+      "name": "taskPage",
+      "schema": "TaskPage",
+      "description": "Initial query fixes total, member IDs and ordering. Each row then uses one detail snapshot, and different rows may reflect different instants.",
+      "method": "GET",
+      "path": "/api/v1/download-tasks",
+      "httpStatus": 200,
+      "value": {
+        "page": 1,
+        "pageSize": 20,
+        "total": 1,
+        "items": [
+          {
+            "taskId": "22222222-2222-4222-8222-222222222222",
+            "submissionId": "33333333-3333-4333-8333-333333333333",
+            "pluginId": "contract_fixture",
+            "apiName": "daily",
+            "mode": "RANGE",
+            "params": {
+              "ts_code": "000001.SZ",
+              "start_date": "20260803",
+              "end_date": "20260805"
+            },
+            "status": "PARTIAL_FAILED",
+            "version": 4,
+            "planReady": true,
+            "counts": {
+              "totalBatches": 3,
+              "pendingBatches": 0,
+              "runningBatches": 0,
+              "succeededBatches": 2,
+              "failedBatches": 1,
+              "splitBatches": 0,
+              "sourceRows": 2,
+              "insertedRows": 2,
+              "updatedRows": 0
+            },
+            "lastError": {
+              "code": "SOURCE_TIMEOUT",
+              "message": "Source request timed out"
+            },
+            "canRetry": true,
+            "canResume": false,
+            "requestCount": 3,
+            "runRequestCount": 3,
+            "createdAt": "2026-09-12T00:00:00Z",
+            "updatedAt": "2026-09-12T00:00:04.123Z",
+            "queuedAt": "2026-09-12T00:00:00Z",
+            "startedAt": "2026-09-12T00:00:01Z",
+            "finishedAt": "2026-09-12T00:00:04.123Z",
+            "deadlineAt": "2026-09-12T00:30:01Z"
+          }
+        ]
+      }
+    },
+    {
+      "name": "availableCapabilities",
+      "schema": "CapabilitiesResponse",
+      "description": "Controlled AVAILABLE example only; contract_fixture is not registered in production.",
+      "method": "GET",
+      "path": "/api/v1/data-sources/contract_fixture/apis/daily/download-capabilities",
+      "httpStatus": 200,
+      "value": {
+        "single": {
+          "available": true,
+          "parameters": [
+            {
+              "name": "ts_code",
+              "label": "Stock code",
+              "type": "TS_CODE",
+              "required": true
+            },
+            {
+              "name": "trade_date",
+              "label": "Trade date",
+              "type": "DATE",
+              "required": true
+            }
+          ]
+        },
+        "range": {
+          "availability": "AVAILABLE",
+          "unavailableReason": null,
+          "dateAxis": "TRADE_DATE",
+          "dateLabel": "Trade date",
+          "startParameter": "start_date",
+          "endParameter": "end_date",
+          "parameters": [
+            {
+              "name": "ts_code",
+              "label": "Stock code",
+              "type": "TS_CODE",
+              "required": true
+            },
+            {
+              "name": "start_date",
+              "label": "Start date",
+              "type": "DATE_RANGE_MEMBER",
+              "required": true,
+              "relatedParameter": "end_date"
+            },
+            {
+              "name": "end_date",
+              "label": "End date",
+              "type": "DATE_RANGE_MEMBER",
+              "required": true,
+              "relatedParameter": "start_date"
+            }
+          ],
+          "planningMode": "TRADING_DAYS",
+          "splittable": false,
+          "policyVersion": "contract-fixture-v1",
+          "completenessRule": {
+            "kind": "VERIFIED_RULE",
+            "rowLimit": null,
+            "evidence": "Controlled fixture returns the complete result for each requested stock and trading day."
+          }
+        }
+      }
+    },
+    {
+      "name": "needsVerificationCapabilities",
+      "schema": "CapabilitiesResponse",
+      "description": "Production Tushare range remains unavailable until T13 verifies source completeness; SINGLE availability is independent.",
+      "method": "GET",
+      "path": "/api/v1/data-sources/tushare_pro/apis/daily/download-capabilities",
+      "httpStatus": 200,
+      "value": {
+        "single": {
+          "available": true,
+          "parameters": [
+            {
+              "name": "ts_code",
+              "label": "Stock code",
+              "type": "TS_CODE",
+              "required": true
+            },
+            {
+              "name": "trade_date",
+              "label": "Trade date",
+              "type": "DATE",
+              "required": true
+            }
+          ]
+        },
+        "range": {
+          "availability": "NEEDS_VERIFICATION",
+          "unavailableReason": "区间参数语义与完整性尚待真实接口验证",
+          "dateAxis": "TRADE_DATE",
+          "dateLabel": "交易日期",
+          "startParameter": "start_date",
+          "endParameter": "end_date",
+          "parameters": [
+            {
+              "name": "ts_code",
+              "label": "Stock code",
+              "type": "TS_CODE",
+              "required": true
+            },
+            {
+              "name": "start_date",
+              "label": "Start date",
+              "type": "DATE_RANGE_MEMBER",
+              "required": true,
+              "relatedParameter": "end_date"
+            },
+            {
+              "name": "end_date",
+              "label": "End date",
+              "type": "DATE_RANGE_MEMBER",
+              "required": true,
+              "relatedParameter": "start_date"
+            }
+          ],
+          "planningMode": "NATIVE_RANGE",
+          "splittable": true,
+          "policyVersion": "tushare-range-v1",
+          "completenessRule": {
+            "kind": "UNKNOWN",
+            "rowLimit": null,
+            "evidence": null
+          }
+        }
+      }
+    },
+    {
+      "name": "unsupportedCapabilities",
+      "schema": "CapabilitiesResponse",
+      "description": "SINGLE-only metadata; range semantics are explicit null, with no false claim of unlimited completeness.",
+      "method": "GET",
+      "path": "/api/v1/data-sources/tushare_pro/apis/index_classify/download-capabilities",
+      "httpStatus": 200,
+      "value": {
+        "single": {
+          "available": true,
+          "parameters": []
+        },
+        "range": {
+          "availability": "UNSUPPORTED",
+          "unavailableReason": "Range download is unsupported",
+          "dateAxis": null,
+          "dateLabel": null,
+          "startParameter": null,
+          "endParameter": null,
+          "parameters": [],
+          "planningMode": null,
+          "splittable": false,
+          "policyVersion": "unsupported-v1",
+          "completenessRule": {
+            "kind": "UNKNOWN",
+            "rowLimit": null,
+            "evidence": null
+          }
+        }
+      }
+    },
+    {
+      "name": "int64RowLimitCapabilities",
+      "schema": "CapabilitiesResponse",
+      "description": "Synthetic Long.MAX_VALUE numeric-boundary example. rowLimit is a JSON number. JavaScript clients need lossless parsing above 9007199254740991.",
+      "httpStatus": 200,
+      "value": {
+        "single": {
+          "available": true,
+          "parameters": [
+            {
+              "name": "ts_code",
+              "label": "Stock code",
+              "type": "TS_CODE",
+              "required": true
+            },
+            {
+              "name": "trade_date",
+              "label": "Trade date",
+              "type": "DATE",
+              "required": true
+            }
+          ]
+        },
+        "range": {
+          "availability": "AVAILABLE",
+          "unavailableReason": null,
+          "dateAxis": "TRADE_DATE",
+          "dateLabel": "Trade date",
+          "startParameter": "start_date",
+          "endParameter": "end_date",
+          "parameters": [
+            {
+              "name": "ts_code",
+              "label": "Stock code",
+              "type": "TS_CODE",
+              "required": true
+            },
+            {
+              "name": "start_date",
+              "label": "Start date",
+              "type": "DATE_RANGE_MEMBER",
+              "required": true,
+              "relatedParameter": "end_date"
+            },
+            {
+              "name": "end_date",
+              "label": "End date",
+              "type": "DATE_RANGE_MEMBER",
+              "required": true,
+              "relatedParameter": "start_date"
+            }
+          ],
+          "planningMode": "NATIVE_RANGE",
+          "splittable": true,
+          "policyVersion": "contract-fixture-v1",
+          "completenessRule": {
+            "kind": "CONFIRMED_ROW_LIMIT",
+            "rowLimit": 9223372036854775807,
+            "evidence": "Synthetic numeric-boundary fixture only; not a real source row limit."
+          }
+        }
+      }
+    },
+    {
+      "name": "invalidError",
+      "schema": "Error",
+      "description": "Classified HTTP failure with fixed safe message and no input echo.",
+      "httpStatus": 400,
+      "headers": {
+        "X-Request-Id": "11111111-1111-4111-8111-111111111111"
+      },
+      "value": {
+        "requestId": "11111111-1111-4111-8111-111111111111",
+        "code": "PARAM_INVALID",
+        "message": "Parameters are invalid",
+        "retryable": false,
+        "fieldErrors": [
+          {
+            "field": "expectedVersion",
+            "message": "has invalid value"
+          }
+        ]
+      }
+    },
+    {
+      "name": "requiredError",
+      "schema": "Error",
+      "description": "Classified HTTP failure with fixed safe message and no input echo.",
+      "httpStatus": 400,
+      "headers": {
+        "X-Request-Id": "11111111-1111-4111-8111-111111111111"
+      },
+      "value": {
+        "requestId": "11111111-1111-4111-8111-111111111111",
+        "code": "PARAM_REQUIRED",
+        "message": "Required parameters are missing",
+        "retryable": false,
+        "fieldErrors": [
+          {
+            "field": "mode",
+            "message": "is required"
+          }
+        ]
+      }
+    },
+    {
+      "name": "notFoundError",
+      "schema": "Error",
+      "description": "Classified HTTP failure with fixed safe message and no input echo.",
+      "httpStatus": 404,
+      "headers": {
+        "X-Request-Id": "11111111-1111-4111-8111-111111111111"
+      },
+      "value": {
+        "requestId": "11111111-1111-4111-8111-111111111111",
+        "code": "TASK_NOT_FOUND",
+        "message": "Download task was not found",
+        "retryable": false,
+        "fieldErrors": []
+      }
+    },
+    {
+      "name": "conflictError",
+      "schema": "Error",
+      "description": "Classified HTTP failure with fixed safe message and no input echo.",
+      "httpStatus": 409,
+      "headers": {
+        "X-Request-Id": "11111111-1111-4111-8111-111111111111"
+      },
+      "value": {
+        "requestId": "11111111-1111-4111-8111-111111111111",
+        "code": "SUBMISSION_CONFLICT",
+        "message": "Submission ID belongs to a different request",
+        "retryable": false,
+        "fieldErrors": []
+      }
+    },
+    {
+      "name": "stateConflictError",
+      "schema": "Error",
+      "description": "Classified HTTP failure with fixed safe message and no input echo.",
+      "httpStatus": 409,
+      "headers": {
+        "X-Request-Id": "11111111-1111-4111-8111-111111111111"
+      },
+      "value": {
+        "requestId": "11111111-1111-4111-8111-111111111111",
+        "code": "TASK_STATE_CONFLICT",
+        "message": "Download task state has changed",
+        "retryable": false,
+        "fieldErrors": []
+      }
+    },
+    {
+      "name": "queueFullError",
+      "schema": "Error",
+      "description": "Classified HTTP failure with fixed safe message and no input echo.",
+      "httpStatus": 429,
+      "headers": {
+        "X-Request-Id": "11111111-1111-4111-8111-111111111111"
+      },
+      "value": {
+        "requestId": "11111111-1111-4111-8111-111111111111",
+        "code": "TASK_QUEUE_FULL",
+        "message": "Download task queue is full",
+        "retryable": true,
+        "fieldErrors": []
+      }
+    },
+    {
+      "name": "persistenceError",
+      "schema": "Error",
+      "description": "A commit receipt can be lost after the database commits. Query by taskId/submissionId before deciding what to do; this error does not guarantee rollback. Never blindly generate a new submissionId or repeat a control operation.",
+      "httpStatus": 500,
+      "headers": {
+        "X-Request-Id": "11111111-1111-4111-8111-111111111111"
+      },
+      "value": {
+        "requestId": "11111111-1111-4111-8111-111111111111",
+        "code": "PERSISTENCE_FAILED",
+        "message": "Persistence failed",
+        "retryable": true,
+        "fieldErrors": []
+      }
+    },
+    {
+      "name": "queryError",
+      "schema": "Error",
+      "description": "Classified HTTP failure with fixed safe message and no input echo.",
+      "httpStatus": 500,
+      "headers": {
+        "X-Request-Id": "11111111-1111-4111-8111-111111111111"
+      },
+      "value": {
+        "requestId": "11111111-1111-4111-8111-111111111111",
+        "code": "QUERY_FAILED",
+        "message": "Query failed",
+        "retryable": true,
+        "fieldErrors": []
+      }
+    }
+  ]
+}

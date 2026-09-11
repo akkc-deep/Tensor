@@ -276,7 +276,7 @@ class GlobalExceptionHandlerTest {
         DatasetQueryService queries = mock(DatasetQueryService.class);
         OperationLogger operations = mock(OperationLogger.class);
         MockMvc mvc = MockMvcBuilders.standaloneSetup(
-                        new DataSourceController(metadata),
+                        new DataSourceController(metadata, org.mockito.Mockito.mock(com.akkc.tensor.core.download.task.DownloadTaskService.class)),
                         new DatasetController(queries, operations))
                 .setControllerAdvice(new GlobalExceptionHandler())
                 .addFilters(new RequestIdFilter(),

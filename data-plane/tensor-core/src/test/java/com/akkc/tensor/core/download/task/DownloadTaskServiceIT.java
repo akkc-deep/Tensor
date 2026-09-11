@@ -78,6 +78,42 @@ class DownloadTaskServiceIT {
     }
 
     @Test
+    void preparationNormalizesWithoutPersistingOrCheckingCapacityAndSubmissionRevalidates() throws Exception {
+        var bounded = service(repository, true, new Settings(true, 1, 36600));
+        bounded.submit(single(UUID.randomUUID(), "000001.SZ"));
+        var request = single(UUID.randomUUID(), " 000002.sz ");
+        var prepared = bounded.prepareSubmission(request);
+        assertThat(prepared.replay()).isFalse();
+        assertThat(prepared.api().queryMode()).isEqualTo(QueryMode.snapshot);
+        assertThat(prepared.submission().params()).containsExactlyInAnyOrderEntriesOf(
+                Map.of("symbol", "000002.SZ", "kind", "basic"));
+        assertThat(query.findSubmission(request.submissionId())).isEmpty();
+        assertThat(query.tasks(null, 1, 20).total()).isEqualTo(1);
+        code(ErrorCode.TASK_QUEUE_FULL, () -> bounded.submit(prepared.submission()));
+        assertThat(query.findSubmission(request.submissionId())).isEmpty();
+    }
+
+    @Test
+    void preparedHistoricalRequestsUseStoredPolicyAndSingleSnapshotsAfterMetadataRemoval() throws Exception {
+        var single = service.submit(single(UUID.randomUUID(), "000001.SZ")).task();
+        var range = service.submit(range(UUID.randomUUID(), "000001.SZ", "20280228", "20280301")).task();
+        var removed = new DownloadTaskService(new PluginRegistry(List.of()), catalog(), new AdapterRegistry(List.of()),
+                new ParameterValidator(), repository, json, Clock.fixed(NOW, ZoneOffset.UTC), RUN,
+                new Settings(false, 1, 1));
+        var exact = removed.prepareSubmission(new Submission(single.submissionId(), KEY,
+                DownloadMode.SINGLE, single.params()));
+        assertThat(exact).isEqualTo(new SubmissionBinding(
+                new Submission(single.submissionId(), KEY, DownloadMode.SINGLE, single.params()), null, true));
+        code(ErrorCode.SUBMISSION_CONFLICT,
+                () -> removed.prepareSubmission(single(single.submissionId(), " 000001.sz ")));
+        var equivalent = removed.prepareSubmission(range(range.submissionId(), " 000001.sz ", "20280228", "20280301"));
+        assertThat(equivalent).isEqualTo(new SubmissionBinding(
+                new Submission(range.submissionId(), KEY, DownloadMode.RANGE, range.params()), null, true));
+        assertThat(removed.submit(equivalent.submission())).isEqualTo(new SubmissionResult(range, false));
+        assertThat(query.tasks(null, 1, 20).total()).isEqualTo(2);
+    }
+
+    @Test
     void singleAcceptanceCommitsBeforeReturningAndReplayPreservesAllFacts() {
         var request = single(UUID.randomUUID(), " 000001.sz ");
         var result = service.submit(request);

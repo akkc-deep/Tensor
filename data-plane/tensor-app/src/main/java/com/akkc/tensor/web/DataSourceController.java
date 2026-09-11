@@ -1,6 +1,9 @@
 package com.akkc.tensor.web;
 
 import com.akkc.tensor.core.metadata.MetadataQueryService;
+import com.akkc.tensor.core.download.task.DownloadTaskService;
+import com.akkc.tensor.web.dto.DownloadCapabilitiesResponse;
+import com.akkc.tensor.web.dto.DownloadTaskQuery;
 import com.akkc.tensor.plugin.api.model.ApiName;
 import com.akkc.tensor.plugin.api.model.DatasetKey;
 import com.akkc.tensor.plugin.api.model.PluginId;
@@ -21,9 +24,16 @@ import org.springframework.web.bind.annotation.RestController;
 @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
 public final class DataSourceController {
     private final MetadataQueryService metadataQueryService;
+    private final DownloadTaskService tasks;
 
-    public DataSourceController(MetadataQueryService metadataQueryService) {
+    public DataSourceController(MetadataQueryService metadataQueryService, DownloadTaskService tasks) {
         this.metadataQueryService = Objects.requireNonNull(metadataQueryService, "metadataQueryService");
+        this.tasks = Objects.requireNonNull(tasks, "tasks");
+    }
+
+    @GetMapping(value = "/{pluginId}/apis/{apiName}/download-capabilities", produces = "application/json")
+    public DownloadCapabilitiesResponse downloadCapabilities(DownloadTaskQuery.Dataset dataset) {
+        return DownloadCapabilitiesResponse.from(tasks.capabilities(dataset.key()));
     }
 
     @GetMapping
