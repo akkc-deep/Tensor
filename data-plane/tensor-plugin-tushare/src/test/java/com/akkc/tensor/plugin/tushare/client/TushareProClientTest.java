@@ -12,6 +12,7 @@ import com.akkc.tensor.plugin.api.dataset.BusinessKeyDefinition;
 import com.akkc.tensor.plugin.api.dataset.BusinessKeyMode;
 import com.akkc.tensor.plugin.api.dataset.DatasetDefinition;
 import com.akkc.tensor.plugin.api.download.DownloadEnvelope;
+import com.akkc.tensor.plugin.api.download.batch.BatchCallContext;
 import com.akkc.tensor.plugin.api.download.DownloadStatus;
 import com.akkc.tensor.plugin.api.error.ErrorCode;
 import com.akkc.tensor.plugin.api.error.SourceException;
@@ -42,6 +43,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.http.HttpHeaders;
@@ -77,9 +80,11 @@ class TushareProClientTest {
         assertThat(TushareProClient.class.getConstructors()[0].getParameterTypes())
                 .containsExactly(RestClient.class, TushareProperties.class);
         assertThat(publicDeclaredMethods(TushareProClient.class)).extracting(Method::getName)
-                .containsExactly("execute");
-        assertThat(publicDeclaredMethods(TushareProClient.class)[0].getParameterTypes())
-                .containsExactly(DatasetDefinition.class, Map.class);
+                .containsExactly("execute", "execute");
+        assertThat(TushareProClient.class.getMethod("execute", DatasetDefinition.class, Map.class).getReturnType())
+                .isEqualTo(DownloadEnvelope.class);
+        assertThat(TushareProClient.class.getMethod("execute", DatasetDefinition.class, Map.class, BatchCallContext.class).getReturnType())
+                .isEqualTo(DownloadEnvelope.class);
         assertThat(publicDeclaredMethods(TushareProClient.class)[0].getReturnType())
                 .isEqualTo(DownloadEnvelope.class);
 
@@ -87,7 +92,7 @@ class TushareProClientTest {
                 .filter(field -> !Modifier.isStatic(field.getModifiers()))
                 .toArray(Field[]::new);
         assertThat(instanceFields).extracting(Field::getType)
-                .containsExactlyInAnyOrder(RestClient.class, TushareProperties.class);
+                .containsExactlyInAnyOrder(RestClient.class, TushareProperties.class, TushareRequestGate.class);
         assertThat(instanceFields).allMatch(field -> Modifier.isPrivate(field.getModifiers())
                 && Modifier.isFinal(field.getModifiers()));
         assertThat(TushareProClient.class.getDeclaredFields())
@@ -139,13 +144,24 @@ class TushareProClientTest {
         assertRequestNullRejected("daily", SECRET, Map.of(), null, "fields");
     }
 
-    @Test
-    void sendsExactRequestAndReturnsSuccessfulEnvelope() {
+    @ParameterizedTest
+    @ValueSource(booleans = {false, true})
+    void sendsExactRequestAndReturnsSuccessfulEnvelope(boolean withContext) {
         stub(HttpStatus.OK.value(), SUCCESS_JSON);
         DatasetDefinition definition = dailyDefinition();
         Map<String, Object> params = dailyParams("000001.SZ", "20260902");
 
-        DownloadEnvelope envelope = client(1_024 * 1_024).execute(definition, params);
+        var client = client(1_024 * 1_024);
+        var reservations = new java.util.concurrent.atomic.AtomicInteger();
+        var deadline = java.time.Instant.now().plusSeconds(5);
+        var context = new BatchCallContext() {
+            public java.time.Instant deadline() { return deadline; }
+            public boolean stopRequested() { return false; }
+            public void beforeRequest() { reservations.incrementAndGet(); }
+        };
+        DownloadEnvelope envelope = withContext ? client.execute(definition, params, context)
+                : client.execute(definition, params);
+        assertThat(reservations.get()).isEqualTo(withContext ? 1 : 0);
 
         assertTrue("tushare_pro".equals(envelope.pluginId().value()), "envelope has the metadata plugin ID");
         assertTrue("daily".equals(envelope.apiName().value()), "envelope has the metadata API name");

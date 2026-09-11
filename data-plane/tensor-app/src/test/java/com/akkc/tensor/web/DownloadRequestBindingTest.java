@@ -100,16 +100,14 @@ class DownloadRequestBindingTest {
                 request(apiName, "{}"), "DATASET_MISCONFIGURED", "[]", true, true);
     }
 
-    @org.junit.jupiter.api.Test
-    void retainsLastValueForDuplicatesBeforeTheRecordCanBeCreated() throws Exception {
-        try (Flow flow = flow(true, true)) {
-            var response = flow.mvc().perform(post("/api/v1/downloads")
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content("{\"apiName\":\"income\",\"apiName\":\"daily\",\"pluginId\":\"tushare_pro\",\"params\":{\"ts_code\":\"000001.SZ\",\"trade_date\":\"20260905\"}}"))
-                    .andReturn().getResponse();
-            assertThat(response.getStatus()).isEqualTo(200);
-            assertThat(flow.mapper().readTree(response.getContentAsString()).path("apiName").asText()).isEqualTo("daily");
-        }
+    @ParameterizedTest
+    @org.junit.jupiter.params.provider.ValueSource(strings = {
+        "{\"apiName\":\"income\",\"apiName\":\"daily\",\"pluginId\":\"tushare_pro\",\"params\":{\"ts_code\":\"000001.SZ\",\"trade_date\":\"20260905\"}}",
+        "{\"apiName\":\"daily\",\"pluginId\":\"tushare_pro\",\"params\":{\"ts_code\":\"000001.SZ\",\"trade_date\":\"20260904\",\"trade_date\":\"20260905\"}}"
+    })
+    void rejectsDuplicateFieldsBeforeAnyOperation(String body) throws Exception {
+        preservesErrorPriorityAndFieldsWithoutOperationEvents(body, "PARAM_INVALID",
+                "[{\"field\":\"request\",\"message\":\"has invalid value\"}]", true, true);
     }
 
     static Stream<Arguments> invalidRequests() {

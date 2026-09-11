@@ -20,3 +20,20 @@ All error responses use `ApiError`. The `requestId` body value equals the `X-Req
 | `PERSISTENCE_FAILED` | 500 | `true` | The persistence transaction failed and was rolled back; no committed download was formed. Retry later. |
 | `QUERY_FAILED` | 500 | `true` | The persisted data could not be queried; retry later. |
 | `INTERNAL_ERROR` | 500 | `false` | An unexpected server error occurred; retry only if advised by support. |
+
+## Download task and batch errors
+
+Batch errors are stored with task results; querying those results returns HTTP 200. The statuses below are fallbacks if a batch error reaches the HTTP exception boundary. Task retry / resume availability depends on state, capability and definition, not only `retryable`.
+
+| Code | HTTP | Retryable | Meaning |
+|---|---:|---|---|
+| `TASK_NOT_FOUND` | 404 | `false` | Download task was not found. |
+| `SUBMISSION_CONFLICT` | 409 | `false` | Submission ID belongs to a different request. |
+| `TASK_STATE_CONFLICT` | 409 | `false` | Download task state has changed. |
+| `TASK_DEFINITION_CHANGED` | 409 | `false` | Download task definition has changed. |
+| `BATCH_DOWNLOAD_UNAVAILABLE` | 409 | `false` | Batch download is unavailable. |
+| `TASK_QUEUE_FULL` | 429 | `true` | Download task queue is full. |
+| `BATCH_COMPLETENESS_UNCONFIRMED` | 409 | `false` | Batch completeness is unconfirmed. |
+| `SOURCE_RANGE_MISMATCH` | 502 | `false` | Source data is outside the requested range. |
+| `TASK_LIMIT_EXCEEDED` | 409 | `false` | Download task limit exceeded. |
+| `EXECUTION_INTERRUPTED` | 409 | `false` | Download task execution was interrupted. |

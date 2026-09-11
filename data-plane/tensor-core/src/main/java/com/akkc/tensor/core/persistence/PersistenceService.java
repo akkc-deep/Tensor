@@ -6,11 +6,9 @@ import com.akkc.tensor.plugin.api.download.AdaptedBatch;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Lock;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
-import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
@@ -38,11 +36,19 @@ public final class PersistenceService {
     }
 
     public WriteCounts persist(AdaptedBatch batch) {
+        return persist(batch, PersistenceParticipant.NONE);
+    }
+
+    public WriteCounts persist(AdaptedBatch batch, PersistenceParticipant participant) {
         Objects.requireNonNull(batch, "batch");
+        Objects.requireNonNull(participant, "participant");
+        if (TransactionSynchronizationManager.isActualTransactionActive()) {
+            throw new IllegalStateException("Persistence cannot run inside an existing transaction");
+        }
         DatasetDefinition definition = datasetCatalog.find(batch.datasetKey())
                 .orElseThrow(() -> new IllegalArgumentException("Dataset is not available"));
         GenericUpsertRepository.validateBatch(definition, batch);
-        if (batch.rows().isEmpty()) {
+        if (batch.rows().isEmpty() && participant == PersistenceParticipant.NONE) {
             return new WriteCounts(0, 0);
         }
 
@@ -51,29 +57,21 @@ public final class PersistenceService {
                 .map(row -> extractor.extract(definition, row))
                 .toList();
         Lock lock = datasetLockManager.acquire(batch.datasetKey());
-        AtomicBoolean transferred = new AtomicBoolean();
         try {
             WriteCounts result = transactionTemplate.execute(status -> {
                 if (!TransactionSynchronizationManager.isSynchronizationActive()) {
                     throw new IllegalStateException("Transaction synchronization is not active");
                 }
-                TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
-                    @Override
-                    public void afterCompletion(int status) {
-                        lock.unlock();
-                    }
-                });
-                transferred.set(true);
+                participant.beforeWrite();
                 Set<BusinessKey> existingKeys = existingKeyRepository.findExisting(definition, keys);
                 WriteCounts counts = WriteCounts.from(keys, existingKeys);
                 genericUpsertRepository.upsert(definition, batch);
+                participant.afterWrite(counts);
                 return counts;
             });
             return Objects.requireNonNull(result, "transaction result");
         } finally {
-            if (!transferred.get()) {
-                lock.unlock();
-            }
+            lock.unlock();
         }
     }
 }

@@ -23,7 +23,7 @@ class TushareErrorClassifierTest {
             "m07-t03-secret-sentinel credential=value https://secret.invalid raw-body";
 
     @Test
-    void exposesOnlyFourPackagePrivateStaticOperationsOnAStatelessFinalType() {
+    void exposesOnlyFivePackagePrivateStaticOperationsOnAStatelessFinalType() {
         assertThat(Modifier.isPublic(TushareErrorClassifier.class.getModifiers())).isFalse();
         assertThat(Modifier.isFinal(TushareErrorClassifier.class.getModifiers())).isTrue();
         assertThat(TushareErrorClassifier.class.getDeclaredConstructors())
@@ -38,7 +38,7 @@ class TushareErrorClassifierTest {
                 .toArray(Method[]::new);
         assertThat(operations).extracting(Method::getName)
                 .containsExactlyInAnyOrder(
-                        "classifyHttp", "classifyBusiness", "classifyTransport", "invalidPayload");
+                        "classifyHttp", "classifyBusiness", "classifyTransport", "invalidPayload", "failure");
         assertThat(operations).allMatch(method -> Modifier.isStatic(method.getModifiers())
                 && !Modifier.isPublic(method.getModifiers())
                 && !Modifier.isProtected(method.getModifiers())

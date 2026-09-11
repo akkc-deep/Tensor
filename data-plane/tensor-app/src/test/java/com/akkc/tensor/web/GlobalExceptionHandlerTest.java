@@ -419,6 +419,16 @@ class GlobalExceptionHandlerTest {
 
     private static int expectedStatus(ErrorCode code) {
         return switch (code) {
+            case TASK_NOT_FOUND -> 404;
+            case SUBMISSION_CONFLICT -> 409;
+            case TASK_STATE_CONFLICT -> 409;
+            case TASK_DEFINITION_CHANGED -> 409;
+            case BATCH_DOWNLOAD_UNAVAILABLE -> 409;
+            case TASK_QUEUE_FULL -> 429;
+            case BATCH_COMPLETENESS_UNCONFIRMED -> 409;
+            case SOURCE_RANGE_MISMATCH -> 502;
+            case TASK_LIMIT_EXCEEDED -> 409;
+            case EXECUTION_INTERRUPTED -> 409;
             case PARAM_REQUIRED, PARAM_INVALID -> 400;
             case PLUGIN_DISABLED, DATASET_MISCONFIGURED -> 409;
             case ADAPTER_FIELD_MISSING, ADAPTER_TYPE_INVALID -> 422;
@@ -451,6 +461,16 @@ class GlobalExceptionHandlerTest {
             case PERSISTENCE_FAILED -> "Persistence failed";
             case QUERY_FAILED -> "Query failed";
             case INTERNAL_ERROR -> "Internal server error";
+            case TASK_NOT_FOUND -> "Download task was not found";
+            case SUBMISSION_CONFLICT -> "Submission ID belongs to a different request";
+            case TASK_STATE_CONFLICT -> "Download task state has changed";
+            case TASK_DEFINITION_CHANGED -> "Download task definition has changed";
+            case BATCH_DOWNLOAD_UNAVAILABLE -> "Batch download is unavailable";
+            case TASK_QUEUE_FULL -> "Download task queue is full";
+            case BATCH_COMPLETENESS_UNCONFIRMED -> "Batch completeness is unconfirmed";
+            case SOURCE_RANGE_MISMATCH -> "Source data is outside the requested range";
+            case TASK_LIMIT_EXCEEDED -> "Download task limit exceeded";
+            case EXECUTION_INTERRUPTED -> "Download task execution was interrupted";
         };
     }
 

@@ -190,7 +190,7 @@ class StockScopedDownloadTest {
         MockRestServiceServer upstream = MockRestServiceServer.bindTo(builder).build();
         TushareProperties properties = new TushareProperties(
                 true, URI.create(BASE_URL), new TushareProperties.Credential(TOKEN),
-                Duration.ofSeconds(5), Duration.ofSeconds(5), 1_048_576);
+                Duration.ofSeconds(5), Duration.ofSeconds(5), 1_048_576, Duration.ZERO);
         TushareProPlugin plugin = new TushareProPlugin(
                 properties, new TushareProClient(builder.build(), properties), DEFINITIONS);
         List<DatasetAdapter> adapters = DEFINITIONS.stream()

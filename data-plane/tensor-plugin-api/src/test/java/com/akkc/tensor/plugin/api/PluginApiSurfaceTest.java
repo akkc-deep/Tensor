@@ -40,7 +40,8 @@ class PluginApiSurfaceTest {
             ErrorCode.SOURCE_UNAVAILABLE,
             ErrorCode.SOURCE_NETWORK_ERROR,
             ErrorCode.SOURCE_TIMEOUT,
-            ErrorCode.SOURCE_PAYLOAD_INVALID);
+            ErrorCode.SOURCE_PAYLOAD_INVALID,
+            ErrorCode.SOURCE_RANGE_MISMATCH);
     private static final Set<ErrorCode> ADAPTER_CODES = EnumSet.of(
             ErrorCode.ADAPTER_FIELD_MISSING,
             ErrorCode.ADAPTER_TYPE_INVALID);
@@ -101,10 +102,14 @@ class PluginApiSurfaceTest {
                 "ADAPTER_TYPE_INVALID",
                 "PERSISTENCE_FAILED",
                 "QUERY_FAILED",
-                "INTERNAL_ERROR");
+                "INTERNAL_ERROR", "TASK_NOT_FOUND", "SUBMISSION_CONFLICT", "TASK_STATE_CONFLICT",
+                "TASK_DEFINITION_CHANGED", "BATCH_DOWNLOAD_UNAVAILABLE", "TASK_QUEUE_FULL",
+                "BATCH_COMPLETENESS_UNCONFIRMED", "SOURCE_RANGE_MISMATCH", "TASK_LIMIT_EXCEEDED",
+                "EXECUTION_INTERRUPTED");
         assertThat(ErrorCode.values()).extracting(ErrorCode::retryable).containsExactly(
                 false, false, false, false, false, false, true, true,
-                true, true, true, false, false, true, true, false);
+                true, true, true, false, false, true, true, false,
+                false, false, false, false, false, true, false, false, false, false);
 
         assertThat(ErrorCode.class.getDeclaredConstructors()).hasSize(1);
         assertThat(ErrorCode.class.getDeclaredMethod("retryable").getReturnType())

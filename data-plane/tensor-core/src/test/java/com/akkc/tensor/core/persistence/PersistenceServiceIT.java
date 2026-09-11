@@ -60,7 +60,9 @@ import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionStatus;
+import org.springframework.transaction.support.DefaultTransactionStatus;
 import org.springframework.transaction.support.SimpleTransactionStatus;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.transaction.support.TransactionTemplate;
 import org.testcontainers.containers.MySQLContainer;
 import org.testcontainers.junit.jupiter.Container;
@@ -71,6 +73,7 @@ import org.testcontainers.utility.DockerImageName;
 class PersistenceServiceIT {
     private static final String COMPOSITE_TABLE = "m06__composite_write";
     private static final String FINGERPRINT_TABLE = "m06__fingerprint_write";
+    private static final String AUDIT_TABLE = "m06__persistence_audit";
     private static final String FAILURE_TRIGGER = "m06_composite_write_fail";
 
     @Container
@@ -111,6 +114,14 @@ class PersistenceServiceIT {
                     PRIMARY KEY (business_key)
                 ) ENGINE=InnoDB
                 """);
+        jdbcTemplate.execute("""
+                CREATE TABLE m06__persistence_audit (
+                    sequence_number BIGINT NOT NULL AUTO_INCREMENT,
+                    phase VARCHAR(16) NOT NULL,
+                    connection_id BIGINT NOT NULL,
+                    PRIMARY KEY (sequence_number)
+                ) ENGINE=InnoDB
+                """);
     }
 
     @BeforeEach
@@ -118,6 +129,42 @@ class PersistenceServiceIT {
         jdbcTemplate.execute("DROP TRIGGER IF EXISTS " + FAILURE_TRIGGER);
         jdbcTemplate.update("DELETE FROM " + COMPOSITE_TABLE);
         jdbcTemplate.update("DELETE FROM " + FINGERPRINT_TABLE);
+        jdbcTemplate.update("DELETE FROM " + AUDIT_TABLE);
+    }
+
+    @Test
+    void executesEmptyBatchParticipantCallbacksInOneCommittedTransaction() {
+        PersistenceService service = service(dataSource, new DatasetLockManager(), transactionManager);
+        PersistenceParticipant participant = new PersistenceParticipant() {
+            @Override
+            public void beforeWrite() {
+                recordAudit("before");
+            }
+
+            @Override
+            public void afterWrite(WriteCounts counts) {
+                assertThat(counts).isEqualTo(new WriteCounts(0, 0));
+                recordAudit("after");
+            }
+
+            private void recordAudit(String phase) {
+                assertThat(TransactionSynchronizationManager.isActualTransactionActive()).isTrue();
+                jdbcTemplate.update(
+                        "INSERT INTO " + AUDIT_TABLE + " (phase, connection_id) VALUES (?, CONNECTION_ID())",
+                        phase);
+            }
+        };
+
+        assertThat(service.persist(emptyBatch(compositeDefinition()), participant))
+                .isEqualTo(new WriteCounts(0, 0));
+
+        JdbcTemplate independent = new JdbcTemplate(new DriverManagerDataSource(
+                MYSQL.getJdbcUrl(), MYSQL.getUsername(), MYSQL.getPassword()));
+        List<Map<String, Object>> audit = independent.queryForList(
+                "SELECT phase, connection_id FROM " + AUDIT_TABLE + " ORDER BY sequence_number");
+        assertThat(audit).extracting(row -> row.get("phase")).containsExactly("before", "after");
+        assertThat(audit).extracting(row -> row.get("connection_id")).doesNotContainNull();
+        assertThat(audit.get(0).get("connection_id")).isEqualTo(audit.get(1).get("connection_id"));
     }
 
     @Test
@@ -136,8 +183,14 @@ class PersistenceServiceIT {
         assertThat(publicDeclaredMethods(GenericUpsertRepository.class)).containsExactly(
                 GenericUpsertRepository.class.getDeclaredMethod(
                         "upsert", DatasetDefinition.class, AdaptedBatch.class));
-        assertThat(publicDeclaredMethods(PersistenceService.class)).containsExactly(
-                PersistenceService.class.getDeclaredMethod("persist", AdaptedBatch.class));
+        assertThat(publicDeclaredMethods(PersistenceService.class)).containsExactlyInAnyOrder(
+                PersistenceService.class.getDeclaredMethod("persist", AdaptedBatch.class),
+                PersistenceService.class.getDeclaredMethod(
+                        "persist", AdaptedBatch.class, PersistenceParticipant.class));
+        assertThat(Modifier.isInterface(PersistenceParticipant.class.getModifiers())).isTrue();
+        assertThat(publicDeclaredMethods(PersistenceParticipant.class)).containsExactlyInAnyOrder(
+                PersistenceParticipant.class.getDeclaredMethod("beforeWrite"),
+                PersistenceParticipant.class.getDeclaredMethod("afterWrite", WriteCounts.class));
 
         DatasetCatalog catalog = catalog();
         DatasetLockManager lockManager = new DatasetLockManager();
@@ -168,6 +221,10 @@ class PersistenceServiceIT {
         PersistenceService service = new PersistenceService(
                 catalog, lockManager, existingKeys, upserts, rejectingTransactions);
         assertThatNullPointerException().isThrownBy(() -> service.persist(null)).withMessage("batch");
+        assertThatNullPointerException().isThrownBy(() -> service.persist(null, PersistenceParticipant.NONE))
+                .withMessage("batch");
+        assertThatNullPointerException().isThrownBy(() -> service.persist(emptyBatch(compositeDefinition()), null))
+                .withMessage("participant");
         assertThatNullPointerException().isThrownBy(() -> upserts.upsert(null, emptyBatch(compositeDefinition())))
                 .withMessage("definition");
         assertThatNullPointerException().isThrownBy(() -> upserts.upsert(compositeDefinition(), null))
@@ -202,6 +259,22 @@ class PersistenceServiceIT {
         assertThatIllegalArgumentException().isThrownBy(() -> service.persist(wrongBusinessKey))
                 .withMessage("Adapted batch does not match dataset");
 
+        AtomicInteger callbacks = new AtomicInteger();
+        PersistenceParticipant participant = new PersistenceParticipant() {
+            @Override
+            public void beforeWrite() {
+                callbacks.incrementAndGet();
+            }
+
+            @Override
+            public void afterWrite(WriteCounts counts) {
+                callbacks.incrementAndGet();
+            }
+        };
+        assertThatIllegalArgumentException().isThrownBy(() -> service.persist(reordered, participant))
+                .withMessage("Adapted batch does not match dataset");
+        assertThat(callbacks).hasValue(0);
+
         assertThat(service.persist(emptyBatch(composite))).isEqualTo(new WriteCounts(0, 0));
         assertThat(rejectingTransactions.attempts()).isZero();
         assertThat(rejectingDataSource.attempts()).isZero();
@@ -218,12 +291,17 @@ class PersistenceServiceIT {
         assertThatIllegalStateException().isThrownBy(() -> service.persist(nonEmpty))
                 .withMessage("transaction refused");
         assertThat(locks(lockManager)).isEmpty();
+        assertThatIllegalStateException().isThrownBy(() -> service.persist(emptyBatch(composite), participant))
+                .withMessage("transaction refused");
+        assertThat(callbacks).hasValue(0);
+        assertThat(locks(lockManager)).isEmpty();
 
         NoSynchronizationTransactionManager noSynchronization = new NoSynchronizationTransactionManager();
         PersistenceService noSynchronizationService = new PersistenceService(
                 catalog, lockManager, existingKeys, upserts, noSynchronization);
-        assertThatIllegalStateException().isThrownBy(() -> noSynchronizationService.persist(nonEmpty))
+        assertThatIllegalStateException().isThrownBy(() -> noSynchronizationService.persist(nonEmpty, participant))
                 .withMessage("Transaction synchronization is not active");
+        assertThat(callbacks).hasValue(0);
         assertThat(locks(lockManager)).isEmpty();
         assertThat(rejectingDataSource.attempts()).isZero();
     }
@@ -325,6 +403,83 @@ class PersistenceServiceIT {
     }
 
     @Test
+    void executesParticipantAroundWritesWithActualCountsBeforeCommit() {
+        jdbcTemplate.update("""
+                INSERT INTO m06__composite_write
+                    (ts_code, trade_date, amount, note, source_plugin, source_api, ingested_at)
+                VALUES (?, ?, ?, ?, ?, ?, ?)
+                """,
+                "AAA", LocalDate.of(2026, 9, 1), new BigDecimal("1.00"), "old",
+                "old", "old", Timestamp.from(Instant.parse("2026-09-01T00:00:00Z")));
+        RecordingTransactionManager recording = new RecordingTransactionManager(transactionManager);
+        PersistenceService service = service(dataSource, new DatasetLockManager(), recording);
+        PersistenceParticipant participant = new PersistenceParticipant() {
+            @Override
+            public void beforeWrite() {
+                assertThat(TransactionSynchronizationManager.isActualTransactionActive()).isTrue();
+                assertThat(jdbcTemplate.queryForObject(
+                        "SELECT COUNT(*) FROM " + COMPOSITE_TABLE, Long.class)).isEqualTo(1);
+                recordAudit("before");
+            }
+
+            @Override
+            public void afterWrite(WriteCounts counts) {
+                assertThat(counts).isEqualTo(new WriteCounts(1, 1));
+                assertThat(jdbcTemplate.queryForList(
+                                "SELECT note FROM " + COMPOSITE_TABLE + " ORDER BY ts_code", String.class))
+                        .containsExactly("updated", "inserted");
+                recordAudit("after");
+            }
+        };
+
+        assertThat(service.persist(batch(
+                        compositeDefinition(),
+                        Instant.parse("2026-09-03T03:05:00Z"),
+                        compositeRow("AAA", LocalDate.of(2026, 9, 1), "9.00", "updated"),
+                        compositeRow("BBB", LocalDate.of(2026, 9, 2), "8.00", "inserted")),
+                        participant))
+                .isEqualTo(new WriteCounts(1, 1));
+
+        assertThat(recording.definitions()).containsExactly(
+                new TransactionSnapshot(TransactionDefinition.PROPAGATION_REQUIRED, 60));
+        List<Map<String, Object>> audit = independentJdbc().queryForList(
+                "SELECT phase, connection_id FROM " + AUDIT_TABLE + " ORDER BY sequence_number");
+        assertThat(audit).extracting(row -> row.get("phase")).containsExactly("before", "after");
+        assertThat(audit.get(0).get("connection_id")).isEqualTo(audit.get(1).get("connection_id"));
+    }
+
+    @Test
+    void rollsBackBeforeWriteCallbackAndSkipsSecuritiesWrite() throws Exception {
+        DatasetLockManager lockManager = new DatasetLockManager();
+        PersistenceService service = service(dataSource, lockManager, transactionManager);
+        PersistenceParticipant participant = new PersistenceParticipant() {
+            @Override
+            public void beforeWrite() {
+                recordAudit("before");
+                throw new IllegalStateException("before failed");
+            }
+
+            @Override
+            public void afterWrite(WriteCounts counts) {
+                throw new AssertionError("afterWrite was not expected");
+            }
+        };
+
+        assertThatIllegalStateException().isThrownBy(() -> service.persist(batch(
+                        compositeDefinition(),
+                        Instant.parse("2026-09-03T03:06:00Z"),
+                        compositeRow("BEFORE", LocalDate.of(2026, 9, 3), "1.00", "not written")),
+                        participant))
+                .withMessage("before failed");
+
+        assertThat(jdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM " + COMPOSITE_TABLE, Long.class)).isZero();
+        assertThat(jdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM " + AUDIT_TABLE, Long.class)).isZero();
+        assertThat(locks(lockManager)).isEmpty();
+    }
+
+    @Test
     void rollsBackEarlierJdbcBatchAndReleasesLockWhenLaterBatchFails() throws Exception {
         jdbcTemplate.execute("""
                 CREATE TRIGGER m06_composite_write_fail
@@ -337,6 +492,7 @@ class PersistenceServiceIT {
                 END
                 """);
         RecordingDataSource recording = new RecordingDataSource(dataSource);
+        JdbcTemplate recordingJdbc = new JdbcTemplate(recording);
         DatasetLockManager lockManager = new DatasetLockManager();
         PersistenceService service = service(
                 recording, lockManager, new DataSourceTransactionManager(recording));
@@ -346,12 +502,29 @@ class PersistenceServiceIT {
                 compositeRow("AAA", LocalDate.of(2026, 9, 1), "1.00", "first"),
                 compositeRow("BBB", LocalDate.of(2026, 9, 2), "2.00", "second"),
                 compositeRow("FAIL", LocalDate.of(2026, 9, 3), "3.00", "sentinel"));
+        AtomicInteger afterCalls = new AtomicInteger();
+        PersistenceParticipant participant = new PersistenceParticipant() {
+            @Override
+            public void beforeWrite() {
+                recordingJdbc.update(
+                        "INSERT INTO " + AUDIT_TABLE + " (phase, connection_id) VALUES (?, CONNECTION_ID())",
+                        "before");
+            }
+
+            @Override
+            public void afterWrite(WriteCounts counts) {
+                afterCalls.incrementAndGet();
+            }
+        };
 
         try {
-            assertThatThrownBy(() -> service.persist(failing)).isInstanceOf(DataAccessException.class);
+            assertThatThrownBy(() -> service.persist(failing, participant)).isInstanceOf(DataAccessException.class);
             assertThat(recording.batchSizes()).containsExactly(2, 1);
             assertThat(jdbcTemplate.queryForObject(
                     "SELECT COUNT(*) FROM " + COMPOSITE_TABLE, Long.class)).isZero();
+            assertThat(jdbcTemplate.queryForObject(
+                    "SELECT COUNT(*) FROM " + AUDIT_TABLE, Long.class)).isZero();
+            assertThat(afterCalls).hasValue(0);
             assertThat(locks(lockManager)).isEmpty();
         } finally {
             jdbcTemplate.execute("DROP TRIGGER IF EXISTS " + FAILURE_TRIGGER);
@@ -368,46 +541,186 @@ class PersistenceServiceIT {
     }
 
     @Test
-    void retainsDatasetLockUntilJoinedOuterTransactionCompletes() throws Exception {
+    void rollsBackSecuritiesAndCallbacksWhenAfterWriteFails() throws Exception {
+        DatasetLockManager lockManager = new DatasetLockManager();
+        PersistenceService service = service(dataSource, lockManager, transactionManager);
+        PersistenceParticipant participant = failingAfterParticipant("after failed");
+
+        assertThatIllegalStateException().isThrownBy(() -> service.persist(batch(
+                        compositeDefinition(),
+                        Instant.parse("2026-09-03T04:07:00Z"),
+                        compositeRow("AFTER", LocalDate.of(2026, 9, 4), "4.00", "rolled back")),
+                        participant))
+                .withMessage("after failed");
+
+        assertThat(jdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM " + COMPOSITE_TABLE, Long.class)).isZero();
+        assertThat(jdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM " + AUDIT_TABLE, Long.class)).isZero();
+        assertThat(locks(lockManager)).isEmpty();
+    }
+
+    @Test
+    void rollsBackEmptyBatchCallbacksWhenAfterWriteFails() throws Exception {
+        DatasetLockManager lockManager = new DatasetLockManager();
+        PersistenceService service = service(dataSource, lockManager, transactionManager);
+
+        assertThatIllegalStateException().isThrownBy(() -> service.persist(
+                        emptyBatch(compositeDefinition()), failingAfterParticipant("empty after failed")))
+                .withMessage("empty after failed");
+
+        assertThat(jdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM " + AUDIT_TABLE, Long.class)).isZero();
+        assertThat(locks(lockManager)).isEmpty();
+    }
+
+    @Test
+    void releasesDatasetLockWhenRollbackItselfFails() throws Exception {
+        DatasetLockManager lockManager = new DatasetLockManager();
+        PersistenceService service = service(
+                dataSource, lockManager, new RollbackFailingTransactionManager(transactionManager));
+        PersistenceParticipant participant = new PersistenceParticipant() {
+            @Override
+            public void beforeWrite() {
+                recordAudit("before");
+                throw new IllegalStateException("callback failed");
+            }
+
+            @Override
+            public void afterWrite(WriteCounts counts) {
+                throw new AssertionError("afterWrite was not expected");
+            }
+        };
+
+        assertThatIllegalStateException().isThrownBy(() -> service.persist(
+                        emptyBatch(compositeDefinition()), participant))
+                .withMessage("rollback refused");
+
+        assertThat(jdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM " + AUDIT_TABLE, Long.class)).isZero();
+        assertThat(locks(lockManager)).isEmpty();
+    }
+
+    @Test
+    void rejectsBothEntrypointsInsideOuterTransactionEvenForEmptyBatch() throws Exception {
         DatasetLockManager lockManager = new DatasetLockManager();
         PersistenceService service = service(dataSource, lockManager, transactionManager);
         TransactionTemplate outer = new TransactionTemplate(transactionManager);
-        ExecutorService executor = Executors.newSingleThreadExecutor();
+        AtomicInteger callbacks = new AtomicInteger();
+        PersistenceParticipant participant = countingParticipant(callbacks);
+        AdaptedBatch nonEmpty = batch(
+                compositeDefinition(),
+                Instant.parse("2026-09-03T05:00:00Z"),
+                compositeRow("LOCK", LocalDate.of(2026, 9, 3), "1.00", "first"));
+        AdaptedBatch empty = emptyBatch(compositeDefinition());
+
+        outer.executeWithoutResult(status -> {
+            assertOuterTransactionRejected(() -> service.persist(nonEmpty));
+            assertOuterTransactionRejected(() -> service.persist(nonEmpty, participant));
+            assertOuterTransactionRejected(() -> service.persist(empty));
+            assertOuterTransactionRejected(() -> service.persist(empty, participant));
+        });
+
+        assertThat(callbacks).hasValue(0);
+        assertThat(jdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM " + COMPOSITE_TABLE, Long.class)).isZero();
+        assertThat(locks(lockManager)).isEmpty();
+    }
+
+    @Test
+    void holdsDatasetLockUntilSuccessfulTransactionCompletes() throws Exception {
+        DatasetLockManager lockManager = new DatasetLockManager();
+        CountDownLatch commitEntered = new CountDownLatch(1);
+        CountDownLatch releaseCommit = new CountDownLatch(1);
+        PersistenceService service = service(
+                dataSource,
+                lockManager,
+                new CommitGatedTransactionManager(dataSource, commitEntered, releaseCommit));
+        ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor();
+        CountDownLatch firstAfterEntered = new CountDownLatch(1);
+        CountDownLatch releaseFirst = new CountDownLatch(1);
         CountDownLatch secondStarted = new CountDownLatch(1);
-        @SuppressWarnings("unchecked")
-        Future<WriteCounts>[] secondResult = new Future[1];
-        WriteCounts[] firstResult = new WriteCounts[1];
+        CountDownLatch secondBeforeEntered = new CountDownLatch(1);
 
         try {
-            outer.executeWithoutResult(status -> {
-                firstResult[0] = service.persist(batch(
-                        compositeDefinition(),
-                        Instant.parse("2026-09-03T05:00:00Z"),
-                        compositeRow("LOCK", LocalDate.of(2026, 9, 3), "1.00", "first")));
-                secondResult[0] = executor.submit(() -> {
-                    secondStarted.countDown();
-                    return service.persist(batch(
+            Future<WriteCounts> first = executor.submit(() -> service.persist(batch(
                             compositeDefinition(),
-                            Instant.parse("2026-09-03T05:01:00Z"),
-                            compositeRow("LOCK", LocalDate.of(2026, 9, 3), "2.00", "second")));
-                });
-                try {
-                    assertThat(secondStarted.await(5, TimeUnit.SECONDS)).isTrue();
-                    assertThatThrownBy(() -> secondResult[0].get(300, TimeUnit.MILLISECONDS))
-                            .isInstanceOf(TimeoutException.class);
-                } catch (InterruptedException failure) {
-                    Thread.currentThread().interrupt();
-                    throw new AssertionError(failure);
-                }
-            });
+                            Instant.parse("2026-09-03T05:10:00Z"),
+                            compositeRow("SERIAL", LocalDate.of(2026, 9, 3), "1.00", "first")),
+                    blockingAfterParticipant(firstAfterEntered, releaseFirst, false)));
+            assertThat(firstAfterEntered.await(5, TimeUnit.SECONDS)).isTrue();
 
-            assertThat(firstResult[0]).isEqualTo(new WriteCounts(1, 0));
-            assertThat(secondResult[0].get(5, TimeUnit.SECONDS)).isEqualTo(new WriteCounts(0, 1));
+            Future<WriteCounts> second = executor.submit(() -> {
+                secondStarted.countDown();
+                return service.persist(batch(
+                                compositeDefinition(),
+                                Instant.parse("2026-09-03T05:11:00Z"),
+                                compositeRow("SERIAL", LocalDate.of(2026, 9, 3), "2.00", "second")),
+                        enteringBeforeParticipant(secondBeforeEntered));
+            });
+            assertThat(secondStarted.await(5, TimeUnit.SECONDS)).isTrue();
+            assertThat(secondBeforeEntered.await(300, TimeUnit.MILLISECONDS)).isFalse();
+
+            releaseFirst.countDown();
+            assertThat(commitEntered.await(5, TimeUnit.SECONDS)).isTrue();
+            assertThat(secondBeforeEntered.await(300, TimeUnit.MILLISECONDS)).isFalse();
+            releaseCommit.countDown();
+            assertThat(first.get(5, TimeUnit.SECONDS)).isEqualTo(new WriteCounts(1, 0));
+            assertThat(secondBeforeEntered.await(5, TimeUnit.SECONDS)).isTrue();
+            assertThat(second.get(5, TimeUnit.SECONDS)).isEqualTo(new WriteCounts(0, 1));
             assertThat(jdbcTemplate.queryForObject(
-                    "SELECT note FROM " + COMPOSITE_TABLE + " WHERE ts_code = 'LOCK'", String.class))
+                    "SELECT note FROM " + COMPOSITE_TABLE + " WHERE ts_code = 'SERIAL'", String.class))
                     .isEqualTo("second");
             assertThat(locks(lockManager)).isEmpty();
         } finally {
+            releaseFirst.countDown();
+            releaseCommit.countDown();
+            executor.shutdownNow();
+            assertThat(executor.awaitTermination(5, TimeUnit.SECONDS)).isTrue();
+        }
+    }
+
+    @Test
+    void releasesDatasetLockAfterTransactionFailure() throws Exception {
+        DatasetLockManager lockManager = new DatasetLockManager();
+        PersistenceService service = service(dataSource, lockManager, transactionManager);
+        ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor();
+        CountDownLatch firstAfterEntered = new CountDownLatch(1);
+        CountDownLatch releaseFirst = new CountDownLatch(1);
+        CountDownLatch secondStarted = new CountDownLatch(1);
+        CountDownLatch secondBeforeEntered = new CountDownLatch(1);
+
+        try {
+            Future<WriteCounts> first = executor.submit(() -> service.persist(batch(
+                            compositeDefinition(),
+                            Instant.parse("2026-09-03T05:20:00Z"),
+                            compositeRow("ROLLBACK", LocalDate.of(2026, 9, 3), "1.00", "first")),
+                    blockingAfterParticipant(firstAfterEntered, releaseFirst, true)));
+            assertThat(firstAfterEntered.await(5, TimeUnit.SECONDS)).isTrue();
+
+            Future<WriteCounts> second = executor.submit(() -> {
+                secondStarted.countDown();
+                return service.persist(batch(
+                                compositeDefinition(),
+                                Instant.parse("2026-09-03T05:21:00Z"),
+                                compositeRow("ROLLBACK", LocalDate.of(2026, 9, 3), "2.00", "second")),
+                        enteringBeforeParticipant(secondBeforeEntered));
+            });
+            assertThat(secondStarted.await(5, TimeUnit.SECONDS)).isTrue();
+            assertThat(secondBeforeEntered.await(300, TimeUnit.MILLISECONDS)).isFalse();
+
+            releaseFirst.countDown();
+            assertThatThrownBy(() -> first.get(5, TimeUnit.SECONDS))
+                    .hasCauseInstanceOf(IllegalStateException.class)
+                    .hasRootCauseMessage("after failed");
+            assertThat(secondBeforeEntered.await(5, TimeUnit.SECONDS)).isTrue();
+            assertThat(second.get(5, TimeUnit.SECONDS)).isEqualTo(new WriteCounts(1, 0));
+            assertThat(jdbcTemplate.queryForObject(
+                    "SELECT note FROM " + COMPOSITE_TABLE + " WHERE ts_code = 'ROLLBACK'", String.class))
+                    .isEqualTo("second");
+            assertThat(locks(lockManager)).isEmpty();
+        } finally {
+            releaseFirst.countDown();
             executor.shutdownNow();
             assertThat(executor.awaitTermination(5, TimeUnit.SECONDS)).isTrue();
         }
@@ -467,6 +780,94 @@ class PersistenceServiceIT {
             Calendar utc = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
             return resultSet.getTimestamp(1, utc).toInstant();
         });
+    }
+
+    private static PersistenceParticipant countingParticipant(AtomicInteger callbacks) {
+        return new PersistenceParticipant() {
+            @Override
+            public void beforeWrite() {
+                callbacks.incrementAndGet();
+            }
+
+            @Override
+            public void afterWrite(WriteCounts counts) {
+                callbacks.incrementAndGet();
+            }
+        };
+    }
+
+    private static PersistenceParticipant failingAfterParticipant(String message) {
+        return new PersistenceParticipant() {
+            @Override
+            public void beforeWrite() {
+                recordAudit("before");
+            }
+
+            @Override
+            public void afterWrite(WriteCounts counts) {
+                recordAudit("after");
+                throw new IllegalStateException(message);
+            }
+        };
+    }
+
+    private static PersistenceParticipant blockingAfterParticipant(
+            CountDownLatch entered, CountDownLatch release, boolean fail) {
+        return new PersistenceParticipant() {
+            @Override
+            public void beforeWrite() {
+            }
+
+            @Override
+            public void afterWrite(WriteCounts counts) {
+                entered.countDown();
+                await(release);
+                if (fail) {
+                    throw new IllegalStateException("after failed");
+                }
+            }
+        };
+    }
+
+    private static PersistenceParticipant enteringBeforeParticipant(CountDownLatch entered) {
+        return new PersistenceParticipant() {
+            @Override
+            public void beforeWrite() {
+                entered.countDown();
+            }
+
+            @Override
+            public void afterWrite(WriteCounts counts) {
+            }
+        };
+    }
+
+    private static void await(CountDownLatch latch) {
+        try {
+            if (!latch.await(5, TimeUnit.SECONDS)) {
+                throw new AssertionError("Timed out waiting for test latch");
+            }
+        } catch (InterruptedException failure) {
+            Thread.currentThread().interrupt();
+            throw new AssertionError(failure);
+        }
+    }
+
+    private static void recordAudit(String phase) {
+        assertThat(TransactionSynchronizationManager.isActualTransactionActive()).isTrue();
+        jdbcTemplate.update(
+                "INSERT INTO " + AUDIT_TABLE + " (phase, connection_id) VALUES (?, CONNECTION_ID())",
+                phase);
+    }
+
+    private static JdbcTemplate independentJdbc() {
+        return new JdbcTemplate(new DriverManagerDataSource(
+                MYSQL.getJdbcUrl(), MYSQL.getUsername(), MYSQL.getPassword()));
+    }
+
+    private static void assertOuterTransactionRejected(Runnable invocation) {
+        assertThatIllegalStateException().isThrownBy(invocation::run)
+                .withMessage("Persistence cannot run inside an existing transaction");
     }
 
     private static PersistenceService service(
@@ -734,6 +1135,49 @@ class PersistenceServiceIT {
     }
 
     private record TransactionSnapshot(int propagation, int timeout) {
+    }
+
+    private static final class CommitGatedTransactionManager extends DataSourceTransactionManager {
+        private final CountDownLatch entered;
+        private final CountDownLatch release;
+
+        private CommitGatedTransactionManager(
+                DataSource dataSource, CountDownLatch entered, CountDownLatch release) {
+            super(dataSource);
+            this.entered = entered;
+            this.release = release;
+        }
+
+        @Override
+        protected void doCommit(DefaultTransactionStatus status) {
+            entered.countDown();
+            await(release);
+            super.doCommit(status);
+        }
+    }
+
+    private static final class RollbackFailingTransactionManager implements PlatformTransactionManager {
+        private final PlatformTransactionManager delegate;
+
+        private RollbackFailingTransactionManager(PlatformTransactionManager delegate) {
+            this.delegate = delegate;
+        }
+
+        @Override
+        public TransactionStatus getTransaction(TransactionDefinition definition) {
+            return delegate.getTransaction(definition);
+        }
+
+        @Override
+        public void commit(TransactionStatus status) {
+            delegate.commit(status);
+        }
+
+        @Override
+        public void rollback(TransactionStatus status) {
+            delegate.rollback(status);
+            throw new IllegalStateException("rollback refused");
+        }
     }
 
     private static final class RejectingDataSource extends AbstractDataSource {

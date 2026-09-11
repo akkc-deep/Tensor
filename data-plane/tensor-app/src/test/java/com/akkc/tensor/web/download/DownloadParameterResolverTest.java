@@ -1,6 +1,7 @@
 package com.akkc.tensor.web.download;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.akkc.tensor.core.registry.AdapterRegistry;
@@ -139,6 +140,101 @@ class DownloadParameterResolverTest {
             var parameters = resolver.resolve(key, raw);
             assertThat(resolver.toRawValues(parameters, raw.keySet())).isEqualTo(raw);
         }
+    }
+
+    @ParameterizedTest
+    @org.junit.jupiter.params.provider.CsvSource({
+        "none,DateRangeParameters", "exchange,ExchangeDateRangeParameters",
+        "exchange_id,ExchangeIdDateRangeParameters", "ts_code,TsCodeDateRangeParameters"
+    })
+    void bindsExplicitRangeShapeWithoutLookingUpSingleMetadata(String scope, String type) {
+        var api = rangeApi(scope);
+        var resolver = resolver(new FixtureConfiguration().fixturePlugin().descriptor().apis().getFirst());
+        var raw = rangeValues(scope);
+        var result = resolver.resolve(api, raw);
+        assertThat(result.getClass().getSimpleName()).isEqualTo(type);
+        var normalized = new LinkedHashMap<>(raw);
+        if (scope.equals("ts_code")) normalized.put("ts_code", "000001.SZ");
+        assertThat(resolver.toRawValues(result, raw.keySet())).isEqualTo(normalized);
+        assertThat(ParameterCodec.supported().stream().filter(codec -> codec.shape().equals(ParameterShape.from(api))))
+                .hasSize(1);
+        assertThat(ParameterCodec.supported()).extracting(ParameterCodec::parameterType).doesNotHaveDuplicates();
+        assertThat(ParameterCodec.supported()).extracting(ParameterCodec::shape).doesNotHaveDuplicates();
+    }
+
+    @ParameterizedTest
+    @org.junit.jupiter.params.provider.ValueSource(strings = {"none", "exchange", "exchange_id", "ts_code"})
+    void explicitlyValidatesRangeEndpointsAndRejectsExtraConditions(String scope) {
+        var api = rangeApi(scope);
+        var resolver = resolver(api);
+        var valid = rangeValues(scope);
+        for (String day : List.of("20240229", "20261231")) {
+            var sameDay = new LinkedHashMap<>(valid);
+            sameDay.put("start_date", day);
+            sameDay.put("end_date", day);
+            assertThatCode(() -> resolver.resolve(api, sameDay)).doesNotThrowAnyException();
+        }
+        for (String field : valid.keySet()) {
+            var missing = new LinkedHashMap<>(valid);
+            missing.remove(field);
+            assertBindingFailure(resolver, api, missing, ErrorCode.PARAM_REQUIRED);
+            for (Object bad : new Object[] {null, " ", 123, true, List.of(), Map.of()}) {
+                var values = new LinkedHashMap<>(valid);
+                values.put(field, bad);
+                assertBindingFailure(resolver, api, values,
+                        bad == null || " ".equals(bad) ? ErrorCode.PARAM_REQUIRED : ErrorCode.PARAM_INVALID);
+            }
+        }
+        for (String badDate : List.of("20230229", "20240230", "2024-02-29", "20250101")) {
+            var invalid = new LinkedHashMap<>(valid);
+            invalid.put("start_date", badDate);
+            assertBindingFailure(resolver, api, invalid, ErrorCode.PARAM_INVALID);
+        }
+        for (String extra : List.of("unknown", "trade_date", "ann_date", "symbol", "ts_code")) {
+            if (valid.containsKey(extra)) continue;
+            var invalid = new LinkedHashMap<>(valid);
+            invalid.put(extra, "000001.SZ");
+            assertBindingFailure(resolver, api, invalid, ErrorCode.PARAM_INVALID);
+        }
+    }
+
+    @Test
+    void rejectsAnExplicitDescriptionWithUnsupportedConstraints() {
+        var api = rangeApi("ts_code");
+        var fields = new ArrayList<>(api.parameters());
+        var original = fields.getFirst();
+        fields.set(0, new ParameterDescriptor(original.name(), original.label(), null,
+                original.type(), false, null, List.of(), null, null));
+        assertBindingFailure(resolver(api), withParameters(api, fields), rangeValues("ts_code"),
+                ErrorCode.DATASET_MISCONFIGURED);
+    }
+
+    private static void assertBindingFailure(DownloadParameterResolver resolver, ApiDescriptor api,
+            Map<String, Object> values, ErrorCode code) {
+        assertThatThrownBy(() -> resolver.resolve(api, values))
+                .isInstanceOfSatisfying(DownloadBindingException.class,
+                        failure -> assertThat(failure.code()).isEqualTo(code));
+    }
+
+    private static ApiDescriptor rangeApi(String scope) {
+        var fields = new ArrayList<ParameterDescriptor>();
+        if (!scope.equals("none")) fields.add(new ParameterDescriptor(scope, "Scope", null,
+                scope.equals("ts_code") ? ParameterType.TS_CODE : ParameterType.ENUM,
+                true, null, scope.equals("ts_code") ? List.of() : List.of("SSE", "SZSE", "BSE"), null, null));
+        fields.add(new ParameterDescriptor("start_date", "Start", null, ParameterType.DATE_RANGE_MEMBER,
+                true, null, List.of(), null, "end_date"));
+        fields.add(new ParameterDescriptor("end_date", "End", null, ParameterType.DATE_RANGE_MEMBER,
+                true, null, List.of(), null, "start_date"));
+        return new ApiDescriptor(ApiName.of("range_api"), "Range", "Test",
+                com.akkc.tensor.plugin.api.descriptor.QueryMode.date_range, fields);
+    }
+
+    private static Map<String, Object> rangeValues(String scope) {
+        Map<String, Object> result = new LinkedHashMap<>();
+        if (!scope.equals("none")) result.put(scope, scope.equals("ts_code") ? " 000001.sz " : "SSE");
+        result.put("start_date", "20240228");
+        result.put("end_date", "20240301");
+        return result;
     }
 
     static Stream<ApiDescriptor> stockApis() {

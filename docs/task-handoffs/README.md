@@ -6,6 +6,7 @@
 | --- | --- | --- |
 | [tensor-v1/](tensor-v1/) | Tensor v1 正式任务：1 份看板、78 份任务交接 | [Tensor v1 看板](tensor-v1/tensor-v1-task-board.md) |
 | [ISSUE-004/](ISSUE-004/) | UI 改版任务；当前已有看板，后续交接放在同一目录 | [ISSUE-004 看板](ISSUE-004/ISSUE-004-task-board.md) |
+| [ISSUE-018/](ISSUE-018/) | 日期区间批量下载：T01–T05 已完成，T06 设计和交接就绪、READY | [ISSUE-018 看板](ISSUE-018/ISSUE-018-task-board.md) |
 
 ```text
 task-handoffs/
@@ -13,8 +14,10 @@ task-handoffs/
 ├── tensor-v1/
 │   ├── tensor-v1-task-board.md
 │   └── Mxx-Txx-handoff.md
-└── ISSUE-004/
-    └── ISSUE-004-task-board.md
+├── ISSUE-004/
+│   └── ISSUE-004-task-board.md
+└── ISSUE-018/
+    └── ISSUE-018-task-board.md
 ```
 
 新增文档沿用以下位置：

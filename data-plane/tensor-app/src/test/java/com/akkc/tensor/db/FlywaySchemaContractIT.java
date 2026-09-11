@@ -1,6 +1,7 @@
 package com.akkc.tensor.db;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import com.akkc.tensor.plugin.api.dataset.BusinessKeyMode;
 import com.akkc.tensor.plugin.api.dataset.ColumnDefinition;
@@ -33,6 +34,8 @@ import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestFactory;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.testcontainers.containers.MySQLContainer;
 import org.testcontainers.utility.DockerImageName;
 
@@ -75,7 +78,7 @@ class FlywaySchemaContractIT {
                 .load();
         MigrateResult firstMigration = flyway.migrate();
         firstMigrationsExecuted = firstMigration.migrationsExecuted;
-        assertThat(firstMigrationsExecuted).as("first Flyway migration count").isEqualTo(7);
+        assertThat(firstMigrationsExecuted).as("first Flyway migration count").isEqualTo(8);
         ValidateResult validation = flyway.validateWithResult();
         validationSuccessful = validation.validationSuccessful;
         assertThat(validationSuccessful).as(validation.getAllErrorMessages()).isTrue();
@@ -105,15 +108,15 @@ class FlywaySchemaContractIT {
     @Test
     void migratesAndValidatesRepeatablyOnMySql846() {
         assertThat(mysqlVersion).startsWith("8.4.6");
-        assertThat(firstMigrationsExecuted).isEqualTo(7);
+        assertThat(firstMigrationsExecuted).isEqualTo(8);
         assertThat(validationSuccessful).isTrue();
         assertThat(repeatMigrationsExecuted).isZero();
-        assertThat(snapshot.tables()).hasSize(50);
-        assertThat(snapshot.columns().values().stream().mapToInt(List::size).sum()).isEqualTo(1008);
+        assertThat(snapshot.tables()).hasSize(52);
+        assertThat(snapshot.columns().values().stream().mapToInt(List::size).sum()).isEqualTo(1051);
         assertThat(snapshot.indexes().values().stream().flatMap(value -> value.values().stream())
-                .filter(value -> value.name().equals("PRIMARY"))).hasSize(50);
+                .filter(value -> value.name().equals("PRIMARY"))).hasSize(52);
         assertThat(snapshot.indexes().values().stream().flatMap(value -> value.values().stream())
-                .filter(value -> !value.name().equals("PRIMARY"))).hasSize(41);
+                .filter(value -> !value.name().equals("PRIMARY"))).hasSize(48);
 
         Set<String> productionTables = definitions.stream().map(value -> value.tableName().value())
                 .collect(java.util.stream.Collectors.toSet());
@@ -143,7 +146,206 @@ class FlywaySchemaContractIT {
                 "V3__create_connect_and_slb_tables.sql",
                 "V4__create_financial_tables.sql",
                 "V5__create_corporate_and_governance_tables.sql",
-                "V7__version_dividend_business_key.sql");
+                "V7__version_dividend_business_key.sql",
+                "V8__create_download_task_tables.sql");
+    }
+
+    @Test
+    void taskTablesHaveExactColumnsDefaultsIndexesAndConstraints() {
+        String task = "tensor_download_task";
+        String batch = "tensor_download_batch";
+        assertTable(task);
+        assertTable(batch);
+        assertColumns(task, List.of(
+                textColumn("task_id", 36, false, true), textColumn("submission_id", 36, false, true),
+                textColumn("request_hash", 64, false, true), textColumn("plugin_id", 64, false, false),
+                textColumn("api_name", 64, false, false), textColumn("mode", 8, false, false),
+                jsonColumn("params"), textColumn("definition_hash", 64, false, true), jsonColumn("policy_snapshot"),
+                textColumn("status", 24, false, false), numberColumn("plan_ready", "tinyint", Types.TINYINT, 3, false),
+                textColumn("active_run_id", 36, false, true), numberColumn("run_generation", "int", Types.INTEGER, 10, false),
+                numberColumn("version", "bigint", Types.BIGINT, 19, false),
+                numberColumn("request_count", "bigint", Types.BIGINT, 19, false),
+                numberColumn("run_request_count", "bigint", Types.BIGINT, 19, false),
+                textColumn("last_error_code", 64, true, false), textColumn("last_error_message", 512, true, false),
+                timeColumn("created_at", false), timeColumn("updated_at", false), timeColumn("queued_at", false),
+                timeColumn("started_at", true), timeColumn("finished_at", true), timeColumn("deadline_at", true)));
+        assertColumns(batch, List.of(
+                textColumn("batch_id", 36, false, true), textColumn("task_id", 36, false, true),
+                textColumn("parent_batch_id", 36, true, true), textColumn("batch_key", 128, false, false),
+                column("range_start", "date", Types.DATE, true, null, null, null, null),
+                column("range_end", "date", Types.DATE, true, null, null, null, null),
+                jsonColumn("source_params"), textColumn("status", 16, false, false),
+                numberColumn("attempt_count", "int", Types.INTEGER, 10, false),
+                numberColumn("run_generation", "int", Types.INTEGER, 10, true),
+                numberColumn("source_rows", "bigint", Types.BIGINT, 19, false),
+                numberColumn("inserted_rows", "bigint", Types.BIGINT, 19, false),
+                numberColumn("updated_rows", "bigint", Types.BIGINT, 19, false),
+                textColumn("error_code", 64, true, false), textColumn("error_message", 512, true, false),
+                timeColumn("created_at", false), timeColumn("updated_at", false),
+                timeColumn("started_at", true), timeColumn("finished_at", true)));
+        assertThat(snapshot.indexes().get(task)).containsExactlyInAnyOrderEntriesOf(Map.of(
+                "PRIMARY", new IndexSnapshot("PRIMARY", false, List.of("task_id")),
+                "uk_download_task_submission", new IndexSnapshot("uk_download_task_submission", false, List.of("submission_id")),
+                "idx_download_task_queue", new IndexSnapshot("idx_download_task_queue", true,
+                        List.of("status", "active_run_id", "queued_at", "task_id")),
+                "idx_download_task_created", new IndexSnapshot("idx_download_task_created", true, List.of("created_at", "task_id")),
+                "idx_download_task_source", new IndexSnapshot("idx_download_task_source", true,
+                        List.of("plugin_id", "api_name", "created_at", "task_id"))));
+        assertThat(snapshot.indexes().get(batch)).containsExactlyInAnyOrderEntriesOf(Map.of(
+                "PRIMARY", new IndexSnapshot("PRIMARY", false, List.of("batch_id")),
+                "uk_download_batch_key", new IndexSnapshot("uk_download_batch_key", false, List.of("task_id", "batch_key")),
+                "idx_download_batch_status", new IndexSnapshot("idx_download_batch_status", true, List.of("task_id", "status", "batch_key")),
+                "idx_download_batch_parent", new IndexSnapshot("idx_download_batch_parent", true, List.of("parent_batch_id"))));
+        JdbcTemplate jdbc = jdbc(MYSQL.getJdbcUrl(), MYSQL.getUsername());
+        for (String table : List.of(task, batch)) {
+            Map<String, String> defaults = new LinkedHashMap<>();
+            jdbc.query("SELECT column_name, column_default, extra FROM information_schema.columns "
+                    + "WHERE table_schema = DATABASE() AND table_name = ?", result -> {
+                if (result.getString("column_default") != null) {
+                    defaults.put(result.getString("column_name"), result.getString("column_default"));
+                }
+                assertThat(result.getString("extra")).isEmpty();
+            }, table);
+            assertThat(defaults).containsExactlyInAnyOrderEntriesOf(table.equals(task)
+                    ? Map.of("plan_ready", "0", "run_generation", "0", "version", "1", "request_count", "0", "run_request_count", "0")
+                    : Map.of("attempt_count", "0", "source_rows", "0", "inserted_rows", "0", "updated_rows", "0"));
+        }
+        assertThat(jdbc.queryForList("SELECT constraint_name FROM information_schema.table_constraints "
+                + "WHERE constraint_schema = DATABASE() AND constraint_type = 'CHECK' AND table_name IN (?, ?)",
+                String.class, task, batch)).containsExactlyInAnyOrder(
+                "ck_download_task_mode", "ck_download_task_status", "ck_download_task_plan_ready", "ck_download_task_counters",
+                "ck_download_task_params", "ck_download_task_policy", "ck_download_task_error",
+                "ck_download_batch_status", "ck_download_batch_range", "ck_download_batch_counters", "ck_download_batch_params",
+                "ck_download_batch_error", "ck_download_batch_parent", "ck_download_batch_success_counts");
+        assertThat(jdbc.queryForList("SELECT CONCAT(k.constraint_name, ':', k.column_name, ':', k.referenced_table_name, ':', "
+                + "k.referenced_column_name, ':', r.delete_rule, ':', r.update_rule) "
+                + "FROM information_schema.key_column_usage k JOIN information_schema.referential_constraints r "
+                + "ON r.constraint_schema = k.constraint_schema AND r.constraint_name = k.constraint_name "
+                + "WHERE k.constraint_schema = DATABASE() AND k.table_name = ?", String.class, batch))
+                .containsExactlyInAnyOrder(
+                        "fk_download_batch_task:task_id:tensor_download_task:task_id:RESTRICT:RESTRICT",
+                        "fk_download_batch_parent:parent_batch_id:tensor_download_batch:batch_id:RESTRICT:RESTRICT");
+    }
+
+    @Test
+    void upgradesV7WithoutChangingChecksumsOrExistingSecurities() {
+        JdbcTemplate admin = jdbc(MYSQL.getJdbcUrl(), "root");
+        admin.execute("CREATE DATABASE tensor_upgrade CHARACTER SET utf8mb4 COLLATE " + COLLATION);
+        String url = MYSQL.getJdbcUrl().replace("/" + SCHEMA, "/tensor_upgrade");
+        Flyway old = Flyway.configure().dataSource(url, "root", MYSQL.getPassword())
+                .locations("classpath:db/migration").target("7").load();
+        assertThat(old.migrate().migrationsExecuted).isEqualTo(7);
+        JdbcTemplate upgraded = jdbc(url, "root");
+        List<Map<String, Object>> before = upgraded.queryForList(
+                "SELECT version, checksum FROM flyway_schema_history ORDER BY installed_rank");
+        upgraded.update("INSERT INTO tushare_pro__daily (ts_code, trade_date, source_plugin, source_api, ingested_at) "
+                + "VALUES ('000001.SZ', '2024-02-29', 'tushare_pro', 'daily', '2024-02-29 12:00:00.123')");
+        Flyway current = Flyway.configure().dataSource(url, "root", MYSQL.getPassword())
+                .locations("classpath:db/migration").load();
+        assertThat(current.migrate().migrationsExecuted).isEqualTo(1);
+        assertThat(current.validateWithResult().validationSuccessful).isTrue();
+        assertThat(upgraded.queryForList("SELECT version, checksum FROM flyway_schema_history "
+                + "WHERE version <> '8' ORDER BY installed_rank")).isEqualTo(before);
+        assertThat(upgraded.queryForObject("SELECT COUNT(*) FROM tushare_pro__daily "
+                + "WHERE ts_code = '000001.SZ' AND trade_date = '2024-02-29' AND source_api = 'daily'", Integer.class)).isEqualTo(1);
+        assertThat(upgraded.queryForObject("SELECT COUNT(*) FROM tensor_download_task", Integer.class)).isZero();
+        assertThat(upgraded.queryForObject("SELECT COUNT(*) FROM tensor_download_batch", Integer.class)).isZero();
+        assertThat(current.migrate().migrationsExecuted).isZero();
+    }
+
+    @Test
+    void productionMigrationInventoryCreates51TablesWithoutFixture() {
+        jdbc(MYSQL.getJdbcUrl(), "root").execute("CREATE DATABASE tensor_production CHARACTER SET utf8mb4 COLLATE " + COLLATION);
+        String url = MYSQL.getJdbcUrl().replace("/" + SCHEMA, "/tensor_production");
+        Flyway production = Flyway.configure().dataSource(url, "root", MYSQL.getPassword())
+                .locations("filesystem:" + Path.of("src/main/resources/db/migration").toAbsolutePath()).load();
+        assertThat(production.migrate().migrationsExecuted).isEqualTo(7);
+        JdbcTemplate jdbc = jdbc(url, "root");
+        assertThat(jdbc.queryForObject("SELECT COUNT(*) FROM information_schema.tables "
+                + "WHERE table_schema = DATABASE() AND table_name <> 'flyway_schema_history'", Integer.class)).isEqualTo(51);
+        assertThat(jdbc.queryForList("SELECT version FROM flyway_schema_history ORDER BY installed_rank", String.class))
+                .containsExactly("1", "2", "3", "4", "5", "7", "8");
+        assertThat(jdbc.queryForList("SHOW TABLES", String.class)).contains("tensor_download_task", "tensor_download_batch")
+                .doesNotContain(FIXTURE_TABLE);
+        assertThat(production.migrate().migrationsExecuted).isZero();
+    }
+
+    @Test
+    void mysqlRejectsTaskAndBatchConstraintViolations() {
+        JdbcTemplate jdbc = jdbc(MYSQL.getJdbcUrl(), MYSQL.getUsername());
+        String taskId = "c67429d7-c9c2-4d00-aa00-000000000001";
+        String batchId = "c67429d7-c9c2-4d00-aa00-000000000002";
+        jdbc.update("INSERT INTO tensor_download_task (task_id, submission_id, request_hash, plugin_id, api_name, mode, "
+                + "params, definition_hash, policy_snapshot, status, active_run_id, created_at, updated_at, queued_at) "
+                + "VALUES (?, ?, ?, 'fixture', 'daily', 'SINGLE', '{}', ?, '{}', 'QUEUED', ?, NOW(3), NOW(3), NOW(3))",
+                taskId, taskId, "a".repeat(64), "b".repeat(64), taskId);
+        jdbc.update("INSERT INTO tensor_download_batch (batch_id, task_id, batch_key, source_params, status, created_at, updated_at) "
+                + "VALUES (?, ?, '000001', '{}', 'PENDING', NOW(3), NOW(3))", batchId, taskId);
+        for (var invalid : List.of(
+                Map.entry("mode='OTHER'", "mode"), Map.entry("status='DONE'", "status"),
+                Map.entry("plan_ready=2", "plan_ready"), Map.entry("run_generation=-1", "counters"),
+                Map.entry("version=0", "counters"), Map.entry("request_count=-1", "counters"),
+                Map.entry("run_request_count=-1", "counters"), Map.entry("run_request_count=1", "counters"),
+                Map.entry("params='[]'", "params"), Map.entry("policy_snapshot='[]'", "policy"),
+                Map.entry("last_error_code='SOURCE_TIMEOUT'", "error"), Map.entry("last_error_message='Failed'", "error"))) {
+            assertThatThrownBy(() -> jdbc.update("UPDATE tensor_download_task SET " + invalid.getKey() + " WHERE task_id=?", taskId))
+                    .isInstanceOf(org.springframework.dao.DataAccessException.class)
+                    .hasMessageContaining("ck_download_task_" + invalid.getValue());
+        }
+        for (var invalid : List.of(
+                Map.entry("status='DONE'", "status"), Map.entry("range_start='2024-02-29'", "range"),
+                Map.entry("range_end='2024-02-29'", "range"),
+                Map.entry("range_start='2024-03-01', range_end='2024-02-29'", "range"),
+                Map.entry("attempt_count=-1", "counters"), Map.entry("run_generation=0", "counters"),
+                Map.entry("status='SUCCEEDED', source_rows=-1", "counters"),
+                Map.entry("status='SUCCEEDED', inserted_rows=-1", "counters"),
+                Map.entry("status='SUCCEEDED', updated_rows=-1", "counters"),
+                Map.entry("source_params='[]'", "params"), Map.entry("error_code='SOURCE_TIMEOUT'", "error"),
+                Map.entry("error_message='Failed'", "error"), Map.entry("parent_batch_id=batch_id", "parent"),
+                Map.entry("source_rows=1", "success_counts"), Map.entry("inserted_rows=1", "success_counts"),
+                Map.entry("updated_rows=1", "success_counts"))) {
+            assertThatThrownBy(() -> jdbc.update("UPDATE tensor_download_batch SET " + invalid.getKey() + " WHERE batch_id=?", batchId))
+                    .isInstanceOf(org.springframework.dao.DataAccessException.class)
+                    .hasMessageContaining("ck_download_batch_" + invalid.getValue());
+        }
+        assertThatThrownBy(() -> jdbc.update("UPDATE tensor_download_batch SET task_id='missing' WHERE batch_id=?", batchId))
+                .hasMessageContaining("fk_download_batch_task");
+        assertThatThrownBy(() -> jdbc.update("UPDATE tensor_download_batch SET parent_batch_id='missing' WHERE batch_id=?", batchId))
+                .hasMessageContaining("fk_download_batch_parent");
+        assertThatThrownBy(() -> jdbc.update("DELETE FROM tensor_download_task WHERE task_id=?", taskId))
+                .hasMessageContaining("fk_download_batch_task");
+        assertThatThrownBy(() -> jdbc.update("INSERT INTO tensor_download_batch (batch_id, task_id, batch_key, source_params, status, created_at, updated_at) "
+                + "VALUES ('c67429d7-c9c2-4d00-aa00-000000000003', ?, '000001', '{}', 'PENDING', NOW(3), NOW(3))", taskId))
+                .isInstanceOf(org.springframework.dao.DuplicateKeyException.class).hasMessageContaining("uk_download_batch_key");
+        assertThatThrownBy(() -> jdbc.update("INSERT INTO tensor_download_task (task_id, submission_id, request_hash, plugin_id, api_name, mode, "
+                + "params, definition_hash, policy_snapshot, status, active_run_id, created_at, updated_at, queued_at) "
+                + "SELECT 'c67429d7-c9c2-4d00-aa00-000000000004', submission_id, request_hash, plugin_id, api_name, mode, "
+                + "params, definition_hash, policy_snapshot, status, active_run_id, created_at, updated_at, queued_at "
+                + "FROM tensor_download_task WHERE task_id=?", taskId))
+                .isInstanceOf(org.springframework.dao.DuplicateKeyException.class).hasMessageContaining("uk_download_task_submission");
+        assertThat(jdbc.queryForObject("SELECT status FROM tensor_download_batch WHERE batch_id=?", String.class, batchId)).isEqualTo("PENDING");
+        assertThat(jdbc.queryForObject("SELECT version FROM tensor_download_task WHERE task_id=?", Long.class, taskId)).isEqualTo(1);
+    }
+
+    private static JdbcTemplate jdbc(String url, String username) {
+        return new JdbcTemplate(new DriverManagerDataSource(url, username, MYSQL.getPassword()));
+    }
+
+    private static ExpectedColumn textColumn(String name, int length, boolean nullable, boolean fixed) {
+        return column(name, fixed ? "char" : "varchar", fixed ? Types.CHAR : Types.VARCHAR,
+                nullable, length, null, null, null);
+    }
+
+    private static ExpectedColumn jsonColumn(String name) {
+        return column(name, "json", Types.LONGVARCHAR, false, null, null, null, null);
+    }
+
+    private static ExpectedColumn numberColumn(String name, String type, int jdbcType, int precision, boolean nullable) {
+        return column(name, type, jdbcType, nullable, null, precision, 0, null);
+    }
+
+    private static ExpectedColumn timeColumn(String name, boolean nullable) {
+        return column(name, "datetime", Types.TIMESTAMP, nullable, null, null, null, 3);
     }
 
     private static void assertProductionSchema(DatasetDefinition definition) {
@@ -316,6 +518,9 @@ class FlywaySchemaContractIT {
             case "date" -> Types.DATE;
             case "char" -> Types.CHAR;
             case "bigint" -> Types.BIGINT;
+            case "tinyint" -> Types.TINYINT;
+            case "int" -> Types.INTEGER;
+            case "json" -> Types.LONGVARCHAR;
             case "decimal" -> Types.DECIMAL;
             case "datetime" -> Types.TIMESTAMP;
             default -> throw new AssertionError("Unsupported MySQL data type: " + dataType);

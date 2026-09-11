@@ -27,14 +27,29 @@ public final class DownloadParameterResolver {
     public DownloadParameters resolve(DatasetKey dataset, Map<String, Object> values) {
         try {
             ApiDescriptor api = descriptors.requireApi(dataset);
-            ParameterCodec<?> codec = byShape.get(ParameterShape.from(api));
-            if (codec == null) {
-                throw DownloadDescriptorResolver.misconfigured();
-            }
-            return codec.read(new ParameterJsonReader(values, api, validator));
+            return codec(api).read(new ParameterJsonReader(values, api, validator));
         } catch (TensorException failure) {
             throw DownloadBindingException.from(failure);
         }
+    }
+
+    /** Binds and normalizes an explicitly selected SINGLE or RANGE description. */
+    public DownloadParameters resolve(ApiDescriptor api, Map<String, Object> values) {
+        try {
+            ParameterCodec<?> codec = codec(api);
+            var normalized = validator.validate(api, values).values();
+            return codec.read(new ParameterJsonReader(normalized, api, validator));
+        } catch (TensorException failure) {
+            throw DownloadBindingException.from(failure);
+        }
+    }
+
+    private ParameterCodec<?> codec(ApiDescriptor api) {
+        ParameterCodec<?> codec = byShape.get(ParameterShape.from(api));
+        if (codec == null) {
+            throw DownloadDescriptorResolver.misconfigured();
+        }
+        return codec;
     }
 
     public Map<String, Object> toRawValues(DownloadParameters parameters, Set<String> suppliedFields) {

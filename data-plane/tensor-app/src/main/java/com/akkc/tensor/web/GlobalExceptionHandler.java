@@ -153,7 +153,11 @@ public final class GlobalExceptionHandler {
     private static HttpStatus status(ErrorCode code) {
         return switch (code) {
             case PARAM_REQUIRED, PARAM_INVALID -> HttpStatus.BAD_REQUEST;
-            case PLUGIN_DISABLED, DATASET_MISCONFIGURED -> HttpStatus.CONFLICT;
+            case PLUGIN_DISABLED, DATASET_MISCONFIGURED, SUBMISSION_CONFLICT,
+                    TASK_STATE_CONFLICT, TASK_DEFINITION_CHANGED, BATCH_DOWNLOAD_UNAVAILABLE,
+                    BATCH_COMPLETENESS_UNCONFIRMED, TASK_LIMIT_EXCEEDED, EXECUTION_INTERRUPTED -> HttpStatus.CONFLICT;
+            case TASK_NOT_FOUND -> HttpStatus.NOT_FOUND;
+            case TASK_QUEUE_FULL -> HttpStatus.TOO_MANY_REQUESTS;
             case ADAPTER_FIELD_MISSING, ADAPTER_TYPE_INVALID ->
                     HttpStatus.UNPROCESSABLE_ENTITY;
             case PERSISTENCE_FAILED, QUERY_FAILED, INTERNAL_ERROR ->
@@ -163,7 +167,7 @@ public final class GlobalExceptionHandler {
                     SOURCE_RATE_LIMITED,
                     SOURCE_UNAVAILABLE,
                     SOURCE_NETWORK_ERROR,
-                    SOURCE_PAYLOAD_INVALID -> HttpStatus.BAD_GATEWAY;
+                    SOURCE_PAYLOAD_INVALID, SOURCE_RANGE_MISMATCH -> HttpStatus.BAD_GATEWAY;
             case SOURCE_TIMEOUT -> HttpStatus.GATEWAY_TIMEOUT;
         };
     }
@@ -186,6 +190,16 @@ public final class GlobalExceptionHandler {
             case PERSISTENCE_FAILED -> "Persistence failed";
             case QUERY_FAILED -> "Query failed";
             case INTERNAL_ERROR -> "Internal server error";
+            case TASK_NOT_FOUND -> "Download task was not found";
+            case SUBMISSION_CONFLICT -> "Submission ID belongs to a different request";
+            case TASK_STATE_CONFLICT -> "Download task state has changed";
+            case TASK_DEFINITION_CHANGED -> "Download task definition has changed";
+            case BATCH_DOWNLOAD_UNAVAILABLE -> "Batch download is unavailable";
+            case TASK_QUEUE_FULL -> "Download task queue is full";
+            case BATCH_COMPLETENESS_UNCONFIRMED -> "Batch completeness is unconfirmed";
+            case SOURCE_RANGE_MISMATCH -> "Source data is outside the requested range";
+            case TASK_LIMIT_EXCEEDED -> "Download task limit exceeded";
+            case EXECUTION_INTERRUPTED -> "Download task execution was interrupted";
         };
     }
 }

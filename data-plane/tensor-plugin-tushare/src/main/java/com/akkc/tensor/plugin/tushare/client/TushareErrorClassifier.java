@@ -72,7 +72,7 @@ final class TushareErrorClassifier {
         return failure(ErrorCode.SOURCE_PAYLOAD_INVALID);
     }
 
-    private static SourceException failure(ErrorCode code) {
+    static SourceException failure(ErrorCode code) {
         String message = switch (code) {
             case SOURCE_AUTH_FAILED -> "Tushare credentials were rejected";
             case SOURCE_PERMISSION_DENIED -> "Tushare API permission is unavailable";

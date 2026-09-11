@@ -52,6 +52,11 @@ class AcceptancePackagedJarContractTest {
 
         Map<String, byte[]> productionContents = archiveContents(PRODUCTION_JAR);
         Map<String, byte[]> acceptanceContents = archiveContents(ACCEPTANCE_JAR);
+        String v8Entry = "BOOT-INF/classes/db/migration/V8__create_download_task_tables.sql";
+        assertThat(productionContents).containsKey(v8Entry);
+        assertThat(acceptanceContents).containsKey(v8Entry);
+        assertThat(acceptanceContents.get(v8Entry)).isEqualTo(Files.readAllBytes(
+                Path.of("src/main/resources/db/migration/V8__create_download_task_tables.sql")));
         Set<String> expectedEntries = new HashSet<>(productionContents.keySet());
         expectedEntries.removeAll(REPLACED_PRODUCTION_ENTRIES);
         expectedEntries.addAll(Set.of(MANIFEST, FIXTURE_ENTRY, V6_ENTRY));

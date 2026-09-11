@@ -23,7 +23,7 @@ public final class DownloadRequestDeserializer extends JsonDeserializer<Download
 
     @Override
     public DownloadRequest deserialize(JsonParser parser, DeserializationContext context) throws IOException {
-        // Retain Jackson record binding, including errors in earlier duplicate fields.
+        parser.enable(JsonParser.Feature.STRICT_DUPLICATE_DETECTION);
         WireValues input = context.readValue(parser, WireValues.class);
         String pluginId = input.pluginId();
         String apiName = input.apiName();
