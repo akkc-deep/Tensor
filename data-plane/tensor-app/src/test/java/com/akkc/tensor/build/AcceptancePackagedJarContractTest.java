@@ -81,6 +81,7 @@ class AcceptancePackagedJarContractTest {
         try (JarFile jar = new JarFile(ACCEPTANCE_JAR.toFile())) {
             List<String> entries = entryNames(jar);
             assertThat(entries).doesNotHaveDuplicates();
+            assertThat(entries).noneMatch(name -> name.contains("DownloadTaskLifecycleIT"));
             Map<String, byte[]> contents = archiveContents(jar, entries);
             Attributes manifest = jar.getManifest().getMainAttributes();
 

@@ -1,186 +1,466 @@
 import { computed, ref, shallowRef } from 'vue'
 
 import { listApis, listDataSources } from '../api/dataSources.js'
-import { downloadDataset } from '../api/downloads.js'
+import { ApiError } from '../api/errors.js'
+import {
+  getDownloadCapabilities,
+  listDownloadTasks,
+  submitDownloadTask,
+} from '../api/downloadTasks.js'
+import {
+  CorruptSubmissionError,
+  clearPendingSubmission,
+  createSubmissionRequest,
+  readPendingSubmission,
+  removePendingSubmission,
+  writePendingSubmission,
+} from '../utils/downloadTaskSubmission.js'
 
-export function useDownloadFlow() {
-  const state = ref('INITIAL')
+const EXPLICIT_REJECTIONS = new Set([
+  'PARAM_REQUIRED',
+  'PARAM_INVALID',
+  'PLUGIN_DISABLED',
+  'DATASET_MISCONFIGURED',
+  'BATCH_DOWNLOAD_UNAVAILABLE',
+  'TASK_STATE_CONFLICT',
+  'TASK_DEFINITION_CHANGED',
+  'TASK_QUEUE_FULL',
+])
+
+const STORAGE_MESSAGES = Object.freeze({
+  READ: '无法读取本地提交记录，请重试。',
+  WRITE: '无法保存提交记录，暂不能提交。',
+  REMOVE: '无法清除本地提交记录，请重试。',
+  CORRUPT: '本地提交记录无法恢复，请先核对近期任务。',
+})
+
+function storageFailure(kind) {
+  return Object.freeze({ kind, message: STORAGE_MESSAGES[kind] })
+}
+
+export function useDownloadFlow({ onAccepted } = {}) {
+  const metadataState = ref('INITIAL')
   const sources = shallowRef([])
   const apis = shallowRef([])
   const selectedPluginId = ref('')
   const selectedApiName = ref('')
-  const result = shallowRef(null)
-  const error = shallowRef(null)
-  let generation = 0
-  let failedOperation = null
+  const capabilities = shallowRef(null)
+  const mode = ref('SINGLE')
+  const formKey = ref(0)
+  const metadataError = shallowRef(null)
+
+  const submissionState = ref('IDLE')
+  const pendingSubmission = shallowRef(null)
+  const receipt = shallowRef(null)
+  const recoveredTask = shallowRef(null)
+  const submissionError = shallowRef(null)
+  const storageError = shallowRef(null)
+
+  let metadataGeneration = 0
+  let submissionGeneration = 0
+  let failedMetadata = null
+  let failedRemoval = null
+  let disposed = false
 
   const selectedSource = computed(
-    () =>
-      sources.value.find(
-        (source) => selectedPluginId.value === source.pluginId,
-      ) ?? null,
+    () => sources.value.find(({ pluginId }) => pluginId === selectedPluginId.value) ?? null,
   )
   const selectedApi = computed(
-    () =>
-      apis.value.find((api) => selectedApiName.value === api.apiName) ??
-      null,
+    () => apis.value.find(({ apiName }) => apiName === selectedApiName.value) ?? null,
   )
-  const locked = computed(() => state.value === 'SUBMITTING')
+  const parameters = computed(
+    () => capabilities.value?.[mode.value.toLowerCase()]?.parameters ?? [],
+  )
+  const locked = computed(
+    () => submissionState.value === 'SUBMITTING' || submissionState.value === 'RECOVERING',
+  )
+  const modeAvailable = computed(() =>
+    mode.value === 'SINGLE'
+      ? capabilities.value?.single.available === true
+      : capabilities.value?.range.availability === 'AVAILABLE',
+  )
+  const storageBlocksSubmit = computed(
+    () =>
+      storageError.value?.kind === 'READ' ||
+      storageError.value?.kind === 'CORRUPT' ||
+      (storageError.value?.kind === 'REMOVE' && failedRemoval?.submissionId === null),
+  )
   const canSubmit = computed(
     () =>
+      !disposed &&
+      !locked.value &&
+      pendingSubmission.value === null &&
+      !storageBlocksSubmit.value &&
+      metadataState.value === 'READY' &&
       selectedSource.value?.downloadAvailable === true &&
       selectedApi.value !== null &&
-      state.value !== 'METADATA_LOADING' &&
-      state.value !== 'SUBMITTING',
-  )
-  const canRetry = computed(
-    () =>
-      state.value === 'FAILURE' &&
-      failedOperation !== null &&
-      error.value?.retryable === true,
+      capabilities.value !== null &&
+      modeAvailable.value,
   )
 
-  function clearDownloadState() {
-    result.value = null
-    error.value = null
-    failedOperation = null
+  function resetCapabilities() {
+    capabilities.value = null
+    mode.value = 'SINGLE'
+    formKey.value += 1
+  }
+
+  function beginMetadata() {
+    metadataError.value = null
+    failedMetadata = null
+    metadataState.value = 'LOADING'
+    return ++metadataGeneration
   }
 
   async function load() {
-    if (locked.value) return false
-
-    const currentGeneration = ++generation
+    if (disposed || locked.value) return false
+    const generation = beginMetadata()
     sources.value = []
     apis.value = []
     selectedPluginId.value = ''
     selectedApiName.value = ''
-    clearDownloadState()
-    state.value = 'METADATA_LOADING'
-
+    resetCapabilities()
     try {
-      const loadedSources = await listDataSources()
-      if (currentGeneration !== generation) return false
-      sources.value = loadedSources
-      state.value = 'READY'
+      const loaded = await listDataSources()
+      if (disposed || generation !== metadataGeneration) return false
+      sources.value = loaded
+      metadataState.value = 'READY'
       return true
     } catch (failure) {
-      if (currentGeneration !== generation) return false
-      error.value = failure
-      failedOperation = { type: 'SOURCES' }
-      state.value = 'FAILURE'
+      if (disposed || generation !== metadataGeneration) return false
+      metadataError.value = failure
+      failedMetadata = { type: 'SOURCES' }
+      metadataState.value = 'FAILURE'
       return false
     }
   }
 
   async function selectSource(pluginId) {
-    if (locked.value) return false
-
-    const currentGeneration = ++generation
+    if (
+      disposed ||
+      locked.value ||
+      (pluginId !== '' && !sources.value.some((source) => source.pluginId === pluginId))
+    ) return false
+    const generation = beginMetadata()
     selectedPluginId.value = pluginId
     selectedApiName.value = ''
     apis.value = []
-    clearDownloadState()
-    if (pluginId.length === 0) {
-      state.value = 'READY'
+    resetCapabilities()
+    if (pluginId === '') {
+      metadataState.value = 'READY'
       return true
     }
-
-    state.value = 'METADATA_LOADING'
     try {
-      const loadedApis = await listApis(pluginId)
-      if (currentGeneration !== generation) return false
-      apis.value = loadedApis
-      state.value = 'READY'
+      const loaded = await listApis(pluginId)
+      if (disposed || generation !== metadataGeneration) return false
+      apis.value = loaded
+      metadataState.value = 'READY'
       return true
     } catch (failure) {
-      if (currentGeneration !== generation) return false
-      error.value = failure
-      failedOperation = { type: 'APIS', pluginId }
-      state.value = 'FAILURE'
+      if (disposed || generation !== metadataGeneration) return false
+      metadataError.value = failure
+      failedMetadata = { type: 'APIS', pluginId }
+      metadataState.value = 'FAILURE'
       return false
     }
   }
 
-  function selectApi(apiName) {
-    if (locked.value) return false
-
-    generation += 1
+  async function selectApi(apiName) {
+    if (
+      disposed ||
+      locked.value ||
+      (apiName !== '' && !apis.value.some((api) => api.apiName === apiName))
+    ) return false
+    const generation = beginMetadata()
     selectedApiName.value = apiName
-    clearDownloadState()
-    state.value = 'READY'
+    resetCapabilities()
+    if (apiName === '') {
+      metadataState.value = 'READY'
+      return true
+    }
+    const pluginId = selectedPluginId.value
+    try {
+      const loaded = await getDownloadCapabilities(pluginId, apiName)
+      if (disposed || generation !== metadataGeneration) return false
+      capabilities.value = loaded
+      mode.value = loaded.range.availability === 'AVAILABLE' ? 'RANGE' : 'SINGLE'
+      formKey.value += 1
+      metadataState.value = 'READY'
+      return true
+    } catch (failure) {
+      if (disposed || generation !== metadataGeneration) return false
+      metadataError.value = failure
+      failedMetadata = { type: 'CAPABILITIES', pluginId, apiName }
+      metadataState.value = 'FAILURE'
+      return false
+    }
+  }
+
+  function selectMode(nextMode) {
+    if (disposed || locked.value || !capabilities.value) return false
+    const available =
+      nextMode === 'SINGLE'
+        ? capabilities.value.single.available === true
+        : nextMode === 'RANGE' && capabilities.value.range.availability === 'AVAILABLE'
+    if (!available) return false
+    mode.value = nextMode
+    formKey.value += 1
     return true
   }
 
-  async function submit(params) {
-    if (locked.value || !canSubmit.value) return false
-
-    const request = {
-      pluginId: selectedPluginId.value,
-      apiName: selectedApiName.value,
-      params: { ...params },
-    }
-    const currentGeneration = ++generation
-    clearDownloadState()
-    state.value = 'SUBMITTING'
-
-    try {
-      const response = await downloadDataset(request)
-      if (currentGeneration !== generation) return false
-      result.value = response
-      state.value = response.outcome
-      return true
-    } catch (failure) {
-      if (currentGeneration !== generation) return false
-      error.value = failure
-      failedOperation = {
-        type: 'DOWNLOAD',
-        pluginId: request.pluginId,
-        apiName: request.apiName,
-        params: { ...request.params },
-      }
-      state.value = 'FAILURE'
-      return false
-    }
-  }
-
-  async function retry() {
-    if (locked.value || !canRetry.value) return false
-
-    const operation = failedOperation
-    if (operation.type === 'SOURCES') return load()
-    if (
-      operation.type === 'APIS' &&
-      selectedPluginId.value === operation.pluginId
-    ) {
-      return selectSource(operation.pluginId)
+  async function retryMetadata() {
+    if (disposed || locked.value || failedMetadata === null) return false
+    const failed = failedMetadata
+    if (failed.type === 'SOURCES') return load()
+    if (failed.type === 'APIS' && selectedPluginId.value === failed.pluginId) {
+      return selectSource(failed.pluginId)
     }
     if (
-      operation.type === 'DOWNLOAD' &&
-      selectedPluginId.value === operation.pluginId &&
-      selectedApiName.value === operation.apiName
+      failed.type === 'CAPABILITIES' &&
+      selectedPluginId.value === failed.pluginId &&
+      selectedApiName.value === failed.apiName
     ) {
-      return submit({ ...operation.params })
+      return selectApi(failed.apiName)
     }
     return false
   }
 
+  function notifyAccepted(value) {
+    if (typeof onAccepted !== 'function') return
+    try {
+      onAccepted(value)
+    } catch {
+      // Acceptance remains a server fact even if a view callback fails.
+    }
+  }
+
+  function clearMatchingPending(request) {
+    try {
+      const removed = removePendingSubmission(request.submissionId)
+      storageError.value = null
+      failedRemoval = null
+      if (removed) pendingSubmission.value = null
+      else pendingSubmission.value = readPendingSubmission()
+      return true
+    } catch {
+      storageError.value = storageFailure('REMOVE')
+      failedRemoval = { submissionId: request.submissionId }
+      pendingSubmission.value = null
+      return false
+    }
+  }
+
+  function accept(value, request, recovered = false) {
+    submissionState.value = 'ACCEPTED'
+    if (recovered) {
+      recoveredTask.value = value
+      receipt.value = null
+    } else {
+      receipt.value = value
+      recoveredTask.value = null
+      submissionError.value = null
+    }
+    clearMatchingPending(request)
+    notifyAccepted(value)
+  }
+
+  function rejectInitial(failure, request) {
+    submissionError.value = failure
+    submissionState.value = 'REJECTED'
+    clearMatchingPending(request)
+  }
+
+  function markUncertain(failure = null) {
+    submissionError.value = failure
+    submissionState.value = 'UNCERTAIN'
+  }
+
+  async function post(request, replay) {
+    const generation = ++submissionGeneration
+    submissionError.value = null
+    receipt.value = null
+    recoveredTask.value = null
+    submissionState.value = 'SUBMITTING'
+    try {
+      const result = await submitDownloadTask(request)
+      if (disposed || generation !== submissionGeneration) return false
+      accept(result, request)
+      return true
+    } catch (failure) {
+      if (disposed || generation !== submissionGeneration) return false
+      if (!replay && failure instanceof ApiError && failure.code === 'SUBMISSION_CONFLICT') {
+        return findPending(request, failure)
+      }
+      if (!replay && failure instanceof ApiError && EXPLICIT_REJECTIONS.has(failure.code)) {
+        rejectInitial(failure, request)
+      } else {
+        markUncertain(failure)
+      }
+      return false
+    }
+  }
+
+  async function submit(params) {
+    if (disposed || !canSubmit.value) return false
+    let request
+    try {
+      request = createSubmissionRequest(
+        {
+          pluginId: selectedPluginId.value,
+          apiName: selectedApiName.value,
+          mode: mode.value,
+          params,
+        },
+        parameters.value.map(({ name }) => name),
+      )
+      writePendingSubmission(request)
+    } catch {
+      storageError.value = storageFailure('WRITE')
+      return false
+    }
+    storageError.value = null
+    failedRemoval = null
+    pendingSubmission.value = request
+    return post(request, false)
+  }
+
+  async function findPending(request, retainedError = null) {
+    const generation = ++submissionGeneration
+    submissionError.value = retainedError
+    receipt.value = null
+    recoveredTask.value = null
+    submissionState.value = 'RECOVERING'
+    try {
+      const page = await listDownloadTasks({ submissionId: request.submissionId })
+      if (disposed || generation !== submissionGeneration) return false
+      if (page.total === 1n && page.items.length === 1) {
+        accept(page.items[0], request, true)
+        if (retainedError) submissionError.value = retainedError
+        return true
+      }
+      markUncertain(retainedError)
+      return false
+    } catch (failure) {
+      if (disposed || generation !== submissionGeneration) return false
+      markUncertain(failure)
+      return false
+    }
+  }
+
+  async function recoverSubmission() {
+    if (disposed || locked.value) return false
+    let request = pendingSubmission.value
+    if (request === null) {
+      try {
+        request = readPendingSubmission()
+      } catch (failure) {
+        const kind = failure instanceof CorruptSubmissionError ? 'CORRUPT' : 'READ'
+        storageError.value = storageFailure(kind)
+        if (kind === 'CORRUPT') submissionState.value = 'UNCERTAIN'
+        return false
+      }
+    }
+    storageError.value = null
+    pendingSubmission.value = request
+    if (request === null) {
+      if (submissionState.value !== 'ACCEPTED' && submissionState.value !== 'REJECTED') {
+        submissionState.value = 'IDLE'
+      }
+      return true
+    }
+    return findPending(request)
+  }
+
+  async function replaySubmission() {
+    if (disposed || locked.value || submissionState.value !== 'UNCERTAIN' || !pendingSubmission.value) {
+      return false
+    }
+    return post(pendingSubmission.value, true)
+  }
+
+  async function retryStorage() {
+    if (disposed || storageError.value === null) return false
+    if (storageError.value.kind === 'READ') return recoverSubmission()
+    if (storageError.value.kind === 'WRITE') {
+      storageError.value = null
+      return true
+    }
+    if (storageError.value.kind === 'REMOVE' && failedRemoval?.submissionId) {
+      try {
+        removePendingSubmission(failedRemoval.submissionId)
+        failedRemoval = null
+        storageError.value = null
+        return true
+      } catch {
+        return false
+      }
+    }
+    if (storageError.value.kind === 'REMOVE' && failedRemoval?.submissionId === null) {
+      try {
+        clearPendingSubmission()
+        failedRemoval = null
+        storageError.value = null
+        submissionState.value = 'IDLE'
+        return true
+      } catch {
+        return false
+      }
+    }
+    return false
+  }
+
+  function clearCorruptSubmission() {
+    if (disposed || storageError.value?.kind !== 'CORRUPT') return false
+    try {
+      clearPendingSubmission()
+      storageError.value = null
+      pendingSubmission.value = null
+      submissionState.value = 'IDLE'
+      return true
+    } catch {
+      storageError.value = storageFailure('REMOVE')
+      failedRemoval = { submissionId: null }
+      return false
+    }
+  }
+
+  function dispose() {
+    if (disposed) return
+    disposed = true
+    metadataGeneration += 1
+    submissionGeneration += 1
+  }
+
   return {
-    state,
+    metadataState,
     sources,
     apis,
     selectedPluginId,
     selectedApiName,
-    result,
-    error,
     selectedSource,
     selectedApi,
+    capabilities,
+    mode,
+    parameters,
+    formKey,
+    metadataError,
+    submissionState,
+    pendingSubmission,
+    receipt,
+    recoveredTask,
+    submissionError,
+    storageError,
     locked,
     canSubmit,
-    canRetry,
     load,
     selectSource,
     selectApi,
+    selectMode,
+    retryMetadata,
     submit,
-    retry,
+    recoverSubmission,
+    replaySubmission,
+    retryStorage,
+    clearCorruptSubmission,
+    dispose,
   }
 }

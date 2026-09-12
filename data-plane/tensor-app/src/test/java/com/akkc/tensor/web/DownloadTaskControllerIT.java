@@ -133,6 +133,7 @@ class DownloadTaskControllerIT {
             for (String body : List.of("{}", "null", "[]", "{\"expectedVersion\":1}",
                     body(UUID.randomUUID(), "RANGE", "{\"start_date\":\"20260912\",\"end_date\":\"20260910\"}"),
                     body(UUID.randomUUID(), "SINGLE", "{\"start_date\":\"20260910\",\"end_date\":\"20260912\"}"),
+                    body(UUID.randomUUID(), "RANGE", "{\"symbol\":\"AA\",\"from\":\"20260910\",\"to\":\"20260912\"}"),
                     body(UUID.randomUUID(), "RANGE", "{\"start_date\":123,\"end_date\":\"20260912\"}"))) {
                 assertThat(flow.post("/api/v1/download-tasks", body).getStatus()).as(body).isEqualTo(400);
             }
@@ -229,6 +230,56 @@ class DownloadTaskControllerIT {
             var batches = after.json(after.get("/api/v1/download-tasks/" + id + "/batches")).path("items");
             assertThat(batches.findValuesAsText("attemptCount")).containsExactly("1", "1", "2");
             assertThat(batches.get(1).path("error").path("code").asText()).isEqualTo("SOURCE_TIMEOUT");
+        }
+    }
+
+    @Test void concurrentResumeAcceptsOnlyOneVersionTransition() throws Exception {
+        String id;
+        try (var before = new Flow(100)) {
+            before.source.failDate = "20260911"; before.source.blockDate = "20260912";
+            before.source.entered = new CountDownLatch(1); before.source.release = new CountDownLatch(1);
+            id = before.json(before.submit(UUID.randomUUID(), "RANGE",
+                    "{\"start_date\":\"20260910\",\"end_date\":\"20260912\"}")).path("taskId").asText();
+            assertThat(before.source.entered.await(5, TimeUnit.SECONDS)).isTrue();
+            try (var shutdown = Executors.newSingleThreadExecutor()) {
+                var stopped = shutdown.submit(before.coordinator::close);
+                await(() -> !before.coordinator.isRunning());
+                before.source.release.countDown();
+                stopped.get(5, TimeUnit.SECONDS);
+            }
+        }
+        try (var after = new Flow(100, transactions, true)) {
+            JsonNode interrupted = after.json(after.get("/api/v1/download-tasks/" + id));
+            assertThat(interrupted.path("status").asText()).isEqualTo("INTERRUPTED");
+            long version = interrupted.path("version").asLong();
+            try (var requests = Executors.newFixedThreadPool(2)) {
+                var start = new CountDownLatch(1);
+                var first = requests.submit(() -> { start.await(); return after.control(id, "resume", version); });
+                var second = requests.submit(() -> { start.await(); return after.control(id, "resume", version); });
+                start.countDown();
+                var results = List.of(first.get(5, TimeUnit.SECONDS), second.get(5, TimeUnit.SECONDS));
+                assertThat(results).extracting(MockHttpServletResponse::getStatus).containsExactlyInAnyOrder(202, 409);
+                var accepted = results.stream().filter(response -> response.getStatus() == 202).findFirst().orElseThrow();
+                assertThat(accepted.getHeader("Location")).isEqualTo("/api/v1/download-tasks/" + id);
+                var rejected = results.stream().filter(response -> response.getStatus() == 409).findFirst().orElseThrow();
+                assertThat(after.json(rejected).path("code").asText()).isEqualTo("TASK_STATE_CONFLICT");
+            }
+            JsonNode queued = after.json(after.get("/api/v1/download-tasks/" + id));
+            assertThat(queued.path("status").asText()).isEqualTo("QUEUED");
+            assertThat(queued.path("version").asLong()).isEqualTo(version + 1);
+            JsonNode beforeCounts = interrupted.path("counts"), afterCounts = queued.path("counts");
+            assertThat(afterCounts.path("pendingBatches").asLong())
+                    .isEqualTo(beforeCounts.path("pendingBatches").asLong() + 1);
+            assertThat(afterCounts.path("failedBatches").asLong())
+                    .isEqualTo(beforeCounts.path("failedBatches").asLong() - 1);
+            for (String name : List.of("totalBatches", "runningBatches", "succeededBatches", "splitBatches",
+                    "sourceRows", "insertedRows", "updatedRows"))
+                assertThat(afterCounts.path(name)).as(name).isEqualTo(beforeCounts.path(name));
+            assertThat(queued.path("requestCount")).isEqualTo(interrupted.path("requestCount"));
+            assertThat(after.source.calls.get()).isZero();
+            var facts = after.facts(id);
+            assertThat(after.control(id, "resume", version).getStatus()).isEqualTo(409);
+            assertThat(after.facts(id)).isEqualTo(facts);
         }
     }
 

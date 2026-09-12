@@ -97,6 +97,23 @@ class DownloadTaskRequestBindingTest {
     }
 
     @Test
+    void refusesUnknownSymbolFromToHttpShapeButBindsSupportedShape() throws Exception {
+        var unknown = rangeFlow(new RangeSource("symbol", "from", "to"));
+        assertCode(unknown.mapper, coreRangeBody(), ErrorCode.DATASET_MISCONFIGURED);
+        org.mockito.Mockito.verify(unknown.repository, org.mockito.Mockito.never()).insert(org.mockito.ArgumentMatchers.any());
+        org.mockito.Mockito.verify(unknown.repository, org.mockito.Mockito.never()).queuedCount();
+
+        var supported = rangeFlow(new RangeSource("ts_code"));
+        var request = (DownloadTaskRequest.Bound) supported.mapper.readValue(rangeBody("ts_code"), DownloadTaskRequest.class);
+        assertThat(request.params()).isInstanceOf(DownloadParameters.TsCodeDateRangeParameters.class);
+        assertThat(supported.resolver.toRawValues(request.params(), request.suppliedFields()))
+                .containsExactlyInAnyOrderEntriesOf(Map.of("ts_code", "000001.SZ",
+                        "start_date", "20260803", "end_date", "20260805"));
+        org.mockito.Mockito.verify(supported.repository, org.mockito.Mockito.never()).insert(org.mockito.ArgumentMatchers.any());
+        org.mockito.Mockito.verify(supported.repository, org.mockito.Mockito.never()).queuedCount();
+    }
+
+    @Test
     void rangeReplayUsesStoredPolicyAfterAllCurrentDescriptionsAreRemoved() throws Exception {
         var source = new RangeSource("ts_code");
         var flow = rangeFlow(source);
@@ -295,6 +312,12 @@ class DownloadTaskRequestBindingTest {
                 + "\"start_date\":\"20260803\",\"end_date\":\"20260805\"}}";
     }
 
+    private static String coreRangeBody() {
+        return "{\"submissionId\":\"10000000-0000-0000-0000-000000000001\",\"pluginId\":\"tushare_pro\","
+                + "\"apiName\":\"daily\",\"mode\":\"RANGE\",\"params\":{\"symbol\":\"AA\","
+                + "\"from\":\"20260803\",\"to\":\"20260805\"}}";
+    }
+
     private static void assertCode(ObjectMapper mapper, String body, ErrorCode expected) {
         assertThat(bindingFailure(mapper, body).code()).isEqualTo(expected);
     }
@@ -312,19 +335,20 @@ class DownloadTaskRequestBindingTest {
     private static final class RangeSource implements BatchDownloadSupport {
         static final DatasetKey KEY = DatasetKey.of(PluginId.of("tushare_pro"), ApiName.of("daily"));
         final BatchDownloadDescriptor range;
-        RangeSource(String shape) {
+        RangeSource(String shape) { this(shape, "start_date", "end_date"); }
+        RangeSource(String shape, String start, String end) {
             var parameters = new ArrayList<ParameterDescriptor>();
             if (!shape.equals("dates")) {
                 ParameterType type = shape.equals("ts_code") ? ParameterType.TS_CODE
-                        : shape.equals("market") ? ParameterType.TEXT : ParameterType.ENUM;
+                        : shape.equals("market") || shape.equals("symbol") ? ParameterType.TEXT : ParameterType.ENUM;
                 parameters.add(new ParameterDescriptor(shape, shape, null, type, true, null,
                         type == ParameterType.ENUM ? List.of("SSE", "SZSE", "BSE") : List.of(), null, null));
             }
-            parameters.add(new ParameterDescriptor("start_date", "Start", null, ParameterType.DATE_RANGE_MEMBER,
-                    true, null, List.of(), null, "end_date"));
-            parameters.add(new ParameterDescriptor("end_date", "End", null, ParameterType.DATE_RANGE_MEMBER,
-                    true, null, List.of(), null, "start_date"));
-            range = new BatchDownloadDescriptor(parameters, "start_date", "end_date",
+            parameters.add(new ParameterDescriptor(start, "Start", null, ParameterType.DATE_RANGE_MEMBER,
+                    true, null, List.of(), null, end));
+            parameters.add(new ParameterDescriptor(end, "End", null, ParameterType.DATE_RANGE_MEMBER,
+                    true, null, List.of(), null, start));
+            range = new BatchDownloadDescriptor(parameters, start, end,
                     BatchDownloadDescriptor.DateAxis.CALENDAR_DATE, "Calendar date",
                     BatchDownloadDescriptor.PlanningMode.NATIVE_RANGE, true,
                     BatchDownloadDescriptor.Availability.AVAILABLE, null, "binding-test-v1",

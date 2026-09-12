@@ -529,6 +529,48 @@ class DownloadTaskRecoveryIT {
     }
 
     @Test
+    void closeWaitsForBlockedRangeAndDropsItsLateEnvelopeBeforeAdaptation() throws Exception {
+        source.plan = List.of(day("2026-09-10"));
+        source.entered = new CountDownLatch(1);
+        source.release = new CountDownLatch(1);
+        AtomicInteger adapted = new AtomicInteger();
+        adapter = spy(adapter);
+        doAnswer(invocation -> {
+            adapted.incrementAndGet();
+            return invocation.callRealMethod();
+        }).when(adapter).adapt(any(), any());
+        tasks = service(repository, runId, DownloadTaskService.Settings.defaults(), source);
+        runner = runner(tasks, repository, commits, runId);
+        var coordinator = start(tasks, repository, runner, runId, Executors.newSingleThreadExecutor());
+        DownloadTask active = submit();
+        coordinator.tick();
+        assertThat(source.entered.await(5, TimeUnit.SECONDS)).isTrue();
+        var closingExecutor = Executors.newSingleThreadExecutor();
+        var closing = closingExecutor.submit(coordinator::close);
+        try {
+            assertThat(waitUntil(() -> !coordinator.isRunning())).isTrue();
+            assertThat(closing.isDone()).isFalse();
+            assertThat(task(active.taskId()).status()).isEqualTo(DownloadTask.Status.RUNNING);
+            assertThat(source.downloads.get()).isEqualTo(1);
+        } finally {
+            source.release.countDown();
+            closing.get(5, TimeUnit.SECONDS);
+            closingExecutor.shutdown();
+        }
+        assertThat(task(active.taskId()).status()).isEqualTo(DownloadTask.Status.INTERRUPTED);
+        assertThat(batches(active.taskId())).singleElement().satisfies(batch -> {
+            assertThat(batch.status()).isEqualTo(DownloadBatch.Status.FAILED);
+            assertThat(batch.error().code()).isEqualTo(ErrorCode.EXECUTION_INTERRUPTED);
+            assertThat(batch.sourceRows()).isZero();
+            assertThat(batch.insertedRows()).isZero();
+            assertThat(batch.updatedRows()).isZero();
+        });
+        assertThat(adapted.get()).isZero();
+        assertThat(jdbc.queryForObject("SELECT COUNT(*) FROM runner_test__prices", Integer.class)).isZero();
+        assertThat(source.downloads.get()).isEqualTo(1);
+    }
+
+    @Test
     void closeRecoversOnlyThisRunsQueuedTasksAndLeavesUnavailableDatabaseForNextStartup() {
         var unavailable = spy(repository);
         AtomicBoolean fail = new AtomicBoolean();

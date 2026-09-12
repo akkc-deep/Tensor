@@ -34,10 +34,10 @@
 | 7 | ISSUE-018-T07 | 通用批次执行、拆分与资源预算 | COMPLETED | ISSUE-018-T03, ISSUE-018-T04, ISSUE-018-T06 | docs/task-designs/ISSUE-018-T07-design.md | docs/task-handoffs/ISSUE-018/ISSUE-018-T07-handoff.md |
 | 8 | ISSUE-018-T08 | 手动重试、恢复与后台生命周期 | COMPLETED | ISSUE-018-T07 | docs/task-designs/ISSUE-018-T08-design.md | docs/task-handoffs/ISSUE-018/ISSUE-018-T08-handoff.md |
 | 9 | ISSUE-018-T09 | 任务 HTTP 合同、应用装配与日志 | COMPLETED | ISSUE-018-T03, ISSUE-018-T08 | docs/task-designs/ISSUE-018-T09-design.md | docs/task-handoffs/ISSUE-018/ISSUE-018-T09-handoff.md |
-| 10 | ISSUE-018-T10 | 前端模式表单、任务提交与近期列表 | READY | ISSUE-018-T09 | docs/task-designs/ISSUE-018-T10-design.md | docs/task-handoffs/ISSUE-018/ISSUE-018-T10-handoff.md |
-| 11 | ISSUE-018-T11 | 任务详情、轮询与手动操作 | NOT_STARTED | ISSUE-018-T09, ISSUE-018-T10 | None | None |
-| 12 | ISSUE-018-T12 | 跨模块故障验证、浏览器闭环与交付门禁 | NOT_STARTED | ISSUE-018-T08, ISSUE-018-T09, ISSUE-018-T11 | None | None |
-| 13 | ISSUE-018-T13 | 真实接口完整性验收与逐项开放 | NOT_STARTED | ISSUE-018-T06, ISSUE-018-T12 | None | None |
+| 10 | ISSUE-018-T10 | 前端模式表单、任务提交与近期列表 | COMPLETED | ISSUE-018-T09 | docs/task-designs/ISSUE-018-T10-design.md | docs/task-handoffs/ISSUE-018/ISSUE-018-T10-handoff.md |
+| 11 | ISSUE-018-T11 | 任务详情、轮询与手动操作 | COMPLETED | ISSUE-018-T09, ISSUE-018-T10 | docs/task-designs/ISSUE-018-T11-design.md | docs/task-handoffs/ISSUE-018/ISSUE-018-T11-handoff.md |
+| 12 | ISSUE-018-T12 | 跨模块故障验证、浏览器闭环与交付门禁 | COMPLETED | ISSUE-018-T08, ISSUE-018-T09, ISSUE-018-T11 | docs/task-designs/ISSUE-018-T12-design.md | docs/task-handoffs/ISSUE-018/ISSUE-018-T12-handoff.md |
+| 13 | ISSUE-018-T13 | 真实接口完整性验收与逐项开放 | READY | ISSUE-018-T06, ISSUE-018-T12 | docs/task-designs/ISSUE-018-T13-design.md | docs/task-handoffs/ISSUE-018/ISSUE-018-T13-handoff.md |
 
 ## Task Details
 
@@ -199,6 +199,12 @@
 - **First action:** 全文读取已链接专属设计与交接，先新增 downloadTasks.spec.js，通过真实 Axios adapter 返回原始 JSON/202/请求头/Location，断言尚不存在的 submitDownloadTask 发送一次完整提交并返回 bigint version Receipt；观察 RED 后实现最小传输，再补未确认提交与同键恢复，不重复设计。
 - **State evidence:** 2026-09-12 在 T09 COMPLETED、四条门禁及独立审查关闭证据记录后，按预定义 Order 选中本项，观察源状态 NOT_STARTED。使用 designing-task-contracts 检查实际 Axios/表单/路由和 T09 合同，完成并全文复核 `docs/task-designs/ISSUE-018-T10-design.md`；独立就绪审查通过，无开放问题。固定能力模式与干净表单、不可变 sessionStorage 提交恢复、服务端列表分页/可见性/退避/互斥、全部数值原 token 校验及 bigint；小数舍入和卸载后异步续体边界已明确，T11/T12 范围保持。T09 直接输入无冲突；先仅回填 Design document，再写入、核对模板及 30 项既有产物路径并链接 `docs/task-handoffs/ISSUE-018/ISSUE-018-T10-handoff.md`，最后执行 `NOT_STARTED -> READY`。仅完成后继准备，尚未启动 T10 实现。
 
+- **Start evidence:** 2026-09-12 用户明确要求按 issue18 看板执行当前任务；全文读取 T10 专属设计与交接，核对 T09 HTTP/DTO 直接输入后执行 `READY -> IN_PROGRESS`。保留原交接和当前 `feat/download-by-date-range` 工作区。实施计划：`docs/superpowers/plans/2026-09-12-issue-018-t10.md`。
+
+- **Completion evidence:** 2026-09-12 `IN_PROGRESS -> COMPLETED`。下载页按能力选择 SINGLE/RANGE 并重建模式参数；只调用 task API，200/202 仅显示“任务已接收”并解锁。不可变白名单快照在 POST 前写入 sessionStorage，响应不明/刷新优先沿原 submissionId 查询，手动确认保持原参数与键；存储故障、双击和销毁后的迟到响应不产生无记录提交。独立 DTO 在原始 JSON number token 上验证整数，version/计数/total 等 int64 以 bigint 保真，旧同步 API 和证券字符串合同不变。近期列表使用服务端分页/顺序，显示动态批数、完整写入次数和时间；五秒轮询、5/10/30 秒失败退避、可见性及 KeepAlive 离开暂停/返回补查均完成，旧响应隔离且请求不重叠。真实分页控件在 total 收缩至 3/0 时保持超尾页，显式翻页仍有效。详情链接交给 T11 实现。
+- **Verification evidence:** 项目 Node 24.15.0/npm 11.12.1 下，T10 设计完整专项命令执行 10 文件/206 项，全量 `npm --prefix control-plane test` 执行 31 文件/340 项，全部通过且无跳过；`npm --prefix control-plane run build` 退出 0（Vite 保留大于 500 kB 的 bundle 提示，不影响构建）。实际命令在上述 npm 前加 `env PATH="$PWD/data-plane/tensor-app/target/frontend/node:$PATH"`，日志 `/tmp/issue018-t10-focused-final.log`、`/tmp/issue018-t10-all-final.log`、`/tmp/issue018-t10-build-final.log`。真实 Axios→DTO→flow 的三项集成包含在全量中；独立 API/flow/UI 审查发现已修复并复核关闭，无 Critical/Important。`git diff --check`、`git diff --cached --check` 均退出 0，Impeccable 三个修改 Vue 文件检测返回空数组。
+- **Browser / boundary evidence:** 最终生产预览的受控 Chromium 检查在 1440×1080 与 390×844 均通过：各一次 RANGE POST、202仅显示接收、9007199254740993 完整展示、零 pageerror、无页面横向溢出；截图已目视核对，日志 `/tmp/issue018-t10-visual-production-final.log`。此前开发预览受残留 Vite error overlay 阻挡，最终生产预览完整重跑通过；本次自建开发/预览服务均已停止。未执行 T12 的真实后端/普通 e2e/发布门禁，未改变 34 项生产 RANGE NEEDS_VERIFICATION，不能将受控页面证据当作后台独立执行或 T13 真实完整性证明。新增文件加入 Git，不自动提交。
+
 ### ISSUE-018-T11
 
 - **Goal:** 用户可以直接打开持久化任务详情，准确查看批次结果并手动 retry / resume。
@@ -206,8 +212,15 @@
 - **Acceptance:** `/downloads/tasks/:taskId` 刷新后直接 GET 同一任务，关闭重开可经服务端列表找回。运行任务详情每 2 秒轮询，终态停止；隐藏暂停时恢复可见立即查询，请求不重叠，卸载 / taskId 切换丢弃旧响应。查询临时失败按 5/10/30 秒退避并提示状态暂不能更新，不把任务改 FAILED。展示失败 / 未执行区间、原因、attemptCount、更新时间与动态批数，不使用固定百分比。retry / resume 依服务端能力独立显示，传 expectedVersion、操作期间禁重复，202 恢复轮询、409 刷新并提示；计数说明与 SINGLE / RANGE 成功含义准确，浏览器交互及前端状态测试通过。
 - **Dependencies:** ISSUE-018-T09、ISSUE-018-T10；分别消费详情 / 批次 / 控制合同，以及任务 API、列表导航和提交后的任务身份。
 - **Sources:** ① `docs/task-designs/ISSUE-018-design.md` §3.7、§3.10–3.12、§5.1–5.2；② T09 / T10 已链接设计与实现；③ `control-plane/src/router/index.js`、`control-plane/src/api/http.js`、`control-plane/src/composables/useDatasetQuery.js`；④ `control-plane/e2e/download-outcomes.spec.js`、`control-plane/e2e/stock-download-parameters.spec.js`、`control-plane/e2e/ui-redesign.fixtures.js`。
-- **First action:** 完成本任务专属设计，固定详情轮询 / 退避状态机、批次分页及版本冲突交互，并回填本行。
-- **State evidence:** None。
+- **First action:** 全文读取已链接专属设计与交接，扩展 downloadTasks.spec.js，以真实 Axios adapter 断言尚不存在的 retryDownloadTask 接收 9007199254740993n 并发送精确 JSON number token、application/json、校验202/Location/同taskId；观察 RED 后实现最小控制传输，再补详情/批次及调度，不重复设计。
+- **State evidence:** 2026-09-12 在 T10 COMPLETED、专项206/全量340/build/受控生产浏览器及独立审查证据记录后，按预定义 Order 选中本项，观察源状态 NOT_STARTED。使用 designing-task-contracts 完成并全文复核 `docs/task-designs/ISSUE-018-T11-design.md`；独立就绪审查通过，无开放实质问题。已固定原bigint number token控制、Task/Batch DTO、详情/批次单一调度与2秒/5-10-30退避、隐藏/路由/控制竞态、版本冲突与不确定响应只查不重发、KeepAlive导航和本项受控浏览器合同。T09/T10直接输入无冲突；先仅回填 Design document，再写入、核对模板及25项既有产物路径并链接 `docs/task-handoffs/ISSUE-018/ISSUE-018-T11-handoff.md`，最后执行 `NOT_STARTED -> READY`。仅完成后继准备，未启动 T11 实现。
+
+- **Start evidence:** 2026-09-12 用户明确要求按 issue18 看板执行当前任务；全文读取 T11 专属设计与交接、核对 T09/T10 直接输入及总体设计后执行 `READY -> IN_PROGRESS`。保留原交接、当前 `feat/download-by-date-range` 工作区和 T10 暂存成果。实施计划：`docs/superpowers/plans/2026-09-12-issue-018-t11.md`。
+
+- **Completion evidence:** 2026-09-12 全文复核 T11 专属设计与 IN_PROGRESS 源状态后执行 `IN_PROGRESS -> COMPLETED`。持久化详情地址、叶子批次分页、列表/接收入口和返回下载页已接通；真实 router 证明下载配置缓存、离屏列表停查及同名详情 ID 切换隔离。Task/Batch 独立快照如实显示动态批数、完整 bigint、失败/未执行区间和尝试次数，空页/总数收缩保持服务端分页。单在途调度覆盖 GET 和控制，运行 2 秒、失败 5/10/30 秒退避、隐藏暂停/恢复补查及销毁隔离均验证。retry/resume 使用点击时原 bigint 的 JSON number token，双操作互斥；202/409/不明响应只 GET 确认，查询失败不改任务状态且新详情成功前控制许可失效。
+- **Verification evidence:** 项目 Node 24.15.0/npm 11.12.1 下，专属设计完整专项命令 10 文件/297 项、全量 `npm --prefix control-plane test` 34 文件/468 项全部通过；`npm --prefix control-plane run build` 退出 0，既有 >500 kB bundle 提示保留。npm 前使用 `env PATH="$PWD/data-plane/tensor-app/target/frontend/node:$PATH"`；日志 `/tmp/issue018-t11-focused.log`、`/tmp/issue018-t11-all.log`、`/tmp/issue018-t11-build.log`。生产预览 `http://127.0.0.1:4173` 上执行 `PLAYWRIGHT_BASE_URL=http://127.0.0.1:4173 npm --prefix control-plane run test:e2e -- e2e/download-tasks.spec.js`，修正夹具后最终 3/3 通过（5.7 秒），无失败/跳过，日志 `/tmp/issue018-t11-browser-final.log`。
+- **Review / browser evidence:** 独立 API/状态审查另执行 4 文件/233 项通过；UI/router/cache 与最终集成审查通过，无开放 Critical/Important。最终审查指出的 StoredError 夹具文案已按后端固定消息修正、与日期区间分开断言，并以三项浏览器重跑复核关闭。1440×1080 与 390×844 截图已目视及独立视觉审查，结论 ship；无页面横向溢出，窄屏表格局部滚动。Impeccable 五个修改 Vue 文件检测返回 `[]`；`git diff --check`、`git diff --cached --check` 均通过。两次自建 preview 均已停止，4173 确认无监听。新增实现和测试已加入 Git，保留 T10 暂存成果及当前分支，不自动提交。
+- **Boundary evidence:** 三项 BrowserContext 夹具证明接收/直接详情/刷新/关闭重开入口、部分失败手动重试和中断恢复交互，不证明真实后台独立执行或重建应用。普通 e2e 迁移、真实 MySQL/后端生命周期和发布门禁留给 T12；34 项生产 RANGE 仍 NEEDS_VERIFICATION，真实来源完整性留给 T13，母 issue 尚未完成。完成记录后仅准备 Order 12 的专属设计与交接。
 
 ### ISSUE-018-T12
 
@@ -216,8 +229,18 @@
 - **Acceptance:** 真实测试后端接收后，浏览器断开时后台调用 / 提交计数继续增长；刷新、关闭重开均查询同任务。同数据库重建应用后不自动重发，手动恢复只执行未完成工作；三批部分失败、响应丢失、拆分原子性、旧轮次、双 retry、数据库不可用等故障有可复现证据。非 Tushare 插件通过任务 / 事务 / 重试闭环，HTTP 测试复用已支持参数形状且未知形状拒绝，不改变生产 40 项注册。生命周期 IT 显式传 URL 与 `TENSOR_TASK_LIVE_E2E=1`，检查子进程退出 0 且 spec 实际执行；默认浏览器套件不误跑受控 spec。§5.2 六条当前源码 / 单测 / 双构建 / 浏览器命令均退出 0，无未解释跳过；MySQL 用 8.4.6，不能用 H2 或纯 route mock 替代。发布脚本保留 main / 干净源码 / HEAD 前置条件，待满足条件按既有流程运行并记录；未运行不写成通过。手册涵盖配置、单实例、接收含义、手动恢复及计数限制。
 - **Dependencies:** ISSUE-018-T08、ISSUE-018-T09、ISSUE-018-T11；分别消费生命周期与故障控制、正式 HTTP / 配置 / 包装配、最终页面及轮询操作链路。
 - **Sources:** ① `docs/task-designs/ISSUE-018-design.md` §3.14、§4、§5.1–5.2、§6；② T08 / T09 / T11 已链接设计、实现与各项验证记录；③ `data-plane/tensor-app/src/test/java/com/akkc/tensor/`、`control-plane/playwright.config.js`、`control-plane/e2e/`；④ `scripts/verify-contracts.sh`、`docs/runbook/configuration.md`、`docs/runbook/first-run.md`。
-- **First action:** 完成本任务专属设计，将自动化场景和故障窗口逐项映射到测试、进程控制、断言与证据位置，并回填本行。
-- **State evidence:** None。
+- **First action:** 全文读取已链接专属设计与交接，在 ProductionWebConfigurationTest 既有精确 origin 场景补 Location 暴露的失败断言，运行该类观察 RED，再最小修正 SpaWebConfiguration 并确认回归；随后按设计建立真实 Servlet/MySQL 的 LifecycleIT 与浏览器子进程，不重复设计。
+- **State evidence:** 2026-09-12 在 T11 COMPLETED、专项297/全量468/build/受控浏览器3项与独立审查关闭证据记录后，按预定义 Order 选中本项，观察源状态 NOT_STARTED。使用 designing-task-contracts 完成并全文复核 `docs/task-designs/ISSUE-018-T12-design.md`，独立就绪审查通过，无开放实质问题。固定真实 Servlet/MySQL/非Tushare来源及flow2/resume1子进程报告、同库恢复与故障矩阵、普通七spec及外部账户套件边界、四验收文件独立空库/串行8080与mock预览4173、V8精确断言、CORS/运行权限及手册。审查发现的互斥库前缀/空库前置与普通harness旧V8数字已在设计修正并复核关闭。T08/T09/T11直接输入无冲突；先仅回填 Design document，再写入、核对模板及27项既有产物路径并链接 `docs/task-handoffs/ISSUE-018/ISSUE-018-T12-handoff.md`，最后执行 `NOT_STARTED -> READY`。仅完成后继准备，未启动T12实现或任何其测试/真实账户/发布门禁。
+
+- **Start evidence:** 2026-09-12 用户明确要求按 issue18 看板执行当前任务；全文读取 T12 专属设计与交接，核对总体故障/验收合同和 T08/T09/T11 直接输入，执行 `READY -> IN_PROGRESS`。保留原交接、当前 `feat/download-by-date-range` 分支与 T10/T11 暂存成果。实施计划：`docs/superpowers/plans/2026-09-12-issue-018-t12.md`。Java 21.0.11、Node 24.15.0、Docker 29.5.2 与已安装 Chromium 已核实；Docker 读取需正常本地权限。
+
+- **Pause evidence:** 2026-09-12 用户要求“把这些工作交接给下一个任务”。已全文复核T12设计，在原路径写入并核对pause交接后执行 `IN_PROGRESS -> PAUSED`。G1最终82类/1282、G2为468、G3为1021+4、G4为1021+4+3、G5为3/3通过；G6第四轮106通过/3失败/17未运行，最新query定向1项600秒超时/10未运行，252个初始任务成功。query扫描等待根因尚未确认；日线14双标签表头与两个ENUM滚动同步修正已写、尚未验证。剩余为定向修复验证、完整126项G6、最终证据/审查/完成交接。自有测试容器与临时凭证已清理，preview核验身份后停止，4173/8080空闲。恢复入口 `docs/task-handoffs/ISSUE-018/ISSUE-018-T12-handoff.md`；T13保持NOT_STARTED，不提前创建后继设计或交接，不提交/发布/真实账户调用/开放RANGE。完整失败关系见基础设施验证文档。
+
+- **Resume evidence:** 2026-09-12 用户明确要求继续 T12、全文读取设计与暂停交接并从“第一项实施动作”恢复。已全文读取两文件，核对看板 PAUSED、当前分支/暂存内容、G1–G5证据及验收包哈希一致，执行 `PAUSED -> IN_PROGRESS`，保留原pause交接路径。按交接 Start Here 顺序消费验证文档、计划、query失败日志与扫描/导航实现、ENUM trace结论及环境runner；剩余为query脱敏扫描阶段诊断与新空库定向、表头/ENUM验证、完整126项G6、最终审查/证据/交接。第一实施动作只增加query未完成扫描路径/阶段及导航前后诊断；不增加超时或忽略安全失败。保留全部原暂存修改，不启动T13、不提交/合并/发布。
+
+- **Completion evidence:** 2026-09-12 全文复核T12专属设计六项Acceptance并逐项核对实际证据，执行 `IN_PROGRESS -> COMPLETED`。真实Servlet/MySQL/非Tushare来源证明无页面窗口继续调用和SQL提交、同taskId刷新重开、同库新runId启动零来源与仅手动继续；部分失败仅重试中批，回执丢失、事务/拆分/旧许可/双控制/数据库故障均对应实际方法与持久事实。补充三个成功叶子及失败中批区间/固定错误/attempt1的页面断言，最终LifecycleIT5/5、flow2/resume1各一次通过。query导航前请求/响应扫描竞态已修，读取失败/未知请求/秘密检查保持严格；14双标签表头、ENUM同步、数值/长文本tooltip及至多1CSS像素的祖先交集断言均由最终普通套件执行。
+- **Verification evidence:** G1为82类/1282，G2为34文件/468，G3为1021+4，G4为1021+4+3，G5为3/3，最终G6为7文件/126项全部通过、退出0、15.8分钟（`/tmp/issue018-t12-resume-gate6.log`），无失败/跳过/未运行/重试；修改后Lifecycle专项退出0、5项通过（`/tmp/issue018-t12-lifecycle-dom-final.log`）。最终query375提交/375来源/events各375、精确证券行数及公告1+122，outcomes14提交/17查询/8来源，metadata40且零上游及两种POST；四packaged证据和真实1440/390截图已核对。精确迁移/双包/运行权限/手册及脚本语法和11个合成拒绝探针通过，V1–V8/manifest/examples/双JAR哈希保持。详见 `docs/verification/ISSUE-018-task-infrastructure.md`；独立最终审查 `.superpowers/sdd/2026-09-12-issue-018-t12/resume-review.md` 规格/质量PASS、运行门禁CLOSED、零开放发现。
+- **Completion boundary:** 本次自有容器、preview、秘密映射已清理，4173/8080空闲。保留原暂存成果，新增产物加入Git，不提交/合并/发布；完整发布脚本因当前非main/输入未提交/HEAD前置未满足而未运行。40生产注册及34/6股票规则不变，34项RANGE仍NEEDS_VERIFICATION；没有真实Tushare调用，T13与母issue未完成。T12完成记录先于后继设计、交接和READY准备，保留原pause交接为历史上下文。
 
 ### ISSUE-018-T13
 
@@ -226,8 +249,8 @@
 - **Acceptance:** 每个开放接口有请求条件、预期覆盖、官方或可核验完整性依据、真实批次数 / 成败空批数、source / insert / update 计数及复查结果。至少覆盖 daily 多日重叠、income 公告区间、fina_indicator 报告期、repurchase 非股票、top_list 交易日、dividend 非交易日公告、disclosure_date 最新公告、trade_cal 完整日历 / 全休市范围；受控满额拆分证据与真实语义证据分别列明。11 项缺失依据未解决前保持 NEEDS_VERIFICATION，少量样例或宽窄区间暂时一致不足以开放；BJ / BSE、标停两项历史范围及 fina_mainbz 默认 type 均有明确处理依据。能力门禁更新后相关回归通过；所有纳入项满足详细设计 §6 与母 issue 关闭条件后才记录完成、更新 issue 状态。仍有待验证项时保留未完成事实；范围排除须引用已有明确决定，不能由看板自行认定。
 - **Dependencies:** ISSUE-018-T06、ISSUE-018-T12；分别消费策略清单 / 来源依据 / 可用性门禁、已验证基础设施和故障 / 拆分测试证据。
 - **Sources:** ① `docs/task-designs/ISSUE-018-design.md` §3.4、§5.3、§6–7；② `docs/issues/problems/ISSUE-018-date-range-batch-downloads.md` 的逐项官方链接与关闭条件；③ T06 / T12 已链接设计、实现与证据；④ `docs/issues/problems/ISSUE-017-stock-scoped-downloads.md`、`docs/verification/ISSUE-017-stock-scoped-downloads.md`；⑤ `docs/runbook/configuration.md`、`docs/issues/README.md`。
-- **First action:** 完成本任务专属设计，建立 40 项验收矩阵，区分已知规则、待补证据、真实用例与开放门禁，并回填本行。
-- **State evidence:** None。
+- **First action:** 全文读取已链接专属设计与交接；明确启动后，先新建 `control-plane/e2e/tushare-range-evidence.test.js` 的40项独立矩阵及“漏项/UNKNOWN误开放”合成拒绝用例，运行Node测试观察RED，再实现最小校验helper与结果索引。无网络、不修改生产Policy，不重复设计。
+- **State evidence:** 2026-09-12 先记录T12 COMPLETED及G1–G6、最终Lifecycle与独立审查证据，再按预定义Order选中本项，观察NOT_STARTED。使用designing-task-contracts完成并全文复核 `docs/task-designs/ISSUE-018-T13-design.md`，40项矩阵与当前样例/31+3+6/34+6/11UNKNOWN精确一致；SOURCE探针→逐项候选规则/版本→真实TASK/SQL闭环、旧live迁移及安全计数均具体化，独立就绪审查PASS（`.superpowers/sdd/2026-09-12-issue-018-t12/t13-design-review.md`）。T06/T12直接输入无冲突；先仅链接Design document，再写入、核对模板并链接 `docs/task-handoffs/ISSUE-018/ISSUE-018-T13-handoff.md`，随后执行 `NOT_STARTED -> READY`。只准备后继，没有启动T13、创建其实现文件、真实账户调用、开放RANGE或关闭母issue。
 
 ## Risks
 

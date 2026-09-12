@@ -40,7 +40,7 @@ public final class SpaWebConfiguration implements WebMvcConfigurer {
                 .allowedOrigins(devAllowedOrigin)
                 .allowedMethods("GET", "POST", "OPTIONS")
                 .allowedHeaders("Content-Type", "X-Request-Id")
-                .exposedHeaders("X-Request-Id")
+                .exposedHeaders("X-Request-Id", "Location")
                 .allowCredentials(false);
     }
 

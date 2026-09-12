@@ -29,3 +29,12 @@ describe('app router', () => {
     expect(router.currentRoute.value.fullPath).toBe('/missing')
   })
 })
+
+ it('resolves a persistent task URL before the catch-all and keeps the UUID parameter', async () => {
+  const router = createAppRouter(createMemoryHistory())
+  const taskId = '22222222-2222-4222-8222-222222222222'
+  await router.push(`/downloads/tasks/${taskId}`)
+  expect(router.currentRoute.value.name).toBe('download-task')
+  expect(router.currentRoute.value.params).toEqual({ taskId })
+  expect(router.resolve({ name: 'download-task', params: { taskId } }).path).toBe(`/downloads/tasks/${taskId}`)
+})

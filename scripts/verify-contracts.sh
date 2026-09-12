@@ -136,12 +136,16 @@ REPORTS = (
         "tensor-app/target/surefire-reports/"
         "TEST-com.akkc.tensor.db.FlywaySchemaContractIT.xml",
         "com.akkc.tensor.db.FlywaySchemaContractIT",
-        43,
+        47,
         {
             "productionSchemasMatchDatasetDefinitions": 40,
             "migratesAndValidatesRepeatablyOnMySql846": 1,
             "fixtureSchemaMatchesContract": 1,
             "keepsV6InTestOutputOnly": 1,
+            "taskTablesHaveExactColumnsDefaultsIndexesAndConstraints": 1,
+            "upgradesV7WithoutChangingChecksumsOrExistingSecurities": 1,
+            "productionMigrationInventoryCreates51TablesWithoutFixture": 1,
+            "mysqlRejectsTaskAndBatchConstraintViolations": 1,
         },
     ),
     (
@@ -447,7 +451,7 @@ def self_probe(root):
     maven_status.write_text('{"exitCode": 37}\n', encoding="utf-8")
     recorded = record_generated_report_counts(valid, maven_status)
     check(recorded["exitCode"] == 37, "probe-maven-exit-code")
-    check([item.get("tests") for item in recorded["generatedReports"]] == [41, 43, 4],
+    check([item.get("tests") for item in recorded["generatedReports"]] == [41, 47, 4],
           "probe-generated-report-counts")
     first_relative, class_name, _, methods = REPORTS[0]
     first = valid / first_relative
@@ -714,12 +718,21 @@ result = {
     "resources": json.loads(Path(resources_path).read_text(encoding="utf-8")),
     "contracts": {
         "sourceYaml": 40,
-        "productionTables": 49,
+        "productionTables": 51,
+        "productionSecuritiesTables": 49,
         "legacyTables": 9,
+        "registeredDatasets": 40,
+        "productionMigrations": 7,
+        "testMigrations": 8,
         "packagedYaml": 40,
         "fixtureAdditionalTables": 1,
         "tableEvidence": "successful FlywaySchemaContractIT result-level assertions",
-        "fixtureTotals": {"businessTables": 50, "totalColumns": 1008, "primaryKeys": 50},
+        "fixtureTotals": {
+            "businessTables": 52,
+            "totalColumns": 1051,
+            "primaryKeys": 52,
+            "nonPrimaryIndexes": 48,
+        },
     },
     "syntheticRejections": 11,
 }
@@ -727,5 +740,5 @@ Path(output).write_text(json.dumps(result, indent=2, sort_keys=True) + "\n", enc
 os.chmod(output, 0o600)
 PY
 
-printf 'M14-T04 contracts passed: metadata=41 schema=43 package=4 yaml=40 tables=49 legacy=9 packaged=40\n'
+printf 'M14-T04 contracts passed: metadata=41 schema=47 package=4 yaml=40 tables=51 legacy=9 packaged=40\n'
 printf 'M14-T04 private evidence: %s\n' "$evidence"

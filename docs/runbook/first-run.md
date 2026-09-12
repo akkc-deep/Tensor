@@ -50,14 +50,14 @@ SELECT VERSION();
 CREATE DATABASE IF NOT EXISTS tensor
   CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_as_cs;
 CREATE USER '<DB_USER>'@'<APP_HOST>' IDENTIFIED BY '<DB_PASSWORD>';
-GRANT CREATE, SELECT, INSERT, UPDATE, ALTER, INDEX ON tensor.* TO '<DB_USER>'@'<APP_HOST>';
+GRANT CREATE, SELECT, INSERT, UPDATE, ALTER, INDEX, REFERENCES ON tensor.* TO '<DB_USER>'@'<APP_HOST>';
 SHOW GRANTS FOR '<DB_USER>'@'<APP_HOST>';
 SHOW CREATE DATABASE tensor;
 ```
 
 确认 schema 的字符集和排序规则正确，授权范围为 `tensor.*`。`IF NOT EXISTS` 不会修正已有 schema 的属性；首次运行应使用符合上述要求的空 schema。MySQL 显示的 `USAGE ON *.*` 不授予实际全局操作权限。
 
-当前生产迁移为 V1～V5、V7，共六次。V7 回填分红指纹并切换主键，除 CREATE、SELECT、INSERT、UPDATE 外还需该 schema 上的 ALTER、INDEX；不授予 DROP、DELETE、全局权限、账号管理或 GRANT OPTION。完成后退出管理员会话。
+当前生产迁移为 V1～V5、V7、V8，共七次。V7 回填分红指纹并切换主键，需要该 schema 上的 ALTER、INDEX；V8 创建任务与批次表及其外键，需要 REFERENCES。不授予 DROP、DELETE、全局权限、账号管理或 GRANT OPTION。完成后退出管理员会话。
 
 ## 3. 注入环境
 
@@ -98,7 +98,7 @@ trap 会在失败、正常 shell 退出或信号中断时恢复终端状态；�
 java -jar tensor-app-1.0-SNAPSHOT.jar --server.address=127.0.0.1 --server.port=8080
 ```
 
-这两个 Boot 参数是非秘密运行参数，首跑只绑定回环地址。观察启动结果：Flyway 自动执行 V1～V5、V7 共六次迁移，建立 49 张业务表（851 业务列、1001 物理列、41 个二级索引），另有一张 `flyway_schema_history`；应用随后自动检查 40 个受支持数据集的元数据和表结构。历史迁移保持不变，因此 49 张表中包含 9 张已下线接口的遗留表，应用不再注册这些接口，也不提供其下载或查询入口。不要手工执行 migration，不启用 fixture 或 acceptance profile，不执行测试 V6，也不另起前端进程。
+这两个 Boot 参数是非秘密运行参数，首跑只绑定回环地址。观察启动结果：Flyway 自动执行 V1～V5、V7、V8 共七次迁移。49 张证券来源/历史表仍包含 851 个证券业务列，其中 9 张属于已下线接口；V8 新增 `tensor_download_task`、`tensor_download_batch` 两张任务表。生产合计 51 张业务表、1044 个物理列、51 个主索引和 48 个非主索引，另有一张 `flyway_schema_history`；应用随后检查 40 个受支持数据集的元数据和表结构。不要把任务字段计入证券业务列，不要手工执行 migration，不启用 fixture 或 acceptance profile，不执行测试 V6，也不另起前端进程。验收/测试 classpath 才包含 V6，因此对应库存为八次迁移、52 张业务表、1051 个物理列、52 个主索引和 48 个非主索引。
 
 组织已有网关可承担 TLS 和访问控制；本地首跑不要求网关。公开访问前应按组织部署入口要求配置访问边界。
 
@@ -121,6 +121,20 @@ sh scripts/smoke-test.sh http://127.0.0.1:8080
 
 两页均由同一 JAR 提供。缺少 Token 时，数据源返回 `credentialConfigured=false`、`downloadAvailable=false`；数据源列表、数据集元数据及数据查看仍可用，Tushare 下载不可用。下载接口列表 `/api/v1/data-sources/tushare_pro/apis` 返回 HTTP 409、`PLUGIN_DISABLED`，下载页可显示“下载配置加载失败 / Plugin is unavailable”等配置不可用提示，这是缺少 Token 的预期行为。新空库没有业务记录属于正常现象。
 
+### 任务接收、查询和人工恢复
+
+下载页提交后，HTTP `202` 只表示任务及 submission 身份已经持久化，不表示来源读取或数据写入成功。保存响应的 `Location` 或浏览器详情 URL；如果回执丢失，可从 `/api/v1/download-tasks` 的近期列表按 submission 找回，再查询 `/api/v1/download-tasks/<taskId>`。刷新、关闭页面或整个浏览器不会停止后台任务，历史详情查询也不依赖当前插件仍注册。
+
+SINGLE 只执行一次当前参数请求，不承诺完整历史；RANGE 的 SUCCEEDED 只表示该任务保存的计划范围完成。NATIVE_RANGE 可能在运行时动态拆分，最终叶子数以详情计数和 `/api/v1/download-tasks/<taskId>/batches` 为准。`requestCount` 为任务跨轮次已取得的来源请求许可数，`runRequestCount` 为当前一轮许可数；`sourceRows` 统计成功提交的来源行，`insertedRows` 和 `updatedRows` 统计已提交写入操作。更新、重试和同一业务键重复出现时，写入操作数不等于业务表净增行数。
+
+正常停止或重启不会自动重发未完成请求。重新启动同一个 JAR 和数据库后，先等 health 及任务恢复完成，再读取详情：普通 FAILED 批次保留；中断批次等待人工确认。只在数据集定义和插件配置仍与任务一致、来源允许再次调用时操作：
+
+1. 对 FAILED 或 PARTIAL_FAILED，向 `/api/v1/download-tasks/<taskId>/retry` POST `{"expectedVersion":<详情中的当前version>}`，重排失败批次并继续尚未执行的工作，保留成功结果。
+2. 对 INTERRUPTED，向 `/api/v1/download-tasks/<taskId>/resume` POST 同样的版本结构，只继续中断或尚未执行的批次；已经成功和普通失败的批次保持不变。
+3. 一个版本只允许一次状态转换。HTTP 409 后重新 GET，不能盲目重复控制；`TASK_DEFINITION_CHANGED` 表示当前定义与任务快照不同，应停止手动继续并核实版本、插件和数据口径。
+
+详情查询暂时失败不会把任务改成 FAILED。`tensor.download-tasks.enabled=false` 仍执行启动恢复并允许历史查询，但禁止新任务接收、retry、resume 和 worker 派发。根 health 为 UP 不等于 Tushare Token 已配置，也不等于 34 个生产 RANGE 已开放；其能力状态必须从对应 capabilities 接口和页面读取。
+
 脚本无参数时使用 `http://127.0.0.1:8080`，也接受一个 http/https base URL（可以带部署路径前缀），会移除末尾 `/`。URL 不得包含 userinfo、query 或 fragment。每项连接上限 5 秒、总上限 15 秒；网络、非 200、内容不符或秘密检查失败退出 1，参数错误退出 2。输出只有固定标签，不打印原始响应。它检查指定敏感键、响应头、JDBC 标记，以及脚本环境中非空的 `TENSOR_DB_PASSWORD`、`TENSOR_TUSHARE_TOKEN` 字面值；新终端不会自动继承前一个终端的变量，未提供的任意秘密不在已知值检查能力内。JSON 检查仅为 smoke 标记，不代替完整接口合同验证。
 
 ## 6. 正常停止
@@ -129,7 +143,7 @@ sh scripts/smoke-test.sh http://127.0.0.1:8080
 
 Spring graceful shutdown 的 **70 秒是每个停机阶段上限，不是整个 JVM 的总停机期限**。现有写事务上限 60 秒，Web 停机阶段为其保留余量。首跑不要设置外部自动强杀倒计时；部署管理器若设置强杀期限，必须覆盖所有实际停机阶段和资源清理时间，不能仅设为 70 秒。
 
-尚未结束的同步上游读取最长 120 秒，超过当前 Web 停机阶段的 70 秒，因此不能保证每个完整下载请求都能在停机期间完成；数据库会回滚未提交事务。再次启动时使用相同 JAR 与数据库配置，Flyway 校验已有迁移，不会重复创建业务表；重新通过 smoke 后再开放流量。
+尚未结束的旧同步上游读取最长 120 秒，超过当前 Web 停机阶段的 70 秒，因此不能保证每个完整同步请求都能在停机期间完成；数据库会回滚未提交事务。后台任务停止后不再取得新来源许可，已经许可且进入受保护事务的操作仍按事务结果结束；70 秒不保证任意插件立即退出。再次启动时使用相同 JAR 与数据库配置，Flyway 校验已有迁移，不会重复创建业务表；启动恢复保留历史并将未完成工作置为需要人工判断的状态，不自动重发来源。重新通过 smoke 后再开放流量，然后按上节读取详情并决定是否 resume。
 
 ## 7. 备份与回退
 
@@ -163,6 +177,12 @@ MySQL 多条 DDL 不构成整体事务。最终 ALTER 失败时旧主键保留�
 
 旧包不生成 business_key，不能直接运行在 V7 schema 上。回退必须在停写状态恢复经过验证的备份及配套旧 schema/旧包，不能只替换 JAR。当前任务只在自有合成库验证迁移，不自动升级外部现有库。
 
+### V8 任务基础设施升级
+
+V8 在 V7 生产库上新增 `tensor_download_task` 和 `tensor_download_batch`，前者保存 submission、数据集、参数、任务状态和跨轮次计数，后者保存计划树、批次状态、提交计数及固定错误；批次通过外键引用任务。因此应用账号需要目标 schema 上的 REFERENCES，但仍不需要 DROP、DELETE、全局权限或测试 harness 使用的 TRIGGER。
+
+升级 V7 库前同样停止全部写入者、完成并验证备份，在 V8 迁移、schema 校验、根 health 和启动恢复完成前保持停写。V1～V5 与 V7 原字节保持不变，Flyway history 最终应为 `1,2,3,4,5,7,8`；不要运行 repair、clean 或手工创建任务表。V8 是前向迁移。旧 V7 包不了解当前任务表和恢复合同，回退不能只替换 JAR；必须在停写状态恢复经过验证的 V7 备份及配套旧包。
+
 ## 8. 故障定位
 
 只检查需要的状态，不输出整个环境、配置文件、可能含秘密的数据库 URL 或原始失败响应。
@@ -174,6 +194,8 @@ MySQL 多条 DDL 不构成整体事务。最终 ALTER 失败时旧主键保留�
 | 8080 端口冲突 | 用系统端口查看工具核实占用进程；选择空闲端口并同步修改启动参数、smoke 地址和浏览器地址，不终止身份不明的进程。 |
 | JAR 无法启动 | 用 `java -version` 确认 Java 21，核对分发文件名和版本；重新取得完整的同版本 JAR。 |
 | health 未达 UP | 核对数据库连接、权限及启动时 Flyway/schema 校验结果；先解决失败，不用 readiness 成功或 JVM 存活代替根 health。仅在本机查看必要日志，分享前清除秘密。 |
+| 任务停在 INTERRUPTED | 从详情读取最新 version 和批次状态，核实当前定义与来源后人工 resume；不要假设重启会自动重发，也不要把 health UP 当作任务成功。 |
+| retry/resume 返回 409 | 重新 GET 详情；可能是另一页面已使用该 version、任务状态已变化或定义已变化。只用新的可控制状态继续，定义变化时停止。 |
 | 页面 404 或内容不符 | 确认请求到了该 JAR 的正确端口和部署路径，使用配套分发版本；直接访问并刷新上述两个页面，无需 Vite。 |
 | Tushare 下载不可用 | 无 Token 时下载接口列表返回 409、下载页显示配置不可用提示符合预期；数据源列表、数据集元数据及数据查看仍可用。下载前隐藏输入 Token 并重启，不输出 Token 本身。 |
 | 开发跨源请求失败 | 按配置说明核对单个精确 origin；生产保持同源，不能通过 wildcard 或关闭安全控制绕过错误。 |

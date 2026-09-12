@@ -1,0 +1,13 @@
+# Lifecycle scoped review
+
+No remaining substantive findings in the current `DownloadTaskLifecycleIT` and `download-task-lifecycle.spec.js`.
+
+The implementation uses the production Servlet application, MySQL 8.4.6 and seven production migrations with a controlled extra source/table. Flow coverage proves durable 202 identity, full BrowserContext closure, background source/SQL progress without pages, list/detail reopen, partial retry isolation, SQL counters and one control POST. Restart coverage uses a distinct runId and durable queued, unplanned, running, pending, ordinary-failed and all-success snapshots; total source calls remain zero through startup/GET, then HTTP resume executes only unfinished work while preserving success and ordinary failure. The resume browser gate observes the third call in flight while SQL still contains only the first key before release.
+
+The receipt-loss filter runs after the controller has produced a committed 202, discards its headers/body, and the test accepts only an IOException or an explicit HTTP 500 with no `Location`, task identity, QUEUED receipt, or canary. Query and replay then recover one taskId with one source call. This is accurately evidence of a swallowed committed receipt through a real Servlet request; it is not evidence of a TCP/device failure.
+
+The restricted-user scenario grants only the documented schema privileges, runs V1–V5/V7/V8, starts the application, completes a task/write, checks both task foreign keys, and verifies no DROP/DELETE/global grant. Browser orchestration fixes argv/cwd/loopback environment, strips application and secret injection, enforces a 180-second process deadline, checks every page request remains on the loopback origin, and records page errors. Report validation requires the exact spec/title/count, expected/skipped/unexpected/flaky totals, one passed attempt and retry zero. Its negative method covers missing spec, missing/malformed/zero-test reports, wrong spec, missing retry, retry one and flaky one.
+
+Static review also found the related V8 gate adjustments consistent: fresh test migrations are eight, V6-to-current applies V7+V8 while preserving dividend data, production inventory directly asserts 51 tables/1044 columns/51 primary/48 secondary indexes, and both package contracts reject `DownloadTaskLifecycleIT` including nested classes. Runbook retry and source-row descriptions now match the repository contract.
+
+I did not run Maven, npm, browser, or external-source commands during this review. The root coordinator reported the earlier lifecycle flow 2/2 and resume 1/1 evidence and owns the fresh combined gate log.

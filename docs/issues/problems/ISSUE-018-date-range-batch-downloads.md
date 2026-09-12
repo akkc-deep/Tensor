@@ -2,9 +2,9 @@
 
 ## 当前状态
 
-处理中，未解决（2026-09-12）。已完成当前 40 个接口的官网文档调研及代码现状核对，并整理[方案草稿](../proposals/ISSUE-018-date-range-batch-downloads.md)和[详细设计](../../task-designs/ISSUE-018-design.md)。当前确认方向为后台执行、按批入库、批次状态持久化、手动重试及多数据源复用；T01–T07 已完成插件合同 / 参数绑定、持久化仓储、本地接收与查询、证券数据与批次状态原子提交、Tushare 请求上下文与共享节流、区间策略 / 日期规划及通用批次执行 / 拆分 / 资源预算，并记录验证证据；34 项生产 RANGE 仍保持待验证。手动重试 / 恢复与后台生命周期、HTTP / 前端及真实完整性验收仍由后续任务实施。下文保留调研依据。
+处理中，未解决（2026-09-12）。[详细设计](../../task-designs/ISSUE-018-design.md)所列T01–T12已完成：插件合同、任务存储/执行/恢复、HTTP与前端，以及真实Servlet/MySQL生命周期、故障矩阵和六条源码门禁均有证据。最终普通浏览器7文件126项全部通过，见[基础设施验证](../../verification/ISSUE-018-task-infrastructure.md)。34项生产RANGE仍为NEEDS_VERIFICATION，真实接口语义和完整性验收由T13跟踪，母issue保持未解决。完整发布脚本因main/干净输入/HEAD前置未满足而未运行。
 
-已依据详细设计拆为 13 项任务，见[ISSUE-018 任务看板](../../task-handoffs/ISSUE-018/ISSUE-018-task-board.md)。当前 T01–T07 为 COMPLETED，T08 的[专属设计](../../task-designs/ISSUE-018-T08-design.md)与[交接](../../task-handoffs/ISSUE-018/ISSUE-018-T08-handoff.md)已就绪，状态 READY、尚未实施；准确状态以看板为准。真实接口完整性验收与基础设施验收分别跟踪。
+T13的[专属设计](../../task-designs/ISSUE-018-T13-design.md)与[交接](../../task-handoffs/ISSUE-018/ISSUE-018-T13-handoff.md)已完成并准备READY，尚未启动实施。准确任务状态见[ISSUE-018看板](../../task-handoffs/ISSUE-018/ISSUE-018-task-board.md)。T12的[专属设计](../../task-designs/ISSUE-018-T12-design.md)与[历史暂停交接](../../task-handoffs/ISSUE-018/ISSUE-018-T12-handoff.md)保留；以下官网调研与旧代码现状是历史来源，不改写为真实接口已验收。
 
 ## 调研范围与结论
 

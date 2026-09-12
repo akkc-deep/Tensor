@@ -10,6 +10,15 @@ const metadataApi = vi.hoisted(() => ({
   listApis: vi.fn(),
 }))
 const downloadApi = vi.hoisted(() => ({ downloadDataset: vi.fn() }))
+const downloadTaskApi = vi.hoisted(() => ({
+  getDownloadCapabilities: vi.fn(),
+  submitDownloadTask: vi.fn(),
+  listDownloadTasks: vi.fn(),
+  getDownloadTask: vi.fn(),
+  listDownloadTaskBatches: vi.fn(),
+  retryDownloadTask: vi.fn(),
+  resumeDownloadTask: vi.fn(),
+}))
 const datasetApi = vi.hoisted(() => ({
   listDatasets: vi.fn(),
   getDataset: vi.fn(),
@@ -23,6 +32,15 @@ vi.mock('../api/dataSources.js', () => ({
 vi.mock('../api/downloads.js', () => ({
   downloadDataset: downloadApi.downloadDataset,
 }))
+vi.mock('../api/downloadTasks.js', () => ({
+  getDownloadCapabilities: downloadTaskApi.getDownloadCapabilities,
+  submitDownloadTask: downloadTaskApi.submitDownloadTask,
+  listDownloadTasks: downloadTaskApi.listDownloadTasks,
+  getDownloadTask: downloadTaskApi.getDownloadTask,
+  listDownloadTaskBatches: downloadTaskApi.listDownloadTaskBatches,
+  retryDownloadTask: downloadTaskApi.retryDownloadTask,
+  resumeDownloadTask: downloadTaskApi.resumeDownloadTask,
+}))
 vi.mock('../api/datasets.js', () => ({
   listDatasets: datasetApi.listDatasets,
   getDataset: datasetApi.getDataset,
@@ -33,6 +51,7 @@ import { ClientError } from '../api/errors.js'
 import DownloadAction from '../components/download/DownloadAction.vue'
 import ApiSelect from '../components/download/ApiSelect.vue'
 import DownloadResult from '../components/download/DownloadResult.vue'
+import DownloadTaskList from '../components/download/DownloadTaskList.vue'
 import DynamicParameterForm from '../components/download/DynamicParameterForm.vue'
 import DatasetPagination from '../components/dataset/DatasetPagination.vue'
 import DatasetSelect from '../components/dataset/DatasetSelect.vue'
@@ -41,6 +60,9 @@ import DynamicFilterForm from '../components/dataset/DynamicFilterForm.vue'
 import { createThemeState, THEME_KEY } from '../composables/useTheme.js'
 import { createAppRouter } from '../router/index.js'
 import AppLayout from './AppLayout.vue'
+import DownloadTaskView from '../views/DownloadTaskView.vue'
+import examples from '../../../docs/contracts/download-task-examples.json'
+import { parseDownloadTask } from '../api/downloadTaskDtos.js'
 
 const styles = readFileSync('src/style.css', 'utf8')
 
@@ -57,6 +79,12 @@ afterAll(() => styleElement.remove())
 beforeEach(() => {
   vi.resetAllMocks()
   metadataApi.listDataSources.mockResolvedValue([])
+  downloadTaskApi.getDownloadCapabilities.mockResolvedValue(capabilities())
+  downloadTaskApi.listDownloadTasks.mockResolvedValue(taskPage())
+  vi.spyOn(globalThis.crypto, 'randomUUID').mockReturnValue(
+    '33333333-3333-4333-8333-333333333333',
+  )
+  sessionStorage.clear()
   localStorage.clear()
   document.documentElement.removeAttribute('style')
 })
@@ -88,6 +116,45 @@ function descriptor() {
       },
     ],
   }
+}
+
+function capabilities() {
+  return {
+    single: { available: true, parameters: descriptor().parameters },
+    range: {
+      availability: 'UNSUPPORTED',
+      unavailableReason: '仅支持单次请求',
+      dateAxis: null,
+      dateLabel: null,
+      startParameter: null,
+      endParameter: null,
+      parameters: [],
+      planningMode: null,
+      splittable: false,
+      policyVersion: null,
+      completenessRule: null,
+    },
+  }
+}
+
+function taskPage(overrides = {}) {
+  return Object.freeze({
+    page: 1,
+    pageSize: 20,
+    total: 0n,
+    items: Object.freeze([]),
+    ...overrides,
+  })
+}
+
+function taskReceipt() {
+  return Object.freeze({
+    requestId: '11111111-1111-4111-8111-111111111111',
+    taskId: '22222222-2222-4222-8222-222222222222',
+    status: 'QUEUED',
+    version: 1n,
+    createdAt: '2026-09-12T00:00:00Z',
+  })
 }
 
 function datasetDescriptor() {
@@ -270,7 +337,7 @@ describe('AppLayout', () => {
       expect(wrapper.get('main h1').text()).toBe('数据下载')
       expect(
         wrapper.findAll('main h2').map((heading) => heading.text()),
-      ).toEqual(['下载配置', '本次下载结果', '请选择数据接口'])
+      ).toEqual(['下载配置', '任务接收', '等待提交任务', '近期任务'])
       expect(wrapper.find('input[type="color"]').exists()).toBe(false)
       expect(wrapper.getComponent(DownloadAction).props('disabled')).toBe(
         true,
@@ -315,6 +382,9 @@ describe('AppLayout', () => {
       expect(metadataApi.listDataSources).not.toHaveBeenCalled()
       expect(metadataApi.listApis).not.toHaveBeenCalled()
       expect(downloadApi.downloadDataset).not.toHaveBeenCalled()
+      expect(downloadTaskApi.getDownloadCapabilities).not.toHaveBeenCalled()
+      expect(downloadTaskApi.submitDownloadTask).not.toHaveBeenCalled()
+      expect(downloadTaskApi.listDownloadTasks).not.toHaveBeenCalled()
       expect(datasetApi.listDatasets).not.toHaveBeenCalled()
       expect(datasetApi.getDataset).not.toHaveBeenCalled()
       expect(datasetApi.queryDataset).not.toHaveBeenCalled()
@@ -330,7 +400,7 @@ describe('AppLayout', () => {
 
     try {
       wrapper.getComponent(ApiSelect).vm.$emit('update:modelValue', 'daily')
-      await nextTick()
+      await flushPromises()
       wrapper
         .getComponent(DynamicParameterForm)
         .getComponent(ElDatePicker)
@@ -357,16 +427,23 @@ describe('AppLayout', () => {
     }
   })
 
-  it('keeps a pending download active while settings is open and shows its single response on return', async () => {
+  it('pauses the kept-alive task list while settings is open and accepts a pending task on return', async () => {
+    vi.useFakeTimers()
     const pending = deferred()
+    const lateList = deferred()
+    const resumedList = deferred()
     metadataApi.listDataSources.mockResolvedValueOnce([source()])
     metadataApi.listApis.mockResolvedValueOnce([descriptor()])
-    downloadApi.downloadDataset.mockReturnValueOnce(pending.promise)
+    downloadTaskApi.listDownloadTasks
+      .mockResolvedValueOnce(taskPage())
+      .mockReturnValueOnce(lateList.promise)
+      .mockReturnValueOnce(resumedList.promise)
+    downloadTaskApi.submitDownloadTask.mockReturnValueOnce(pending.promise)
     const { router, wrapper } = await mountAt('/downloads')
 
     try {
       wrapper.getComponent(ApiSelect).vm.$emit('update:modelValue', 'daily')
-      await nextTick()
+      await flushPromises()
       wrapper
         .getComponent(DynamicParameterForm)
         .getComponent(ElDatePicker)
@@ -375,35 +452,45 @@ describe('AppLayout', () => {
       await wrapper.getComponent(DownloadAction).get('button').trigger('click')
       await nextTick()
 
-      expect(downloadApi.downloadDataset).toHaveBeenCalledOnce()
+      expect(downloadTaskApi.submitDownloadTask).toHaveBeenCalledOnce()
+      await vi.advanceTimersByTimeAsync(5_000)
+      expect(downloadTaskApi.listDownloadTasks).toHaveBeenCalledTimes(2)
+
       await router.push('/settings')
       await flushPromises()
-      pending.resolve({
-        requestId: 'download-request',
-        outcome: 'SUCCESS',
-        pluginId: 'fixture',
-        apiName: 'daily',
-        sourceRowCount: 12,
-        insertedRows: 7,
-        updatedRows: 5,
-        message: '下载完成',
-      })
+      await vi.advanceTimersByTimeAsync(30_000)
+      expect(downloadTaskApi.listDownloadTasks).toHaveBeenCalledTimes(2)
+
+      lateList.resolve(taskPage({ total: 9n }))
+      pending.resolve(taskReceipt())
       await flushPromises()
+      expect(downloadTaskApi.listDownloadTasks).toHaveBeenCalledTimes(2)
 
       await router.push('/downloads')
       await flushPromises()
 
-      expect(wrapper.getComponent(DownloadResult).props('state')).toBe(
-        'SUCCESS',
-      )
+      expect(downloadTaskApi.listDownloadTasks).toHaveBeenCalledTimes(3)
+      expect(wrapper.getComponent(DownloadTaskList).props('result').total).toBe(0n)
+      resumedList.resolve(taskPage({ total: 2n }))
+      await flushPromises()
+
       expect(
-        wrapper.getComponent(DownloadResult).props('result').requestId,
-      ).toBe('download-request')
-      expect(downloadApi.downloadDataset).toHaveBeenCalledOnce()
+        wrapper
+          .getComponent(DynamicParameterForm)
+          .getComponent(ElDatePicker)
+          .props('modelValue'),
+      ).toBe('2026-09-04')
+      expect(wrapper.text()).toContain('任务已接收')
+      expect(wrapper.text()).not.toContain('下载成功')
+      expect(wrapper.findComponent(DownloadResult).exists()).toBe(false)
+      expect(wrapper.getComponent(DownloadTaskList).props('result').total).toBe(2n)
+      expect(downloadTaskApi.submitDownloadTask).toHaveBeenCalledOnce()
       expect(metadataApi.listDataSources).toHaveBeenCalledOnce()
       expect(metadataApi.listApis).toHaveBeenCalledOnce()
     } finally {
       wrapper.unmount()
+      vi.clearAllTimers()
+      vi.useRealTimers()
     }
   })
 
@@ -583,4 +670,60 @@ describe('AppLayout', () => {
       wrapper.unmount()
     }
   })
+})
+
+function detailTask(overrides = {}) {
+  return parseDownloadTask({ ...examples.examples.find((e) => e.name === 'partialFailedTask').value, ...overrides }, '11111111-1111-4111-8111-111111111111')
+}
+
+it('opens details through the list RouterLink, pauses the cached list, and returns to the same form', async () => {
+  vi.useFakeTimers()
+  metadataApi.listDataSources.mockResolvedValueOnce([source()])
+  metadataApi.listApis.mockResolvedValueOnce([descriptor()])
+  downloadTaskApi.listDownloadTasks.mockResolvedValue(taskPage({ total: 1n, items: [detailTask()] }))
+  downloadTaskApi.getDownloadTask.mockResolvedValue(detailTask())
+  downloadTaskApi.listDownloadTaskBatches.mockResolvedValue(taskPage())
+  const { router, wrapper } = await mountAt('/downloads')
+  try {
+    wrapper.getComponent(ApiSelect).vm.$emit('update:modelValue', 'daily')
+    await flushPromises()
+    const originalForm = wrapper.getComponent(DynamicParameterForm).element
+    wrapper.getComponent(DynamicParameterForm).getComponent(ElDatePicker).vm.$emit('update:modelValue', '2026-09-04')
+    await nextTick()
+    await wrapper.get('.download-task-list a').trigger('click')
+    await flushPromises()
+    expect(router.currentRoute.value.name).toBe('download-task')
+    expect(wrapper.get('h1').text()).toBe('任务详情')
+    expect(wrapper.get('.workspace-bar b').text()).toBe('任务详情')
+    expect(wrapper.get('nav[aria-label="工作区导航"] a').classes()).toContain('router-link-active')
+    expect(downloadTaskApi.getDownloadTask).toHaveBeenCalledExactlyOnceWith(detailTask().taskId)
+    await vi.advanceTimersByTimeAsync(6000)
+    expect(downloadTaskApi.listDownloadTasks).toHaveBeenCalledTimes(1)
+    await wrapper.get('.task-detail__toolbar a').trigger('click')
+    await flushPromises()
+    expect(router.currentRoute.value.name).toBe('downloads')
+    expect(wrapper.getComponent(DynamicParameterForm).element).toBe(originalForm)
+    expect(wrapper.getComponent(DynamicParameterForm).getComponent(ElDatePicker).props('modelValue')).toBe('2026-09-04')
+    expect(downloadTaskApi.listDownloadTasks).toHaveBeenCalledTimes(2)
+  } finally { wrapper.unmount(); vi.clearAllTimers(); vi.useRealTimers() }
+})
+
+it('reuses a same-name detail route while discarding the old task response', async () => {
+  const late = deferred()
+  downloadTaskApi.getDownloadTask.mockReturnValueOnce(late.promise)
+  downloadTaskApi.listDownloadTaskBatches.mockResolvedValue(taskPage())
+  const { router, wrapper } = await mountAt(`/downloads/tasks/${detailTask().taskId}`)
+  try {
+    const view = wrapper.getComponent(DownloadTaskView).element
+    const other = 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa'
+    await router.push(`/downloads/tasks/${other}`)
+    downloadTaskApi.getDownloadTask.mockResolvedValue(detailTask({ taskId: other, canRetry: false }))
+    late.resolve(detailTask())
+    await flushPromises()
+    expect(wrapper.getComponent(DownloadTaskView).element).toBe(view)
+    expect(wrapper.text()).toContain(other)
+    expect(wrapper.text()).not.toContain(detailTask().taskId)
+    expect(downloadTaskApi.getDownloadTask).toHaveBeenCalledTimes(2)
+    expect(metadataApi.listDataSources).not.toHaveBeenCalled()
+  } finally { wrapper.unmount() }
 })

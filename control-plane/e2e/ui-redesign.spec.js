@@ -8,18 +8,21 @@ import {
   EXPECTED_ROWS,
   apiFailure,
   installApi,
+  rangeCapability,
   successDownload,
   syntheticRecords,
 } from './ui-redesign.fixtures.js'
 
 const SOURCE_COLUMNS = ['source_plugin', 'source_api', 'ingested_at']
-const SCREENSHOT_DIR = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../docs/verification/ISSUE-004-ui-redesign')
+const SCREENSHOT_DIR = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../control-plane/node_modules/.cache/issue018-t12-ui')
 const MARKET_LABELS = {
   ts_code: '证券代码', trade_date: '交易日', open: '开盘价', high: '最高价',
   low: '最低价', close: '收盘价', pre_close: '前收盘价', change: '涨跌额',
   vol: '成交量', amount: '成交额', source_plugin: '来源插件', source_api: '来源接口',
   ingested_at: '入库时间',
 }
+
+test.use({ baseURL: process.env.TENSOR_UI_BASE_URL || 'http://127.0.0.1:4173' })
 
 test.describe.configure({ timeout: 60_000 })
 
@@ -128,7 +131,13 @@ async function fillMetadataField(page, wrapper, parameter) {
   if (parameter.type === 'ENUM') {
     await wrapper.locator('.el-select__wrapper').click()
     const listboxId = await input.getAttribute('aria-controls')
-    await page.locator(`#${listboxId}`).getByRole('option', { name: parameter.allowedValues[0], exact: true }).click()
+    const option = page.locator(`#${listboxId}`).getByRole('option', { name: parameter.allowedValues[0], exact: true })
+    await option.scrollIntoViewIfNeeded()
+    await expect(option).toBeInViewport({ ratio: 1 })
+    await option.click()
+    await expect(input).toHaveAttribute('aria-expanded', 'false')
+    await expect(wrapper.locator('.el-select__selected-item').filter({ hasText: parameter.allowedValues[0] }))
+      .toHaveText(parameter.allowedValues[0])
     return parameter.allowedValues[0]
   }
   const displayValue = ['DATE', 'DATE_RANGE_MEMBER'].includes(parameter.type)
@@ -157,8 +166,16 @@ async function submitDownload(page, definition) {
     else if (['DATE', 'DATE_RANGE_MEMBER'].includes(parameter.type)) await expect(wrapper.locator('.el-date-editor')).toBeVisible()
     params[parameter.name] = await fillMetadataField(page, wrapper, parameter)
   }
-  await page.getByRole('button', { name: '开始下载' }).click()
-  await expect(page.getByRole('heading', { name: '下载成功', level: 2 })).toBeVisible()
+  await page.getByRole('button', { name: '提交任务' }).click()
+  await expect(page.getByRole('heading', { name: '任务已接收', level: 2 })).toBeVisible()
+  await expect(page.getByRole('heading', { name: '下载成功' })).toHaveCount(0)
+  await page.locator('.task-identity').getByRole('link', { name: '查看任务' }).click()
+  await expect(page.locator('[data-task-status]')).toHaveText('已成功')
+  await expect(page.locator('.task-detail__counts')).toContainText('来源行数 12')
+  await expect(page.locator('.task-detail__counts')).toContainText('新增记录次数 10')
+  await expect(page.locator('.task-detail__counts')).toContainText('更新记录次数 2')
+  await expect(page.getByText('本次请求已完成。', { exact: true })).toBeVisible()
+  await page.getByRole('link', { name: '返回下载页' }).click()
   return params
 }
 
@@ -217,10 +234,13 @@ test.describe('40 项 UI 元数据矩阵', () => {
       const api = await installApi(page)
       await openDownloads(page)
       await chooseDownload(page, apiName)
+      await expect(page.getByRole('radio', { name: '单次请求', exact: true })).toBeChecked()
+      await expect(page.getByRole('radio', { name: '日期区间', exact: true })).toBeDisabled()
+      await expect(page.locator('.download-mode')).toContainText(rangeCapability(apiName).unavailableReason)
       const expectedParams = await submitDownload(page, definition)
-      const posts = apiRequests(api, ({ method, path: requestPath }) => method === 'POST' && requestPath === '/api/v1/downloads')
+      const posts = apiRequests(api, ({ method, path: requestPath }) => method === 'POST' && requestPath === '/api/v1/download-tasks')
       expect(posts).toHaveLength(1)
-      expect(posts[0].body).toEqual({ pluginId: 'tushare_pro', apiName, params: expectedParams })
+      expect(posts[0].body).toEqual({ submissionId: expect.stringMatching(/^[0-9a-f-]{36}$/), mode: 'SINGLE', pluginId: 'tushare_pro', apiName, params: expectedParams })
       await openDataset(page, apiName)
       const expectedCriteria = await submitDataset(page, definition)
       const queries = apiRequests(api, ({ method, path: requestPath }) => method === 'GET' && requestPath.endsWith(`/${apiName}/records`))
@@ -245,16 +265,16 @@ test('下载状态、校验、往返缓存与原参数重试', async ({ page }) 
       }
       return { status: 200, body: [DATA_SOURCE] }
     },
-    'POST /api/v1/downloads': async (request) => {
+    'POST /api/v1/download-tasks': async (request) => {
       downloadAttempt += 1
       if (downloadAttempt === 1) {
         await new Promise((resolve) => { releaseDownload = resolve })
-        return { status: 200, body: successDownload(request.body.apiName, request.requestId) }
+        return successDownload(request)
       }
       if (downloadAttempt === 2) return apiFailure(request.requestId, 'SOURCE_TIMEOUT')
-      if (downloadAttempt === 4) return { status: 200, body: successDownload(request.body.apiName, request.requestId, 'EMPTY') }
+      if (downloadAttempt === 4) return successDownload(request, 'EMPTY')
       if (downloadAttempt === 5) return apiFailure(request.requestId, 'PARAM_INVALID')
-      return { status: 200, body: successDownload(request.body.apiName, request.requestId) }
+      return successDownload(request)
     },
   })
   await page.goto('/downloads')
@@ -262,9 +282,9 @@ test('下载状态、校验、往返缓存与原参数重试', async ({ page }) 
   releaseSources()
   await expect(page.getByRole('heading', { name: '下载配置加载失败' })).toBeVisible()
   await expect(page.getByText(/请求 ID：/)).toBeVisible()
-  await page.getByRole('button', { name: '重新加载' }).click()
+  await page.getByRole('button', { name: '重新加载配置' }).click()
   await chooseDownload(page, 'daily')
-  await page.getByRole('button', { name: '开始下载' }).click()
+  await page.getByRole('button', { name: '提交任务' }).click()
   const stockCode = page.locator('[data-parameter="ts_code"] input')
   const tradeDate = page.locator('[data-parameter="trade_date"] input')
   await expect(stockCode).toHaveAttribute('aria-invalid', 'true')
@@ -273,61 +293,62 @@ test('下载状态、校验、往返缓存与原参数重试', async ({ page }) 
   await stockCode.fill(' 000001.sz ')
   await tradeDate.fill('2026-08-07')
   await tradeDate.press('Enter')
-  await page.getByRole('button', { name: '开始下载' }).click()
-  await expect(page.getByRole('heading', { name: '正在下载' })).toBeVisible()
+  await page.getByRole('button', { name: '提交任务' }).click()
+  await expect(page.getByRole('heading', { name: '正在提交任务' })).toBeVisible()
   await expect(page.locator('#download-data-source')).toBeDisabled()
   await expect(page.locator('#download-api')).toBeDisabled()
   await expect(stockCode).toBeDisabled()
   await expect(tradeDate).toBeDisabled()
-  await expect(page.getByRole('button', { name: /开始下载/ })).toBeDisabled()
+  await expect(page.getByRole('button', { name: /提交任务/ })).toBeDisabled()
   await page.getByRole('link', { name: /设置/ }).click()
   releaseDownload()
   await page.getByRole('link', { name: /数据下载/ }).click()
   await expect(stockCode).toHaveValue(' 000001.sz ')
   await expect(tradeDate).toHaveValue('2026-08-07')
-  await expect(page.getByRole('heading', { name: '下载成功' })).toBeVisible()
-  await expect(page.locator('.download-result__counts dd')).toHaveText(['12', '10', '2'])
+  await expect(page.getByRole('heading', { name: '任务已接收' })).toBeVisible()
+  await expect(page.locator('.task-identity code')).toHaveText(/^[0-9a-f-]{36}$/)
   expect(apiRequests(api, ({ method }) => method === 'POST')).toHaveLength(1)
 
-  await page.getByRole('button', { name: '开始下载' }).click()
-  await expect(page.getByRole('heading', { name: '下载失败' })).toBeVisible()
+  await page.getByRole('button', { name: '提交任务' }).click()
+  await expect(page.getByRole('heading', { name: '提交结果尚未确认' })).toBeVisible()
   await stockCode.fill('000002.SZ')
   await tradeDate.fill('2026-08-08')
   await page.getByRole('link', { name: /设置/ }).click()
   await page.getByRole('link', { name: /数据下载/ }).click()
-  await expect(page.getByRole('heading', { name: '下载失败' })).toBeVisible()
-  await page.getByRole('button', { name: '使用原参数重试' }).click()
-  await expect(page.getByRole('heading', { name: '下载成功' })).toBeVisible()
+  await expect(page.getByRole('heading', { name: '提交结果尚未确认' })).toBeVisible()
+  await page.getByRole('button', { name: '使用原参数重新确认' }).click()
+  await expect(page.getByRole('heading', { name: '任务已接收' })).toBeVisible()
   const posts = apiRequests(api, ({ method }) => method === 'POST')
   expect(posts).toHaveLength(3)
   expect(posts[0].body.params).toEqual({ ts_code: '000001.SZ', trade_date: '20260807' })
   expect(posts[1].body.params).toEqual({ ts_code: '000001.SZ', trade_date: '20260807' })
+  expect(posts[2].body.submissionId).toBe(posts[1].body.submissionId)
   expect(posts[2].body.params).toEqual({ ts_code: '000001.SZ', trade_date: '20260807' })
 
-  await page.getByRole('button', { name: '开始下载' }).click()
-  await expect(page.getByRole('heading', { name: '下载成功，0 条数据' })).toBeVisible()
-  await page.getByRole('button', { name: '开始下载' }).click()
-  await expect(page.getByRole('heading', { name: '下载失败' })).toBeVisible()
-  await expect(page.getByRole('button', { name: '使用原参数重试' })).toHaveCount(0)
+  await page.getByRole('button', { name: '提交任务' }).click()
+  await expect(page.getByRole('heading', { name: '任务已接收' })).toBeVisible()
+  await page.getByRole('button', { name: '提交任务' }).click()
+  await expect(page.getByRole('heading', { name: '任务未接收' })).toBeVisible()
+  await expect(page.getByRole('button', { name: '使用原参数重新确认' })).toHaveCount(0)
 
   await chooseDownload(page, 'new_share')
   const start = page.locator('[data-parameter="start_date"] input')
   const end = page.locator('[data-parameter="end_date"] input')
-  await page.getByRole('button', { name: '开始下载' }).click()
+  await page.getByRole('button', { name: '提交任务' }).click()
   expect(apiRequests(api, ({ method }) => method === 'POST')).toHaveLength(5)
   await start.fill('2026-08-08')
   await start.press('Enter')
   await end.fill('2026-08-07')
   await end.press('Enter')
-  await page.getByRole('button', { name: '开始下载' }).click()
+  await page.getByRole('button', { name: '提交任务' }).click()
   await expect(start).toHaveAttribute('aria-invalid', 'true')
   expect(apiRequests(api, ({ method }) => method === 'POST')).toHaveLength(5)
   await end.fill('2026-08-09')
   await end.press('Enter')
-  await page.getByRole('button', { name: '开始下载' }).click()
-  await expect(page.getByRole('heading', { name: '下载成功' })).toBeVisible()
+  await page.getByRole('button', { name: '提交任务' }).click()
+  await expect(page.getByRole('heading', { name: '任务已接收' })).toBeVisible()
   const finalPost = apiRequests(api, ({ method }) => method === 'POST').at(-1)
-  expect(finalPost.body).toEqual({ pluginId: 'tushare_pro', apiName: 'new_share', params: { start_date: '20260808', end_date: '20260809' } })
+  expect(finalPost.body).toEqual({ submissionId: expect.stringMatching(/^[0-9a-f-]{36}$/), mode: 'SINGLE', pluginId: 'tushare_pro', apiName: 'new_share', params: { start_date: '20260808', end_date: '20260809' } })
   assertApiClean(api)
 })
 
@@ -445,20 +466,20 @@ test.describe('主题、五视口与布局稳定性', () => {
       })
       await openDownloads(page)
       await chooseDownload(page, 'daily')
+      await page.locator('[data-parameter="ts_code"] input').fill('000001.SZ')
       const tradeDate = page.locator('[data-parameter="trade_date"] input')
       await tradeDate.fill('2026-08-07')
       await tradeDate.press('Enter')
-      await page.getByRole('button', { name: '开始下载' }).click()
-      await expect(page.getByRole('heading', { name: '下载成功' })).toBeVisible()
-      const countColumns = await page.locator('.download-result__counts').evaluate((element) => getComputedStyle(element).gridTemplateColumns)
-      expect(countColumns.split(' ')).toHaveLength(3)
+      await page.getByRole('button', { name: '提交任务' }).click()
+      await expect(page.getByRole('heading', { name: '任务已接收' })).toBeVisible()
+      await expect(page.locator('.task-identity code')).toHaveText(/^[0-9a-f-]{36}$/)
       await page.evaluate(() => scrollTo(0, 0))
       expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true)
       const columns = await page.locator('.download-grid').evaluate((element) => getComputedStyle(element).gridTemplateColumns)
       expect(columns.split(' ').length).toBe(width <= 1000 ? 1 : 2)
       const downloadTargets = [
         page.locator('.app-nav__link.router-link-active'), page.locator('#download-api'),
-        page.getByRole('button', { name: '开始下载' }), page.locator('.download-config-panel'),
+        page.getByRole('button', { name: '提交任务' }), page.locator('.download-config-panel'),
         page.locator('.download-result-panel'),
       ]
       const downloadBaseline = await boxes(downloadTargets)
@@ -651,7 +672,8 @@ test('设置零 API、四主题真实颜色、持久化降级、非法值与完�
   const businessDate = businessPage.locator('[data-parameter="trade_date"] input')
   await businessDate.fill('2026-08-07')
   await businessDate.press('Enter')
-  await businessPage.getByRole('button', { name: '开始下载' }).click()
+  await businessPage.locator('[data-parameter="ts_code"] input').fill('000001.SZ')
+  await businessPage.getByRole('button', { name: '提交任务' }).click()
   await openDataset(businessPage, 'daily')
   await businessPage.getByRole('button', { name: '查询', exact: true }).click()
   await expect(businessPage.getByRole('status').filter({ hasText: '共 201 条' })).toContainText('第 1 / 5 页')
@@ -785,6 +807,9 @@ test('键盘、焦点、移动端弹层与 reduced motion', async ({ page }) => 
   await page.keyboard.press('Escape')
   await expect(page.locator('.api-select .el-select__selected-item:not(.el-select__input-wrapper)')).toContainText('daily')
 
+  const stock = page.locator('[data-parameter="ts_code"] input')
+  await tabTo(page, stock)
+  await page.keyboard.type('000001.SZ')
   const date = page.locator('[data-parameter="trade_date"] input')
   await tabTo(page, date)
   await expectFocusOutline(date, date.locator('xpath=ancestor::*[contains(@class, "el-input__wrapper")][1]'))
@@ -798,11 +823,11 @@ test('键盘、焦点、移动端弹层与 reduced motion', async ({ page }) => 
   await page.keyboard.type('2026-08-07')
   await page.keyboard.press('Enter')
   await expect(date).toHaveValue('2026-08-07')
-  const downloadButton = page.getByRole('button', { name: '开始下载' })
+  const downloadButton = page.getByRole('button', { name: '提交任务' })
   await tabTo(page, downloadButton)
   await expectFocusOutline(downloadButton)
   await page.keyboard.press('Enter')
-  await expect(page.getByRole('heading', { name: '下载成功' })).toBeVisible()
+  await expect(page.getByRole('heading', { name: '任务已接收' })).toBeVisible()
 
   await tabTo(page, datasetsLink)
   await expectFocusOutline(datasetsLink)
@@ -879,11 +904,12 @@ test('生成八张可复现的正式验收截图', async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 1080 })
   await openDownloads(page)
   await chooseDownload(page, 'daily')
+  await page.locator('[data-parameter="ts_code"] input').fill('000001.SZ')
   const date = page.locator('[data-parameter="trade_date"] input')
   await date.fill('2026-08-07')
   await date.press('Enter')
-  await page.getByRole('button', { name: '开始下载' }).click()
-  await expect(page.getByRole('heading', { name: '下载成功' })).toBeVisible()
+  await page.getByRole('button', { name: '提交任务' }).click()
+  await expect(page.getByRole('heading', { name: '任务已接收' })).toBeVisible()
   await shot('downloads-desktop.png')
   await openDataset(page, 'daily')
   await page.getByRole('button', { name: '查询', exact: true }).click()
@@ -906,18 +932,19 @@ test('生成八张可复现的正式验收截图', async ({ page }) => {
   await page.keyboard.press('Escape')
   await page.unroute('**/api/**')
   const errorApi = await installApi(page, {
-    'POST /api/v1/downloads': (request) => {
+    'POST /api/v1/download-tasks': (request) => {
       const failure = apiFailure(request.requestId, 'SOURCE_TIMEOUT')
-      failure.body.message = '上游数据源响应超时，当前请求未完成。请检查网络与凭证后稍后使用原参数重试；字面标记 <strong> 必须作为纯文本显示。'
+      failure.body.message = '上游数据源响应超时，当前请求未完成。请检查网络与凭证后稍后使用原参数重新确认；字面标记 <strong> 必须作为纯文本显示。'
       return failure
     },
   })
   await page.reload()
   await chooseDownload(page, 'daily')
+  await page.locator('[data-parameter="ts_code"] input').fill('000001.SZ')
   await page.locator('[data-parameter="trade_date"] input').fill('2026-08-07')
   await page.locator('[data-parameter="trade_date"] input').press('Enter')
-  await page.getByRole('button', { name: '开始下载' }).click()
-  await expect(page.getByRole('heading', { name: '下载失败' })).toBeVisible()
+  await page.getByRole('button', { name: '提交任务' }).click()
+  await expect(page.getByRole('heading', { name: '提交结果尚未确认' })).toBeVisible()
   await shot('download-error-mobile.png')
   assertApiClean(api)
   assertApiClean(errorApi)

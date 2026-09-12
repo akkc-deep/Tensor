@@ -263,6 +263,14 @@ class FlywaySchemaContractIT {
         JdbcTemplate jdbc = jdbc(url, "root");
         assertThat(jdbc.queryForObject("SELECT COUNT(*) FROM information_schema.tables "
                 + "WHERE table_schema = DATABASE() AND table_name <> 'flyway_schema_history'", Integer.class)).isEqualTo(51);
+        assertThat(jdbc.queryForObject("SELECT COUNT(*) FROM information_schema.columns "
+                + "WHERE table_schema = DATABASE() AND table_name <> 'flyway_schema_history'", Integer.class)).isEqualTo(1044);
+        assertThat(jdbc.queryForObject("SELECT COUNT(DISTINCT table_name, index_name) FROM information_schema.statistics "
+                + "WHERE table_schema = DATABASE() AND table_name <> 'flyway_schema_history' "
+                + "AND index_name = 'PRIMARY'", Integer.class)).isEqualTo(51);
+        assertThat(jdbc.queryForObject("SELECT COUNT(DISTINCT table_name, index_name) FROM information_schema.statistics "
+                + "WHERE table_schema = DATABASE() AND table_name <> 'flyway_schema_history' "
+                + "AND index_name <> 'PRIMARY'", Integer.class)).isEqualTo(48);
         assertThat(jdbc.queryForList("SELECT version FROM flyway_schema_history ORDER BY installed_rank", String.class))
                 .containsExactly("1", "2", "3", "4", "5", "7", "8");
         assertThat(jdbc.queryForList("SHOW TABLES", String.class)).contains("tensor_download_task", "tensor_download_batch")

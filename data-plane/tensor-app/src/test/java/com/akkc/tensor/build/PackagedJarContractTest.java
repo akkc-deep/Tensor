@@ -102,6 +102,10 @@ class PackagedJarContractTest {
                     .filter(name -> name.endsWith(".jar"))
                     .toList()).containsExactlyInAnyOrderElementsOf(TENSOR_MODULE_JARS);
             assertThat(outerEntries).noneMatch(name -> name.startsWith("BOOT-INF/lib/tensor-plugin-fixture-"));
+            String schemaValidator = "BOOT-INF/lib/json-schema-validator-1.5.9.jar";
+            assertThat(outerEntries).contains(schemaValidator);
+            assertThat(innerJarEntryNames(jarFile, schemaValidator))
+                    .contains("com/networknt/schema/SpecVersion$VersionFlag.class");
 
             Map<String, List<String>> tensorEntriesByJar = new HashMap<>();
             List<String> tensorEntries = new ArrayList<>();
@@ -169,6 +173,7 @@ class PackagedJarContractTest {
         assertThat(entries).noneMatch(name -> FORBIDDEN_ENTRIES.stream().anyMatch(name::endsWith));
         assertThat(entries).noneMatch(name -> name.contains("V6__"));
         assertThat(entries).noneMatch(name -> name.contains("test-classes")
+                || name.contains("DownloadTaskLifecycleIT")
                 || name.contains("surefire-reports")
                 || name.contains("failsafe-reports")
                 || name.endsWith("Test.class")

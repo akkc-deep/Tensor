@@ -193,7 +193,7 @@ class ProductionWebConfigurationTest {
                 MvcResult actual = web.mockMvc().perform(request.header("Origin", DEV_ORIGIN))
                         .andExpect(status().isNoContent())
                         .andExpect(header().string("Access-Control-Allow-Origin", DEV_ORIGIN))
-                        .andExpect(header().string("Access-Control-Expose-Headers", "X-Request-Id"))
+                        .andExpect(header().string("Access-Control-Expose-Headers", "X-Request-Id, Location"))
                         .andExpect(header().string("X-Request-Id", "cors-test-request"))
                         .andExpect(header().doesNotExist("Access-Control-Allow-Credentials"))
                         .andReturn();
@@ -215,6 +215,18 @@ class ProductionWebConfigurationTest {
                 assertThat(headers.toLowerCase(Locale.ROOT))
                         .contains("content-type", "x-request-id");
             }
+        }
+    }
+
+    @Test
+    void exposesTheAcceptedTaskLocationToTheConfiguredOrigin() throws Exception {
+        try (WebFixture web = web(DEV_ORIGIN)) {
+            web.mockMvc().perform(post("/api/v1/download-tasks").header("Origin", DEV_ORIGIN))
+                    .andExpect(status().isAccepted())
+                    .andExpect(header().string("Access-Control-Allow-Origin", DEV_ORIGIN))
+                    .andExpect(header().string("Access-Control-Expose-Headers", "X-Request-Id, Location"))
+                    .andExpect(header().string("Location", "/api/v1/download-tasks/00000000-0000-4000-8000-000000000001"))
+                    .andExpect(header().doesNotExist("Access-Control-Allow-Credentials"));
         }
     }
 
@@ -280,6 +292,13 @@ class ProductionWebConfigurationTest {
                 "test-origin", Map.of("tensor.web.dev-allowed-origin", origin)));
         @RestController
         class ApiProbeController {
+            @RequestMapping(path = "/api/v1/download-tasks", method = RequestMethod.POST)
+            ResponseEntity<Void> accepted() {
+                return ResponseEntity.accepted()
+                        .header("Location", "/api/v1/download-tasks/00000000-0000-4000-8000-000000000001")
+                        .build();
+            }
+
             @RequestMapping(
                     path = "/api/v1/probe",
                     method = {RequestMethod.GET, RequestMethod.POST})

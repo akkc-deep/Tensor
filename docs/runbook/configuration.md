@@ -17,6 +17,35 @@
 
 缺少 Token 时，`/api/v1/data-sources/tushare_pro/apis` 返回 HTTP 409、`PLUGIN_DISABLED`，下载页可显示“下载配置加载失败 / Plugin is unavailable”；这是配置不可用的预期提示，不妨碍数据源列表、数据集元数据及数据查看。
 
+## 后台下载任务
+
+当前 JAR 使用以下 Spring 属性。未覆盖时采用表中的默认值；除 `enabled` 外，任务限制必须为正数，`max-run-duration` 还必须为可转换为纳秒的正时长，非法值会使应用启动失败。
+
+| 属性 | 默认值 | 运行含义 |
+|---|---:|---|
+| `tensor.download-tasks.enabled` | `true` | 允许新任务接收、手动控制和 worker 派发。设为 `false` 时仍执行启动恢复并保留历史查询，但不接收、retry、resume 或派发任务。 |
+| `tensor.download-tasks.max-queued-tasks` | `100` | 当前排队任务容量；等价 submission 的查询/重放不新建任务。 |
+| `tensor.download-tasks.max-range-days` | `36600` | RANGE 请求允许的最大自然日跨度。 |
+| `tensor.download-tasks.max-batch-nodes` | `10000` | 一个任务允许持久化的叶子和拆分节点总量上限。 |
+| `tensor.download-tasks.max-requests-per-run` | `5000` | 每轮 worker 获得的来源请求许可上限。 |
+| `tensor.download-tasks.max-run-duration` | `30m` | 每轮 worker 的截止时长；截止后不再取得新许可。 |
+| `tensor.download-tasks.max-source-rows-per-task` | `1000000` | 一个任务跨轮次累计成功提交的 `sourceRows` 上限。 |
+
+任务由单个应用实例、一个 worker 串行领取。HTTP `202` 只确认任务及 submission 身份已经持久化，不表示来源请求或数据写入成功；响应的 `Location`、详情 URL 和近期任务列表用于重新找到任务。SINGLE 只代表一次当前参数请求，不代表完整历史；RANGE 成功只证明已保存计划所覆盖的请求范围完成。NATIVE_RANGE 仍可能动态拆分，所以最终叶子数应以任务详情和批次列表为准。
+
+`requestCount` 是任务跨轮次取得的来源请求许可数，`runRequestCount` 是当前一轮的许可数；`sourceRows` 是成功批次返回并提交的来源行数，`insertedRows` 和 `updatedRows` 是已提交写入操作数。重试、更新或同一业务键跨批出现时，写入操作数不等于最终表净增行数。
+
+正常停止或重启不会自动重发未完成来源请求。启动恢复会保留历史和普通失败，并将未完成工作置为需要人工判断的中断状态；`retry` 重排失败批次并继续尚未执行的工作、保留成功结果，`resume` 只继续因中断而未完成的批次并保留普通失败和成功结果。两者都必须提交详情中的当前 `expectedVersion`，并再次校验当前数据集定义、插件可用性和容量；定义变化时拒绝继续。暂时的详情查询失败不会把任务改成 FAILED，历史查询也不依赖当前插件仍注册。根 health 为 UP 只证明其健康合同，不表示 Token 已配置或某个 RANGE 已开放。
+
+Tushare 客户端还使用下列固定属性；同一客户端上的旧同步入口和后台任务入口共享最小请求间隔。
+
+| 属性 | 默认值 | 约束 |
+|---|---:|---|
+| `tensor.plugins.tushare-pro.connect-timeout` | `5s` | 必须为正。 |
+| `tensor.plugins.tushare-pro.read-timeout` | `120s` | 必须为正且不超过 120 秒。 |
+| `tensor.plugins.tushare-pro.max-response-bytes` | `67108864` | 1～67108864 字节。 |
+| `tensor.plugins.tushare-pro.min-request-interval` | `1500ms` | 非负且必须可转换为纳秒。 |
+
 ## 秘密注入
 
 数据库账号采用 `read -r TENSOR_DB_USERNAME` 输入，密码采用关闭终端回显后读取并导出的方式，完整命令及恢复回显 trap 见 [首次运行的环境注入](first-run.md#3-注入环境)。默认显式 `unset TENSOR_TUSHARE_TOKEN TENSOR_DEV_CORS_ALLOWED_ORIGIN`；若现有 shell 已设置二者，先确认是否应该保留，不要直接打印变量内容。
@@ -42,7 +71,7 @@ smoke 只检查指定敏感键/头、JDBC 标记及调用者提供的两个非�
 
 ## 同源访问和开发 CORS
 
-生产由一个 JAR 提供 Vue、静态资源和 `/api/v1`，默认不注册 CORS。开发 origin 只作用于 `/api/v1/**`，允许 GET、POST、OPTIONS；请求头只允许 `Content-Type`、`X-Request-Id`，响应暴露 `X-Request-Id`，`credentials=false`。UI、assets 和 Actuator 没有开发 CORS 映射。
+生产由一个 JAR 提供 Vue、静态资源和 `/api/v1`，默认不注册 CORS。开发 origin 只作用于 `/api/v1/**`，允许 GET、POST、OPTIONS；请求头只允许 `Content-Type`、`X-Request-Id`，响应暴露 `X-Request-Id`、`Location`，`credentials=false`。UI、assets 和 Actuator 没有开发 CORS 映射。
 
 未设置、空字符串、纯空白、逗号列表、末尾斜杠均不开放 CORS；精确 `*` 会导致启动失败。其他不匹配浏览器 Origin 的值不会获得允许响应，不能通过 wildcard 或关闭安全控制解决错误配置。CORS 不提供认证；公网 TLS 和访问控制边界由部署入口承担。
 
@@ -54,11 +83,12 @@ smoke 只检查指定敏感键/头、JDBC 标记及调用者提供的两个非�
 | 前端请求 | 130 秒 | 大于上游读取上限。 |
 | 部署代理响应 | **至少 130 秒** | 保持 `120s < 130s <= proxy`；组织已有代理必须满足此约束。 |
 | 写事务 | 60 秒 | 当前写事务 timeout。 |
+| 后台任务每轮 | 30 分钟 | 到达截止时间后不再取得新来源许可；已许可且通过事务边界检查的写入可完成。 |
 | Spring graceful shutdown | 每阶段 70 秒 | Web 阶段覆盖 60 秒写事务并留余量，不是 JVM 总停机期限。 |
 
-同步 Servlet 请求没有本任务可配置的独立应用处理 timeout，连接 timeout 或异步 MVC 参数不能代替它。smoke 的每项检查连接上限 5 秒、总上限 15 秒，只约束相应的轻量 GET 检查，不改变应用或下载超时。
+旧同步 Servlet 请求没有本任务可配置的独立应用处理 timeout，连接 timeout 或异步 MVC 参数不能代替它。后台任务的每轮截止与旧同步 HTTP timeout 是不同边界；截止或停止后不再取得新许可，但已经许可且进入受保护事务的操作仍按事务结果结束。smoke 的每项检查连接上限 5 秒、总上限 15 秒，只约束相应的轻量 GET 检查，不改变应用或下载超时。
 
-正常停止采用 Ctrl-C 或向已核实的应用 PID 发送 SIGTERM，并等待 JVM 自行退出，不常规使用 SIGKILL。首跑不设置外部强杀倒计时；部署管理器的终止窗口必须包含全部实际停机阶段与清理时间，不能只设为 70 秒。上游读取最长 120 秒而 Web 停机阶段为 70 秒，不能承诺每个完整下载请求均在停机期间完成，未提交事务由数据库回滚。操作步骤见 [正常停止](first-run.md#6-正常停止)。
+正常停止采用 Ctrl-C 或向已核实的应用 PID 发送 SIGTERM，并等待 JVM 自行退出，不常规使用 SIGKILL。首跑不设置外部强杀倒计时；部署管理器的终止窗口必须包含全部实际停机阶段与清理时间，不能只设为 70 秒。上游读取最长 120 秒而 Web 停机阶段为 70 秒，不能承诺每个完整下载请求均在停机期间完成，未提交事务由数据库回滚。关闭浏览器不会取消后台任务，70 秒也不保证任意插件立即退出。操作步骤见 [正常停止](first-run.md#6-正常停止)。
 
 ## 健康和缓存
 
@@ -70,6 +100,6 @@ smoke 只检查指定敏感键/头、JDBC 标记及调用者提供的两个非�
 
 ## 数据库权限与版本维护
 
-首次运行创建 `utf8mb4` / `utf8mb4_0900_as_cs` 的 `tensor` schema，并仅向匹配实际 JDBC 客户端来源的应用账号授予 `tensor.*` 上 CREATE、SELECT、INSERT、UPDATE、ALTER、INDEX；管理员通过 `SHOW GRANTS` 检查。当前生产支持 40 个 Tushare 数据集；自动迁移仍为 V1～V5、V7，共六次、49 张业务表，其中 9 张是已下线接口的遗留表，应用不提供其下载或查询入口。历史迁移保持不变，Flyway history 另计，不启用 fixture 或测试 V6。ALTER、INDEX 用于 V7 分红指纹回填及主键切换，不授予 DROP、DELETE 或全局权限。已有库须先停止所有写入者并验证备份；新包迁移、schema 校验和 health 通过前保持停写。旧包不兼容 V7 schema，失败或回退按[升级说明](first-run.md#v7-分红身份升级)处理，不自动 repair 或只回退 JAR。
+首次运行创建 `utf8mb4` / `utf8mb4_0900_as_cs` 的 `tensor` schema，并仅向匹配实际 JDBC 客户端来源的应用账号授予 `tensor.*` 上 CREATE、SELECT、INSERT、UPDATE、ALTER、INDEX、REFERENCES；管理员通过 `SHOW GRANTS` 检查。当前生产支持 40 个 Tushare 数据集；自动迁移为 V1～V5、V7、V8，共七次、51 张业务表。49 张证券来源/历史表中有 9 张已下线接口遗留表；V8 另建 `tensor_download_task` 和 `tensor_download_batch`，保存任务身份、状态、计划叶子、计数和固定错误。生产 schema 共 1044 个物理列、51 个主索引和 48 个非主索引；证券业务列与任务字段分别解释。Flyway history 另计，不启用 fixture 或测试 V6；验收/测试库存为八次迁移、52 张业务表、1051 个物理列、52 个主索引和 48 个非主索引。ALTER、INDEX 用于 V7，REFERENCES 用于 V8 批次外键；不授予 DROP、DELETE 或全局权限。已有库须先停止所有写入者并验证备份；新包迁移、schema 校验和 health 通过前保持停写。旧 V7 包不兼容 V8 任务 schema 的当前行为，失败或回退按[升级说明](first-run.md#v8-任务基础设施升级)处理，不自动 repair 或只回退 JAR。
 
 发布前使用管理员或备份账号，将交互密码的 `mysqldump --single-transaction --no-tablespaces --set-gtid-purged=OFF` 备份写入新建的权限受限唯一目录，避免覆盖，并在独立环境验证恢复。完整示例见 [备份与回退](first-run.md#7-备份与回退)。Flyway 只前向，不运行 clean、不删 history、不执行逆向/破坏性 DDL。上一应用版本必须兼容当前 schema 才能回退；删除/缩窄字段先兼容再清理，误写恢复依赖已验证备份。

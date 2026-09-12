@@ -1,3 +1,5 @@
+import { randomUUID } from 'node:crypto'
+import { rawJson, task, batch } from './download-tasks.fixtures.js'
 import { readFileSync } from 'node:fs'
 
 // Contract copied from tushare-metadata.spec.js. It intentionally stays
@@ -194,13 +196,13 @@ export function syntheticRecords(apiName, count = 8) {
     row.source_api = apiName
     row.ingested_at = '2026-08-07T12:34:56Z'
     if (apiName === 'daily') {
-      row.change = ['0.0100', '-0.0200', '-0.0000', '0', '1.25', '-2.5', null, ''][rowIndex]
-      row.pct_chg = ['1.2500', '-2.5000', '-0.0000', '0', '3.75', '-4.25', null, ''][rowIndex]
+      row.change = ['0.0100', '-0.0200', '-0.0000', '0', '1.25', '-2.5', null, ''][rowIndex % 8]
+      row.pct_chg = ['1.2500', '-2.5000', '-0.0000', '0', '3.75', '-4.25', null, ''][rowIndex % 8]
       row.pre_close = '11.2700'
     }
     if (apiName === 'weekly') {
-      row.change = ['0.0100', '-0.0200', '-0.0000', '0', '1.25', '-2.5', null, ''][rowIndex]
-      row.pct_chg = ['-0.0378', '0.0250', '-0.0000', '0', '0.01', '-0.02', null, ''][rowIndex]
+      row.change = ['0.0100', '-0.0200', '-0.0000', '0', '1.25', '-2.5', null, ''][rowIndex % 8]
+      row.pct_chg = ['-0.0378', '0.0250', '-0.0000', '0', '0.01', '-0.02', null, ''][rowIndex % 8]
       row.pre_close = '11.2700'
     }
     if (apiName === 'stk_holdernumber') row.holder_num = rowIndex === 0 ? '9223372036854775807' : String(1000 + rowIndex)
@@ -232,18 +234,58 @@ function pageResponse(apiName, url, requestId) {
   }
 }
 
-export function successDownload(apiName, requestId, outcome = 'SUCCESS') {
+export function successDownload(request, outcome = 'SUCCESS') {
   const empty = outcome === 'EMPTY'
-  return {
-    requestId,
-    outcome,
-    pluginId: 'tushare_pro',
-    apiName,
-    sourceRowCount: empty ? 0 : 12,
-    insertedRows: empty ? 0 : 10,
-    updatedRows: empty ? 0 : 2,
-    message: empty ? '没有可写入的数据' : '下载完成',
+  const saved = task({
+    taskId: randomUUID(), submissionId: request.body.submissionId,
+    apiName: request.body.apiName, mode: request.body.mode, params: request.body.params,
+    version: 1n, requestCount: 1n, runRequestCount: 1n,
+    counts: { totalBatches: 1n, pendingBatches: 0n, runningBatches: 0n, succeededBatches: 1n,
+      failedBatches: 0n, splitBatches: 0n, sourceRows: empty ? 0n : 12n,
+      insertedRows: empty ? 0n : 10n, updatedRows: empty ? 0n : 2n },
+  })
+  return { status: 202, task: saved,
+    body: { requestId: request.requestId, taskId: saved.taskId, status: 'QUEUED', version: 1n, createdAt: saved.createdAt },
+    headers: { Location: `/api/v1/download-tasks/${saved.taskId}` } }
+}
+
+// Independent current production RANGE matrix: source verification is still closed.
+export const RANGE_EXPECTATIONS = new Map([
+  ['TRADE_DATE', '交易日期', 'NATIVE_RANGE', true, 'ts_code', 'daily weekly monthly adj_factor daily_basic stk_limit suspend_d moneyflow margin_detail block_trade slb_sec slb_sec_detail'],
+  ['TRADE_DATE', '交易日期', 'NATIVE_RANGE', true, 'exchange_id', 'margin'],
+  ['TRADE_DATE', '交易日期', 'NATIVE_RANGE', true, null, 'slb_len'],
+  ['CALENDAR_DATE', '日历日期', 'NATIVE_RANGE', false, 'exchange', 'trade_cal'],
+  ['ISSUE_DATE', '上网发行日期', 'NATIVE_RANGE', true, null, 'new_share'],
+  ['ANNOUNCEMENT_DATE', '公告日期', 'NATIVE_RANGE', true, 'ts_code', 'income balancesheet cashflow fina_audit forecast express stk_managers stk_holdernumber stk_holdertrade pledge_detail'],
+  ['ANNOUNCEMENT_DATE', '公告日期', 'NATIVE_RANGE', true, null, 'repurchase'],
+  ['REPORT_PERIOD', '报告期', 'NATIVE_RANGE', true, 'ts_code', 'fina_indicator fina_mainbz top10_holders top10_floatholders'],
+  ['TRADE_DATE', '交易日期', 'TRADING_DAYS', false, 'ts_code', 'top_list'],
+  ['ANNOUNCEMENT_DATE', '公告日期', 'CALENDAR_DAYS', false, 'ts_code', 'dividend'],
+  ['ANNOUNCEMENT_DATE', '最新披露公告日', 'CALENDAR_DAYS', false, 'ts_code', 'disclosure_date'],
+].flatMap(([dateAxis, dateLabel, planningMode, splittable, scope, names]) => names.split(' ').map((name) => [name, { dateAxis, dateLabel, planningMode, splittable, scope }])))
+requireFixture(RANGE_EXPECTATIONS.size === 34, 'exactly 34 RANGE candidates')
+const MISSING_COMPLETENESS = new Set('adj_factor suspend_d income balancesheet cashflow fina_audit express repurchase stk_managers top10_holders top10_floatholders'.split(' '))
+
+export function rangeCapability(apiName) {
+  const policy = RANGE_EXPECTATIONS.get(apiName)
+  const common = { completenessRule: { kind: 'UNKNOWN', rowLimit: null, evidence: null } }
+  if (!policy) return { ...common, availability: 'UNSUPPORTED', unavailableReason: 'Range download is not supported',
+    dateAxis: null, dateLabel: null, startParameter: null, endParameter: null, parameters: [],
+    planningMode: null, splittable: false, policyVersion: 'unsupported-v1' }
+  const { scope, ...metadata } = policy
+  const label = policy.dateLabel.replace(/日期$/, '')
+  return { ...common, ...metadata, availability: 'NEEDS_VERIFICATION', policyVersion: 'tushare-range-v1',
+    unavailableReason: '区间参数语义与完整性尚待真实接口验证' + (MISSING_COMPLETENESS.has(apiName) ? '；尚无可确认的完整提取依据' : ''),
+    startParameter: 'start_date', endParameter: 'end_date', parameters: [
+      ...(scope ? [structuredClone(PARAMETER[scope])] : []),
+      { ...PARAMETER.start_date, label: `${label}开始日期` },
+      { ...PARAMETER.end_date, label: `${label}结束日期` },
+    ],
   }
+}
+
+function capabilities(apiName) {
+  return { single: { available: true, parameters: EXPECTED.get(apiName).parameters }, range: rangeCapability(apiName) }
 }
 
 export function apiFailure(requestId, code = 'SOURCE_TIMEOUT') {
@@ -263,6 +305,7 @@ export function apiFailure(requestId, code = 'SOURCE_TIMEOUT') {
 export async function installApi(page, overrides = {}) {
   const requests = []
   const unexpected = []
+  const tasks = new Map()
 
   await page.route('**/api/v1/**', async (route) => {
     const request = route.request()
@@ -296,31 +339,56 @@ export async function installApi(page, overrides = {}) {
     } else if (key === 'GET /api/v1/data-sources/tushare_pro/datasets') {
       response = { status: 200, body: DATASETS }
     } else {
+      const capabilityMatch = path.match(/^\/api\/v1\/data-sources\/tushare_pro\/apis\/([^/]+)\/download-capabilities$/)
+      const taskMatch = path.match(/^\/api\/v1\/download-tasks\/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})(?:\/(batches|retry|resume))?$/)
       const definitionMatch = path.match(/^\/api\/v1\/data-sources\/tushare_pro\/datasets\/([^/]+)$/)
       const recordsMatch = path.match(/^\/api\/v1\/data-sources\/tushare_pro\/datasets\/([^/]+)\/records$/)
-      if (method === 'GET' && definitionMatch && EXPECTED.has(decodeURIComponent(definitionMatch[1]))) {
+      if (method === 'GET' && capabilityMatch && EXPECTED.has(capabilityMatch[1])) {
+        if (url.search) return reject('unexpected capabilities query')
+        response = { status: 200, body: capabilities(capabilityMatch[1]) }
+      } else if (key === 'GET /api/v1/download-tasks') {
+        const allowed = ['page', 'pageSize', 'submissionId', 'pluginId', 'apiName', 'status']
+        if ([...url.searchParams.keys()].some((key) => !allowed.includes(key)) || new Set(url.searchParams.keys()).size !== [...url.searchParams.keys()].length) return reject('invalid list query')
+        const items = [...tasks.values()].reverse().filter((item) => ['submissionId','pluginId','apiName','status'].every((key) => !url.searchParams.has(key) || item[key] === url.searchParams.get(key)))
+        const pageNumber = Number(url.searchParams.get('page') || 1)
+        const pageSize = Number(url.searchParams.get('pageSize') || 20)
+        response = { status: 200, body: { page: pageNumber, pageSize, total: BigInt(items.length), items: items.slice((pageNumber - 1) * pageSize, pageNumber * pageSize) } }
+      } else if (taskMatch && tasks.has(taskMatch[1])) {
+        const saved = tasks.get(taskMatch[1])
+        if (method === 'GET' && !taskMatch[2] && !url.search) response = { status: 200, body: saved }
+        else if (method === 'GET' && taskMatch[2] === 'batches' && url.searchParams.toString() === 'page=1&pageSize=20&includeSplit=false') {
+          response = { status: 200, body: { page: 1, pageSize: 20, total: 1n, items: [batch(0, { rangeStart: null, rangeEnd: null, sourceParams: saved.params, sourceRows: saved.counts.sourceRows, insertedRows: saved.counts.insertedRows, updatedRows: saved.counts.updatedRows })] } }
+        } else if (method === 'POST' && ['retry', 'resume'].includes(taskMatch[2]) && !url.search && request.postData() === `{"expectedVersion":${saved.version}}`) {
+          saved.version += 1n
+          response = { status: 202, headers: { Location: `/api/v1/download-tasks/${saved.taskId}` }, body: { requestId, taskId: saved.taskId, status: saved.status, version: saved.version, createdAt: saved.createdAt } }
+        } else return reject('invalid task request')
+      } else if (method === 'GET' && definitionMatch && EXPECTED.has(decodeURIComponent(definitionMatch[1]))) {
         response = { status: 200, body: definitionResponse(decodeURIComponent(definitionMatch[1])) }
       } else if (method === 'GET' && recordsMatch && EXPECTED.has(decodeURIComponent(recordsMatch[1]))) {
         const apiName = decodeURIComponent(recordsMatch[1])
         response = { status: 200, body: pageResponse(apiName, url, requestId) }
-      } else if (key === 'POST /api/v1/downloads') {
-        if (body?.pluginId !== 'tushare_pro' || !EXPECTED.has(body?.apiName) || body?.params === null || typeof body?.params !== 'object') {
+      } else if (key === 'POST /api/v1/download-tasks') {
+        if (body?.pluginId !== 'tushare_pro' || !EXPECTED.has(body?.apiName) || body?.mode !== 'SINGLE' || !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/.test(body?.submissionId ?? '') || body?.params === null || typeof body?.params !== 'object') {
           return reject('invalid download identity')
         }
-        response = { status: 200, body: successDownload(body.apiName, requestId) }
+        const existing = [...tasks.values()].find((item) => item.submissionId === body.submissionId)
+        response = existing
+          ? { status: 200, headers: { Location: `/api/v1/download-tasks/${existing.taskId}` }, body: { requestId, taskId: existing.taskId, status: existing.status, version: existing.version, createdAt: existing.createdAt } }
+          : successDownload(recorded)
       } else {
         return reject('undeclared API route')
       }
     }
 
     if (!response || !Number.isInteger(response.status) || response.body === undefined) return reject('invalid override response')
+    if (response.task) tasks.set(response.task.taskId, response.task)
     const responseBody = typeof response.body === 'function' ? await response.body(recorded) : response.body
     if (responseBody?.requestId !== undefined && responseBody.requestId !== requestId) return reject('response requestId mismatch')
     await route.fulfill({
       status: response.status,
       contentType: 'application/json',
-      headers: { 'X-Request-Id': requestId },
-      body: JSON.stringify(responseBody),
+      headers: { 'X-Request-Id': requestId, ...response.headers },
+      body: rawJson(responseBody),
     })
   })
 

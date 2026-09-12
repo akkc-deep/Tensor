@@ -1,3 +1,4 @@
+import { configurePackagedEnvironment } from './packaged-test-environment.js'
 import { expect, test } from '@playwright/test'
 import { spawn } from 'node:child_process'
 import { createHash, randomBytes } from 'node:crypto'
@@ -18,6 +19,8 @@ const SQL_CANARY = 'M14_T02_FAULT_SQL_CANARY'
 const FIXTURE_API = /Fixture 日线.*fixture_daily/
 const DAILY_OPTION = /^日线行情daily$/
 const NEW_SHARE_API = /IPO 新股发行信息.*new_share$/
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
+const OUTCOME_APIS = { fixture: new Set(['fixture_daily']), tushare_pro: new Set(['daily', 'new_share']) }
 const DAILY_FIELDS = [
   'ts_code',
   'trade_date',
@@ -49,6 +52,7 @@ let downloadPostCount = 0
 let queryCount = 0
 const requestIds = new Set()
 const expectedEvents = []
+const expectedTasks = []
 const evidence = {
   startedAt: undefined,
   finishedAt: undefined,
@@ -368,12 +372,12 @@ async function verifyMigratedSchema() {
     `SELECT GROUP_CONCAT(CONCAT(version, ':', success) ORDER BY installed_rank SEPARATOR ',') FROM \`${mysqlConfig.schema}\`.flyway_schema_history;\n`,
     'read migration history',
   )
-  expect(migrations).toBe('1:1,2:1,3:1,4:1,5:1,6:1,7:1')
+  expect(migrations).toBe('1:1,2:1,3:1,4:1,5:1,6:1,7:1,8:1')
   const tables = await mysql(
     `SELECT COUNT(*) FROM information_schema.TABLES WHERE TABLE_SCHEMA = '${mysqlConfig.schema}' AND TABLE_NAME <> 'flyway_schema_history';\n`,
     'count business tables',
   )
-  expect(tables).toBe('50')
+  expect(tables).toBe('52')
   const rows = await mysql(
     `SELECT (SELECT COUNT(*) FROM \`${mysqlConfig.schema}\`.\`fixture__fixture_daily\`), (SELECT COUNT(*) FROM \`${mysqlConfig.schema}\`.\`tushare_pro__daily\`);\n`,
     'count initial business rows',
@@ -455,8 +459,10 @@ function createUpstreamStub(token) {
           JSON.stringify(['api_name', 'fields', 'params', 'token'])
         checks.api = body.api_name === 'daily'
         checks.token = body.token === token
-        checks.params =
-          JSON.stringify(body.params) === JSON.stringify({ ts_code: '000001.SZ', trade_date: '20260807' })
+        checks.params = body.params !== null && typeof body.params === 'object' &&
+          !Array.isArray(body.params) &&
+          JSON.stringify(Object.keys(body.params).sort()) === JSON.stringify(['trade_date', 'ts_code']) &&
+          body.params.ts_code === '000001.SZ' && body.params.trade_date === '20260807'
         checks.fields = body.fields === DAILY_FIELDS.join(',')
       }
       for (const [name, passed] of Object.entries(checks)) {
@@ -673,18 +679,39 @@ async function stopApplication() {
   await expect.poll(canConnectToPort, { timeout: 2_000 }).toBe(false)
 }
 
+function allowedApiGet(url) {
+  const route = url.pathname
+  if (route === '/api/v1/data-sources') return url.search === ''
+  if (route === '/api/v1/download-tasks') {
+    return url.searchParams.toString() === 'page=1&pageSize=20'
+  }
+  if (/^\/api\/v1\/download-tasks\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/.test(route)) return url.search === ''
+  if (/^\/api\/v1\/download-tasks\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\/batches$/.test(route)) {
+    return url.searchParams.toString() === 'page=1&pageSize=20&includeSplit=false'
+  }
+  const match = route.match(/^\/api\/v1\/data-sources\/(fixture|tushare_pro)\/(apis|datasets)(?:\/([a-z0-9_]+)(\/download-capabilities|\/records)?)?$/)
+  if (!match) return false
+  const [, plugin, kind, apiName, suffix] = match
+  if (!apiName) return url.search === ''
+  if (!OUTCOME_APIS[plugin].has(apiName)) return false
+  if (kind === 'apis') return suffix === '/download-capabilities' && url.search === ''
+  return suffix === '/records' || (!suffix && url.search === '')
+}
+
 function monitorPage(page) {
   const failures = []
   const writes = []
-  const allowedErrors = []
   const responseScans = []
   page.on('pageerror', () => failures.push('page error'))
   page.on('request', (request) => {
     const url = new URL(request.url())
     if (url.origin !== BASE_URL) failures.push('external request')
+    if (request.method() === 'GET' && url.pathname.startsWith('/api/v1/') && !allowedApiGet(url)) {
+      failures.push('unexpected API route')
+    }
     if (!['GET', 'HEAD', 'OPTIONS'].includes(request.method())) {
       writes.push(`${request.method()} ${url.pathname}`)
-      if (request.method() === 'POST' && url.pathname === '/api/v1/downloads') {
+      if (request.method() === 'POST' && url.pathname === '/api/v1/download-tasks') {
         downloadPostCount += 1
       } else {
         failures.push('unexpected write')
@@ -710,23 +737,14 @@ function monitorPage(page) {
       )
     }
     if (url.pathname.startsWith('/api/v1/') && response.status() >= 400) {
-      const index = allowedErrors.findIndex(
-        ({ path: allowedPath, status }) =>
-          allowedPath === url.pathname && status === response.status(),
-      )
-      if (index >= 0) allowedErrors.splice(index, 1)
-      else failures.push('unexpected business HTTP error')
+      failures.push('unexpected business HTTP error')
     }
   })
   return {
-    allowError(status, pathname = '/api/v1/downloads') {
-      allowedErrors.push({ status, path: pathname })
-    },
     async assertClean(expectedWrites) {
       await Promise.all(responseScans)
       await assertPageSafety(page, 'test boundary')
       expect(writes).toEqual(expectedWrites)
-      expect(allowedErrors).toEqual([])
       expect(failures).toEqual([])
     },
   }
@@ -743,7 +761,7 @@ async function selectOption(page, label, optionName) {
   const combobox = page.getByRole('combobox', { name: label, exact: true })
   await combobox.focus()
   await combobox.press('Enter')
-  const option = page.getByRole('option', { name: optionName })
+  const option = page.getByRole('option', { name: optionName, exact: typeof optionName === 'string' })
   await expect(option).toBeVisible()
   await option.click()
 }
@@ -769,7 +787,7 @@ function downloadResponse(response) {
   const url = new URL(response.url())
   return (
     response.request().method() === 'POST' &&
-    url.pathname === '/api/v1/downloads'
+    url.pathname === '/api/v1/download-tasks'
   )
 }
 
@@ -789,121 +807,167 @@ function rememberRequest(response, body) {
   return body.requestId
 }
 
-function parameterSummary(requestBody) {
-  return `[${Object.keys(requestBody.params).join(', ')}]`
-}
-
 async function assertNoExtraFeatures(page) {
   await expect(page.getByRole('progressbar')).toHaveCount(0)
-  await expect(page.getByRole('button', { name: /取消|历史/ })).toHaveCount(0)
-  await expect(page.getByRole('link', { name: /取消|历史/ })).toHaveCount(0)
-  await expect(page.getByText(/下载中|适配中|入库中|百分比|进度/)).toHaveCount(0)
+  await expect(page.getByRole('button', { name: /取消/ })).toHaveCount(0)
+  await expect(page.getByRole('link', { name: /取消/ })).toHaveCount(0)
 }
 
-async function assertNoSuccessResult(page) {
-  await expect(page.getByRole('status')).toHaveCount(0)
-  await expect(page.getByRole('heading', { name: /^下载成功/ })).toHaveCount(0)
-  await expect(page.getByText('本次请求没有可写入的数据。')).toHaveCount(0)
+async function readTaskApi(page, pathname) {
+  const result = await page.evaluate(async (path) => {
+    const requestId = crypto.randomUUID()
+    const response = await fetch(path, { headers: { 'X-Request-Id': requestId } })
+    return {
+      status: response.status,
+      requestId,
+      responseRequestId: response.headers.get('X-Request-Id'),
+      body: await response.json(),
+    }
+  }, pathname)
+  expect(result.status).toBe(200)
+  expect(result.responseRequestId).toBe(result.requestId)
+  return result.body
+}
+
+async function waitForTask(page, taskId, status, timeout) {
+  let task
+  await expect.poll(async () => {
+    task = await readTaskApi(page, `/api/v1/download-tasks/${taskId}`)
+    return task.status
+  }, { timeout }).toBe(status)
+  const batches = await readTaskApi(
+    page,
+    `/api/v1/download-tasks/${taskId}/batches?page=1&pageSize=20&includeSplit=false`,
+  )
+  expect(batches).toMatchObject({ page: 1, pageSize: 20, total: 1 })
+  expect(batches.items).toHaveLength(1)
+  return { task, batch: batches.items[0] }
 }
 
 async function submitDownload(
   page,
-  { title, requestBody, status, success, error, timeout = 15_000 },
+  { title, requestBody, success, error, timeout = 15_000, onAccepted },
 ) {
   await assertNoExtraFeatures(page)
   const startedAt = Date.now()
   const responsePromise = page.waitForResponse(downloadResponse, { timeout })
-  await page.getByRole('button', { name: '开始下载', exact: true }).click()
+  await page.getByRole('button', { name: '提交任务', exact: true }).click()
   const response = await responsePromise
-  const body = await readPublicJson(response, 'download response')
-  expect(response.status()).toBe(status)
-  expect(await response.request().postDataJSON()).toEqual(requestBody)
-  const requestId = rememberRequest(response, body)
-  await assertPageSafety(page, 'download result')
-  if (success) {
-    expect(body).toEqual({ requestId, ...success })
-    const panel = page.getByRole('status')
-    if (success.outcome === 'EMPTY') {
-      await expect(panel.getByRole('heading', { name: '下载成功，0 条数据' })).toBeVisible()
-      await expect(panel.getByText('本次请求没有可写入的数据。')).toBeVisible()
-      await expect(panel.getByRole('term')).toHaveCount(0)
-    } else {
-      await expect(panel.getByRole('heading', { name: '下载成功' })).toBeVisible()
-      await expect(panel.getByRole('term')).toHaveText([
-        '上游返回数',
-        '插入数',
-        '更新数',
-      ])
-      await expect(panel.getByRole('definition')).toHaveText([
-        String(success.sourceRowCount),
-        String(success.insertedRows),
-        String(success.updatedRows),
-      ])
-    }
-    expectedEvents.push({
-      requestId,
-      operation: 'download',
-      pluginId: requestBody.pluginId,
-      apiName: requestBody.apiName,
-      paramSummary: parameterSummary(requestBody),
-      outcome: success.outcome.toLowerCase(),
-      failureStage: 'none',
-      errorCode: 'none',
-      sourceRowCount: String(success.sourceRowCount),
-      insertedRows: String(success.insertedRows),
-      updatedRows: String(success.updatedRows),
-    })
-  } else {
-    const { failureStage, ...publicError } = error
-    expect(Object.keys(body).sort()).toEqual([
-      'code',
-      'fieldErrors',
-      'message',
-      'requestId',
-      'retryable',
-    ])
-    expect(body).toEqual({ requestId, ...publicError, fieldErrors: [] })
-    const alert = page.getByRole('alert')
-    await expect(alert.getByRole('heading', { name: '下载失败' })).toBeVisible()
-    await expect(alert).toContainText(error.message)
-    await expect(alert).toContainText(`请求 ID：${requestId}`)
-    await expect(alert).not.toContainText(error.code)
-    await expect(alert).not.toContainText(UPSTREAM_CANARY)
-    await expect(alert).not.toContainText(SQL_CANARY)
-    await expect(alert).not.toContainText('not-a-decimal')
-    const retry = alert.getByRole('button', { name: '使用原参数重试' })
-    await expect(retry).toHaveCount(error.retryable ? 1 : 0)
-    await assertNoSuccessResult(page)
-    expectedEvents.push({
-      requestId,
-      operation: 'download',
-      pluginId: requestBody.pluginId,
-      apiName: requestBody.apiName,
-      paramSummary: parameterSummary(requestBody),
-      outcome: 'failure',
-      failureStage,
-      errorCode: error.code,
-      sourceRowCount: 'unavailable',
-      insertedRows: 'unavailable',
-      updatedRows: 'unavailable',
-    })
+  const receipt = await readPublicJson(response, 'download task receipt')
+  assertExactKeys(receipt, ['requestId', 'taskId', 'status', 'version', 'createdAt'], 'download task receipt')
+  expect(response.status()).toBe(202)
+  const request = await response.request().postDataJSON()
+  expect(request).toEqual({
+    submissionId: expect.stringMatching(UUID),
+    mode: 'SINGLE',
+    ...requestBody,
+  })
+  const requestId = rememberRequest(response, receipt)
+  expect(receipt).toMatchObject({
+    requestId,
+    taskId: expect.stringMatching(UUID),
+    status: 'QUEUED',
+    version: 1,
+  })
+  expect(response.headers().location).toBe(`/api/v1/download-tasks/${receipt.taskId}`)
+  const accepted = page.locator('.download-result-panel')
+  await expect(accepted.getByRole('heading', { name: '任务已接收' })).toBeVisible()
+  if (onAccepted) await onAccepted({ receipt, durationMs: Date.now() - startedAt })
+  const terminalStatus = success ? 'SUCCEEDED' : 'FAILED'
+  const { task, batch } = await waitForTask(page, receipt.taskId, terminalStatus, timeout)
+
+  const detailPromise = page.waitForResponse((candidate) => {
+    const url = new URL(candidate.url())
+    return candidate.request().method() === 'GET' &&
+      url.pathname === `/api/v1/download-tasks/${receipt.taskId}`
+  })
+  const batchesPromise = page.waitForResponse((candidate) => {
+    const url = new URL(candidate.url())
+    return candidate.request().method() === 'GET' &&
+      url.pathname === `/api/v1/download-tasks/${receipt.taskId}/batches`
+  })
+  await accepted.getByRole('link', { name: '查看任务' }).click()
+  expect((await detailPromise).status()).toBe(200)
+  expect((await batchesPromise).status()).toBe(200)
+  await expect(page).toHaveURL(`/downloads/tasks/${receipt.taskId}`)
+  await expect(page.locator('[data-task-status]')).toHaveText(success ? '已成功' : '失败')
+  await assertPageSafety(page, 'download task result')
+
+  const zeroCounts = {
+    totalBatches: 1,
+    pendingBatches: 0,
+    runningBatches: 0,
+    succeededBatches: success ? 1 : 0,
+    failedBatches: success ? 0 : 1,
+    splitBatches: 0,
+    sourceRows: success?.sourceRowCount ?? 0,
+    insertedRows: success?.insertedRows ?? 0,
+    updatedRows: success?.updatedRows ?? 0,
   }
+  expect(task).toMatchObject({
+    taskId: receipt.taskId,
+    submissionId: request.submissionId,
+    pluginId: requestBody.pluginId,
+    apiName: requestBody.apiName,
+    mode: 'SINGLE',
+    params: requestBody.params,
+    status: terminalStatus,
+    planReady: true,
+    counts: zeroCounts,
+    lastError: error ? { code: error.code, message: error.message } : null,
+    canRetry: Boolean(error),
+    canResume: false,
+    requestCount: 1,
+    runRequestCount: 1,
+  })
+  expect(batch).toMatchObject({
+    status: terminalStatus,
+    attemptCount: 1,
+    sourceRows: zeroCounts.sourceRows,
+    insertedRows: zeroCounts.insertedRows,
+    updatedRows: zeroCounts.updatedRows,
+    error: error ? { code: error.code, message: error.message } : null,
+  })
+  if (success) {
+    const counts = page.locator('.task-detail__counts')
+    await expect(counts.getByText(`来源行数 ${success.sourceRowCount}`, { exact: true })).toBeVisible()
+    await expect(counts.getByText(`新增记录次数 ${success.insertedRows}`, { exact: true })).toBeVisible()
+    await expect(counts.getByText(`更新记录次数 ${success.updatedRows}`, { exact: true })).toBeVisible()
+  } else {
+    const details = page.locator('.task-detail')
+    await expect(details).toContainText(error.code)
+    await expect(details).toContainText(error.message)
+    await expect(details).not.toContainText(UPSTREAM_CANARY)
+    await expect(details).not.toContainText(SQL_CANARY)
+    await expect(details).not.toContainText('not-a-decimal')
+    await expect(page.locator('[data-retry]')).toHaveCount(1)
+  }
+  expectedTasks.push({
+    requestId,
+    taskId: receipt.taskId,
+    pluginId: requestBody.pluginId,
+    apiName: requestBody.apiName,
+    status: terminalStatus,
+    counts: zeroCounts,
+    errorCode: error?.code ?? 'none',
+  })
   await assertNoExtraFeatures(page)
   const durationMs = Date.now() - startedAt
   evidence.results.push({
     title,
-    status,
+    status: 202,
+    taskId: receipt.taskId,
     requestId,
     durationMs,
     ...success,
     ...error,
   })
-  return { response, body, requestId, durationMs }
+  return { response, body: task, batch, requestId, durationMs }
 }
 
 async function queryDataset(page, { plugin, api, option, code, navigate = false }) {
   if (navigate) {
-    await page.getByRole('link', { name: '数据查看', exact: true }).click()
+    await page.getByRole('link', { name: /^数据查看\s*02$/ }).click()
     await expect(page.getByRole('heading', { level: 1, name: '数据查看' })).toBeVisible()
   } else {
     await openRoute(page, '/datasets', '数据查看')
@@ -987,7 +1051,12 @@ async function assertSingleRow(page, body, expectedColumns, expectedRow) {
   })
   expect(body.items).toHaveLength(1)
   expect(body.items[0]).toEqual(expectedRow)
-  await expect(page.getByRole('columnheader')).toHaveText(expectedColumns)
+  const headers = body.pluginId === 'tushare_pro' && body.apiName === 'daily'
+    ? ['证券代码ts_code', '交易日trade_date', '开盘价open', '最高价high', '最低价low',
+      '收盘价close', '前收盘价pre_close', '涨跌额change', '涨跌幅（%）pct_chg',
+      '成交量vol', '成交额amount', '来源插件source_plugin', '来源接口source_api', '入库时间ingested_at']
+    : expectedColumns
+  await expect(page.getByRole('columnheader')).toHaveText(headers)
   const row = page
     .getByRole('row')
     .filter({ has: page.getByRole('cell', { name: expectedRow.ts_code, exact: true }) })
@@ -1092,8 +1161,7 @@ async function assertDailyUnchanged(page) {
   return body
 }
 
-function parseCompletedEvent(line) {
-  const marker = 'tensor.operation.completed'
+function parseCompletedEvent(line, marker = 'tensor.operation.completed') {
   const start = line.indexOf(marker)
   if (start < 0) throw new Error('Completion event marker missing')
   const text = line.slice(start + marker.length).trim()
@@ -1200,6 +1268,61 @@ async function verifyEventsAndSafety() {
     completed.length === expectedEvents.length,
     'private log completion event count matches',
   )
+  safeCheck(
+    completed.every((line) => parseCompletedEvent(line).operation === 'query'),
+    'task submission does not emit synchronous download completion events',
+  )
+  const accepted = log.split(/\r?\n/)
+    .filter((line) => line.includes('tensor.download_task.accepted'))
+    .map((line) => parseCompletedEvent(line, 'tensor.download_task.accepted'))
+  const finished = log.split(/\r?\n/)
+    .filter((line) => line.includes('tensor.download_task.finished'))
+    .map((line) => parseCompletedEvent(line, 'tensor.download_task.finished'))
+  const batches = log.split(/\r?\n/)
+    .filter((line) => line.includes('tensor.download_batch.finished'))
+    .map((line) => parseCompletedEvent(line, 'tensor.download_batch.finished'))
+  expect(accepted).toHaveLength(expectedTasks.length)
+  expect(finished).toHaveLength(expectedTasks.length)
+  expect(batches).toHaveLength(expectedTasks.length)
+  for (const expected of expectedTasks) {
+    expect(accepted.find(({ taskId }) => taskId === expected.taskId)).toMatchObject({
+      requestId: expected.requestId,
+      taskId: expected.taskId,
+      pluginId: expected.pluginId,
+      apiName: expected.apiName,
+      status: 'QUEUED',
+      version: '1',
+      kind: 'CREATED',
+      outcome: 'accepted',
+    })
+    expect(finished.find(({ taskId }) => taskId === expected.taskId)).toMatchObject({
+      taskId: expected.taskId,
+      pluginId: expected.pluginId,
+      apiName: expected.apiName,
+      status: expected.status,
+      totalBatches: '1',
+      pendingBatches: '0',
+      runningBatches: '0',
+      succeededBatches: String(expected.counts.succeededBatches),
+      failedBatches: String(expected.counts.failedBatches),
+      sourceRows: String(expected.counts.sourceRows),
+      insertedRows: String(expected.counts.insertedRows),
+      updatedRows: String(expected.counts.updatedRows),
+      errorCode: expected.errorCode,
+    })
+    expect(batches.find(({ taskId }) => taskId === expected.taskId)).toMatchObject({
+      taskId: expected.taskId,
+      pluginId: expected.pluginId,
+      apiName: expected.apiName,
+      status: expected.status,
+      attemptCount: '1',
+      sourceRows: String(expected.counts.sourceRows),
+      insertedRows: String(expected.counts.insertedRows),
+      updatedRows: String(expected.counts.updatedRows),
+      errorCode: expected.errorCode,
+    })
+  }
+  evidence.taskEvents = { accepted: accepted.length, batches: batches.length, finished: finished.length }
 }
 
 async function recordScreenshot(locator, testInfo, name) {
@@ -1227,6 +1350,7 @@ test.describe('download outcome matrix', () => {
   test.describe.configure({ mode: 'serial', retries: 0, timeout: 180_000 })
 
   test.beforeAll(async () => {
+    configurePackagedEnvironment('download-outcomes')
     test.setTimeout(300_000)
     evidence.startedAt = new Date().toISOString()
     expect(path.isAbsolute(process.env.ACCEPTANCE_JAR ?? '')).toBe(true)
@@ -1328,9 +1452,10 @@ test.describe('download outcome matrix', () => {
     const calls = [...stub.counts.values()].reduce((sum, value) => sum + value, 0)
     await openRoute(page, '/downloads', '数据下载')
     await chooseTushareDownload(page)
+    await page.getByLabel('股票代码', { exact: false }).fill('000001.SZ')
     const date = page.getByLabel('交易日期', { exact: false })
-    await expect(page.getByRole('button', { name: '开始下载', exact: true })).toBeEnabled()
-    await page.getByRole('button', { name: '开始下载', exact: true }).click()
+    await expect(page.getByRole('button', { name: '提交任务', exact: true })).toBeEnabled()
+    await page.getByRole('button', { name: '提交任务', exact: true }).click()
     await expect(date).toHaveAttribute('aria-invalid', 'true')
     await expect(date).toBeFocused()
     const ids = (await date.getAttribute('aria-describedby')).split(' ')
@@ -1338,10 +1463,9 @@ test.describe('download outcome matrix', () => {
     const fieldError = page.locator(`#${ids.at(-1)}`)
     await expect(fieldError).toHaveAttribute('role', 'alert')
     await expect(fieldError).toHaveText('此项为必填项')
-    await expect(page.getByRole('button', { name: '开始下载', exact: true })).toBeEnabled()
-    await expect(page.getByRole('status')).toHaveCount(0)
-    await expect(page.getByRole('heading', { name: '下载失败' })).toHaveCount(0)
-    await expect(page.getByText('下载成功，0 条数据')).toHaveCount(0)
+    await expect(page.getByRole('button', { name: '提交任务', exact: true })).toBeEnabled()
+    await expect(page.getByRole('heading', { name: '任务已接收' })).toHaveCount(0)
+    await expect(page.locator('[data-task-status]')).toHaveCount(0)
     await assertNoExtraFeatures(page)
     expect(downloadPostCount).toBe(posts)
     expect([...stub.counts.values()].reduce((sum, value) => sum + value, 0)).toBe(calls)
@@ -1362,7 +1486,7 @@ test.describe('download outcome matrix', () => {
     await end.press('Tab')
     await expect(start).toHaveValue('2026-08-08')
     await expect(end).toHaveValue('2026-08-07')
-    await page.getByRole('button', { name: '开始下载', exact: true }).click()
+    await page.getByRole('button', { name: '提交任务', exact: true }).click()
     await expect(start).toHaveAttribute('aria-invalid', 'true')
     await expect(start).toBeFocused()
     await expect(end).not.toHaveAttribute('aria-invalid', 'true')
@@ -1407,8 +1531,7 @@ test.describe('download outcome matrix', () => {
         apiName: 'fixture_daily',
         params: { scenario: 'SUCCESS' },
       },
-      status: 200,
-      success: { ...successBase, insertedRows: 1, updatedRows: 0, message: '下载成功' },
+      success: { ...successBase, insertedRows: 1, updatedRows: 0 },
     })
     body = await queryDataset(page, {
       plugin: 'fixture',
@@ -1432,8 +1555,7 @@ test.describe('download outcome matrix', () => {
         apiName: 'fixture_daily',
         params: { scenario: 'SUCCESS' },
       },
-      status: 200,
-      success: { ...successBase, insertedRows: 0, updatedRows: 1, message: '下载成功' },
+      success: { ...successBase, insertedRows: 0, updatedRows: 1 },
     })
     body = await queryDataset(page, {
       plugin: 'fixture',
@@ -1454,7 +1576,7 @@ test.describe('download outcome matrix', () => {
       testInfo,
       'fixture-upsert-row.png',
     )
-    await monitor.assertClean(['POST /api/v1/downloads', 'POST /api/v1/downloads'])
+    await monitor.assertClean(['POST /api/v1/download-tasks', 'POST /api/v1/download-tasks'])
   })
 
   test('keepsRowsOnFixtureEmpty', async ({ page }) => {
@@ -1469,7 +1591,6 @@ test.describe('download outcome matrix', () => {
         apiName: 'fixture_daily',
         params: { scenario: 'EMPTY' },
       },
-      status: 200,
       success: {
         outcome: 'EMPTY',
         pluginId: 'fixture',
@@ -1477,11 +1598,10 @@ test.describe('download outcome matrix', () => {
         sourceRowCount: 0,
         insertedRows: 0,
         updatedRows: 0,
-        message: '下载成功，0 条数据',
       },
     })
     await assertFixtureUnchanged(page)
-    await monitor.assertClean(['POST /api/v1/downloads'])
+    await monitor.assertClean(['POST /api/v1/download-tasks'])
   })
 
   test('showsFixtureSourceFailure', async ({ page }) => {
@@ -1489,7 +1609,6 @@ test.describe('download outcome matrix', () => {
     await openRoute(page, '/downloads', '数据下载')
     await chooseFixtureDownload(page)
     await selectOption(page, /场景/, 'SOURCE_FAILURE')
-    monitor.allowError(502)
     await submitDownload(page, {
       title: 'showsFixtureSourceFailure',
       requestBody: {
@@ -1497,7 +1616,6 @@ test.describe('download outcome matrix', () => {
         apiName: 'fixture_daily',
         params: { scenario: 'SOURCE_FAILURE' },
       },
-      status: 502,
       error: {
         code: 'SOURCE_UNAVAILABLE',
         message: 'Source is unavailable',
@@ -1506,7 +1624,7 @@ test.describe('download outcome matrix', () => {
       },
     })
     await assertFixtureUnchanged(page)
-    await monitor.assertClean(['POST /api/v1/downloads'])
+    await monitor.assertClean(['POST /api/v1/download-tasks'])
   })
 
   test('rejectsFixtureTypeFailure', async ({ page }) => {
@@ -1514,7 +1632,6 @@ test.describe('download outcome matrix', () => {
     await openRoute(page, '/downloads', '数据下载')
     await chooseFixtureDownload(page)
     await selectOption(page, /场景/, 'TYPE_FAILURE')
-    monitor.allowError(422)
     const { body } = await submitDownload(page, {
       title: 'rejectsFixtureTypeFailure',
       requestBody: {
@@ -1522,7 +1639,6 @@ test.describe('download outcome matrix', () => {
         apiName: 'fixture_daily',
         params: { scenario: 'TYPE_FAILURE' },
       },
-      status: 422,
       error: {
         code: 'ADAPTER_TYPE_INVALID',
         message: 'Source data contains an invalid value',
@@ -1535,7 +1651,7 @@ test.describe('download outcome matrix', () => {
       'adapter response excludes raw field details',
     )
     await assertFixtureUnchanged(page)
-    await monitor.assertClean(['POST /api/v1/downloads'])
+    await monitor.assertClean(['POST /api/v1/download-tasks'])
   })
 
   test('rollsBackFixturePersistenceFailure', async ({ page }, testInfo) => {
@@ -1547,15 +1663,13 @@ test.describe('download outcome matrix', () => {
         await openRoute(page, '/downloads', '数据下载')
         await chooseFixtureDownload(page)
         await selectOption(page, /场景/, 'PERSISTENCE_FAILURE')
-        monitor.allowError(500)
-        const { body } = await submitDownload(page, {
+        const { body, batch } = await submitDownload(page, {
           title: 'rollsBackFixturePersistenceFailure',
           requestBody: {
             pluginId: 'fixture',
             apiName: 'fixture_daily',
             params: { scenario: 'PERSISTENCE_FAILURE' },
           },
-          status: 500,
           error: {
             code: 'PERSISTENCE_FAILED',
             message: 'Persistence failed',
@@ -1565,9 +1679,9 @@ test.describe('download outcome matrix', () => {
         })
         safeCheck(
           !/PERSISTENCE_FAILURE|M14_T02_FAULT_SQL_CANARY|SQLSTATE|UPDATE/i.test(
-            JSON.stringify(body),
+            JSON.stringify({ taskError: body.lastError, batchError: batch.error }),
           ),
-          'persistence response excludes SQL details',
+          'stored persistence errors exclude SQL details',
         )
         await assertFixtureUnchanged(page)
         await recordScreenshot(
@@ -1579,7 +1693,7 @@ test.describe('download outcome matrix', () => {
       dropFailureTrigger,
       'Persistence assertion and trigger cleanup failed',
     )
-    await monitor.assertClean(['POST /api/v1/downloads'])
+    await monitor.assertClean(['POST /api/v1/download-tasks'])
   })
 
   test('downloadsDailyFromLocalUpstream', async ({ page }, testInfo) => {
@@ -1606,7 +1720,6 @@ test.describe('download outcome matrix', () => {
         apiName: 'daily',
         params: { ts_code: '000001.SZ', trade_date: '20260807' },
       },
-      status: 200,
       success: {
         outcome: 'SUCCESS',
         pluginId: 'tushare_pro',
@@ -1614,7 +1727,6 @@ test.describe('download outcome matrix', () => {
         sourceRowCount: 1,
         insertedRows: 1,
         updatedRows: 0,
-        message: '下载成功',
       },
     })
     stub.assertMode('success')
@@ -1628,14 +1740,13 @@ test.describe('download outcome matrix', () => {
     evidence.dailyRow = dailyBaseline
     const row = await assertDailyBody(page, body, dailyBaseline)
     await recordScreenshot(row, testInfo, 'daily-success-row.png')
-    await monitor.assertClean(['POST /api/v1/downloads'])
+    await monitor.assertClean(['POST /api/v1/download-tasks'])
   })
 
   for (const scenario of [
     {
       title: 'showsSourceAuthFailure',
       mode: 'auth',
-      status: 502,
       code: 'SOURCE_AUTH_FAILED',
       message: 'Source authentication failed',
       retryable: false,
@@ -1643,7 +1754,6 @@ test.describe('download outcome matrix', () => {
     {
       title: 'showsSourcePermissionFailure',
       mode: 'permission',
-      status: 502,
       code: 'SOURCE_PERMISSION_DENIED',
       message: 'Source permission denied',
       retryable: false,
@@ -1651,7 +1761,6 @@ test.describe('download outcome matrix', () => {
     {
       title: 'showsSourceRateLimitFailure',
       mode: 'rate',
-      status: 502,
       code: 'SOURCE_RATE_LIMITED',
       message: 'Source rate limit exceeded',
       retryable: true,
@@ -1659,7 +1768,6 @@ test.describe('download outcome matrix', () => {
     {
       title: 'showsSourceUnavailableFailure',
       mode: 'unavailable',
-      status: 502,
       code: 'SOURCE_UNAVAILABLE',
       message: 'Source is unavailable',
       retryable: true,
@@ -1667,7 +1775,6 @@ test.describe('download outcome matrix', () => {
     {
       title: 'showsSourceNetworkFailure',
       mode: 'network',
-      status: 502,
       code: 'SOURCE_NETWORK_ERROR',
       message: 'Source network request failed',
       retryable: true,
@@ -1675,7 +1782,6 @@ test.describe('download outcome matrix', () => {
     {
       title: 'showsSourceTimeoutFailure',
       mode: 'timeout',
-      status: 504,
       code: 'SOURCE_TIMEOUT',
       message: 'Source request timed out',
       retryable: true,
@@ -1683,7 +1789,6 @@ test.describe('download outcome matrix', () => {
     {
       title: 'showsSourcePayloadFailure',
       mode: 'payload',
-      status: 502,
       code: 'SOURCE_PAYLOAD_INVALID',
       message: 'Source returned an invalid payload',
       retryable: true,
@@ -1700,86 +1805,46 @@ test.describe('download outcome matrix', () => {
       await tradeDate.press('Tab')
       await expect(tradeDate).toHaveValue('2026-08-07')
       const received = stub.setMode(scenario.mode)
-      monitor.allowError(scenario.status)
-      const startedAt = Date.now()
-      const responsePromise = page.waitForResponse(downloadResponse, {
+      const result = await submitDownload(page, {
+        title: scenario.title,
+        requestBody: {
+          pluginId: 'tushare_pro',
+          apiName: 'daily',
+          params: { ts_code: '000001.SZ', trade_date: '20260807' },
+        },
+        error: {
+          code: scenario.code,
+          message: scenario.message,
+          retryable: scenario.retryable,
+          failureStage: 'source',
+        },
         timeout: scenario.mode === 'timeout' ? 135_000 : 15_000,
+        onAccepted: async ({ durationMs }) => {
+          expect(durationMs).toBeLessThan(5_000)
+          if (scenario.mode !== 'timeout') return
+          await received
+          const button = page.getByRole('button', { name: '提交任务', exact: true })
+          await expect(button).toBeEnabled()
+          await expect(button).not.toHaveAttribute('aria-busy', 'true')
+          await expect(page.getByRole('combobox', { name: '数据源', exact: true })).toBeEnabled()
+          await expect(page.getByRole('combobox', { name: '数据接口', exact: true })).toBeEnabled()
+          await expect(stockCode).toBeEnabled()
+          await expect(tradeDate).toBeEnabled()
+        },
       })
-      await assertNoExtraFeatures(page)
-      await page.getByRole('button', { name: '开始下载', exact: true }).click()
+      await received
       if (scenario.mode === 'timeout') {
-        await received
-        const button = page.getByRole('button', { name: '开始下载', exact: true })
-        await expect(button).toBeDisabled()
-        await expect(button).toHaveAttribute('aria-busy', 'true')
-        await expect(page.getByRole('combobox', { name: '数据源', exact: true })).toBeDisabled()
-        await expect(page.getByRole('combobox', { name: '数据接口', exact: true })).toBeDisabled()
-        await expect(stockCode).toBeDisabled()
-        await expect(tradeDate).toBeDisabled()
-        await assertNoExtraFeatures(page)
-      }
-      const response = await responsePromise
-      const body = await readPublicJson(response, 'download response')
-      expect(response.status()).toBe(scenario.status)
-      expect(await response.request().postDataJSON()).toEqual({
-        pluginId: 'tushare_pro',
-        apiName: 'daily',
-        params: { ts_code: '000001.SZ', trade_date: '20260807' },
-      })
-      const requestId = rememberRequest(response, body)
-      await assertPageSafety(page, 'download result')
-      expect(body).toEqual({
-        requestId,
-        code: scenario.code,
-        message: scenario.message,
-        retryable: scenario.retryable,
-        fieldErrors: [],
-      })
-      const alert = page.getByRole('alert')
-      await expect(alert.getByRole('heading', { name: '下载失败' })).toBeVisible()
-      await expect(alert).toContainText(scenario.message)
-      await expect(alert).toContainText(`请求 ID：${requestId}`)
-      await expect(alert).not.toContainText(scenario.code)
-      await expect(alert).not.toContainText(UPSTREAM_CANARY)
-      await expect(alert.getByRole('button', { name: '使用原参数重试' })).toHaveCount(
-        scenario.retryable ? 1 : 0,
-      )
-      await assertNoSuccessResult(page)
-      expectedEvents.push({
-        requestId,
-        operation: 'download',
-        pluginId: 'tushare_pro',
-        apiName: 'daily',
-        paramSummary: '[ts_code, trade_date]',
-        outcome: 'failure',
-        failureStage: 'source',
-        errorCode: scenario.code,
-        sourceRowCount: 'unavailable',
-        insertedRows: 'unavailable',
-        updatedRows: 'unavailable',
-      })
-      const durationMs = Date.now() - startedAt
-      if (scenario.mode === 'timeout') {
-        expect(durationMs).toBeGreaterThanOrEqual(120_000)
-        expect(durationMs).toBeLessThan(130_000)
-        await expect(page.getByRole('button', { name: '开始下载', exact: true })).toBeEnabled()
+        expect(result.durationMs).toBeGreaterThanOrEqual(120_000)
+        expect(result.durationMs).toBeLessThan(130_000)
         await stub.closeMode('timeout')
       }
-      evidence.results.push({
-        title: scenario.title,
-        status: scenario.status,
-        requestId,
-        code: scenario.code,
-        retryable: scenario.retryable,
-        durationMs,
-      })
       stub.assertMode(scenario.mode)
       if (scenario.mode === 'payload') {
-        await recordScreenshot(alert, testInfo, 'source-payload-error.png')
+        await recordScreenshot(page.locator('.task-detail__stop-reason'), testInfo, 'source-payload-error.png')
       }
       await assertDailyUnchanged(page)
       await assertNoExtraFeatures(page)
-      await monitor.assertClean(['POST /api/v1/downloads'])
+      await monitor.assertClean(['POST /api/v1/download-tasks'])
     })
   }
 })

@@ -25,7 +25,7 @@ describe('DownloadAction', () => {
     const wrapper = mount(DownloadAction)
     const action = wrapper.getComponent(ElButton)
 
-    expect(action.text()).toBe('开始下载')
+    expect(action.text()).toBe('提交任务')
     expect(action.props()).toMatchObject({
       type: 'primary',
       nativeType: 'button',
@@ -44,14 +44,14 @@ describe('DownloadAction', () => {
     const action = wrapper.getComponent(ElButton)
 
     expect(action.props('disabled')).toBe(true)
-    action.vm.$emit('click')
+    action.vm.$emit('click', new MouseEvent('click'))
     expect(wrapper.emitted('submit')).toBeUndefined()
 
     await wrapper.setProps({ disabled: false, submitting: true })
     expect(action.props()).toMatchObject({ disabled: true, loading: true })
     expect(action.get('button').attributes('aria-busy')).toBe('true')
-    expect(action.text()).toBe('开始下载')
-    action.vm.$emit('click')
+    expect(action.text()).toBe('提交任务')
+    action.vm.$emit('click', new MouseEvent('click'))
     expect(wrapper.emitted('submit')).toBeUndefined()
     expect(wrapper.text()).not.toMatch(/下载中|适配中|入库中|进度|百分比/)
   })

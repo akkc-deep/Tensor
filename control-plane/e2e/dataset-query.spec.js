@@ -1,3 +1,4 @@
+import { configurePackagedEnvironment } from './packaged-test-environment.js'
 import { expect, test } from '@playwright/test'
 import { spawn } from 'node:child_process'
 import { createHash, randomBytes } from 'node:crypto'
@@ -22,8 +23,14 @@ const STOP_TIMEOUT_MS = 150_000
 const MYSQL_TIMEOUT_MS = 15_000
 const INITIAL_DOWNLOAD_COUNT = 252
 const TOTAL_DOWNLOAD_COUNT = 375
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
 const LONG_TEXT = `M14_T03_TEXT_${'查询说明'.repeat(80)}`
 const SOURCE_COLUMNS = ['source_plugin', 'source_api', 'ingested_at']
+const DAILY_HEADERS = [
+  '证券代码ts_code', '交易日trade_date', '开盘价open', '最高价high', '最低价low',
+  '收盘价close', '前收盘价pre_close', '涨跌额change', '涨跌幅（%）pct_chg',
+  '成交量vol', '成交额amount', '来源插件source_plugin', '来源接口source_api', '入库时间ingested_at',
+]
 const PAGE_KEYS = [
   'requestId',
   'pluginId',
@@ -75,6 +82,7 @@ let downloadPostCount = 0
 let recordsResponseCount = 0
 const requestIds = new Set()
 const expectedEvents = []
+const expectedTasks = []
 const ingestionBaselines = new Map()
 const evidence = {
   task: 'M14-T03',
@@ -488,6 +496,38 @@ async function syntheticProbes() {
   try { await unexpectedFailureMonitor.assertClean() } catch { unexpectedFailureRejected = true }
   safeCheck(unexpectedFailureRejected, 'unregistered request failure probe is rejected')
 
+  const pendingPage = probePage()
+  const pendingMonitor = monitorPage(pendingPage)
+  const pendingRequest = probeRequest('/api/v1/download-tasks?page=1&pageSize=20')
+  pendingPage.emit('request', pendingRequest)
+  let pendingDrainCompleted = false
+  const pendingDrain = pendingMonitor.drainResponseScans('probe:pending-request')
+    .then(() => { pendingDrainCompleted = true })
+  await delay(0)
+  safeCheck(!pendingDrainCompleted, 'response drain waits for request before response')
+  pendingPage.emit('response', {
+    status: () => 200,
+    url: pendingRequest.url,
+    request: () => pendingRequest,
+    text: async () => '{}',
+  })
+  pendingPage.emit('requestfinished', pendingRequest)
+  await pendingDrain
+  await pendingMonitor.assertClean()
+
+  const rejectedBodyPage = probePage()
+  const rejectedBodyMonitor = monitorPage(rejectedBodyPage)
+  const rejectedBodyRequest = probeRequest('/api/v1/download-tasks?page=1&pageSize=20')
+  rejectedBodyPage.emit('response', {
+    status: () => 200,
+    url: rejectedBodyRequest.url,
+    request: () => rejectedBodyRequest,
+    text: async () => { throw new Error('No resource with given identifier found') },
+  })
+  let rejectedBodyDetected = false
+  try { await rejectedBodyMonitor.assertClean() } catch { rejectedBodyDetected = true }
+  safeCheck(rejectedBodyDetected, 'API response body rejection probe is rejected')
+
   const original = process.env.MYSQL_PWD
   process.env.MYSQL_PWD = 'probe-only'
   try {
@@ -628,11 +668,11 @@ async function verifyMigratedDatabase() {
     'migrated read-only evidence',
   )
   expect(output.split(/\r?\n/)).toEqual([
-    'migrations\t1:1,2:1,3:1,4:1,5:1,6:1,7:1',
-    'tables\t50',
+    'migrations\t1:1,2:1,3:1,4:1,5:1,6:1,7:1,8:1',
+    'tables\t52',
     'rows\t0\t0\t0\t0\t0',
   ])
-  evidence.database.migrated = { migrations: 7, businessTables: 50, targetRows: [0, 0, 0, 0, 0] }
+  evidence.database.migrated = { migrations: 8, businessTables: 52, targetRows: [0, 0, 0, 0, 0] }
 }
 
 async function verifyFinalDatabase() {
@@ -642,13 +682,13 @@ async function verifyFinalDatabase() {
     'final read-only evidence',
   )
   expect(output.split(/\r?\n/)).toEqual([
-    'migrations\t1:1,2:1,3:1,4:1,5:1,6:1,7:1',
-    'tables\t50',
+    'migrations\t1:1,2:1,3:1,4:1,5:1,6:1,7:1,8:1',
+    'tables\t52',
     'rows\t126\t1\t1\t1\t123\t1\t122',
   ])
   evidence.database.final = {
-    migrations: 7,
-    businessTables: 50,
+    migrations: 8,
+    businessTables: 52,
     daily: 126,
     company: 1,
     index: 1,
@@ -955,6 +995,8 @@ async function startApplication() {
       process.env.ACCEPTANCE_JAR,
       '--spring.profiles.active=acceptance',
       '--tensor.plugins.fixture.enabled=true',
+      // The owned stub makes all 375 fixture calls local and deterministic.
+      '--tensor.plugins.tushare-pro.min-request-interval=0ms',
       '--server.address=127.0.0.1',
       '--server.port=8080',
     ],
@@ -1018,52 +1060,146 @@ async function loadTemplateFields() {
   return Object.fromEntries(entries)
 }
 
+function allowedApiGet(url) {
+  const path = url.pathname
+  if (path === '/api/v1/data-sources') return url.search === ''
+  if (path === '/api/v1/data-sources/fixture/datasets') return url.search === ''
+  if (path === '/api/v1/download-tasks') {
+    return url.searchParams.toString() === 'page=1&pageSize=20'
+  }
+  if (/^\/api\/v1\/download-tasks\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/.test(path)) return url.search === ''
+  if (/^\/api\/v1\/download-tasks\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\/batches$/.test(path)) {
+    return url.searchParams.toString() === 'page=1&pageSize=20&includeSplit=false'
+  }
+  const match = path.match(/^\/api\/v1\/data-sources\/tushare_pro\/(apis|datasets)(?:\/([a-z0-9_]+)(\/download-capabilities|\/records)?)?$/)
+  if (!match) return false
+  const [, kind, apiName, suffix] = match
+  if (!apiName) return url.search === ''
+  if (!Object.hasOwn(DATASETS, apiName)) return false
+  if (kind === 'apis') return suffix === '/download-capabilities' && url.search === ''
+  return suffix === '/records' || (!suffix && url.search === '')
+}
+
 function monitorPage(page) {
   const failures = []
   const writes = []
   const responseScans = []
+  const pendingApiRequests = new Map()
   let recordsRequests = 0
   let allowedFailure
   page.on('pageerror', () => failures.push('page error'))
   page.on('request', (request) => {
     const url = new URL(request.url())
     if (url.origin !== BASE_URL) failures.push('external request')
+    if (url.pathname.startsWith('/api/v1/')) {
+      let complete
+      const done = new Promise((resolve) => { complete = resolve })
+      pendingApiRequests.set(request, { complete, done })
+    }
+    if (request.method() === 'GET' && url.pathname.startsWith('/api/v1/') && !allowedApiGet(url)) {
+      failures.push('unexpected API route')
+    }
     if (request.method() === 'GET' && url.pathname.endsWith('/records')) {
       recordsRequests += 1
     }
     if (!['GET', 'HEAD', 'OPTIONS'].includes(request.method())) {
       writes.push(`${request.method()} ${url.pathname}`)
-      if (request.method() === 'POST' && url.pathname === '/api/v1/downloads') {
+      if (request.method() === 'POST' && url.pathname === '/api/v1/download-tasks') {
         downloadPostCount += 1
       } else {
         failures.push('unexpected write')
       }
     }
   })
+  const finishApiRequest = (request) => {
+    pendingApiRequests.get(request)?.complete()
+    pendingApiRequests.delete(request)
+  }
+  page.on('requestfinished', finishApiRequest)
   page.on('requestfailed', (request) => {
     if (allowedFailure?.(request)) allowedFailure = undefined
     else failures.push('failed request')
+    finishApiRequest(request)
   })
   page.on('response', (response) => {
     const url = new URL(response.url())
     if (url.pathname.startsWith('/api/v1/')) {
-      responseScans.push(
-        response.text()
-          .then((text) => assertPublicSurface(text, 'API response'))
-          .catch(() => failures.push('API response safety scan')),
-      )
+      const method = response.request().method()
+      const allowedRoute = method === 'GET' && allowedApiGet(url)
+        ? `${method} ${url.pathname.replace(/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}/g, ':taskId')}`
+        : method === 'POST' && url.pathname === '/api/v1/download-tasks'
+          ? 'POST /api/v1/download-tasks'
+          : undefined
+      const scan = {
+        route: allowedRoute,
+        settled: false,
+        bodyReadFailed: false,
+      }
+      scan.promise = response.text().then(
+          (text) => {
+            try { assertPublicSurface(text, 'API response') }
+            catch (error) { failures.push(error.message) }
+          },
+          (error) => {
+            scan.bodyReadFailed = true
+            const reason = /No resource with given identifier found/.test(error.message)
+              ? 'resource unavailable' : /closed|disposed/i.test(error.message) ? 'page closed' : 'read failed'
+            const route = allowedApiGet(url) ? url.pathname.replace(/[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12}/g, ':taskId') : 'unexpected route'
+            failures.push(`API response body ${reason}: ${route}`)
+          },
+        ).finally(() => { scan.settled = true })
+      responseScans.push(scan)
     }
     if (response.status() >= 400) failures.push('unexpected HTTP error')
   })
+  const reportResponseScans = (phase) => {
+    const pending = responseScans.filter(({ settled }) => !settled)
+    const bodyReadFailed = responseScans.filter((scan) => scan.bodyReadFailed).length
+    const routes = Object.fromEntries([...new Set(
+      pending.map(({ route }) => route).filter(Boolean),
+    )].sort().map((route) => [route, pending.filter((scan) => scan.route === route).length]))
+    console.info(`M14-T03 response scans ${JSON.stringify({
+      phase,
+      total: responseScans.length,
+      settled: responseScans.length - pending.length,
+      pending: pending.length,
+      pendingRequests: pendingApiRequests.size,
+      bodyReadFailed,
+      failureCount: failures.length,
+      routes,
+    })}`)
+  }
+  const drainResponseScans = async (phase) => {
+    let stableScanCount = -1
+    while (true) {
+      const scans = responseScans.filter(({ settled }) => !settled)
+      const requests = [...pendingApiRequests.values()]
+      if (scans.length === 0 && requests.length === 0) {
+        if (stableScanCount === responseScans.length) break
+        stableScanCount = responseScans.length
+        await delay(0)
+        continue
+      }
+      stableScanCount = -1
+      await Promise.all([
+        ...scans.map(({ promise }) => promise),
+        ...requests.map(({ done }) => done),
+      ])
+    }
+    reportResponseScans(phase)
+  }
   return {
     recordsRequests: () => recordsRequests,
+    reportResponseScans,
+    drainResponseScans,
     allowOneRecordsFailure(predicate) {
       safeCheck(allowedFailure === undefined, 'only one request failure exemption is registered')
       safeCheck(typeof predicate === 'function', 'request failure exemption is explicit')
       allowedFailure = predicate
     },
     async assertClean(expectedWrites = []) {
-      await Promise.all(responseScans)
+      reportResponseScans('assert-clean:before-drain')
+      await drainResponseScans('assert-clean:after-drain')
       await assertPageSafety(page, 'test boundary')
       expect(writes).toEqual(expectedWrites)
       expect(allowedFailure).toBeUndefined()
@@ -1293,7 +1429,8 @@ function displayValue(name, value) {
 }
 
 async function assertTable(page, definition, body) {
-  const headers = [...definition.columns.map(({ label }) => label), ...SOURCE_COLUMNS]
+  const headers = body.apiName === 'daily' ? DAILY_HEADERS
+    : [...definition.columns.map(({ label }) => label), ...SOURCE_COLUMNS]
   await expect(page.getByRole('columnheader')).toHaveText(headers)
   await expect(page.getByRole('row')).toHaveCount(body.items.length + 1)
   const rows = page.getByRole('row').filter({ has: page.getByRole('cell') })
@@ -1325,6 +1462,45 @@ async function doubleAnimationFrame(page) {
   }))
 }
 
+async function geometryWithinViewport(page, locator, name) {
+  await expect(locator).toBeVisible()
+  await expect(locator).toBeInViewport()
+  const [geometry, viewport] = await Promise.all([
+    locator.evaluate((element) => new Promise((resolve) => {
+      const observer = new IntersectionObserver(([entry]) => {
+        observer.disconnect()
+        const box = entry.boundingClientRect
+        const intersection = entry.intersectionRect
+        resolve({
+          box: { x: box.x, y: box.y, width: box.width, height: box.height },
+          intersection: {
+            x: intersection.x,
+            y: intersection.y,
+            width: intersection.width,
+            height: intersection.height,
+          },
+        })
+      })
+      observer.observe(element)
+    })),
+    page.viewportSize(),
+  ])
+  safeCheck(Boolean(geometry && viewport), `${name} viewport geometry exists`)
+  const { box, intersection } = geometry
+  safeCheck(
+    box.x >= -1 && box.y >= -1 &&
+      box.x + box.width <= viewport.width + 1 &&
+      box.y + box.height <= viewport.height + 1,
+    `${name} is within one CSS pixel of the viewport`,
+  )
+  safeCheck(
+    box.width - intersection.width <= 1 &&
+      box.height - intersection.height <= 1,
+    `${name} is visible within one CSS pixel`,
+  )
+  return geometry
+}
+
 async function recordScreenshot(locator, testInfo, name) {
   await assertPageSafety(locator.page(), 'screenshot page')
   const text = await locator.innerText()
@@ -1335,7 +1511,13 @@ async function recordScreenshot(locator, testInfo, name) {
   evidence.screenshots.push({ name, path: screenshotPath, sha256, manuallyReviewed: false })
 }
 
-async function hoverOverflowText(page, cell, text, name) {
+async function hoverTextTooltip(
+  page,
+  cell,
+  text,
+  name,
+  { cellTrigger = false, layout = 'clipped' } = {},
+) {
   await page.mouse.move(8, 8)
   await cell.scrollIntoViewIfNeeded()
   await doubleAnimationFrame(page)
@@ -1346,6 +1528,21 @@ async function hoverOverflowText(page, cell, text, name) {
     const box = element.getBoundingClientRect()
     const range = document.createRange()
     range.selectNodeContents(element)
+    const textWidth = range.getBoundingClientRect().width
+    const lineCount = range.getClientRects().length
+    let current = element
+    let clippedByAncestor = false
+    while (current) {
+      const style = getComputedStyle(current)
+      if (
+        ['auto', 'clip', 'hidden', 'scroll'].includes(style.overflowX) &&
+        textWidth > current.clientWidth + 1
+      ) {
+        clippedByAncestor = true
+        break
+      }
+      current = current.parentElement
+    }
     return {
       x: box.x,
       y: box.y,
@@ -1353,7 +1550,9 @@ async function hoverOverflowText(page, cell, text, name) {
       height: box.height,
       clientWidth: element.clientWidth,
       scrollWidth: element.scrollWidth,
-      textWidth: range.getBoundingClientRect().width,
+      textWidth,
+      lineCount,
+      clippedByAncestor,
       overflow: getComputedStyle(element).overflow,
       textOverflow: getComputedStyle(element).textOverflow,
     }
@@ -1363,12 +1562,18 @@ async function hoverOverflowText(page, cell, text, name) {
       geometry.x + geometry.width <= 1440 && geometry.y + geometry.height <= 1000,
     `${name} hover target is inside viewport`,
   )
-  safeCheck(
-    geometry.scrollWidth > geometry.clientWidth || geometry.textWidth > geometry.width,
-    `${name} text actually overflows`,
-  )
+  if (layout === 'clipped') {
+    safeCheck(
+      geometry.scrollWidth > geometry.clientWidth ||
+        geometry.textWidth > geometry.width || geometry.clippedByAncestor,
+      `${name} text is clipped`,
+    )
+  } else {
+    safeCheck(layout === 'wrapped', `${name} layout contract is known`)
+    safeCheck(geometry.lineCount > 1, `${name} text wraps across lines`)
+  }
   evidence.geometry.push({ name, ...geometry })
-  await target.hover()
+  await (cellTrigger ? cell : target).hover()
 }
 
 async function horizontalScrollState(cell) {
@@ -1398,7 +1603,38 @@ async function assertReadOnly(page) {
 
 function downloadRequest(response) {
   const url = new URL(response.url())
-  return response.request().method() === 'POST' && url.pathname === '/api/v1/downloads'
+  return response.request().method() === 'POST' && url.pathname === '/api/v1/download-tasks'
+}
+
+async function readTaskApi(page, pathname) {
+  const result = await page.evaluate(async (path) => {
+    const requestId = crypto.randomUUID()
+    const response = await fetch(path, { headers: { 'X-Request-Id': requestId } })
+    return {
+      status: response.status,
+      requestId,
+      responseRequestId: response.headers.get('X-Request-Id'),
+      body: await response.json(),
+    }
+  }, pathname)
+  expect(result.status).toBe(200)
+  expect(result.responseRequestId).toBe(result.requestId)
+  return result.body
+}
+
+async function waitForTask(page, taskId) {
+  let task
+  await expect.poll(async () => {
+    task = await readTaskApi(page, `/api/v1/download-tasks/${taskId}`)
+    return task.status
+  }, { timeout: 15_000 }).toBe('SUCCEEDED')
+  const batches = await readTaskApi(
+    page,
+    `/api/v1/download-tasks/${taskId}/batches?page=1&pageSize=20&includeSplit=false`,
+  )
+  expect(batches).toMatchObject({ page: 1, pageSize: 20, total: 1 })
+  expect(batches.items).toHaveLength(1)
+  return { task, batch: batches.items[0] }
 }
 
 async function fillDownloadParameters(page, api, params) {
@@ -1421,61 +1657,90 @@ async function fillDownloadParameters(page, api, params) {
   void api
 }
 
-async function performDownload(page, mode, expectedCounts, tsCode, reuseForm = false) {
+async function performDownload(page, monitor, mode, expectedCounts, tsCode, reuseForm = false) {
   const definition = modeDefinition(mode, tsCode)
   if (!reuseForm) {
+    monitor.reportResponseScans(`${mode}:before-goto`)
+    await monitor.drainResponseScans(`${mode}:before-goto:drained`)
     await openRoute(page, '/downloads', '数据下载')
+    monitor.reportResponseScans(`${mode}:after-goto`)
     await chooseTushareDownload(page, definition.api)
   }
   await fillDownloadParameters(page, definition.api, definition.params)
   const received = upstream.setMode(mode, tsCode)
   const responsePromise = page.waitForResponse(downloadRequest)
-  await page.getByRole('button', { name: '开始下载', exact: true }).click()
+  await page.getByRole('button', { name: '提交任务', exact: true }).click()
   const response = await responsePromise
   await received
-  expect(response.status()).toBe(200)
-  expect(await response.request().postDataJSON()).toEqual({
+  expect(response.status()).toBe(202)
+  const request = await response.request().postDataJSON()
+  expect(request).toEqual({
+    submissionId: expect.stringMatching(UUID),
     pluginId: 'tushare_pro',
     apiName: definition.api,
+    mode: 'SINGLE',
     params: definition.params,
   })
-  const body = await readPublicJson(response, 'download response')
-  exactKeys(body, [
-    'requestId', 'outcome', 'pluginId', 'apiName', 'sourceRowCount',
-    'insertedRows', 'updatedRows', 'message',
-  ], 'download response')
-  const requestId = rememberRequest(response, body)
-  expect(body).toEqual({
+  const receipt = await readPublicJson(response, 'download task receipt')
+  exactKeys(receipt, ['requestId', 'taskId', 'status', 'version', 'createdAt'], 'download task receipt')
+  const requestId = rememberRequest(response, receipt)
+  expect(receipt).toMatchObject({
     requestId,
-    outcome: 'SUCCESS',
+    taskId: expect.stringMatching(UUID),
+    status: 'QUEUED',
+    version: 1,
+  })
+  expect(response.headers().location).toBe(`/api/v1/download-tasks/${receipt.taskId}`)
+  await expect(page.locator('.download-result-panel').getByRole('heading', { name: '任务已接收' })).toBeVisible()
+  const { task, batch } = await waitForTask(page, receipt.taskId)
+  expect(task).toMatchObject({
+    taskId: receipt.taskId,
+    submissionId: request.submissionId,
     pluginId: 'tushare_pro',
     apiName: definition.api,
-    sourceRowCount: expectedCounts[0],
+    mode: 'SINGLE',
+    params: definition.params,
+    status: 'SUCCEEDED',
+    planReady: true,
+    counts: {
+      totalBatches: 1,
+      pendingBatches: 0,
+      runningBatches: 0,
+      succeededBatches: 1,
+      failedBatches: 0,
+      splitBatches: 0,
+      sourceRows: expectedCounts[0],
+      insertedRows: expectedCounts[1],
+      updatedRows: expectedCounts[2],
+    },
+    lastError: null,
+    requestCount: 1,
+    runRequestCount: 1,
+  })
+  expect(batch).toMatchObject({
+    status: 'SUCCEEDED',
+    attemptCount: 1,
+    sourceRows: expectedCounts[0],
     insertedRows: expectedCounts[1],
     updatedRows: expectedCounts[2],
-    message: body.message,
+    error: null,
   })
-  expect(body.message.length).toBeGreaterThan(0)
-  const status = page.getByRole('status')
-  await expect(status.getByRole('heading', { name: '下载成功' })).toBeVisible()
-  await expect(status.getByRole('term')).toHaveText(['上游返回数', '插入数', '更新数'])
-  await expect(status.getByRole('definition')).toHaveText(expectedCounts.map(String))
   upstream.assertMode(mode, tsCode)
-  expectedEvents.push({
-    requestId,
-    operation: 'download',
+  expectedTasks.push({
+    requestId, taskId: receipt.taskId,
     pluginId: 'tushare_pro',
     apiName: definition.api,
-    paramSummary: `[${Object.keys(definition.params).join(', ')}]`,
-    sourceRowCount: String(expectedCounts[0]),
+    status: 'SUCCEEDED',
+    sourceRows: String(expectedCounts[0]),
     insertedRows: String(expectedCounts[1]),
     updatedRows: String(expectedCounts[2]),
-    outcome: 'success',
-    failureStage: 'none',
-    errorCode: 'none',
   })
   evidence.requests.push({ api: definition.api, operation: 'download', mode, tsCode, counts: expectedCounts, requestId })
-  return body
+  return {
+    sourceRowCount: task.counts.sourceRows,
+    insertedRows: task.counts.insertedRows,
+    updatedRows: task.counts.updatedRows,
+  }
 }
 
 function modeStockCodes(mode) {
@@ -1493,12 +1758,12 @@ function modeStockCodes(mode) {
   return stockCodes
 }
 
-async function performModeDownloads(page, mode, expectedTotals) {
+async function performModeDownloads(page, monitor, mode, expectedTotals) {
   const stockCodes = modeStockCodes(mode)
   const totals = [0, 0, 0]
   for (let index = 0; index < stockCodes.length; index += 1) {
     const expectedCounts = mode === 'disclosure-corrected' ? [1, 0, 1] : [1, 1, 0]
-    const body = await performDownload(page, mode, expectedCounts, stockCodes[index], index > 0)
+    const body = await performDownload(page, monitor, mode, expectedCounts, stockCodes[index], index > 0)
     totals[0] += body.sourceRowCount
     totals[1] += body.insertedRows
     totals[2] += body.updatedRows
@@ -1507,8 +1772,7 @@ async function performModeDownloads(page, mode, expectedTotals) {
   return stockCodes.length
 }
 
-function parseCompletedEvent(line) {
-  const marker = 'tensor.operation.completed'
+function parseLogEvent(line, marker) {
   const start = line.indexOf(marker)
   safeCheck(start >= 0, 'completion event marker is present')
   const text = line.slice(start + marker.length).trim()
@@ -1532,7 +1796,7 @@ async function verifyEventsAndLog() {
   safeCheck(lines.length === expectedEvents.length, 'private log completion event count matches')
   const byRequest = new Map()
   for (const line of lines) {
-    const parsed = parseCompletedEvent(line)
+    const parsed = parseLogEvent(line, 'tensor.operation.completed')
     safeCheck(!byRequest.has(parsed.requestId), 'completion request ID is unique')
     byRequest.set(parsed.requestId, parsed)
   }
@@ -1550,6 +1814,63 @@ async function verifyEventsAndLog() {
     assertPublicSurface(lines.find((line) => line.includes(`requestId=${expected.requestId}`)), 'completion event')
     evidence.events.push(Object.fromEntries(keys.map((key) => [key, actual[key]])))
   }
+  safeCheck(
+    [...byRequest.values()].every(({ operation }) => operation === 'query'),
+    'task submission does not emit synchronous download completion events',
+  )
+
+  const accepted = log.split(/\r?\n/)
+    .filter((line) => line.includes('tensor.download_task.accepted'))
+    .map((line) => parseLogEvent(line, 'tensor.download_task.accepted'))
+  const finished = log.split(/\r?\n/)
+    .filter((line) => line.includes('tensor.download_task.finished'))
+    .map((line) => parseLogEvent(line, 'tensor.download_task.finished'))
+  const batches = log.split(/\r?\n/)
+    .filter((line) => line.includes('tensor.download_batch.finished'))
+    .map((line) => parseLogEvent(line, 'tensor.download_batch.finished'))
+  expect(accepted).toHaveLength(expectedTasks.length)
+  expect(finished).toHaveLength(expectedTasks.length)
+  expect(batches).toHaveLength(expectedTasks.length)
+  for (const expected of expectedTasks) {
+    const acceptedEvent = accepted.find(({ taskId }) => taskId === expected.taskId)
+    const finishedEvent = finished.find(({ taskId }) => taskId === expected.taskId)
+    const batchEvent = batches.find(({ taskId }) => taskId === expected.taskId)
+    expect(acceptedEvent).toMatchObject({
+      requestId: expected.requestId,
+      taskId: expected.taskId,
+      pluginId: expected.pluginId,
+      apiName: expected.apiName,
+      status: 'QUEUED',
+      version: '1',
+      kind: 'CREATED',
+      outcome: 'accepted',
+    })
+    expect(finishedEvent).toMatchObject({
+      taskId: expected.taskId,
+      pluginId: expected.pluginId,
+      apiName: expected.apiName,
+      status: expected.status,
+      totalBatches: '1',
+      succeededBatches: '1',
+      failedBatches: '0',
+      sourceRows: expected.sourceRows,
+      insertedRows: expected.insertedRows,
+      updatedRows: expected.updatedRows,
+      errorCode: 'none',
+    })
+    expect(batchEvent).toMatchObject({
+      taskId: expected.taskId,
+      pluginId: expected.pluginId,
+      apiName: expected.apiName,
+      status: 'SUCCEEDED',
+      attemptCount: '1',
+      sourceRows: expected.sourceRows,
+      insertedRows: expected.insertedRows,
+      updatedRows: expected.updatedRows,
+      errorCode: 'none',
+    })
+  }
+  evidence.taskEvents = { accepted: accepted.length, batches: batches.length, finished: finished.length }
 }
 
 async function focusByTab(page, locator, { backwards = false } = {}) {
@@ -1603,6 +1924,7 @@ test.describe('dataset query UX', () => {
   test.describe.configure({ mode: 'serial', retries: 0, timeout: 180_000 })
 
   test.beforeAll(async () => {
+    configurePackagedEnvironment('dataset-query')
     test.setTimeout(300_000)
     evidence.startedAt = new Date().toISOString()
     await syntheticProbes()
@@ -1689,9 +2011,9 @@ test.describe('dataset query UX', () => {
     test.setTimeout(600_000)
     const monitor = monitorPage(page)
     await openRoute(page, '/downloads', '数据下载')
-    await page.getByRole('link', { name: '数据查看', exact: true }).click()
+    await page.getByRole('link', { name: /^数据查看\s*02$/ }).click()
     await expect(page.getByRole('heading', { level: 1, name: '数据查看' })).toBeVisible()
-    await page.getByRole('link', { name: '数据下载', exact: true }).click()
+    await page.getByRole('link', { name: /^数据下载\s*01$/ }).click()
     await expect(page.getByRole('heading', { level: 1, name: '数据下载' })).toBeVisible()
 
     let seedDownloads = 0
@@ -1703,12 +2025,12 @@ test.describe('dataset query UX', () => {
       ['balance', [1, 1, 0]],
       ['disclosure-initial', [123, 123, 0]],
     ]) {
-      seedDownloads += await performModeDownloads(page, mode, counts)
+      seedDownloads += await performModeDownloads(page, monitor, mode, counts)
     }
     expect(seedDownloads).toBe(INITIAL_DOWNLOAD_COUNT)
     expect(downloadPostCount).toBe(INITIAL_DOWNLOAD_COUNT)
     expect([...upstream.counts.values()].reduce((sum, count) => sum + count, 0)).toBe(INITIAL_DOWNLOAD_COUNT)
-    await monitor.assertClean(Array(INITIAL_DOWNLOAD_COUNT).fill('POST /api/v1/downloads'))
+    await monitor.assertClean(Array(INITIAL_DOWNLOAD_COUNT).fill('POST /api/v1/download-tasks'))
   })
 
   test('showsOnlyDeclaredFiltersWithoutAutoQuery', async ({ page }) => {
@@ -1981,9 +2303,14 @@ test.describe('dataset query UX', () => {
     const updaterMonitor = monitorPage(updater)
     await runWithCleanup(
       async () => {
-        const updateDownloads = await performModeDownloads(updater, 'disclosure-corrected', [123, 0, 123])
+        const updateDownloads = await performModeDownloads(
+          updater,
+          updaterMonitor,
+          'disclosure-corrected',
+          [123, 0, 123],
+        )
         expect(updateDownloads).toBe(123)
-        await updaterMonitor.assertClean(Array(updateDownloads).fill('POST /api/v1/downloads'))
+        await updaterMonitor.assertClean(Array(updateDownloads).fill('POST /api/v1/download-tasks'))
       },
       () => updater.close(),
       'disclosure update and page cleanup failed',
@@ -2119,7 +2446,13 @@ test.describe('dataset query UX', () => {
     await precise.scrollIntoViewIfNeeded()
     await doubleAnimationFrame(page)
     await recordScreenshot(page.locator('body'), testInfo, 'balancesheet-precision-target.png')
-    await hoverOverflowText(page, precise, '9007199254740993.123456789012345678', 'balance precision')
+    await hoverTextTooltip(
+      page,
+      precise,
+      '9007199254740993.123456789012345678',
+      'balance precision',
+      { cellTrigger: true },
+    )
     const preciseTooltip = page.getByRole('tooltip').filter({ hasText: '9007199254740993.123456789012345678' })
     await expect(preciseTooltip).toHaveText('9007199254740993.123456789012345678')
     await expect(preciseTooltip.locator('strong, em, script, style')).toHaveCount(0)
@@ -2153,7 +2486,13 @@ test.describe('dataset query UX', () => {
     await longCell.scrollIntoViewIfNeeded()
     await doubleAnimationFrame(page)
     await recordScreenshot(page.locator('body'), testInfo, 'company-long-text-target.png')
-    await hoverOverflowText(page, longCell, LONG_TEXT, 'company long text')
+    await hoverTextTooltip(
+      page,
+      longCell,
+      LONG_TEXT,
+      'company long text',
+      { layout: 'wrapped' },
+    )
     const longTooltip = page.getByRole('tooltip').filter({ hasText: LONG_TEXT })
     await expect(longTooltip).toHaveText(LONG_TEXT)
     expect(await longTooltip.textContent()).toBe(LONG_TEXT)
@@ -2162,9 +2501,18 @@ test.describe('dataset query UX', () => {
     await page.mouse.move(8, 8)
     await mainBusinessCell.scrollIntoViewIfNeeded()
     await doubleAnimationFrame(page)
-    await expect(businessScopeCell).toBeInViewport({ ratio: 1 })
-    await expect(mainBusinessCell).toBeInViewport({ ratio: 1 })
-    await expect(employeesCell).toBeInViewport({ ratio: 1 })
+    const [businessScopeBox, mainBusinessBox, employeesBox] = await Promise.all([
+      geometryWithinViewport(page, businessScopeCell, 'company empty value'),
+      geometryWithinViewport(page, mainBusinessCell, 'company null value'),
+      geometryWithinViewport(page, employeesCell, 'company zero value'),
+    ])
+    evidence.geometry.push({
+      name: 'company empty/null/zero viewport',
+      tolerance: 1,
+      businessScopeBox,
+      mainBusinessBox,
+      employeesBox,
+    })
     await recordScreenshot(page.locator('body'), testInfo, 'company-empty-null-zero.png')
 
     definition = await chooseDataset(page, 'index_classify', { source: false })
@@ -2539,7 +2887,7 @@ test.describe('dataset query UX', () => {
   test('queriesAndPaginatesUsingKeyboard', async ({ page }, testInfo) => {
     const monitor = monitorPage(page)
     await openRoute(page, '/downloads', '数据下载')
-    const datasetsLink = page.getByRole('link', { name: '数据查看', exact: true })
+    const datasetsLink = page.getByRole('link', { name: /^数据查看\s*02$/ })
     await focusByTab(page, datasetsLink)
     await expect(datasetsLink).toBeFocused()
     await page.keyboard.press('Enter')
