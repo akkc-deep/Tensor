@@ -15,6 +15,7 @@ const category = ref('全部')
 const visibleCatalog = computed(() => demo.catalog.filter(item => (category.value === '全部' || item.category === category.value) && `${item.name} ${item.id}`.toLowerCase().includes(search.value.toLowerCase())))
 const detailDialog = ref(null)
 const main = ref(null)
+const keyboardFocus = ref(false)
 function navigate(id) { demo.page = id; nextTick(() => main.value?.focus()) }
 watch(() => demo.detail, async value => {
   if (value) { await nextTick(); detailDialog.value?.showModal() }
@@ -24,7 +25,7 @@ onBeforeUnmount(demo.dispose)
 </script>
 
 <template>
-  <div class="demo-root theme-studio" :style="demo.settingsColor ? { '--accent': demo.settingsColor } : {}">
+  <div class="demo-root theme-studio" :style="demo.settingsColor ? { '--accent': demo.settingsColor } : {}" :data-keyboard-focus="keyboardFocus" @keydown.tab="keyboardFocus = true" @pointerdown="keyboardFocus = false">
     <a href="#demo-workspace" class="skip-link">跳转到工作区</a>
     <header class="demo-banner">
       <a class="demo-label" href="/ui-demos.html"><span class="demo-label-mark">T</span><span>工作台设计<span class="demo-label-sub">交互 Demo</span></span></a>
