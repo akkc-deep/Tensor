@@ -46,6 +46,24 @@ Tushare 客户端还使用下列固定属性；同一客户端上的旧同步入
 | `tensor.plugins.tushare-pro.max-response-bytes` | `67108864` | 1～67108864 字节。 |
 | `tensor.plugins.tushare-pro.min-request-interval` | `1500ms` | 非负且必须可转换为纳秒。 |
 
+## 已核验的 Tushare 日期区间
+
+2026-09-13 首批核验的下列四项，均要求一只股票及起止日期，版本为 `tushare-range-v2`，按闭区间 `trade_date` 规划原生RANGE。部署后以实际包的能力接口和下载页为准；该源码验收不表示已发布到外部环境。
+
+| 接口 | 原始响应行数上界 | 新干净SOURCE证据 |
+| --- | ---: | --- |
+| `daily_basic` | 6000 | `issue018-t14-priority-source-20260913T092938Z-daily_basic-range`及两股票两端/跨年 |
+| `stk_limit` | 5800 | `issue018-t14-priority-source-20260913T092938Z-stk_limit-range`及两股票两端 |
+| `moneyflow` | 6000 | `issue018-t14-priority-source-20260913T092938Z-moneyflow-range`及两股票两端 |
+| `margin_detail` | 6000 | `issue018-t14-priority-source-20260913T092938Z-margin_detail-range`及两股票两端 |
+
+原始行数小于上界才可认定该叶子完整；等于或超过上界继续按日期拆分，最小单日仍满额则报告完整性未确认，不把部分结果算作完整成功。官方依据与完整case引用见 [40项验收](../verification/ISSUE-018-range-acceptance.md)，25项真实RANGE TASK/SQL见 [T14运行](../verification/ISSUE-018-T14-runs.md#四接口-range-task-实际结果)。
+
+2026-09-15 ISSUE-031又完成`daily`、`forecast`、`dividend`、`fina_mainbz`、`margin`、`top_list`的固定TASK/SQL验收，正式证据共10 AVAILABLE、24 NEEDS_VERIFICATION、6 SINGLE_ONLY，详情见[当前验收](../verification/ISSUE-031-range-live-task-verification.md)。任务整体在fina_indicator首次失败后停止；该接口RANGE已撤回为v3 / NEEDS_VERIFICATION，SINGLE仍可用。
+
+当前构建延续本地验收候选，能力为33 AVAILABLE、1 NEEDS_VERIFICATION、6 UNSUPPORTED；其中23项尚未完成正式TASK验收，页面可提交不等于已有完整验收。十一项RESPONSE_ONLY只收集本次响应，完整性未确认。BJ top_list保留BJ证券并参照SSE日历，直接trade_cal BSE仍拒绝；margin支持三exchange_id。配置Token不会绕过准入。版本变化后旧任务若返回TASK_DEFINITION_CHANGED，应核实原任务口径，不能盲目retry/resume。
+
+
 ## 秘密注入
 
 数据库账号采用 `read -r TENSOR_DB_USERNAME` 输入，密码采用关闭终端回显后读取并导出的方式，完整命令及恢复回显 trap 见 [首次运行的环境注入](first-run.md#3-注入环境)。默认显式 `unset TENSOR_TUSHARE_TOKEN TENSOR_DEV_CORS_ALLOWED_ORIGIN`；若现有 shell 已设置二者，先确认是否应该保留，不要直接打印变量内容。

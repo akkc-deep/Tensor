@@ -56,7 +56,8 @@ public final class DownloadTaskController {
     @GetMapping("/{taskId}")
     public DownloadTaskResponse detail(DownloadTaskQuery.TaskId taskId) {
         var snapshot = queries.detail(taskId.value());
-        return DownloadTaskResponse.from(snapshot, service.controls(snapshot.task().orElseThrow()));
+        var task = snapshot.task().orElseThrow();
+        return DownloadTaskResponse.from(snapshot, service.controls(task), service.policySummary(task));
     }
 
     @GetMapping("/{taskId}/batches")

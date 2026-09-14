@@ -5,6 +5,7 @@ import static org.mockito.Mockito.*;
 import com.akkc.tensor.core.download.task.*;
 import com.akkc.tensor.observability.DownloadTaskOperationLogger;
 import com.akkc.tensor.plugin.api.download.batch.DownloadMode;
+import com.akkc.tensor.plugin.api.download.batch.BatchDownloadDescriptor;
 import com.akkc.tensor.plugin.api.error.ErrorCode;
 import com.akkc.tensor.plugin.api.model.*;
 import com.akkc.tensor.web.download.DownloadParameterResolver;
@@ -14,6 +15,27 @@ import java.util.*;
 import org.junit.jupiter.api.Test;
 
 class DownloadTaskControllerTest {
+    @Test void mapsControlsAndPersistedExtractionFromTheSameDetailTask() {
+        var service = mock(DownloadTaskService.class);
+        var queries = mock(DownloadTaskQueryService.class);
+        var controller = new DownloadTaskController(service, queries, mock(DownloadParameterResolver.class), new DownloadTaskOperationLogger());
+        var task = task(UUID.randomUUID(), DownloadTask.Status.QUEUED, DownloadMode.RANGE);
+        var snapshot = new DownloadTaskRepository.TaskSnapshot(Optional.of(task),
+                new DownloadTaskRepository.Counts(0, 0, 0, 0, 0, 0, 0, 0, 0));
+        var controls = new DownloadTaskService.ControlAvailability(false, false);
+        var summary = new DownloadTaskService.TaskPolicySummary("saved-v1",
+                BatchDownloadDescriptor.CompletenessRule.Kind.RESPONSE_ONLY);
+        when(queries.detail(task.taskId())).thenReturn(snapshot);
+        when(service.controls(task)).thenReturn(controls);
+        when(service.policySummary(task)).thenReturn(summary);
+
+        var response = controller.detail(new DownloadTaskQuery.TaskId(task.taskId()));
+
+        assertThat(response.extraction()).isEqualTo(summary);
+        verify(service).controls(task);
+        verify(service).policySummary(task);
+    }
+
     @Test void keepsPageMembershipButMapsEveryRowFromItsOwnCompleteSnapshot() {
         var service = mock(DownloadTaskService.class);
         var queries = mock(DownloadTaskQueryService.class);
@@ -38,9 +60,13 @@ class DownloadTaskControllerTest {
     }
 
     static DownloadTask task(UUID id, DownloadTask.Status status) {
+        return task(id, status, DownloadMode.SINGLE);
+    }
+
+    static DownloadTask task(UUID id, DownloadTask.Status status, DownloadMode mode) {
         var now = Instant.parse("2026-09-12T00:00:00Z");
         return new DownloadTask(id, UUID.randomUUID(), "private", DatasetKey.of(PluginId.of("task_test"), ApiName.of("prices")),
-                DownloadMode.SINGLE, Map.of(), "private", "private", status, true, UUID.randomUUID(), 1, 4, 1, 1, null,
+                mode, Map.of(), "private", "private", status, true, UUID.randomUUID(), 1, 4, 1, 1, null,
                 now, now, now, now, null, now.plusSeconds(60));
     }
 }

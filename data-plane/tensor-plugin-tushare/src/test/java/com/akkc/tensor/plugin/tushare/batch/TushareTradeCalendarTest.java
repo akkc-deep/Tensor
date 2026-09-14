@@ -23,14 +23,13 @@ class TushareTradeCalendarTest {
         assertThat(days).containsExactly(LocalDate.of(2024,2,28),LocalDate.of(2024,2,29));
         assertThatThrownBy(() -> days.clear()).isInstanceOf(UnsupportedOperationException.class);
         assertThat(TushareTradeCalendar.openDays(RANGE,"SZSE",calendar(List.of(day("20240228",0),day("20240229",0),day("20240301",0))))).isEmpty();
-        assertThat(verified("trade_cal").assess(api("trade_cal"),RANGE,calendar(rows))).isEqualTo(BatchAssessment.COMPLETE);
+        assertThat(production().assess(api("trade_cal"),RANGE,calendar(rows))).isEqualTo(BatchAssessment.COMPLETE);
     }
 
     @Test void missingDuplicateAndOpenOnlyCalendarsNeverBecomePartialPlans() {
         for(var rows:List.<List<List<Object>>>of(List.of(),List.of(day("20240228",1)),List.of(day("20240228",1),day("20240228",0),day("20240301",1)),List.of(day("20240228",1),day("20240229",1),day("20240301",1),day("20240301",1)))) {
             code(() -> TushareTradeCalendar.openDays(RANGE,"SZSE",calendar(rows)),ErrorCode.BATCH_COMPLETENESS_UNCONFIRMED);
-            assertThat(production().assess(api("trade_cal"),RANGE,calendar(rows))).isEqualTo(BatchAssessment.UNKNOWN);
-            code(() -> verified("trade_cal").assess(api("trade_cal"),RANGE,calendar(rows)),ErrorCode.BATCH_COMPLETENESS_UNCONFIRMED);
+            code(() -> production().assess(api("trade_cal"),RANGE,calendar(rows)),ErrorCode.BATCH_COMPLETENESS_UNCONFIRMED);
         }
     }
 

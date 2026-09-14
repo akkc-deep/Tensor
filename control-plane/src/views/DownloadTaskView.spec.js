@@ -62,7 +62,7 @@ it.each([
   ['SINGLE', '本次请求已完成', '单次请求，结果不代表完整历史'],
   ['RANGE', '本次请求范围内的计划已完成', '日期区间'],
 ])('describes %s success within the request scope', async (mode, success, description) => {
-  api.getDownloadTask.mockResolvedValue(task('succeededTask', { mode }))
+  api.getDownloadTask.mockResolvedValue(task('succeededTask', { mode, extraction: mode === 'SINGLE' ? null : task('succeededTask').extraction }))
   await render()
   expect(wrapper.text()).toContain(success)
   expect(wrapper.text()).toContain(description)
@@ -146,4 +146,40 @@ it('connects leaf pagination and refresh to the shared query cycle', async () =>
   wrapper.getComponent(DownloadBatchTable).vm.$emit('update:pageSize', 50)
   await flushPromises()
   expect(api.listDownloadTaskBatches).toHaveBeenLastCalledWith(ID, { page: 1, pageSize: 50 })
+})
+
+it.each([
+  ['QUEUED', 0n, '排队中'], ['RUNNING', 2n, '运行中'],
+  ['SUCCEEDED', 2n, '返回记录已采集'], ['SUCCEEDED', 0n, '本次请求未返回记录'],
+  ['FAILED', 2n, '失败'], ['PARTIAL_FAILED', 2n, '部分失败'], ['INTERRUPTED', 2n, '已中断'],
+])('keeps saved response-only caveat in detail %s with %s rows', async (status, sourceRows, label) => {
+  api.getDownloadTask.mockResolvedValue(task('succeededTask', { status,
+    extraction: { policyVersion: 'saved-v1', ruleKind: 'RESPONSE_ONLY' },
+    counts: { ...task('succeededTask').counts, sourceRows } }))
+  await render()
+  expect(wrapper.get('[data-task-status]').text()).toBe(label)
+  expect(wrapper.text()).toContain('数据完整性未确认，可能存在上游截断')
+  expect(wrapper.text()).toContain('saved-v1')
+  expect(wrapper.text()).toContain('RESPONSE_ONLY')
+  expect(wrapper.text()).not.toContain('本次请求范围内的计划已完成')
+  if (status !== 'SUCCEEDED') {
+    expect(wrapper.text()).not.toContain('返回记录已采集')
+    expect(wrapper.text()).not.toContain('本次请求未返回记录')
+  }
+})
+
+it('refreshes historical UNKNOWN text from saved snapshots without consulting capabilities', async () => {
+  api.getDownloadTask.mockResolvedValueOnce(task('succeededTask', {
+    extraction: { policyVersion: 'historical-v1', ruleKind: 'UNKNOWN' },
+  }))
+  await render()
+  expect(wrapper.text()).toContain('数据完整性未确认')
+  expect(wrapper.text()).not.toContain('可能存在上游截断')
+  api.getDownloadTask.mockResolvedValueOnce(task('succeededTask', {
+    extraction: { policyVersion: 'historical-v2', ruleKind: 'VERIFIED_RULE' },
+  }))
+  await wrapper.get('[data-refresh-task]').trigger('click')
+  await flushPromises()
+  expect(wrapper.text()).toContain('historical-v2')
+  expect(wrapper.text()).not.toContain('数据完整性未确认')
 })

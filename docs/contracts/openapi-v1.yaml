@@ -244,8 +244,9 @@ paths:
         unknown fields and trailing JSON values are rejected. Invalid present top-level
         values take precedence over missing required fields. UUIDs require the full
         8-4-4-4-12 hexadecimal form; either case is accepted and normalized to lowercase.
-        Production Tushare RANGE remains NEEDS_VERIFICATION for 34 APIs; the remaining
-        six APIs are SINGLE-only. AVAILABLE RANGE examples are controlled fixtures.
+        Production Tushare RANGE remains AVAILABLE for four APIs and NEEDS_VERIFICATION
+        for 30; the remaining six APIs are SINGLE-only. Contract-only examples do not
+        change production admission.
       requestBody:
         required: true
         content:
@@ -287,7 +288,8 @@ paths:
         statuses; members are not re-filtered, re-sorted or filled in. Any detail read
         failure fails the entire response. A page beyond the end stays unchanged.
         Stored task or batch failures, including SOURCE_TIMEOUT and PERSISTENCE_FAILED,
-        remain HTTP 200; 500 means this query itself failed. Controls are current hints.
+        remain HTTP 200; 500 means this query itself failed. Each item's extraction is
+        read from that task's persisted policy snapshot; controls are current hints.
       parameters:
         - {$ref: '#/components/parameters/DownloadTaskPage'}
         - {$ref: '#/components/parameters/DownloadTaskPageSize'}
@@ -312,11 +314,16 @@ paths:
       operationId: getDownloadTask
       description: >-
         Return one consistent task/counts snapshot with current canRetry/canResume hints.
-        No query parameters are accepted. Failed or interrupted tasks are HTTP 200;
-        a missing task is 404. Internal permission, hash, policy and run fields are omitted.
+        extraction is null for SINGLE and is the exact policyVersion/ruleKind saved with
+        a RANGE task; it is not inferred from current capability metadata. No query
+        parameters are accepted. Failed or interrupted tasks are HTTP 200; a missing
+        task is 404. Internal permission, hash, policy and run fields are omitted.
       responses:
         '200':
-          description: Current task snapshot, including any safely classified stored failure.
+          description: >-
+            Current task snapshot, including any safely classified stored failure.
+            For RESPONSE_ONLY, SUCCEEDED means the records returned by the source were
+            processed successfully; it does not claim upstream range completeness.
           headers:
             X-Request-Id: {$ref: '#/components/headers/TaskRequestId'}
           content:
@@ -424,8 +431,10 @@ paths:
         filtering. Known disabled sources remain queryable with single.available=false
         and an unavailable RANGE. Unknown identity is DATASET_MISCONFIGURED (409).
         No query parameters are accepted. Capabilities are not an acceptance promise;
-        disabling task admission does not remove metadata. The production 34 Tushare
-        ranges remain NEEDS_VERIFICATION and six APIs remain SINGLE-only.
+        disabling task admission does not remove metadata. RESPONSE_ONLY requires one
+        NATIVE_RANGE request, splittable=false, no row limit and non-empty evidence,
+        including while NEEDS_VERIFICATION. The production Tushare shape remains four
+        AVAILABLE, 30 NEEDS_VERIFICATION and six SINGLE-only APIs.
       responses:
         '200':
           description: Current metadata and readiness, with explicit nullable range semantics.

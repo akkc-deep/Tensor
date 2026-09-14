@@ -1,6 +1,6 @@
 package com.akkc.tensor.plugin.api.download.batch;
 
-/** Only COMPLETE permits range data to proceed to adaptation and persistence. */
+/** COMPLETE and RESPONSE_ONLY permit persistence only under their matching policy rules. */
 public enum BatchAssessment {
-    COMPLETE, SPLIT_REQUIRED, UNKNOWN
+    COMPLETE, SPLIT_REQUIRED, RESPONSE_ONLY, UNKNOWN
 }

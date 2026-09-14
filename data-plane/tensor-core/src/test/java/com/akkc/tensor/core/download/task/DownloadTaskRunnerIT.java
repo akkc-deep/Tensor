@@ -136,6 +136,85 @@ class DownloadTaskRunnerIT {
     }
 
     @Test
+    void responseOnlyCommitsAllReturnedKeysAndEmptyResponseAsOneNativeLeaf() throws Exception {
+        source.responseOnly = true;
+        source.rowsOverride = List.of(List.of("AA", "20260910", "10.00"), List.of("AA", "20260911", "20.00"));
+        DownloadTask accepted = submitRange(RUN, "20260910", "20260912");
+        var result = runner(repository, commits, RUN, settings(20, 20, 20)).runNext(() -> false);
+        assertThat(result.error()).isNull();
+        assertThat(task(accepted.taskId()).status()).isEqualTo(DownloadTask.Status.SUCCEEDED);
+        assertThat(task(accepted.taskId()).requestCount()).isEqualTo(1);
+        assertThat(priceFacts()).containsExactly("AA-2026-09-10=10.00", "AA-2026-09-11=20.00");
+        assertThat(repository.counts(accepted.taskId()))
+                .isEqualTo(new DownloadTaskRepository.Counts(1, 0, 0, 1, 0, 0, 2, 2, 0));
+        assertThat(allBatches(accepted.taskId())).singleElement().satisfies(batch -> {
+            assertThat(batch.range()).isEqualTo(new DateRange(LocalDate.of(2026, 9, 10), LocalDate.of(2026, 9, 12)));
+            assertThat(batch.sourceParams()).isEqualTo(accepted.params());
+            assertThat(batch.status()).isEqualTo(DownloadBatch.Status.SUCCEEDED);
+        });
+        assertThat(tasks.policySummary(task(accepted.taskId())))
+                .isEqualTo(new DownloadTaskService.TaskPolicySummary("runner-test-v1", BatchDownloadDescriptor.CompletenessRule.Kind.RESPONSE_ONLY));
+
+        // A second task updates the original key, preserving the other returned record.
+        source.rowsOverride = List.of(List.of("AA", "20260910", "30.00"));
+        DownloadTask update = submitRange(RUN, "20260910", "20260912");
+        runner(repository, commits, RUN, settings(20, 20, 20)).runNext(() -> false);
+        assertThat(repository.counts(update.taskId()))
+                .isEqualTo(new DownloadTaskRepository.Counts(1, 0, 0, 1, 0, 0, 1, 0, 1));
+        assertThat(priceFacts()).containsExactly("AA-2026-09-10=30.00", "AA-2026-09-11=20.00");
+
+        resetHarness(); source.responseOnly = true; source.empty = true;
+        DownloadTask empty = submitRange(RUN, "20260910", "20260912");
+        runner(repository, commits, RUN, settings(20, 20, 20)).runNext(() -> false);
+        assertThat(task(empty.taskId()).status()).isEqualTo(DownloadTask.Status.SUCCEEDED);
+        assertThat(task(empty.taskId()).requestCount()).isEqualTo(1);
+        assertThat(repository.counts(empty.taskId()))
+                .isEqualTo(new DownloadTaskRepository.Counts(1, 0, 0, 1, 0, 0, 0, 0, 0));
+        assertThat(priceFacts()).isEmpty();
+    }
+
+    @Test
+    void responseOnlyAdapterAndMidWriteFailuresLeaveNoBusinessRows() throws Exception {
+        for (boolean writeFailure : List.of(false, true)) {
+            resetHarness(); source.responseOnly = true;
+            source.rowsOverride = List.of(List.of("AA", "20260910", "10.00"),
+                    List.of("AA", "20260911", writeFailure ? "20.00" : "invalid-amount"));
+            if (writeFailure) jdbc.execute("""
+                    CREATE TRIGGER reject_runner_price BEFORE INSERT ON runner_test__prices FOR EACH ROW
+                    BEGIN IF NEW.observed_on='2026-09-11' THEN SIGNAL SQLSTATE '45000'
+                      SET MESSAGE_TEXT='controlled-write-failure'; END IF; END
+                    """);
+            DownloadTask accepted = submitRange(RUN, "20260910", "20260912");
+            runner(repository, commits, RUN, settings(20, 20, 20)).runNext(() -> false);
+            assertThat(task(accepted.taskId()).status()).isEqualTo(DownloadTask.Status.FAILED);
+            assertThat(task(accepted.taskId()).lastError().code())
+                    .isEqualTo(writeFailure ? ErrorCode.PERSISTENCE_FAILED : ErrorCode.ADAPTER_TYPE_INVALID);
+            assertThat(task(accepted.taskId()).requestCount()).isEqualTo(1);
+            assertThat(repository.counts(accepted.taskId()))
+                    .isEqualTo(new DownloadTaskRepository.Counts(1, 0, 0, 0, 1, 0, 0, 0, 0));
+            assertThat(priceFacts()).isEmpty();
+        }
+    }
+
+    @Test
+    void mismatchedResponseOnlyAssessmentsNeverReachMySqlWritesOrSplits() throws Exception {
+        for (boolean responseOnly : List.of(true, false)) {
+            for (var assessment : responseOnly ? List.of(BatchAssessment.COMPLETE, BatchAssessment.SPLIT_REQUIRED, BatchAssessment.UNKNOWN)
+                    : List.of(BatchAssessment.RESPONSE_ONLY)) {
+                resetHarness(); source.responseOnly = responseOnly; source.assessmentOverride = assessment;
+                DownloadTask accepted = submitRange(RUN, "20260910", "20260912");
+                runner(repository, commits, RUN, settings(20, 20, 20)).runNext(() -> false);
+                assertThat(task(accepted.taskId()).status()).isEqualTo(DownloadTask.Status.FAILED);
+                assertThat(task(accepted.taskId()).lastError().code()).isEqualTo(assessment == BatchAssessment.UNKNOWN
+                        ? ErrorCode.BATCH_COMPLETENESS_UNCONFIRMED : ErrorCode.DATASET_MISCONFIGURED);
+                assertThat(repository.counts(accepted.taskId()))
+                        .isEqualTo(new DownloadTaskRepository.Counts(1, 0, 0, 0, 1, 0, 0, 0, 0));
+                assertThat(priceFacts()).isEmpty();
+            }
+        }
+    }
+
+    @Test
     void t03TaskPlansThreeBatchesAndContinuesAfterTheMiddleNetworkFailure() throws Exception {
         source.mode = BatchDownloadDescriptor.PlanningMode.TRADING_DAYS;
         source.plan = List.of(day("2026-09-10"), day("2026-09-11"), day("2026-09-12"));
@@ -586,6 +665,9 @@ class DownloadTaskRunnerIT {
         volatile List<DateRange> plan;
         volatile boolean splitMultiDay;
         volatile boolean empty;
+        volatile boolean responseOnly;
+        volatile List<List<Object>> rowsOverride;
+        volatile BatchAssessment assessmentOverride;
         volatile boolean available = true;
         volatile CountDownLatch entered;
         volatile CountDownLatch release;
@@ -611,10 +693,11 @@ class DownloadTaskRunnerIT {
             return Optional.of(new BatchDownloadDescriptor(
                     List.of(symbol, endpoint("from", "to"), endpoint("to", "from")), "from", "to",
                     BatchDownloadDescriptor.DateAxis.CALENDAR_DATE, "Observed date", mode,
-                    mode == BatchDownloadDescriptor.PlanningMode.NATIVE_RANGE,
+                    mode == BatchDownloadDescriptor.PlanningMode.NATIVE_RANGE && !responseOnly,
                     BatchDownloadDescriptor.Availability.AVAILABLE, null, "runner-test-v1",
                     new BatchDownloadDescriptor.CompletenessRule(
-                            BatchDownloadDescriptor.CompletenessRule.Kind.VERIFIED_RULE, null,
+                            responseOnly ? BatchDownloadDescriptor.CompletenessRule.Kind.RESPONSE_ONLY
+                                    : BatchDownloadDescriptor.CompletenessRule.Kind.VERIFIED_RULE, null,
                             "Controlled complete response")));
         }
 
@@ -649,7 +732,7 @@ class DownloadTaskRunnerIT {
             if (failure != null) throw classified(failure);
             List<List<Object>> rows = empty || emptyOn.contains(from) ? List.of() : List.of(List.of(
                     symbolOn.getOrDefault(from, (String) params.get("symbol")), from, "10.00"));
-            return envelope(params, rows);
+            return envelope(params, rowsOverride == null ? rows : rowsOverride);
         }
 
         DownloadEnvelope envelope(Map<String, Object> params, List<List<Object>> rows) {
@@ -660,6 +743,8 @@ class DownloadTaskRunnerIT {
 
         @Override
         public BatchAssessment assess(ApiName apiName, DateRange range, DownloadEnvelope envelope) {
+            if (assessmentOverride != null) return assessmentOverride;
+            if (responseOnly) return BatchAssessment.RESPONSE_ONLY;
             return splitMultiDay && range.start().isBefore(range.end())
                     ? BatchAssessment.SPLIT_REQUIRED : BatchAssessment.COMPLETE;
         }

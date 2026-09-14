@@ -21,7 +21,7 @@
     {
       "name": "rangeSubmission",
       "schema": "SubmissionRequest",
-      "description": "Controlled AVAILABLE contract example only. contract_fixture is not a production plugin. All 34 production Tushare RANGE APIs remain NEEDS_VERIFICATION and cannot currently accept this mode.",
+      "description": "Controlled AVAILABLE contract example only; contract_fixture is not a production plugin. Production Tushare remains four AVAILABLE, 30 NEEDS_VERIFICATION and six SINGLE-only APIs.",
       "method": "POST",
       "path": "/api/v1/download-tasks",
       "value": {
@@ -68,6 +68,10 @@
         "pluginId": "contract_fixture",
         "apiName": "daily",
         "mode": "RANGE",
+        "extraction": {
+          "policyVersion": "contract-fixture-v1",
+          "ruleKind": "VERIFIED_RULE"
+        },
         "params": {
           "ts_code": "000001.SZ",
           "start_date": "20260803",
@@ -113,6 +117,10 @@
         "pluginId": "contract_fixture",
         "apiName": "daily",
         "mode": "RANGE",
+        "extraction": {
+          "policyVersion": "contract-fixture-v1",
+          "ruleKind": "VERIFIED_RULE"
+        },
         "params": {
           "ts_code": "000001.SZ",
           "start_date": "20260803",
@@ -158,6 +166,10 @@
         "pluginId": "contract_fixture",
         "apiName": "daily",
         "mode": "RANGE",
+        "extraction": {
+          "policyVersion": "contract-fixture-v1",
+          "ruleKind": "VERIFIED_RULE"
+        },
         "params": {
           "ts_code": "000001.SZ",
           "start_date": "20260803",
@@ -254,6 +266,10 @@
         "pluginId": "contract_fixture",
         "apiName": "daily",
         "mode": "RANGE",
+        "extraction": {
+          "policyVersion": "contract-fixture-v1",
+          "ruleKind": "VERIFIED_RULE"
+        },
         "params": {
           "ts_code": "000001.SZ",
           "start_date": "20260803",
@@ -299,6 +315,10 @@
         "pluginId": "contract_fixture",
         "apiName": "daily",
         "mode": "RANGE",
+        "extraction": {
+          "policyVersion": "contract-fixture-v1",
+          "ruleKind": "VERIFIED_RULE"
+        },
         "params": {
           "ts_code": "000001.SZ",
           "start_date": "20260803",
@@ -376,6 +396,10 @@
         "pluginId": "contract_fixture",
         "apiName": "daily",
         "mode": "RANGE",
+        "extraction": {
+          "policyVersion": "contract-fixture-v1",
+          "ruleKind": "VERIFIED_RULE"
+        },
         "params": {
           "ts_code": "000001.SZ",
           "start_date": "20260803",
@@ -408,6 +432,235 @@
         "queuedAt": "2026-09-12T00:00:00Z",
         "startedAt": "2026-09-12T00:00:01Z",
         "finishedAt": "2026-09-12T00:00:04.123Z",
+        "deadlineAt": "2026-09-12T00:30:01Z"
+      }
+    },
+    {
+      "name": "responseOnlySucceededTask",
+      "schema": "TaskResponse",
+      "description": "SUCCEEDED means both returned records were processed; RESPONSE_ONLY does not assert that the upstream range was complete.",
+      "httpStatus": 200,
+      "value": {
+        "taskId": "22222222-2222-4222-8222-000000000001",
+        "submissionId": "33333333-3333-4333-8333-000000000001",
+        "pluginId": "contract_fixture",
+        "apiName": "response_only",
+        "mode": "RANGE",
+        "extraction": {
+          "policyVersion": "contract-response-only-v1",
+          "ruleKind": "RESPONSE_ONLY"
+        },
+        "params": {
+          "start_date": "20260803",
+          "end_date": "20260805"
+        },
+        "status": "SUCCEEDED",
+        "version": 4,
+        "planReady": true,
+        "counts": {
+          "totalBatches": 1,
+          "pendingBatches": 0,
+          "runningBatches": 0,
+          "succeededBatches": 1,
+          "failedBatches": 0,
+          "splitBatches": 0,
+          "sourceRows": 2,
+          "insertedRows": 2,
+          "updatedRows": 0
+        },
+        "lastError": null,
+        "canRetry": false,
+        "canResume": false,
+        "requestCount": 1,
+        "runRequestCount": 1,
+        "createdAt": "2026-09-12T00:00:00Z",
+        "updatedAt": "2026-09-12T00:00:02Z",
+        "queuedAt": "2026-09-12T00:00:00Z",
+        "startedAt": "2026-09-12T00:00:01Z",
+        "finishedAt": "2026-09-12T00:00:02Z",
+        "deadlineAt": "2026-09-12T00:30:01Z"
+      }
+    },
+    {
+      "name": "responseOnlyEmptyTask",
+      "schema": "TaskResponse",
+      "description": "The single RESPONSE_ONLY request returned no records; this is not a claim that the requested range contains no data.",
+      "httpStatus": 200,
+      "value": {
+        "taskId": "22222222-2222-4222-8222-000000000002",
+        "submissionId": "33333333-3333-4333-8333-000000000002",
+        "pluginId": "contract_fixture",
+        "apiName": "response_only",
+        "mode": "RANGE",
+        "extraction": {
+          "policyVersion": "contract-response-only-v1",
+          "ruleKind": "RESPONSE_ONLY"
+        },
+        "params": {
+          "start_date": "20260803",
+          "end_date": "20260805"
+        },
+        "status": "SUCCEEDED",
+        "version": 4,
+        "planReady": true,
+        "counts": {
+          "totalBatches": 1,
+          "pendingBatches": 0,
+          "runningBatches": 0,
+          "succeededBatches": 1,
+          "failedBatches": 0,
+          "splitBatches": 0,
+          "sourceRows": 0,
+          "insertedRows": 0,
+          "updatedRows": 0
+        },
+        "lastError": null,
+        "canRetry": false,
+        "canResume": false,
+        "requestCount": 1,
+        "runRequestCount": 1,
+        "createdAt": "2026-09-12T00:00:00Z",
+        "updatedAt": "2026-09-12T00:00:02Z",
+        "queuedAt": "2026-09-12T00:00:00Z",
+        "startedAt": "2026-09-12T00:00:01Z",
+        "finishedAt": "2026-09-12T00:00:02Z",
+        "deadlineAt": "2026-09-12T00:30:01Z"
+      }
+    },
+    {
+      "name": "historicalConfirmedRangeTask",
+      "schema": "TaskResponse",
+      "description": "A historical strict range keeps its saved v1 row-limit rule even when current capability metadata changes.",
+      "httpStatus": 200,
+      "value": {
+        "taskId": "22222222-2222-4222-8222-000000000003",
+        "submissionId": "33333333-3333-4333-8333-000000000003",
+        "pluginId": "contract_fixture",
+        "apiName": "strict_history",
+        "mode": "RANGE",
+        "extraction": {
+          "policyVersion": "contract-strict-v1",
+          "ruleKind": "CONFIRMED_ROW_LIMIT"
+        },
+        "params": {
+          "start_date": "20260803",
+          "end_date": "20260805"
+        },
+        "status": "QUEUED",
+        "version": 1,
+        "planReady": false,
+        "counts": {
+          "totalBatches": 0,
+          "pendingBatches": 0,
+          "runningBatches": 0,
+          "succeededBatches": 0,
+          "failedBatches": 0,
+          "splitBatches": 0,
+          "sourceRows": 0,
+          "insertedRows": 0,
+          "updatedRows": 0
+        },
+        "lastError": null,
+        "canRetry": false,
+        "canResume": false,
+        "requestCount": 0,
+        "runRequestCount": 0,
+        "createdAt": "2026-09-12T00:00:00Z",
+        "updatedAt": "2026-09-12T00:00:00Z",
+        "queuedAt": "2026-09-12T00:00:00Z",
+        "startedAt": null,
+        "finishedAt": null,
+        "deadlineAt": null
+      }
+    },
+    {
+      "name": "historicalUnknownRangeTask",
+      "schema": "TaskResponse",
+      "description": "A historical UNKNOWN range reports the saved uncertainty and is not reinterpreted from current capabilities.",
+      "httpStatus": 200,
+      "value": {
+        "taskId": "22222222-2222-4222-8222-000000000004",
+        "submissionId": "33333333-3333-4333-8333-000000000004",
+        "pluginId": "contract_fixture",
+        "apiName": "unknown_history",
+        "mode": "RANGE",
+        "extraction": {
+          "policyVersion": "contract-unknown-v1",
+          "ruleKind": "UNKNOWN"
+        },
+        "params": {
+          "start_date": "20260803",
+          "end_date": "20260805"
+        },
+        "status": "FAILED",
+        "version": 2,
+        "planReady": false,
+        "counts": {
+          "totalBatches": 0,
+          "pendingBatches": 0,
+          "runningBatches": 0,
+          "succeededBatches": 0,
+          "failedBatches": 0,
+          "splitBatches": 0,
+          "sourceRows": 0,
+          "insertedRows": 0,
+          "updatedRows": 0
+        },
+        "lastError": {
+          "code": "BATCH_COMPLETENESS_UNCONFIRMED",
+          "message": "Batch completeness is unconfirmed"
+        },
+        "canRetry": true,
+        "canResume": false,
+        "requestCount": 0,
+        "runRequestCount": 0,
+        "createdAt": "2026-09-12T00:00:00Z",
+        "updatedAt": "2026-09-12T00:00:01Z",
+        "queuedAt": "2026-09-12T00:00:00Z",
+        "startedAt": "2026-09-12T00:00:01Z",
+        "finishedAt": "2026-09-12T00:00:01Z",
+        "deadlineAt": "2026-09-12T00:30:01Z"
+      }
+    },
+    {
+      "name": "singleTask",
+      "schema": "TaskResponse",
+      "description": "SINGLE has no range extraction policy and therefore exposes extraction as explicit null.",
+      "httpStatus": 200,
+      "value": {
+        "taskId": "22222222-2222-4222-8222-000000000005",
+        "submissionId": "33333333-3333-4333-8333-000000000005",
+        "pluginId": "contract_fixture",
+        "apiName": "daily",
+        "mode": "SINGLE",
+        "extraction": null,
+        "params": {
+          "trade_date": "20260803"
+        },
+        "status": "SUCCEEDED",
+        "version": 4,
+        "planReady": true,
+        "counts": {
+          "totalBatches": 1,
+          "pendingBatches": 0,
+          "runningBatches": 0,
+          "succeededBatches": 1,
+          "failedBatches": 0,
+          "splitBatches": 0,
+          "sourceRows": 1,
+          "insertedRows": 1,
+          "updatedRows": 0
+        },
+        "lastError": null,
+        "canRetry": false,
+        "canResume": false,
+        "requestCount": 1,
+        "runRequestCount": 1,
+        "createdAt": "2026-09-12T00:00:00Z",
+        "updatedAt": "2026-09-12T00:00:02Z",
+        "queuedAt": "2026-09-12T00:00:00Z",
+        "startedAt": "2026-09-12T00:00:01Z",
+        "finishedAt": "2026-09-12T00:00:02Z",
         "deadlineAt": "2026-09-12T00:30:01Z"
       }
     },
@@ -780,6 +1033,10 @@
             "pluginId": "contract_fixture",
             "apiName": "daily",
             "mode": "RANGE",
+            "extraction": {
+              "policyVersion": "contract-fixture-v1",
+              "ruleKind": "VERIFIED_RULE"
+            },
             "params": {
               "ts_code": "000001.SZ",
               "start_date": "20260803",
@@ -883,9 +1140,55 @@
       }
     },
     {
+      "name": "responseOnlyAvailableCapabilities",
+      "schema": "CapabilitiesResponse",
+      "description": "Controlled RESPONSE_ONLY shape: one native request is persisted as returned without a completeness claim, numeric row threshold or splitting.",
+      "method": "GET",
+      "path": "/api/v1/data-sources/contract_fixture/apis/response_only/download-capabilities",
+      "httpStatus": 200,
+      "value": {
+        "single": {
+          "available": true,
+          "parameters": []
+        },
+        "range": {
+          "availability": "AVAILABLE",
+          "unavailableReason": null,
+          "dateAxis": "ANNOUNCEMENT_DATE",
+          "dateLabel": "Announcement date",
+          "startParameter": "start_date",
+          "endParameter": "end_date",
+          "parameters": [
+            {
+              "name": "start_date",
+              "label": "Start date",
+              "type": "DATE_RANGE_MEMBER",
+              "required": true,
+              "relatedParameter": "end_date"
+            },
+            {
+              "name": "end_date",
+              "label": "End date",
+              "type": "DATE_RANGE_MEMBER",
+              "required": true,
+              "relatedParameter": "start_date"
+            }
+          ],
+          "planningMode": "NATIVE_RANGE",
+          "splittable": false,
+          "policyVersion": "contract-response-only-v1",
+          "completenessRule": {
+            "kind": "RESPONSE_ONLY",
+            "rowLimit": null,
+            "evidence": "The source response is persisted as returned; upstream completeness is not asserted."
+          }
+        }
+      }
+    },
+    {
       "name": "needsVerificationCapabilities",
       "schema": "CapabilitiesResponse",
-      "description": "Production Tushare range remains unavailable until T13 verifies source completeness; SINGLE availability is independent.",
+      "description": "One NEEDS_VERIFICATION production shape; production Tushare remains four AVAILABLE, 30 NEEDS_VERIFICATION and six SINGLE-only APIs. SINGLE availability is independent.",
       "method": "GET",
       "path": "/api/v1/data-sources/tushare_pro/apis/daily/download-capabilities",
       "httpStatus": 200,

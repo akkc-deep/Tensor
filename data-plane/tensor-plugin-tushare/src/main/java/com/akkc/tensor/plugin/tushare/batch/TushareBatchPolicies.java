@@ -23,7 +23,7 @@ import java.util.*;
 /** Local range semantics. Documented candidates remain closed until source verification. */
 public final class TushareBatchPolicies {
     enum ParameterShape { STOCK, DATES, EXCHANGE, EXCHANGE_ID }
-    enum RuleKind { ROW_LIMIT, CALENDAR_COVERAGE, UNKNOWN }
+    enum RuleKind { ROW_LIMIT, CALENDAR_COVERAGE, RESPONSE_ONLY, UNKNOWN }
     record Policy(ApiName apiName, ParameterShape parameterShape,
                   DateAxis dateAxis, String dateLabel, PlanningMode planningMode,
                   String outputDateColumn, String dailyParameter, boolean splittable,
@@ -34,6 +34,9 @@ public final class TushareBatchPolicies {
     private static final DateTimeFormatter DATE = DateTimeFormatter.ofPattern("uuuuMMdd", Locale.ROOT)
             .withResolverStyle(ResolverStyle.STRICT);
     private static final List<String> EXCHANGES = List.of("SSE", "SZSE", "BSE");
+    private static final Set<String> RESPONSE_ONLY = Set.of("adj_factor", "suspend_d", "income", "balancesheet",
+            "cashflow", "fina_audit", "express", "repurchase", "stk_managers", "top10_holders", "top10_floatholders");
+    private static final Map<String, CandidateEvidence> CANDIDATES = candidateEvidence();
     private static final Map<ApiName, Policy> PRODUCTION = createPolicies();
     private final TushareProClient client;
     private final Map<ApiName, DatasetDefinition> definitions;
@@ -74,7 +77,9 @@ public final class TushareBatchPolicies {
                                              : p.verificationEvidence() != null)
                         || (p.planningMode() == PlanningMode.NATIVE_RANGE ? p.dailyParameter() != null
                             : !text(p.dailyParameter()) || p.splittable())
-                        || p.splittable() != (p.planningMode() == PlanningMode.NATIVE_RANGE && p.ruleKind() != RuleKind.CALENDAR_COVERAGE)
+                        || p.splittable() != (p.planningMode() == PlanningMode.NATIVE_RANGE
+                            && (p.ruleKind() == RuleKind.ROW_LIMIT || p.ruleKind() == RuleKind.UNKNOWN))
+                        || (p.ruleKind() == RuleKind.RESPONSE_ONLY && p.planningMode() != PlanningMode.NATIVE_RANGE)
                         || (p.ruleKind() == RuleKind.CALENDAR_COVERAGE && !p.apiName().value().equals("trade_cal"))) throw invalidPolicies();
             }
             this.definitions = Map.copyOf(index);
@@ -101,8 +106,12 @@ public final class TushareBatchPolicies {
         String reason = p.sourceVerified() ? null : "区间参数语义与完整性尚待真实接口验证"
                 + (p.ruleKind() == RuleKind.UNKNOWN ? "；尚无可确认的完整提取依据" : "");
         var rule = !p.sourceVerified() ? new CompletenessRule(CompletenessRule.Kind.UNKNOWN, null, null)
-                : new CompletenessRule(p.ruleKind() == RuleKind.ROW_LIMIT ? CompletenessRule.Kind.CONFIRMED_ROW_LIMIT
-                        : CompletenessRule.Kind.VERIFIED_RULE, p.documentedRowLimit(), p.verificationEvidence() + "；" + p.officialUrl());
+                : new CompletenessRule(switch (p.ruleKind()) {
+                    case ROW_LIMIT -> CompletenessRule.Kind.CONFIRMED_ROW_LIMIT;
+                    case CALENDAR_COVERAGE -> CompletenessRule.Kind.VERIFIED_RULE;
+                    case RESPONSE_ONLY -> CompletenessRule.Kind.RESPONSE_ONLY;
+                    case UNKNOWN -> throw invalidPolicies();
+                }, p.documentedRowLimit(), p.verificationEvidence() + "；" + p.officialUrl());
         return Optional.of(new BatchDownloadDescriptor(parameters, "start_date", "end_date", p.dateAxis(),
                 p.dateLabel(), p.planningMode(), p.splittable(), p.sourceVerified() ? Availability.AVAILABLE
                 : Availability.NEEDS_VERIFICATION, reason, p.policyVersion(), rule));
@@ -178,6 +187,7 @@ public final class TushareBatchPolicies {
             if (p.ruleKind() == RuleKind.CALENDAR_COVERAGE) TushareTradeCalendar.isOpen(row.get(envelope.fields().indexOf("is_open")));
         }
         if (!p.sourceVerified() || p.ruleKind() == RuleKind.UNKNOWN) return BatchAssessment.UNKNOWN;
+        if (p.ruleKind() == RuleKind.RESPONSE_ONLY) return BatchAssessment.RESPONSE_ONLY;
         if (p.ruleKind() == RuleKind.CALENDAR_COVERAGE) {
             TushareTradeCalendar.openDays(range, (String) params.get("exchange"), envelope);
             return BatchAssessment.COMPLETE;
@@ -250,6 +260,7 @@ public final class TushareBatchPolicies {
         String text = (String) stock;
         if (text.endsWith(".SH")) return "SSE";
         if (text.endsWith(".SZ")) return "SZSE";
+        if (text.endsWith(".BJ")) return "SSE";
         throw failure(BATCH_DOWNLOAD_UNAVAILABLE);
     }
     private void check(BatchCallContext context) {
@@ -268,16 +279,20 @@ public final class TushareBatchPolicies {
         add(result,"weekly",ParameterShape.STOCK,DateAxis.TRADE_DATE,6000L,144,"实际每周最后交易日");
         add(result,"monthly",ParameterShape.STOCK,DateAxis.TRADE_DATE,4500L,145,"实际每月最后交易日");
         add(result,"adj_factor",ParameterShape.STOCK,DateAxis.TRADE_DATE,null,28,"");
-        add(result,"daily_basic",ParameterShape.STOCK,DateAxis.TRADE_DATE,6000L,32,"");
-        add(result,"stk_limit",ParameterShape.STOCK,DateAxis.TRADE_DATE,5800L,183,"");
+        add(result,"daily_basic",ParameterShape.STOCK,DateAxis.TRADE_DATE,6000L,32,"",
+                "single-000001", "single-600000", "range", "lower-bound", "upper-bound", "range-600000", "lower-bound-600000", "upper-bound-600000", "cross-year");
+        add(result,"stk_limit",ParameterShape.STOCK,DateAxis.TRADE_DATE,5800L,183,"",
+                "single-000001", "single-600000", "range", "lower-bound", "upper-bound", "range-600000", "lower-bound-600000", "upper-bound-600000");
         add(result,"suspend_d",ParameterShape.STOCK,DateAxis.TRADE_DATE,null,214,"");
-        add(result,"moneyflow",ParameterShape.STOCK,DateAxis.TRADE_DATE,6000L,170,"");
+        add(result,"moneyflow",ParameterShape.STOCK,DateAxis.TRADE_DATE,6000L,170,"",
+                "single-000001", "single-600000", "range", "lower-bound", "upper-bound", "range-600000", "lower-bound-600000", "upper-bound-600000");
         add(result,"margin",ParameterShape.EXCHANGE_ID,DateAxis.TRADE_DATE,4000L,58,"保留 exchange_id");
-        add(result,"margin_detail",ParameterShape.STOCK,DateAxis.TRADE_DATE,6000L,59,"");
+        add(result,"margin_detail",ParameterShape.STOCK,DateAxis.TRADE_DATE,6000L,59,"",
+                "single-000001", "single-600000", "range", "lower-bound", "upper-bound", "range-600000", "lower-bound-600000", "upper-bound-600000");
         add(result,"block_trade",ParameterShape.STOCK,DateAxis.TRADE_DATE,1000L,161,"");
         add(result,"slb_len",ParameterShape.DATES,DateAxis.TRADE_DATE,5000L,331,"");
-        add(result,"slb_sec",ParameterShape.STOCK,DateAxis.TRADE_DATE,5000L,332,"标停，历史可用性待验");
-        add(result,"slb_sec_detail",ParameterShape.STOCK,DateAxis.TRADE_DATE,5000L,333,"标停，历史可用性待验");
+        add(result,"slb_sec",ParameterShape.STOCK,DateAxis.TRADE_DATE,5000L,332,"标停；保留未知起止及持续可访问承诺");
+        add(result,"slb_sec_detail",ParameterShape.STOCK,DateAxis.TRADE_DATE,5000L,333,"标停；保留未知起止及持续可访问承诺");
         add(result,"trade_cal",ParameterShape.EXCHANGE,DateAxis.CALENDAR_DATE,null,26,"完整自然日覆盖；无猜测行数上限");
         add(result,"new_share",ParameterShape.DATES,DateAxis.ISSUE_DATE,2000L,123,"不是 issue_date 上市日期");
         add(result,"income",ParameterShape.STOCK,DateAxis.ANNOUNCEMENT_DATE,null,33,"");
@@ -301,16 +316,83 @@ public final class TushareBatchPolicies {
         return Map.copyOf(result);
     }
     private static void add(Map<ApiName,Policy> result, String name, ParameterShape shape, DateAxis axis,
-                            Long limit, int document, String note) {
+                            Long limit, int document, String note, String... sourceCases) {
         PlanningMode mode = switch (name) { case "top_list" -> PlanningMode.TRADING_DAYS; case "dividend", "disclosure_date" -> PlanningMode.CALENDAR_DAYS; default -> PlanningMode.NATIVE_RANGE; };
         String column = switch (axis) { case TRADE_DATE -> "trade_date"; case ANNOUNCEMENT_DATE -> "ann_date"; case REPORT_PERIOD -> "end_date"; case CALENDAR_DATE -> "cal_date"; case ISSUE_DATE -> "ipo_date"; };
         String label = name.equals("disclosure_date") ? "最新披露公告日" : switch (axis) { case TRADE_DATE -> "交易日期"; case ANNOUNCEMENT_DATE -> "公告日期"; case REPORT_PERIOD -> "报告期"; case CALENDAR_DATE -> "日历日期"; case ISSUE_DATE -> "上网发行日期"; };
-        RuleKind rule = name.equals("trade_cal") ? RuleKind.CALENDAR_COVERAGE : limit == null ? RuleKind.UNKNOWN : RuleKind.ROW_LIMIT;
+        RuleKind rule = name.equals("trade_cal") ? RuleKind.CALENDAR_COVERAGE
+                : RESPONSE_ONLY.contains(name) ? RuleKind.RESPONSE_ONLY : limit == null ? RuleKind.UNKNOWN : RuleKind.ROW_LIMIT;
+        CandidateEvidence candidate = CANDIDATES.get(name);
+        boolean withdrawn = name.equals("fina_indicator"); // ISSUE-031: actual RANGE TASK failed adaptation.
+        boolean verified = !withdrawn && (sourceCases.length > 0 || candidate != null);
+        String sourceRun = "issue018-t14-priority-source-20260913T092938Z";
+        String evidence = sourceCases.length > 0 ? "docs/verification/ISSUE-018-range-acceptance.md#" + name + "；SOURCE " + sourceRun + "；"
+                + String.join(",", Arrays.stream(sourceCases).map(suffix -> sourceRun + "-" + name + "-" + suffix).toList())
+                : candidate == null ? null : candidate.reference(name);
         ApiName api = new ApiName(name);
         var p = new Policy(api,shape,axis,label,mode,column,mode == PlanningMode.NATIVE_RANGE ? null : column,
-                mode == PlanningMode.NATIVE_RANGE && rule != RuleKind.CALENDAR_COVERAGE,rule,limit,
-                (limit == null ? "尚待真实接口验证；" : "官网候选行数上限 " + limit + "；") + note,
-                "https://tushare.pro/document/2?doc_id=" + document,LocalDate.of(2026,9,11),"tushare-range-v1",false,null);
+                mode == PlanningMode.NATIVE_RANGE && rule == RuleKind.ROW_LIMIT,rule,limit,
+                (sourceCases.length > 0 ? "官网候选行数上限 " + limit + "；"
+                        : rule == RuleKind.RESPONSE_ONLY ? "允许不完整的响应采集；上游完整性未确认；"
+                        : rule == RuleKind.CALENDAR_COVERAGE ? "完整自然日覆盖；"
+                        : name.startsWith("slb_") ? "已采用历史查询及工程阈值 " + limit + "；"
+                        : "已采用工程阈值 " + limit + "；") + note,
+                "https://tushare.pro/document/2?doc_id=" + document,
+                LocalDate.of(2026,9,sourceCases.length > 0 ? 13 : 14),
+                withdrawn ? "tushare-range-v3" : "tushare-range-v2",verified,verified ? evidence : null);
         if (result.put(api,p) != null) throw invalidPolicies();
+    }
+
+    private record CandidateEvidence(String decision, String source) {
+        String reference(String apiName) {
+            return decision + "；docs/verification/ISSUE-018-range-acceptance.md#" + apiName
+                    + "；docs/verification/ISSUE-018-range-acceptance.json#" + source;
+        }
+    }
+
+    private static Map<String, CandidateEvidence> candidateEvidence() {
+        String issue019 = "docs/issues/proposals/ISSUE-019-documented-range-limits.md#决策记录";
+        String issue020 = "docs/issues/proposals/ISSUE-020-fina-mainbz-default-type.md#决策记录";
+        String issue021 = "docs/task-designs/ISSUE-021-design.md";
+        String issue022 = "docs/task-designs/ISSUE-022-design.md";
+        String issue023 = "docs/task-designs/ISSUE-023-design.md";
+        String issue024 = "docs/issues/proposals/ISSUE-024-historical-support.md#决策记录";
+        String issue025 = "docs/issues/proposals/ISSUE-025-extraction-contracts.md#决策记录";
+        return Map.ofEntries(
+                evidence("daily", issue019, "issue019-source-20260913T122126Z-daily-000001-whole"),
+                evidence("forecast", issue019, "issue019-source-20260913T122126Z-forecast-000001-whole"),
+                evidence("dividend", issue019, "issue019-source-20260913T122126Z-dividend-000001-whole"),
+                evidence("fina_mainbz", issue020, "issue026-mainbz-split-source-20260914T013736Z-000001-annual"),
+                evidence("trade_cal", issue021, "issue021-source-20260913T135006Z-trade_cal-sse-whole"),
+                evidence("margin", issue021, "issue021-source-20260913T135006Z-margin-sse-whole"),
+                evidence("top_list", issue021, "issue021-bj-source-20260913T135704Z-920008-whole"),
+                evidence("weekly", issue022, "issue022-source-20260913T141544Z-weekly-000001-whole"),
+                evidence("monthly", issue022, "issue022-source-20260913T141544Z-monthly-000001-whole"),
+                evidence("fina_indicator", issue022, "issue022-source-20260913T141544Z-indicator-000001-whole"),
+                evidence("stk_holdernumber", issue022, "issue022-source-20260913T141544Z-holder-000001-whole"),
+                evidence("new_share", issue022, "issue022-source-20260913T141544Z-ipo-whole"),
+                evidence("block_trade", issue023, "issue023-source-20260913T144308Z-block-official"),
+                evidence("disclosure_date", issue023, "issue023-source-20260913T144308Z-disclosure-official"),
+                evidence("stk_holdertrade", issue023, "issue023-source-20260913T144308Z-holder-official"),
+                evidence("pledge_detail", "docs/task-designs/ISSUE-023-design.md#质押非空样本决定2026-09-13", "issue023-source-20260913T144308Z-pledge-official"),
+                evidence("slb_len", issue024, "issue024-source-20260913T153146Z-len-whole"),
+                evidence("slb_sec", issue024, "issue024-source-20260913T153146Z-slb_sec-000001-whole"),
+                evidence("slb_sec_detail", issue024, "issue024-source-20260913T153146Z-slb_sec_detail-000001-whole"),
+                evidence("adj_factor", issue025, "issue025-source-20260913T162759Z-adj_factor-000001-whole"),
+                evidence("suspend_d", issue025, "issue025-source-20260913T162759Z-suspend_d-000001-whole"),
+                evidence("income", issue025, "issue025-source-20260913T162759Z-income-000001-whole"),
+                evidence("balancesheet", issue025, "issue025-source-20260913T162759Z-balancesheet-000001-whole"),
+                evidence("cashflow", issue025, "issue025-source-20260913T162759Z-cashflow-000001-whole"),
+                evidence("fina_audit", issue025, "issue025-source-20260913T162759Z-fina_audit-000001-whole"),
+                evidence("express", issue025, "issue025-source-20260913T162759Z-express-600000-whole"),
+                evidence("repurchase", issue025, "issue025-source-20260913T162759Z-repurchase-all-whole"),
+                evidence("stk_managers", issue025, "issue025-source-20260913T162759Z-stk_managers-000001-whole"),
+                evidence("top10_holders", issue025, "issue025-source-20260913T162759Z-top10_holders-000001-whole"),
+                evidence("top10_floatholders", issue025, "issue025-source-20260913T162759Z-top10_floatholders-000001-whole"));
+    }
+
+    private static Map.Entry<String, CandidateEvidence> evidence(String apiName, String decision, String caseId) {
+        String runId = caseId.substring(0, caseId.indexOf('Z') + 1);
+        return Map.entry(apiName, new CandidateEvidence(decision, runId + "/" + caseId));
     }
 }

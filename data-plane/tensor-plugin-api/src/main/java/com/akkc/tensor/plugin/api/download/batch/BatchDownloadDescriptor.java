@@ -29,7 +29,7 @@ public record BatchDownloadDescriptor(
         }
         if (availability == Availability.AVAILABLE) {
             if (unavailableReason != null || completenessRule.kind() == CompletenessRule.Kind.UNKNOWN) {
-                throw new IllegalArgumentException("AVAILABLE requires confirmed completeness and no unavailable reason");
+                throw new IllegalArgumentException("AVAILABLE requires a known collection rule and no unavailable reason");
             }
         } else {
             requireText(unavailableReason, "unavailableReason");
@@ -57,6 +57,10 @@ public record BatchDownloadDescriptor(
             if (splittable && planningMode != PlanningMode.NATIVE_RANGE) {
                 throw new IllegalArgumentException("daily planning cannot be split");
             }
+            if (completenessRule.kind() == CompletenessRule.Kind.RESPONSE_ONLY
+                    && (planningMode != PlanningMode.NATIVE_RANGE || splittable)) {
+                throw new IllegalArgumentException("response-only collection requires an unsplit native range");
+            }
         }
     }
 
@@ -72,7 +76,7 @@ public record BatchDownloadDescriptor(
         AVAILABLE, NEEDS_VERIFICATION, UNSUPPORTED
     }
 
-    /** Evidence describes a verified source contract, never a database insert batch size. */
+    /** Evidence describes the collection contract; RESPONSE_ONLY makes no completeness guarantee. */
     public record CompletenessRule(Kind kind, Long rowLimit, String evidence) {
         public CompletenessRule {
             Objects.requireNonNull(kind, "kind");
@@ -92,7 +96,7 @@ public record BatchDownloadDescriptor(
             }
         }
 
-        public enum Kind { CONFIRMED_ROW_LIMIT, VERIFIED_RULE, UNKNOWN }
+        public enum Kind { CONFIRMED_ROW_LIMIT, VERIFIED_RULE, RESPONSE_ONLY, UNKNOWN }
     }
 
     private static void requireText(String value, String name) {

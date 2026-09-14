@@ -258,6 +258,12 @@ public final class DownloadTaskRunner {
                 BatchAssessment assessment = call(() -> source.assess(task.datasetKey().apiName(), current.range(), envelope), ErrorCode.INTERNAL_ERROR);
                 require(assessment != null, ErrorCode.DATASET_MISCONFIGURED);
                 require(assessment != BatchAssessment.UNKNOWN, ErrorCode.BATCH_COMPLETENESS_UNCONFIRMED);
+                require(switch (policy.completenessRule().kind()) {
+                    case RESPONSE_ONLY -> assessment == BatchAssessment.RESPONSE_ONLY;
+                    case CONFIRMED_ROW_LIMIT, VERIFIED_RULE -> assessment == BatchAssessment.COMPLETE
+                            || assessment == BatchAssessment.SPLIT_REQUIRED;
+                    case UNKNOWN -> false;
+                }, ErrorCode.DATASET_MISCONFIGURED);
                 if (assessment == BatchAssessment.SPLIT_REQUIRED) {
                     require(policy.splittable() && policy.planningMode() == PlanningMode.NATIVE_RANGE
                             && current.range().start().isBefore(current.range().end()), ErrorCode.BATCH_COMPLETENESS_UNCONFIRMED);

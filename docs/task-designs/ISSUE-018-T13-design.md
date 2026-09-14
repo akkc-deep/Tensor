@@ -1,5 +1,9 @@
 # ISSUE-018-T13：真实接口完整性验收与逐项开放
 
+> 2026-09-13 任务移交：用户明确要求将当前全部剩余工作新建为 [T14](ISSUE-018-T14-design.md)。本设计保留原矩阵、接口和 Acceptance；已实现的工具不重新创建，后续实施入口以 T14 设计与交接为准。任务迁移不代表原验收已完成。
+
+> 2026-09-14 合同修订：用户明确接受 ISSUE-025 十一接口不完整，按下文“ISSUE-025 响应采集限定采用”及[决策记录](../issues/proposals/ISSUE-025-extraction-contracts.md#决策记录)替代这些接口的完整提取要求；其他范围和历史事实保持。
+
 ## Goal
 
 为40项现有接口建立可追查的最终处理清单；仅在真实参数语义、完整提取依据和任务端到端结果均成立时开放对应RANGE。身份来自 `docs/task-handoffs/ISSUE-018/ISSUE-018-task-board.md` 的T13、Order13，直接依赖T06和T12。
@@ -31,7 +35,7 @@ S=`ts_code,start_date,end_date`，D=`start_date,end_date`，E=`exchange,start_da
 | --- | --- | --- | --- | --- |
 | daily | S/N | trade_date | L6000 / 27 | 多日、两端、重叠重下；停牌缺行不能按每天一行判错 |
 | weekly | S/N | trade_date | L6000 / 144 | 实际每周最后交易日，不能固定周五 |
-| monthly | S/N | trade_date | L4500 / 145 | 实际每月最后交易日，不能固定自然月末 |
+| monthly | S/N | trade_date | L4500 / 145 | 正文称每月最后交易日，但同页样例含非交易日自然月末；SOURCE记录实际日期并裁决冲突，不预设周末月末为通过或失败 |
 | adj_factor | S/N | trade_date | UNKNOWN / 28 | 全历史声明不等于无限量；补完整提取规则 |
 | daily_basic | S/N | trade_date | L6000 / 32 | 股票条件与交易日期都有效，确认截断合同 |
 | stk_limit | S/N | trade_date | L5800 / 183 | 循环获取声明与每片截断规则分别核对 |
@@ -40,7 +44,7 @@ S=`ts_code,start_date,end_date`，D=`start_date,end_date`，E=`exchange,start_da
 | margin | I/N | trade_date | L4000 / 58 | 保留exchange_id，核对返回交易所；BSE单列实际结果 |
 | margin_detail | S/N | trade_date | L6000 / 59 | 股票/日期与业务键归属 |
 | block_trade | S/N | trade_date | L1000 / 161 | 同股同日多条，不按股票日期先去重 |
-| slb_len | D/N | trade_date | L5000 / 331 | 无股票输入，期限/规模多行不套股票校验 |
+| slb_len | D/N | trade_date | L5000 / 331 | 无股票输入，融资汇总行不套股票校验；官网输出无期限字段，实际基数需SOURCE核对 |
 | slb_sec | S/N | trade_date | L5000 / 332 | 官网标停；记录有依据的历史窗口和实际可用范围 |
 | slb_sec_detail | S/N | trade_date | L5000 / 333 | 同上；当前空结果不能证明历史或持续更新 |
 | trade_cal | E/N | cal_date | 每自然日恰1条 / 26 | SSE/SZSE完整日历、全休市；BSE直接输入独立核验 |
@@ -83,16 +87,22 @@ S=`ts_code,start_date,end_date`，D=`start_date,end_date`，E=`exchange,start_da
 
 每个run记录唯一runId、开始/结束UTC、源码差异指纹、production/acceptance JAR及manifest/examples SHA-256、执行命令（无环境秘密）、退出码和清理结果。每个case固定记录caseId/API/阶段SOURCE或TASK、mode、精确params、日期轴、预期覆盖及其来源、实际状态、固定错误码、taskId/submissionId（SOURCE为null）、请求数、所有批节点及叶子/成功/失败/空批数、source/insert/update计数、SQL前后业务键数/归属/摘要、复查方式及证据路径。未发生的任务/SQL字段为null，不能给SOURCE探针虚构持久化。
 
-校验器拒绝漏项/重复项、额外API、34/6或31/3/6错配、UNKNOWN标AVAILABLE、缺证据的AVAILABLE、失败/未执行结果标PASS，以及遗漏构建身份/清理事实。阈值等号、空批、SPLIT父与成功叶子计数沿T06/T12；写入操作数与最终去重键数分别保存，不相减推导insert/update。只保留脱敏字段、数量、日期集合摘要和业务键摘要；Token/数据库凭证/JDBC及原始错误/响应不进入仓库或公开日志。
+校验器拒绝漏项/重复项、额外API、34/6或31/3/6错配、UNKNOWN标AVAILABLE、缺证据的AVAILABLE、失败/未执行结果标PASS，以及遗漏构建身份/清理事实。 SOURCE与TASK保留各自运行身份；已声明PASS的原生区间和自然日逐日节点须完整且不重叠地覆盖请求范围，部分树只能记录为失败或证据未齐。交易日覆盖依据完整日历证据，不猜工作日；top_list全休市零叶子使用expectedCoverage=`COMPLETE_CLOSED_CALENDAR`、明确的完整日历引用与复查记录，两个阶段的requestCount均包含至少一次日历请求，证券与写入计数为0。阈值等号、空批、SPLIT父与成功叶子计数沿T06/T12；写入操作数与最终去重键数分别保存，不相减推导insert/update。只保留脱敏字段、数量、日期集合摘要和业务键摘要；Token/数据库凭证/JDBC及原始错误/响应不进入仓库或公开日志。
 
 ### 执行顺序和门禁闭环
 
 1. **本地准备。** 从本表和当前40项请求样例建立结果索引及拒绝测试，先验证漏项、UNKNOWN误开放会失败。修正现有真实账户浏览器harness的同步页面假设，保留普通G6和专用账户套件分离。没有账户配置也能完成这些工作；不把缺配置当skip或通过。
-2. **官方依据。** 逐行读取母issue官方链接，保存实际日期、接口正文/限量/日期语义的准确引文及摘要。ROW_LIMIT要求证据说明按该L截断且小于L可视为本片完整；默认返回数、数据库batchSize和一次样例不足。UNKNOWN行取得可核验规则前保持UNKNOWN。网页变更、权限/历史范围均如实记录。
+2. **官方依据。** 逐行读取母issue官方链接，保存实际日期、接口正文/限量/日期语义的准确引文及摘要。ROW_LIMIT要求证据说明按该L截断且小于L可视为本片完整；默认返回数、数据库batchSize和一次样例不足。UNKNOWN行取得可核验规则前保持UNKNOWN。网页变更、权限/历史范围均如实记录。 **ISSUE-019限定修订（2026-09-13）：** 用户已明确同意[方案A](../issues/proposals/ISSUE-019-documented-range-limits.md#决策记录)，仅接受daily“每次6000条”、forecast“单次3500行”、dividend“单次查询返回2000行”为当前固定单股票请求的工程阈值依据，不再要求补充“最大/最多”字样或新的截断保证。分别按trade_date原生区间、ann_date原生区间、逐自然日ann_date使用6000/3500/2000；原始行数小于L按该口径判定完整，达到或超过L要求拆分，单日仍满额则完整性未确认失败。该例外不适用于其他UNKNOWN或repurchase默认值，不免除真实SOURCE、边界、任务/SQL及版本门禁；原run中的UNKNOWN说明不回填。本次规则决定与上游事实分别保存，未来反证须撤回对应判断。
 3. **来源语义取证。** 生产门禁仍关闭时，使用下述测试侧Probe直接调用已有TushareProClient，验证真实请求条件、字段、股票、范围/边界及候选完整性；不经任务服务、不入库、不篡改sourceVerified来“启动测试”。一轮参数清单先固定再执行，失败停该轮、保存已执行与未执行项，不自动更换日期/股票或重试。
 4. **逐项本地候选开放。** 只有官方/可核验完整性与真实SOURCE证据均满足时，才修改该项Policy的规则、核验日期、verificationEvidence和policyVersion。证据引用 `docs/verification/ISSUE-018-range-acceptance.md#<api>` 及对应caseId；每项版本固定由v1升为 `tushare-range-v2`，以后有新语义再递增。未知/未证实项保持原值；禁止全表默认true。top_list还依赖已验证trade_cal。修改用于本地待验收构建，尚不是发布。
 5. **真实任务闭环。** 重建并绑定新包，对候选开放项执行页面RANGE→202/Location→详情/全部批次→SQL复核→记录查询；成功和空结果与SOURCE证据分别记录。失败立即保留原因并撤回该项本轮开放标记，不能把“接收202”当成功；撤回/再次开放均更新版本，防止旧任务按变化后的定义手动续跑。已成功SQL不回滚、不删除历史。
 6. **回归与最终状态。** 按下文命令检查所有受影响范围。全部纳入项满足总体设计§6、40项清单有明确结论且母issue关闭条件逐条成立，才完成T13/母issue。仍有待验证项时T13不完成；按实际阻塞写pause交接。不得通过把未决项写成SINGLE_ONLY或EXCLUDED缩减34目标。
+
+### ISSUE-020 限定采用（2026-09-13）
+
+用户明确回复“同意方案A（推荐）”，依据[决定及差异](../issues/proposals/ISSUE-020-fina-mainbz-default-type.md#决策记录)，仅对fina_mainbz采用：省略type时保留一次普通请求中上游实际返回的分类（两股票新样本均含P/D/I）；不逐类请求拼接、不默认成P、不改8列或业务键。SINGLE为单次快照，不承诺全历史；150只为观察值。RANGE接受100作为工程拆分阈值，原始行数<100按该口径视为本片完整，>=100要求日期拆分，最小单日仍满额失败。
+
+该决定替代本接口原先必须取得上游默认完整集合/实际100硬上限保证的严格要求；官网100与实测RANGE110/150冲突仍如实保留，不称作上游新保证。两轮18case与4个满额EVIDENCE_MISSING原样保存，SOURCE摘要不回填，真实TASK/SQL、股票归属、键及版本门禁不豁免。所选两股票报告期整段/边界有效来源和12项匹配任务输入交ISSUE-026，未执行的全年/宽窗口拆分继续由其固定新计划验收。此例外不适用于其他接口或未知规则；生产仍sourceVerified=false/v1，只有候选包任务闭环后开放。
 
 ### 测试侧来源Probe
 
@@ -101,6 +111,36 @@ S=`ts_code,start_date,end_date`，D=`start_date,end_date`，E=`exchange,start_da
 Probe复用DatasetDefinitionLoader、TushareProClient和TushareProperties，不新增HTTP客户端框架。baseUrl固定 `https://api.tushare.pro`，Token只从 `TENSOR_TUSHARE_TOKEN` 进入Credential；connect5s/read120s/maxResponseBytes67108864。`M14_T05_CALL_INTERVAL_MS` 仍要求2000～3600000，Probe与任务应用的来源节流均至少该间隔；严禁沿用T12假上游0ms。每轮BatchCallContext截止30分钟、beforeRequest最多5000次、收到停止信号不再预约；已有客户端逐次许可、共享节流、有限响应和错误分类保持。
 
 输入 `ISSUE018_T13_CASES_FILE` 必须为绝对路径、当前用户普通非symlink的0600 JSON，所在本次目录0700；不含Token。顶层仅 `runId,cases`，每case仅 `caseId,apiName,mode,params,dateAxis,start,end,evidenceRefs`，全部API/参数/日期按矩阵校验，禁止type/VIP/offset/多股票。SINGLE遵循当前YAML，dateAxis/start/end均为null；RANGE这三项必须非空且与本表和params一致，使用T06 sourceParameters生成原生或单日参数。自然日Probe按闭区间枚举每一天；top_list Probe先直接取得SH→SSE/SZ→SZSE整段日历并调用同包TushareTradeCalendar.openDays校验，再按返回日期取数，不调用被生产availability阻止的plan。该测试侧编排不改变生产plan或缓存。trade_cal的BSE来源探针直接使用已白名单校验的exchange/start_date/end_date对象调用client，绕开的仅是测试取证侧本地准入，生产sourceParameters/plan仍保持拒绝；不得在任务服务内引入该入口。BJ日历参照只有取得明确官方/实际依据后才记录候选，不在Probe猜映射。输出至 `ISSUE018_T13_EVIDENCE_DIR` 私有目录的 `source-evidence.json`，只含上述安全投影；来源错误保留固定code，丢弃原cause/body。Probe不创建数据库连接，不改生产门禁，也不把assess对未验证策略返回UNKNOWN解释为失败的请求。
+
+### ISSUE-021 日历取证限定扩展（2026-09-13）
+
+按[专属设计](ISSUE-021-design.md)，新Probe先对结构合法的日历Envelope记录请求交易所和响应行数，再校验整段覆盖；只有覆盖通过才输出升序开市日期。失败响应的安全行数不计为成功叶子的sourceRowCount；没有响应/非法Envelope没有该摘要。旧BSE失败仍不能据旧零计数断言原响应为空。
+
+官网26明确北交所参考沪深日历；本issue新SSE/SZSE六组实际完整日历的开市日期已逐项一致。基于该官方和实际依据，允许测试Probe独立验证BJ→SSE候选：仅日历用SSE，股票请求保留原BJ代码，依旧逐自然日完整校验后枚举开市日。该候选不改生产exchangeForStock或BSE直接入口，不默默替换trade_cal用户的BSE参数，不新增配置开关。通过新的独立SOURCE后将生产映射要求交ISSUE-026随候选v2、真实TASK/SQL验收；单有测试映射不宣称生产BJ已开放。
+
+### 后续来源轮次的代表场景安全投影
+
+2026-09-13 首轮真实SOURCE已保留失败run。其单轴日期集合无法复查同一行跨日期条件或非股票结果的实际证券数量；未来新轮在现有`reviewMethod`中增加以下固定整数观察，不新增case字段、不保留原始行、不修改或回填旧run：
+
+- 仅income RANGE：严格解析同一成功行的ann_date/end_date，记录`dateComparisonValidRows`、`dateComparisonUnavailableRows`、`annDateDifferentFromEndDateRows`、`annInRangeEndOutsideRows`。
+- 仅fina_indicator RANGE：同一行记录`dateComparisonValidRows`、`dateComparisonUnavailableRows`、`endInRangeAnnOutsideRows`。
+- 仅repurchase RANGE：按现有六位证券代码及SH/SZ/BJ后缀检查，记录`validStockCodeRows`、`unavailableStockCodeRows`、`distinctStockCodeCount`；仅在内存去重，不保存证券列表。
+
+分母仅为已通过现有主轴/字段检查的成功响应行；有效与不可比较数量之和必须等于已观察行数。空的成功响应可记录0；未执行或尚无成功响应则不记录指标。失败的部分case只能保留已成功响应的观察，并以原状态说明不完整。缺失/非法比较值计入unavailable，不静默当相等、范围外或新证券，不改变既有SOURCE状态；指标不充分时代表场景仍未满足。非上述API/模式不输出这些指标。不通过自由文本关键词自动开放，数值必须由人工复核对应真实case身份。正计数只证明该样本的同一行关系/多股票结果，不代替完整提取合同、边界取样、公告真实性或TASK/SQL证据。
+
+### ISSUE-022 日期取证限定扩展（2026-09-13）
+
+按[专属设计](ISSUE-022-design.md)，仅对新RANGE追加两接口的同一行安全计数：stk_holdernumber比较ann_date/end_date，记录dateComparisonValidRows、dateComparisonUnavailableRows、annDateDifferentFromEndDateRows、annInRangeEndOutsideRows；new_share比较ipo_date/issue_date，记录dateComparisonValidRows、dateComparisonUnavailableRows、ipoDateDifferentFromIssueDateRows、ipoInRangeIssueOutsideRows。日期严格解析；无效副轴计unavailable，主轴检查及SOURCE状态不变。沿用上述分母、空/失败/未执行及禁止原始行规则，旧run不回填。此扩展不修改生产日期轴、参数、完整性或业务键。
+
+### ISSUE-023 事件取证限定扩展（2026-09-13）
+
+按[专属设计](ISSUE-023-design.md)，仅测试RANGE为stk_holdertrade附加选择begin_date/close_date、disclosure_date附加modify_date；完整响应字段/宽度/成功严格校验后，原列视图交原策略。所有观察来自通过主轴/归属校验的同一响应，不改生产列、参数、业务键或状态门禁。
+
+block_trade输出原六列键的有效/不可用行数、不同键数、同股同日多键组数和不同买卖方组合数；十进制价格/数量规范化，仅内存去重，原sourceRowCount保持。holder的Begin/Close及pledge的Start/End/Release分别记录有效/不可比较/与公告不同/公告在范围而业务日在范围外整数。pledge SINGLE只追加合法公告日期集合，为新固定边界提供依据。
+
+disclosure输出报告期日期集合、原[ts_code,end_date]键有效/不可用/不同数量、同键不同五列记录数，以及原键集合和五列记录集合的稳定SHA-256；摘要忽略行顺序/重复及辅助modify_date，原始计数保留。ann/end及pre/actual分别有有效/不可比/不同整数；modify_date仅记录非空、严格可解析、不可用及多个不同日期行数，接受合法YYYYMMDD/ISO日期及逗号列表，整项非法则不可用，不回显文本。公开修订线索与当次同键复查不等同于已发生跨时点更新，实际入库由ISSUE-026验证。
+
+上述计数沿用成功空/未执行/部分失败和有效+不可比的合同；仅新run输出，旧run不回填。除明确的pledge SINGLE日期摘要外，SINGLE及其他接口保持原投影。Token、原始返回、金额、业务键原文与买卖方/股东名称不进入安全证据。
 
 ### 样本与代表场景的固定规则
 
@@ -122,13 +162,19 @@ Probe复用DatasetDefinitionLoader、TushareProClient和TushareProperties，不�
 
 BJ/BSE若真实依据仍不足，保留本地拒绝及运行说明，不能以沪深成功推定北交所。两项标停接口必须明确实际历史窗口与支持限制；若官网/实际不可用，保留待验证，除非用户另有范围决定。fina_mainbz分别保留单股票SINGLE与报告期RANGE未传type的请求，依据官方默认说明与实际返回确定涵盖的分类；现有 `[ts_code,end_date,bz_item,curr_type]` 业务键不含type，不能通过多次P/D/I请求“补齐”。这几项外部事实是T13要取得的证据，不在本设计中填造答案。
 
+### ISSUE-023 质押代表股票限定调整（2026-09-13）
+
+用户明确同意[质押非空样本决定](ISSUE-023-design.md#质押非空样本决定2026-09-13)：仅pledge_detail的非空SOURCE及匹配TASK/SQL代表股票使用000014.SZ与600000.SH。000001.SZ旧及新固定快照空结果保留，不改PASS，也不据此断言没有任何质押历史。此决定替代本接口原要求000001.SZ承担非空事件样本的约束；不影响原74项SINGLE、其他33项股票样本、生产支持/参数/原业务键或完整性和版本门禁。
+
 ### 真实账户浏览器与持久化证据
 
 复用 `control-plane/e2e/tushare-live.spec.js` 的40项注册、私有目录/日志、输入哈希、RequestLedger、SafeLogSink、RunCounters和清理期限。将submitDownload/fixture准备/监控/日志关联改为正式task API：精确submit body含submissionId和mode，202校验Location/X-Request-Id，完整查询task/分页叶子并核对终态及固定错误；保留query记录来源列/精确小数/股票归属，旧同步接口另由后端回归保证。不以宽泛 `/api/**` 放行，新增capabilities/list/detail/batches必须逐一匹配；查询失败不是任务FAILED。
 
-默认仍40项SINGLE测试：34项各两只股票、6项各原请求，精确74次真实任务提交，另有既有fixture两次；每样本固定执行提交前、终态后两次records查询，股票项均携带本样本股票筛选且核对SQL中另一股票历史保留，实际查询总数固定为148并单独计fixture三次，不沿用旧40下载/80查询总数。使用当前请求样例及第二股票样本；RANGE阶段由已校验case清单和当次实际AVAILABLE集合驱动，精确记录选中/未选中/失败，选中0项不可报告成功。专用 `TENSOR_TUSHARE_LIVE_E2E=1` 保持；新增 `ISSUE018_T13_PHASE=single|range`（缺省single），range要求case清单、对应真实SOURCE及完整性证据齐全。保留retries0、workers1、禁trace/screenshot/video，浏览器环境不含Token/DB；页面只访问回环应用，真实来源由后端访问。禁止page.route伪造任务成功。
+默认仍40项SINGLE测试：34项各两只股票、6项各原请求，精确74次真实任务提交，另有既有fixture两次；每样本固定执行提交前、终态后两次records查询，股票项均携带本样本股票筛选且核对SQL中另一股票历史保留，实际查询总数固定为148并单独计fixture三次，不沿用旧40下载/80查询总数。使用当前请求样例及第二股票样本；RANGE阶段由已校验case清单和当次实际AVAILABLE集合驱动，精确记录选中/未选中/失败，选中0项不可报告成功。专用 `TENSOR_TUSHARE_LIVE_E2E=1` 保持；新增 `ISSUE018_T13_PHASE=single|range`（缺省single），range要求case清单、对应真实SOURCE及完整性证据齐全。range额外要求 `ISSUE018_T13_EVIDENCE_INDEX_FILE` 指向经校验的完整结果索引，以保留SOURCE所属run的构建身份、退出码与清理事实；不另用丢失run身份的裸SOURCE结果代替。`--list`只按固定TASK清单及SOURCE/完整性候选证据注册项目，不访问运行时；真实提交前逐项核对当次能力AVAILABLE，缺失即停止，不自动替换清单。TASK caseId与全部SOURCE caseId必须不同。保留retries0、workers1、禁trace/screenshot/video，浏览器环境不含Token/DB；页面只访问回环应用，真实来源由后端访问。禁止page.route伪造任务成功。
 
 应用仍由harness占用空闲8080，DB沿用明确隔离前缀 `tensor_m14_t05_<hex>`，每轮新MySQL8.4.6 schema、初始无表；八迁移/52表，不共用T12已销毁的库。Token仅后端环境，最小schema权限CREATE/SELECT/INSERT/UPDATE/ALTER/INDEX/REFERENCES；T13不制造持久化故障，不需要TRIGGER。为每轮只读核对提供同账号0600 defaults文件，路径变量 `ISSUE018_T13_MYSQL_DEFAULTS_FILE`；校验主机/端口/schema/账号与JDBC一致，不输出值。SQL只对自有schema查询，以YAML业务键读取前后数量、证券归属和稳定摘要；已有证券列与V8任务列分开核对，不能仅依赖任务自报计数。harness的固定迁移数、导航编号、14双标签表头沿T12当前源码，不能复制历史7迁移/50表断言。
+
+账户harness使用全轮共享30分钟硬期限，当前case挂起时也须停止自有JVM；累计持久来源requestCount达到5000时停止且不再提交。现有应用5000/30分钟配置属于每个任务执行轮次，不宣称提供新的全局原子许可。串行来源及共享至少2000ms间隔使30分钟内请求启动数约不超过901；仍记录实际计数及轮询时可能在途的请求，停止后保留实际任务状态，不能虚构FAILED。
 
 能力变化同步 `TushareBatchPoliciesTest`、`TushareBatchAvailabilityTest`、TushareBatchDownload/Calendar测试和 `ui-redesign.fixtures.js`、`tushare-metadata.spec.js` 独立预期。预期必须逐项有证据对应，不能读取生产表直接生成期望来隐藏错配；未开放项继续严格NEEDS_VERIFICATION。ordinary套件继续只用受控来源、T12四隔离库与7文件边界。
 
@@ -194,9 +240,9 @@ npm --prefix control-plane run test:e2e
 ## Acceptance
 
 1. 40项结果索引与本表一致，31原生+3逐日+6SINGLE明确处理；34/6股票规则与业务键不变，不用排除未决接口制造完成。
-2. 每个AVAILABLE项有可核验的完整提取规则、真实SOURCE参数/日期轴/边界证据，以及相同候选策略包的真实任务页面/全部叶子/SQL/日志证据。官方网页或少量样例不单独构成通过。
+2. 每个AVAILABLE项有适用提取规则、真实SOURCE参数/日期轴/边界证据，以及相同候选策略包的真实任务页面/全部叶子/SQL/日志证据。ISSUE-025十一项按已批准RESPONSE_ONLY验收，其余项沿用完整提取合同。官方网页或少量样例不单独构成通过。
 3. 代表场景逐项满足；真实来源语义、T12受控满额拆分/故障证据分开。未知、单点满额、失败或未完成叶子不能显示整段完成，父节点和规划日历不累计证券成功行。
-4. 11 UNKNOWN、BJ/BSE、两项标停历史范围和fina_mainbz默认type均有真实处理依据；未解决则保持待验证及任务未完成。ISSUE-017新两股票证据只按实际补记，不自动关闭其其他缺口。
+4. 11项上游UNKNOWN以已批准响应采集合同处理；BJ/BSE、两项标停历史范围和fina_mainbz默认type均有适用依据。响应采集语义未实现或真实任务未验证时保持待验证；用户决定不充当上游保证。ISSUE-017新两股票证据只按实际补记，不自动关闭其其他缺口。
 5. 开放集合/版本/证据引用与独立测试、能力HTTP、页面描述和运行手册一致；旧任务遇语义变化拒绝人工重放。相关六条源码门禁及真实任务回归有完整结果、安全投影和清理记录。
 6. 只有所有纳入项满足总体设计§6和母issue关闭条件才记录T13 COMPLETED及母issue关闭；否则写明剩余项/依据缺口和继续动作。完成不自动授权提交、合并或发布。
 
@@ -207,3 +253,27 @@ npm --prefix control-plane run test:e2e
 - BJ与BSE支持性、fina_mainbz默认类型若仍有歧义，将阻止相应最终验收；不得混类型、替换交易所或省略股票绕过。
 - 跨批上游可修订，完整性不等于同一时刻快照。私有凭证/真实金融返回应留在本次受限环境，仓库只存安全证据。
 - 当前旧live helper仍基于同步POST，是T13待实施的迁移工作；T12仅验证其明确发现入口。T12发布脚本未运行，本设计不把历史包、旧manifest或T12普通测试冒充真实账户通过。
+
+### ISSUE-024 历史取证限定扩展（2026-09-13）
+
+按[专属设计](ISSUE-024-design.md)，仅三接口RANGE复用已验证响应计算原业务键计数及规范化键摘要；融资汇总不含期限，明细仅输出期限/费率的不同值和同股同日分组数量，不输出原值、金额或名称。成功空响应输出0，未成功/未运行不输出；生产列、参数、业务键、5000上界和准入保持。实际可查日期与上游历史保留承诺分别取证，不能以监管暂停日期代替API截止。
+
+### ISSUE-024 历史支持限定采用（2026-09-14）
+
+用户明确“同意方案 A（推荐）”，详见[决策记录](../issues/proposals/ISSUE-024-historical-support.md#决策记录)。仅对slb_len、slb_sec、slb_sec_detail，采用官网历史查询说明、5000上界和代表整段/边界/期限费率SOURCE验收历史查询能力；不再要求取得精确历史起止或持续保留保证才能满足历史范围条款。这些上游保证继续未知，实际日期不能充当支持边界，不新增日期限制、不排除接口或要求停业后持续产生新业务。
+
+本节限定修订原历史范围条款及对应Acceptance，不能推广到其他接口。原5000拆分/单日满额失败、参数和业务键、6空EVIDENCE_MISSING、逐项候选v2和真实TASK/SQL要求保持；33项非空输入交ISSUE-026。用户决定不是新来源或生产开放结果，T13及母issue不因该决定完成。
+
+### ISSUE-025 日期与事件取证限定扩展（2026-09-14）
+
+按[专属设计](ISSUE-025-design.md)，仅新RANGE为balancesheet/cashflow/fina_audit/express复用income公告/报告期计数，为top10两项复用fina_indicator反向计数；cashflow另比较ann_date/f_ann_date，managers比较公告/上任/离任日期。suspend_d只输出S/R/不可用类型及非空日内时间行数，既有日期集合记录实际返回日。沿用成功空/失败/未执行及有效+不可比合同，不新增请求字段、不输出原始行，不修改SINGLE或生产列/键/规则。旧run不回填；UNKNOWN、完整性承诺和代表股票要求保持。
+
+### ISSUE-025 响应采集限定采用（2026-09-14）
+
+用户明确“可以接受不完整”，采用[方案 A 的逐接口及结果合同](../issues/proposals/ISSUE-025-extraction-contracts.md#决策记录)。仅 `adj_factor,suspend_d,income,balancesheet,cashflow,fina_audit,express,repurchase,stk_managers,top10_holders,top10_floatholders` 的 RANGE 改为 `RESPONSE_ONLY`：原生区间一次请求、单叶子、无rowLimit、不按行数拆分；原日期轴、十项单股票/回购无股票、字段及业务键保持。
+
+本节限定替代 Goal、实施矩阵中十一UNKNOWN的规则要求、候选开放门禁和 Acceptance 2/4 对这些接口的完整性要求。来源校验、所有返回行适配/事务写入、任务/SQL、版本、日志与清理继续适用。SOURCE PASS是返回结构和范围证据，不能升级成未截断保证；空SOURCE代表性仍EVIDENCE_MISSING，合法空TASK可另按新合同完成本次采集。失败、取消、超时和未完成叶子仍不能显示成功。
+
+ISSUE-026须显式加入策略规则/能力 `RESPONSE_ONLY` 和独立批次评估值；该值表示响应可处理，严格 `COMPLETE` 原意不变，UNKNOWN仍拒绝。持久化策略快照保存规则及版本；提交前及任务列表/详情显示“数据完整性未确认，可能存在上游截断”。非空终态为“返回记录已采集”，空为“本次请求未返回记录”；SUCCEEDED仅说明本次采集操作成功，不称全量下载完成。不能只改sourceVerified或把新规则映射成VERIFIED_RULE。
+
+本轮schemaVersion 1索引只记decisionRef及RESPONSE_ONLY_IMPLEMENTATION_PENDING，十一completeness仍UNKNOWN/v1、生产仍关闭，全部25轮/822case不回填。未来证据消费者须支持独立RESPONSE_ONLY规则和明确结果语义，要求本决定、合法来源及候选包任务闭环后才可AVAILABLE；原SOURCE的UNKNOWN和43空状态保留。此修订明确了采用合同，没有执行生产实现或新TASK/SQL，T14及母issue不因该决定完成。

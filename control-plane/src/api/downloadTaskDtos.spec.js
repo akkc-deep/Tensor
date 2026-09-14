@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs'
 import { ClientError } from './errors.js'
 import {
   parseDownloadBatch,
@@ -13,6 +14,13 @@ const REQUEST_ID = '11111111-1111-4111-8111-111111111111'
 const TASK_ID = '22222222-2222-4222-8222-222222222222'
 const SUBMISSION_ID = '33333333-3333-4333-8333-333333333333'
 const BATCH_ID = '44444444-4444-4444-8444-444444444444'
+
+const published = parseTaskJson(readFileSync('../docs/contracts/download-task-examples.json', 'utf8'))
+const publishedParsers = { TaskResponse: parseDownloadTask, TaskPage: parseDownloadTaskPage, CapabilitiesResponse: parseDownloadCapabilities }
+
+it.each(published.examples.filter(({ schema }) => publishedParsers[schema]))('accepts published $name through the strict DTO', ({ schema, value }) => {
+  expect(Object.isFrozen(publishedParsers[schema](value, REQUEST_ID))).toBe(true)
+})
 
 function batch(overrides = {}) {
   return {
@@ -53,6 +61,7 @@ function task(overrides = {}) {
     pluginId: 'contract_fixture',
     apiName: 'daily',
     mode: 'RANGE',
+    extraction: { policyVersion: 'contract-fixture-v1', ruleKind: 'VERIFIED_RULE' },
     params: {
       ts_code: '000001.SZ',
       start_date: '20260803',
@@ -225,6 +234,37 @@ describe('download task receipt DTO', () => {
 })
 
 describe('download task DTO', () => {
+  it.each(['CONFIRMED_ROW_LIMIT', 'VERIFIED_RULE', 'RESPONSE_ONLY', 'UNKNOWN'])('preserves and freezes saved extraction %s', (ruleKind) => {
+    const extraction = { policyVersion: 'saved-v1', ruleKind }
+    const parsed = parseDownloadTask(task({ extraction }), REQUEST_ID)
+    extraction.policyVersion = 'current-v2'
+    expect(parsed.extraction).toEqual({ policyVersion: 'saved-v1', ruleKind })
+    expect(Object.isFrozen(parsed.extraction)).toBe(true)
+  })
+
+  it('requires extraction on RANGE and explicit null on SINGLE', () => {
+    const missing = task()
+    delete missing.extraction
+    expectInvalid(() => parseDownloadTask(missing, REQUEST_ID))
+    expect(parseDownloadTask(task({ mode: 'SINGLE', extraction: null }), REQUEST_ID).extraction).toBeNull()
+  })
+
+  it.each([
+    null, [], 'RESPONSE_ONLY', {},
+    { policyVersion: 'v1' }, { ruleKind: 'RESPONSE_ONLY' },
+    { policyVersion: ' ', ruleKind: 'RESPONSE_ONLY' },
+    { policyVersion: 1, ruleKind: 'RESPONSE_ONLY' },
+    { policyVersion: 'v1', ruleKind: 'COMPLETE' },
+    { policyVersion: 'v1', ruleKind: ['RESPONSE_ONLY'] },
+    { policyVersion: 'v1', ruleKind: 'RESPONSE_ONLY', rowLimit: null },
+  ])('rejects invalid saved extraction %j', (extraction) => {
+    expectInvalid(() => parseDownloadTask(task({ extraction }), REQUEST_ID))
+  })
+
+  it('rejects RANGE extraction on SINGLE', () => {
+    expectInvalid(() => parseDownloadTask(task({ mode: 'SINGLE', extraction: { policyVersion: 'v1', ruleKind: 'RESPONSE_ONLY' } }), REQUEST_ID))
+  })
+
   it('copies, deeply freezes and converts all task int64 fields', () => {
     const source = task({
       version: 9007199254740993n,
@@ -298,7 +338,7 @@ describe('download task DTO', () => {
       expectInvalid(() => parseDownloadTask(value, REQUEST_ID))
     }
     for (const mode of ['SINGLE', 'RANGE']) {
-      expect(parseDownloadTask(task({ mode }), REQUEST_ID).mode).toBe(mode)
+      expect(parseDownloadTask(task({ mode, extraction: mode === 'SINGLE' ? null : task().extraction }), REQUEST_ID).mode).toBe(mode)
     }
   })
 
@@ -617,4 +657,32 @@ it('uses a safe ClientError without echoing invalid response data', () => {
   expect(error.message).toBe('服务返回了无法识别的响应。')
   expect(error.message).not.toContain('upstream-token')
   expect(error.cause).toBeUndefined()
+})
+
+describe('response-only capability', () => {
+  function responseOnly(availability = 'AVAILABLE') {
+    const value = availableCapabilities()
+    Object.assign(value.range, {
+      availability, unavailableReason: availability === 'AVAILABLE' ? null : '尚未验证',
+      planningMode: 'NATIVE_RANGE', splittable: false,
+      completenessRule: { kind: 'RESPONSE_ONLY', rowLimit: null, evidence: '允许不完整的响应采集合同' },
+    })
+    return value
+  }
+  it.each(['AVAILABLE', 'NEEDS_VERIFICATION'])('accepts native unsplittable %s', (availability) => {
+    const parsed = parseDownloadCapabilities(responseOnly(availability), REQUEST_ID)
+    expect(parsed.range.completenessRule).toEqual(responseOnly().range.completenessRule)
+  })
+  it.each(['AVAILABLE', 'NEEDS_VERIFICATION'])('rejects every invalid combination for %s', (availability) => {
+    for (const change of [
+      { splittable: true }, { planningMode: 'TRADING_DAYS' }, { planningMode: 'CALENDAR_DAYS' },
+      { completenessRule: { kind: 'RESPONSE_ONLY', rowLimit: 100, evidence: '依据' } },
+      { completenessRule: { kind: 'RESPONSE_ONLY', rowLimit: null, evidence: '' } },
+      { completenessRule: { kind: 'RESPONSE_ONLY', rowLimit: null, evidence: null } },
+    ]) {
+      const value = responseOnly(availability)
+      Object.assign(value.range, change)
+      expectInvalid(() => parseDownloadCapabilities(value, REQUEST_ID))
+    }
+  })
 })

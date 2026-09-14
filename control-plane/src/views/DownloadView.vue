@@ -69,6 +69,9 @@ const apiDisabled = computed(
 const rangeAvailable = computed(
   () => capabilities.value?.range.availability === 'AVAILABLE',
 )
+const responseOnly = computed(
+  () => mode.value === 'RANGE' && capabilities.value?.range.completenessRule.kind === 'RESPONSE_ONLY',
+)
 const pendingParameters = computed(() =>
   Object.entries(pendingSubmission.value?.params ?? {}).sort(([left], [right]) =>
     left.localeCompare(right),
@@ -258,6 +261,7 @@ onUnmounted(() => {
           </template>
         </div>
         <footer class="form-footer">
+          <p v-if="responseOnly" class="form-footer__help">按所选日期区间采集本次接口返回的记录。数据完整性未确认，可能存在上游截断。</p>
           <DownloadAction
             :disabled="!canSubmit"
             :submitting="locked"

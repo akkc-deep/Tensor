@@ -293,24 +293,22 @@ class TushareProPluginTest {
     }
 
     @Test
-    void keepsProductionRangesGatedEvenWithCredentialsAndDelegatesPureSourceParameters() {
+    void exposesCandidateProductionRangesWithoutCallingTheSourceDuringNativePlanning() {
         var client = mock(TushareProClient.class);
         BatchDownloadSupport batch = plugin(properties(true, SECRET), client, definitions());
         var day = LocalDate.of(2026, 9, 3);
         var range = new DateRange(day, day);
         var params = Map.<String, Object>of("ts_code", "000001.SZ", "start_date", "20260903", "end_date", "20260903");
         var descriptor = batch.batchDescriptor(ApiName.of("daily")).orElseThrow();
-        assertThat(descriptor.availability()).isEqualTo(BatchDownloadDescriptor.Availability.NEEDS_VERIFICATION);
+        assertThat(descriptor.availability()).isEqualTo(BatchDownloadDescriptor.Availability.AVAILABLE);
         assertThat(batch.sourceParameters(ApiName.of("daily"), params, range)).isEqualTo(params);
-        assertThatThrownBy(() -> batch.plan(ApiName.of("daily"), params, context()))
-                .isInstanceOfSatisfying(TensorException.class,
-                        error -> assertThat(error.code()).isEqualTo(ErrorCode.BATCH_DOWNLOAD_UNAVAILABLE));
+        assertThat(batch.plan(ApiName.of("daily"), params, context())).containsExactly(range);
         assertThat(batch.assess(ApiName.of("daily"), range, new DownloadEnvelope(
                 com.akkc.tensor.plugin.api.model.PluginId.of("tushare_pro"), ApiName.of("daily"), params,
                 definitions().stream().filter(d -> d.datasetKey().apiName().value().equals("daily"))
                         .findFirst().orElseThrow().columns().stream().map(c -> c.name()).toList(),
                 0, List.of(), com.akkc.tensor.plugin.api.download.DownloadStatus.SUCCESS, null)))
-                .isEqualTo(com.akkc.tensor.plugin.api.download.batch.BatchAssessment.UNKNOWN);
+                .isEqualTo(com.akkc.tensor.plugin.api.download.batch.BatchAssessment.COMPLETE);
         verifyNoInteractions(client);
     }
 

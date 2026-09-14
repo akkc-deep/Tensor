@@ -70,7 +70,7 @@ class DownloadTaskContractTest {
         var counts = new DownloadTaskRepository.Counts(Long.MAX_VALUE, Long.MAX_VALUE - 6, 1, 2, 3, 11,
                 Long.MAX_VALUE, Long.MAX_VALUE - 1, 1);
         var response = DownloadTaskResponse.from(new DownloadTaskRepository.TaskSnapshot(Optional.of(task), counts),
-                new DownloadTaskService.ControlAvailability(true, false));
+                new DownloadTaskService.ControlAvailability(true, false), null);
         JsonNode taskJson = mapper.readTree(mapper.writeValueAsBytes(response));
         assertThat(schema("TaskResponse").validate(taskJson)).isEmpty();
         assertNumber(taskJson, "version", Long.MAX_VALUE);
@@ -94,6 +94,7 @@ class DownloadTaskContractTest {
         assertThat(taskJson.path("lastError").path("message").asText()).isEqualTo("Source request timed out");
         assertThat(taskJson.path("canRetry").booleanValue()).isTrue();
         assertThat(taskJson.path("canResume").booleanValue()).isFalse();
+        assertThat(taskJson.path("extraction").isNull()).isTrue();
         assertThat(taskJson.toString()).doesNotContain("private-", "activeRunId", "runGeneration", "retryable");
 
         JsonNode receipt = mapper.readTree(mapper.writeValueAsBytes(DownloadTaskReceipt.from(
@@ -172,6 +173,71 @@ class DownloadTaskContractTest {
         assertThat(nulls.path("range").path("completenessRule").path("evidence").isNull()).isTrue();
     }
 
+    @Test
+    void responseOnlyCapabilitiesRequireNativeUnsplittableRangesWithoutARowLimit() throws IOException {
+        for (String availability : List.of("AVAILABLE", "NEEDS_VERIFICATION")) {
+            ObjectNode capability = (ObjectNode) example("availableCapabilities");
+            ObjectNode range = (ObjectNode) capability.path("range");
+            range.put("availability", availability)
+                    .putNull("unavailableReason")
+                    .put("planningMode", "NATIVE_RANGE")
+                    .put("splittable", false);
+            if (availability.equals("NEEDS_VERIFICATION")) range.put("unavailableReason", "Controlled review pending");
+            ((ObjectNode) range.path("completenessRule"))
+                    .put("kind", "RESPONSE_ONLY")
+                    .putNull("rowLimit")
+                    .put("evidence", "The response rows are persisted without a completeness claim");
+            assertThat(schema("CapabilitiesResponse").validate(capability)).as(availability).isEmpty();
+
+            ObjectNode limited = capability.deepCopy();
+            ((ObjectNode) limited.path("range").path("completenessRule")).put("rowLimit", 100);
+            assertInvalid("CapabilitiesResponse", limited);
+            ObjectNode missingEvidence = capability.deepCopy();
+            ((ObjectNode) missingEvidence.path("range").path("completenessRule")).putNull("evidence");
+            assertInvalid("CapabilitiesResponse", missingEvidence);
+            ObjectNode blankEvidence = capability.deepCopy();
+            ((ObjectNode) blankEvidence.path("range").path("completenessRule")).put("evidence", "   ");
+            assertInvalid("CapabilitiesResponse", blankEvidence);
+            ObjectNode split = capability.deepCopy();
+            ((ObjectNode) split.path("range")).put("splittable", true);
+            assertInvalid("CapabilitiesResponse", split);
+            ObjectNode calendarDays = capability.deepCopy();
+            ((ObjectNode) calendarDays.path("range")).put("planningMode", "CALENDAR_DAYS");
+            assertInvalid("CapabilitiesResponse", calendarDays);
+        }
+    }
+
+    @Test
+    void taskExtractionRequiresTheExactPersistedSummaryForRangeAndNullForSingle() throws IOException {
+        ObjectNode range = (ObjectNode) example("queuedTask");
+        range.set("extraction", JSON.readTree("{\"policyVersion\":\"contract-v2\",\"ruleKind\":\"RESPONSE_ONLY\"}"));
+        assertThat(schema("TaskResponse").validate(range)).isEmpty();
+
+        ObjectNode single = range.deepCopy().put("mode", "SINGLE");
+        single.set("extraction", JSON.nullNode());
+        assertThat(schema("TaskResponse").validate(single)).isEmpty();
+
+        ObjectNode missing = range.deepCopy();
+        missing.remove("extraction");
+        assertInvalid("TaskResponse", missing);
+        ObjectNode nullRange = range.deepCopy();
+        nullRange.set("extraction", JSON.nullNode());
+        assertInvalid("TaskResponse", nullRange);
+        ObjectNode objectSingle = single.deepCopy();
+        objectSingle.set("extraction", range.path("extraction"));
+        assertInvalid("TaskResponse", objectSingle);
+        for (String invalid : List.of(
+                "{}",
+                "{\"policyVersion\":\"\",\"ruleKind\":\"RESPONSE_ONLY\"}",
+                "{\"policyVersion\":\"   \",\"ruleKind\":\"RESPONSE_ONLY\"}",
+                "{\"policyVersion\":\"contract-v2\",\"ruleKind\":\"NOT_A_RULE\"}",
+                "{\"policyVersion\":\"contract-v2\",\"ruleKind\":\"RESPONSE_ONLY\",\"extra\":true}")) {
+            ObjectNode bad = range.deepCopy();
+            bad.set("extraction", JSON.readTree(invalid));
+            assertInvalid("TaskResponse", bad);
+        }
+    }
+
     private static ObjectMapper productionMapper() {
         return new ObjectMapper().registerModule(new JavaTimeModule())
                 .registerModule(new JacksonPrecisionConfiguration().precisionModule())
@@ -195,7 +261,10 @@ class DownloadTaskContractTest {
         assertThat(names).contains("singleSubmission", "rangeSubmission", "createdReceipt", "replayedReceipt",
                 "retryRequest", "retryReceipt", "resumeRequest", "resumeReceipt", "queuedTask", "runningTask",
                 "partialFailedTask", "succeededTask", "interruptedTask", "unplannedFailedTask",
+                "responseOnlySucceededTask", "responseOnlyEmptyTask", "historicalConfirmedRangeTask",
+                "historicalUnknownRangeTask", "singleTask",
                 "splitParent", "splitChild", "emptyTaskPage", "emptyBatchPage", "availableCapabilities",
+                "responseOnlyAvailableCapabilities",
                 "needsVerificationCapabilities", "unsupportedCapabilities", "invalidError", "notFoundError",
                 "conflictError", "queueFullError", "persistenceError");
     }

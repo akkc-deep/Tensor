@@ -31,8 +31,9 @@ public interface BatchDownloadSupport extends DataSourcePlugin {
 
     /**
      * Before adaptation, verifies fields and source-specific stock/date scope, then
-     * assesses completeness. Scope violations throw a classified source exception;
-     * unknown completeness must remain UNKNOWN, including empty responses without evidence.
+     * assesses the declared collection rule. Scope violations throw a classified source exception;
+     * RESPONSE_ONLY accepts validated returned rows without guaranteeing completeness.
+     * Missing rule evidence must remain UNKNOWN, including empty responses without evidence.
      */
     BatchAssessment assess(ApiName apiName, DateRange range, DownloadEnvelope envelope);
 }

@@ -121,6 +121,8 @@ sh scripts/smoke-test.sh http://127.0.0.1:8080
 
 两页均由同一 JAR 提供。缺少 Token 时，数据源返回 `credentialConfigured=false`、`downloadAvailable=false`；数据源列表、数据集元数据及数据查看仍可用，Tushare 下载不可用。下载接口列表 `/api/v1/data-sources/tushare_pro/apis` 返回 HTTP 409、`PLUGIN_DISABLED`，下载页可显示“下载配置加载失败 / Plugin is unavailable”等配置不可用提示，这是缺少 Token 的预期行为。新空库没有业务记录属于正常现象。
 
+当前正式证据已有10项RANGE通过，当前本地验收候选能力为33 AVAILABLE、1 NEEDS_VERIFICATION、6 UNSUPPORTED；可提交状态不等于完成真实验收。fina_indicator因TASK失败已撤回v3，SINGLE仍可用。按实际能力选择接口和原参数；配置Token不会自动开放待验证项。当前范围及限制见[已核验日期区间](configuration.md#已核验的-tushare-日期区间)，部署须使用对应版本包。
+
 ### 任务接收、查询和人工恢复
 
 下载页提交后，HTTP `202` 只表示任务及 submission 身份已经持久化，不表示来源读取或数据写入成功。保存响应的 `Location` 或浏览器详情 URL；如果回执丢失，可从 `/api/v1/download-tasks` 的近期列表按 submission 找回，再查询 `/api/v1/download-tasks/<taskId>`。刷新、关闭页面或整个浏览器不会停止后台任务，历史详情查询也不依赖当前插件仍注册。

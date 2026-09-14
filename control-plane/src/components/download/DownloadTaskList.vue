@@ -3,19 +3,12 @@ import { computed, nextTick, watch } from 'vue'
 import { RouterLink } from 'vue-router'
 
 import { parseTaskJson } from '../../api/downloadTaskDtos.js'
+import { taskExtractionNotice, taskStatusLabel } from '../../utils/downloadTaskText.js'
 import AsyncStatePanel from '../common/AsyncStatePanel.vue'
 import WorkbenchPanel from '../common/WorkbenchPanel.vue'
 
 const PAGE_SIZES = [20, 50, 100]
 const MAX_PAGE = 2_147_483_647n
-const STATUS_LABELS = Object.freeze({
-  QUEUED: '排队中',
-  RUNNING: '运行中',
-  SUCCEEDED: '已成功',
-  PARTIAL_FAILED: '部分失败',
-  FAILED: '失败',
-  INTERRUPTED: '已中断',
-})
 
 const props = defineProps({
   page: { type: Number, default: 1 },
@@ -181,12 +174,14 @@ function updatePageSize(nextPageSize) {
               </td>
               <td>
                 <span>{{ task.mode === 'RANGE' ? '日期区间' : '单次请求' }}</span>
+                <small v-if="task.extraction">采集规则 {{ task.extraction.ruleKind }} · 策略版本 {{ task.extraction.policyVersion }}</small>
+                <span v-if="taskExtractionNotice(task)">{{ taskExtractionNotice(task) }}</span>
                 <strong
                   data-task-status
                   class="download-task-list__status"
                   :class="`download-task-list__status--${task.status.toLowerCase()}`"
                 >
-                  {{ STATUS_LABELS[task.status] }}
+                  {{ taskStatusLabel(task) }}
                 </strong>
               </td>
               <td>

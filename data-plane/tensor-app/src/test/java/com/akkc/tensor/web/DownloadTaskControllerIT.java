@@ -29,6 +29,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.BooleanSupplier;
 import org.junit.jupiter.api.*;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
@@ -174,6 +177,140 @@ class DownloadTaskControllerIT {
                 assertThat(flow.json(failed).toString()).doesNotContain("jdbc:", "unavailable_tasks");
             } finally { jdbc.execute("RENAME TABLE unavailable_tasks TO tensor_download_task"); }
         }
+    }
+
+    @Test void exposesSavedResponseOnlyExtractionForDetailAndListAfterCurrentCapabilityChanges() throws Exception {
+        try (var flow = new Flow(100, transactions, true)) {
+            String singleId = flow.json(flow.submit(UUID.randomUUID(), "SINGLE", "{}")).path("taskId").asText();
+            assertThat(flow.json(flow.get("/api/v1/download-tasks/" + singleId)).path("extraction").isNull()).isTrue();
+
+            flow.source.mode = BatchDownloadDescriptor.PlanningMode.NATIVE_RANGE;
+            flow.source.ruleKind = BatchDownloadDescriptor.CompletenessRule.Kind.RESPONSE_ONLY;
+            flow.source.policyVersion = "http-response-only-v1";
+            String rangeId = flow.json(flow.submit(UUID.randomUUID(), "RANGE",
+                    "{\"start_date\":\"20260910\",\"end_date\":\"20260912\"}"))
+                    .path("taskId").asText();
+            JsonNode saved = flow.json(flow.get("/api/v1/download-tasks/" + rangeId)).path("extraction");
+            assertThat(saved.fieldNames()).toIterable().containsExactlyInAnyOrder("policyVersion", "ruleKind");
+            assertThat(saved.path("policyVersion").asText()).isEqualTo("http-response-only-v1");
+            assertThat(saved.path("ruleKind").asText()).isEqualTo("RESPONSE_ONLY");
+
+            flow.source.mode = BatchDownloadDescriptor.PlanningMode.CALENDAR_DAYS;
+            flow.source.ruleKind = BatchDownloadDescriptor.CompletenessRule.Kind.VERIFIED_RULE;
+            flow.source.policyVersion = "http-current-v2";
+            JsonNode current = flow.json(flow.get("/api/v1/data-sources/http_test/apis/prices/download-capabilities"));
+            assertThat(current.path("range").path("policyVersion").asText()).isEqualTo("http-current-v2");
+            assertThat(current.path("range").path("completenessRule").path("kind").asText()).isEqualTo("VERIFIED_RULE");
+            assertThat(flow.json(flow.get("/api/v1/download-tasks/" + rangeId)).path("extraction")).isEqualTo(saved);
+            JsonNode items = flow.json(flow.get("/api/v1/download-tasks")).path("items");
+            JsonNode listed = java.util.stream.StreamSupport.stream(items.spliterator(), false)
+                    .filter(item -> rangeId.equals(item.path("taskId").asText())).findFirst().orElseThrow();
+            assertThat(listed.path("extraction")).isEqualTo(saved);
+        }
+    }
+
+    @Test void exposesLegacyStrictAndUnknownSavedRulesWithoutUsingCurrentCapability() throws Exception {
+        try (var flow = new Flow(100, transactions, true)) {
+            String params = "{\"start_date\":\"20260910\",\"end_date\":\"20260912\"}";
+            String strictId = flow.json(flow.submit(UUID.randomUUID(), "RANGE", params)).path("taskId").asText();
+            String unknownId = flow.json(flow.submit(UUID.randomUUID(), "RANGE", params)).path("taskId").asText();
+            jdbc.update("UPDATE tensor_download_task SET policy_snapshot=? WHERE task_id=?",
+                    flow.source.savedPolicy("legacy-strict-v1",
+                            BatchDownloadDescriptor.CompletenessRule.Kind.CONFIRMED_ROW_LIMIT), strictId);
+            jdbc.update("UPDATE tensor_download_task SET policy_snapshot=? WHERE task_id=?",
+                    flow.source.savedPolicy("legacy-unknown-v1",
+                            BatchDownloadDescriptor.CompletenessRule.Kind.UNKNOWN), unknownId);
+
+            flow.source.policyVersion = "current-v9";
+            JsonNode strict = flow.json(flow.get("/api/v1/download-tasks/" + strictId)).path("extraction");
+            JsonNode unknown = flow.json(flow.get("/api/v1/download-tasks/" + unknownId)).path("extraction");
+            assertThat(strict).isEqualTo(flow.mapper.readTree(
+                    "{\"policyVersion\":\"legacy-strict-v1\",\"ruleKind\":\"CONFIRMED_ROW_LIMIT\"}"));
+            assertThat(unknown).isEqualTo(flow.mapper.readTree(
+                    "{\"policyVersion\":\"legacy-unknown-v1\",\"ruleKind\":\"UNKNOWN\"}"));
+
+            JsonNode items = flow.json(flow.get("/api/v1/download-tasks")).path("items");
+            Map<String, JsonNode> listed = new HashMap<>();
+            items.forEach(item -> listed.put(item.path("taskId").asText(), item.path("extraction")));
+            assertThat(listed.get(strictId)).isEqualTo(strict);
+            assertThat(listed.get(unknownId)).isEqualTo(unknown);
+        }
+    }
+
+    @Test void mapsDamagedSavedPolicyToTheExistingQueryFailureForDetailAndList() throws Exception {
+        try (var flow = new Flow(100, transactions, true)) {
+            String id = flow.json(flow.submit(UUID.randomUUID(), "RANGE",
+                    "{\"start_date\":\"20260910\",\"end_date\":\"20260912\"}"))
+                    .path("taskId").asText();
+            jdbc.update("UPDATE tensor_download_task SET policy_snapshot=? WHERE task_id=?",
+                    "{\"secret\":\"private-value\"}", id);
+            for (String path : List.of("/api/v1/download-tasks/" + id, "/api/v1/download-tasks")) {
+                var response = flow.get(path);
+                assertThat(response.getStatus()).as(path).isEqualTo(500);
+                JsonNode error = flow.json(response);
+                assertThat(error.path("code").asText()).isEqualTo("QUERY_FAILED");
+                assertThat(error.toString()).doesNotContain("private-value", "secret");
+            }
+        }
+    }
+
+    @ParameterizedTest(name = "RESPONSE_ONLY HTTP outcome {0}")
+    @MethodSource("responseOnlyOutcomes")
+    void preservesResponseOnlyExtractionAcrossExecutedOutcomes(String name, boolean empty, boolean fail,
+            boolean interrupt, String status, long sourceRows, long succeededBatches, long failedBatches) throws Exception {
+        try (var flow = new Flow(100)) {
+            flow.source.mode = BatchDownloadDescriptor.PlanningMode.NATIVE_RANGE;
+            flow.source.ruleKind = BatchDownloadDescriptor.CompletenessRule.Kind.RESPONSE_ONLY;
+            flow.source.policyVersion = "http-response-only-v1";
+            flow.source.empty = empty;
+            if (fail) flow.source.failDate = "20260910";
+            if (interrupt) {
+                flow.source.blockDate = "20260910";
+                flow.source.entered = new CountDownLatch(1);
+                flow.source.release = new CountDownLatch(1);
+            }
+
+            String id = flow.json(flow.submit(UUID.randomUUID(), "RANGE",
+                    "{\"start_date\":\"20260910\",\"end_date\":\"20260912\"}"))
+                    .path("taskId").asText();
+            if (interrupt) {
+                assertThat(flow.source.entered.await(5, TimeUnit.SECONDS)).as(name).isTrue();
+                try (var shutdown = Executors.newSingleThreadExecutor()) {
+                    var stopped = shutdown.submit(flow.coordinator::close);
+                    await(() -> !flow.coordinator.isRunning());
+                    assertThat(stopped.isDone()).as(name).isFalse();
+                    flow.source.release.countDown();
+                    stopped.get(5, TimeUnit.SECONDS);
+                }
+            }
+
+            JsonNode detail = interrupt
+                    ? flow.json(flow.get("/api/v1/download-tasks/" + id))
+                    : flow.terminal(id, status);
+            assertThat(detail.path("status").asText()).as(name).isEqualTo(status);
+            assertThat(detail.path("extraction")).as(name).isEqualTo(flow.mapper.readTree(
+                    "{\"policyVersion\":\"http-response-only-v1\",\"ruleKind\":\"RESPONSE_ONLY\"}"));
+            assertThat(detail.path("counts").path("totalBatches").asLong()).as(name).isEqualTo(1);
+            assertThat(detail.path("counts").path("sourceRows").asLong()).as(name).isEqualTo(sourceRows);
+            assertThat(detail.path("counts").path("succeededBatches").asLong()).as(name).isEqualTo(succeededBatches);
+            assertThat(detail.path("counts").path("failedBatches").asLong()).as(name).isEqualTo(failedBatches);
+            if (!status.equals("SUCCEEDED")) assertThat(detail.path("lastError").isObject()).as(name).isTrue();
+
+            JsonNode items = flow.json(flow.get("/api/v1/download-tasks")).path("items");
+            JsonNode listed = java.util.stream.StreamSupport.stream(items.spliterator(), false)
+                    .filter(item -> id.equals(item.path("taskId").asText())).findFirst().orElseThrow();
+            assertThat(listed.path("status")).as(name).isEqualTo(detail.path("status"));
+            assertThat(listed.path("counts")).as(name).isEqualTo(detail.path("counts"));
+            assertThat(listed.path("extraction")).as(name).isEqualTo(detail.path("extraction"));
+        }
+    }
+
+    static java.util.stream.Stream<Arguments> responseOnlyOutcomes() {
+        return java.util.stream.Stream.of(
+                Arguments.of("non-empty success", false, false, false, "SUCCEEDED", 1L, 1L, 0L),
+                Arguments.of("empty success", true, false, false, "SUCCEEDED", 0L, 1L, 0L),
+                Arguments.of("source failure", false, true, false, "FAILED", 0L, 0L, 1L),
+                Arguments.of("interrupted", false, false, true, "INTERRUPTED", 0L, 0L, 1L));
     }
 
     @Test void keepsQueuedCapacityAndAllRouteQueryWhitelists() throws Exception {
@@ -528,7 +665,10 @@ class DownloadTaskControllerIT {
     static final class Source implements BatchDownloadSupport {
         final AtomicInteger calls = new AtomicInteger();
         volatile String failDate, blockDate;
+        volatile boolean empty;
         volatile String policyVersion = "http-test-v1";
+        volatile BatchDownloadDescriptor.CompletenessRule.Kind ruleKind =
+                BatchDownloadDescriptor.CompletenessRule.Kind.VERIFIED_RULE;
         volatile boolean ready = true;
         volatile BatchDownloadDescriptor.PlanningMode mode = BatchDownloadDescriptor.PlanningMode.CALENDAR_DAYS;
         volatile CountDownLatch entered, release;
@@ -538,7 +678,25 @@ class DownloadTaskControllerIT {
         public Optional<BatchDownloadDescriptor> batchDescriptor(ApiName name) {
             return Optional.of(new BatchDownloadDescriptor(List.of(endpoint("start_date", "end_date"), endpoint("end_date", "start_date")),
                     "start_date", "end_date", BatchDownloadDescriptor.DateAxis.CALENDAR_DATE, "Calendar date", mode,
-                    mode == BatchDownloadDescriptor.PlanningMode.NATIVE_RANGE, BatchDownloadDescriptor.Availability.AVAILABLE, null, policyVersion, new BatchDownloadDescriptor.CompletenessRule(BatchDownloadDescriptor.CompletenessRule.Kind.VERIFIED_RULE, null, "Controlled complete source")));
+                    mode == BatchDownloadDescriptor.PlanningMode.NATIVE_RANGE
+                            && ruleKind != BatchDownloadDescriptor.CompletenessRule.Kind.RESPONSE_ONLY,
+                    BatchDownloadDescriptor.Availability.AVAILABLE, null, policyVersion,
+                    new BatchDownloadDescriptor.CompletenessRule(ruleKind,
+                            ruleKind == BatchDownloadDescriptor.CompletenessRule.Kind.CONFIRMED_ROW_LIMIT ? 100L : null,
+                            ruleKind == BatchDownloadDescriptor.CompletenessRule.Kind.UNKNOWN ? null : "Controlled collection rule")));
+        }
+        String savedPolicy(String version, BatchDownloadDescriptor.CompletenessRule.Kind kind) {
+            var availability = kind == BatchDownloadDescriptor.CompletenessRule.Kind.UNKNOWN
+                    ? BatchDownloadDescriptor.Availability.NEEDS_VERIFICATION
+                    : BatchDownloadDescriptor.Availability.AVAILABLE;
+            return new DownloadTaskJson().policySnapshot(DownloadMode.RANGE, new BatchDownloadDescriptor(
+                    List.of(endpoint("start_date", "end_date"), endpoint("end_date", "start_date")),
+                    "start_date", "end_date", BatchDownloadDescriptor.DateAxis.CALENDAR_DATE, "Calendar date",
+                    BatchDownloadDescriptor.PlanningMode.NATIVE_RANGE, kind != BatchDownloadDescriptor.CompletenessRule.Kind.RESPONSE_ONLY,
+                    availability, availability == BatchDownloadDescriptor.Availability.AVAILABLE ? null : "Historical policy",
+                    version, new BatchDownloadDescriptor.CompletenessRule(kind,
+                            kind == BatchDownloadDescriptor.CompletenessRule.Kind.CONFIRMED_ROW_LIMIT ? 100L : null,
+                            kind == BatchDownloadDescriptor.CompletenessRule.Kind.UNKNOWN ? null : "Historical collection rule")));
         }
         public List<DateRange> plan(ApiName api, Map<String,Object> params, BatchCallContext context) {
             var start = LocalDate.parse((String) params.get("start_date"), DateTimeFormatter.BASIC_ISO_DATE);
@@ -554,9 +712,12 @@ class DownloadTaskControllerIT {
             if (entered != null && (blockDate == null || blockDate.equals(params.get("start_date")))) { entered.countDown(); try { if (!release.await(8, TimeUnit.SECONDS)) throw new AssertionError("Source was not released"); } catch (InterruptedException e) { throw new AssertionError(e); } }
             String value = (String) params.getOrDefault("start_date", "single");
             if (value.equals(failDate)) throw new SourceException(ErrorCode.SOURCE_TIMEOUT, "private-token-response");
-            return new DownloadEnvelope(KEY.pluginId(), api, params, List.of("value"), 1, List.of(List.of(value)), DownloadStatus.SUCCESS, null);
+            return new DownloadEnvelope(KEY.pluginId(), api, params, List.of("value"), empty ? 0 : 1,
+                    empty ? List.of() : List.of(List.of(value)), DownloadStatus.SUCCESS, null);
         }
         public BatchAssessment assess(ApiName api, DateRange range, DownloadEnvelope envelope) {
+            if (ruleKind == BatchDownloadDescriptor.CompletenessRule.Kind.RESPONSE_ONLY)
+                return BatchAssessment.RESPONSE_ONLY;
             return mode == BatchDownloadDescriptor.PlanningMode.NATIVE_RANGE && range.start().isBefore(range.end())
                     ? BatchAssessment.SPLIT_REQUIRED : BatchAssessment.COMPLETE;
         }

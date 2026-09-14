@@ -13,6 +13,7 @@ const TASK_STATUSES = new Set([
   'INTERRUPTED',
 ])
 const MODES = new Set(['SINGLE', 'RANGE'])
+const RULE_KINDS = new Set(['CONFIRMED_ROW_LIMIT', 'VERIFIED_RULE', 'RESPONSE_ONLY', 'UNKNOWN'])
 const BATCH_STATUSES = new Set(['PENDING', 'RUNNING', 'SUCCEEDED', 'FAILED', 'SPLIT'])
 const IDENTIFIER = /^[a-z][a-z0-9_]{1,63}$/
 const PARAMETER_TYPES = new Set([
@@ -199,11 +200,21 @@ function taskCounts(value, requestId) {
 }
 
 const TASK_KEYS = [
-  'taskId', 'submissionId', 'pluginId', 'apiName', 'mode', 'params', 'status',
+  'taskId', 'submissionId', 'pluginId', 'apiName', 'mode', 'extraction', 'params', 'status',
   'version', 'planReady', 'counts', 'lastError', 'canRetry', 'canResume',
   'requestCount', 'runRequestCount', 'createdAt', 'updatedAt', 'queuedAt',
   'startedAt', 'finishedAt', 'deadlineAt',
 ]
+
+function taskExtraction(value, mode, requestId) {
+  if (mode === 'SINGLE') {
+    if (value !== null) invalid(requestId)
+    return null
+  }
+  exactObject(value, ['policyVersion', 'ruleKind'], requestId)
+  if (!nonBlank(value.policyVersion) || !RULE_KINDS.has(value.ruleKind)) invalid(requestId)
+  return Object.freeze({ policyVersion: value.policyVersion, ruleKind: value.ruleKind })
+}
 
 /** Parse one complete persisted task snapshot. */
 export function parseDownloadTask(value, requestId) {
@@ -230,6 +241,7 @@ export function parseDownloadTask(value, requestId) {
     pluginId: value.pluginId,
     apiName: value.apiName,
     mode: value.mode,
+    extraction: taskExtraction(value.extraction, value.mode, requestId),
     params: stringMap(value.params, requestId),
     status: value.status,
     version: positiveInt64(value.version, requestId),
@@ -429,7 +441,7 @@ function parameters(value, requestId) {
 
 function completenessRule(value, requestId) {
   exactObject(value, ['kind', 'rowLimit', 'evidence'], requestId)
-  if (!['UNKNOWN', 'CONFIRMED_ROW_LIMIT', 'VERIFIED_RULE'].includes(value.kind)) {
+  if (!RULE_KINDS.has(value.kind)) {
     invalid(requestId)
   }
   let rowLimit = null
@@ -504,6 +516,8 @@ function rangeCapability(value, requestId) {
     invalid(requestId)
   }
   if (value.splittable && value.planningMode !== 'NATIVE_RANGE') invalid(requestId)
+  if (parsedCompleteness.kind === 'RESPONSE_ONLY' &&
+      (value.planningMode !== 'NATIVE_RANGE' || value.splittable)) invalid(requestId)
   if (availability === 'AVAILABLE' && parsedCompleteness.kind === 'UNKNOWN') {
     invalid(requestId)
   }

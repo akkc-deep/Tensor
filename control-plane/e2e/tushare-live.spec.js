@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test'
 import { execFile, spawn } from 'node:child_process'
-import { createHash } from 'node:crypto'
+import { createHash, randomUUID } from 'node:crypto'
 import {
   appendFile,
   chmod,
@@ -11,21 +11,20 @@ import {
   stat,
   writeFile,
 } from 'node:fs/promises'
-import { readFileSync } from 'node:fs'
+import { readFileSync, lstatSync } from 'node:fs'
 import { createConnection } from 'node:net'
 import path from 'node:path'
 import { promisify } from 'node:util'
 import { setTimeout as delay } from 'node:timers/promises'
+
+import { selectTaskCases, validateTaskAcceptance, allowedTaskRead, summarizeTaskBatches, summarizeSqlRows, sqlMetadata, safeCaseEvidence, validateEvidenceCase, bindEvidenceInput, safeRecordsQueryFailure, safeTaskQueryFailure, responseOnlyExpectedCoverageSource, evidenceInteger, validateTaskRuntime } from './tushare-range-evidence.js'
+import { parseDownloadTask, parseDownloadBatchPage, parseDownloadCapabilities } from '../src/api/downloadTaskDtos.js'
 
 const execFileAsync = promisify(execFile)
 const BASE_URL = 'http://127.0.0.1:8080'
 const MANIFEST_SHA = '386f46a99b6605e203129836d7a744b96b65304307f52991dd8bba6fd1870984'
 const REQUESTS_SHA = '6d4c74a1a539b59ac20fb0cbd3ba1fba0954c40ef1209b652f7dcc2192ec932f'
 const JAR_SHA = process.env.ISSUE_017_ACCEPTANCE_JAR_SHA256
-const DOWNLOAD_KEYS = [
-  'requestId', 'outcome', 'pluginId', 'apiName', 'sourceRowCount', 'insertedRows',
-  'updatedRows', 'message',
-]
 const ERROR_KEYS = ['requestId', 'code', 'message', 'retryable', 'fieldErrors']
 const FIELD_ERROR_KEYS = ['field', 'message']
 const API_ERROR_CODES = new Set([
@@ -59,16 +58,6 @@ const SUPPORTED_API_NAMES = [
   'index_classify', 'index_member_all',
 ]
 
-const PARAMETERS = {
-  list_status: { label: '上市状态', type: 'ENUM' },
-  exchange: { label: '交易所', type: 'ENUM' },
-  exchange_id: { label: '交易所', type: 'ENUM' },
-  start_date: { label: '开始日期', type: 'DATE_RANGE_MEMBER' },
-  end_date: { label: '结束日期', type: 'DATE_RANGE_MEMBER' },
-  trade_date: { label: '交易日期', type: 'DATE' },
-  ann_date: { label: '公告日期', type: 'DATE' },
-  ts_code: { label: '股票代码', type: 'TS_CODE' },
-}
 const FILTER_LABELS = {
   ts_code: ['证券代码 (ts_code)'],
   trade_date: ['交易日期开始 (trade_date)', '交易日期结束 (trade_date)'],
@@ -225,47 +214,12 @@ export function selectLiveInterfaces(interfaces, requests) {
     'live scope supported API order',
   )
   safeCheck(Array.isArray(requests) && requests.length === interfaces.length, 'live scope request count')
-  const sampleCount = requests.length
-  const okCount = interfaces.filter(({ status }) => status === 'ok').length
-  const emptyCount = interfaces.filter(({ status }) => status === 'empty').length
-  safeCheck(sampleCount === 40, 'live scope sample count')
-  safeCheck(okCount === 28 && emptyCount === 12, 'live scope status counts')
-  const acceptanceInterfaces = interfaces.map((entry, index) => ({
-    ...entry,
-    params: [requests[index].params],
-  }))
-  return {
-    interfaces: acceptanceInterfaces,
-    sampleCount,
-    okCount,
-    emptyCount,
-  }
-}
-
-export function validateDownloadSuccess(body, pluginId, apiName) {
-  objectWithExactKeys(body, DOWNLOAD_KEYS, 'download response')
-  safeCheck(typeof body.requestId === 'string' && body.requestId.length > 0, 'download request ID')
-  safeCheck(body.pluginId === pluginId && body.apiName === apiName, 'download identity')
-  safeCheck(['SUCCESS', 'EMPTY'].includes(body.outcome), 'download outcome')
-  safeCheck(
-    integer(body.sourceRowCount) && integer(body.insertedRows) && integer(body.updatedRows),
-    'download safe counts',
-  )
-  safeCheck(typeof body.message === 'string', 'download public message')
-  if (body.outcome === 'SUCCESS') {
-    safeCheck(body.sourceRowCount > 0, 'SUCCESS source rows')
-    safeCheck(
-      body.insertedRows + body.updatedRows > 0 &&
-        body.insertedRows + body.updatedRows <= body.sourceRowCount,
-      'SUCCESS distinct-key counts',
-    )
-  } else {
-    safeCheck(
-      body.sourceRowCount === 0 && body.insertedRows === 0 && body.updatedRows === 0,
-      'EMPTY zero counts',
-    )
-  }
-  return body
+  const samples = selectTaskCases('single')
+  safeCheck(requests.every((request) => JSON.stringify(samples.find((c) => c.apiName === request.apiName).params) === JSON.stringify(request.params)), 'single examples match canonical cases')
+  return { interfaces: interfaces.map((entry) => ({ ...entry,
+    cases: samples.filter((c) => c.apiName === entry.api_name),
+    params: samples.filter((c) => c.apiName === entry.api_name).map((c) => c.params),
+  })), sampleCount: samples.length, okCount: 28, emptyCount: 12 }
 }
 
 export function validateApiError(body) {
@@ -282,24 +236,6 @@ export function validateApiError(body) {
   return body
 }
 
-export function validateInterfaceOutcomes(status, outcomes) {
-  safeCheck(Array.isArray(outcomes) && outcomes.length > 0, 'interface outcomes present')
-  if (status === 'ok') {
-    safeCheck(outcomes.some(({ outcome }) => outcome === 'SUCCESS'), 'ok interface has SUCCESS')
-    safeCheck(
-      outcomes.reduce((sum, result) => sum + result.sourceRowCount, 0) > 0,
-      'ok interface source rows',
-    )
-  } else {
-    safeCheck(
-      outcomes.every((result) =>
-        result.outcome === 'EMPTY' && result.sourceRowCount === 0 &&
-        result.insertedRows === 0 && result.updatedRows === 0),
-      'empty interface stays empty',
-    )
-  }
-}
-
 export function validateBusinessRow(row, columns, pluginId, apiName, startedAt, finishedAt) {
   objectWithExactKeys(row, columns, 'business row')
   safeCheck(Object.values(row).every((value) => value === null || typeof value === 'string'), 'business row value types')
@@ -307,28 +243,6 @@ export function validateBusinessRow(row, columns, pluginId, apiName, startedAt, 
   const instant = Date.parse(row.ingested_at)
   safeCheck(Number.isFinite(instant), 'business row ingestion instant')
   safeCheck(instant >= startedAt && instant <= finishedAt, 'business row ingestion window')
-}
-
-export function validateFinalDataset({
-  outcomeStatus,
-  insertedRows,
-  body,
-  definition,
-  startedAt,
-  finishedAt,
-}) {
-  objectWithExactKeys(body, PAGE_KEYS, 'page response')
-  safeCheck(body.totalElements === insertedRows, 'final total equals inserted rows')
-  const columns = [...definition.columns.map(({ name }) => name), ...SOURCE_COLUMNS]
-  safeCheck(JSON.stringify(body.columns) === JSON.stringify(columns), 'final columns')
-  if (outcomeStatus === 'empty') {
-    safeCheck(body.totalElements === 0 && body.items.length === 0, 'empty interface has no rows')
-    return
-  }
-  safeCheck(body.totalElements > 0 && body.items.length > 0, 'ok interface has visible rows')
-  validateBusinessRow(
-    body.items[0], columns, 'tushare_pro', body.apiName, startedAt, finishedAt,
-  )
 }
 
 export class RequestLedger {
@@ -368,9 +282,12 @@ export class RequestLedger {
   }
 
   observeWrite(method, pathname, body) {
-    safeCheck(method === 'POST' && pathname === '/api/v1/downloads', 'only download POST')
+    safeCheck(method === 'POST' && pathname === '/api/v1/download-tasks', 'only task POST')
     safeCheck(Boolean(this.expectedDownload), 'download POST registered')
-    safeCheck(JSON.stringify(body) === JSON.stringify(this.expectedDownload), 'download POST body')
+    objectWithExactKeys(body, ['submissionId', 'pluginId', 'apiName', 'mode', 'params'], 'task request')
+    safeCheck(/^[0-9a-f-]{36}$/i.test(body.submissionId), 'task submission UUID')
+    const { submissionId, ...actual } = body
+    safeCheck(actual.pluginId === this.expectedDownload.pluginId && actual.apiName === this.expectedDownload.apiName && actual.mode === this.expectedDownload.mode && JSON.stringify(Object.entries(actual.params).sort()) === JSON.stringify(Object.entries(this.expectedDownload.params).sort()), 'task POST body')
     this.expectedDownload = undefined
   }
 
@@ -569,10 +486,66 @@ const { manifest, sampleCount: manifestSampleCount } = validateManifest(manifest
 const requestsPath = new URL('../../docs/contracts/download-request-examples.json', import.meta.url)
 const requestBytes = readFileSync(requestsPath)
 const requests = validateRequests(requestBytes, manifest.interfaces)
-const liveScope = selectLiveInterfaces(manifest.interfaces, requests)
-const INTERFACES = liveScope.interfaces.map((entry) => ({ ...entry, contract: CONTRACTS.get(entry.api_name) }))
+const phase = process.env.ISSUE018_T13_PHASE ?? 'single'
+function readSafeInput(name, file = process.env[name]) {
+  try {
+    safeCheck(path.isAbsolute(file ?? ''), 'evidence input absolute')
+    const state = lstatSync(file)
+    safeCheck(state.isFile() && !state.isSymbolicLink() && state.uid === process.getuid(), 'evidence input ordinary owned file')
+    if (name === 'ISSUE018_T13_CASES_FILE') {
+      const parent = lstatSync(path.dirname(file))
+      safeCheck((state.mode & 0o777) === 0o600 && parent.isDirectory() && !parent.isSymbolicLink() && (parent.mode & 0o777) === 0o700 && parent.uid === process.getuid(), 'case plan private')
+    }
+    return { ...bindEvidenceInput(readFileSync(file)), path: file }
+  }
+  catch { throw new Error('Safe check failed: task evidence input') }
+}
+const casePlanInput = phase === 'range' || process.env.ISSUE018_T13_CASES_FILE !== undefined
+  ? readSafeInput('ISSUE018_T13_CASES_FILE') : undefined
+const evidenceIndexInput = phase === 'range' ? readSafeInput('ISSUE018_T13_EVIDENCE_INDEX_FILE') : undefined
+const casePlan = casePlanInput?.value
+const candidateIndex = evidenceIndexInput?.value
+async function evidenceInputsUnchanged() {
+  try {
+    for (const [name, input] of [['ISSUE018_T13_CASES_FILE', casePlanInput],
+      ['ISSUE018_T13_EVIDENCE_INDEX_FILE', evidenceIndexInput]]) {
+      if (input && readSafeInput(name, input.path).sha256 !== input.sha256) return false
+    }
+    return true
+  } catch { return false }
+}
+function initialTaskEvidence(candidate) {
+  const source = sourceBindings.get(candidate.caseId)
+  const responseOnly = candidateIndex?.interfaces.find(({ apiName }) =>
+    apiName === candidate.apiName)?.completeness.kind === 'RESPONSE_ONLY'
+  return safeCaseEvidence({
+    ...candidate, phase: 'TASK', status: 'NOT_RUN', batchNodes: [], evidencePaths: [],
+    expectedCoverage: candidate.mode === 'SINGLE' ? 'SINGLE_SAMPLE'
+      : responseOnly ? 'RESPONSE_ONLY' : source.expectedCoverage,
+    expectedCoverageSource: candidate.mode === 'SINGLE' ? 'current request examples'
+      : responseOnly ? responseOnlyExpectedCoverageSource(source) : source.expectedCoverageSource,
+  })
+}
+const taskRunId = casePlan?.runId ?? `issue018-t13-single-${randomUUID()}`
+const sourceBindings = new Map()
+const selectedCases = selectTaskCases(phase, casePlan, candidateIndex, sourceBindings).map((c) => phase === 'single' && !casePlanInput ? { ...c, caseId: `${taskRunId}-${c.caseId}` } : c)
+const liveScope = phase === 'single' ? selectLiveInterfaces(manifest.interfaces, requests) : {
+  interfaces: manifest.interfaces.filter((entry) => selectedCases.some((c) => c.apiName === entry.api_name))
+    .map((entry) => ({ ...entry, cases: selectedCases.filter((c) => c.apiName === entry.api_name),
+      params: selectedCases.filter((c) => c.apiName === entry.api_name).map((c) => c.params) })),
+  sampleCount: selectedCases.length,
+}
+if (candidateIndex) safeCheck(candidateIndex.inputHashes.manifestSha256 === MANIFEST_SHA && candidateIndex.inputHashes.requestExamplesSha256 === REQUESTS_SHA, 'candidate input hashes')
+const INTERFACES = liveScope.interfaces.map((entry) => ({ ...entry, cases: selectedCases.filter((c) => c.apiName === entry.api_name), contract: CONTRACTS.get(entry.api_name) }))
 
 let application
+let mysqlDefaultsPath
+let runDeadline
+let budgetTimer
+let sourceRequests = 0
+const downloadParameters = new WeakMap()
+const ownedTaskIds = new Set()
+const observedTasks = []
 let logSink
 let applicationLogPath
 let artifactDirectory
@@ -593,8 +566,11 @@ const expectedEvents = new Map()
 const correlatedEvents = new Map()
 const evidence = {
   version: 2,
-  task: 'M14-T09',
-  sourceTask: 'M14-T05',
+  task: 'ISSUE-018-T13',
+  phase,
+  runId: taskRunId,
+  cases: selectedCases.map(initialTaskEvidence),
+  sourceBindings: [...sourceBindings].map(([taskCaseId, source]) => ({ taskCaseId, sourceRunId: source.runId, sourceCaseId: source.caseId })),
   scope: {
     id: 'supported-apis',
     manifestCases: manifest.interfaces.length,
@@ -703,6 +679,72 @@ function canConnectToPort() {
   })
 }
 
+async function validateSqlInputs() {
+  mysqlDefaultsPath = process.env.ISSUE018_T13_MYSQL_DEFAULTS_FILE
+  safeCheck(path.isAbsolute(mysqlDefaultsPath ?? ''), 'SQL defaults absolute')
+  const state = await lstat(mysqlDefaultsPath)
+  safeCheck(state.isFile() && !state.isSymbolicLink() && (state.mode & 0o777) === 0o600 && state.uid === process.getuid(), 'SQL defaults private')
+  const lines = (await readFile(mysqlDefaultsPath, 'utf8')).trim().split(/\r?\n/)
+  safeCheck([7, 8].includes(lines.length) && lines.shift() === '[client]', 'SQL defaults shape')
+  const values = Object.fromEntries(lines.map((line) => {
+    const split = line.indexOf('=')
+    safeCheck(split > 0, 'SQL defaults syntax')
+    return [line.slice(0, split), line.slice(split + 1)]
+  }))
+  const keys = ['host', 'port', 'user', 'password', 'database', 'protocol']
+  if (lines.length === 7) keys.push('default-character-set')
+  objectWithExactKeys(values, keys, 'SQL defaults')
+  safeCheck(lines.length === 6 || values['default-character-set'] === 'utf8mb4', 'SQL defaults charset')
+  const jdbc = new URL(process.env.TENSOR_DB_URL.slice(5))
+  safeCheck(values.host === jdbc.hostname && Number(values.port) === Number(jdbc.port || 3306) && `/${values.database}` === jdbc.pathname && values.user === process.env.TENSOR_DB_USERNAME && values.password === process.env.TENSOR_DB_PASSWORD && values.protocol === 'TCP', 'SQL matches application account and schema')
+}
+
+async function mysql(sql) {
+  safeCheck(/^SELECT\s/i.test(sql) && !/;/.test(sql), 'read-only SQL statement')
+  return new Promise((resolve, reject) => {
+    const child = spawn('mysql', [`--defaults-file=${mysqlDefaultsPath}`, '--no-login-paths', '--default-character-set=utf8mb4', '--batch', '--skip-column-names', '--raw'], {
+      shell: false, env: { PATH: process.env.PATH, LANG: 'C', LC_ALL: 'C' }, stdio: ['pipe', 'pipe', 'pipe'],
+    })
+    const chunks = []
+    let size = 0, failed = false
+    const rejectSafe = () => { failed = true; child.kill('SIGTERM'); reject(new Error('Safe check failed: read-only SQL')) }
+    const timer = setTimeout(rejectSafe, 15_000)
+    child.stdout.on('data', (chunk) => { size += chunk.length; if (size > 16 * 1024 * 1024) rejectSafe(); else chunks.push(chunk) })
+    child.stderr.on('data', () => { failed = true })
+    child.once('error', () => { clearTimeout(timer); rejectSafe() })
+    child.once('close', (code) => {
+      clearTimeout(timer)
+      if (failed || code !== 0) reject(new Error('Safe check failed: read-only SQL'))
+      else resolve(Buffer.concat(chunks).toString('utf8').trimEnd())
+    })
+    child.stdin.on('error', rejectSafe)
+    child.stdin.end(`${sql};\n`)
+  })
+}
+
+async function sqlSnapshot(contract, definition, stock) {
+  const yaml = await readFile(new URL(`../../data-plane/tensor-plugin-tushare/src/main/resources/datasets/tushare_pro/${contract.apiName}.yaml`, import.meta.url), 'utf8')
+  const metadata = sqlMetadata(yaml)
+  const columns = [...definition.columns.map((c) => c.name), ...SOURCE_COLUMNS]
+  safeCheck(columns.every((c) => /^[a-z][a-z0-9_]+$/.test(c)) && metadata.keys.every((c) => columns.includes(c)), 'SQL trusted column metadata')
+  const quote = (name) => `\`${name}\``
+  // HEX keeps tabs/newlines, NULL and decimal text exact without GROUP_CONCAT limits.
+  const expressions = columns.map((name) => `IF(${quote(name)} IS NULL, 'N', CONCAT('V', HEX(CAST(${quote(name)} AS CHAR))))`)
+  const rows = []
+  for (let offset = 0; ; offset += 500) {
+    safeCheck(Date.now() < runDeadline && offset <= 1_000_000, 'bounded SQL snapshot')
+    const output = await mysql(`SELECT ${expressions.join(',')} FROM ${quote(metadata.table)} ORDER BY ${metadata.keys.map(quote).join(',')} LIMIT 500 OFFSET ${offset}`)
+    const page = output ? output.split('\n').map((line) => line.split('\t').map((value) => {
+      safeCheck(value === 'N' || /^V(?:[0-9A-F]{2})*$/.test(value), 'SQL canonical cell')
+      return value === 'N' ? null : Buffer.from(value.slice(1), 'hex').toString('utf8')
+    })) : []
+    safeCheck(page.every((row) => row.length === columns.length && row[columns.indexOf('source_plugin')] === 'tushare_pro' && row[columns.indexOf('source_api')] === contract.apiName), 'SQL row source identity')
+    rows.push(...page)
+    if (page.length < 500) break
+  }
+  return summarizeSqlRows(rows, metadata.keys.map((key) => columns.indexOf(key)), columns.indexOf('ts_code'), stock)
+}
+
 async function validatePreconditions(testInfo) {
   safeCheck(path.isAbsolute(process.env.M14_T05_ARTIFACT_DIR ?? ''), 'artifact directory absolute')
   artifactDirectory = process.env.M14_T05_ARTIFACT_DIR
@@ -719,6 +761,8 @@ async function validatePreconditions(testInfo) {
   artifactInitialized = true
 
   safeCheck(testInfo.config.workers === 1, 'single Playwright worker')
+  safeCheck(testInfo.retry === 0 && testInfo.project.use.trace === 'off' && testInfo.project.use.screenshot === 'off' && testInfo.project.use.video === 'off', 'live artifacts disabled')
+  safeCheck(!testInfo.config.grepInvert && String(testInfo.config.grep) === '/.*/', 'exact selected cases without grep')
   safeCheck((process.env.PLAYWRIGHT_BASE_URL ?? BASE_URL) === BASE_URL, 'isolated base URL')
   safeCheck(typeof process.env.TENSOR_TUSHARE_TOKEN === 'string' && process.env.TENSOR_TUSHARE_TOKEN.length > 0, 'live token supplied')
   for (const name of DB_ENV) safeCheck(typeof process.env[name] === 'string' && process.env[name].length > 0, `${name} supplied`)
@@ -745,6 +789,8 @@ async function validatePreconditions(testInfo) {
   const javaVersion = `${java.stdout}\n${java.stderr}`
   safeCheck(/(?:java|openjdk) version "21(?:[.\s])/.test(javaVersion), 'Java 21')
   safeCheck(!(await canConnectToPort()), 'port 8080 unused')
+  await validateSqlInputs()
+  safeCheck((await mysql('SELECT COUNT(*) FROM information_schema.TABLES WHERE TABLE_SCHEMA = DATABASE()')) === '0', 'fresh empty SQL schema')
 
 }
 
@@ -781,6 +827,9 @@ async function startApplication() {
       '-jar', process.env.ACCEPTANCE_JAR,
       '--spring.profiles.active=acceptance',
       '--tensor.plugins.fixture.enabled=true',
+      `--tensor.plugins.tushare-pro.min-request-interval=${intervalMs}ms`,
+      '--tensor.download-tasks.max-requests-per-run=5000',
+      '--tensor.download-tasks.max-run-duration=30m',
       '--server.address=127.0.0.1',
       '--server.port=8080',
     ],
@@ -810,6 +859,15 @@ async function startApplication() {
   child.stdout.once('end', () => { void logSink.end('stdout') })
   child.stderr.once('end', () => { void logSink.end('stderr') })
   await waitForHealth(current)
+  safeCheck(await mysql("SELECT CONCAT(version, ':', success) FROM flyway_schema_history ORDER BY installed_rank") === '1:1\n2:1\n3:1\n4:1\n5:1\n6:1\n7:1\n8:1', 'eight migrations')
+  safeCheck(await mysql("SELECT COUNT(*) FROM information_schema.TABLES WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME <> 'flyway_schema_history'") === '52', '52 business and task tables')
+}
+
+function signalOwnedApplication() {
+  if (application && !application.closed && !application.signalled) {
+    application.signalled = true
+    application.child.kill('SIGTERM')
+  }
 }
 
 async function stopApplication() {
@@ -862,13 +920,14 @@ function createMonitor(page, pluginId, apiName) {
         const metadata = pathname === '/api/v1/data-sources' ||
           pathname === `/api/v1/data-sources/${pluginId}/apis` ||
           pathname === `/api/v1/data-sources/${pluginId}/datasets` ||
-          pathname === `/api/v1/data-sources/${pluginId}/datasets/${apiName}`
+          pathname === `/api/v1/data-sources/${pluginId}/datasets/${apiName}` ||
+          pathname === `/api/v1/data-sources/${pluginId}/apis/${apiName}/download-capabilities`
         const recordPath = `/api/v1/data-sources/${pluginId}/datasets/${apiName}/records`
         if (pathname === recordPath) {
           ledger.observeQuery(pathname)
           records += 1
           runCounters.observe(pluginId === 'fixture' ? 'fixtureRecordsGets' : 'liveRecordsGets')
-        } else safeCheck(normal || metadata, 'browser request allowlist')
+        } else safeCheck(((normal || metadata) && url.search === '') || allowedTaskRead(url, ownedTaskIds), 'browser request allowlist')
       }
     } catch {
       failures.push('request-contract')
@@ -945,6 +1004,7 @@ async function drainAllMonitors() {
 }
 
 async function openRoute(page, route, heading) {
+  await drainAllMonitors()
   const response = await page.goto(route)
   safeCheck(response?.status() === 200, 'page route status')
   await assertPageSafe(page, 'page route')
@@ -956,6 +1016,7 @@ async function selectOption(page, label, name) {
   await combobox.focus()
   await combobox.press('Enter')
   const option = page.getByRole('option', { name, exact: typeof name === 'string' })
+  await option.scrollIntoViewIfNeeded()
   await expect(option).toBeVisible()
   await option.click()
   await expect(combobox).toHaveAttribute('aria-expanded', 'false')
@@ -983,17 +1044,44 @@ async function chooseDownload(page, pluginId, contract) {
     JSON.stringify(descriptor.parameters.map(({ name }) => name)) === JSON.stringify(contract.parameters),
     'selected API parameter order',
   )
+  const capabilityPath = `/api/v1/data-sources/${pluginId}/apis/${contract.apiName}/download-capabilities`
+  const capabilityPromise = page.waitForResponse((response) => isGet(response, capabilityPath))
   await selectOption(page, '数据接口', pluginId === 'fixture' ? FIXTURE_OPTION : optionName(contract))
+  const capabilityResponse = await capabilityPromise
+  const wireCapability = await safeJson(capabilityResponse, 'capabilities')
+  safeCheck(capabilityResponse.status() === 200, 'capability status')
+  const capability = parseDownloadCapabilities(
+    wireCapability, capabilityResponse.headers()['x-request-id'])
+  const mode = pluginId === 'fixture' ? 'SINGLE' : phase.toUpperCase()
+  if (mode === 'RANGE') {
+    const candidate = candidateIndex.interfaces.find((c) => c.apiName === contract.apiName)
+    const expectedRule = { ROW_LIMIT: 'CONFIRMED_ROW_LIMIT', CALENDAR_COVERAGE: 'VERIFIED_RULE',
+      RESPONSE_ONLY: 'RESPONSE_ONLY' }[candidate.completeness.kind]
+    const rowLimit = capability.range.completenessRule.rowLimit
+    safeCheck(capability.range.availability === 'AVAILABLE'
+      && capability.range.dateAxis === candidate.dateAxis
+      && capability.range.policyVersion === candidate.policyVersion
+      && capability.range.planningMode === candidate.planningMode
+      && capability.range.completenessRule.kind === expectedRule
+      && (typeof rowLimit === 'bigint' ? rowLimit === BigInt(candidate.completeness.rowLimit)
+        : rowLimit === candidate.completeness.rowLimit)
+      && (expectedRule !== 'RESPONSE_ONLY' || !capability.range.splittable),
+    'runtime RANGE matches candidate')
+  } else safeCheck(capability.single.available, 'runtime SINGLE available')
+  const modeLabel = mode === 'RANGE' ? '日期区间' : '单次请求'
+  await page.getByRole('radiogroup', { name: '下载模式', exact: true }).getByText(modeLabel, { exact: true }).click()
+  await expect(page.getByRole('radio', { name: modeLabel, exact: true })).toBeChecked()
+  downloadParameters.set(page, capability[mode.toLowerCase()].parameters)
   await assertPageSafe(page, 'download selection')
   const region = page.getByRole('region', { name: '接口说明', exact: true })
   await expect(region.getByText(contract.apiName, { exact: true })).toBeVisible()
 }
 
 async function openDownloadFromDataset(page, pluginId, contract) {
+  await drainAllMonitors()
   const sourcesPromise = page.waitForResponse((response) => isGet(response, '/api/v1/data-sources'))
-  await page.getByRole('link', { name: '数据下载', exact: true }).click()
-  await assertPageSafe(page, 'download navigation')
-  await expect(page.getByRole('heading', { level: 1, name: '数据下载' })).toBeVisible()
+  // Navigation links include indices, and KeepAlive reactivation does not refresh metadata.
+  await openRoute(page, '/downloads', '数据下载')
   const sourcesResponse = await sourcesPromise
   safeCheck(sourcesResponse.status() === 200, 'data source status')
   const sources = await safeJson(sourcesResponse, 'data sources')
@@ -1011,14 +1099,11 @@ async function doubleAnimationFrame(page) {
     requestAnimationFrame(() => requestAnimationFrame(resolve))))
 }
 
-async function openDataset(page, monitor, pluginId, contract, navigate = false) {
+async function openDataset(page, monitor, pluginId, contract) {
+  await monitor.drain()
   const recordsBefore = monitor.records()
   const sourcesPromise = page.waitForResponse((response) => isGet(response, '/api/v1/data-sources'))
-  if (navigate) {
-    await page.getByRole('link', { name: '数据查看', exact: true }).click()
-    await assertPageSafe(page, 'dataset navigation')
-    await expect(page.getByRole('heading', { level: 1, name: '数据查看' })).toBeVisible()
-  } else await openRoute(page, '/datasets', '数据查看')
+  await openRoute(page, '/datasets', '数据查看')
   const sourcesResponse = await sourcesPromise
   safeCheck(sourcesResponse.status() === 200, 'data source status')
   await safeJson(sourcesResponse, 'data sources')
@@ -1071,20 +1156,12 @@ function validatePageBody(response, body, pluginId, apiName, requestId) {
   safeCheck(body.totalPages === Math.ceil(body.totalElements / body.pageSize), 'records total pages')
 }
 
-function eventFieldSet(operation) {
-  return operation === 'download'
-    ? [
-        'requestId', 'operation', 'pluginId', 'apiName', 'paramSummary', 'sourceRowCount',
-        'insertedRows', 'updatedRows', 'durationMs', 'outcome', 'failureStage', 'errorCode',
-      ]
-    : [
-        'requestId', 'operation', 'pluginId', 'apiName', 'filterNames', 'page', 'pageSize',
-        'resultCount', 'totalElements', 'durationMs', 'outcome', 'failureStage', 'errorCode',
-      ]
+function eventFieldSet() {
+  return ['requestId', 'operation', 'pluginId', 'apiName', 'filterNames', 'page', 'pageSize',
+    'resultCount', 'totalElements', 'durationMs', 'outcome', 'failureStage', 'errorCode']
 }
 
-function parseCompletedEvent(line) {
-  const marker = 'tensor.operation.completed'
+function parseCompletedEvent(line, marker = 'tensor.operation.completed') {
   const index = line.indexOf(marker)
   safeCheck(index >= 0, 'completion event marker')
   const text = line.slice(index + marker.length).trim()
@@ -1122,20 +1199,12 @@ async function correlateEvent(expected) {
   for (const [key, value] of Object.entries(expected)) {
     safeCheck(event[key] === String(value), `completion event ${key}`)
   }
-  if (expected.outcome === 'failure') {
-    safeCheck(event.failureStage !== 'none', 'failed completion stage')
-    safeCheck(
-      event.sourceRowCount === 'unavailable' && event.insertedRows === 'unavailable' &&
-      event.updatedRows === 'unavailable',
-      'failed completion unavailable counts',
-    )
-  }
   safeCheck(integer(Number(event.durationMs)), 'completion duration')
   correlatedEvents.set(expected.requestId, event)
   return Number(event.durationMs)
 }
 
-async function queryDataset(page, monitor, pluginId, contract, definition, { code } = {}) {
+async function queryDataset(page, monitor, pluginId, contract, definition, { code, caseId, position } = {}) {
   const pathname = `/api/v1/data-sources/${pluginId}/datasets/${contract.apiName}/records`
   const priorRecords = monitor.records()
   safeCheck(priorRecords >= 0, 'records counter')
@@ -1145,6 +1214,15 @@ async function queryDataset(page, monitor, pluginId, contract, definition, { cod
   await page.getByRole('button', { name: '查询', exact: true }).click()
   const response = await responsePromise
   const body = await safeJson(response, 'records response')
+  if (response.status() !== 200) {
+    validateApiError(body)
+    const failure = safeRecordsQueryFailure(body, { pluginId, apiName: contract.apiName, caseId, position,
+      httpStatus: response.status(), requestId: response.headers()['x-request-id'] })
+    ledger.rememberRequestId(body.requestId)
+    evidence.queryFailures ??= []
+    evidence.queryFailures.push(failure)
+    throw new Error('Safe check failed: records query failed')
+  }
   validatePageBody(response, body, pluginId, contract.apiName)
   safeCheck(
     JSON.stringify(body.columns) === JSON.stringify([
@@ -1152,6 +1230,7 @@ async function queryDataset(page, monitor, pluginId, contract, definition, { cod
     ]),
     'records columns match definition',
   )
+  for (const row of body.items) validateBusinessRow(row, body.columns, pluginId, contract.apiName, 0, Date.now())
   const url = new URL(response.url())
   const expectedQuery = code
     ? [['page', '1'], ['pageSize', '50'], ['tsCode', code]]
@@ -1162,7 +1241,7 @@ async function queryDataset(page, monitor, pluginId, contract, definition, { cod
   )
   safeCheck(monitor.records() === priorRecords + 1, 'one records request')
   const projection = {
-    apiName: contract.apiName,
+    apiName: contract.apiName, caseId, position,
     outcome: 'SUCCESS',
     totalElements: body.totalElements,
     resultCount: body.items.length,
@@ -1195,8 +1274,11 @@ function compactDisplayValue(type, value) {
 }
 
 async function fillSample(page, contract, sample) {
-  for (const name of contract.parameters) {
-    const parameter = PARAMETERS[name]
+  const descriptors = downloadParameters.get(page)
+  safeCheck(Array.isArray(descriptors), 'selected capability parameters')
+  for (const name of Object.keys(sample)) {
+    const parameter = descriptors.find((descriptor) => descriptor.name === name)
+    safeCheck(Boolean(parameter), 'fixed sample parameter in selected capability')
     const value = sample[name]
     if (parameter.type === 'ENUM') {
       await selectOption(page, parameter.label, value)
@@ -1218,100 +1300,131 @@ async function rateLimit() {
   safeCheck(Date.now() - lastDownloadFinishedAt >= intervalMs, 'live call interval')
 }
 
-async function submitDownload(page, monitor, pluginId, contract, params, fixture = false) {
+async function readTaskApi(page, pathname, parser, context) {
+  safeCheck(context && ownedTaskIds.has(context.taskId)
+    && pathname.startsWith(`/api/v1/download-tasks/${context.taskId}`)
+    && allowedTaskRead(new URL(pathname, BASE_URL), ownedTaskIds), 'owned task query')
+  const result = await page.evaluate(async (route) => {
+    const requestId = crypto.randomUUID()
+    const response = await fetch(route, { headers: { 'X-Request-Id': requestId } })
+    return { status: response.status, requestId, header: response.headers.get('X-Request-Id'), text: await response.text() }
+  }, pathname)
+  assertSafeText(result.text, 'task API response')
+  if (result.status !== 200) {
+    let failure = { operation: 'TASK_QUERY', httpStatus: result.status, requestId: null, errorCode: null }
+    try {
+      failure = safeTaskQueryFailure(JSON.parse(result.text), { ...context, pathname,
+        httpStatus: result.status, requestId: result.requestId, responseRequestId: result.header })
+    } catch {}
+    evidence.queryFailures ??= []
+    evidence.queryFailures.push(failure)
+  }
+  safeCheck(result.status === 200 && result.header === result.requestId, 'task query response')
+  ledger.rememberRequestId(result.requestId)
+  let body
+  try { body = parser(JSON.parse(result.text), result.requestId) }
+  catch { throw new Error('Safe check failed: task query contract') }
+  return body
+}
+
+async function assertResponseOnlyPage(page, sourceRows) {
+  const detail = page.locator('.task-detail')
+  const outcome = sourceRows > 0n ? '返回记录已采集' : '本次请求未返回记录'
+  await expect(detail.getByText(outcome, { exact: true })).toBeVisible()
+  await expect(detail.getByText('数据完整性未确认，可能存在上游截断', { exact: true })).toBeVisible()
+}
+
+async function submitDownload(page, monitor, pluginId, contract, params, fixture = false, evidenceCase) {
   if (!fixture) await rateLimit()
-  const expectedBody = { pluginId, apiName: contract.apiName, params }
+  safeCheck(Date.now() < runDeadline && sourceRequests < 5000, 'shared task run budget')
+  const expectedBody = { pluginId, apiName: contract.apiName, mode: fixture ? 'SINGLE' : phase.toUpperCase(), params }
   ledger.expectDownload(expectedBody)
   const beforePosts = monitor.downloads()
-  const responsePromise = page.waitForResponse(
-    (response) => response.request().method() === 'POST' && responsePath(response) === '/api/v1/downloads',
-    { timeout: fixture ? 30_000 : 135_000 },
-  )
+  const responsePromise = page.waitForResponse((response) => response.request().method() === 'POST' && responsePath(response) === '/api/v1/download-tasks', { timeout: 30_000 })
   const startedAt = Date.now()
-  await page.getByRole('button', { name: '开始下载', exact: true }).click()
+  await page.getByRole('button', { name: '提交任务', exact: true }).click()
   const response = await responsePromise
-  const body = await safeJson(response, 'download response')
-  if (!fixture) lastDownloadFinishedAt = Date.now()
-  safeCheck(monitor.downloads() === beforePosts + 1, 'one download POST')
-  safeCheck(response.headers()['x-request-id'] === body.requestId, 'download header request ID')
-  ledger.rememberRequestId(body.requestId)
-
-  if (response.status() !== 200) {
-    validateApiError(body)
-    const projection = {
-      apiName: contract.apiName,
-      outcome: body.code,
-      requestId: body.requestId,
-    }
-    evidence[fixture ? 'fixture' : 'downloads'].push(projection)
-    await assertPageSafe(page, 'download result')
-    const alert = page.getByRole('alert')
-    await expect(alert.getByRole('heading', { name: '下载失败' })).toBeVisible()
-    const alertText = await alert.innerText()
-    assertSafeText(alertText, 'download failure alert')
-    safeCheck(alertText.includes(body.message), 'download failure summary')
-    await expect(page.getByRole('status')).toHaveCount(0)
-    const durationMs = await correlateEvent({
-      requestId: body.requestId,
-      operation: 'download',
-      pluginId,
-      apiName: contract.apiName,
-      outcome: 'failure',
-      errorCode: body.code,
-    })
-    projection.durationMs = durationMs
-    await monitor.drain()
-    throw new Error(`Safe live blocker: ${body.code}`)
-  }
-
-  validateDownloadSuccess(body, pluginId, contract.apiName)
-  const projection = {
-    apiName: contract.apiName,
-    outcome: body.outcome,
-    sourceRowCount: body.sourceRowCount,
-    insertedRows: body.insertedRows,
-    updatedRows: body.updatedRows,
-    requestId: body.requestId,
-  }
-  evidence[fixture ? 'fixture' : 'downloads'].push(projection)
-  await assertPageSafe(page, 'download result')
-  const panel = page.getByRole('status')
-  if (body.outcome === 'EMPTY') {
-    await expect(panel.getByRole('heading', { name: '下载成功，0 条数据' })).toBeVisible()
-    await expect(panel.getByText('本次请求没有可写入的数据。')).toBeVisible()
-    await expect(panel.getByRole('term')).toHaveCount(0)
-  } else {
-    await expect(panel.getByRole('heading', { name: '下载成功' })).toBeVisible()
-    await expect(panel.getByRole('term')).toHaveText(['上游返回数', '插入数', '更新数'])
-    await expect(panel.getByRole('definition')).toHaveText([
-      String(body.sourceRowCount), String(body.insertedRows), String(body.updatedRows),
-    ])
-  }
-  await expect(page.getByRole('button', { name: '开始下载', exact: true })).toBeEnabled()
+  const receipt = validateTaskAcceptance(response.request().postDataJSON(), expectedBody, {
+    status: response.status(), location: response.headers().location,
+    requestId: response.headers()['x-request-id'], body: await safeJson(response, 'task receipt'),
+  })
+  safeCheck(response.request().headers()['x-request-id'] === receipt.requestId, 'task outgoing request ID')
+  ledger.rememberRequestId(receipt.requestId)
+  safeCheck(!ownedTaskIds.has(receipt.taskId), 'new unique task')
+  ownedTaskIds.add(receipt.taskId)
+  safeCheck(monitor.downloads() === beforePosts + 1, 'one task POST')
+  const submissionId = response.request().postDataJSON().submissionId
+  if (evidenceCase) Object.assign(evidenceCase, { taskId: receipt.taskId, submissionId })
+  const queryContext = { pluginId, apiName: contract.apiName, taskId: receipt.taskId, caseId: evidenceCase?.caseId ?? null }
+  const observed = { ...expectedBody, submissionId, requestId: receipt.requestId, taskId: receipt.taskId, task: null, batches: [] }
+  observedTasks.push(observed)
+  const panel = page.locator('.download-result-panel')
+  await expect(panel.getByRole('heading', { name: '任务已接收' })).toBeVisible()
   await expect(page.getByRole('combobox', { name: '数据源', exact: true })).toBeEnabled()
   await expect(page.getByRole('combobox', { name: '数据接口', exact: true })).toBeEnabled()
-  for (const name of contract.parameters) {
-    const parameter = PARAMETERS[name]
-    const control = parameter?.type === 'ENUM'
-      ? page.getByRole('combobox', { name: parameter.label, exact: true })
-      : page.getByLabel(new RegExp(`^${escapeRegex(parameter?.label ?? '场景')}\\s*\\*?$`))
-    await expect(control).toBeEnabled()
-  }
-  const durationMs = await correlateEvent({
-    requestId: body.requestId,
-    operation: 'download',
-    pluginId,
-    apiName: contract.apiName,
-    sourceRowCount: body.sourceRowCount,
-    insertedRows: body.insertedRows,
-    updatedRows: body.updatedRows,
-    outcome: body.outcome.toLowerCase(),
-    failureStage: 'none',
-    errorCode: 'none',
-  })
-  projection.durationMs = durationMs
   await monitor.drain()
-  return { body, startedAt, finishedAt: Date.now() }
+  await panel.getByRole('link', { name: '查看任务', exact: true }).click()
+  await expect(page).toHaveURL(`/downloads/tasks/${receipt.taskId}`)
+  const candidate = !fixture && phase === 'range'
+    ? candidateIndex.interfaces.find(({ apiName }) => apiName === contract.apiName) : null
+  let task
+  do {
+    safeCheck(Date.now() < runDeadline && !runtimeFailure, 'shared 30 minute task deadline')
+    task = await readTaskApi(page, `/api/v1/download-tasks/${receipt.taskId}`, parseDownloadTask, queryContext)
+    observed.task = task
+    observed.observedAt = new Date().toISOString()
+    const requestCount = evidenceInteger(task.requestCount, 5000)
+    if (evidenceCase) evidenceCase.requestCount = requestCount
+    safeCheck(task.taskId === receipt.taskId && task.submissionId === submissionId && task.pluginId === pluginId && task.apiName === contract.apiName && task.mode === expectedBody.mode && JSON.stringify(Object.entries(task.params).sort()) === JSON.stringify(Object.entries(params).sort()), 'task identity')
+    if (sourceRequests + requestCount >= 5000) {
+      runtimeFailure = new Error('Safe check failed: shared source request budget')
+      signalOwnedApplication()
+      throw runtimeFailure
+    }
+    if (['QUEUED', 'RUNNING'].includes(task.status)) await delay(1000)
+  } while (['QUEUED', 'RUNNING'].includes(task.status))
+  const requestCount = evidenceInteger(task.requestCount, 5000)
+  if (sourceRequests + requestCount >= 5000) {
+    runtimeFailure = new Error('Safe check failed: shared source budget exhausted')
+    signalOwnedApplication()
+  }
+  sourceRequests += requestCount
+  const batches = observed.batches
+  let total
+  for (let number = 1; ; number += 1) {
+    const batchPage = await readTaskApi(page, `/api/v1/download-tasks/${receipt.taskId}/batches?page=${number}&pageSize=100&includeSplit=true`, parseDownloadBatchPage, queryContext)
+    const pageTotal = evidenceInteger(batchPage.total, 5000)
+    total ??= pageTotal
+    safeCheck(batchPage.page === number && batchPage.pageSize === 100 && pageTotal === total
+      && batchPage.items.length === Math.min(100, total - batches.length),
+    'complete stable batch pages')
+    batches.push(...batchPage.items)
+    if (batches.length === total) break
+  }
+  if (candidate) validateTaskRuntime(candidate, params, task, batches)
+  const summary = summarizeTaskBatches(task, batches)
+  if (expectedBody.mode === 'SINGLE' && task.status === 'SUCCEEDED') safeCheck(requestCount === 1 && summary.leafCount === 1 && batches[0].attemptCount === 1, 'one SINGLE source attempt')
+  const body = { apiName: contract.apiName, outcome: task.status === 'SUCCEEDED'
+    ? summary.sourceRowCount === 0 ? 'EMPTY' : 'SUCCESS' : task.status,
+    taskId: receipt.taskId, submissionId, requestId: receipt.requestId, requestCount,
+    ...summary, status: task.status, errorCode: task.lastError?.code ?? null }
+  evidence[fixture ? 'fixture' : 'downloads'].push(body)
+  if (!fixture) lastDownloadFinishedAt = Date.now()
+  await assertPageSafe(page, 'task result')
+  if (task.status === 'SUCCEEDED') {
+    safeCheck(task.planReady && task.lastError === null, 'successful planned task')
+    await expect(page.locator('[data-task-status]')).toHaveText('已成功')
+    safeCheck(!task.canRetry && !task.canResume, 'successful task cannot be replayed')
+    const progress = page.locator('.task-detail__counts')
+    await expect(progress.getByText(`来源行数 ${task.counts.sourceRows}`, { exact: true })).toBeVisible()
+    await expect(progress.getByText(`新增记录次数 ${task.counts.insertedRows}`, { exact: true })).toBeVisible()
+    await expect(progress.getByText(`更新记录次数 ${task.counts.updatedRows}`, { exact: true })).toBeVisible()
+    if (candidate?.completeness.kind === 'RESPONSE_ONLY') {
+      await assertResponseOnlyPage(page, task.counts.sourceRows)
+    }
+  }
+  await monitor.drain()
+  return { body, task, startedAt, finishedAt: Date.now() }
 }
 
 function shanghaiTimestamp(value) {
@@ -1326,9 +1439,12 @@ function shanghaiTimestamp(value) {
 
 async function assertVisibleRow(page, definition, row) {
   await assertPageSafe(page, 'visible business row')
-  const headerTexts = [...definition.columns.map(({ label }) => label), ...SOURCE_COLUMNS]
+  const marketLabels = { ts_code: '证券代码', trade_date: '交易日', open: '开盘价', high: '最高价', low: '最低价', close: '收盘价', pre_close: '前收盘价', change: '涨跌额', vol: '成交量', amount: '成交额', source_plugin: '来源插件', source_api: '来源接口', ingested_at: '入库时间', pct_chg: definition.apiName === 'daily' ? '涨跌幅（%）' : '涨跌幅（比率）' }
+  const market = definition.pluginId === 'tushare_pro' && ['daily', 'weekly'].includes(definition.apiName)
+  const headerTexts = [...definition.columns, ...SOURCE_COLUMNS.map((name) => ({ name, label: name }))]
+    .map(({ name, label }) => market && marketLabels[name] ? `${marketLabels[name]}${name}` : label)
   safeCheck(
-    JSON.stringify(await page.getByRole('columnheader').allTextContents()) === JSON.stringify(headerTexts),
+    JSON.stringify((await page.getByRole('columnheader').allTextContents()).map((v) => v.replace(/\s+/g, ''))) === JSON.stringify(headerTexts.map((v) => v.replace(/\s+/g, ''))),
     'visible column labels',
   )
   const rows = page.getByRole('row')
@@ -1337,6 +1453,7 @@ async function assertVisibleRow(page, definition, row) {
   const names = [...definition.columns.map(({ name }) => name), ...SOURCE_COLUMNS]
   const expected = names.map((name) => {
     if (name === 'ingested_at') return shanghaiTimestamp(row[name])
+    if (['change', 'pct_chg'].includes(name) && row[name] !== null && !String(row[name]).startsWith('-') && /[1-9]/.test(row[name])) return `+${row[name]}`
     return row[name] === null ? '--' : row[name]
   })
   const actual = await cells.allTextContents()
@@ -1355,7 +1472,7 @@ async function runFixture(browser) {
       await initializeOwnedPage(browser, owned, workDeadline, 'fixture', contract.apiName)
       const { page, monitor } = owned
       const definition = await openDataset(page, monitor, 'fixture', contract)
-      let body = await queryDataset(page, monitor, 'fixture', contract, definition)
+      let body = await queryDataset(page, monitor, 'fixture', contract, definition, { caseId: 'fixture-success', position: 'BEFORE' })
       safeCheck(body.totalElements === 0 && body.items.length === 0, 'fixture initially empty')
 
       await openDownloadFromDataset(page, 'fixture', contract)
@@ -1371,8 +1488,8 @@ async function runFixture(browser) {
         'fixture SUCCESS counts',
       )
 
-      const afterSuccessDefinition = await openDataset(page, monitor, 'fixture', contract, true)
-      body = await queryDataset(page, monitor, 'fixture', contract, afterSuccessDefinition, { code: '000001.SZ' })
+      const afterSuccessDefinition = await openDataset(page, monitor, 'fixture', contract)
+      body = await queryDataset(page, monitor, 'fixture', contract, afterSuccessDefinition, { code: '000001.SZ', caseId: 'fixture-success', position: 'AFTER' })
       safeCheck(JSON.stringify(body.columns) === JSON.stringify(FIXTURE_COLUMNS), 'fixture columns')
       safeCheck(body.totalElements === 1 && body.items.length === 1, 'fixture SUCCESS row')
       const row = body.items[0]
@@ -1393,8 +1510,8 @@ async function runFixture(browser) {
       const empty = await submitDownload(page, monitor, 'fixture', contract, { scenario: 'EMPTY' }, true)
       safeCheck(empty.body.outcome === 'EMPTY', 'fixture EMPTY outcome')
 
-      const afterEmptyDefinition = await openDataset(page, monitor, 'fixture', contract, true)
-      const afterEmpty = await queryDataset(page, monitor, 'fixture', contract, afterEmptyDefinition)
+      const afterEmptyDefinition = await openDataset(page, monitor, 'fixture', contract)
+      const afterEmpty = await queryDataset(page, monitor, 'fixture', contract, afterEmptyDefinition, { caseId: 'fixture-empty', position: 'AFTER' })
       safeCheck(afterEmpty.totalElements === 1 && afterEmpty.items.length === 1, 'fixture row retained')
       safeCheck(JSON.stringify(afterEmpty.items[0]) === JSON.stringify(row), 'fixture row unchanged')
       await assertVisibleRow(page, afterEmptyDefinition, row)
@@ -1403,6 +1520,7 @@ async function runFixture(browser) {
     primary = error instanceof Error && error.message.startsWith('Safe')
       ? error
       : new Error('Safe check failed: fixture preparation')
+    signalOwnedApplication()
   }
   let cleanupFailure
   try {
@@ -1420,7 +1538,7 @@ async function runFixture(browser) {
 }
 
 function liveCaseTimeoutMs(sampleCount) {
-  return 240_000 + sampleCount * (150_000 + intervalMs)
+  return phase === 'range' ? 1_980_000 : 240_000 + sampleCount * (150_000 + (intervalMs ?? 2000))
 }
 
 async function runLiveInterface(browser, entry) {
@@ -1435,46 +1553,57 @@ async function runLiveInterface(browser, entry) {
     await beforeDeadline((async () => {
       await initializeOwnedPage(browser, owned, workDeadline, 'tushare_pro', contract.apiName)
       const { page, monitor } = owned
-      const definition = await openDataset(page, monitor, 'tushare_pro', contract)
-      await expect(page.getByRole('heading', { name: '设置筛选条件后查询' })).toBeVisible()
-      const initial = await queryDataset(page, monitor, 'tushare_pro', contract, definition)
-      safeCheck(initial.totalElements === 0 && initial.items.length === 0, 'live dataset initially empty')
-
-      await openDownloadFromDataset(page, 'tushare_pro', contract)
-      const results = []
-      let firstDownloadAt
-      let lastDownloadAt
-      for (let index = 0; index < entry.params.length; index += 1) {
-        if (index > 0) {
-          await openDataset(page, monitor, 'tushare_pro', contract, true)
-          await openDownloadFromDataset(page, 'tushare_pro', contract)
-        }
-        await fillSample(page, contract, entry.params[index])
-        const result = await submitDownload(
-          page, monitor, 'tushare_pro', contract, entry.params[index], false,
-        )
-        firstDownloadAt ??= result.startedAt
-        lastDownloadAt = result.finishedAt
-        results.push(result.body)
-      }
-      const outcomeStatus = results.some(({ outcome }) => outcome === 'SUCCESS') ? 'ok' : 'empty'
-      validateInterfaceOutcomes(outcomeStatus, results)
-
-      const finalDefinition = await openDataset(page, monitor, 'tushare_pro', contract, true)
-      const finalBody = await queryDataset(page, monitor, 'tushare_pro', contract, finalDefinition)
-      const insertedRows = results.reduce((sum, result) => sum + result.insertedRows, 0)
-      validateFinalDataset({
-        outcomeStatus,
-        insertedRows,
-        body: finalBody,
-        definition: finalDefinition,
-        startedAt: firstDownloadAt,
-        finishedAt: lastDownloadAt,
-      })
-      if (outcomeStatus === 'ok') await assertVisibleRow(page, finalDefinition, finalBody.items[0])
-      else {
-        await expect(page.getByText('未找到符合条件的数据')).toBeVisible()
-        safeCheck(await page.getByRole('row').count() <= 1, 'empty interface has no placeholder row')
+      for (let index = 0; index < entry.cases.length; index += 1) {
+        const sample = entry.cases[index]
+        const evidenceCase = evidence.cases.find((c) => c.caseId === sample.caseId)
+        const candidate = typeof candidateIndex === 'undefined' ? null
+          : candidateIndex.interfaces.find(({ apiName }) => apiName === contract.apiName)
+        const responseOnly = candidate?.completeness.kind === 'RESPONSE_ONLY'
+        const binding = responseOnly ? sourceBindings.get(sample.caseId) : null
+        const boundSource = responseOnly ? candidateIndex.runs
+          .find(({ runId }) => runId === binding?.runId)?.cases
+          .find(({ caseId }) => caseId === binding?.caseId) : null
+        if (responseOnly) safeCheck(boundSource?.phase === 'SOURCE'
+          && boundSource.status === 'PASS' && boundSource.apiName === sample.apiName
+          && JSON.stringify(Object.entries(boundSource.params).sort())
+            === JSON.stringify(Object.entries(sample.params).sort()),
+        'bound RESPONSE_ONLY source')
+        const definition = await openDataset(page, monitor, 'tushare_pro', contract)
+        const initial = await queryDataset(page, monitor, 'tushare_pro', contract, definition, { code: sample.params.ts_code, caseId: sample.caseId, position: 'BEFORE' })
+        const before = await sqlSnapshot(contract, definition, sample.params.ts_code)
+        evidence.sql ??= []
+        const sqlEvidence = { caseId: sample.caseId, before, after: null }
+        evidence.sql.push(sqlEvidence)
+        safeCheck(initial.totalElements === before.selectedCount, 'initial browser and SQL selected count')
+        await openDownloadFromDataset(page, 'tushare_pro', contract)
+        await fillSample(page, contract, sample.params)
+        Object.assign(evidenceCase, { status: 'EVIDENCE_MISSING', reviewMethod: 'task API plus read-only SQL', evidencePaths: ['safe-results.json'] })
+        const result = await submitDownload(page, monitor, 'tushare_pro', contract, sample.params, false, evidenceCase)
+        const after = await sqlSnapshot(contract, definition, sample.params.ts_code)
+        Object.assign(evidenceCase, safeCaseEvidence({ ...evidenceCase, ...result.body,
+          status: result.task.lastError ? 'FAILED' : 'EVIDENCE_MISSING',
+          sqlBeforeKeyCount: before.keyCount, sqlAfterKeyCount: after.keyCount,
+          ownershipSummary: after.ownershipSummary, businessKeyDigest: after.keyDigest,
+          reviewMethod: responseOnly
+            ? 'verified persisted RESPONSE_ONLY policy/rule, one full-range request and successful leaf, source/write counts, read-only SQL, page outcome, and unconfirmed-completeness notice'
+            : evidenceCase.reviewMethod,
+        }))
+        sqlEvidence.after = after
+        safeCheck(after.otherStockDigest === before.otherStockDigest, 'other-stock history unchanged')
+        safeCheck(after.keyCount === before.keyCount + result.body.insertedRows, 'SQL key growth matches inserted facts')
+        if (sample.params.ts_code) safeCheck(after.selectedCount === before.selectedCount + result.body.insertedRows, 'all inserts belong to selected stock')
+        const finalDefinition = await openDataset(page, monitor, 'tushare_pro', contract)
+        const finalBody = await queryDataset(page, monitor, 'tushare_pro', contract, finalDefinition, { code: sample.params.ts_code, caseId: sample.caseId, position: 'AFTER' })
+        safeCheck(finalBody.totalElements === after.selectedCount, 'final browser and SQL selected count')
+        safeCheck(!sample.params.ts_code || finalBody.items.every((row) => row.ts_code === sample.params.ts_code), 'visible rows belong to selected stock')
+        if (finalBody.items.length) await assertVisibleRow(page, finalDefinition, finalBody.items[0])
+        else await expect(page.getByText('未找到符合条件的数据')).toBeVisible()
+        safeCheck(result.task.status === 'SUCCEEDED', 'task terminal success')
+        const completed = { ...evidenceCase,
+          status: responseOnly && boundSource.sourceRowCount > 0
+            && result.body.sourceRowCount === 0 ? 'EVIDENCE_MISSING' : 'PASS' }
+        validateEvidenceCase(completed)
+        Object.assign(evidenceCase, completed)
       }
       await monitor.drain(Math.min(workDeadline, Date.now() + 135_000))
     })(), workDeadline, 'live interface work', () => cancelOwned(owned))
@@ -1482,6 +1611,7 @@ async function runLiveInterface(browser, entry) {
     primary = error instanceof Error && /^Safe (?:check failed|live blocker):/.test(error.message)
       ? error
       : new Error('Safe check failed: live interface execution')
+    signalOwnedApplication()
   }
   let cleanupFailure
   try {
@@ -1496,6 +1626,47 @@ async function runLiveInterface(browser, entry) {
   runCounters.complete(contract.apiName)
 }
 
+async function verifyTaskEvents(text) {
+  const events = (marker) => text.split(/\r?\n/).filter((line) => line.includes(marker)).map((line) => parseCompletedEvent(line, marker))
+  const accepted = events('tensor.download_task.accepted')
+  const started = events('tensor.download_task.started')
+  const finished = events('tensor.download_task.finished')
+  const batches = events('tensor.download_batch.finished')
+  safeCheck(accepted.length === observedTasks.length && started.length === observedTasks.length, 'one acceptance and start per task')
+  const equalFields = (event, expected, keys) => {
+    objectWithExactKeys(event, keys.split(' '), 'task event')
+    for (const [key, value] of Object.entries(expected)) safeCheck(event[key] === String(value), 'task event fact')
+  }
+  for (const item of observedTasks) {
+    const identity = { taskId: item.taskId, pluginId: item.pluginId, apiName: item.apiName }
+    const one = (rows) => {
+      const found = rows.filter((row) => row.taskId === item.taskId)
+      safeCheck(found.length === 1, 'unique task event')
+      return found[0]
+    }
+    equalFields(one(accepted), { ...identity, requestId: item.requestId, status: 'QUEUED', version: 1, kind: 'CREATED', outcome: 'accepted' }, 'requestId taskId pluginId apiName status version kind outcome durationMs')
+    equalFields(one(started), { ...identity, runGeneration: 1 }, 'taskId pluginId apiName runGeneration')
+    if (!item.task || ['QUEUED', 'RUNNING'].includes(item.task.status)) continue
+    equalFields(one(finished), { ...identity, runGeneration: 1, status: item.task.status, recovered: false,
+      requestCount: item.task.requestCount, runRequestCount: item.task.runRequestCount,
+      ...item.task.counts, errorCode: item.task.lastError?.code ?? 'none',
+    }, 'taskId pluginId apiName runGeneration status recovered durationMs requestCount runRequestCount totalBatches pendingBatches runningBatches succeededBatches failedBatches splitBatches sourceRows insertedRows updatedRows errorCode')
+    const taskBatches = batches.filter((row) => row.taskId === item.taskId)
+    const executed = item.batches.filter((batch) => batch.attemptCount > 0 && !['RUNNING', 'PENDING'].includes(batch.status))
+    safeCheck(taskBatches.length === executed.length, 'batch events match actual executed nodes')
+    for (const batch of executed) {
+      const matches = taskBatches.filter((row) => row.batchId === batch.batchId)
+      safeCheck(matches.length === 1, 'unique batch event')
+      equalFields(matches[0], { ...identity, batchId: batch.batchId, runGeneration: 1, status: batch.status,
+        attemptCount: batch.attemptCount, sourceRows: batch.sourceRows, insertedRows: batch.insertedRows,
+        updatedRows: batch.updatedRows, errorCode: batch.error?.code ?? 'none',
+      }, 'taskId batchId pluginId apiName runGeneration status attemptCount durationMs sourceRows insertedRows updatedRows errorCode')
+    }
+  }
+  safeCheck(finished.every((event) => ownedTaskIds.has(event.taskId)) && batches.every((event) => ownedTaskIds.has(event.taskId)), 'only owned task events')
+  evidence.taskEvents = { accepted: accepted.length, started: started.length, finished: finished.length, batches: batches.length }
+}
+
 async function verifyAllEvents() {
   await logSink?.idle()
   safeCheck(Boolean(applicationLogPath), 'application log initialized')
@@ -1504,11 +1675,26 @@ async function verifyAllEvents() {
   const completed = text.split(/\r?\n/).filter((line) => line.includes('tensor.operation.completed'))
   safeCheck(completed.length === expectedEvents.size, 'completion event total')
   safeCheck(correlatedEvents.size === expectedEvents.size, 'completion events correlated')
+  safeCheck(completed.every((line) => parseCompletedEvent(line).operation === 'query'), 'no synchronous download completion')
+  await verifyTaskEvents(text)
 }
 
 async function writeSafeEvidence() {
   if (evidenceWritten) return
   evidence.finishedAt = new Date().toISOString()
+  evidence.taskObservations = observedTasks.map((item) => ({ taskId: item.taskId, submissionId: item.submissionId,
+    apiName: item.apiName, pluginId: item.pluginId, requestId: item.requestId,
+    status: item.task?.status ?? null, observedAt: item.observedAt ?? null,
+    requestCount: item.task ? evidenceInteger(item.task.requestCount, 5000) : null,
+    counts: item.task ? Object.fromEntries(Object.entries(item.task.counts)
+      .map(([key, value]) => [key, evidenceInteger(value)])) : null,
+    errorCode: item.task?.lastError?.code ?? null,
+    batchNodes: item.batches.map((node) => ({ batchId: node.batchId, parentBatchId: node.parentBatchId,
+      status: node.status, start: node.rangeStart?.replaceAll('-', '') ?? null, end: node.rangeEnd?.replaceAll('-', '') ?? null,
+      attemptCount: node.attemptCount, sourceRowCount: evidenceInteger(node.sourceRows),
+      insertedRows: evidenceInteger(node.insertedRows), updatedRows: evidenceInteger(node.updatedRows),
+      errorCode: node.error?.code ?? null })),
+  }))
   const counters = runCounters.snapshot(INTERFACES.length)
   evidence.totals = {
     registeredCases: INTERFACES.length,
@@ -1525,12 +1711,21 @@ async function writeSafeEvidence() {
     liveDownloadResultsRecorded: evidence.downloads.length,
     liveQueryResultsRecorded: evidence.queries.length,
     callIntervalMs: intervalMs,
+    completedSourceRequests: sourceRequests,
+    sourceRequestsObserved: observedTasks.reduce((sum, item) =>
+      sum + (item.task ? evidenceInteger(item.task.requestCount, 5000) : 0), 0),
+    liveSourceRequestsObserved: observedTasks.filter((item) => item.pluginId === 'tushare_pro')
+      .reduce((sum, item) => sum + (item.task ? evidenceInteger(item.task.requestCount, 5000) : 0), 0),
+    effectiveRetries: 0,
+    workers: 1,
   }
   evidence.inputs.specSha256 = await sha256(new URL(import.meta.url))
   evidence.inputs.gitCommit = (await execFileAsync('git', ['rev-parse', 'HEAD'], {
     cwd: new URL('../..', import.meta.url), env: publicEnvironment(), timeout: 10_000,
   })).stdout.trim()
-  evidence.command = 'npx playwright test e2e/tushare-live.spec.js --workers=1'
+  evidence.command = `ISSUE018_T13_PHASE=${phase} TENSOR_TUSHARE_LIVE_E2E=1 npx playwright test e2e/tushare-live.spec.js --workers=1`
+  evidence.inputs.casePlanSha256 = casePlanInput?.sha256 ?? null
+  evidence.inputs.evidenceIndexSha256 = evidenceIndexInput?.sha256 ?? null
   const serialized = `${JSON.stringify(evidence, null, 2)}\n`
   assertSafeText(serialized, 'safe evidence')
   const target = path.join(runDirectory, 'safe-results.json')
@@ -1547,10 +1742,11 @@ async function writeSafeEvidence() {
   }
   await chmod(target, 0o600)
   evidenceWritten = true
-  console.info(`M14-T09 safe results: ${target}`)
+  console.info(`ISSUE-018-T13 safe results: ${target}`)
 }
 
 async function cleanupAfterSetupFailure(error) {
+  signalOwnedApplication()
   const failures = [error]
   if (monitors.size) {
     try { await drainAllMonitors() } catch (cleanupError) { failures.push(cleanupError) }
@@ -1570,12 +1766,17 @@ function registerTests() {
     launchOptions: { env: publicEnvironment() },
   })
 
-  test.describe('M14-T09 live Tushare acceptance', () => {
+  test.describe(`ISSUE-018-T13 ${phase} live Tushare acceptance`, () => {
     test.describe.configure({ mode: 'serial', retries: 0 })
 
     test.beforeAll(async ({ browser }, testInfo) => {
       test.setTimeout(600_000)
       evidence.startedAt = new Date().toISOString()
+      runDeadline = Date.now() + 30 * 60_000
+      budgetTimer = setTimeout(() => {
+        runtimeFailure = new Error('Safe check failed: shared 30 minute deadline')
+        signalOwnedApplication()
+      }, 30 * 60_000)
       try {
         await bounded(validatePreconditions(testInfo), 30_000, 'preconditions')
         await startApplication()
@@ -1595,6 +1796,7 @@ function registerTests() {
       const failures = []
       try { await bounded(drainAllMonitors(), 135_000, 'final network drain') } catch { failures.push(new Error('Safe check failed: final network drain')) }
       try { await stopApplication() } catch { failures.push(new Error('Safe check failed: JVM cleanup')) }
+      clearTimeout(budgetTimer)
       if (jarValidated) {
         try {
           safeCheck(await sha256(process.env.ACCEPTANCE_JAR) === jarHashBefore, 'acceptance JAR unchanged')
@@ -1609,11 +1811,11 @@ function registerTests() {
         try {
           safeCheck(fixturePassed, 'fixture preparation completed')
           safeCheck(evidence.downloads.length === liveScope.sampleCount, 'selected live downloads completed')
-          safeCheck(evidence.queries.length === INTERFACES.length * 2, 'selected live queries completed')
+          safeCheck(evidence.queries.length === liveScope.sampleCount * 2, 'selected live queries completed')
           safeCheck(evidence.fixture.length === 5, '2 fixture downloads and 3 fixture queries completed')
           safeCheck(runCounters.traffic.liveDownloadPosts === liveScope.sampleCount, 'selected live download POSTs observed')
           safeCheck(runCounters.traffic.fixtureDownloadPosts === 2, '2 fixture download POSTs observed')
-          safeCheck(runCounters.traffic.liveRecordsGets === INTERFACES.length * 2, 'selected live records GETs observed')
+          safeCheck(runCounters.traffic.liveRecordsGets === liveScope.sampleCount * 2, 'selected live records GETs observed')
           safeCheck(runCounters.traffic.fixtureRecordsGets === 3, '3 fixture records GETs observed')
           safeCheck(runCounters.attempted.size === INTERFACES.length && runCounters.failed.size === 0, 'selected live cases attempted without failure')
         } catch { failures.push(new Error('Safe check failed: complete matrix totals')) }
@@ -1623,12 +1825,16 @@ function registerTests() {
         immutableInputs = Boolean(process.env.ACCEPTANCE_JAR) &&
           await sha256(process.env.ACCEPTANCE_JAR) === JAR_SHA &&
           createHash('sha256').update(await readFile(manifestPath)).digest('hex') === MANIFEST_SHA &&
-          createHash('sha256').update(await readFile(requestsPath)).digest('hex') === REQUESTS_SHA
+          createHash('sha256').update(await readFile(requestsPath)).digest('hex') === REQUESTS_SHA &&
+          await evidenceInputsUnchanged()
       } catch {
         immutableInputs = false
       }
+      if (!immutableInputs && jarValidated) failures.push(new Error('Safe check failed: immutable input verification'))
       evidence.cleanup = {
         networkDrained: failures.every(({ message }) => !message.includes('network')),
+        logCorrelated: failures.every(({ message }) => !message.includes('log correlation')),
+        budgetExpired: Boolean(runtimeFailure),
         jvmStopped: !(await canConnectToPort()),
       }
       if (artifactInitialized) evidence.cleanup.logScanned = !logSink?.failed
@@ -1636,7 +1842,7 @@ function registerTests() {
       if (artifactInitialized) {
         try { await writeSafeEvidence() } catch { failures.push(new Error('Safe check failed: evidence write')) }
       }
-      if (failures.length) throw new AggregateError(failures, 'Safe M14-T09 cleanup failure')
+      if (failures.length) throw new AggregateError(failures, 'Safe ISSUE-018-T13 cleanup failure')
     })
 
     for (const entry of INTERFACES) {

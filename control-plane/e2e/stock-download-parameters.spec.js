@@ -28,6 +28,8 @@ async function selectApi(page, apiName) {
     .filter({ has: page.getByText(apiName, { exact: true }) })
   await expect(option).toHaveCount(1)
   await option.click()
+  await page.getByRole('radiogroup', { name: '下载模式', exact: true }).getByText('单次请求', { exact: true }).click()
+  await expect(page.getByRole('radio', { name: '单次请求', exact: true })).toBeChecked()
 }
 
 async function fillParameter(page, parameter, rawStockCode = ' 000001.sz ') {

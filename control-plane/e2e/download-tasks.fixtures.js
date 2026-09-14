@@ -102,6 +102,7 @@ export function task(overrides = {}) {
     pluginId: 'tushare_pro',
     apiName: 'daily',
     mode: 'RANGE',
+    extraction: { policyVersion: 'controlled-browser-v1', ruleKind: 'VERIFIED_RULE' },
     params: {
       ts_code: '000001.SZ',
       start_date: '20260901',
@@ -234,6 +235,7 @@ function exactQuery(url, expected) {
 async function installDownloadTaskApi(context) {
   const state = {
     scenario: 'submission',
+    capabilities: structuredClone(CAPABILITIES),
     task: null,
     batches: [],
     requests: [],
@@ -305,7 +307,7 @@ async function installDownloadTaskApi(context) {
       return fulfill(200, [API])
     }
     if (method === 'GET' && path === '/api/v1/data-sources/tushare_pro/apis/daily/download-capabilities') {
-      return fulfill(200, CAPABILITIES)
+      return fulfill(200, state.capabilities)
     }
     if (method === 'GET' && path === '/api/v1/download-tasks') {
       const query = Object.fromEntries(url.searchParams)
@@ -333,6 +335,13 @@ async function installDownloadTaskApi(context) {
       if (state.task) return reject('duplicate fixture submission')
       state.task = task({ submissionId: body.submissionId })
       state.batches = succeededBatches()
+      if (state.capabilities.range.completenessRule.kind === 'RESPONSE_ONLY') {
+        state.task.extraction = { policyVersion: state.capabilities.range.policyVersion, ruleKind: 'RESPONSE_ONLY' }
+        state.task.counts = counts({ totalBatches: 1n, succeededBatches: 1n, sourceRows: 2n, insertedRows: 2n, updatedRows: 0n })
+        state.task.requestCount = state.task.runRequestCount = 1n
+        state.batches = [batch(0, { rangeEnd: '2026-09-03',
+          sourceParams: { ...body.params }, sourceRows: 2n, insertedRows: 2n })]
+      }
       return fulfill(202, {
         requestId,
         taskId: TASK_ID,
@@ -378,7 +387,7 @@ async function installDownloadTaskApi(context) {
       if (batchesMatch[1] !== TASK_ID || !exactQuery(url, { page: '1', pageSize: '20', includeSplit: 'false' })) {
         return reject('invalid leaf-batch request')
       }
-      return fulfill(200, { page: 1, pageSize: 20, total: 3n, items: state.batches })
+      return fulfill(200, { page: 1, pageSize: 20, total: BigInt(state.batches.length), items: state.batches })
     }
 
     const controlMatch = path.match(/^\/api\/v1\/download-tasks\/([^/]+)\/(retry|resume)$/)

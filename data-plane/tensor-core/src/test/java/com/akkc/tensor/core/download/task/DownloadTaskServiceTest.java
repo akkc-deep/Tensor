@@ -41,6 +41,68 @@ class DownloadTaskServiceTest {
             "kind", "Kind", null, ParameterType.TEXT, false, "basic", List.of(), null, null);
 
     @Test
+    void policySummaryReadsOnlyHistoricalFactsEvenWithoutCurrentPluginOrAdapter() {
+        for (var kind : BatchDownloadDescriptor.CompletenessRule.Kind.values()) {
+            Harness h = new Harness();
+            h.plugin.range = summaryPolicy(kind, "v1");
+            var historical = h.synthetic(Map.of("symbol", "000001.SZ", "from", "20280228", "to", "20280301"),
+                    DownloadMode.RANGE, new ApiDescriptor(API_NAME, "Daily", "market", QueryMode.date_range,
+                            h.plugin.range.parameters()), h.plugin.range);
+            h.plugin.range = summaryPolicy(BatchDownloadDescriptor.CompletenessRule.Kind.RESPONSE_ONLY, "v2");
+            var removed = h.service(new PluginRegistry(List.of()), h.catalog, new AdapterRegistry(List.of()),
+                    new DownloadTaskService.Settings(false, 1, 1));
+            org.mockito.Mockito.clearInvocations(h.repository, h.catalog);
+            assertThat(removed.policySummary(historical)).isEqualTo(new DownloadTaskService.TaskPolicySummary("v1", kind));
+            org.mockito.Mockito.verifyNoInteractions(h.repository, h.catalog);
+            assertThat(h.plugin.executions).hasValue(0);
+        }
+    }
+
+    @Test
+    void policySummaryReturnsNullForSingleAndRejectsDamagedStoredRangeWithoutFallback() {
+        Harness h = new Harness(); var service = h.service();
+        var single = service.submit(single(SUBMISSION_ID, "000001.SZ")).task();
+        assertThat(service.policySummary(single)).isNull();
+        code(ErrorCode.PARAM_INVALID, () -> service.policySummary(null));
+        var range = h.synthetic(Map.of("symbol", "000001.SZ", "from", "20280228", "to", "20280301"),
+                DownloadMode.RANGE, new ApiDescriptor(API_NAME, "Daily", "market", QueryMode.date_range,
+                        h.plugin.range.parameters()), h.plugin.range);
+        var corrupted = new DownloadTask(range.taskId(), range.submissionId(), range.requestHash(), KEY, DownloadMode.RANGE,
+                range.params(), range.definitionHash(), "{\"secret\":\"private-value\"}", range.status(), false, RUN_ID,
+                0, 1, 0, 0, null, NOW, NOW, NOW, null, null, null);
+        assertThatThrownBy(() -> service.policySummary(corrupted)).isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("Invalid download task JSON").hasNoCause();
+    }
+
+    @Test
+    void responseOnlyDefinitionChangesStillRejectManualRetryAndResume() {
+        for (boolean retry : List.of(true, false)) {
+            for (var changed : List.of(summaryPolicy(BatchDownloadDescriptor.CompletenessRule.Kind.RESPONSE_ONLY, "v3"),
+                    summaryPolicy(BatchDownloadDescriptor.CompletenessRule.Kind.VERIFIED_RULE, "v2"))) {
+                Harness h = new Harness(); h.plugin.range = summaryPolicy(BatchDownloadDescriptor.CompletenessRule.Kind.RESPONSE_ONLY, "v2");
+                var service = h.service(); var task = service.submit(rangeSubmission(SUBMISSION_ID, "20280228", "20280301")).task();
+                h.stored.set(withStatus(task, retry ? DownloadTask.Status.FAILED : DownloadTask.Status.INTERRUPTED));
+                var coordinator = mock(DownloadTaskCoordinator.class); when(coordinator.controlAllowed()).thenReturn(true);
+                service.bindCoordinator(coordinator); h.plugin.range = changed;
+                code(ErrorCode.TASK_DEFINITION_CHANGED, () -> control(service, retry, task.taskId(), task.version()));
+                assertThat(h.stored.get().status()).isEqualTo(retry ? DownloadTask.Status.FAILED : DownloadTask.Status.INTERRUPTED);
+                assertThat(h.plugin.executions).hasValue(0);
+            }
+        }
+    }
+
+    private static BatchDownloadDescriptor summaryPolicy(BatchDownloadDescriptor.CompletenessRule.Kind kind, String version) {
+        var original = policy(BatchDownloadDescriptor.Availability.AVAILABLE, null, version);
+        boolean unknown = kind == BatchDownloadDescriptor.CompletenessRule.Kind.UNKNOWN;
+        return new BatchDownloadDescriptor(original.parameters(), original.startParameter(), original.endParameter(),
+                original.dateAxis(), original.dateLabel(), original.planningMode(), false,
+                unknown ? BatchDownloadDescriptor.Availability.NEEDS_VERIFICATION : BatchDownloadDescriptor.Availability.AVAILABLE,
+                unknown ? "Pending" : null, version, new BatchDownloadDescriptor.CompletenessRule(kind,
+                        kind == BatchDownloadDescriptor.CompletenessRule.Kind.CONFIRMED_ROW_LIMIT ? 100L : null,
+                        unknown ? null : "controlled-test-only"));
+    }
+
+    @Test
     void preparesNormalizedSubmissionWithoutAdmissionOrCapacityMutation() {
         Harness h = new Harness();
         h.queued = Long.MAX_VALUE;

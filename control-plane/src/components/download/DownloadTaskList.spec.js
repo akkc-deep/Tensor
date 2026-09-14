@@ -22,6 +22,7 @@ function task(overrides = {}) {
     pluginId: 'tushare_pro',
     apiName: 'daily',
     mode: 'SINGLE',
+    extraction: null,
     params: Object.freeze({ trade_date: '20260912', ts_code: '000001.SZ' }),
     status: 'QUEUED',
     version: 1n,
@@ -322,4 +323,35 @@ describe('DownloadTaskList', () => {
       wrapper.unmount()
     }
   })
+})
+
+it.each([
+  ['QUEUED', 0n, '排队中'], ['RUNNING', 2n, '运行中'],
+  ['SUCCEEDED', 2n, '返回记录已采集'], ['SUCCEEDED', 0n, '本次请求未返回记录'],
+  ['FAILED', 2n, '失败'], ['PARTIAL_FAILED', 2n, '部分失败'], ['INTERRUPTED', 2n, '已中断'],
+])('keeps saved response-only caveat on list %s with %s rows', (status, sourceRows, label) => {
+  const row = task({ mode: 'RANGE', status, extraction: { policyVersion: 'saved-v1', ruleKind: 'RESPONSE_ONLY' },
+    counts: { ...task().counts, sourceRows } })
+  const wrapper = mount(DownloadTaskList, { props: { result: result([row]) } })
+  expect(wrapper.text()).toContain('数据完整性未确认，可能存在上游截断')
+  expect(wrapper.text()).toContain('saved-v1')
+  expect(wrapper.text()).toContain('RESPONSE_ONLY')
+  expect(wrapper.get('.download-task-list__status').text()).toBe(label)
+  if (status !== 'SUCCEEDED') {
+    expect(wrapper.text()).not.toContain('返回记录已采集')
+    expect(wrapper.text()).not.toContain('本次请求未返回记录')
+  }
+  wrapper.unmount()
+})
+
+it('updates the list explanation from the next saved task snapshot', async () => {
+  const wrapper = mount(DownloadTaskList, { props: { result: result([task({ mode: 'RANGE',
+    extraction: { policyVersion: 'old-v1', ruleKind: 'UNKNOWN' } })]) } })
+  expect(wrapper.text()).toContain('数据完整性未确认')
+  expect(wrapper.text()).not.toContain('可能存在上游截断')
+  await wrapper.setProps({ result: result([task({ mode: 'RANGE',
+    extraction: { policyVersion: 'old-v2', ruleKind: 'CONFIRMED_ROW_LIMIT' } })]) })
+  expect(wrapper.text()).toContain('old-v2')
+  expect(wrapper.text()).not.toContain('数据完整性未确认')
+  wrapper.unmount()
 })

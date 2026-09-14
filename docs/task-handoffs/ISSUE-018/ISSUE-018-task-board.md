@@ -4,8 +4,8 @@
 
 - **Project ID:** `ISSUE-018`。
 - **Goal:** 用户提交单接口 SINGLE / RANGE 下载后取得持久化任务 ID；后台按批执行并原子入库，支持刷新后查询、失败批次手动重试和服务中断后手动恢复。
-- **Scope:** 13 项任务，覆盖可选插件合同、参数绑定、任务存储、后台执行、Tushare 策略、HTTP、前端和验证。保留 40 项下载入口、34 项股票必填 / 6 项非股票规则及旧同步 `/api/v1/downloads`；RANGE 目标为 31 项原生区间 + 3 项逐日，另 6 项仅 SINGLE。不恢复已移除的 9 项接口，不增加多股票、多接口合并、取消、定时、自动失败重试、重启自动续跑、多实例协调、任务删除、历史数据回滚或通用游标框架。
-- **Completion condition:** 13 项均为 `COMPLETED`，且详细设计第 6 节与母 issue 关闭条件均有证据。T12 证明基础设施与自动化闭环；T13 逐项证明上游语义、完整性和开放状态。仍有待验证项时，不将母 issue 宣称全部完成；明确不纳入的项目须有已记录的范围决定。
+- **Scope:** 14 项任务；T14 按用户要求承接 T13 剩余实施，产品范围不变。覆盖可选插件合同、参数绑定、任务存储、后台执行、Tushare 策略、HTTP、前端和验证。保留 40 项下载入口、34 项股票必填 / 6 项非股票规则及旧同步 `/api/v1/downloads`；RANGE 目标为 31 项原生区间 + 3 项逐日，另 6 项仅 SINGLE。不恢复已移除的 9 项接口，不增加多股票、多接口合并、取消、定时、自动失败重试、重启自动续跑、多实例协调、任务删除、历史数据回滚或通用游标框架。
+- **Completion condition:** 14 项均为 `COMPLETED`，且详细设计第 6 节与母 issue 关闭条件均有证据。T12 证明基础设施；T13 保留已审查工具、历史证据及原验收要求，T14 完成剩余上游语义、完整性与开放验收。T14 完成后以实际证据复核 T13 原 Acceptance，再按合法转换完成 T13 的最终验收收尾，不重复实施。仍有待验证项时，不将母 issue 宣称全部完成；明确不纳入的项目须有已记录的范围决定。
 - **Authority:** 本看板是 ISSUE-018 子任务身份、Order、范围、直接依赖、状态和交接路径的唯一权威；不变更 tensor-v1 或 ISSUE-004 看板。
 - **Project design:** [docs/task-designs/ISSUE-018-design.md](../../task-designs/ISSUE-018-design.md)，2026-09-11 版本；原文状态仍为详细设计待复核、尚未实施，本次拆分不代替设计复核或真实验证。
 - **Sources:** [母 issue 与 40 项官网依据](../../issues/problems/ISSUE-018-date-range-batch-downloads.md) → [已确认方案](../../issues/proposals/ISSUE-018-date-range-batch-downloads.md) → [详细设计](../../task-designs/ISSUE-018-design.md)。实施约束以详细设计为准，母 issue 保留来源与关闭条件。
@@ -14,12 +14,15 @@
 ## Workflow
 
 - **Execution:** 用户于 2026-09-11 要求依据 issue18 详细设计拆任务，随后明确要求执行当前任务。初始化 T01 为 `READY`，其他任务为 `NOT_STARTED`；后续执行事实记录在各任务 State evidence。串行执行由用户管理，本看板不额外执行跨任务互斥检查。
+- **Explicit transfer (2026-09-13):** 用户明确要求“把t13当前剩余的任务，重新创建t14然后我在t14里面完成剩余工作”。新增 Order14；剩余实施入口改为 T14，T13 保留 BLOCKED 历史与原验收边界。本次是用户指定的范围移交，不是前项已完成后的自动后继准备；允许消费 T13 已就绪的部分产物。T14 设计完成并链接后写交接，再单独准备 READY，不启动实施。交接保留 next-task 标题与章节，但明确转出任务未完成，不填写虚假的 Completed task。
 - **Next-task selection:** 当前任务完成后，选择 Order 更大的未完成任务中 Order 最小的一项；Dependencies 只记录直接消费的输入，不代替 Order。
 - **Successor preparation:** 先记录当前任务完成证据，再完成并链接所选后继的专属设计，之后创建 next-task 交接并准备 `READY`。后继设计或输入有缺口时，保留前项完成事实，不创建不完整交接。
 - **Allowed transitions:** `NOT_STARTED -> READY`、`READY -> IN_PROGRESS`、`IN_PROGRESS -> PAUSED`、`PAUSED -> IN_PROGRESS`、`READY -> BLOCKED`、`IN_PROGRESS -> BLOCKED`、`BLOCKED -> READY`、`IN_PROGRESS -> COMPLETED`。
 - **Design references:** 总体详细设计是各任务的共享来源，不冒充任何子任务的专属设计。启动实现前完成该任务专属设计，并将准确路径回填对应单元格；不生成占位设计或在前项完成前编写后继交接。
 - **Handoff paths:** 沿用 `docs/task-handoffs/README.md` 的项目目录约定：`docs/task-handoffs/ISSUE-018/<task-id>-handoff.md`。首项无前驱交接，各行记录准确交接路径或 `None`。
 - **Verification:** 每项实现包含其范围内的行为测试及证据，不把测试全部推迟到 T12。T12 汇总跨模块、真实测试后端和构建门禁；T13 的真实 API 证据与受控上游证据分别记录，不互相替代。
+
+2026-09-13 用户要求把 T14 剩余问题拆成多个 issue 并串行解决，已登记独立的 [ISSUE-019～026 看板](ISSUE-018-followups-task-board.md)。新看板只管理这些 issue，原 T14 行、设计、BLOCKED 状态及已有交接继续有效；ISSUE-026 最终将结果交回本看板验收，不把拆分当作 T14 解除或完成证据。
 
 ## Tasks
 
@@ -37,7 +40,8 @@
 | 10 | ISSUE-018-T10 | 前端模式表单、任务提交与近期列表 | COMPLETED | ISSUE-018-T09 | docs/task-designs/ISSUE-018-T10-design.md | docs/task-handoffs/ISSUE-018/ISSUE-018-T10-handoff.md |
 | 11 | ISSUE-018-T11 | 任务详情、轮询与手动操作 | COMPLETED | ISSUE-018-T09, ISSUE-018-T10 | docs/task-designs/ISSUE-018-T11-design.md | docs/task-handoffs/ISSUE-018/ISSUE-018-T11-handoff.md |
 | 12 | ISSUE-018-T12 | 跨模块故障验证、浏览器闭环与交付门禁 | COMPLETED | ISSUE-018-T08, ISSUE-018-T09, ISSUE-018-T11 | docs/task-designs/ISSUE-018-T12-design.md | docs/task-handoffs/ISSUE-018/ISSUE-018-T12-handoff.md |
-| 13 | ISSUE-018-T13 | 真实接口完整性验收与逐项开放 | READY | ISSUE-018-T06, ISSUE-018-T12 | docs/task-designs/ISSUE-018-T13-design.md | docs/task-handoffs/ISSUE-018/ISSUE-018-T13-handoff.md |
+| 13 | ISSUE-018-T13 | 真实接口完整性验收与逐项开放 | BLOCKED | ISSUE-018-T06, ISSUE-018-T12 | docs/task-designs/ISSUE-018-T13-design.md | docs/task-handoffs/ISSUE-018/ISSUE-018-T13-handoff.md |
+| 14 | ISSUE-018-T14 | 剩余真实验收、完整性补证与逐项开放 | BLOCKED | ISSUE-018-T13, ISSUE-018-T06, ISSUE-018-T12 | docs/task-designs/ISSUE-018-T14-design.md | docs/task-handoffs/ISSUE-018/ISSUE-018-T14-handoff.md |
 
 ## Task Details
 
@@ -249,12 +253,55 @@
 - **Acceptance:** 每个开放接口有请求条件、预期覆盖、官方或可核验完整性依据、真实批次数 / 成败空批数、source / insert / update 计数及复查结果。至少覆盖 daily 多日重叠、income 公告区间、fina_indicator 报告期、repurchase 非股票、top_list 交易日、dividend 非交易日公告、disclosure_date 最新公告、trade_cal 完整日历 / 全休市范围；受控满额拆分证据与真实语义证据分别列明。11 项缺失依据未解决前保持 NEEDS_VERIFICATION，少量样例或宽窄区间暂时一致不足以开放；BJ / BSE、标停两项历史范围及 fina_mainbz 默认 type 均有明确处理依据。能力门禁更新后相关回归通过；所有纳入项满足详细设计 §6 与母 issue 关闭条件后才记录完成、更新 issue 状态。仍有待验证项时保留未完成事实；范围排除须引用已有明确决定，不能由看板自行认定。
 - **Dependencies:** ISSUE-018-T06、ISSUE-018-T12；分别消费策略清单 / 来源依据 / 可用性门禁、已验证基础设施和故障 / 拆分测试证据。
 - **Sources:** ① `docs/task-designs/ISSUE-018-design.md` §3.4、§5.3、§6–7；② `docs/issues/problems/ISSUE-018-date-range-batch-downloads.md` 的逐项官方链接与关闭条件；③ T06 / T12 已链接设计、实现与证据；④ `docs/issues/problems/ISSUE-017-stock-scoped-downloads.md`、`docs/verification/ISSUE-017-stock-scoped-downloads.md`；⑤ `docs/runbook/configuration.md`、`docs/issues/README.md`。
-- **First action:** 全文读取已链接专属设计与交接；明确启动后，先新建 `control-plane/e2e/tushare-range-evidence.test.js` 的40项独立矩阵及“漏项/UNKNOWN误开放”合成拒绝用例，运行Node测试观察RED，再实现最小校验helper与结果索引。无网络、不修改生产Policy，不重复设计。
+- **First action:** 剩余实施已由用户转交 T14，从其已链接专属设计开始；不重复 T13 已完成的工具实现。T14 取得完整验收结果后，本项只复核原 Acceptance 与真实解除证据，按合法转换记录最终收尾。
 - **State evidence:** 2026-09-12 先记录T12 COMPLETED及G1–G6、最终Lifecycle与独立审查证据，再按预定义Order选中本项，观察NOT_STARTED。使用designing-task-contracts完成并全文复核 `docs/task-designs/ISSUE-018-T13-design.md`，40项矩阵与当前样例/31+3+6/34+6/11UNKNOWN精确一致；SOURCE探针→逐项候选规则/版本→真实TASK/SQL闭环、旧live迁移及安全计数均具体化，独立就绪审查PASS（`.superpowers/sdd/2026-09-12-issue-018-t12/t13-design-review.md`）。T06/T12直接输入无冲突；先仅链接Design document，再写入、核对模板并链接 `docs/task-handoffs/ISSUE-018/ISSUE-018-T13-handoff.md`，随后执行 `NOT_STARTED -> READY`。只准备后继，没有启动T13、创建其实现文件、真实账户调用、开放RANGE或关闭母issue。
+
+- **Start evidence:** 2026-09-12 用户明确要求按issue18任务看板执行当前任务；全文读取T13专属设计与交接，核对T06策略与总体真实验收合同，执行 `READY -> IN_PROGRESS`。保留原next-task交接为入口上下文。当前HEAD为 `5dd840d71509398afde4f14d2b2b501a0c882e40`、分支 `feat/download-by-date-range`，工作区起始干净（交接中的旧HEAD/暂存描述是历史快照，已由提交前进）。实施计划 `docs/superpowers/plans/2026-09-12-issue-018-t13.md`。当前进程未配置Token/DB，已询问授权凭证的受限路径，同时继续离线实现与公开依据核对；未调用真实API、未开放RANGE。
+
+- **Continuation evidence:** 2026-09-12 用户再次要求执行当前任务；全文读取T13设计与入口交接，看板观察IN_PROGRESS，保留该状态及已有部分成果，未重复启动转换。已核对40份官网缓存HTML/正文哈希和189条引文；明确monthly官方正文/样例冲突与slb_len无期限字段并修正设计文字。当前Token环境已存在；准备140个固定SOURCE用例（40 SINGLE/100 RANGE）于0700目录/0600文件，尚未调用上游。新建自有MySQL8.4.6隔离空schema并验证0表及最小单库权限；校验器、Probe与账户任务harness按既有计划继续，尚无真实通过或开放证据。
+
+- **Continuation evidence:** 2026-09-13 用户要求继续当前任务；全文复核T13设计和入口交接，保持IN_PROGRESS。证据校验器完成两轮审查修复，最后Node24为38/38通过、0跳过、退出0，独立规格/质量PASS；40项初始JSON保持0运行/0 AVAILABLE。固定SOURCE输入已补为181项（74 SINGLE/107 RANGE），自有MySQL容器仍运行、8080空闲；开始测试侧SOURCE探针实施。尚无真实来源或任务验收，不将离线工具完成当作T13完成。
+
+- **Local verification evidence:** 2026-09-13 测试侧SOURCE探针完成，专项Maven最终26/26、0失败/错误/跳过、退出0；独立复审规格/质量PASS。补齐SINGLE日历完整性与日期谓词校验，181固定用例输入及合成失败/未运行输出跨Java/Node校验通过。正式Probe尚未调用，当前开始账户浏览器task API/SQL迁移；仍0真实运行/0 AVAILABLE，T13保持IN_PROGRESS。
+
+- **Local harness evidence:** 2026-09-13 账户harness完成task API/全批次/SQL/日志迁移；五项Important修复后独立限定复审规格/质量PASS。Node54/54、0失败/跳过，SINGLE精确40API发现，RANGE合成3样本/2API及空清单拒绝、有效重试0均通过。本地五类Maven专项158/158及同生命周期前端468/构建通过。尚无真实SOURCE/TASK或RANGE开放，T13保持IN_PROGRESS；下一步在索引测试适配后执行固定181项SOURCE。
+
+- **Actual run evidence:** 2026-09-13 首次真实SOURCE固定181项运行结束，退出1、cleanup PASS：244请求，88 PASS/89 EVIDENCE_MISSING/1 FAILED/3 NOT_RUN。trade_cal-bse-direct报BATCH_COMPLETENESS_UNCONFIRMED，后续3项未运行；全量安全run已导入JSON，不重试或剪裁成功子集，0 AVAILABLE。独立SINGLE首次bootstrap在fixture导航等待超时，尚无任何任务POST/Tushare请求；74样本全NOT_RUN，清理通过。真实失败与未运行已保留，当前修复离线harness启动问题，T13保持IN_PROGRESS。
+
+- **Final local evidence:** 2026-09-13 导航与utf8mb4 SQL观察修复、未来SOURCE同一行日期/证券数量投影均完成专项和独立复审。整体审查发现公开规则未进入索引、TASK_QUERY错误码/身份丢失，统一离线修复后Node67/67、0失败/跳过，限定复审规格/质量PASS；Probe最终专项30/30。此前五类158/158含Probe26，同生命周期前端468/构建通过，不重复累计。索引记录19个公布ROW_LIMIT、1个CALENDAR_COVERAGE、20个UNKNOWN；不代表生产已验证，fina_mainbz默认type及150对100适用关系仍未解决。原全部3轮/329个case、接口状态/版本/处置保留；真实259次Tushare调用，fixture另2次，0 AVAILABLE、无RANGE任务。
+
+- **Block evidence:** 2026-09-13 全文复核已链接T13设计，观察IN_PROGRESS；完成独立本地修复及最终限定审查后，先在原路径写入并核对模板pause交接，再执行`IN_PROGRESS -> BLOCKED`。SOURCE因BSE覆盖未确认停止且3项未运行；第二轮SINGLE已有15个SUCCEEDED任务，但SQL观察失败及并行源码变化使整轮退出1/cleanup FAILED，14个历史PASS标记不构成完整有效验收。工具已修复，不能追认旧轮或自动重复来源/任务。恢复须先登记可核验的补充依据或新固定取证轮次，明确旧失败/未运行项的处理、执行边界、稳定源码和独立新空schema；记录实际解除证据后才`BLOCKED -> READY`，启动另行`READY -> IN_PROGRESS`。11项UNKNOWN、含糊数值合同、特殊/历史样本、BJ/BSE、monthly及fina_mainbz仍保留缺口。母issue未解决，不创建T14，不提交/合并/发布；并行demo/vite成果及自有数据库原数据保留。持久依据见`docs/verification/ISSUE-018-range-acceptance.md`、`.json`及两份整体/限定审查记录。
+
+- **Handoff refresh evidence:** 2026-09-13 用户确认恢复方案后明确要求“把当前的工作交给下一个任务”，将在新会话接续。全文复核T13设计，在原路径刷新pause交接：先完整迁移当前已暂存未提交成果并隔离源码/准备新空库，优先为daily_basic、stk_limit、moneyflow、margin_detail登记新固定SOURCE轮次，再做任务闭环并单列疑难项。当前没有新环境/新case/新运行证据，状态保持BLOCKED；新会话可先完成解除阻塞的准备，实际条件成立后按`BLOCKED -> READY -> IN_PROGRESS`分步记录。没有重复状态转换、创建T14、重跑测试/来源或提交代码。
+
+- **Transfer evidence:** 2026-09-13 用户明确要求将当前剩余工作新建为 T14。原六项 Remaining Work 全部转入 Order14 专属设计与交接；本项保持 BLOCKED、既有 Handoff 路径及原 Acceptance，不将转交冒充解除或完成。旧记录中的“不创建T14”仅是当时事实，已由本次明确指令替代。剩余实现、真实取证和暂停恢复在 T14 执行，本项待 T14 完整结果后只做最终验收收尾。
+
+### ISSUE-018-T14
+
+- **Goal:** 完成 T13 尚未完成的全部真实验收、完整性补证和逐项开放，为 40 项结果及母 issue 关闭条件提供有效证据。
+- **Scope:** 完整迁移未提交成果并隔离源码 / 新空库；优先 daily_basic、stk_limit、moneyflow、margin_detail 新固定 SOURCE；完整 34 股票各两只 + 6 原方式的 SINGLE / SQL；11 UNKNOWN、3 含糊合同、特殊 / 历史样本、BJ / BSE、monthly、fina_mainbz 调查；逐项策略 / 版本与 RANGE / SQL；回归、运行说明、最终审查及验收。复用已审查工具，保留 40 项范围、旧失败和已成功任务，不增加范围排除或自动重试。
+- **Acceptance:** `docs/task-designs/ISSUE-018-T14-design.md` 六项 Acceptance 全部成立；新轮次有固定输入、稳定源码 / 实际包身份、新库与清理记录；SINGLE 完整 74 任务 / 148 records 查询、fixture 另计；每个 AVAILABLE 同时有明确完整性、有效 SOURCE、匹配候选包的完整 TASK / SQL。疑难项与代表场景有依据、相关门禁及审查通过；总体设计 §6、T13 原 Acceptance 与母 issue 关闭条件仍约束完成。旧 3 轮 / 329 case、15 个成功任务不改写，0 AVAILABLE 不因任务迁移改变。
+- **Dependencies:** ISSUE-018-T13、ISSUE-018-T06、ISSUE-018-T12；分别消费已审查的 helper / Probe / task harness 与部分证据、策略 / 日期 / 日历门禁合同、已验证基础设施 / 受控边界 / 六条源码门禁。T13 的原最终验收未完成不妨碍其已就绪工具用于本项准备，不构成“先完成 T13 才能开始 T14”的循环。
+- **Sources:** ① 本项已链接专属设计；② `docs/task-handoffs/ISSUE-018/ISSUE-018-T13-handoff.md` 历史快照及 `docs/task-designs/ISSUE-018-T13-design.md` 全文；③ `docs/verification/ISSUE-018-range-acceptance.md`、`.json`、`.superpowers/sdd/2026-09-12-issue-018-t13/task-4-candidate-assessment.md`、T13 整体 / 限定审查；④ 总体设计 §6–7、T06 / T12 设计与基础设施验证、ISSUE-017 证据及 ISSUE-018 关闭条件。
+- **First action:** 核验可解决当前逐接口缺口的新上游规则/默认类型/日历或历史事件依据，登记独立固定轮次及旧case关系；实际解除证据成立后BLOCKED→READY，启动另行READY→IN_PROGRESS。保留74 SINGLE及四项25 RANGE，不直接调用旧runner。
+- **State evidence:** 2026-09-13 用户明确要求新建 T14 承接 T13 全部剩余工作。已全文读取 T13 设计及暂停交接、核对六项剩余范围和既有证据；新增本项为 NOT_STARTED，完成并链接 `docs/task-designs/ISSUE-018-T14-design.md`。尚未创建交接或启动实现；新的环境 / case / 运行是本项实施产物，不伪报已经具备。
+- **Handoff evidence:** 2026-09-13 设计链接后创建并核对 `docs/task-handoffs/ISSUE-018/ISSUE-018-T14-handoff.md`，再回填本行 Handoff。交接明确来自用户指定的未完成任务移交，Completed task=None；T13/T06/T12 直接输入和六项剩余范围一致。当前仍 NOT_STARTED，尚未启动实施。
+- **Readiness evidence:** 2026-09-13 全文复核已链接 T14 设计，确认本项仍 NOT_STARTED、交接已链接，14 项顺序唯一、所有看板设计 / 交接路径存在，T14 文档模板章节及本地链接检查通过。执行 `NOT_STARTED -> READY`；仅完成任务准备，没有执行 `READY -> IN_PROGRESS`、创建新库 / 私有清单或真实调用。用户后续可直接启动 T14 的第一项准备动作；T13 保持 BLOCKED，原外部缺口继续由本项解决。
+
+- **Start evidence:** 2026-09-13 用户明确要求“完成issue18的t14任务”；全文读取本项设计、入口交接和T13共享验收合同，核对源状态READY后执行 `READY -> IN_PROGRESS`。HEAD为 `34f3e283c0ee7f58c19bf72e8a470c1c858ac26d`，当前 `feat/download-by-date-range` 分支有22个暂存文件、无未暂存差异。完整迁移822个Git管理文件到 `/private/tmp/issue018-t14-work-20260913T092556Z` 并逐文件核对SHA-256，原工作树、暂存成果、旧3轮及15个成功任务保留。已检查现有受限配置存在及权限，尚未运行新SOURCE或TASK；执行登记见 `docs/verification/ISSUE-018-T14-runs.md`。
+
+- **Execution evidence:** 2026-09-13 新增5个独立固定轮次：优先SOURCE33/33 PASS，历史SOURCE5 PASS/1 EVIDENCE_MISSING，代表SOURCE7 PASS/1 EVIDENCE_MISSING，完整SINGLE40API/74TASK/148查询全部PASS，以及四接口RANGE25TASK/50查询全部PASS。新轮exit0/cleanup PASS、输入稳定；全部账户库保留。SINGLE SQL来源5265/插入5265/更新0，RANGE来源68/插入52/更新16，fixture各轮另计2提交/3查询。当前索引8轮475case、累计411次Tushare请求，旧3轮329case逐对象不变。
+
+- **Policy evidence:** daily_basic、stk_limit、moneyflow、margin_detail逐项具备明确ROW_LIMIT、干净SOURCE和候选包RANGE/SQL，全四项AVAILABLE / tushare-range-v2。其余30项NEEDS_VERIFICATION、6项SINGLE_ONLY；UNKNOWN、BJ/BSE拒绝、最小满额与定义变更保护不变。完整性与fina_mainbz默认类型等剩余缺口见唯一验收索引和T14公开补证，不能据四项通过标记T14完成。
+
+- **Verification evidence:** G1=1318、G2=468（34文件）、G3=1060、G4=1063、G5=3、最终G6=126（7文件，15.9m）均exit0，Java无失败/错误/跳过。G6首轮97PASS/7FAILED/22NOT_RUN、exit1；第二轮49PASS/1FAILED/1INTERRUPTED/75NOT_RUN、exit130。已定位既有AVAILABLE默认RANGE及Element Plus radio点击/同名标签问题，仅修正harness/普通测试并保留覆盖。第一聚焦3PASS/1FAIL、最终聚焦4/4PASS；Node最终77/77。失败产物保留，最终全量为独立新轮。最终及限定复审无剩余Critical/Important/Minor，见 `docs/verification/ISSUE-018-T14-final-review.md`。
+
+- **Block evidence:** 2026-09-13 最终全文复核本项设计，观察IN_PROGRESS；可执行本地验证、四项TASK/SQL与审查完成后，先在既有路径刷新并核对pause模板，再执行IN_PROGRESS→BLOCKED。11UNKNOWN/三项含糊限量/fina_mainbz默认类型与100/150适用性及其余日历/历史/特殊样本/RANGE缺口仍使Acceptance第4/6项未成立，不自行排除。测试容器/秘密/preview已清理、4173/8080空闲，原账户容器和15/74/25任务只读核对保留且SUCCEEDED。新增文件Git纳管；不提交/合并/发布，完整发布脚本未运行。恢复条件归属T14 pause交接，T13保持BLOCKED、母issue未解决、不创建T15。
 
 ## Risks
 
-- **完整性证据缺失：** `adj_factor, suspend_d, income, balancesheet, cashflow, fina_audit, express, repurchase, stk_managers, top10_holders, top10_floatholders` 共 11 项原生区间尚无完整提取依据；这是 T13 的已知外部前置条件，不妨碍先实现 NEEDS_VERIFICATION 门禁，也不表示 T13 已进入 BLOCKED。
+
+- **完整性证据缺失：** `adj_factor, suspend_d, income, balancesheet, cashflow, fina_audit, express, repurchase, stk_managers, top10_holders, top10_floatholders` 共 11 项原生区间尚无完整提取依据；这些缺口与本次真实运行失败共同构成T13当前BLOCKED的未完成事实；已实现的NEEDS_VERIFICATION门禁继续保留。
 - **特殊来源语义：** BJ 日历映射、BSE 直接输入、`slb_sec/slb_sec_detail` 标停历史范围和 `fina_mainbz` 默认类型需实测；数值上限或文档可访问不证明账户权限与数据可用性。
 - **事务与执行许可：** 计划、父子拆分及证券数据 / 成功状态均须原子提交；数据库不可用或调用未退出时不能盲目续发。单实例前提继续成立，启动 ID / 轮次校验不构成多实例支持。
 - **兼容与演进：** 保留旧同步下载、普通 SINGLE 插件和 40 项查询注册；任务表不计入证券数据集。新参数形状、游标来源仍可能需要扩展合同；旧任务定义摘要变化必须拒绝语义重放。

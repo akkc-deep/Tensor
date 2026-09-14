@@ -654,10 +654,39 @@ async function openDownloads(page, contract) {
   await page.getByRole('option', { name: optionName(contract) }).click()
   const capabilitiesResponse = await capabilitiesPromise
   expect(capabilitiesResponse.status()).toBe(200)
-  expect(await readPublicJson(capabilitiesResponse, 'download capabilities')).toEqual({
+  const capabilities = await readPublicJson(capabilitiesResponse, 'download capabilities')
+  expect(capabilities).toEqual({
     single: { available: true, parameters: contract.parameters },
     range: rangeCapability(contract.apiName),
   })
+  const expectedRange = rangeCapability(contract.apiName)
+  const rangeMode = page.getByRole('radio', { name: '日期区间', exact: true })
+  if (expectedRange.availability === 'AVAILABLE') {
+    expect(capabilities.range).toMatchObject({ availability: 'AVAILABLE', policyVersion: 'tushare-range-v2',
+      completenessRule: { kind: expectedRange.completenessRule.kind,
+        rowLimit: expectedRange.completenessRule.rowLimit } })
+    if (capabilities.range.completenessRule.kind === 'CONFIRMED_ROW_LIMIT') {
+      expect(capabilities.range.completenessRule.rowLimit).toBeGreaterThan(0)
+      expect(capabilities.range.splittable).toBe(capabilities.range.planningMode === 'NATIVE_RANGE')
+    } else if (capabilities.range.completenessRule.kind === 'VERIFIED_RULE') {
+      expect(capabilities.range.completenessRule.rowLimit).toBeNull()
+      expect(capabilities.range.splittable).toBe(false)
+    } else {
+      expect(capabilities.range.completenessRule.kind).toBe('RESPONSE_ONLY')
+      expect(capabilities.range.completenessRule.rowLimit).toBeNull()
+      expect(capabilities.range.splittable).toBe(false)
+      const warning = page.locator('.form-footer__help').filter({ hasText: '数据完整性未确认，可能存在上游截断' })
+      await expect(warning).toBeVisible()
+      await expect(warning).toContainText('数据完整性未确认，可能存在上游截断')
+    }
+    await expect(rangeMode).toBeEnabled()
+    await expect(rangeMode).toBeChecked()
+  } else {
+    await expect(rangeMode).toBeDisabled()
+    await expect(page.getByRole('radio', { name: '单次请求', exact: true })).toBeChecked()
+  }
+  await page.getByRole('radiogroup', { name: '下载模式', exact: true }).getByText('单次请求', { exact: true }).click()
+  await expect(page.getByRole('radio', { name: '单次请求', exact: true })).toBeChecked()
   await expect(combobox).toHaveAttribute('aria-expanded', 'false')
   await expect(page.getByRole('option')).toHaveCount(0)
   await doubleAnimationFrame(page)

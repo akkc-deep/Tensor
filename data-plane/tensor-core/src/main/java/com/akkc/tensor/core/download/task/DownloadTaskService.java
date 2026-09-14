@@ -125,6 +125,16 @@ public final class DownloadTaskService {
         }
     }
 
+    public record TaskPolicySummary(String policyVersion, BatchDownloadDescriptor.CompletenessRule.Kind ruleKind) {}
+
+    /** Historical collection semantics, independent of the currently installed plugin. */
+    public TaskPolicySummary policySummary(DownloadTask task) {
+        if (task == null) throw new TaskException(ErrorCode.PARAM_INVALID);
+        if (task.mode() == DownloadMode.SINGLE) return null;
+        var policy = json.readRangePolicy(task.policySnapshot());
+        return new TaskPolicySummary(policy.policyVersion(), policy.completenessRule().kind());
+    }
+
     public DownloadCapabilities capabilities(DatasetKey key) {
         outsideTransaction();
         if (key == null) throw new TaskException(ErrorCode.PARAM_INVALID);

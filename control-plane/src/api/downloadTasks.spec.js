@@ -36,6 +36,7 @@ function validTask(overrides = {}) {
     pluginId: 'contract_fixture',
     apiName: 'daily',
     mode: 'RANGE',
+    extraction: { policyVersion: 'contract-fixture-v1', ruleKind: 'VERIFIED_RULE' },
     params: { start_date: '20260803', end_date: '20260805' },
     status: 'QUEUED',
     version: 1,

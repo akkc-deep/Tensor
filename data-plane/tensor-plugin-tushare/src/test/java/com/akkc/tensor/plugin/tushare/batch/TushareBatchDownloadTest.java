@@ -42,14 +42,14 @@ class TushareBatchDownloadTest {
         plugin=new TushareProPlugin(properties,client,DEFINITIONS);
     }
 
-    @ParameterizedTest @ValueSource(strings={"000001.SZ","600000.SH"})
+    @ParameterizedTest @ValueSource(strings={"000001.SZ","600000.SH","920008.BJ"})
     void tradingPlanAndEachDailyDownloadShareOneContextAndReserveExactlyOnce(String stock) throws Exception {
-        String exchange=stock.endsWith("SH")?"SSE":"SZSE";
+        String exchange=stock.endsWith(".SZ")?"SZSE":"SSE";
         var input=params("top_list");input.put("ts_code",stock);
         var days=List.of(Arrays.<Object>asList(exchange,"20240301",0,"20240229"),Arrays.<Object>asList(exchange,"20240228",1,"20240227"),Arrays.<Object>asList(exchange,"20240229",1,"20240228"));
         expect("trade_cal",Map.of("exchange",exchange,"start_date","20240228","end_date","20240301"),response("trade_cal",days));
         for(String date:List.of("20240228","20240229")) expect("top_list",Map.of("ts_code",stock,"trade_date",date),response("top_list",List.of(with("top_list",row("top_list",date),"ts_code",stock))));
-        var context=new Context();var policies=verified(client,"top_list","trade_cal");
+        var context=new Context();var policies=new TushareBatchPolicies(client,DEFINITIONS);
         var plan=policies.plan(api("top_list"),input,context);
         assertThat(plan).containsExactly(range("2024-02-28","2024-02-28"),range("2024-02-29","2024-02-29"));
         assertThat(context.reservations.get()).isEqualTo(1);
@@ -61,13 +61,45 @@ class TushareBatchDownloadTest {
             assertThat(policies.assess(api("top_list"),date,envelope)).isEqualTo(BatchAssessment.COMPLETE);
         }
         assertThat(securitiesRows).isEqualTo(2);assertThat(context.reservations.get()).isEqualTo(3);verifyRequests();
-        assertThat(plugin.batchDescriptor(api("top_list")).orElseThrow().availability()).isEqualTo(BatchDownloadDescriptor.Availability.NEEDS_VERIFICATION);
+        assertThat(plugin.batchDescriptor(api("top_list")).orElseThrow().availability()).isEqualTo(BatchDownloadDescriptor.Availability.AVAILABLE);
+    }
+
+    @ParameterizedTest @ValueSource(booleans={false,true})
+    void responseOnlyUsesOneRealClientRequestForNonemptyAndEmptyResponses(boolean empty) throws Exception {
+        var input = params("adj_factor"); var context = new Context();
+        var policies = new TushareBatchPolicies(client, DEFINITIONS);
+        expect("adj_factor", input, response("adj_factor", empty ? List.of() : List.of(row("adj_factor", "20240229"))));
+        assertThat(policies.plan(api("adj_factor"), input, context)).containsExactly(RANGE);
+        var envelope = plugin.downloadBatch(api("adj_factor"), policies.sourceParameters(api("adj_factor"), input, RANGE), context);
+        assertThat(policies.assess(api("adj_factor"), RANGE, envelope)).isEqualTo(BatchAssessment.RESPONSE_ONLY);
+        assertThat(envelope.rowCount()).isEqualTo(empty ? 0 : 1);
+        assertThat(context.reservations.get()).isEqualTo(1); verifyRequests();
+    }
+
+    @ParameterizedTest @ValueSource(strings={"stock", "date", "width", "fields", "http", "body"})
+    void responseOnlyRetainsRealClientAndPolicyFailureChecks(String fault) throws Exception {
+        var input = params("adj_factor"); var context = new Context();
+        var policies = new TushareBatchPolicies(client, DEFINITIONS);
+        var bad = switch (fault) {
+            case "stock" -> response("adj_factor", List.of(with("adj_factor", row("adj_factor", "20240229"), "ts_code", "600000.SH")));
+            case "date" -> response("adj_factor", List.of(row("adj_factor", "20240302")));
+            case "width" -> response("adj_factor", List.of(List.of("000001.SZ")));
+            case "fields" -> aResponse().withHeader("Content-Type", "application/json")
+                    .withBody("{\"code\":0,\"data\":{\"fields\":[\"ts_code\"],\"items\":[]}}");
+            case "http" -> aResponse().withStatus(503);
+            default -> aResponse().withHeader("Content-Type", "application/json").withBody("invalid-json");
+        };
+        expect("adj_factor", input, bad);
+        code(() -> policies.assess(api("adj_factor"), RANGE, plugin.downloadBatch(api("adj_factor"), input, context)),
+                fault.equals("date") ? ErrorCode.SOURCE_RANGE_MISMATCH
+                        : fault.equals("http") ? ErrorCode.SOURCE_UNAVAILABLE : ErrorCode.SOURCE_PAYLOAD_INVALID);
+        assertThat(context.reservations.get()).isEqualTo(1); verifyRequests();
     }
 
     @Test void nativeAndSixSingleOnlyDownloadsUseTheSameRealClientContext() throws Exception {
         var context=new Context();
         expect("daily",params("daily"),response("daily",List.of(row("daily","20240229"))));
-        var policies=verified(client,"daily");
+        var policies=new TushareBatchPolicies(client,DEFINITIONS);
         var plan=policies.plan(api("daily"),params("daily"),context);
         assertThat(plan).containsExactly(RANGE);assertThat(context.reservations.get()).isZero();
         assertThat(policies.assess(api("daily"),RANGE,plugin.downloadBatch(api("daily"),policies.sourceParameters(api("daily"),params("daily"),RANGE),context))).isEqualTo(BatchAssessment.COMPLETE);
@@ -84,19 +116,40 @@ class TushareBatchDownloadTest {
         assertThat(context.reservations.get()).isEqualTo(7);verifyRequests();
     }
 
+    @ParameterizedTest @ValueSource(strings={"daily_basic","stk_limit","moneyflow","margin_detail"})
+    void productionCandidatesPlanAndAssessBothStocksWithTheRealClient(String name) throws Exception {
+        var context=new Context();
+        assertThat(plugin.batchDescriptor(api(name)).orElseThrow().availability()).isEqualTo(BatchDownloadDescriptor.Availability.AVAILABLE);
+        for(String stock:List.of("000001.SZ","600000.SH")) {
+            var input=params(name);input.put("ts_code",stock);
+            var plan=plugin.plan(api(name),input,context);
+            assertThat(plan).containsExactly(RANGE);
+            var source=plugin.sourceParameters(api(name),input,RANGE);
+            assertThat(source).isEqualTo(input);
+            expect(name,input,response(name,List.of(with(name,row(name,"20240229"),"ts_code",stock))));
+            var result=plugin.downloadBatch(api(name),source,context);
+            assertThat(plugin.assess(api(name),RANGE,result)).isEqualTo(BatchAssessment.COMPLETE);
+            assertThat(result.rowCount()).isEqualTo(1);
+        }
+        assertThat(context.reservations.get()).isEqualTo(2);verifyRequests();
+    }
+
     @Test void wholeClosedCalendarMakesEmptyPlanButEmptyResponseFailsAndNoResultsAreCached() throws Exception {
         expect("trade_cal",params("trade_cal"),response("trade_cal",List.of(day("20240228",0),day("20240229",0),day("20240301",0))));
         expect("trade_cal",params("trade_cal"),response("trade_cal",List.of()));
-        var context=new Context();var policies=verified(client,"top_list","trade_cal");
+        var context=new Context();var policies=new TushareBatchPolicies(client,DEFINITIONS);
         assertThat(policies.plan(api("top_list"),params("top_list"),context)).isEmpty();
         code(() -> policies.plan(api("top_list"),params("top_list"),context),ErrorCode.BATCH_COMPLETENESS_UNCONFIRMED);
         assertThat(context.reservations.get()).isEqualTo(2);verifyRequests();
     }
 
-    @Test void unavailableCalendarOrUnsupportedExchangeNeverMakesHttpOrReservations() {
+    @Test void directBseCalendarAndUnsupportedStockNeverMakeHttpOrReservations() {
         var context=new Context();
-        code(() -> verified(client,"top_list").plan(api("top_list"),params("top_list"),context),ErrorCode.BATCH_DOWNLOAD_UNAVAILABLE);
-        for(String stock:List.of("000001.BJ","000001.XX")) {var input=params("top_list");input.put("ts_code",stock);code(() -> verified(client,"top_list","trade_cal").plan(api("top_list"),input,context),ErrorCode.BATCH_DOWNLOAD_UNAVAILABLE);}
+        var policies=new TushareBatchPolicies(client,DEFINITIONS);
+        var stock=params("top_list");stock.put("ts_code","000001.XX");
+        code(() -> policies.plan(api("top_list"),stock,context),ErrorCode.BATCH_DOWNLOAD_UNAVAILABLE);
+        var bse=params("trade_cal");bse.put("exchange","BSE");
+        code(() -> policies.plan(api("trade_cal"),bse,context),ErrorCode.BATCH_DOWNLOAD_UNAVAILABLE);
         assertThat(context.reservations.get()).isZero();verifyRequests();
     }
 
@@ -171,7 +224,7 @@ class TushareBatchDownloadTest {
         var context=new Context();
         var valid=plugin.downloadBatch(api("stk_holdernumber"),source,context);
         assertThat(valid.data().getFirst().get(valid.fields().indexOf("ann_date"))).isEqualTo("20240229");
-        assertThat(production().assess(api("stk_holdernumber"),RANGE,valid)).isEqualTo(BatchAssessment.UNKNOWN);
+        assertThat(production().assess(api("stk_holdernumber"),RANGE,valid)).isEqualTo(BatchAssessment.COMPLETE);
         var invalid=plugin.downloadBatch(api("stk_holdernumber"),source,context);
         code(() -> production().assess(api("stk_holdernumber"),RANGE,invalid),ErrorCode.SOURCE_PAYLOAD_INVALID);
         verifyRequests();

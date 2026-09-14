@@ -126,6 +126,12 @@ async function chooseDownload(page, apiName) {
   await expect(page.locator('.download-config-panel')).toContainText(apiName)
 }
 
+async function chooseSingleMode(page) {
+  const singleMode = page.getByRole('radio', { name: '单次请求', exact: true })
+  await page.getByRole('radiogroup', { name: '下载模式', exact: true }).getByText('单次请求', { exact: true }).click()
+  await expect(singleMode).toBeChecked()
+}
+
 async function fillMetadataField(page, wrapper, parameter) {
   const input = wrapper.locator('input')
   if (parameter.type === 'ENUM') {
@@ -234,9 +240,24 @@ test.describe('40 项 UI 元数据矩阵', () => {
       const api = await installApi(page)
       await openDownloads(page)
       await chooseDownload(page, apiName)
+      const range = rangeCapability(apiName)
+      const rangeMode = page.getByRole('radio', { name: '日期区间', exact: true })
+      if (range.availability === 'AVAILABLE') {
+        await expect(rangeMode).toBeEnabled()
+        await expect(rangeMode).toBeChecked()
+        if (range.completenessRule.kind === 'RESPONSE_ONLY') {
+          const warning = page.locator('.form-footer__help').filter({ hasText: '数据完整性未确认，可能存在上游截断' })
+          await expect(warning).toBeVisible()
+          await expect(warning).toContainText('数据完整性未确认，可能存在上游截断')
+        }
+      }
+      else {
+        await expect(rangeMode).toBeDisabled()
+        await expect(page.getByRole('radio', { name: '单次请求', exact: true })).toBeChecked()
+        await expect(page.locator('.download-mode')).toContainText(range.unavailableReason)
+      }
+      await page.getByRole('radiogroup', { name: '下载模式', exact: true }).getByText('单次请求', { exact: true }).click()
       await expect(page.getByRole('radio', { name: '单次请求', exact: true })).toBeChecked()
-      await expect(page.getByRole('radio', { name: '日期区间', exact: true })).toBeDisabled()
-      await expect(page.locator('.download-mode')).toContainText(rangeCapability(apiName).unavailableReason)
       const expectedParams = await submitDownload(page, definition)
       const posts = apiRequests(api, ({ method, path: requestPath }) => method === 'POST' && requestPath === '/api/v1/download-tasks')
       expect(posts).toHaveLength(1)
@@ -284,6 +305,7 @@ test('下载状态、校验、往返缓存与原参数重试', async ({ page }) 
   await expect(page.getByText(/请求 ID：/)).toBeVisible()
   await page.getByRole('button', { name: '重新加载配置' }).click()
   await chooseDownload(page, 'daily')
+  await chooseSingleMode(page)
   await page.getByRole('button', { name: '提交任务' }).click()
   const stockCode = page.locator('[data-parameter="ts_code"] input')
   const tradeDate = page.locator('[data-parameter="trade_date"] input')
@@ -332,6 +354,7 @@ test('下载状态、校验、往返缓存与原参数重试', async ({ page }) 
   await expect(page.getByRole('button', { name: '使用原参数重新确认' })).toHaveCount(0)
 
   await chooseDownload(page, 'new_share')
+  await chooseSingleMode(page)
   const start = page.locator('[data-parameter="start_date"] input')
   const end = page.locator('[data-parameter="end_date"] input')
   await page.getByRole('button', { name: '提交任务' }).click()
@@ -466,6 +489,7 @@ test.describe('主题、五视口与布局稳定性', () => {
       })
       await openDownloads(page)
       await chooseDownload(page, 'daily')
+      await chooseSingleMode(page)
       await page.locator('[data-parameter="ts_code"] input').fill('000001.SZ')
       const tradeDate = page.locator('[data-parameter="trade_date"] input')
       await tradeDate.fill('2026-08-07')
@@ -669,6 +693,7 @@ test('设置零 API、四主题真实颜色、持久化降级、非法值与完�
 
   await openDownloads(businessPage)
   await chooseDownload(businessPage, 'daily')
+  await chooseSingleMode(businessPage)
   const businessDate = businessPage.locator('[data-parameter="trade_date"] input')
   await businessDate.fill('2026-08-07')
   await businessDate.press('Enter')
@@ -801,11 +826,13 @@ test('键盘、焦点、移动端弹层与 reduced motion', async ({ page }) => 
   await tabTo(page, downloadApi)
   await expectFocusOutline(downloadApi, downloadApi.locator('xpath=ancestor::*[contains(@class, "el-select__wrapper")][1]'))
   await page.keyboard.press('ControlOrMeta+A')
-  await page.keyboard.type('daily')
+  await page.keyboard.type('日线行情')
+  await expect(page.getByRole('option')).toHaveCount(1)
   await page.keyboard.press('ArrowDown')
   await page.keyboard.press('Enter')
   await page.keyboard.press('Escape')
-  await expect(page.locator('.api-select .el-select__selected-item:not(.el-select__input-wrapper)')).toContainText('daily')
+  await expect(page.locator('.api-select .el-select__selected-item:not(.el-select__input-wrapper)')).toHaveText('日线行情 (daily)')
+  await chooseSingleMode(page)
 
   const stock = page.locator('[data-parameter="ts_code"] input')
   await tabTo(page, stock)
@@ -904,6 +931,7 @@ test('生成八张可复现的正式验收截图', async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 1080 })
   await openDownloads(page)
   await chooseDownload(page, 'daily')
+  await chooseSingleMode(page)
   await page.locator('[data-parameter="ts_code"] input').fill('000001.SZ')
   const date = page.locator('[data-parameter="trade_date"] input')
   await date.fill('2026-08-07')
@@ -940,6 +968,7 @@ test('生成八张可复现的正式验收截图', async ({ page }) => {
   })
   await page.reload()
   await chooseDownload(page, 'daily')
+  await chooseSingleMode(page)
   await page.locator('[data-parameter="ts_code"] input').fill('000001.SZ')
   await page.locator('[data-parameter="trade_date"] input').fill('2026-08-07')
   await page.locator('[data-parameter="trade_date"] input').press('Enter')

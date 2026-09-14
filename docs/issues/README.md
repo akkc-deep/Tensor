@@ -13,6 +13,10 @@
 
 ## 问题索引
 
+2026-09-13 按用户要求，将 ISSUE-018-T14 的剩余缺口拆为 ISSUE-019～026，按编号串行处理。主责接口分组不重叠，最终任务验收统一归 ISSUE-026；[后续 issue 看板](../task-handoffs/ISSUE-018/ISSUE-018-followups-task-board.md)管理新 issue 状态，原 T14 仍由原看板管理，拆分不改变其验收结论。
+
+2026-09-14 按用户明确要求，将ISSUE-026继续拆为ISSUE-027～032六个子issue；[子issue看板](../task-handoffs/ISSUE-026/ISSUE-026-task-board.md)管理它们，ISSUE-026保留总任务与最终关闭条件。
+
 | ID | 问题 | 状态 | 当前阶段 | 文档 |
 | --- | --- | --- | --- | --- |
 | ISSUE-001 | Controller 方法入口参数不够聚合 | 已解决 | 请求聚合与13种下载类型完成；624项后端、170项前端及7项包合同通过 | [详情](problems/ISSUE-001-method-input-aggregation.md) · [方案](proposals/ISSUE-001-download-request-aggregation.md) · [设计](../task-designs/ISSUE-001-designs.md) · [验收](../verification/ISSUE-001-controller-inputs.md) |
@@ -31,5 +35,19 @@
 | ISSUE-014 | 安全 Maven 门禁未完成 | 已解决 | 原命令重跑：HEAD 七类 81 项、当前源码七类 118 项通过；六模块 Enforcer 通过 | [详情](problems/ISSUE-014-security-maven-verification.md) · [验收记录](../verification/ISSUE-014-security-maven-verification.md) |
 | ISSUE-015 | 后端漏洞扫描未形成有效报告 | 已完成 | 扫描脚本已修复；27 个高阈值 CVE 与四类分析缺口按用户决定标记为不需要处理，接受剩余风险并关闭 | [详情](problems/ISSUE-015-backend-dependency-audit.md) · [验证记录](../verification/ISSUE-015-backend-dependency-audit.md) |
 | ISSUE-016 | UI 测试 YAML 解析器缺少严格字段校验 | 新增 | 从 ISSUE-004 延期项拆出，已登记，待解决方案 | [详情](problems/ISSUE-016-ui-fixture-yaml-validation.md) |
-| ISSUE-017 | 支持股票参数的接口必填股票，其余保留原下载方式 | 处理中 | 34 项股票必填、6 项原方式已实施并通过自动化验证；fina_mainbz 参数已由 T06 纠正，真实下载验收待完成 | [详情](problems/ISSUE-017-stock-scoped-downloads.md) · [方案](proposals/ISSUE-017-required-stock-parameters.md) · [实施与验证](../verification/ISSUE-017-stock-scoped-downloads.md) |
-| ISSUE-018 | 补齐按日期区间批量下载能力 | 处理中 | T01–T12 已完成；126 项普通浏览器门禁通过，T13 已准备 READY、未实施，34 项生产 RANGE 保持待验证 | [详情](problems/ISSUE-018-date-range-batch-downloads.md) · [方案草稿](proposals/ISSUE-018-date-range-batch-downloads.md) · [详细设计](../task-designs/ISSUE-018-design.md) · [任务看板](../task-handoffs/ISSUE-018/ISSUE-018-task-board.md) |
+| ISSUE-017 | 支持股票参数的接口必填股票，其余保留原下载方式 | 处理中 | T14完整74任务/148查询及SQL归属通过；fina_mainbz按方案A采用默认分类及工程阈值，RANGE验收交ISSUE-026 | [详情](problems/ISSUE-017-stock-scoped-downloads.md) · [方案](proposals/ISSUE-017-required-stock-parameters.md) · [实施与验证](../verification/ISSUE-017-stock-scoped-downloads.md) |
+| ISSUE-018 | 补齐按日期区间批量下载能力 | 处理中 | T01–T12 已完成；T14完整SINGLE74任务/148查询及四接口RANGE25任务通过，4 AVAILABLE/v2；G1–G6通过；其余30项证据未闭环，T14 BLOCKED，母issue未关闭 | [详情](problems/ISSUE-018-date-range-batch-downloads.md) · [方案草稿](proposals/ISSUE-018-date-range-batch-downloads.md) · [详细设计](../task-designs/ISSUE-018-design.md) · [任务看板](../task-handoffs/ISSUE-018/ISSUE-018-task-board.md) · [T14交接](../task-handoffs/ISSUE-018/ISSUE-018-T14-handoff.md) |
+| ISSUE-019 | 确认三接口限量规则并补齐来源证据 | 已解决 | 方案A已确认；两轮SOURCE及78/160项回归通过，28项任务输入交ISSUE-026，生产准入保持 | [详情](problems/ISSUE-019-documented-range-limits.md) · [已确认方案](proposals/ISSUE-019-documented-range-limits.md) · [设计](../task-designs/ISSUE-019-design.md) · [执行看板](../task-handoffs/ISSUE-018/ISSUE-018-followups-task-board.md) |
+| ISSUE-020 | 厘清主营业务构成默认分类与数量限制 | 已解决 | 方案A已确认；两股票来源与12项任务输入交ISSUE-026，78项Node/163项Maven通过 | [详情](problems/ISSUE-020-fina-mainbz-default-type.md) · [执行看板](../task-handoffs/ISSUE-018/ISSUE-018-followups-task-board.md) |
+| ISSUE-021 | 验证交易所日历与交易日下载 | 已解决 | 三轮39项来源已验证；沪深/BJ与直接BSE结论明确，38项任务输入交ISSUE-026 | [详情](problems/ISSUE-021-exchange-calendar-semantics.md) · [执行看板](../task-handoffs/ISSUE-018/ISSUE-018-followups-task-board.md) |
+| ISSUE-022 | 补齐日期口径与区间边界证据 | 已解决 | 五接口日期/边界来源补齐；两轮39请求、35项候选交ISSUE-026，回归与复审通过 | [详情](problems/ISSUE-022-range-date-axis-evidence.md) · [执行看板](../task-handoffs/ISSUE-018/ISSUE-018-followups-task-board.md) |
+| ISSUE-023 | 补齐稀疏事件与记录修订证据 | 已解决 | 三轮39项来源/131请求，四接口事件与边界完成；35项候选交ISSUE-026，复审通过 | [详情](problems/ISSUE-023-sparse-event-range-evidence.md) · [执行看板](../task-handoffs/ISSUE-018/ISSUE-018-followups-task-board.md) |
+| ISSUE-024 | 验证转融资与转融券历史范围 | 已完成 | 用户已批准方案A；39项来源及33项任务输入交付，TASK/SQL由ISSUE-026验收 | [详情](problems/ISSUE-024-slb-historical-range-evidence.md) · [执行看板](../task-handoffs/ISSUE-018/ISSUE-018-followups-task-board.md) |
+| ISSUE-025 | 明确十一接口响应采集合同与来源 | 已完成 | 用户接受不完整；响应采集合同、135项来源及87组输入交付，78项回归通过；生产实现归ISSUE-026 | [详情](problems/ISSUE-025-unknown-extraction-contracts.md) · [执行看板](../task-handoffs/ISSUE-018/ISSUE-018-followups-task-board.md) |
+| ISSUE-026 | 完成剩余区间任务验收与 T14 收尾 | 处理中 | 总任务；已拆为027～032，278项真实验证及原关闭条件保持 | [详情](problems/ISSUE-026-range-task-final-acceptance.md) · [执行看板](../task-handoffs/ISSUE-018/ISSUE-018-followups-task-board.md) |
+| ISSUE-027 | 实现允许不完整的后端响应采集 | 已完成 | RESPONSE_ONLY、runner及历史摘要交付；287项后端/包与468项前端、独立审查通过 | [详情](problems/ISSUE-027-response-only-backend.md) · [子看板](../task-handoffs/ISSUE-026/ISSUE-026-task-board.md) |
+| ISSUE-028 | 贯通响应采集接口合同与页面说明 | 已完成 | HTTP/页面合同交付，后端1144、前端524、受控浏览器66项及独立审查通过 | [详情](problems/ISSUE-028-response-only-contract-ui.md) · [子看板](../task-handoffs/ISSUE-026/ISSUE-026-task-board.md) |
+| ISSUE-029 | 升级验收工具并补齐主营业务拆分来源 | 已完成 | schema2/严格身份及四SOURCE交付；42请求、完整拆分树与独立验收通过，生产及旧证据保持 | [详情](problems/ISSUE-029-range-evidence-and-split-source.md) · [子看板](../task-handoffs/ISSUE-026/ISSUE-026-task-board.md) |
+| ISSUE-030 | 配置剩余接口候选策略与日历映射 | 已完成 | 30候选/BJ映射、272绑定与新两包交付；1133后端、524前端、104证据、106浏览器检查通过，正式证据保持4/30/6 | [详情](problems/ISSUE-030-range-candidate-policies.md) · [设计](../task-designs/ISSUE-030-design.md) · [交接](../task-handoffs/ISSUE-030-handoff.md) · [子看板](../task-handoffs/ISSUE-026/ISSUE-026-task-board.md) |
+| ISSUE-031 | 完成278项真实区间任务与SQL验收 | 阻塞 | 82通过、1失败、195未运行；fina_indicator适配失败后撤回v3，待安全诊断与恢复合同 | [详情](problems/ISSUE-031-range-live-task-verification.md) · [设计](../task-designs/ISSUE-031-design.md) · [交接](../task-handoffs/ISSUE-031-handoff.md) · [子看板](../task-handoffs/ISSUE-026/ISSUE-026-task-board.md) |
+| ISSUE-032 | 完成最终回归与母任务收尾 | 未开始 | 依赖ISSUE-031，待专属设计与实施 | [详情](problems/ISSUE-032-range-final-closure.md) · [子看板](../task-handoffs/ISSUE-026/ISSUE-026-task-board.md) |

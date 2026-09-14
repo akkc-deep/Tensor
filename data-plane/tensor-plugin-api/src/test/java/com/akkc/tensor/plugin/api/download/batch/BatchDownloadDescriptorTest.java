@@ -20,6 +20,29 @@ class BatchDownloadDescriptorTest {
             new CompletenessRule(CompletenessRule.Kind.UNKNOWN, null, null);
 
     @Test
+    void responseOnlyRequiresEvidenceAndAnUnsplitNativeRequestWithoutLimit() {
+        assertThat(CompletenessRule.Kind.values()).extracting(Enum::name).contains("RESPONSE_ONLY");
+        assertThat(BatchAssessment.values()).extracting(Enum::name).contains("RESPONSE_ONLY");
+        var kind = CompletenessRule.Kind.valueOf("RESPONSE_ONLY");
+        var rule = new CompletenessRule(kind, null, "Accepted incomplete response");
+        for (var availability : List.of(Availability.AVAILABLE, Availability.NEEDS_VERIFICATION)) {
+            for (var mode : PlanningMode.values()) {
+                for (boolean split : List.of(false, true)) {
+                    org.assertj.core.api.ThrowableAssert.ThrowingCallable construct = () -> new BatchDownloadDescriptor(
+                            parameters(), "from", "to", DateAxis.TRADE_DATE, "Date", mode, split,
+                            availability, availability == Availability.AVAILABLE ? null : "Pending", "v2", rule);
+                    if (mode == PlanningMode.NATIVE_RANGE && !split) assertThatCode(construct).doesNotThrowAnyException();
+                    else assertThatIllegalArgumentException().isThrownBy(construct);
+                }
+            }
+        }
+        assertThatIllegalArgumentException().isThrownBy(() -> new CompletenessRule(kind, 100L, "evidence"));
+        for (String evidence : new String[] {null, "", " "}) {
+            assertThatIllegalArgumentException().isThrownBy(() -> new CompletenessRule(kind, null, evidence));
+        }
+    }
+
+    @Test
     void acceptsClosedRangesAndRejectsMissingOrReversedEndpoints() {
         var leapDay = LocalDate.of(2024, 2, 29);
         assertThat(new DateRange(leapDay, leapDay).end()).isEqualTo(leapDay);

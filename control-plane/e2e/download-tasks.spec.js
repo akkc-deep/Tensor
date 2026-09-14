@@ -1,6 +1,6 @@
 import { expect } from '@playwright/test'
 
-import { TASK_ID, test } from './download-tasks.fixtures.js'
+import { TASK_ID, task, batch, test } from './download-tasks.fixtures.js'
 
 const DETAIL_PATH = `/api/v1/download-tasks/${TASK_ID}`
 
@@ -8,7 +8,7 @@ test.use({ baseURL: process.env.TENSOR_UI_BASE_URL || 'http://127.0.0.1:4173' })
 
 test.describe.configure({ timeout: 30_000 })
 
-async function selectDaily(page) {
+async function selectDaily(page, rangeAvailable = true) {
   const input = page.locator('#download-api')
   await expect(input).toBeEnabled()
   await input.click()
@@ -18,7 +18,7 @@ async function selectDaily(page) {
     .filter({ has: page.getByText('daily', { exact: true }) })
   await expect(option).toHaveCount(1)
   await option.click()
-  await expect(page.getByText('交易日期范围。', { exact: true })).toBeVisible()
+  await expect(page.getByText(rangeAvailable ? '交易日期范围。' : '单次请求，结果不代表完整历史。', { exact: true })).toBeVisible()
 }
 
 async function fillRange(page) {
@@ -202,3 +202,111 @@ test('INTERRUPTED conflict preserves status through a query 500 and resumes with
   expectDynamicRequestIds(downloadTaskApi)
   downloadTaskApi.assertClean()
 })
+
+const RESPONSE_NOTICE = '数据完整性未确认，可能存在上游截断'
+
+function responseOnlyCapability(downloadTaskApi) {
+  Object.assign(downloadTaskApi.state.capabilities.range, {
+    planningMode: 'NATIVE_RANGE', splittable: false, policyVersion: 'response-browser-v2',
+    completenessRule: { kind: 'RESPONSE_ONLY', rowLimit: null, evidence: '受控响应采集合同' },
+  })
+}
+
+test('response-only submission explains the contract and keeps it after completion', async ({ page, downloadTaskApi }) => {
+  responseOnlyCapability(downloadTaskApi)
+  await page.goto('/downloads')
+  await selectDaily(page)
+  await expect(page.locator('.form-footer')).toContainText(`按所选日期区间采集本次接口返回的记录。${RESPONSE_NOTICE}。`)
+  await expect(page.getByRole('dialog')).toHaveCount(0)
+  await expect(page.getByRole('checkbox')).toHaveCount(0)
+  await fillRange(page)
+  await page.getByRole('button', { name: '提交任务', exact: true }).click()
+  const recent = page.locator('.download-task-list')
+  await expect(recent).toContainText(RESPONSE_NOTICE)
+  await expect(recent.locator('.download-task-list__status')).toHaveText('返回记录已采集')
+  await recent.getByRole('link', { name: '查看任务' }).click()
+  await expectTask(page, '返回记录已采集')
+  await expect(page.locator('.task-detail__identity')).toContainText(RESPONSE_NOTICE)
+  await expect(page.locator('.task-detail__identity')).toContainText('response-browser-v2')
+  expect(downloadTaskApi.state.task.extraction).toEqual({ policyVersion: 'response-browser-v2', ruleKind: 'RESPONSE_ONLY' })
+  expect(downloadTaskApi.requests('POST', '/api/v1/download-tasks')).toHaveLength(1)
+  downloadTaskApi.assertClean()
+})
+
+for (const [status, sourceRows, label] of [
+  ['QUEUED', 0n, '排队中'], ['RUNNING', 0n, '运行中'],
+  ['SUCCEEDED', 2n, '返回记录已采集'], ['SUCCEEDED', 0n, '本次请求未返回记录'],
+  ['FAILED', 0n, '失败'], ['PARTIAL_FAILED', 2n, '部分失败'], ['INTERRUPTED', 2n, '已中断'],
+]) {
+  test(`saved response-only ${status}/${sourceRows} stays truthful under changed capabilities`, async ({ page, downloadTaskApi }, testInfo) => {
+    const succeeded = status === 'SUCCEEDED'
+    downloadTaskApi.state.task = task({ status,
+      extraction: { policyVersion: 'saved-response-v1', ruleKind: 'RESPONSE_ONLY' },
+      requestCount: status === 'QUEUED' ? 0n : 1n, runRequestCount: status === 'QUEUED' ? 0n : 1n,
+      counts: { totalBatches: 1n, pendingBatches: ['QUEUED', 'INTERRUPTED'].includes(status) ? 1n : 0n,
+        runningBatches: status === 'RUNNING' ? 1n : 0n, succeededBatches: succeeded ? 1n : 0n,
+        failedBatches: ['FAILED', 'PARTIAL_FAILED'].includes(status) ? 1n : 0n,
+        splitBatches: 0n, sourceRows, insertedRows: sourceRows, updatedRows: 0n },
+      canRetry: status === 'FAILED', canResume: status === 'INTERRUPTED',
+      lastError: ['FAILED', 'PARTIAL_FAILED'].includes(status) ? { code: 'SOURCE_TIMEOUT', message: '受控上游超时' } : null,
+    })
+    downloadTaskApi.state.batches = [batch(0, { rangeEnd: '2026-09-03', sourceParams: { ...downloadTaskApi.state.task.params },
+      status: succeeded ? 'SUCCEEDED' : status === 'RUNNING' ? 'RUNNING' : ['QUEUED', 'INTERRUPTED'].includes(status) ? 'PENDING' : 'FAILED', sourceRows, insertedRows: sourceRows })]
+    Object.assign(downloadTaskApi.state.capabilities.range, { availability: 'NEEDS_VERIFICATION',
+      policyVersion: 'current-v9', unavailableReason: '当前能力尚未验证',
+      completenessRule: { kind: 'UNKNOWN', rowLimit: null, evidence: null } })
+    await page.setViewportSize(sourceRows === 0n ? { width: 390, height: 844 } : { width: 1440, height: 1080 })
+    await page.goto('/downloads')
+    await selectDaily(page, false)
+    const recent = page.locator('.download-task-list')
+    await expect(recent).toContainText(RESPONSE_NOTICE)
+    await expect(recent).toContainText('saved-response-v1')
+    await expect(recent.locator('.download-task-list__status')).toHaveText(label)
+    await recent.getByRole('link', { name: '查看任务' }).click()
+    await expectTask(page, label)
+    await expect(page.locator('.task-detail__identity')).toContainText(RESPONSE_NOTICE)
+    await expect(page.locator('.task-detail__identity')).toContainText('saved-response-v1')
+    await expect(page.locator('.task-detail__identity')).not.toContainText('current-v9')
+    if (!succeeded) {
+      await expect(page.locator('.task-detail')).not.toContainText('返回记录已采集')
+      await expect(page.locator('.task-detail')).not.toContainText('本次请求未返回记录')
+    }
+    await expectNoPageOverflow(page)
+    if (succeeded) await page.screenshot({ path: testInfo.outputPath(`response-${sourceRows}.png`), fullPage: true })
+    await page.reload()
+    await expectTask(page, label)
+    await expect(page.locator('.task-detail__identity')).toContainText(RESPONSE_NOTICE)
+    downloadTaskApi.assertClean()
+  })
+}
+
+for (const [mode, ruleKind, notice] of [
+  ['RANGE', 'CONFIRMED_ROW_LIMIT', ''], ['RANGE', 'VERIFIED_RULE', ''],
+  ['RANGE', 'UNKNOWN', '数据完整性未确认'], ['SINGLE', null, '单次请求，结果不代表完整历史。'],
+]) {
+  test(`old ${mode}/${ruleKind} keeps saved meaning when current capability is response-only`, async ({ page, downloadTaskApi }) => {
+    responseOnlyCapability(downloadTaskApi)
+    downloadTaskApi.state.task = task({ mode, extraction: mode === 'SINGLE' ? null : { policyVersion: 'historical-v1', ruleKind } })
+    downloadTaskApi.state.batches = [batch(0), batch(1), batch(2)]
+    if (mode === 'SINGLE') {
+      downloadTaskApi.state.task.params = { ts_code: '000001.SZ', trade_date: '20260901' }
+      Object.assign(downloadTaskApi.state.task.counts, { totalBatches: 1n, succeededBatches: 1n })
+      downloadTaskApi.state.task.requestCount = downloadTaskApi.state.task.runRequestCount = 1n
+      downloadTaskApi.state.batches = [batch(0, { rangeStart: null, rangeEnd: null,
+        sourceParams: { ...downloadTaskApi.state.task.params }, sourceRows: 15n, insertedRows: 14n, updatedRows: 1n })]
+    }
+    await page.goto('/downloads')
+    await selectDaily(page)
+    const recent = page.locator('.download-task-list')
+    await expect(recent.locator('.download-task-list__status')).toHaveText('已成功')
+    await expect(recent).not.toContainText(RESPONSE_NOTICE)
+    if (ruleKind === 'UNKNOWN') await expect(recent).toContainText(notice)
+    if (ruleKind) await expect(recent).toContainText('historical-v1')
+    await recent.getByRole('link', { name: '查看任务' }).click()
+    await expectTask(page, '已成功')
+    await expect(page.locator('.task-detail')).not.toContainText(RESPONSE_NOTICE)
+    if (notice) await expect(page.locator('.task-detail__identity')).toContainText(notice)
+    if (ruleKind) await expect(page.locator('.task-detail__identity')).toContainText('historical-v1')
+    downloadTaskApi.assertClean()
+  })
+}

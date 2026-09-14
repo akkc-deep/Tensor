@@ -1,3 +1,5 @@
+import examples from '../../../docs/contracts/download-task-examples.json'
+import { parseDownloadTask } from '../api/downloadTaskDtos.js'
 import { ApiError, ClientError } from '../api/errors.js'
 import { PENDING_SUBMISSION_KEY } from '../utils/downloadTaskSubmission.js'
 
@@ -22,6 +24,11 @@ vi.mock('../api/downloadTasks.js', () => ({
 import { useDownloadFlow } from './useDownloadFlow.js'
 
 const submissionId = '33333333-3333-4333-8333-333333333333'
+const savedTask = () => parseDownloadTask({
+  ...examples.examples.find(({ name }) => name === 'queuedTask').value,
+  params: { ts_code: '000001.SZ', start_date: '20260901', end_date: '20260902' },
+  extraction: { policyVersion: 'fixture-v1', ruleKind: 'VERIFIED_RULE' },
+}, '11111111-1111-4111-8111-111111111111')
 
 function deferred() {
   let resolve
@@ -147,7 +154,7 @@ it('keeps the same identity after a lost receipt and finds it without metadata',
   const stored = sessionStorage.getItem(PENDING_SUBMISSION_KEY)
   flow.dispose()
 
-  const recoveredTask = { taskId: receipt().taskId, submissionId, status: 'QUEUED', version: 1n }
+  const recoveredTask = savedTask()
   api.listDownloadTasks.mockResolvedValueOnce({ page: 1, pageSize: 20, total: 1n, items: [recoveredTask] })
   const accepted = vi.fn()
   const restored = useDownloadFlow({ onAccepted: accepted })
@@ -200,7 +207,7 @@ it('automatically looks up a submission conflict without changing its identity',
     fieldErrors: [],
   })
   api.submitDownloadTask.mockRejectedValueOnce(conflict)
-  const existing = { taskId: receipt().taskId, submissionId, status: 'QUEUED', version: 1n }
+  const existing = savedTask()
   api.listDownloadTasks.mockResolvedValueOnce({ page: 1, pageSize: 20, total: 1n, items: [existing] })
   const flow = await readyFlow()
 

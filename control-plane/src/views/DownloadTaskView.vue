@@ -3,6 +3,7 @@ import { computed, onUnmounted, watch } from 'vue'
 import { RouterLink, useRoute } from 'vue-router'
 
 import { parseTaskJson } from '../api/downloadTaskDtos.js'
+import { taskExtractionNotice, taskStatusLabel } from '../utils/downloadTaskText.js'
 import AsyncStatePanel from '../components/common/AsyncStatePanel.vue'
 import PageHeading from '../components/common/PageHeading.vue'
 import WorkbenchPanel from '../components/common/WorkbenchPanel.vue'
@@ -19,10 +20,6 @@ const {
 watch(() => route.params.taskId, (id) => flow.load(id), { immediate: true })
 onUnmounted(flow.dispose)
 
-const STATUS_LABELS = {
-  QUEUED: '排队中', RUNNING: '运行中', SUCCEEDED: '已成功',
-  PARTIAL_FAILED: '部分失败', FAILED: '失败', INTERRUPTED: '已中断',
-}
 const TIMES = [
   ['createdAt', '创建时间'], ['updatedAt', '更新时间'], ['queuedAt', '排队时间'],
   ['startedAt', '开始时间'], ['finishedAt', '结束时间'], ['deadlineAt', '本轮截止时间'],
@@ -70,6 +67,8 @@ function errorMessage(error) {
             <strong class="task-detail__dataset">{{ task.pluginId }} / {{ task.apiName }}</strong>
             <span>任务 ID <code>{{ task.taskId }}</code></span>
             <span>{{ task.mode === 'SINGLE' ? '单次请求' : '日期区间' }} · 版本 {{ task.version.toString() }}</span>
+            <span v-if="task.extraction">采集规则 {{ task.extraction.ruleKind }} · 策略版本 {{ task.extraction.policyVersion }}</span>
+            <p v-if="taskExtractionNotice(task)">{{ taskExtractionNotice(task) }}</p>
             <div class="task-detail__parameters" aria-label="规范化参数">
               <code v-for="[name, value] in parameters" :key="name">{{ name }}={{ value }}</code>
               <span v-if="!parameters.length">无业务参数</span>
@@ -77,8 +76,10 @@ function errorMessage(error) {
             <p v-if="task.mode === 'SINGLE'">单次请求，结果不代表完整历史。</p>
           </div>
           <div class="task-detail__execution">
-            <strong data-task-status class="task-detail__status" :class="`task-detail__status--${task.status.toLowerCase()}`">{{ STATUS_LABELS[task.status] }}</strong>
-            <p v-if="task.status === 'SUCCEEDED'">{{ task.mode === 'SINGLE' ? '本次请求已完成' : '本次请求范围内的计划已完成' }}。</p>
+            <strong data-task-status class="task-detail__status" :class="`task-detail__status--${task.status.toLowerCase()}`">{{ taskStatusLabel(task) }}</strong>
+            <template v-if="task.status === 'SUCCEEDED'">
+              <p v-if="task.extraction?.ruleKind !== 'RESPONSE_ONLY'">{{ task.mode === 'SINGLE' ? '本次请求已完成' : '本次请求范围内的计划已完成' }}。</p>
+            </template>
             <p v-else-if="task.status === 'INTERRUPTED'">任务已中断，需要手动恢复。已成功的结果保留。</p>
             <p v-else-if="['FAILED', 'PARTIAL_FAILED'].includes(task.status)">
               失败 {{ task.counts.failedBatches.toString() }} 批，待执行 {{ task.counts.pendingBatches.toString() }} 批。

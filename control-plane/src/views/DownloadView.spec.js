@@ -140,6 +140,7 @@ function recoveredTask() {
     pluginId: 'removed_source',
     apiName: 'removed_api',
     mode: 'SINGLE',
+    extraction: null,
     params: Object.freeze({ trade_date: '20260912' }),
     status: 'QUEUED',
     version: 1n,
@@ -315,6 +316,22 @@ describe('DownloadView', () => {
       'ts_code', 'trade_date',
     ])
     expect(wrapper.getComponent(DynamicParameterForm).get('input').element.value).toBe('')
+    expect(wrapper.text()).toContain('单次请求，结果不代表完整历史')
+  })
+
+  it('explains response-only before submission and removes the caveat for SINGLE', async () => {
+    api.getDownloadCapabilities.mockResolvedValueOnce(capabilities({ range: {
+      ...capabilities().range, planningMode: 'NATIVE_RANGE', splittable: false,
+      completenessRule: { kind: 'RESPONSE_ONLY', rowLimit: null, evidence: '受控采集合同' },
+    } }))
+    const wrapper = await mountView()
+    await selectApi(wrapper)
+    expect(wrapper.get('.form-footer').text()).toContain('按所选日期区间采集本次接口返回的记录。数据完整性未确认，可能存在上游截断。')
+    expect(wrapper.find('[role="dialog"]').exists()).toBe(false)
+    expect(wrapper.find('input[type="checkbox"]').exists()).toBe(false)
+    wrapper.getComponent(ElRadioGroup).vm.$emit('update:modelValue', 'SINGLE')
+    await nextTick()
+    expect(wrapper.text()).not.toContain('可能存在上游截断')
     expect(wrapper.text()).toContain('单次请求，结果不代表完整历史')
   })
 

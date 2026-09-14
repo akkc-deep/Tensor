@@ -72,3 +72,23 @@ TDD 证据：元数据测试先复现 26 项缺少股票字段；YAML 增加字�
 ## ISSUE-018-T06 后续纠正（2026-09-11）
 
 [T06 完成证据](../task-handoffs/ISSUE-018/ISSUE-018-task-board.md#issue-018-t06)已将 `fina_mainbz` SINGLE 改为 `snapshot` + 必填 `ts_code`，原业务键和字段不变。合法单股票请求200；旧 `ann_date` 及未声明 `type/period/start_date/end_date` 返回400、零上游/写入；40示例、34股票/6非股票及受控浏览器回归均通过。此为后续任务的纠正，不改写上文原始实施基线和测试数量。真实默认类型及真实下载仍由 T13 验证，母 issue 未关闭。
+
+## ISSUE-018-T13 部分真实证据（2026-09-13）
+
+[T13验收记录](ISSUE-018-range-acceptance.md)及[完整安全索引](ISSUE-018-range-acceptance.json)保留新请求的全部运行身份。首轮SOURCE固定74个SINGLE样本（34项各两只股票、6项原方式）均已尝试：36 PASS、38 EVIDENCE_MISSING；SOURCE没有任务或SQL事实，所在整轮因后续BSE RANGE日历覆盖未确认而退出1，不能当作完整验收通过。
+
+SINGLE首轮bootstrap没有提交任务，74样本全NOT_RUN。导航修复后独立轮次实际提交15个Tushare任务、调用15次来源，观察终态均为SUCCEEDED；harness记录14 PASS、1 EVIDENCE_MISSING、59 NOT_RUN。SQL字符集观察缺陷及运行期间并行源码变化使该轮退出1、canonical cleanup FAILED；14个历史PASS标记受此限制，不构成完整有效的两股票验收。保留失败轮次，不自动重试已提交任务或补写成功结论。
+
+`fina_mainbz`的新snapshot请求已实际执行：SOURCE两股票各150行，首股票任务写入150行。只读复核确认原数据150个业务键，SQL工具latin1转换造成观察时仅68个不同键；工具固定utf8mb4后同库只读核对150/150/150，未重新下载或修改数据。默认type仍无依据，SINGLE 150行与官网100上界的适用关系未解决，不能宣称完整提取。`stock_basic`输出不含list_status，输入L也不独立证明实际上市状态。
+
+母issue保留全部未勾选关闭条件。34+6完整真实回归、两股票任务/SQL归属闭环及特殊语义仍待补齐；新证据只追加，不改写上述2026-09-11历史结果。
+
+## ISSUE-018-T14 完整两股票验收（2026-09-13）
+
+真实新轮 `issue018-t14-single-20260913T093339Z` 使用独立新空schema及稳定重建包，34个股票接口分别执行000001.SZ/600000.SH、6个非股票接口保持原方式：40API、74任务、148records查询全部通过（fixture另2/3），exit0/cleanupPASS。SQL独立核对全部业务键/来源归属及第二股票写入后第一股票历史保留，实际5265来源行/5265插入/0更新；逐API表、固定参数、包/源码/计划摘要见 [T14运行记录](ISSUE-018-T14-runs.md#完整-single-实际结果)。当前SINGLE任务闭环与两股票归属已补齐，旧两轮和15个任务保留；fina_mainbz未传type的默认类别及两股票SINGLE各150行与官网100上界的适用关系仍未解决，不关闭母issue。
+
+## ISSUE-020 默认分类补证（2026-09-13）
+
+新增两轮18case/18请求，exit0/cleanup PASS；仅SOURCE，无新TASK/SQL。两股票默认省略type均返回P/D/I，SINGLE各150行；2025全年RANGE分别74/110行，宽区间各150，故100并非只约束RANGE的已确认上限。报告期整段、单日及非空上下边界已补齐；本轮业务键全部唯一、跨分类共用键0，但不推定全历史无冲突。原74个SINGLE任务/SQL仍为独立既有事实。
+
+用户已明确“同意方案A（推荐）”，[决定](../issues/proposals/ISSUE-020-fina-mainbz-default-type.md#决策记录)采用默认原样返回、单次快照及100工程拆分阈值；>=100拆分，单日满额失败。决定和来源观察不当作上游完整性保证。ISSUE-020的规则/默认范围缺口按此限定修订处理，12项匹配RANGE输入交ISSUE-026，母issue保留未关闭状态。

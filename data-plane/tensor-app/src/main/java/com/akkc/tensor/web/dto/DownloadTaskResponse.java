@@ -9,17 +9,18 @@ import java.util.UUID;
 
 /** Public facts from a single repository snapshot; execution permissions stay internal. */
 public record DownloadTaskResponse(UUID taskId, UUID submissionId, String pluginId, String apiName,
-        DownloadMode mode, Map<String, Object> params, DownloadTask.Status status, long version, boolean planReady,
+        DownloadMode mode, DownloadTaskService.TaskPolicySummary extraction, Map<String, Object> params,
+        DownloadTask.Status status, long version, boolean planReady,
         TaskCounts counts, StoredErrorResponse lastError, boolean canRetry, boolean canResume,
         long requestCount, long runRequestCount, Instant createdAt, Instant updatedAt, Instant queuedAt,
         Instant startedAt, Instant finishedAt, Instant deadlineAt) {
     public DownloadTaskResponse { params = Map.copyOf(params); }
 
     public static DownloadTaskResponse from(DownloadTaskRepository.TaskSnapshot snapshot,
-            DownloadTaskService.ControlAvailability controls) {
+            DownloadTaskService.ControlAvailability controls, DownloadTaskService.TaskPolicySummary extraction) {
         var task = snapshot.task().orElseThrow();
         return new DownloadTaskResponse(task.taskId(), task.submissionId(), task.datasetKey().pluginId().value(),
-                task.datasetKey().apiName().value(), task.mode(), task.params(), task.status(), task.version(), task.planReady(),
+                task.datasetKey().apiName().value(), task.mode(), extraction, task.params(), task.status(), task.version(), task.planReady(),
                 TaskCounts.from(snapshot.counts()), StoredErrorResponse.from(task.lastError()), controls.canRetry(), controls.canResume(),
                 task.requestCount(), task.runRequestCount(), task.createdAt(), task.updatedAt(), task.queuedAt(),
                 task.startedAt(), task.finishedAt(), task.deadlineAt());

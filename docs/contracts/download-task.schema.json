@@ -235,6 +235,29 @@
       },
       "description": "StoredError.message() fixed classification text only; no raw cause, stack trace, upstream payload, parameters or retryable flag."
     },
+    "TaskPolicySummary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "policyVersion",
+        "ruleKind"
+      ],
+      "properties": {
+        "policyVersion": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "\\S"
+        },
+        "ruleKind": {
+          "enum": [
+            "CONFIRMED_ROW_LIMIT",
+            "VERIFIED_RULE",
+            "RESPONSE_ONLY",
+            "UNKNOWN"
+          ]
+        }
+      }
+    },
     "TaskResponse": {
       "type": "object",
       "additionalProperties": false,
@@ -244,6 +267,7 @@
         "pluginId",
         "apiName",
         "mode",
+        "extraction",
         "params",
         "status",
         "version",
@@ -276,6 +300,16 @@
         },
         "mode": {
           "$ref": "#/$defs/Mode"
+        },
+        "extraction": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/TaskPolicySummary"
+            },
+            {
+              "type": "null"
+            }
+          ]
         },
         "params": {
           "$ref": "#/$defs/Parameters"
@@ -354,7 +388,35 @@
           ]
         }
       },
-      "description": "List and detail share this whitelist. Each row uses one task/counts snapshot; controls are transient hints and retry/resume revalidate state, version, lifecycle, definition and capacity."
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "mode": {
+                "const": "SINGLE"
+              }
+            },
+            "required": [
+              "mode"
+            ]
+          },
+          "then": {
+            "properties": {
+              "extraction": {
+                "type": "null"
+              }
+            }
+          },
+          "else": {
+            "properties": {
+              "extraction": {
+                "$ref": "#/$defs/TaskPolicySummary"
+              }
+            }
+          }
+        }
+      ],
+      "description": "List and detail share this whitelist. Each row uses one task/counts snapshot and extraction reports that task's persisted collection policy; controls are transient hints and retry/resume revalidate state, version, lifecycle, definition and capacity."
     },
     "BatchResponse": {
       "type": "object",
@@ -671,7 +733,8 @@
           "enum": [
             "UNKNOWN",
             "CONFIRMED_ROW_LIMIT",
-            "VERIFIED_RULE"
+            "VERIFIED_RULE",
+            "RESPONSE_ONLY"
           ]
         },
         "rowLimit": {
@@ -748,6 +811,27 @@
               "evidence": {
                 "type": "string",
                 "minLength": 1
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "kind": {
+                "const": "RESPONSE_ONLY"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "rowLimit": {
+                "type": "null"
+              },
+              "evidence": {
+                "type": "string",
+                "minLength": 1,
+                "pattern": "\\S"
               }
             }
           }
@@ -885,7 +969,8 @@
                   "kind": {
                     "enum": [
                       "CONFIRMED_ROW_LIMIT",
-                      "VERIFIED_RULE"
+                      "VERIFIED_RULE",
+                      "RESPONSE_ONLY"
                     ]
                   }
                 }
@@ -897,6 +982,35 @@
               "unavailableReason": {
                 "type": "string",
                 "minLength": 1
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "completenessRule": {
+                "properties": {
+                  "kind": {
+                    "const": "RESPONSE_ONLY"
+                  }
+                },
+                "required": [
+                  "kind"
+                ]
+              }
+            },
+            "required": [
+              "completenessRule"
+            ]
+          },
+          "then": {
+            "properties": {
+              "planningMode": {
+                "const": "NATIVE_RANGE"
+              },
+              "splittable": {
+                "const": false
               }
             }
           }
@@ -997,7 +1111,7 @@
           "$ref": "#/$defs/RangeCapability"
         }
       },
-      "description": "Capabilities describe metadata and current source readiness, not an acceptance promise. Known disabled sources remain queryable. Production Tushare has 34 NEEDS_VERIFICATION ranges and six SINGLE-only APIs; AVAILABLE examples are controlled fixtures only."
+      "description": "Capabilities describe metadata and current source readiness, not an acceptance promise. Known disabled sources remain queryable. Production Tushare remains four AVAILABLE, 30 NEEDS_VERIFICATION and six SINGLE-only APIs; contract_fixture examples remain controlled."
     },
     "FieldError": {
       "type": "object",

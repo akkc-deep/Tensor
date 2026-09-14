@@ -2,9 +2,17 @@
 
 ## 当前状态
 
-处理中，未解决（2026-09-12）。[详细设计](../../task-designs/ISSUE-018-design.md)所列T01–T12已完成：插件合同、任务存储/执行/恢复、HTTP与前端，以及真实Servlet/MySQL生命周期、故障矩阵和六条源码门禁均有证据。最终普通浏览器7文件126项全部通过，见[基础设施验证](../../verification/ISSUE-018-task-infrastructure.md)。34项生产RANGE仍为NEEDS_VERIFICATION，真实接口语义和完整性验收由T13跟踪，母issue保持未解决。完整发布脚本因main/干净输入/HEAD前置未满足而未运行。
+处理中，未解决（更新于2026-09-13）。T01–T12基础设施已完成；T14新增完整40API/74个SINGLE任务/148次查询与SQL验收，四接口33项SOURCE及25个RANGE任务全部通过。`daily_basic`、`stk_limit`、`moneyflow`、`margin_detail` 当前AVAILABLE / `tushare-range-v2`；30项仍NEEDS_VERIFICATION、6项SINGLE_ONLY。六条当前源码门禁与实际包身份见 [T14运行](../../verification/ISSUE-018-T14-runs.md)，完整发布脚本因main/干净输入/HEAD前置未满足而未运行。
 
-T13的[专属设计](../../task-designs/ISSUE-018-T13-design.md)与[交接](../../task-handoffs/ISSUE-018/ISSUE-018-T13-handoff.md)已完成并准备READY，尚未启动实施。准确任务状态见[ISSUE-018看板](../../task-handoffs/ISSUE-018/ISSUE-018-task-board.md)。T12的[专属设计](../../task-designs/ISSUE-018-T12-design.md)与[历史暂停交接](../../task-handoffs/ISSUE-018/ISSUE-018-T12-handoff.md)保留；以下官网调研与旧代码现状是历史来源，不改写为真实接口已验收。
+T14保留BLOCKED，尚未满足全部验收：11项UNKNOWN、BJ/BSE、部分特殊/历史样本及其余RANGE任务仍有缺口。ISSUE-019三接口限量和ISSUE-020默认分类/100工程阈值已分别按用户同意方案A采用；用户决定、官方事实与来源观察分开记录，相关RANGE TASK/SQL仍由ISSUE-026验收。完整证据见 [唯一验收记录](../../verification/ISSUE-018-range-acceptance.md)及 [公开补证](../../verification/ISSUE-018-T14-official-evidence.md)。本次独立新库保留成功数据，旧T13三轮329case、15个成功任务及失败身份原样保留；不追认旧14个PASS，也不因四项开放缩减34项RANGE目标。
+
+后续从 [T14设计](../../task-designs/ISSUE-018-T14-design.md)及 [T14交接](../../task-handoffs/ISSUE-018/ISSUE-018-T14-handoff.md)接续，准确状态以 [ISSUE-018看板](../../task-handoffs/ISSUE-018/ISSUE-018-task-board.md)为准。T13保留BLOCKED历史，母issue不关闭，不自动创建T15。以下官网调研与旧代码现状保留为原调研时事实；不代表当前全部能力或真实验收已经完成。
+
+## 后续问题拆分（2026-09-13）
+
+用户要求“把这些问题分成多个issue，然后挨个解决，过程中可以找我决策”。已新建 ISSUE-019～026，具体范围、顺序及关闭条件见[后续 issue 看板](../../task-handoffs/ISSUE-018/ISSUE-018-followups-task-board.md)。这些 issue 分别承担规则、语义和来源缺口，最终真实 RANGE / SQL 和 T14 收尾归 ISSUE-026；仍消费本 issue 的统一证据，不另造通过记录。
+
+本次拆分不创建 T15，不把 T13 / T14 改为已完成，不缩减 30 个待验证接口。是否修改限量解释、分类参数、日历映射或历史承诺，逐项提交具体依据和必要的用户决策。
 
 ## 调研范围与结论
 
@@ -128,6 +136,8 @@ T13的[专属设计](../../task-designs/ISSUE-018-T13-design.md)与[交接](../.
 调研时将另外 3 项列为逐日候选；2 项单截止日 / 报告期接口先验证，4 项无日期输入接口保持现有方式。当前方案已将 3 项逐日调用纳入草稿，具体方向见[方案草稿](../proposals/ISSUE-018-date-range-batch-downloads.md)，上线前仍需验证。
 
 ## 关闭条件
+
+2026-09-14，用户明确接受ISSUE-025十一接口不完整；这些接口以[RESPONSE_ONLY响应采集合同](../proposals/ISSUE-025-extraction-contracts.md#决策记录)替代原完整提取要求，完整性未确认和可能漏数须对用户可见。以下条款对它们按该限定合同验收，其他接口保持原要求；日期/股票/键、失败处理及真实TASK/SQL不豁免。ISSUE-026尚须完成实现和验收，本决定不代表母issue关闭。
 
 - 确定并记录最终支持清单；31 项原生区间均有实现与验收证据，或将明确不纳入的项目记录范围决定；其余 9 项的产品处理与上表分类一致。
 - 对纳入范围的接口，日期区间从前端、请求类型、参数校验到上游调用完整贯通，日期轴标签准确；34 项股票必填与 6 项非股票接口规则保持成立。

@@ -170,6 +170,68 @@ class DownloadTaskRunnerTest {
         assertThat(disabled.source.requests).isEmpty();
     }
 
+    @Test void assessmentsCannotImpersonateAnotherPersistedRule() throws Exception {
+        for (var kind : List.of(BatchDownloadDescriptor.CompletenessRule.Kind.RESPONSE_ONLY,
+                BatchDownloadDescriptor.CompletenessRule.Kind.VERIFIED_RULE,
+                BatchDownloadDescriptor.CompletenessRule.Kind.CONFIRMED_ROW_LIMIT)) {
+            for (var assessment : BatchAssessment.values()) {
+                boolean responseOnly = kind == BatchDownloadDescriptor.CompletenessRule.Kind.RESPONSE_ONLY;
+                if ((!responseOnly && assessment != BatchAssessment.RESPONSE_ONLY)
+                        || (responseOnly && assessment == BatchAssessment.RESPONSE_ONLY)) continue;
+                Harness h = new Harness(); h.source.ruleKind = kind; h.source.splittable = !responseOnly;
+                h.source.assessment = r -> assessment; h.submit(DownloadMode.RANGE);
+                assertThat(h.runner().runNext(() -> false).error()).isEqualTo(assessment == BatchAssessment.UNKNOWN
+                        ? ErrorCode.BATCH_COMPLETENESS_UNCONFIRMED : ErrorCode.DATASET_MISCONFIGURED);
+                assertThat(h.task.status()).isEqualTo(DownloadTask.Status.FAILED);
+                assertThat(h.source.adaptations).isZero(); assertThat(h.committed).isEmpty();
+                assertThat(h.batches.values()).singleElement().satisfies(b ->
+                        assertThat(b.status()).isEqualTo(DownloadBatch.Status.FAILED));
+            }
+        }
+    }
+
+    @Test void responseOnlyAdaptsEmptyAndNonemptyResponsesWithoutSplitting() throws Exception {
+        for (int count : List.of(0, 3)) {
+            Harness h = new Harness(); h.source.ruleKind = BatchDownloadDescriptor.CompletenessRule.Kind.RESPONSE_ONLY;
+            h.source.splittable = false; h.source.assessment = r -> BatchAssessment.RESPONSE_ONLY;
+            h.source.response = p -> h.source.envelope(p, count); h.submit(DownloadMode.RANGE);
+            assertThat(h.runner().runNext(() -> false).error()).isNull();
+            assertThat(h.task.status()).isEqualTo(DownloadTask.Status.SUCCEEDED);
+            assertThat(h.source.requests).containsExactly(h.task.params());
+            assertThat(h.source.adaptations).isEqualTo(1);
+            assertThat(h.committed).singleElement().satisfies(b -> assertThat(b.rows()).hasSize(count));
+            assertThat(h.batches.values()).singleElement().satisfies(b -> {
+                assertThat(b.status()).isEqualTo(DownloadBatch.Status.SUCCEEDED);
+                assertThat(b.range()).isEqualTo(RANGE); assertThat(b.sourceRows()).isEqualTo(count);
+            });
+        }
+    }
+
+    @Test void responseOnlyStillHonorsRowRequestTimeAndInterruptionBudgets() throws Exception {
+        for (String failure : List.of("rows", "requests", "deadline", "stop", "adapt-stop", "adapter")) {
+            Harness h = new Harness(); AtomicBoolean stop = new AtomicBoolean();
+            h.source.ruleKind = BatchDownloadDescriptor.CompletenessRule.Kind.RESPONSE_ONLY;
+            h.source.splittable = false; h.source.assessment = r -> BatchAssessment.RESPONSE_ONLY;
+            h.settings = new DownloadTaskRunner.Settings(true, 36600, 10, 1, Duration.ofSeconds(1), 1);
+            h.source.response = p -> {
+                if (failure.equals("deadline")) h.now.set(NOW.plusSeconds(1));
+                if (failure.equals("stop")) stop.set(true);
+                return h.source.envelope(p, failure.equals("rows") ? 2 : 1);
+            };
+            if (failure.equals("requests")) h.source.beforePlan = BatchCallContext::beforeRequest;
+            if (failure.equals("adapt-stop")) h.source.afterAdapt = () -> stop.set(true);
+            if (failure.equals("adapter")) h.source.afterAdapt = () -> { throw failure(ErrorCode.ADAPTER_TYPE_INVALID); };
+            h.submit(DownloadMode.RANGE);
+            assertThat(h.runner().runNext(stop::get).error()).isEqualTo(switch (failure) {
+                case "stop", "adapt-stop" -> ErrorCode.EXECUTION_INTERRUPTED;
+                case "adapter" -> ErrorCode.ADAPTER_TYPE_INVALID;
+                default -> ErrorCode.TASK_LIMIT_EXCEEDED;
+            });
+            assertThat(h.committed).isEmpty();
+            assertThat(h.source.requests).hasSize(failure.equals("requests") ? 0 : 1);
+        }
+    }
+
     @Test void unknownAndUnsplittableResponsesNeverCommit() throws Exception {
         for(var assessment:List.of(BatchAssessment.UNKNOWN,BatchAssessment.SPLIT_REQUIRED)) {
             Harness h=new Harness(); h.source.assessment=r -> assessment;
@@ -263,9 +325,14 @@ class DownloadTaskRunnerTest {
         }
     }
 
-    @Test void rejectsInvalidEnvelopeIdentityStructureAndNullAssessmentBeforeAdaptation() throws Exception {
+    @ParameterizedTest @org.junit.jupiter.params.provider.ValueSource(booleans = {false, true})
+    void rejectsInvalidEnvelopeIdentityStructureAndNullAssessmentBeforeAdaptation(boolean responseOnly) throws Exception {
         for(int variant=0;variant<6;variant++) {
             Harness h=new Harness(); int selected=variant;
+            if (responseOnly) {
+                h.source.ruleKind = BatchDownloadDescriptor.CompletenessRule.Kind.RESPONSE_ONLY;
+                h.source.splittable = false; h.source.assessment = r -> BatchAssessment.RESPONSE_ONLY;
+            }
             h.source.response=p -> switch(selected) {
                 case 0 -> null;
                 case 1 -> new DownloadEnvelope(KEY.pluginId(),KEY.apiName(),p,List.of(),0,List.of(),DownloadStatus.FAILURE,"private-response");
@@ -274,7 +341,7 @@ class DownloadTaskRunnerTest {
                 case 4 -> h.source.envelope(Map.of("symbol","other"),0);
                 default -> new DownloadEnvelope(KEY.pluginId(),KEY.apiName(),p,List.of("amount","observed_on","symbol"),0,List.of(),DownloadStatus.SUCCESS,null);
             };
-            h.submit(DownloadMode.SINGLE);
+            h.submit(responseOnly ? DownloadMode.RANGE : DownloadMode.SINGLE);
             assertThat(h.runner().runNext(() -> false).error()).isEqualTo(variant>=2&&variant<=4?ErrorCode.SOURCE_RANGE_MISMATCH:ErrorCode.SOURCE_PAYLOAD_INVALID);
             assertThat(h.source.adaptations).isZero(); assertThat(h.committed).isEmpty();
         }
@@ -529,6 +596,7 @@ class DownloadTaskRunnerTest {
         String version = "v1";
         boolean available = true;
         boolean splittable = true;
+        BatchDownloadDescriptor.CompletenessRule.Kind ruleKind = BatchDownloadDescriptor.CompletenessRule.Kind.VERIFIED_RULE;
         int plans, assessments, adaptations, mappings;
         final List<Map<String,Object>> requests = new ArrayList<>();
         final List<BatchCallContext> contexts = new ArrayList<>();
@@ -556,7 +624,9 @@ class DownloadTaskRunnerTest {
                     "from","to",BatchDownloadDescriptor.DateAxis.REPORT_PERIOD,"Observed",mode,
                     splittable && mode == BatchDownloadDescriptor.PlanningMode.NATIVE_RANGE,
                     BatchDownloadDescriptor.Availability.AVAILABLE,null,version,
-                    new BatchDownloadDescriptor.CompletenessRule(BatchDownloadDescriptor.CompletenessRule.Kind.VERIFIED_RULE,null,"controlled-test-only")));
+                    new BatchDownloadDescriptor.CompletenessRule(ruleKind,
+                            ruleKind == BatchDownloadDescriptor.CompletenessRule.Kind.CONFIRMED_ROW_LIMIT ? 100L : null,
+                            "controlled-test-only")));
         }
         public List<DateRange> plan(ApiName api,Map<String,Object> p,BatchCallContext c) {
             outside(); plans++; beforePlan.accept(c); DateRange r=dates((String)p.get("from"),(String)p.get("to"));

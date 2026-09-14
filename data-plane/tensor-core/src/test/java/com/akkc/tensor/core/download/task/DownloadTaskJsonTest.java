@@ -166,6 +166,37 @@ class DownloadTaskJsonTest {
     }
 
     @Test
+    void responseOnlySnapshotsRetainStrictReadingAndOldPolicyVersions() {
+        String original = json.policySnapshot(DownloadMode.RANGE, rangePolicy());
+        String response = original.replace("CONFIRMED_ROW_LIMIT", "RESPONSE_ONLY")
+                .replace("\"rowLimit\":5000", "\"rowLimit\":null").replace("\"splittable\":true", "\"splittable\":false");
+        for (String version : List.of("v1", "v2")) {
+            for (String snapshot : List.of(original, response,
+                    response.replace("RESPONSE_ONLY", "VERIFIED_RULE"),
+                    response.replace("RESPONSE_ONLY", "UNKNOWN").replace("\"evidence\":\"documented\"", "\"evidence\":null")
+                            .replace("AVAILABLE", "NEEDS_VERIFICATION").replace("\"unavailableReason\":null", "\"unavailableReason\":\"Pending\""))) {
+                String saved = snapshot.replace("\"policyVersion\":\"v1\"", "\"policyVersion\":\"" + version + "\"");
+                assertThat(json.policySnapshot(DownloadMode.RANGE, json.readRangePolicy(saved))).isEqualTo(saved);
+                assertThat(json.readRangePolicy(saved).policyVersion()).isEqualTo(version);
+            }
+        }
+        var rule = json.readRangePolicy(response);
+        assertThat(rule.completenessRule().kind()).isEqualTo(BatchDownloadDescriptor.CompletenessRule.Kind.RESPONSE_ONLY);
+        var strict = json.readRangePolicy(response.replace("RESPONSE_ONLY", "VERIFIED_RULE"));
+        String baseline = json.definitionHash(api("API", rule.parameters()), definition("Dataset", false, 100), DownloadMode.RANGE, rule);
+        assertThat(json.definitionHash(api("API", strict.parameters()), definition("Dataset", false, 100), DownloadMode.RANGE, strict))
+                .isNotEqualTo(baseline);
+        for (String bad : List.of(response.replace("\"splittable\":false", "\"splittable\":true"),
+                response.replace("NATIVE_RANGE", "CALENDAR_DAYS"), response.replace("NATIVE_RANGE", "TRADING_DAYS"),
+                response.replace("\"rowLimit\":null", "\"rowLimit\":100"),
+                response.replace("\"evidence\":\"documented\"", "\"evidence\":null"),
+                response.replace("RESPONSE_ONLY", "OTHER_RULE"))) {
+            assertThatThrownBy(() -> json.readRangePolicy(bad)).isInstanceOf(IllegalArgumentException.class)
+                    .hasMessage("Invalid download task JSON");
+        }
+    }
+
+    @Test
     void unsupportedRangePolicyRoundTripsExplicitNullSemantics() {
         var unsupported = new BatchDownloadDescriptor(List.of(), null, null, null, null, null, false,
                 BatchDownloadDescriptor.Availability.UNSUPPORTED, "Not supported", "v1",
