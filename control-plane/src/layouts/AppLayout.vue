@@ -28,6 +28,7 @@ const navItems = [
 ]
 const routeLabels = {
   downloads: '数据下载',
+  'download-task': '任务详情',
   datasets: '数据查看',
   settings: '设置',
   'not-found': '页面不存在',
@@ -55,6 +56,7 @@ const currentLabel = computed(() => routeLabels[route.name] ?? '页面不存在'
           v-for="item in navItems"
           :key="item.name"
           class="app-nav__link"
+          :class="{ 'router-link-active': item.name === 'downloads' && route.name === 'download-task' }"
           :to="{ name: item.name }"
         >
           <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">

@@ -6,6 +6,10 @@
 | --- | --- | --- |
 | [tensor-v1/](tensor-v1/) | Tensor v1 正式任务：1 份看板、78 份任务交接 | [Tensor v1 看板](tensor-v1/tensor-v1-task-board.md) |
 | [ISSUE-004/](ISSUE-004/) | UI 改版任务；当前已有看板，后续交接放在同一目录 | [ISSUE-004 看板](ISSUE-004/ISSUE-004-task-board.md) |
+| [ISSUE-018/](ISSUE-018/) | 日期区间批量下载：T01–T14均已完成；本次30个RANGE/251项通过，四接口27项明确排除，SINGLE74项保留；032六门禁及终审通过，母任务已收尾 | [ISSUE-018 看板](ISSUE-018/ISSUE-018-task-board.md) · [T14交接](ISSUE-018/ISSUE-018-T14-handoff.md) |
+| [ISSUE-026/](ISSUE-026/) | 原六项ISSUE-027～032均COMPLETED；251项通过、四接口27项明确排除且问题保留；033本次跳过，保持NOT_STARTED | [子issue看板](ISSUE-026/ISSUE-026-task-board.md) · [历史交接](ISSUE-031-handoff.md) · [最终验收](../verification/ISSUE-032-range-final-closure.md) · [总任务原交接](ISSUE-026-handoff.md) |
+
+ISSUE-018 的后续缺口按用户要求另由 [ISSUE-019～026 看板](ISSUE-018/ISSUE-018-followups-task-board.md)串行管理；与 T01～T14 身份分开，不替代原看板或已有验收状态。ISSUE-026的六子issue另由其子看板管理，母任务仍在019～026看板；不重复登记同一任务的权威状态。
 
 ```text
 task-handoffs/
@@ -13,8 +17,12 @@ task-handoffs/
 ├── tensor-v1/
 │   ├── tensor-v1-task-board.md
 │   └── Mxx-Txx-handoff.md
-└── ISSUE-004/
-    └── ISSUE-004-task-board.md
+├── ISSUE-004/
+│   └── ISSUE-004-task-board.md
+├── ISSUE-018/
+│   └── ISSUE-018-task-board.md
+└── ISSUE-026/
+    └── ISSUE-026-task-board.md
 ```
 
 新增文档沿用以下位置：

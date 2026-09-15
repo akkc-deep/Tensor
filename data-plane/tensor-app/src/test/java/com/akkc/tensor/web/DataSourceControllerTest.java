@@ -63,7 +63,7 @@ class DataSourceControllerTest {
 
     @BeforeEach
     void setUp() {
-        DataSourceController controller = new DataSourceController(new MetadataQueryService(pluginRegistry, datasetCatalog));
+        DataSourceController controller = new DataSourceController(new MetadataQueryService(pluginRegistry, datasetCatalog), org.mockito.Mockito.mock(com.akkc.tensor.core.download.task.DownloadTaskService.class));
         mockMvc = MockMvcBuilders.standaloneSetup(controller)
                 .setControllerAdvice(new GlobalExceptionHandler())
                 .setCustomArgumentResolvers(new DatasetRequestArgumentResolver())

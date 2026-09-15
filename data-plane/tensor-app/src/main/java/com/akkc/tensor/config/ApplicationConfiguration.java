@@ -7,6 +7,12 @@ import com.akkc.tensor.core.catalog.DatasetCatalog;
 import com.akkc.tensor.core.catalog.DatasetStartupValidator;
 import com.akkc.tensor.core.catalog.SchemaInspector;
 import com.akkc.tensor.core.download.DownloadService;
+import com.akkc.tensor.core.download.task.BatchCommitService;
+import com.akkc.tensor.core.download.task.DownloadTaskJson;
+import com.akkc.tensor.core.download.task.DownloadTaskQueryService;
+import com.akkc.tensor.core.download.task.DownloadTaskRepository;
+import com.akkc.tensor.core.download.task.DownloadTaskRunner;
+import com.akkc.tensor.core.download.task.DownloadTaskService;
 import com.akkc.tensor.core.metadata.MetadataQueryService;
 import com.akkc.tensor.core.persistence.DatasetLockManager;
 import com.akkc.tensor.core.persistence.ExistingKeyRepository;
@@ -18,6 +24,7 @@ import com.akkc.tensor.core.registry.AdapterRegistry;
 import com.akkc.tensor.core.registry.PluginRegistry;
 import com.akkc.tensor.core.validation.ParameterValidator;
 import com.akkc.tensor.observability.OperationLogger;
+import com.akkc.tensor.observability.DownloadTaskOperationLogger;
 import com.akkc.tensor.observability.TensorMetrics;
 import com.akkc.tensor.plugin.api.DataSourcePlugin;
 import com.akkc.tensor.plugin.api.DatasetAdapter;
@@ -26,18 +33,23 @@ import io.micrometer.core.instrument.MeterRegistry;
 import java.time.Clock;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import javax.sql.DataSource;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.sql.init.dependency.DependsOnDatabaseInitialization;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.transaction.PlatformTransactionManager;
 
 @Configuration(proxyBeanMethods = false)
 @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
+@EnableConfigurationProperties(DownloadTaskProperties.class)
+@Import(DownloadTaskConfiguration.class)
 public final class ApplicationConfiguration {
     @Bean
     public PluginRegistry pluginRegistry(List<DataSourcePlugin> plugins) {
@@ -122,6 +134,47 @@ public final class ApplicationConfiguration {
             Clock clock) {
         return new DownloadService(
                 plugins, adapters, validator, persistence, clock);
+    }
+
+    @Bean
+    public DownloadTaskJson downloadTaskJson() {
+        return new DownloadTaskJson();
+    }
+
+    @Bean
+    public DownloadTaskOperationLogger downloadTaskOperationLogger() {
+        return new DownloadTaskOperationLogger();
+    }
+
+    @Bean
+    public DownloadTaskRepository downloadTaskRepository(JdbcTemplate jdbcTemplate,
+            PlatformTransactionManager transactions, DownloadTaskJson json, DownloadTaskOperationLogger observer) {
+        return new DownloadTaskRepository(jdbcTemplate, transactions, json, observer);
+    }
+
+    @Bean
+    public DownloadTaskQueryService downloadTaskQueryService(DownloadTaskRepository repository) {
+        return new DownloadTaskQueryService(repository);
+    }
+
+    @Bean
+    public DownloadTaskService downloadTaskService(PluginRegistry plugins, DatasetCatalog catalog, AdapterRegistry adapters,
+            ParameterValidator validator, DownloadTaskRepository repository, DownloadTaskJson json, Clock clock,
+            @Qualifier("downloadTaskRunId") UUID runId, DownloadTaskProperties properties) {
+        return new DownloadTaskService(plugins, catalog, adapters, validator, repository, json, clock,
+                runId, properties.toServiceSettings());
+    }
+
+    @Bean
+    public BatchCommitService batchCommitService(PersistenceService persistence, DownloadTaskRepository repository, Clock clock) {
+        return new BatchCommitService(persistence, repository, clock);
+    }
+
+    @Bean
+    public DownloadTaskRunner downloadTaskRunner(DownloadTaskService tasks, DownloadTaskRepository repository,
+            BatchCommitService commits, DownloadTaskJson json, Clock clock,
+            @Qualifier("downloadTaskRunId") UUID runId, DownloadTaskProperties properties) {
+        return new DownloadTaskRunner(tasks, repository, commits, json, clock, runId, properties.toRunnerSettings());
     }
 
     @Bean

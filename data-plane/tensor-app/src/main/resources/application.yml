@@ -12,6 +12,14 @@ server:
   shutdown: graceful
 
 tensor:
+  download-tasks:
+    enabled: true
+    max-queued-tasks: 100
+    max-range-days: 36600
+    max-batch-nodes: 10000
+    max-requests-per-run: 5000
+    max-run-duration: 30m
+    max-source-rows-per-task: 1000000
   web:
     dev-allowed-origin: ${TENSOR_DEV_CORS_ALLOWED_ORIGIN:}
   display-zone: ${TENSOR_DISPLAY_ZONE:Asia/Shanghai}

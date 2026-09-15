@@ -1,3 +1,5 @@
+import { configurePackagedEnvironment } from './packaged-test-environment.js'
+import { rangeCapability } from './ui-redesign.fixtures.js'
 import { expect, test } from '@playwright/test'
 import { spawn, execFile } from 'node:child_process'
 import { createHash, randomBytes } from 'node:crypto'
@@ -13,7 +15,7 @@ import { setTimeout as delay } from 'node:timers/promises'
 const execFileAsync = promisify(execFile)
 const BASE_URL = 'http://127.0.0.1:8080'
 const MANIFEST_SHA = '386f46a99b6605e203129836d7a744b96b65304307f52991dd8bba6fd1870984'
-const REQUESTS_SHA = 'f9f147c605262ee1e4f04031dc8508470acd0b4a837927495a9aefecf98bf7af'
+const REQUESTS_SHA = '6d4c74a1a539b59ac20fb0cbd3ba1fba0954c40ef1209b652f7dcc2192ec932f'
 const ACCEPTANCE_JAR_SHA = process.env.ISSUE_017_ACCEPTANCE_JAR_SHA256
 const HEALTH_TIMEOUT_MS = 90_000
 const STOP_TIMEOUT_MS = 150_000
@@ -77,7 +79,7 @@ const EXPECTED_ROWS = [
   ['cashflow', '现金流量表', '财务与披露', 'ann_date', ['ts_code', 'ann_date'], 97],
   ['fina_indicator', '财务指标', '财务与披露', 'ann_date', ['ts_code', 'ann_date'], 108],
   ['fina_audit', '财务审计意见', '财务与披露', 'ann_date', ['ts_code', 'ann_date'], 7],
-  ['fina_mainbz', '主营业务构成', '财务与披露', 'ann_date', ['ts_code', 'ann_date'], 8],
+  ['fina_mainbz', '主营业务构成', '财务与披露', 'snapshot', ['ts_code'], 8],
   ['stk_rewards', '管理层薪酬与持股', '股东与治理', 'snapshot', ['ts_code'], 7],
   ['stk_holdernumber', '股东户数', '股东与治理', 'snapshot', ['ts_code'], 4],
   ['trade_cal', '交易日历', 'basic_organization', 'date_range', ['exchange', 'start_date', 'end_date'], 4],
@@ -173,7 +175,13 @@ for (const entry of manifest.interfaces) {
   for (const sample of entry.params ?? []) {
     safeCheck(sample !== null && typeof sample === 'object' && !Array.isArray(sample), 'manifest params object')
   }
-  expect(entry.query_mode === 'range' ? 'date_range' : entry.query_mode).toBe(contract.queryMode)
+  if (entry.api_name === 'fina_mainbz') {
+    // T06 removed the unsupported ann_date input; the immutable source capture remains historical evidence.
+    expect(entry.query_mode).toBe('ann_date')
+    expect(entry.params).toEqual([{ ts_code: '000001.SZ', ann_date: '20260807' }])
+  } else {
+    expect(entry.query_mode === 'range' ? 'date_range' : entry.query_mode).toBe(contract.queryMode)
+  }
   manifestNames.push(entry.api_name)
 }
 safeCheck(new Set(manifestNames).size === 40 && EXPECTED.size === 40 && FILTERS.size === 40, 'independent coverage')
@@ -421,6 +429,20 @@ function isResponse(response, pathname) {
   return response.request().method() === 'GET' && url.origin === BASE_URL && url.pathname === pathname
 }
 
+function allowedApiGet(url) {
+  if (url.pathname === '/api/v1/data-sources') return url.search === ''
+  if (url.pathname === '/api/v1/download-tasks') {
+    return url.searchParams.toString() === 'page=1&pageSize=20'
+  }
+  const match = url.pathname.match(/^\/api\/v1\/data-sources\/tushare_pro\/(apis|datasets)(?:\/([a-z0-9_]+)(\/download-capabilities|\/records)?)?$/)
+  if (!match) return false
+  const [, kind, apiName, suffix] = match
+  if (!apiName) return url.search === ''
+  if (!EXPECTED.has(apiName)) return false
+  if (kind === 'apis') return suffix === '/download-capabilities' && url.search === ''
+  return suffix === '/records' || (!suffix && url.search === '')
+}
+
 async function doubleAnimationFrame(page) {
   await page.evaluate(() => new Promise((resolve) =>
     requestAnimationFrame(() => requestAnimationFrame(resolve))))
@@ -432,7 +454,8 @@ function monitorPage(page) {
   const pendingRequests = new Map()
   const started = new WeakMap()
   const metadata = []
-  let downloadPosts = 0
+  let taskPosts = 0
+  let synchronousDownloadPosts = 0
   let recordsGets = 0
   page.on('pageerror', () => failures.push('page-error'))
   page.on('request', (request) => {
@@ -442,7 +465,11 @@ function monitorPage(page) {
     started.set(request, Date.now())
     const url = new URL(request.url())
     if (url.origin !== BASE_URL) failures.push('external-request')
-    if (request.method() === 'POST' && url.pathname === '/api/v1/downloads') downloadPosts += 1
+    if (request.method() === 'GET' && url.pathname.startsWith('/api/v1/') && !allowedApiGet(url)) {
+      failures.push('unexpected-api-route')
+    }
+    if (request.method() === 'POST' && url.pathname === '/api/v1/download-tasks') taskPosts += 1
+    else if (request.method() === 'POST' && url.pathname === '/api/v1/downloads') synchronousDownloadPosts += 1
     else if (!['GET', 'HEAD', 'OPTIONS'].includes(request.method())) failures.push('write-request')
     if (request.method() === 'GET' && url.pathname.endsWith('/records')) recordsGets += 1
   })
@@ -482,7 +509,8 @@ function monitorPage(page) {
     }
   }
   return {
-    downloadPosts: () => downloadPosts,
+    taskPosts: () => taskPosts,
+    synchronousDownloadPosts: () => synchronousDownloadPosts,
     recordsGets: () => recordsGets,
     metadata: () => structuredClone(metadata),
     async assertClean() {
@@ -490,7 +518,11 @@ function monitorPage(page) {
       await assertPageSafety(page, 'test boundary')
       try { await page.close() } catch { failures.push('page-close') }
       await drain()
-      expect({ downloadPosts, recordsGets }).toEqual({ downloadPosts: 0, recordsGets: 0 })
+      expect({ taskPosts, synchronousDownloadPosts, recordsGets }).toEqual({
+        taskPosts: 0,
+        synchronousDownloadPosts: 0,
+        recordsGets: 0,
+      })
       expect(failures).toEqual([])
     },
   }
@@ -591,10 +623,15 @@ async function validateDefinition(response, contract, summary) {
 
 async function openDownloads(page, contract) {
   const sourcesPromise = page.waitForResponse((response) => isResponse(response, '/api/v1/data-sources'))
+  const tasksPromise = page.waitForResponse((response) => isResponse(response, '/api/v1/download-tasks'))
   const navigation = await page.goto('/downloads')
   expect(navigation?.status()).toBe(200)
   await expect(page.getByRole('heading', { level: 1, name: '数据下载' })).toBeVisible()
   await validateSources(await sourcesPromise)
+  const tasksResponse = await tasksPromise
+  expect(tasksResponse.status()).toBe(200)
+  const tasksUrl = new URL(tasksResponse.url())
+  expect(Object.fromEntries(tasksUrl.searchParams)).toEqual({ page: '1', pageSize: '20' })
   const apisPromise = page.waitForResponse((response) =>
     isResponse(response, '/api/v1/data-sources/tushare_pro/apis'))
   await selectOption(page, '数据源', 'Tushare Pro')
@@ -612,7 +649,44 @@ async function openDownloads(page, contract) {
       await expect(page.getByText(category, { exact: true }).last()).toBeVisible()
     }
   }
+  const capabilitiesPromise = page.waitForResponse((response) =>
+    isResponse(response, `/api/v1/data-sources/tushare_pro/apis/${contract.apiName}/download-capabilities`))
   await page.getByRole('option', { name: optionName(contract) }).click()
+  const capabilitiesResponse = await capabilitiesPromise
+  expect(capabilitiesResponse.status()).toBe(200)
+  const capabilities = await readPublicJson(capabilitiesResponse, 'download capabilities')
+  expect(capabilities).toEqual({
+    single: { available: true, parameters: contract.parameters },
+    range: rangeCapability(contract.apiName),
+  })
+  const expectedRange = rangeCapability(contract.apiName)
+  const rangeMode = page.getByRole('radio', { name: '日期区间', exact: true })
+  if (expectedRange.availability === 'AVAILABLE') {
+    expect(capabilities.range).toMatchObject({ availability: 'AVAILABLE', policyVersion: 'tushare-range-v2',
+      completenessRule: { kind: expectedRange.completenessRule.kind,
+        rowLimit: expectedRange.completenessRule.rowLimit } })
+    if (capabilities.range.completenessRule.kind === 'CONFIRMED_ROW_LIMIT') {
+      expect(capabilities.range.completenessRule.rowLimit).toBeGreaterThan(0)
+      expect(capabilities.range.splittable).toBe(capabilities.range.planningMode === 'NATIVE_RANGE')
+    } else if (capabilities.range.completenessRule.kind === 'VERIFIED_RULE') {
+      expect(capabilities.range.completenessRule.rowLimit).toBeNull()
+      expect(capabilities.range.splittable).toBe(false)
+    } else {
+      expect(capabilities.range.completenessRule.kind).toBe('RESPONSE_ONLY')
+      expect(capabilities.range.completenessRule.rowLimit).toBeNull()
+      expect(capabilities.range.splittable).toBe(false)
+      const warning = page.locator('.form-footer__help').filter({ hasText: '数据完整性未确认，可能存在上游截断' })
+      await expect(warning).toBeVisible()
+      await expect(warning).toContainText('数据完整性未确认，可能存在上游截断')
+    }
+    await expect(rangeMode).toBeEnabled()
+    await expect(rangeMode).toBeChecked()
+  } else {
+    await expect(rangeMode).toBeDisabled()
+    await expect(page.getByRole('radio', { name: '单次请求', exact: true })).toBeChecked()
+  }
+  await page.getByRole('radiogroup', { name: '下载模式', exact: true }).getByText('单次请求', { exact: true }).click()
+  await expect(page.getByRole('radio', { name: '单次请求', exact: true })).toBeChecked()
   await expect(combobox).toHaveAttribute('aria-expanded', 'false')
   await expect(page.getByRole('option')).toHaveCount(0)
   await doubleAnimationFrame(page)
@@ -673,12 +747,13 @@ async function validateParameters(page, contract, testInfo) {
     }
   }
 
-  const button = page.getByRole('button', { name: '开始下载', exact: true })
+  const button = page.getByRole('button', { name: '提交任务', exact: true })
   await expect(button).toBeEnabled()
   if (!contract.parameters.length) {
     await expect(page.getByText('此项为必填项', { exact: true })).toHaveCount(0)
-    await expect(page.getByRole('combobox')).toHaveCount(2)
-    await expect(page.getByRole('textbox')).toHaveCount(0)
+    const configuration = page.getByRole('region', { name: '下载配置', exact: true })
+    await expect(configuration.getByRole('combobox')).toHaveCount(2)
+    await expect(configuration.getByRole('textbox')).toHaveCount(0)
     if (DOWNLOAD_SCREENSHOTS.has(contract.apiName)) await screenshot(page, testInfo, `download-${contract.apiName}.png`)
     return { requiredBlocked: false, parameterless: true }
   }
@@ -727,7 +802,7 @@ async function validateParameters(page, contract, testInfo) {
 
 async function openDataset(page, contract) {
   const sourcesPromise = page.waitForResponse((response) => isResponse(response, '/api/v1/data-sources'))
-  await page.getByRole('link', { name: '数据查看', exact: true }).click()
+  await page.getByRole('link', { name: /^数据查看\s*02$/ }).click()
   await expect(page).toHaveURL(`${BASE_URL}/datasets`)
   await expect(page.getByRole('heading', { level: 1, name: '数据查看' })).toBeVisible()
   await validateSources(await sourcesPromise)
@@ -795,6 +870,7 @@ test.describe('Tushare 40 metadata contracts', () => {
   test.describe.configure({ mode: 'serial', retries: 0, timeout: 120_000 })
 
   test.beforeAll(async () => {
+    configurePackagedEnvironment('tushare-metadata')
     test.setTimeout(180_000)
     evidence.startedAt = new Date().toISOString()
     safeCheck(path.isAbsolute(process.env.ACCEPTANCE_JAR ?? ''), 'acceptance JAR absolute path')
@@ -854,14 +930,16 @@ test.describe('Tushare 40 metadata contracts', () => {
         datasetsPassed: evidence.results.filter(({ datasetPassed }) => datasetPassed).length,
         requiredBlocked: evidence.results.filter(({ requiredBlocked }) => requiredBlocked).length,
         parameterless: evidence.results.filter(({ parameterless }) => parameterless).length,
-        downloadPosts: evidence.results.reduce((sum, result) => sum + result.downloadPosts, 0),
+        taskPosts: evidence.results.reduce((sum, result) => sum + result.taskPosts, 0),
+        synchronousDownloadPosts: evidence.results.reduce((sum, result) => sum + result.synchronousDownloadPosts, 0),
         recordsGets: evidence.results.reduce((sum, result) => sum + result.recordsGets, 0),
         upstreamCalls: sentinelCalls,
         screenshots: evidence.screenshots.length,
       }
       const expectedTotals = {
         cases: 40, apiPassed: 40, datasetsPassed: 40, requiredBlocked: 39,
-        parameterless: 1, downloadPosts: 0, recordsGets: 0, upstreamCalls: 0, screenshots: 11,
+        parameterless: 1, taskPosts: 0, synchronousDownloadPosts: 0,
+        recordsGets: 0, upstreamCalls: 0, screenshots: 11,
       }
       if (evidence.results.length === 40) expect(evidence.totals).toEqual(expectedTotals)
       else expect(sentinelCalls, 'failed run must still make zero upstream calls').toBe(0)
@@ -882,7 +960,8 @@ test.describe('Tushare 40 metadata contracts', () => {
       const monitor = monitorPage(page)
       await openDownloads(page, contract)
       const form = await validateParameters(page, contract, testInfo)
-      expect(monitor.downloadPosts()).toBe(0)
+      expect(monitor.taskPosts()).toBe(0)
+      expect(monitor.synchronousDownloadPosts()).toBe(0)
       const definition = await openDataset(page, contract)
       expect(definition.filters).toEqual(contract.filters)
       await validateFilterControls(page, contract, testInfo)
@@ -899,7 +978,8 @@ test.describe('Tushare 40 metadata contracts', () => {
         apiPassed: true,
         datasetPassed: true,
         ...form,
-        downloadPosts: monitor.downloadPosts(),
+        taskPosts: monitor.taskPosts(),
+        synchronousDownloadPosts: monitor.synchronousDownloadPosts(),
         recordsGets: monitor.recordsGets(),
         metadataRequests: monitor.metadata(),
         durationMs: Date.now() - startedAt,

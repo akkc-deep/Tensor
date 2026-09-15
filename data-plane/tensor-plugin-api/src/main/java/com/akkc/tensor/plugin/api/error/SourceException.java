@@ -15,7 +15,8 @@ public final class SourceException extends TensorException {
                 && code != ErrorCode.SOURCE_UNAVAILABLE
                 && code != ErrorCode.SOURCE_NETWORK_ERROR
                 && code != ErrorCode.SOURCE_TIMEOUT
-                && code != ErrorCode.SOURCE_PAYLOAD_INVALID) {
+                && code != ErrorCode.SOURCE_PAYLOAD_INVALID
+                && code != ErrorCode.SOURCE_RANGE_MISMATCH) {
             throw new IllegalArgumentException("code must identify a source failure");
         }
         return code;

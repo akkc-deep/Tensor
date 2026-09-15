@@ -4,6 +4,7 @@ import com.akkc.tensor.plugin.api.descriptor.PluginReadiness;
 import java.net.URI;
 import java.time.Duration;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.context.properties.bind.ConstructorBinding;
 import org.springframework.boot.context.properties.bind.DefaultValue;
 
 @ConfigurationProperties("tensor.plugins.tushare-pro")
@@ -13,7 +14,9 @@ public record TushareProperties(
         @DefaultValue("") Credential token,
         @DefaultValue("5s") Duration connectTimeout,
         @DefaultValue("120s") Duration readTimeout,
-        @DefaultValue("67108864") int maxResponseBytes) {
+        @DefaultValue("67108864") int maxResponseBytes,
+        @DefaultValue("1500ms") Duration minRequestInterval) {
+    @ConstructorBinding
     public TushareProperties {
         token = token == null ? new Credential("") : token;
         if (!validBaseUrl(baseUrl)) {
@@ -29,6 +32,19 @@ public record TushareProperties(
         if (maxResponseBytes < 1 || maxResponseBytes > 67_108_864) {
             throw new IllegalArgumentException("maxResponseBytes must be between 1 and 67108864");
         }
+        if (minRequestInterval == null || minRequestInterval.isNegative()) {
+            throw new IllegalArgumentException("minRequestInterval must be non-negative and fit in nanoseconds");
+        }
+        try {
+            minRequestInterval.toNanos();
+        } catch (ArithmeticException exception) {
+            throw new IllegalArgumentException("minRequestInterval must be non-negative and fit in nanoseconds");
+        }
+    }
+
+    public TushareProperties(boolean enabled, URI baseUrl, Credential token, Duration connectTimeout,
+                             Duration readTimeout, int maxResponseBytes) {
+        this(enabled, baseUrl, token, connectTimeout, readTimeout, maxResponseBytes, Duration.ofMillis(1_500));
     }
 
     public PluginReadiness readiness() {

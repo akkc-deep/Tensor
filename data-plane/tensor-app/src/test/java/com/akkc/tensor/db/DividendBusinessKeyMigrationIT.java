@@ -82,7 +82,7 @@ class DividendBusinessKeyMigrationIT {
     void migratesFreshDatabaseAndValidatesRepeatably() {
         Flyway flyway = flyway(dataSource);
 
-        assertThat(flyway.migrate().migrationsExecuted).isEqualTo(7);
+        assertThat(flyway.migrate().migrationsExecuted).isEqualTo(8);
         assertThat(flyway.validateWithResult().validationSuccessful).isTrue();
         assertThat(flyway.migrate().migrationsExecuted).isZero();
 
@@ -100,9 +100,9 @@ class DividendBusinessKeyMigrationIT {
         insertLegacyRows(jdbc);
         List<DividendRow> before = dividendRows(jdbc);
 
-        Flyway v7 = flyway(dataSource);
-        assertThat(v7.migrate().migrationsExecuted).isOne();
-        assertThat(v7.validateWithResult().validationSuccessful).isTrue();
+        Flyway current = flyway(dataSource);
+        assertThat(current.migrate().migrationsExecuted).isEqualTo(2);
+        assertThat(current.validateWithResult().validationSuccessful).isTrue();
 
         assertThat(dividendRows(jdbc)).containsExactlyElementsOf(before);
         Map<String, String> migratedKeys = jdbc.query(
@@ -138,7 +138,7 @@ class DividendBusinessKeyMigrationIT {
                 null, null, null, new BigDecimal("0.110000000000000000"),
                 new BigDecimal("0.110000000000000000"), null, null, null, null, null,
                 "legacy-plugin", "dividend", Instant.parse("2026-09-05T01:02:03.456Z")));
-        assertThat(flyway(dataSource).migrate().migrationsExecuted).isOne();
+        assertThat(flyway(dataSource).migrate().migrationsExecuted).isEqualTo(2);
 
         DatasetDefinition definition = dividendDefinition();
         DatasetCatalog catalog = new DatasetStartupValidator(

@@ -3,6 +3,9 @@ package com.akkc.tensor.plugin.tushare.client;
 import com.akkc.tensor.plugin.api.dataset.ColumnDefinition;
 import com.akkc.tensor.plugin.api.dataset.DatasetDefinition;
 import com.akkc.tensor.plugin.api.download.DownloadEnvelope;
+import com.akkc.tensor.plugin.api.download.batch.BatchCallContext;
+import com.akkc.tensor.plugin.api.error.ErrorCode;
+import com.akkc.tensor.plugin.api.error.TensorException;
 import com.akkc.tensor.plugin.tushare.config.TushareProperties;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.StreamReadFeature;
@@ -12,8 +15,15 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.json.JsonMapper;
 import java.io.IOException;
 import java.io.InputStream;
+import java.time.Clock;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.FutureTask;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 import org.springframework.http.MediaType;
 import org.springframework.web.client.ResourceAccessException;
@@ -29,15 +39,33 @@ public final class TushareProClient {
 
     private final RestClient restClient;
     private final TushareProperties properties;
+    private final TushareRequestGate gate;
 
     public TushareProClient(RestClient restClient, TushareProperties properties) {
+        this(restClient, properties, new TushareRequestGate(
+                Objects.requireNonNull(properties, "properties").minRequestInterval(),
+                Clock.systemUTC(), System::nanoTime, Thread::sleep));
+    }
+
+    TushareProClient(RestClient restClient, TushareProperties properties, TushareRequestGate gate) {
         this.restClient = Objects.requireNonNull(restClient, "restClient");
         this.properties = Objects.requireNonNull(properties, "properties");
+        this.gate = Objects.requireNonNull(gate, "gate");
     }
 
     public DownloadEnvelope execute(DatasetDefinition definition, Map<String, Object> params) {
+        return execute(definition, params, new BatchCallContext() {
+            public Instant deadline() { return Instant.MAX; }
+            public boolean stopRequested() { return false; }
+            public void beforeRequest() {}
+        });
+    }
+
+    public DownloadEnvelope execute(DatasetDefinition definition, Map<String, Object> params,
+                                    BatchCallContext context) {
         Objects.requireNonNull(definition, "definition");
         Objects.requireNonNull(params, "params");
+        Objects.requireNonNull(context, "context");
 
         String fields = definition.columns().stream()
                 .map(ColumnDefinition::name)
@@ -48,12 +76,73 @@ public final class TushareProClient {
                 params,
                 fields);
         byte[] requestBody = encode(request);
+        return gate.execute(context, () -> controlledExchange(definition, params, requestBody, context));
+    }
 
+    private DownloadEnvelope controlledExchange(DatasetDefinition definition, Map<String, Object> params,
+                                                byte[] requestBody, BatchCallContext context) {
+        var future = new FutureTask<>(() -> {
+            TushareRequestGate.check(context, gate.clock());
+            return exchange(definition, params, requestBody, context);
+        });
+        Thread io = Thread.ofVirtual().name("tushare-request").start(future);
+        DownloadEnvelope result = null;
+        Throwable failure = null;
+        TensorException controlFailure = null;
+        boolean interrupted = false;
+        try {
+            while (true) {
+                TushareRequestGate.check(context, gate.clock());
+                Duration remaining = Duration.between(gate.clock().instant(), context.deadline());
+                long waitNanos = remaining.compareTo(Duration.ofMillis(100)) < 0
+                        ? Math.max(1, remaining.toNanos()) : TimeUnit.MILLISECONDS.toNanos(100);
+                try {
+                    result = future.get(waitNanos, TimeUnit.NANOSECONDS);
+                    break;
+                } catch (TimeoutException ignored) {
+                    // A completed Future still requires joining the actual I/O thread below.
+                }
+            }
+        } catch (InterruptedException stopped) {
+            interrupted = true;
+            future.cancel(true);
+        } catch (TensorException stopped) {
+            controlFailure = stopped;
+            future.cancel(true);
+        } catch (ExecutionException failed) {
+            failure = failed.getCause();
+        } finally {
+            while (io.isAlive()) {
+                try {
+                    io.join();
+                } catch (InterruptedException stopped) {
+                    interrupted = true;
+                    future.cancel(true);
+                }
+            }
+            if (interrupted) Thread.currentThread().interrupt();
+        }
+        if (interrupted) throw TushareRequestGate.failure(ErrorCode.EXECUTION_INTERRUPTED);
+        if (controlFailure != null) throw controlFailure;
+        TushareRequestGate.check(context, gate.clock());
+        if (failure instanceof Error error) throw error;
+        if (failure instanceof TensorException classified) throw classified;
+        if (failure instanceof ResourceAccessException || failure instanceof IOException) {
+            throw TushareErrorClassifier.classifyTransport(failure);
+        }
+        if (failure != null) throw TushareErrorClassifier.failure(ErrorCode.SOURCE_UNAVAILABLE);
+        return result;
+    }
+
+    private DownloadEnvelope exchange(DatasetDefinition definition, Map<String, Object> params,
+                                      byte[] requestBody, BatchCallContext context) {
         try {
             return restClient.post()
                     .uri("")
                     .contentType(MediaType.APPLICATION_JSON)
                     .accept(MediaType.APPLICATION_JSON)
+                    .attribute(TushareRestClientFactory.CONTROL_ATTRIBUTE,
+                            new TushareRestClientFactory.RequestControl(context, gate.clock()))
                     .body(requestBody)
                     .exchange((outboundRequest, response) -> {
                         if (!response.getStatusCode().is2xxSuccessful()) {

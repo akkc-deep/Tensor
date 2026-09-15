@@ -60,8 +60,7 @@
       "pluginId": "tushare_pro",
       "apiName": "fina_mainbz",
       "params": {
-        "ts_code": "000001.SZ",
-        "ann_date": "20260807"
+        "ts_code": "000001.SZ"
       }
     },
     {

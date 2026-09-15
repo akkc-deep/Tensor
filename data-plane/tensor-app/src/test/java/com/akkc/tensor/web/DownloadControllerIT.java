@@ -130,7 +130,9 @@ class DownloadControllerIT {
                 .dataSource(dataSource)
                 .locations("classpath:db/migration")
                 .load();
-        assertThat(flyway.migrate().migrationsExecuted).isEqualTo(7);
+        assertThat(flyway.migrate().migrationsExecuted).isEqualTo(8);
+        assertThat(flyway.info().applied()).extracting(info -> info.getVersion().getVersion())
+                .containsExactly("1", "2", "3", "4", "5", "6", "7", "8");
         assertThat(flyway.validateWithResult().validationSuccessful).isTrue();
 
         fixtureContext = new AnnotationConfigApplicationContext();

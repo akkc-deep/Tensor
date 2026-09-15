@@ -1,3 +1,5 @@
+import { randomUUID } from 'node:crypto'
+import { rawJson, task, batch } from './download-tasks.fixtures.js'
 import { readFileSync } from 'node:fs'
 
 // Contract copied from tushare-metadata.spec.js. It intentionally stays
@@ -21,7 +23,7 @@ export const EXPECTED_ROWS = [
   ['cashflow', '现金流量表', '财务与披露', 'ann_date', ['ts_code', 'ann_date'], 97],
   ['fina_indicator', '财务指标', '财务与披露', 'ann_date', ['ts_code', 'ann_date'], 108],
   ['fina_audit', '财务审计意见', '财务与披露', 'ann_date', ['ts_code', 'ann_date'], 7],
-  ['fina_mainbz', '主营业务构成', '财务与披露', 'ann_date', ['ts_code', 'ann_date'], 8],
+  ['fina_mainbz', '主营业务构成', '财务与披露', 'snapshot', ['ts_code'], 8],
   ['stk_rewards', '管理层薪酬与持股', '股东与治理', 'snapshot', ['ts_code'], 7],
   ['stk_holdernumber', '股东户数', '股东与治理', 'snapshot', ['ts_code'], 4],
   ['trade_cal', '交易日历', 'basic_organization', 'date_range', ['exchange', 'start_date', 'end_date'], 4],
@@ -194,13 +196,13 @@ export function syntheticRecords(apiName, count = 8) {
     row.source_api = apiName
     row.ingested_at = '2026-08-07T12:34:56Z'
     if (apiName === 'daily') {
-      row.change = ['0.0100', '-0.0200', '-0.0000', '0', '1.25', '-2.5', null, ''][rowIndex]
-      row.pct_chg = ['1.2500', '-2.5000', '-0.0000', '0', '3.75', '-4.25', null, ''][rowIndex]
+      row.change = ['0.0100', '-0.0200', '-0.0000', '0', '1.25', '-2.5', null, ''][rowIndex % 8]
+      row.pct_chg = ['1.2500', '-2.5000', '-0.0000', '0', '3.75', '-4.25', null, ''][rowIndex % 8]
       row.pre_close = '11.2700'
     }
     if (apiName === 'weekly') {
-      row.change = ['0.0100', '-0.0200', '-0.0000', '0', '1.25', '-2.5', null, ''][rowIndex]
-      row.pct_chg = ['-0.0378', '0.0250', '-0.0000', '0', '0.01', '-0.02', null, ''][rowIndex]
+      row.change = ['0.0100', '-0.0200', '-0.0000', '0', '1.25', '-2.5', null, ''][rowIndex % 8]
+      row.pct_chg = ['-0.0378', '0.0250', '-0.0000', '0', '0.01', '-0.02', null, ''][rowIndex % 8]
       row.pre_close = '11.2700'
     }
     if (apiName === 'stk_holdernumber') row.holder_num = rowIndex === 0 ? '9223372036854775807' : String(1000 + rowIndex)
@@ -232,18 +234,166 @@ function pageResponse(apiName, url, requestId) {
   }
 }
 
-export function successDownload(apiName, requestId, outcome = 'SUCCESS') {
+export function successDownload(request, outcome = 'SUCCESS') {
   const empty = outcome === 'EMPTY'
-  return {
-    requestId,
-    outcome,
-    pluginId: 'tushare_pro',
-    apiName,
-    sourceRowCount: empty ? 0 : 12,
-    insertedRows: empty ? 0 : 10,
-    updatedRows: empty ? 0 : 2,
-    message: empty ? '没有可写入的数据' : '下载完成',
+  const saved = task({
+    taskId: randomUUID(), submissionId: request.body.submissionId,
+    apiName: request.body.apiName, mode: request.body.mode, params: request.body.params,
+    extraction: request.body.mode === 'SINGLE' ? null : {
+      policyVersion: rangeCapability(request.body.apiName).policyVersion,
+      ruleKind: rangeCapability(request.body.apiName).completenessRule.kind,
+    },
+    version: 1n, requestCount: 1n, runRequestCount: 1n,
+    counts: { totalBatches: 1n, pendingBatches: 0n, runningBatches: 0n, succeededBatches: 1n,
+      failedBatches: 0n, splitBatches: 0n, sourceRows: empty ? 0n : 12n,
+      insertedRows: empty ? 0n : 10n, updatedRows: empty ? 0n : 2n },
+  })
+  return { status: 202, task: saved,
+    body: { requestId: request.requestId, taskId: saved.taskId, status: 'QUEUED', version: 1n, createdAt: saved.createdAt },
+    headers: { Location: `/api/v1/download-tasks/${saved.taskId}` } }
+}
+
+// Independent candidate matrix: API, scope, mode, axis, rule, row limit, official document.
+export const RANGE_EXPECTATIONS = new Map(`
+daily ts_code N TRADE_DATE ROW 6000 27
+weekly ts_code N TRADE_DATE ROW 6000 144
+monthly ts_code N TRADE_DATE ROW 4500 145
+adj_factor ts_code N TRADE_DATE RESPONSE - 28
+daily_basic ts_code N TRADE_DATE ROW 6000 32
+stk_limit ts_code N TRADE_DATE ROW 5800 183
+suspend_d ts_code N TRADE_DATE RESPONSE - 214
+moneyflow ts_code N TRADE_DATE ROW 6000 170
+margin exchange_id N TRADE_DATE ROW 4000 58
+margin_detail ts_code N TRADE_DATE ROW 6000 59
+block_trade ts_code N TRADE_DATE ROW 1000 161
+slb_len - N TRADE_DATE ROW 5000 331
+slb_sec ts_code N TRADE_DATE ROW 5000 332
+slb_sec_detail ts_code N TRADE_DATE ROW 5000 333
+trade_cal exchange N CALENDAR_DATE CALENDAR - 26
+new_share - N ISSUE_DATE ROW 2000 123
+income ts_code N ANNOUNCEMENT_DATE RESPONSE - 33
+balancesheet ts_code N ANNOUNCEMENT_DATE RESPONSE - 36
+cashflow ts_code N ANNOUNCEMENT_DATE RESPONSE - 44
+fina_audit ts_code N ANNOUNCEMENT_DATE RESPONSE - 80
+forecast ts_code N ANNOUNCEMENT_DATE ROW 3500 45
+express ts_code N ANNOUNCEMENT_DATE RESPONSE - 46
+repurchase - N ANNOUNCEMENT_DATE RESPONSE - 124
+stk_managers ts_code N ANNOUNCEMENT_DATE RESPONSE - 193
+stk_holdernumber ts_code N ANNOUNCEMENT_DATE ROW 3000 166
+stk_holdertrade ts_code N ANNOUNCEMENT_DATE ROW 3000 175
+pledge_detail ts_code N ANNOUNCEMENT_DATE ROW 1000 111
+fina_indicator ts_code N REPORT_PERIOD ROW 100 79
+fina_mainbz ts_code N REPORT_PERIOD ROW 100 81
+top10_holders ts_code N REPORT_PERIOD RESPONSE - 61
+top10_floatholders ts_code N REPORT_PERIOD RESPONSE - 62
+top_list ts_code T TRADE_DATE ROW 10000 106
+dividend ts_code C ANNOUNCEMENT_DATE ROW 2000 103
+disclosure_date ts_code C ANNOUNCEMENT_DATE ROW 6000 162
+`.trim().split('\n').map((line) => {
+  const [apiName, rawScope, mode, dateAxis, rule, rawLimit, document] = line.split(' ')
+  const dateLabel = apiName === 'disclosure_date' ? '最新披露公告日' : {
+    TRADE_DATE: '交易日期', CALENDAR_DATE: '日历日期', ISSUE_DATE: '上网发行日期',
+    ANNOUNCEMENT_DATE: '公告日期', REPORT_PERIOD: '报告期',
+  }[dateAxis]
+  return [apiName, { scope: rawScope === '-' ? null : rawScope,
+    planningMode: { N: 'NATIVE_RANGE', T: 'TRADING_DAYS', C: 'CALENDAR_DAYS' }[mode],
+    dateAxis, dateLabel, rule, rowLimit: rawLimit === '-' ? null : Number(rawLimit), document: Number(document),
+    splittable: mode === 'N' && rule === 'ROW' }]
+}))
+requireFixture(RANGE_EXPECTATIONS.size === 34, 'exactly 34 RANGE candidates')
+const LEGACY_SOURCE = new Map([
+  ['daily_basic', [6000, 32]], ['stk_limit', [5800, 183]],
+  ['moneyflow', [6000, 170]], ['margin_detail', [6000, 59]],
+])
+const CANDIDATE_SOURCE = new Map(`
+daily issue019-source-20260913T122126Z issue019-source-20260913T122126Z-daily-000001-whole ISSUE019
+forecast issue019-source-20260913T122126Z issue019-source-20260913T122126Z-forecast-000001-whole ISSUE019
+dividend issue019-source-20260913T122126Z issue019-source-20260913T122126Z-dividend-000001-whole ISSUE019
+fina_mainbz issue026-mainbz-split-source-20260914T013736Z issue026-mainbz-split-source-20260914T013736Z-000001-annual ISSUE020
+trade_cal issue021-source-20260913T135006Z issue021-source-20260913T135006Z-trade_cal-sse-whole ISSUE021
+margin issue021-source-20260913T135006Z issue021-source-20260913T135006Z-margin-sse-whole ISSUE021
+top_list issue021-bj-source-20260913T135704Z issue021-bj-source-20260913T135704Z-920008-whole ISSUE021
+weekly issue022-source-20260913T141544Z issue022-source-20260913T141544Z-weekly-000001-whole ISSUE022
+monthly issue022-source-20260913T141544Z issue022-source-20260913T141544Z-monthly-000001-whole ISSUE022
+fina_indicator issue022-source-20260913T141544Z issue022-source-20260913T141544Z-indicator-000001-whole ISSUE022
+stk_holdernumber issue022-source-20260913T141544Z issue022-source-20260913T141544Z-holder-000001-whole ISSUE022
+new_share issue022-source-20260913T141544Z issue022-source-20260913T141544Z-ipo-whole ISSUE022
+block_trade issue023-source-20260913T144308Z issue023-source-20260913T144308Z-block-official ISSUE023
+disclosure_date issue023-source-20260913T144308Z issue023-source-20260913T144308Z-disclosure-official ISSUE023
+stk_holdertrade issue023-source-20260913T144308Z issue023-source-20260913T144308Z-holder-official ISSUE023
+pledge_detail issue023-source-20260913T144308Z issue023-source-20260913T144308Z-pledge-official PLEDGE
+slb_len issue024-source-20260913T153146Z issue024-source-20260913T153146Z-len-whole ISSUE024
+slb_sec issue024-source-20260913T153146Z issue024-source-20260913T153146Z-slb_sec-000001-whole ISSUE024
+slb_sec_detail issue024-source-20260913T153146Z issue024-source-20260913T153146Z-slb_sec_detail-000001-whole ISSUE024
+adj_factor issue025-source-20260913T162759Z issue025-source-20260913T162759Z-adj_factor-000001-whole ISSUE025
+suspend_d issue025-source-20260913T162759Z issue025-source-20260913T162759Z-suspend_d-000001-whole ISSUE025
+income issue025-source-20260913T162759Z issue025-source-20260913T162759Z-income-000001-whole ISSUE025
+balancesheet issue025-source-20260913T162759Z issue025-source-20260913T162759Z-balancesheet-000001-whole ISSUE025
+cashflow issue025-source-20260913T162759Z issue025-source-20260913T162759Z-cashflow-000001-whole ISSUE025
+fina_audit issue025-source-20260913T162759Z issue025-source-20260913T162759Z-fina_audit-000001-whole ISSUE025
+express issue025-source-20260913T162759Z issue025-source-20260913T162759Z-express-600000-whole ISSUE025
+repurchase issue025-source-20260913T162759Z issue025-source-20260913T162759Z-repurchase-all-whole ISSUE025
+stk_managers issue025-source-20260913T162759Z issue025-source-20260913T162759Z-stk_managers-000001-whole ISSUE025
+top10_holders issue025-source-20260913T162759Z issue025-source-20260913T162759Z-top10_holders-000001-whole ISSUE025
+top10_floatholders issue025-source-20260913T162759Z issue025-source-20260913T162759Z-top10_floatholders-000001-whole ISSUE025
+`.trim().split('\n').map((line) => {
+  const [apiName, runId, caseId, decision] = line.split(' ')
+  return [apiName, { runId, caseId, decision }]
+}))
+const DECISION = {
+  ISSUE019: 'docs/issues/proposals/ISSUE-019-documented-range-limits.md#决策记录',
+  ISSUE020: 'docs/issues/proposals/ISSUE-020-fina-mainbz-default-type.md#决策记录',
+  ISSUE021: 'docs/task-designs/ISSUE-021-design.md',
+  ISSUE022: 'docs/task-designs/ISSUE-022-design.md',
+  ISSUE023: 'docs/task-designs/ISSUE-023-design.md',
+  PLEDGE: 'docs/task-designs/ISSUE-023-design.md#质押非空样本决定2026-09-13',
+  ISSUE024: 'docs/issues/proposals/ISSUE-024-historical-support.md#决策记录',
+  ISSUE025: 'docs/issues/proposals/ISSUE-025-extraction-contracts.md#决策记录',
+}
+
+export function rangeCapability(apiName) {
+  const policy = RANGE_EXPECTATIONS.get(apiName)
+  const common = { completenessRule: { kind: 'UNKNOWN', rowLimit: null, evidence: null } }
+  if (!policy) return { ...common, availability: 'UNSUPPORTED', unavailableReason: 'Range download is not supported',
+    dateAxis: null, dateLabel: null, startParameter: null, endParameter: null, parameters: [],
+    planningMode: null, splittable: false, policyVersion: 'unsupported-v1' }
+  const { scope, rule, rowLimit, document, ...metadata } = policy
+  const label = policy.dateLabel.replace(/日期$/, '')
+  const legacy = LEGACY_SOURCE.get(apiName)
+  if (legacy) {
+    const runId = 'issue018-t14-priority-source-20260913T092938Z'
+    const suffixes = ['single-000001', 'single-600000', 'range', 'lower-bound', 'upper-bound',
+      'range-600000', 'lower-bound-600000', 'upper-bound-600000', ...(apiName === 'daily_basic' ? ['cross-year'] : [])]
+    common.completenessRule = { kind: 'CONFIRMED_ROW_LIMIT', rowLimit,
+      evidence: `docs/verification/ISSUE-018-range-acceptance.md#${apiName}；SOURCE ${runId}；`
+        + suffixes.map((suffix) => `${runId}-${apiName}-${suffix}`).join(',')
+        + `；https://tushare.pro/document/2?doc_id=${document}` }
+  } else {
+    const source = CANDIDATE_SOURCE.get(apiName)
+    requireFixture(source && DECISION[source.decision], `${apiName} candidate evidence`)
+    common.completenessRule = {
+      kind: { ROW: 'CONFIRMED_ROW_LIMIT', CALENDAR: 'VERIFIED_RULE', RESPONSE: 'RESPONSE_ONLY' }[rule],
+      rowLimit,
+      evidence: `${DECISION[source.decision]}；docs/verification/ISSUE-018-range-acceptance.md#${apiName}`
+        + `；docs/verification/ISSUE-018-range-acceptance.json#${source.runId}/${source.caseId}`
+        + `；https://tushare.pro/document/2?doc_id=${document}`,
+    }
   }
+  const withdrawn = ['fina_indicator', 'balancesheet', 'cashflow', 'repurchase'].includes(apiName)
+  if (withdrawn) common.completenessRule = { kind: 'UNKNOWN', rowLimit: null, evidence: null }
+  return { ...common, ...metadata, availability: withdrawn ? 'NEEDS_VERIFICATION' : 'AVAILABLE',
+    policyVersion: withdrawn ? 'tushare-range-v3' : 'tushare-range-v2',
+    unavailableReason: withdrawn ? '区间参数语义与完整性尚待真实接口验证' : null,
+    startParameter: 'start_date', endParameter: 'end_date', parameters: [
+      ...(scope ? [structuredClone(PARAMETER[scope])] : []),
+      { ...PARAMETER.start_date, label: `${label}开始日期` },
+      { ...PARAMETER.end_date, label: `${label}结束日期` },
+    ],
+  }
+}
+
+function capabilities(apiName) {
+  return { single: { available: true, parameters: EXPECTED.get(apiName).parameters }, range: rangeCapability(apiName) }
 }
 
 export function apiFailure(requestId, code = 'SOURCE_TIMEOUT') {
@@ -263,6 +413,7 @@ export function apiFailure(requestId, code = 'SOURCE_TIMEOUT') {
 export async function installApi(page, overrides = {}) {
   const requests = []
   const unexpected = []
+  const tasks = new Map()
 
   await page.route('**/api/v1/**', async (route) => {
     const request = route.request()
@@ -296,31 +447,56 @@ export async function installApi(page, overrides = {}) {
     } else if (key === 'GET /api/v1/data-sources/tushare_pro/datasets') {
       response = { status: 200, body: DATASETS }
     } else {
+      const capabilityMatch = path.match(/^\/api\/v1\/data-sources\/tushare_pro\/apis\/([^/]+)\/download-capabilities$/)
+      const taskMatch = path.match(/^\/api\/v1\/download-tasks\/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})(?:\/(batches|retry|resume))?$/)
       const definitionMatch = path.match(/^\/api\/v1\/data-sources\/tushare_pro\/datasets\/([^/]+)$/)
       const recordsMatch = path.match(/^\/api\/v1\/data-sources\/tushare_pro\/datasets\/([^/]+)\/records$/)
-      if (method === 'GET' && definitionMatch && EXPECTED.has(decodeURIComponent(definitionMatch[1]))) {
+      if (method === 'GET' && capabilityMatch && EXPECTED.has(capabilityMatch[1])) {
+        if (url.search) return reject('unexpected capabilities query')
+        response = { status: 200, body: capabilities(capabilityMatch[1]) }
+      } else if (key === 'GET /api/v1/download-tasks') {
+        const allowed = ['page', 'pageSize', 'submissionId', 'pluginId', 'apiName', 'status']
+        if ([...url.searchParams.keys()].some((key) => !allowed.includes(key)) || new Set(url.searchParams.keys()).size !== [...url.searchParams.keys()].length) return reject('invalid list query')
+        const items = [...tasks.values()].reverse().filter((item) => ['submissionId','pluginId','apiName','status'].every((key) => !url.searchParams.has(key) || item[key] === url.searchParams.get(key)))
+        const pageNumber = Number(url.searchParams.get('page') || 1)
+        const pageSize = Number(url.searchParams.get('pageSize') || 20)
+        response = { status: 200, body: { page: pageNumber, pageSize, total: BigInt(items.length), items: items.slice((pageNumber - 1) * pageSize, pageNumber * pageSize) } }
+      } else if (taskMatch && tasks.has(taskMatch[1])) {
+        const saved = tasks.get(taskMatch[1])
+        if (method === 'GET' && !taskMatch[2] && !url.search) response = { status: 200, body: saved }
+        else if (method === 'GET' && taskMatch[2] === 'batches' && url.searchParams.toString() === 'page=1&pageSize=20&includeSplit=false') {
+          response = { status: 200, body: { page: 1, pageSize: 20, total: 1n, items: [batch(0, { rangeStart: null, rangeEnd: null, sourceParams: saved.params, sourceRows: saved.counts.sourceRows, insertedRows: saved.counts.insertedRows, updatedRows: saved.counts.updatedRows })] } }
+        } else if (method === 'POST' && ['retry', 'resume'].includes(taskMatch[2]) && !url.search && request.postData() === `{"expectedVersion":${saved.version}}`) {
+          saved.version += 1n
+          response = { status: 202, headers: { Location: `/api/v1/download-tasks/${saved.taskId}` }, body: { requestId, taskId: saved.taskId, status: saved.status, version: saved.version, createdAt: saved.createdAt } }
+        } else return reject('invalid task request')
+      } else if (method === 'GET' && definitionMatch && EXPECTED.has(decodeURIComponent(definitionMatch[1]))) {
         response = { status: 200, body: definitionResponse(decodeURIComponent(definitionMatch[1])) }
       } else if (method === 'GET' && recordsMatch && EXPECTED.has(decodeURIComponent(recordsMatch[1]))) {
         const apiName = decodeURIComponent(recordsMatch[1])
         response = { status: 200, body: pageResponse(apiName, url, requestId) }
-      } else if (key === 'POST /api/v1/downloads') {
-        if (body?.pluginId !== 'tushare_pro' || !EXPECTED.has(body?.apiName) || body?.params === null || typeof body?.params !== 'object') {
+      } else if (key === 'POST /api/v1/download-tasks') {
+        if (body?.pluginId !== 'tushare_pro' || !EXPECTED.has(body?.apiName) || body?.mode !== 'SINGLE' || !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/.test(body?.submissionId ?? '') || body?.params === null || typeof body?.params !== 'object') {
           return reject('invalid download identity')
         }
-        response = { status: 200, body: successDownload(body.apiName, requestId) }
+        const existing = [...tasks.values()].find((item) => item.submissionId === body.submissionId)
+        response = existing
+          ? { status: 200, headers: { Location: `/api/v1/download-tasks/${existing.taskId}` }, body: { requestId, taskId: existing.taskId, status: existing.status, version: existing.version, createdAt: existing.createdAt } }
+          : successDownload(recorded)
       } else {
         return reject('undeclared API route')
       }
     }
 
     if (!response || !Number.isInteger(response.status) || response.body === undefined) return reject('invalid override response')
+    if (response.task) tasks.set(response.task.taskId, response.task)
     const responseBody = typeof response.body === 'function' ? await response.body(recorded) : response.body
     if (responseBody?.requestId !== undefined && responseBody.requestId !== requestId) return reject('response requestId mismatch')
     await route.fulfill({
       status: response.status,
       contentType: 'application/json',
-      headers: { 'X-Request-Id': requestId },
-      body: JSON.stringify(responseBody),
+      headers: { 'X-Request-Id': requestId, ...response.headers },
+      body: rawJson(responseBody),
     })
   })
 

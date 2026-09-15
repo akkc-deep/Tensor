@@ -20,6 +20,6 @@ function submit() {
     :aria-busy="submitting"
     @click="submit"
   >
-    开始下载
+    提交任务
   </el-button>
 </template>

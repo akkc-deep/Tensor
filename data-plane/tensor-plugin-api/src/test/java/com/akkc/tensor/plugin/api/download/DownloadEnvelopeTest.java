@@ -252,6 +252,6 @@ class DownloadEnvelopeTest {
     }
 
     private static List<Class<?>> componentTypes(Class<?> type) {
-        return Arrays.stream(type.getRecordComponents()).map(RecordComponent::getType).toList();
+        return Arrays.stream(type.getRecordComponents()).<Class<?>>map(RecordComponent::getType).toList();
     }
 }

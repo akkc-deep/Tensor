@@ -38,7 +38,8 @@ class PackagedJarContractTest {
             "BOOT-INF/classes/db/migration/V3__create_connect_and_slb_tables.sql",
             "BOOT-INF/classes/db/migration/V4__create_financial_tables.sql",
             "BOOT-INF/classes/db/migration/V5__create_corporate_and_governance_tables.sql",
-            "BOOT-INF/classes/db/migration/V7__version_dividend_business_key.sql");
+            "BOOT-INF/classes/db/migration/V7__version_dividend_business_key.sql",
+            "BOOT-INF/classes/db/migration/V8__create_download_task_tables.sql");
     private static final List<String> TENSOR_MODULE_JARS = List.of(
             "BOOT-INF/lib/tensor-plugin-api-1.0-SNAPSHOT.jar",
             "BOOT-INF/lib/tensor-core-1.0-SNAPSHOT.jar",
@@ -101,6 +102,10 @@ class PackagedJarContractTest {
                     .filter(name -> name.endsWith(".jar"))
                     .toList()).containsExactlyInAnyOrderElementsOf(TENSOR_MODULE_JARS);
             assertThat(outerEntries).noneMatch(name -> name.startsWith("BOOT-INF/lib/tensor-plugin-fixture-"));
+            String schemaValidator = "BOOT-INF/lib/json-schema-validator-1.5.9.jar";
+            assertThat(outerEntries).contains(schemaValidator);
+            assertThat(innerJarEntryNames(jarFile, schemaValidator))
+                    .contains("com/networknt/schema/SpecVersion$VersionFlag.class");
 
             Map<String, List<String>> tensorEntriesByJar = new HashMap<>();
             List<String> tensorEntries = new ArrayList<>();
@@ -168,6 +173,7 @@ class PackagedJarContractTest {
         assertThat(entries).noneMatch(name -> FORBIDDEN_ENTRIES.stream().anyMatch(name::endsWith));
         assertThat(entries).noneMatch(name -> name.contains("V6__"));
         assertThat(entries).noneMatch(name -> name.contains("test-classes")
+                || name.contains("DownloadTaskLifecycleIT")
                 || name.contains("surefire-reports")
                 || name.contains("failsafe-reports")
                 || name.endsWith("Test.class")

@@ -7,6 +7,11 @@ import NotFoundView from '../views/NotFoundView.vue'
 const routes = [
   { path: '/', redirect: { name: 'downloads' } },
   { path: '/downloads', name: 'downloads', component: DownloadView },
+  {
+    path: '/downloads/tasks/:taskId',
+    name: 'download-task',
+    component: () => import('../views/DownloadTaskView.vue'),
+  },
   { path: '/datasets', name: 'datasets', component: DatasetView },
   {
     path: '/settings',

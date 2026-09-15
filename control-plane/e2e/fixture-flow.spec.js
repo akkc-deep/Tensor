@@ -1,3 +1,4 @@
+import { configurePackagedEnvironment } from './packaged-test-environment.js'
 import { expect, test } from '@playwright/test'
 import { spawn } from 'node:child_process'
 import { open, mkdtemp, stat, writeFile } from 'node:fs/promises'
@@ -19,7 +20,10 @@ const DB_VARIABLES = [
 let runtime
 let tushareSummary
 let savedRow
-let downloadPostCount = 0
+let taskPostCount = 0
+
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
+const FIXTURE_APIS = { fixture: new Set(['fixture_daily']), tushare_pro: new Set() }
 
 function processEnvironment() {
   const env = Object.fromEntries(
@@ -172,6 +176,25 @@ async function readDataSources() {
   return response.json()
 }
 
+function allowedApiGet(url) {
+  const route = url.pathname
+  if (route === '/api/v1/data-sources') return url.search === ''
+  if (route === '/api/v1/download-tasks') {
+    return url.searchParams.toString() === 'page=1&pageSize=20'
+  }
+  if (/^\/api\/v1\/download-tasks\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/.test(route)) return url.search === ''
+  if (/^\/api\/v1\/download-tasks\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\/batches$/.test(route)) {
+    return url.searchParams.toString() === 'page=1&pageSize=20&includeSplit=false'
+  }
+  const match = route.match(/^\/api\/v1\/data-sources\/(fixture|tushare_pro)\/(apis|datasets)(?:\/([a-z0-9_]+)(\/download-capabilities|\/records)?)?$/)
+  if (!match) return false
+  const [, plugin, kind, apiName, suffix] = match
+  if (!apiName) return url.search === ''
+  if (!FIXTURE_APIS[plugin].has(apiName)) return false
+  if (kind === 'apis') return suffix === '/download-capabilities' && url.search === ''
+  return suffix === '/records' || (!suffix && url.search === '')
+}
+
 function monitorPage(page, { allowTushareUnavailable = false } = {}) {
   const failures = []
   const writes = []
@@ -180,10 +203,13 @@ function monitorPage(page, { allowTushareUnavailable = false } = {}) {
   page.on('request', (request) => {
     const url = new URL(request.url())
     if (url.origin !== BASE_URL) failures.push(`external request: ${url.origin}`)
+    if (request.method() === 'GET' && url.pathname.startsWith('/api/v1/') && !allowedApiGet(url)) {
+      failures.push(`unexpected API route: ${url.pathname}`)
+    }
     if (!['GET', 'HEAD', 'OPTIONS'].includes(request.method())) {
       writes.push(`${request.method()} ${url.pathname}`)
-      if (request.method() === 'POST' && url.pathname === '/api/v1/downloads') {
-        downloadPostCount += 1
+      if (request.method() === 'POST' && url.pathname === '/api/v1/download-tasks') {
+        taskPostCount += 1
       } else {
         failures.push(`unexpected write: ${request.method()} ${url.pathname}`)
       }
@@ -231,7 +257,7 @@ async function selectOption(page, label, optionName) {
   const combobox = page.getByRole('combobox', { name: label, exact: true })
   await combobox.focus()
   await combobox.press('Enter')
-  const option = page.getByRole('option', { name: optionName })
+  const option = page.getByRole('option', { name: optionName, exact: typeof optionName === 'string' })
   await expect(option).toBeVisible()
   await option.click()
 }
@@ -252,6 +278,87 @@ function recordsResponse(response) {
     response.request().method() === 'GET' &&
     url.pathname === '/api/v1/data-sources/fixture/datasets/fixture_daily/records'
   )
+}
+
+function taskSubmitResponse(response) {
+  const url = new URL(response.url())
+  return response.request().method() === 'POST' && url.pathname === '/api/v1/download-tasks'
+}
+
+function taskGetResponse(response, taskId, suffix = '') {
+  const url = new URL(response.url())
+  return response.request().method() === 'GET' &&
+    url.pathname === `/api/v1/download-tasks/${taskId}${suffix}`
+}
+
+async function submitFixtureTask(page, scenario, expected) {
+  const submitPromise = page.waitForResponse(taskSubmitResponse)
+  await page.getByRole('button', { name: '提交任务', exact: true }).click()
+  const response = await submitPromise
+  expect(response.status()).toBe(202)
+  const request = await response.request().postDataJSON()
+  expect(request).toEqual({
+    submissionId: expect.stringMatching(UUID),
+    pluginId: 'fixture',
+    apiName: 'fixture_daily',
+    mode: 'SINGLE',
+    params: { scenario },
+  })
+  const receipt = await response.json()
+  expect(Object.keys(receipt).sort()).toEqual(['createdAt', 'requestId', 'status', 'taskId', 'version'])
+  expect(receipt).toMatchObject({
+    requestId: expect.stringMatching(UUID),
+    taskId: expect.stringMatching(UUID),
+    status: 'QUEUED',
+    version: 1,
+  })
+  expect(response.headers()['x-request-id']).toBe(receipt.requestId)
+  expect(response.headers().location).toBe(`/api/v1/download-tasks/${receipt.taskId}`)
+  const accepted = page.locator('.download-result-panel')
+  await expect(accepted.getByRole('heading', { name: '任务已接收' })).toBeVisible()
+
+  const initialDetail = page.waitForResponse((candidate) => taskGetResponse(candidate, receipt.taskId))
+  const initialBatches = page.waitForResponse((candidate) => taskGetResponse(candidate, receipt.taskId, '/batches'))
+  await accepted.getByRole('link', { name: '查看任务' }).click()
+  expect((await initialDetail).status()).toBe(200)
+  expect((await initialBatches).status()).toBe(200)
+  await expect(page).toHaveURL(`/downloads/tasks/${receipt.taskId}`)
+  await expect(page.locator('[data-task-status]')).toHaveText(expected.statusLabel, { timeout: 15_000 })
+
+  const detailPromise = page.waitForResponse((candidate) => taskGetResponse(candidate, receipt.taskId))
+  const batchesPromise = page.waitForResponse((candidate) => taskGetResponse(candidate, receipt.taskId, '/batches'))
+  await page.locator('[data-refresh-task]').click()
+  const detailResponse = await detailPromise
+  const batchesResponse = await batchesPromise
+  expect(detailResponse.status()).toBe(200)
+  expect(batchesResponse.status()).toBe(200)
+  const task = await detailResponse.json()
+  const batches = await batchesResponse.json()
+  expect(task).toMatchObject({
+    taskId: receipt.taskId,
+    submissionId: request.submissionId,
+    pluginId: 'fixture',
+    apiName: 'fixture_daily',
+    mode: 'SINGLE',
+    params: { scenario },
+    status: expected.status,
+    planReady: true,
+    counts: expected.counts,
+    lastError: null,
+    requestCount: 1,
+    runRequestCount: 1,
+  })
+  expect(batches).toMatchObject({ page: 1, pageSize: 20, total: 1 })
+  expect(batches.items).toHaveLength(1)
+  expect(batches.items[0]).toMatchObject({
+    status: expected.status,
+    attemptCount: 1,
+    sourceRows: expected.counts.sourceRows,
+    insertedRows: expected.counts.insertedRows,
+    updatedRows: expected.counts.updatedRows,
+    error: null,
+  })
+  return { receipt, task, batches }
 }
 
 async function queryByCode(page) {
@@ -351,6 +458,7 @@ test.describe('fixture page flow', () => {
   test.use({ viewport: { width: 1440, height: 1000 } })
 
   test.beforeAll(async () => {
+    configurePackagedEnvironment('fixture-flow')
     test.setTimeout(180_000)
     expect(path.isAbsolute(process.env.ACCEPTANCE_JAR ?? '')).toBe(true)
     expect((await stat(process.env.ACCEPTANCE_JAR)).isFile()).toBe(true)
@@ -389,7 +497,7 @@ test.describe('fixture page flow', () => {
       page.getByRole('heading', { name: '未找到符合条件的数据' }),
     ).toBeVisible()
 
-    await page.getByRole('link', { name: '数据下载', exact: true }).click()
+    await page.getByRole('link', { name: /^数据下载\s*01$/ }).click()
     await expect(page.getByRole('heading', { level: 1, name: '数据下载' })).toBeVisible()
     await chooseFixtureDownload(page)
     const scenario = page.getByRole('combobox', { name: /场景/ })
@@ -400,44 +508,34 @@ test.describe('fixture page flow', () => {
     ).toBeVisible()
     await scenario.press('Escape')
 
-    const responsePromise = page.waitForResponse((response) => {
-      const url = new URL(response.url())
-      return response.request().method() === 'POST' && url.pathname === '/api/v1/downloads'
+    const result = await submitFixtureTask(page, 'SUCCESS', {
+      status: 'SUCCEEDED',
+      statusLabel: '已成功',
+      counts: {
+        totalBatches: 1,
+        pendingBatches: 0,
+        runningBatches: 0,
+        succeededBatches: 1,
+        failedBatches: 0,
+        splitBatches: 0,
+        sourceRows: 1,
+        insertedRows: 1,
+        updatedRows: 0,
+      },
     })
-    await page.getByRole('button', { name: '开始下载', exact: true }).click()
-    const response = await responsePromise
-    expect(response.status()).toBe(200)
-    expect(await response.request().postDataJSON()).toEqual({
-      pluginId: 'fixture',
-      apiName: 'fixture_daily',
-      params: { scenario: 'SUCCESS' },
-    })
-    const result = await response.json()
-    expect(result).toMatchObject({
-      outcome: 'SUCCESS',
-      pluginId: 'fixture',
-      apiName: 'fixture_daily',
-      sourceRowCount: 1,
-      insertedRows: 1,
-      updatedRows: 0,
-    })
-    expect(result.requestId).toBeTruthy()
-    expect(response.headers()['x-request-id']).toBe(result.requestId)
-    const status = page.getByRole('status')
-    await expect(status.getByRole('heading', { name: '下载成功' })).toBeVisible()
-    await expect(status.getByRole('term')).toHaveText(['上游返回数', '插入数', '更新数'])
-    await expect(status.getByRole('definition')).toHaveText(['1', '1', '0'])
-    await status.screenshot({ path: testInfo.outputPath('success-counts.png') })
+    await page.locator('.task-detail__counts').screenshot({ path: testInfo.outputPath('success-counts.png') })
 
-    await page.getByRole('link', { name: '数据查看', exact: true }).click()
+    await page.getByRole('link', { name: '返回下载页', exact: true }).click()
+    await page.getByRole('link', { name: /^数据查看\s*02$/ }).click()
     await expect(page.getByRole('heading', { level: 1, name: '数据查看' })).toBeVisible()
     await chooseFixtureDataset(page)
     const pageBody = await queryByCode(page)
     const { rowData, row } = await assertFixtureRow(page, pageBody)
     savedRow = structuredClone(rowData)
     await row.screenshot({ path: testInfo.outputPath('success-row.png') })
-    monitor.assertClean(['POST /api/v1/downloads'])
-    expect(downloadPostCount).toBe(1)
+    expect(result.task.counts).toMatchObject({ sourceRows: 1, insertedRows: 1, updatedRows: 0 })
+    monitor.assertClean(['POST /api/v1/download-tasks'])
+    expect(taskPostCount).toBe(1)
   })
 
   test('showsEmptyDownloadWithoutAddingRows', async ({ page }, testInfo) => {
@@ -446,38 +544,34 @@ test.describe('fixture page flow', () => {
     await chooseFixtureDownload(page)
     await selectOption(page, /场景/, 'EMPTY')
 
-    const responsePromise = page.waitForResponse((response) => {
-      const url = new URL(response.url())
-      return response.request().method() === 'POST' && url.pathname === '/api/v1/downloads'
+    await submitFixtureTask(page, 'EMPTY', {
+      status: 'SUCCEEDED',
+      statusLabel: '已成功',
+      counts: {
+        totalBatches: 1,
+        pendingBatches: 0,
+        runningBatches: 0,
+        succeededBatches: 1,
+        failedBatches: 0,
+        splitBatches: 0,
+        sourceRows: 0,
+        insertedRows: 0,
+        updatedRows: 0,
+      },
     })
-    await page.getByRole('button', { name: '开始下载', exact: true }).click()
-    const response = await responsePromise
-    expect(response.status()).toBe(200)
-    expect(await response.request().postDataJSON()).toEqual({
-      pluginId: 'fixture',
-      apiName: 'fixture_daily',
-      params: { scenario: 'EMPTY' },
-    })
-    expect(await response.json()).toMatchObject({
-      outcome: 'EMPTY',
-      pluginId: 'fixture',
-      apiName: 'fixture_daily',
-      sourceRowCount: 0,
-      insertedRows: 0,
-      updatedRows: 0,
-    })
-    await expect(page.getByRole('heading', { name: '下载成功，0 条数据' })).toBeVisible()
-    await expect(page.getByText('本次请求没有可写入的数据。')).toBeVisible()
-    await expect(page.getByText('下载失败')).toHaveCount(0)
-    await page.getByRole('status').screenshot({ path: testInfo.outputPath('empty-result.png') })
+    const counts = page.locator('.task-detail__counts')
+    await expect(counts.getByText('来源行数 0', { exact: true })).toBeVisible()
+    await expect(counts.getByText('新增记录次数 0', { exact: true })).toBeVisible()
+    await page.locator('.task-detail__counts').screenshot({ path: testInfo.outputPath('empty-result.png') })
 
-    await page.getByRole('link', { name: '数据查看', exact: true }).click()
+    await page.getByRole('link', { name: '返回下载页', exact: true }).click()
+    await page.getByRole('link', { name: /^数据查看\s*02$/ }).click()
     await chooseFixtureDataset(page)
     const pageBody = await queryByCode(page)
     const { rowData } = await assertFixtureRow(page, pageBody)
     expect(rowData).toEqual(savedRow)
-    monitor.assertClean(['POST /api/v1/downloads'])
-    expect(downloadPostCount).toBe(2)
+    monitor.assertClean(['POST /api/v1/download-tasks'])
+    expect(taskPostCount).toBe(2)
   })
 
   test('hidesDisabledFixtureOnBothPagesAfterRestart', async ({ page }, testInfo) => {
@@ -511,6 +605,6 @@ test.describe('fixture page flow', () => {
       testInfo.outputPath('disabled-datasets.png'),
     )
     monitor.assertClean([])
-    expect(downloadPostCount).toBe(2)
+    expect(taskPostCount).toBe(2)
   })
 })
