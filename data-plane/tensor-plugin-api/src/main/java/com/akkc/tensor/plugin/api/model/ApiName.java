@@ -1,10 +1,11 @@
 package com.akkc.tensor.plugin.api.model;
 
+import com.akkc.tensor.plugin.api.constant.ValidationConstants;
 import java.util.Objects;
 import java.util.regex.Pattern;
 
 public record ApiName(String value) {
-    private static final Pattern PATTERN = Pattern.compile("^[a-z][a-z0-9_]{1,63}$");
+    private static final Pattern PATTERN = Pattern.compile(ValidationConstants.IDENTIFIER_REGEX);
 
     public ApiName {
         Objects.requireNonNull(value, "value");

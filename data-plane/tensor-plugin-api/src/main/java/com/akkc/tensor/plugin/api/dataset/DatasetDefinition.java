@@ -1,5 +1,7 @@
 package com.akkc.tensor.plugin.api.dataset;
 
+import com.akkc.tensor.plugin.api.constant.ValidationConstants;
+import com.akkc.tensor.plugin.api.constant.ValidationMessages;
 import com.akkc.tensor.plugin.api.descriptor.ParameterDescriptor;
 import com.akkc.tensor.plugin.api.descriptor.QueryMode;
 import com.akkc.tensor.plugin.api.model.DatasetKey;
@@ -23,8 +25,9 @@ public record DatasetDefinition(
         String fixedColumn,
         int batchSize
 ) {
-    private static final int DEFAULT_BATCH_SIZE = 500;
-    private static final Pattern IDENTIFIER_PATTERN = Pattern.compile("^[a-z][a-z0-9_]{1,63}$");
+    private static final int MAX_BATCH_SIZE = 500;
+    private static final int DEFAULT_BATCH_SIZE = MAX_BATCH_SIZE;
+    private static final Pattern IDENTIFIER_PATTERN = Pattern.compile(ValidationConstants.IDENTIFIER_REGEX);
 
     public DatasetDefinition {
         Objects.requireNonNull(datasetKey, "datasetKey");
@@ -33,8 +36,8 @@ public record DatasetDefinition(
             throw new IllegalArgumentException("displayName must be at most 128 characters");
         }
         requireNonBlank(category, "category");
-        if (category.codePointCount(0, category.length()) > 64) {
-            throw new IllegalArgumentException("category must be at most 64 characters");
+        if (category.codePointCount(0, category.length()) > ValidationConstants.MAX_CATEGORY_LENGTH) {
+            throw new IllegalArgumentException(ValidationMessages.CATEGORY_TOO_LONG);
         }
         Objects.requireNonNull(queryMode, "queryMode");
         parameters = List.copyOf(Objects.requireNonNull(parameters, "parameters"));
@@ -44,13 +47,13 @@ public record DatasetDefinition(
         filters = List.copyOf(Objects.requireNonNull(filters, "filters"));
 
         if (columns.isEmpty()) {
-            throw new IllegalArgumentException("columns must not be empty");
+            throw new IllegalArgumentException(ValidationMessages.COLUMNS_EMPTY);
         }
         rejectDuplicates(parameters, ParameterDescriptor::name, "parameters");
         rejectDuplicates(columns, ColumnDefinition::name, "columns");
         rejectDuplicates(filters, FilterDefinition::field, "filters");
         if (!tableName.equals(TableName.from(datasetKey))) {
-            throw new IllegalArgumentException("tableName must match datasetKey");
+            throw new IllegalArgumentException(ValidationMessages.TABLE_NAME_MISMATCH);
         }
 
         Set<String> columnNames = columns.stream()
@@ -66,7 +69,7 @@ public record DatasetDefinition(
                 throw new IllegalArgumentException("fixedColumn must reference a column");
             }
         }
-        if (batchSize < 1 || batchSize > 500) {
+        if (batchSize < 1 || batchSize > MAX_BATCH_SIZE) {
             throw new IllegalArgumentException("batchSize must be between 1 and 500");
         }
     }
@@ -101,7 +104,7 @@ public record DatasetDefinition(
     private static void requireNonBlank(String value, String component) {
         Objects.requireNonNull(value, component);
         if (value.isBlank()) {
-            throw new IllegalArgumentException(component + " must not be blank");
+            throw new IllegalArgumentException(component + ValidationMessages.MUST_NOT_BE_BLANK);
         }
     }
 }

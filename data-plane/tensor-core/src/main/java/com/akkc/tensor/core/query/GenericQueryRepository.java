@@ -1,5 +1,8 @@
 package com.akkc.tensor.core.query;
 
+import java.time.ZoneOffset;
+
+import com.akkc.tensor.plugin.api.constant.DatasetFields;
 import com.akkc.tensor.plugin.api.dataset.ColumnDefinition;
 import com.akkc.tensor.plugin.api.dataset.DatasetDefinition;
 import java.sql.Date;
@@ -19,6 +22,8 @@ import java.util.TimeZone;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 public final class GenericQueryRepository {
+    private static final String UNSUPPORTED_VALUE_TYPE = "Unsupported query value type";
+
     private final JdbcTemplate jdbcTemplate;
 
     public GenericQueryRepository(JdbcTemplate jdbcTemplate) {
@@ -56,9 +61,9 @@ public final class GenericQueryRepository {
         List<String> columns = definition.columns().stream()
                 .map(ColumnDefinition::name)
                 .collect(java.util.stream.Collectors.toCollection(ArrayList::new));
-        columns.add("source_plugin");
-        columns.add("source_api");
-        columns.add("ingested_at");
+        columns.add(DatasetFields.SOURCE_PLUGIN);
+        columns.add(DatasetFields.SOURCE_API);
+        columns.add(DatasetFields.INGESTED_AT);
         return List.copyOf(columns);
     }
 
@@ -68,7 +73,7 @@ public final class GenericQueryRepository {
                     || value instanceof LocalDate
                     || value instanceof Integer
                     || value instanceof Long)) {
-                throw new IllegalArgumentException("Unsupported query value type");
+                throw new IllegalArgumentException(UNSUPPORTED_VALUE_TYPE);
             }
         }
     }
@@ -86,7 +91,7 @@ public final class GenericQueryRepository {
             } else if (value instanceof Long longValue) {
                 statement.setLong(parameter, longValue);
             } else {
-                throw new IllegalArgumentException("Unsupported query value type");
+                throw new IllegalArgumentException(UNSUPPORTED_VALUE_TYPE);
             }
         }
     }
@@ -98,11 +103,11 @@ public final class GenericQueryRepository {
         for (ColumnDefinition column : definition.columns()) {
             row.put(column.name(), readValue(resultSet, index++, column));
         }
-        row.put("source_plugin", resultSet.getString(index++));
-        row.put("source_api", resultSet.getString(index++));
-        Calendar utc = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+        row.put(DatasetFields.SOURCE_PLUGIN, resultSet.getString(index++));
+        row.put(DatasetFields.SOURCE_API, resultSet.getString(index++));
+        Calendar utc = Calendar.getInstance(TimeZone.getTimeZone(ZoneOffset.UTC));
         Timestamp ingestedAt = resultSet.getTimestamp(index, utc);
-        row.put("ingested_at", ingestedAt == null ? null : ingestedAt.toInstant());
+        row.put(DatasetFields.INGESTED_AT, ingestedAt == null ? null : ingestedAt.toInstant());
         return Collections.unmodifiableMap(row);
     }
 

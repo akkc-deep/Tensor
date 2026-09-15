@@ -1,5 +1,6 @@
 package com.akkc.tensor.core.query;
 
+import com.akkc.tensor.plugin.api.constant.DatasetFields;
 import com.akkc.tensor.core.persistence.SqlIdentifierPolicy;
 import com.akkc.tensor.plugin.api.dataset.BusinessKeyMode;
 import com.akkc.tensor.plugin.api.dataset.DatasetDefinition;
@@ -24,8 +25,8 @@ public final class QuerySqlFactory {
         List<String> conditions = new ArrayList<>();
         List<Object> values = new ArrayList<>();
         addTsCodeCondition(criteria, filters, conditions, values);
-        addDateConditions("trade_date", criteria.tradeDateFrom(), criteria.tradeDateTo(), filters, conditions, values);
-        addDateConditions("ann_date", criteria.annDateFrom(), criteria.annDateTo(), filters, conditions, values);
+        addDateConditions(DatasetFields.TRADE_DATE, criteria.tradeDateFrom(), criteria.tradeDateTo(), filters, conditions, values);
+        addDateConditions(DatasetFields.ANN_DATE, criteria.annDateFrom(), criteria.annDateTo(), filters, conditions, values);
 
         String where = conditions.isEmpty() ? "" : " WHERE " + String.join(" AND ", conditions);
         String table = identifiers.quote(definition.tableName().value());
@@ -40,8 +41,8 @@ public final class QuerySqlFactory {
 
     private void addTsCodeCondition(QueryCriteria criteria, Set<String> filters, List<String> conditions, List<Object> values) {
         if (criteria.tsCode() != null) {
-            requireDeclaredFilter("ts_code", filters);
-            conditions.add(identifiers.quote("ts_code") + " = ?");
+            requireDeclaredFilter(DatasetFields.TS_CODE, filters);
+            conditions.add(identifiers.quote(DatasetFields.TS_CODE) + " = ?");
             values.add(criteria.tsCode());
         }
     }
@@ -76,9 +77,9 @@ public final class QuerySqlFactory {
         List<String> columns = definition.columns().stream()
                 .map(column -> identifiers.quote(column.name()))
                 .collect(Collectors.toCollection(ArrayList::new));
-        columns.add(identifiers.quote("source_plugin"));
-        columns.add(identifiers.quote("source_api"));
-        columns.add(identifiers.quote("ingested_at"));
+        columns.add(identifiers.quote(DatasetFields.SOURCE_PLUGIN));
+        columns.add(identifiers.quote(DatasetFields.SOURCE_API));
+        columns.add(identifiers.quote(DatasetFields.INGESTED_AT));
         return String.join(", ", columns);
     }
 
@@ -87,7 +88,7 @@ public final class QuerySqlFactory {
                 .map(field -> identifiers.quote(field) + " ASC")
                 .collect(Collectors.toCollection(ArrayList::new));
         if (definition.businessKey().mode() == BusinessKeyMode.FINGERPRINT) {
-            columns.add(identifiers.quote("business_key") + " ASC");
+            columns.add(identifiers.quote(DatasetFields.BUSINESS_KEY) + " ASC");
         }
         return String.join(", ", columns);
     }

@@ -1,5 +1,6 @@
 package com.akkc.tensor.core.catalog;
 
+import com.akkc.tensor.plugin.api.constant.ValidationMessages;
 import com.akkc.tensor.plugin.api.model.TableName;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
@@ -15,6 +16,9 @@ import java.util.TreeMap;
 import javax.sql.DataSource;
 
 public final class SchemaInspector {
+    private static final String COLUMN_NAME = "COLUMN_NAME";
+    private static final String ORDINAL_POSITION = "ORDINAL_POSITION";
+
     private final DataSource dataSource;
 
     public SchemaInspector(DataSource dataSource) {
@@ -60,8 +64,8 @@ public final class SchemaInspector {
                     throw failure();
                 }
                 columns.add(new ColumnRow(
-                        result.getInt("ORDINAL_POSITION"),
-                        new ColumnMetadata(result.getString("COLUMN_NAME"), result.getInt("DATA_TYPE"), nullable)));
+                        result.getInt(ORDINAL_POSITION),
+                        new ColumnMetadata(result.getString(COLUMN_NAME), result.getInt("DATA_TYPE"), nullable)));
             }
         }
         return columns;
@@ -72,7 +76,7 @@ public final class SchemaInspector {
         List<KeyRow> keys = new ArrayList<>();
         try (ResultSet result = metadata.getPrimaryKeys(catalog, null, table)) {
             while (result.next()) {
-                keys.add(new KeyRow(result.getInt("KEY_SEQ"), result.getString("COLUMN_NAME")));
+                keys.add(new KeyRow(result.getInt("KEY_SEQ"), result.getString(COLUMN_NAME)));
             }
         }
         return keys.stream().sorted(Comparator.comparingInt(KeyRow::sequence)).map(KeyRow::column).toList();
@@ -84,14 +88,14 @@ public final class SchemaInspector {
         try (ResultSet result = metadata.getIndexInfo(catalog, null, table, true, false)) {
             while (result.next()) {
                 String indexName = result.getString("INDEX_NAME");
-                String columnName = result.getString("COLUMN_NAME");
+                String columnName = result.getString(COLUMN_NAME);
                 int type = result.getInt("TYPE");
                 if (type == DatabaseMetaData.tableIndexStatistic || indexName == null || "PRIMARY".equals(indexName)) {
                     continue;
                 }
                 List<IndexRow> rows = indexes.computeIfAbsent(indexName, ignored -> new ArrayList<>());
                 if (columnName != null) {
-                    rows.add(new IndexRow(result.getInt("ORDINAL_POSITION"), columnName));
+                    rows.add(new IndexRow(result.getInt(ORDINAL_POSITION), columnName));
                 }
             }
         }
@@ -110,7 +114,7 @@ public final class SchemaInspector {
     private static String requireName(String value, String component) {
         Objects.requireNonNull(value, component);
         if (value.isBlank()) {
-            throw new IllegalArgumentException(component + " must not be blank");
+            throw new IllegalArgumentException(component + ValidationMessages.MUST_NOT_BE_BLANK);
         }
         return value;
     }

@@ -94,8 +94,8 @@ public final class TushareProClient {
             while (true) {
                 TushareRequestGate.check(context, gate.clock());
                 Duration remaining = Duration.between(gate.clock().instant(), context.deadline());
-                long waitNanos = remaining.compareTo(Duration.ofMillis(100)) < 0
-                        ? Math.max(1, remaining.toNanos()) : TimeUnit.MILLISECONDS.toNanos(100);
+                long waitNanos = remaining.compareTo(TushareRequestGate.MAX_WAIT) < 0
+                        ? Math.max(1, remaining.toNanos()) : TushareRequestGate.MAX_WAIT.toNanos();
                 try {
                     result = future.get(waitNanos, TimeUnit.NANOSECONDS);
                     break;

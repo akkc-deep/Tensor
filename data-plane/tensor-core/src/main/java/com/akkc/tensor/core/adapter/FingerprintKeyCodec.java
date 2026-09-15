@@ -1,5 +1,6 @@
 package com.akkc.tensor.core.adapter;
 
+import com.akkc.tensor.plugin.api.constant.ValidationMessages;
 import java.io.ByteArrayOutputStream;
 import java.math.BigDecimal;
 import java.nio.ByteBuffer;
@@ -15,13 +16,14 @@ import java.util.Objects;
 import java.util.Set;
 
 public final class FingerprintKeyCodec {
+    public static final String HASH_ALGORITHM = "SHA-256";
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("uuuu-MM-dd");
 
     public String sha256(List<String> fields, Map<String, Object> row) {
         Objects.requireNonNull(fields, "fields");
         Objects.requireNonNull(row, "row");
         if (fields.isEmpty()) {
-            throw new IllegalArgumentException("fields must not be empty");
+            throw new IllegalArgumentException(ValidationMessages.FIELDS_EMPTY);
         }
         Set<String> names = new HashSet<>();
         for (String field : fields) {
@@ -29,7 +31,7 @@ public final class FingerprintKeyCodec {
                 throw new IllegalArgumentException("fields must not contain null");
             }
             if (!names.add(field)) {
-                throw new IllegalArgumentException("fields must not contain duplicates");
+                throw new IllegalArgumentException(ValidationMessages.DUPLICATE_FIELDS);
             }
             if (!row.containsKey(field)) {
                 throw new IllegalArgumentException("row must contain fields");
@@ -69,7 +71,7 @@ public final class FingerprintKeyCodec {
 
     private byte[] digest(byte[] bytes) {
         try {
-            return MessageDigest.getInstance("SHA-256").digest(bytes);
+            return MessageDigest.getInstance(HASH_ALGORITHM).digest(bytes);
         } catch (NoSuchAlgorithmException exception) {
             throw new IllegalStateException("SHA-256 unavailable");
         }

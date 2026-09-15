@@ -1,5 +1,6 @@
 package com.akkc.tensor.config;
 
+import com.akkc.tensor.web.RequestIdFilter;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
@@ -39,8 +40,8 @@ public final class SpaWebConfiguration implements WebMvcConfigurer {
         registry.addMapping("/api/v1/**")
                 .allowedOrigins(devAllowedOrigin)
                 .allowedMethods("GET", "POST", "OPTIONS")
-                .allowedHeaders("Content-Type", "X-Request-Id")
-                .exposedHeaders("X-Request-Id", "Location")
+                .allowedHeaders("Content-Type", RequestIdFilter.HEADER_NAME)
+                .exposedHeaders(RequestIdFilter.HEADER_NAME, "Location")
                 .allowCredentials(false);
     }
 

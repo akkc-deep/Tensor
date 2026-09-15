@@ -1,5 +1,6 @@
 package com.akkc.tensor.core.persistence;
 
+import com.akkc.tensor.plugin.api.constant.DatasetFields;
 import com.akkc.tensor.plugin.api.dataset.BusinessKeyMode;
 import com.akkc.tensor.plugin.api.dataset.ColumnDefinition;
 import com.akkc.tensor.plugin.api.dataset.DatasetDefinition;
@@ -16,7 +17,6 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 public final class GenericUpsertRepository {
-    private static final String FINGERPRINT_COLUMN = "business_key";
 
     private final JdbcTemplate jdbcTemplate;
 
@@ -49,7 +49,7 @@ public final class GenericUpsertRepository {
                 .map(ColumnDefinition::name)
                 .toList());
         if (definition.businessKey().mode() == BusinessKeyMode.FINGERPRINT) {
-            expectedColumns.add(FINGERPRINT_COLUMN);
+            expectedColumns.add(DatasetFields.BUSINESS_KEY);
         }
         if (!batch.datasetKey().equals(definition.datasetKey())
                 || !batch.tableName().equals(definition.tableName())
@@ -70,7 +70,7 @@ public final class GenericUpsertRepository {
             binder.bind(statement, parameter++, row.get(column.name()), jdbcType(column.logicalType()));
         }
         if (definition.businessKey().mode() == BusinessKeyMode.FINGERPRINT) {
-            binder.bind(statement, parameter++, row.get(FINGERPRINT_COLUMN), Types.CHAR);
+            binder.bind(statement, parameter++, row.get(DatasetFields.BUSINESS_KEY), Types.CHAR);
         }
         binder.bind(
                 statement,

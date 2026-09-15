@@ -40,7 +40,7 @@ public final class DownloadController {
         Objects.requireNonNull(request, "request");
         String value = MDC.get(RequestIdFilter.MDC_KEY);
         if (value == null) {
-            throw new IllegalStateException("Request ID is unavailable");
+            throw new IllegalStateException(WebConstants.REQUEST_ID_UNAVAILABLE);
         }
         DatasetKey key = request.dataset();
         Map<String, Object> parameters = parameterResolver.toRawValues(request.params(), request.suppliedFields());

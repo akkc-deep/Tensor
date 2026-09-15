@@ -1,5 +1,6 @@
 package com.akkc.tensor.plugin.api.download.batch;
 
+import com.akkc.tensor.plugin.api.constant.ValidationMessages;
 import com.akkc.tensor.plugin.api.descriptor.ParameterDescriptor;
 import com.akkc.tensor.plugin.api.descriptor.ParameterType;
 import java.util.List;
@@ -25,7 +26,7 @@ public record BatchDownloadDescriptor(
         Objects.requireNonNull(completenessRule, "completenessRule");
         requireText(policyVersion, "policyVersion");
         if (parameters.stream().map(ParameterDescriptor::name).distinct().count() != parameters.size()) {
-            throw new IllegalArgumentException("parameters must not contain duplicate names");
+            throw new IllegalArgumentException(ValidationMessages.DUPLICATE_PARAMETERS);
         }
         if (availability == Availability.AVAILABLE) {
             if (unavailableReason != null || completenessRule.kind() == CompletenessRule.Kind.UNKNOWN) {
@@ -101,7 +102,7 @@ public record BatchDownloadDescriptor(
 
     private static void requireText(String value, String name) {
         if (value == null || value.isBlank()) {
-            throw new IllegalArgumentException(name + " must not be blank");
+            throw new IllegalArgumentException(name + ValidationMessages.MUST_NOT_BE_BLANK);
         }
     }
 }

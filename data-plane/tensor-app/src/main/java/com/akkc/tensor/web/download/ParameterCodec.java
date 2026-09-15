@@ -1,5 +1,7 @@
 package com.akkc.tensor.web.download;
 
+import com.akkc.tensor.plugin.api.constant.DatasetFields;
+import com.akkc.tensor.plugin.tushare.TushareConstants;
 import static com.akkc.tensor.plugin.api.descriptor.ParameterType.*;
 import static com.akkc.tensor.web.download.ParameterShape.of;
 
@@ -13,6 +15,9 @@ import java.util.function.Function;
 
 record ParameterCodec<T extends DownloadParameters>(ParameterShape shape, Class<T> parameterType,
         Function<ParameterJsonReader, T> reader, Function<T, Map<String, Object>> writer) {
+    private static final String SCENARIO = "scenario";
+    private static final String SUCCESS_SCENARIO = "SUCCESS";
+
     T read(ParameterJsonReader json) {
         return reader.apply(json);
     }
@@ -22,67 +27,67 @@ record ParameterCodec<T extends DownloadParameters>(ParameterShape shape, Class<
     }
 
     static List<ParameterCodec<?>> supported() {
-        var tradeDate = field("trade_date", DATE);
-        var annDate = field("ann_date", DATE);
-        var tsCode = field("ts_code", TS_CODE);
-        var exchange = enumeration("exchange", "SSE", "SZSE", "BSE");
-        var start = new ParameterShape.Field("start_date", DATE_RANGE_MEMBER, true, null,
-                Set.of(), null, "end_date");
-        var end = new ParameterShape.Field("end_date", DATE_RANGE_MEMBER, true, null,
-                Set.of(), null, "start_date");
+        var tradeDate = field(DatasetFields.TRADE_DATE, DATE);
+        var annDate = field(DatasetFields.ANN_DATE, DATE);
+        var tsCode = field(DatasetFields.TS_CODE, TS_CODE);
+        var exchange = enumeration(DatasetFields.EXCHANGE, TushareConstants.SSE, TushareConstants.SZSE, TushareConstants.BSE);
+        var start = new ParameterShape.Field(DatasetFields.START_DATE, DATE_RANGE_MEMBER, true, null,
+                Set.of(), null, DatasetFields.END_DATE);
+        var end = new ParameterShape.Field(DatasetFields.END_DATE, DATE_RANGE_MEMBER, true, null,
+                Set.of(), null, DatasetFields.START_DATE);
         return List.of(
                 new ParameterCodec<>(of(), SnapshotParameters.class,
                         json -> new SnapshotParameters(), value -> values()),
                 new ParameterCodec<>(of(annDate), AnnDateParameters.class,
-                        json -> new AnnDateParameters(json.nullableText("ann_date")),
-                        value -> values("ann_date", value.annDate())),
+                        json -> new AnnDateParameters(json.nullableText(DatasetFields.ANN_DATE)),
+                        value -> values(DatasetFields.ANN_DATE, value.annDate())),
                 new ParameterCodec<>(of(tsCode, exchange), ExchangeParameters.class,
-                        json -> new ExchangeParameters(json.nullableText("ts_code"), json.nullableText("exchange")),
-                        value -> values("ts_code", value.tsCode(), "exchange", value.exchange())),
+                        json -> new ExchangeParameters(json.nullableText(DatasetFields.TS_CODE), json.nullableText(DatasetFields.EXCHANGE)),
+                        value -> values(DatasetFields.TS_CODE, value.tsCode(), DatasetFields.EXCHANGE, value.exchange())),
                 new ParameterCodec<>(of(exchange, start, end), ExchangeDateRangeParameters.class,
-                        json -> new ExchangeDateRangeParameters(json.nullableText("exchange"),
-                                json.nullableText("start_date"), json.nullableText("end_date")),
-                        value -> values("exchange", value.exchange(), "start_date", value.startDate(),
-                                "end_date", value.endDate())),
-                new ParameterCodec<>(of(enumeration("exchange_id", "SSE", "SZSE", "BSE"), tradeDate),
+                        json -> new ExchangeDateRangeParameters(json.nullableText(DatasetFields.EXCHANGE),
+                                json.nullableText(DatasetFields.START_DATE), json.nullableText(DatasetFields.END_DATE)),
+                        value -> values(DatasetFields.EXCHANGE, value.exchange(), DatasetFields.START_DATE, value.startDate(),
+                                DatasetFields.END_DATE, value.endDate())),
+                new ParameterCodec<>(of(enumeration(DatasetFields.EXCHANGE_ID, TushareConstants.SSE, TushareConstants.SZSE, TushareConstants.BSE), tradeDate),
                         ExchangeTradeDateParameters.class,
-                        json -> new ExchangeTradeDateParameters(json.nullableText("exchange_id"),
-                                json.nullableText("trade_date")),
-                        value -> values("exchange_id", value.exchangeId(), "trade_date", value.tradeDate())),
-                new ParameterCodec<>(of(enumeration("exchange_id", "SSE", "SZSE", "BSE"), start, end),
+                        json -> new ExchangeTradeDateParameters(json.nullableText(DatasetFields.EXCHANGE_ID),
+                                json.nullableText(DatasetFields.TRADE_DATE)),
+                        value -> values(DatasetFields.EXCHANGE_ID, value.exchangeId(), DatasetFields.TRADE_DATE, value.tradeDate())),
+                new ParameterCodec<>(of(enumeration(DatasetFields.EXCHANGE_ID, TushareConstants.SSE, TushareConstants.SZSE, TushareConstants.BSE), start, end),
                         ExchangeIdDateRangeParameters.class,
-                        json -> new ExchangeIdDateRangeParameters(json.nullableText("exchange_id"),
-                                json.nullableText("start_date"), json.nullableText("end_date")),
-                        value -> values("exchange_id", value.exchangeId(), "start_date", value.startDate(),
-                                "end_date", value.endDate())),
+                        json -> new ExchangeIdDateRangeParameters(json.nullableText(DatasetFields.EXCHANGE_ID),
+                                json.nullableText(DatasetFields.START_DATE), json.nullableText(DatasetFields.END_DATE)),
+                        value -> values(DatasetFields.EXCHANGE_ID, value.exchangeId(), DatasetFields.START_DATE, value.startDate(),
+                                DatasetFields.END_DATE, value.endDate())),
                 new ParameterCodec<>(of(tsCode, start, end), TsCodeDateRangeParameters.class,
-                        json -> new TsCodeDateRangeParameters(json.nullableText("ts_code"),
-                                json.nullableText("start_date"), json.nullableText("end_date")),
-                        value -> values("ts_code", value.tsCode(), "start_date", value.startDate(),
-                                "end_date", value.endDate())),
-                new ParameterCodec<>(of(tsCode, enumeration("list_status", "L", "P", "D")), ListStatusParameters.class,
-                        json -> new ListStatusParameters(json.nullableText("ts_code"), json.nullableText("list_status")),
-                        value -> values("ts_code", value.tsCode(), "list_status", value.listStatus())),
+                        json -> new TsCodeDateRangeParameters(json.nullableText(DatasetFields.TS_CODE),
+                                json.nullableText(DatasetFields.START_DATE), json.nullableText(DatasetFields.END_DATE)),
+                        value -> values(DatasetFields.TS_CODE, value.tsCode(), DatasetFields.START_DATE, value.startDate(),
+                                DatasetFields.END_DATE, value.endDate())),
+                new ParameterCodec<>(of(tsCode, enumeration(DatasetFields.LIST_STATUS, "L", "P", "D")), ListStatusParameters.class,
+                        json -> new ListStatusParameters(json.nullableText(DatasetFields.TS_CODE), json.nullableText(DatasetFields.LIST_STATUS)),
+                        value -> values(DatasetFields.TS_CODE, value.tsCode(), DatasetFields.LIST_STATUS, value.listStatus())),
                 new ParameterCodec<>(of(start, end), DateRangeParameters.class,
-                        json -> new DateRangeParameters(json.nullableText("start_date"), json.nullableText("end_date")),
-                        value -> values("start_date", value.startDate(), "end_date", value.endDate())),
+                        json -> new DateRangeParameters(json.nullableText(DatasetFields.START_DATE), json.nullableText(DatasetFields.END_DATE)),
+                        value -> values(DatasetFields.START_DATE, value.startDate(), DatasetFields.END_DATE, value.endDate())),
                 new ParameterCodec<>(of(tsCode, tradeDate), TradeDateParameters.class,
-                        json -> new TradeDateParameters(json.nullableText("ts_code"), json.nullableText("trade_date")),
-                        value -> values("ts_code", value.tsCode(), "trade_date", value.tradeDate())),
+                        json -> new TradeDateParameters(json.nullableText(DatasetFields.TS_CODE), json.nullableText(DatasetFields.TRADE_DATE)),
+                        value -> values(DatasetFields.TS_CODE, value.tsCode(), DatasetFields.TRADE_DATE, value.tradeDate())),
                 new ParameterCodec<>(of(tradeDate), TradeDateOnlyParameters.class,
-                        json -> new TradeDateOnlyParameters(json.nullableText("trade_date")),
-                        value -> values("trade_date", value.tradeDate())),
+                        json -> new TradeDateOnlyParameters(json.nullableText(DatasetFields.TRADE_DATE)),
+                        value -> values(DatasetFields.TRADE_DATE, value.tradeDate())),
                 new ParameterCodec<>(of(tsCode), TsCodeParameters.class,
-                        json -> new TsCodeParameters(json.nullableText("ts_code")),
-                        value -> values("ts_code", value.tsCode())),
+                        json -> new TsCodeParameters(json.nullableText(DatasetFields.TS_CODE)),
+                        value -> values(DatasetFields.TS_CODE, value.tsCode())),
                 new ParameterCodec<>(of(tsCode, annDate), TsCodeAnnDateParameters.class,
-                        json -> new TsCodeAnnDateParameters(json.nullableText("ts_code"), json.nullableText("ann_date")),
-                        value -> values("ts_code", value.tsCode(), "ann_date", value.annDate())),
-                new ParameterCodec<>(of(new ParameterShape.Field("scenario", ENUM, true, "SUCCESS",
-                        Set.of("SUCCESS", "EMPTY", "SOURCE_FAILURE", "TYPE_FAILURE", "PERSISTENCE_FAILURE"),
+                        json -> new TsCodeAnnDateParameters(json.nullableText(DatasetFields.TS_CODE), json.nullableText(DatasetFields.ANN_DATE)),
+                        value -> values(DatasetFields.TS_CODE, value.tsCode(), DatasetFields.ANN_DATE, value.annDate())),
+                new ParameterCodec<>(of(new ParameterShape.Field(SCENARIO, ENUM, true, SUCCESS_SCENARIO,
+                        Set.of(SUCCESS_SCENARIO, "EMPTY", "SOURCE_FAILURE", "TYPE_FAILURE", "PERSISTENCE_FAILURE"),
                         null, null)), ScenarioParameters.class,
-                        json -> new ScenarioParameters(json.nullableText("scenario")),
-                        value -> values("scenario", value.scenario())));
+                        json -> new ScenarioParameters(json.nullableText(SCENARIO)),
+                        value -> values(SCENARIO, value.scenario())));
     }
 
     private static ParameterShape.Field field(String name, ParameterType type) {

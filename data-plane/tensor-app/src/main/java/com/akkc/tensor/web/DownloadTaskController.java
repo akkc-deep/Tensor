@@ -1,5 +1,7 @@
 package com.akkc.tensor.web;
 
+import org.springframework.http.MediaType;
+
 import com.akkc.tensor.core.download.task.*;
 import com.akkc.tensor.observability.DownloadTaskOperationLogger;
 import com.akkc.tensor.observability.DownloadTaskOperationLogger.AcceptanceKind;
@@ -17,7 +19,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping(value = "/api/v1/download-tasks", produces = "application/json")
+@RequestMapping(value = "/api/v1/download-tasks", produces = MediaType.APPLICATION_JSON_VALUE)
 @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
 @DependsOn("downloadTaskCoordinator")
 public final class DownloadTaskController {
@@ -82,7 +84,7 @@ public final class DownloadTaskController {
     }
 
     private ResponseEntity<DownloadTaskReceipt> receipt(DownloadTask task, AcceptanceKind kind, int status, long started) {
-        var requestId = new RequestId(UUID.fromString(Objects.requireNonNull(MDC.get(RequestIdFilter.MDC_KEY), "Request ID is unavailable")));
+        var requestId = new RequestId(UUID.fromString(Objects.requireNonNull(MDC.get(RequestIdFilter.MDC_KEY), WebConstants.REQUEST_ID_UNAVAILABLE)));
         logger.recordAccepted(requestId, task, kind, Duration.ofNanos(System.nanoTime() - started));
         return ResponseEntity.status(status).location(URI.create("/api/v1/download-tasks/" + task.taskId()))
                 .body(DownloadTaskReceipt.from(requestId, task));

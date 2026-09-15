@@ -1,5 +1,8 @@
 package com.akkc.tensor.web.download;
 
+import com.akkc.tensor.plugin.api.constant.RequestFields;
+import com.akkc.tensor.plugin.api.constant.ValidationConstants;
+import com.akkc.tensor.plugin.api.constant.ValidationMessages;
 import com.akkc.tensor.plugin.api.error.ErrorCode;
 import com.akkc.tensor.plugin.api.model.ApiName;
 import com.akkc.tensor.plugin.api.model.DatasetKey;
@@ -28,16 +31,16 @@ public final class DownloadRequestDeserializer extends JsonDeserializer<Download
         String pluginId = input.pluginId();
         String apiName = input.apiName();
         Map<String, Boolean> errors = new TreeMap<>();
-        identifier("pluginId", pluginId, errors);
-        identifier("apiName", apiName, errors);
+        identifier(RequestFields.PLUGIN_ID, pluginId, errors);
+        identifier(RequestFields.API_NAME, apiName, errors);
         if (input.params() == null) {
-            errors.put("params", false);
+            errors.put(RequestFields.PARAMS, false);
         }
         if (!errors.isEmpty()) {
             ErrorCode code = errors.containsValue(true) ? ErrorCode.PARAM_INVALID : ErrorCode.PARAM_REQUIRED;
             List<FieldErrorResponse> fields = errors.entrySet().stream()
                     .map(entry -> new FieldErrorResponse(entry.getKey(),
-                            entry.getValue() ? "has invalid value" : "is required")).toList();
+                            entry.getValue() ? ValidationMessages.INVALID_VALUE : ValidationMessages.REQUIRED)).toList();
             throw new DownloadBindingException(code, fields);
         }
         DatasetKey dataset = DatasetKey.of(PluginId.of(pluginId), ApiName.of(apiName));
@@ -51,7 +54,7 @@ public final class DownloadRequestDeserializer extends JsonDeserializer<Download
     private static void identifier(String name, String value, Map<String, Boolean> errors) {
         if (value == null) {
             errors.put(name, false);
-        } else if (!value.matches("^[a-z][a-z0-9_]{1,63}$")) {
+        } else if (!value.matches(ValidationConstants.IDENTIFIER_REGEX)) {
             errors.put(name, true);
         }
     }

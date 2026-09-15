@@ -1,5 +1,6 @@
 package com.akkc.tensor.plugin.api.descriptor;
 
+import com.akkc.tensor.plugin.api.constant.ValidationMessages;
 import com.akkc.tensor.plugin.api.model.DatasetKey;
 import com.akkc.tensor.plugin.api.model.PluginId;
 import java.util.List;
@@ -42,7 +43,7 @@ public record PluginDescriptor(
     private static void requireNonBlank(String value, String component) {
         Objects.requireNonNull(value, component);
         if (value.isBlank()) {
-            throw new IllegalArgumentException(component + " must not be blank");
+            throw new IllegalArgumentException(component + ValidationMessages.MUST_NOT_BE_BLANK);
         }
     }
 }

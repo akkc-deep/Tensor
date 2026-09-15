@@ -1,5 +1,6 @@
 package com.akkc.tensor.plugin.tushare.client;
 
+import com.akkc.tensor.plugin.api.constant.ValidationMessages;
 import com.akkc.tensor.plugin.api.error.ErrorCode;
 import com.akkc.tensor.plugin.api.error.SourceException;
 import java.net.ConnectException;
@@ -81,7 +82,7 @@ final class TushareErrorClassifier {
             case SOURCE_NETWORK_ERROR -> "Tushare could not be reached";
             case SOURCE_TIMEOUT -> "Tushare response timed out";
             case SOURCE_PAYLOAD_INVALID -> "Tushare returned an invalid payload";
-            default -> throw new IllegalArgumentException("code must identify a source failure");
+            default -> throw new IllegalArgumentException(ValidationMessages.INVALID_SOURCE_FAILURE_CODE);
         };
         return new SourceException(code, message);
     }

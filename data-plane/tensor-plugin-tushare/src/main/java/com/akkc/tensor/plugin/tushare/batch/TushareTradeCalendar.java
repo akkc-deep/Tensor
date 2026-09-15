@@ -1,5 +1,7 @@
 package com.akkc.tensor.plugin.tushare.batch;
 
+import com.akkc.tensor.plugin.api.constant.DatasetFields;
+import com.akkc.tensor.plugin.tushare.TushareConstants;
 import static com.akkc.tensor.plugin.api.error.ErrorCode.*;
 import static com.akkc.tensor.plugin.tushare.batch.TushareBatchPolicies.*;
 
@@ -16,9 +18,9 @@ final class TushareTradeCalendar {
     private TushareTradeCalendar() {}
 
     static List<LocalDate> openDays(DateRange range, String exchange, DownloadEnvelope envelope) {
-        validateEnvelope(new ApiName("trade_cal"), List.of("exchange", "cal_date", "is_open", "pretrade_date"), envelope);
-        if (range == null || exchange == null || !envelope.params().equals(Map.of("exchange", exchange,
-                "start_date", format(range.start()), "end_date", format(range.end())))) throw failure(SOURCE_RANGE_MISMATCH);
+        validateEnvelope(new ApiName(TushareConstants.TRADE_CAL), List.of(DatasetFields.EXCHANGE, DatasetFields.CAL_DATE, DatasetFields.IS_OPEN, "pretrade_date"), envelope);
+        if (range == null || exchange == null || !envelope.params().equals(Map.of(DatasetFields.EXCHANGE, exchange,
+                DatasetFields.START_DATE, format(range.start()), DatasetFields.END_DATE, format(range.end())))) throw failure(SOURCE_RANGE_MISMATCH);
         var days = new TreeMap<LocalDate, Boolean>();
         boolean duplicate = false;
         for (List<Object> row : envelope.data()) {

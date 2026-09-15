@@ -1,5 +1,7 @@
 package com.akkc.tensor.plugin.api.download;
 
+import com.akkc.tensor.plugin.api.constant.ValidationConstants;
+import com.akkc.tensor.plugin.api.constant.ValidationMessages;
 import com.akkc.tensor.plugin.api.dataset.BusinessKeyDefinition;
 import com.akkc.tensor.plugin.api.model.DatasetKey;
 import com.akkc.tensor.plugin.api.model.TableName;
@@ -20,7 +22,7 @@ public record AdaptedBatch(
         List<Map<String, Object>> rows,
         BusinessKeyDefinition businessKeyDefinition,
         Instant ingestedAt) {
-    private static final Pattern IDENTIFIER_PATTERN = Pattern.compile("^[a-z][a-z0-9_]{1,63}$");
+    private static final Pattern IDENTIFIER_PATTERN = Pattern.compile(ValidationConstants.IDENTIFIER_REGEX);
 
     public AdaptedBatch {
         Objects.requireNonNull(datasetKey, "datasetKey");
@@ -31,15 +33,15 @@ public record AdaptedBatch(
         Objects.requireNonNull(ingestedAt, "ingestedAt");
 
         if (!tableName.equals(TableName.from(datasetKey))) {
-            throw new IllegalArgumentException("tableName must match datasetKey");
+            throw new IllegalArgumentException(ValidationMessages.TABLE_NAME_MISMATCH);
         }
 
         columns = List.copyOf(columns);
         if (columns.isEmpty()) {
-            throw new IllegalArgumentException("columns must not be empty");
+            throw new IllegalArgumentException(ValidationMessages.COLUMNS_EMPTY);
         }
         if (columns.size() != new HashSet<>(columns).size()) {
-            throw new IllegalArgumentException("columns must not contain duplicates");
+            throw new IllegalArgumentException(ValidationMessages.DUPLICATE_COLUMNS);
         }
         for (String column : columns) {
             if (!IDENTIFIER_PATTERN.matcher(column).matches()) {

@@ -1,5 +1,7 @@
 package com.akkc.tensor.plugin.api.descriptor;
 
+import com.akkc.tensor.plugin.api.constant.ValidationConstants;
+import com.akkc.tensor.plugin.api.constant.ValidationMessages;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
@@ -16,7 +18,7 @@ public record ParameterDescriptor(
         String pattern,
         String relatedParameter
 ) {
-    private static final Pattern IDENTIFIER_PATTERN = Pattern.compile("^[a-z][a-z0-9_]{1,63}$");
+    private static final Pattern IDENTIFIER_PATTERN = Pattern.compile(ValidationConstants.IDENTIFIER_REGEX);
 
     public ParameterDescriptor {
         requireIdentifier(name, "name");
@@ -27,7 +29,7 @@ public record ParameterDescriptor(
         Objects.requireNonNull(type, "type");
         allowedValues = List.copyOf(Objects.requireNonNull(allowedValues, "allowedValues"));
         if (allowedValues.size() != new HashSet<>(allowedValues).size()) {
-            throw new IllegalArgumentException("allowedValues must not contain duplicates");
+            throw new IllegalArgumentException(ValidationMessages.DUPLICATE_ALLOWED_VALUES);
         }
         if (type == ParameterType.ENUM && allowedValues.isEmpty()) {
             throw new IllegalArgumentException("ENUM parameters require allowedValues");
@@ -55,7 +57,7 @@ public record ParameterDescriptor(
     private static void requireNonBlank(String value, String component) {
         Objects.requireNonNull(value, component);
         if (value.isBlank()) {
-            throw new IllegalArgumentException(component + " must not be blank");
+            throw new IllegalArgumentException(component + ValidationMessages.MUST_NOT_BE_BLANK);
         }
     }
 }

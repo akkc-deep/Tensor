@@ -1,5 +1,8 @@
 package com.akkc.tensor.core.download.task;
 
+import com.akkc.tensor.core.adapter.FingerprintKeyCodec;
+import com.akkc.tensor.plugin.api.constant.RequestFields;
+import com.akkc.tensor.plugin.api.constant.ValidationConstants;
 import com.akkc.tensor.plugin.api.dataset.ColumnDefinition;
 import com.akkc.tensor.plugin.api.dataset.DatasetDefinition;
 import com.akkc.tensor.plugin.api.descriptor.ApiDescriptor;
@@ -31,20 +34,45 @@ import java.util.regex.Pattern;
 
 /** Bounded canonical JSON used by persisted download tasks. */
 public final class DownloadTaskJson {
+    private static final String SCHEMA_VERSION = "schemaVersion";
+    private static final String PARAMETERS = "parameters";
+    static final String START_PARAMETER = "startParameter";
+    static final String END_PARAMETER = "endParameter";
+    private static final String DATE_AXIS = "dateAxis";
+    private static final String DATE_LABEL = "dateLabel";
+    private static final String PLANNING_MODE = "planningMode";
+    private static final String SPLITTABLE = "splittable";
+    private static final String AVAILABILITY = "availability";
+    private static final String UNAVAILABLE_REASON = "unavailableReason";
+    private static final String POLICY_VERSION = "policyVersion";
+    private static final String COMPLETENESS_RULE = "completenessRule";
+    private static final String NAME = "name";
+    private static final String LABEL = "label";
+    private static final String DESCRIPTION = "description";
+    private static final String TYPE = "type";
+    private static final String REQUIRED = "required";
+    private static final String DEFAULT_VALUE = "defaultValue";
+    private static final String ALLOWED_VALUES = "allowedValues";
+    private static final String PATTERN = "pattern";
+    private static final String RELATED_PARAMETER = "relatedParameter";
+    private static final String KIND = "kind";
+    private static final String ROW_LIMIT = "rowLimit";
+    private static final String EVIDENCE = "evidence";
+
     private static final int TASK_BYTES = 8 * 1024;
     private static final int SNAPSHOT_BYTES = 16 * 1024;
     private static final int INPUT_BYTES = 128 * 1024;
-    private static final Pattern PARAMETER_NAME = Pattern.compile("^[a-z][a-z0-9_]{1,63}$");
+    private static final Pattern PARAMETER_NAME = Pattern.compile(ValidationConstants.IDENTIFIER_REGEX);
     private static final Set<String> SECRET_KEYS = Set.of(
             "token", "access_token", "refresh_token", "authorization", "password", "secret", "api_key");
     private static final Set<String> POLICY_FIELDS = Set.of(
-            "schemaVersion", "mode", "parameters", "startParameter", "endParameter", "dateAxis",
-            "dateLabel", "planningMode", "splittable", "availability", "unavailableReason",
-            "policyVersion", "completenessRule");
+            SCHEMA_VERSION, RequestFields.MODE, PARAMETERS, START_PARAMETER, END_PARAMETER, DATE_AXIS,
+            DATE_LABEL, PLANNING_MODE, SPLITTABLE, AVAILABILITY, UNAVAILABLE_REASON,
+            POLICY_VERSION, COMPLETENESS_RULE);
     private static final Set<String> PARAMETER_FIELDS = Set.of(
-            "name", "label", "description", "type", "required", "defaultValue", "allowedValues",
-            "pattern", "relatedParameter");
-    private static final Set<String> RULE_FIELDS = Set.of("kind", "rowLimit", "evidence");
+            NAME, LABEL, DESCRIPTION, TYPE, REQUIRED, DEFAULT_VALUE, ALLOWED_VALUES,
+            PATTERN, RELATED_PARAMETER);
+    private static final Set<String> RULE_FIELDS = Set.of(KIND, ROW_LIMIT, EVIDENCE);
 
     private final ObjectMapper mapper;
 
@@ -78,25 +106,25 @@ public final class DownloadTaskJson {
             if (range != null) {
                 throw invalid();
             }
-            return bounded(canonical(Map.of("schemaVersion", 1, "mode", mode.name())), SNAPSHOT_BYTES);
+            return bounded(canonical(Map.of(SCHEMA_VERSION, 1, RequestFields.MODE, mode.name())), SNAPSHOT_BYTES);
         }
         if (range == null) {
             throw invalid();
         }
         Map<String, Object> value = new LinkedHashMap<>();
-        value.put("schemaVersion", 1);
-        value.put("mode", mode.name());
-        value.put("parameters", range.parameters().stream().map(this::fullParameter).toList());
-        value.put("startParameter", range.startParameter());
-        value.put("endParameter", range.endParameter());
-        value.put("dateAxis", name(range.dateAxis()));
-        value.put("dateLabel", range.dateLabel());
-        value.put("planningMode", name(range.planningMode()));
-        value.put("splittable", range.splittable());
-        value.put("availability", range.availability().name());
-        value.put("unavailableReason", range.unavailableReason());
-        value.put("policyVersion", range.policyVersion());
-        value.put("completenessRule", rule(range.completenessRule()));
+        value.put(SCHEMA_VERSION, 1);
+        value.put(RequestFields.MODE, mode.name());
+        value.put(PARAMETERS, range.parameters().stream().map(this::fullParameter).toList());
+        value.put(START_PARAMETER, range.startParameter());
+        value.put(END_PARAMETER, range.endParameter());
+        value.put(DATE_AXIS, name(range.dateAxis()));
+        value.put(DATE_LABEL, range.dateLabel());
+        value.put(PLANNING_MODE, name(range.planningMode()));
+        value.put(SPLITTABLE, range.splittable());
+        value.put(AVAILABILITY, range.availability().name());
+        value.put(UNAVAILABLE_REASON, range.unavailableReason());
+        value.put(POLICY_VERSION, range.policyVersion());
+        value.put(COMPLETENESS_RULE, rule(range.completenessRule()));
         String result = bounded(canonical(value), SNAPSHOT_BYTES);
         validatePolicySnapshot(result);
         return result;
@@ -113,7 +141,7 @@ public final class DownloadTaskJson {
     BatchDownloadDescriptor readRangePolicy(String json) {
         try {
             ObjectNode root = requireObject(parse(validatePolicySnapshotValue(json)));
-            if (enumValue(root, "mode", DownloadMode.class) != DownloadMode.RANGE) {
+            if (enumValue(root, RequestFields.MODE, DownloadMode.class) != DownloadMode.RANGE) {
                 throw invalid();
             }
             return rangePolicy(root);
@@ -125,8 +153,8 @@ public final class DownloadTaskJson {
     private String validatePolicySnapshotValue(String json) {
         ObjectNode root = requireObject(parse(json));
         rejectUnknown(root, POLICY_FIELDS);
-        requireInt(root, "schemaVersion", 1);
-        DownloadMode mode = enumValue(root, "mode", DownloadMode.class);
+        requireInt(root, SCHEMA_VERSION, 1);
+        DownloadMode mode = enumValue(root, RequestFields.MODE, DownloadMode.class);
         if (mode == DownloadMode.SINGLE) {
             if (root.size() != 2) {
                 throw invalid();
@@ -141,29 +169,29 @@ public final class DownloadTaskJson {
     }
 
     private BatchDownloadDescriptor rangePolicy(ObjectNode root) {
-        List<ParameterDescriptor> parameters = readParameters(requireArray(root, "parameters"));
-        ObjectNode rule = requireObject(root.get("completenessRule"));
+        List<ParameterDescriptor> parameters = readParameters(requireArray(root, PARAMETERS));
+        ObjectNode rule = requireObject(root.get(COMPLETENESS_RULE));
         rejectUnknown(rule, RULE_FIELDS);
         var completeness = new BatchDownloadDescriptor.CompletenessRule(
-                enumValue(rule, "kind", BatchDownloadDescriptor.CompletenessRule.Kind.class),
-                nullableLong(rule, "rowLimit"), nullableText(rule, "evidence"));
-        return new BatchDownloadDescriptor(parameters, nullableText(root, "startParameter"),
-                nullableText(root, "endParameter"),
-                nullableEnumValue(root, "dateAxis", BatchDownloadDescriptor.DateAxis.class),
-                nullableText(root, "dateLabel"),
-                nullableEnumValue(root, "planningMode", BatchDownloadDescriptor.PlanningMode.class),
-                bool(root, "splittable"),
-                enumValue(root, "availability", BatchDownloadDescriptor.Availability.class),
-                nullableText(root, "unavailableReason"), text(root, "policyVersion"), completeness);
+                enumValue(rule, KIND, BatchDownloadDescriptor.CompletenessRule.Kind.class),
+                nullableLong(rule, ROW_LIMIT), nullableText(rule, EVIDENCE));
+        return new BatchDownloadDescriptor(parameters, nullableText(root, START_PARAMETER),
+                nullableText(root, END_PARAMETER),
+                nullableEnumValue(root, DATE_AXIS, BatchDownloadDescriptor.DateAxis.class),
+                nullableText(root, DATE_LABEL),
+                nullableEnumValue(root, PLANNING_MODE, BatchDownloadDescriptor.PlanningMode.class),
+                bool(root, SPLITTABLE),
+                enumValue(root, AVAILABILITY, BatchDownloadDescriptor.Availability.class),
+                nullableText(root, UNAVAILABLE_REASON), text(root, POLICY_VERSION), completeness);
     }
 
     public String requestHash(DatasetKey dataset, DownloadMode mode, Map<String, Object> normalized) {
         if (dataset == null || mode == null) throw invalid();
         Map<String, Object> value = new LinkedHashMap<>();
-        value.put("pluginId", dataset.pluginId().value());
-        value.put("apiName", dataset.apiName().value());
-        value.put("mode", mode.name());
-        value.put("params", validatedParams(normalized));
+        value.put(RequestFields.PLUGIN_ID, dataset.pluginId().value());
+        value.put(RequestFields.API_NAME, dataset.apiName().value());
+        value.put(RequestFields.MODE, mode.name());
+        value.put(RequestFields.PARAMS, validatedParams(normalized));
         return sha256(canonical(value));
     }
 
@@ -180,16 +208,16 @@ public final class DownloadTaskJson {
             throw invalid();
         }
         Map<String, Object> value = new LinkedHashMap<>();
-        value.put("schemaVersion", 1);
-        value.put("datasetKey", Map.of("pluginId", dataset.datasetKey().pluginId().value(),
-                "apiName", dataset.datasetKey().apiName().value()));
+        value.put(SCHEMA_VERSION, 1);
+        value.put("datasetKey", Map.of(RequestFields.PLUGIN_ID, dataset.datasetKey().pluginId().value(),
+                RequestFields.API_NAME, dataset.datasetKey().apiName().value()));
         value.put("tableName", dataset.tableName().value());
-        value.put("mode", mode.name());
+        value.put(RequestFields.MODE, mode.name());
         value.put("queryMode", selectedApi.queryMode().name());
-        value.put("parameters", selectedApi.parameters().stream().map(this::contractParameter).toList());
-        value.put("rangePolicy", range == null ? Map.of("kind", "SINGLE") : rangePolicy(range));
+        value.put(PARAMETERS, selectedApi.parameters().stream().map(this::contractParameter).toList());
+        value.put("rangePolicy", range == null ? Map.of(KIND, DownloadMode.SINGLE.name()) : rangePolicy(range));
         value.put("columns", dataset.columns().stream().map(this::column).toList());
-        value.put("businessKey", Map.of("mode", dataset.businessKey().mode().name(),
+        value.put("businessKey", Map.of(RequestFields.MODE, dataset.businessKey().mode().name(),
                 "fields", dataset.businessKey().fields()));
         return sha256(canonical(value));
     }
@@ -274,60 +302,60 @@ public final class DownloadTaskJson {
 
     private Map<String, Object> fullParameter(ParameterDescriptor p) {
         Map<String, Object> value = new LinkedHashMap<>();
-        value.put("name", p.name());
-        value.put("label", p.label());
-        value.put("description", p.description());
-        value.put("type", p.type().name());
-        value.put("required", p.required());
-        value.put("defaultValue", p.defaultValue());
-        value.put("allowedValues", p.allowedValues().stream().sorted().toList());
-        value.put("pattern", p.pattern());
-        value.put("relatedParameter", p.relatedParameter());
+        value.put(NAME, p.name());
+        value.put(LABEL, p.label());
+        value.put(DESCRIPTION, p.description());
+        value.put(TYPE, p.type().name());
+        value.put(REQUIRED, p.required());
+        value.put(DEFAULT_VALUE, p.defaultValue());
+        value.put(ALLOWED_VALUES, p.allowedValues().stream().sorted().toList());
+        value.put(PATTERN, p.pattern());
+        value.put(RELATED_PARAMETER, p.relatedParameter());
         return value;
     }
 
     private Map<String, Object> contractParameter(ParameterDescriptor p) {
         Map<String, Object> value = new LinkedHashMap<>();
-        value.put("name", p.name());
-        value.put("type", p.type().name());
-        value.put("required", p.required());
-        value.put("defaultValue", p.defaultValue());
-        value.put("allowedValues", p.allowedValues());
-        value.put("pattern", p.pattern());
-        value.put("relatedParameter", p.relatedParameter());
+        value.put(NAME, p.name());
+        value.put(TYPE, p.type().name());
+        value.put(REQUIRED, p.required());
+        value.put(DEFAULT_VALUE, p.defaultValue());
+        value.put(ALLOWED_VALUES, p.allowedValues());
+        value.put(PATTERN, p.pattern());
+        value.put(RELATED_PARAMETER, p.relatedParameter());
         return value;
     }
 
     private Map<String, Object> rangePolicy(BatchDownloadDescriptor range) {
         Map<String, Object> value = new LinkedHashMap<>();
-        value.put("startParameter", range.startParameter());
-        value.put("endParameter", range.endParameter());
-        value.put("dateAxis", name(range.dateAxis()));
-        value.put("planningMode", name(range.planningMode()));
-        value.put("splittable", range.splittable());
-        value.put("policyVersion", range.policyVersion());
-        value.put("completenessRule", rule(range.completenessRule()));
+        value.put(START_PARAMETER, range.startParameter());
+        value.put(END_PARAMETER, range.endParameter());
+        value.put(DATE_AXIS, name(range.dateAxis()));
+        value.put(PLANNING_MODE, name(range.planningMode()));
+        value.put(SPLITTABLE, range.splittable());
+        value.put(POLICY_VERSION, range.policyVersion());
+        value.put(COMPLETENESS_RULE, rule(range.completenessRule()));
         return value;
     }
 
     private Map<String, Object> rule(BatchDownloadDescriptor.CompletenessRule rule) {
         Map<String, Object> value = new LinkedHashMap<>();
-        value.put("kind", rule.kind().name());
-        value.put("rowLimit", rule.rowLimit());
-        value.put("evidence", rule.evidence());
+        value.put(KIND, rule.kind().name());
+        value.put(ROW_LIMIT, rule.rowLimit());
+        value.put(EVIDENCE, rule.evidence());
         return value;
     }
 
     private Map<String, Object> column(ColumnDefinition column) {
         Map<String, Object> value = new LinkedHashMap<>();
-        value.put("name", column.name());
+        value.put(NAME, column.name());
         value.put("logicalType", column.logicalType().name());
         value.put("nullable", column.nullable());
         value.put("displayOrder", column.displayOrder());
         value.put("length", column.length());
         value.put("precision", column.precision());
         value.put("scale", column.scale());
-        value.put("allowedValues", column.allowedValues());
+        value.put(ALLOWED_VALUES, column.allowedValues());
         return value;
     }
 
@@ -339,17 +367,17 @@ public final class DownloadTaskJson {
             if (parameter.size() != PARAMETER_FIELDS.size()) {
                 throw invalid();
             }
-            ArrayNode allowed = requireArray(parameter, "allowedValues");
+            ArrayNode allowed = requireArray(parameter, ALLOWED_VALUES);
             List<String> allowedValues = new ArrayList<>();
             allowed.forEach(item -> {
                 if (!item.isTextual()) throw invalid();
                 allowedValues.add(item.textValue());
             });
             if (!allowedValues.equals(allowedValues.stream().sorted().toList())) throw invalid();
-            result.add(new ParameterDescriptor(text(parameter, "name"), text(parameter, "label"),
-                    nullableText(parameter, "description"), enumValue(parameter, "type", ParameterType.class),
-                    bool(parameter, "required"), nullableText(parameter, "defaultValue"), allowedValues,
-                    nullableText(parameter, "pattern"), nullableText(parameter, "relatedParameter")));
+            result.add(new ParameterDescriptor(text(parameter, NAME), text(parameter, LABEL),
+                    nullableText(parameter, DESCRIPTION), enumValue(parameter, TYPE, ParameterType.class),
+                    bool(parameter, REQUIRED), nullableText(parameter, DEFAULT_VALUE), allowedValues,
+                    nullableText(parameter, PATTERN), nullableText(parameter, RELATED_PARAMETER)));
         });
         return result;
     }
@@ -425,7 +453,7 @@ public final class DownloadTaskJson {
     private static String sha256(String value) {
         try {
             return java.util.HexFormat.of().formatHex(
-                    MessageDigest.getInstance("SHA-256").digest(value.getBytes(StandardCharsets.UTF_8)));
+                    MessageDigest.getInstance(FingerprintKeyCodec.HASH_ALGORITHM).digest(value.getBytes(StandardCharsets.UTF_8)));
         } catch (NoSuchAlgorithmException exception) {
             throw new IllegalStateException(exception);
         }

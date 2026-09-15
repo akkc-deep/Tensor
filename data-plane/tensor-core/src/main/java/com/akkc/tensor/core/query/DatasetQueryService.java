@@ -1,5 +1,6 @@
 package com.akkc.tensor.core.query;
 
+import com.akkc.tensor.plugin.api.constant.ValidationMessages;
 import com.akkc.tensor.core.catalog.DatasetCatalog;
 import com.akkc.tensor.plugin.api.dataset.DatasetDefinition;
 import com.akkc.tensor.plugin.api.error.ErrorCode;
@@ -72,8 +73,8 @@ public final class DatasetQueryService {
         return new QueryAccessException(
                 code,
                 code == ErrorCode.PARAM_INVALID
-                        ? "Query parameters are invalid"
-                        : "Dataset metadata is unavailable");
+                        ? ValidationMessages.QUERY_PARAMETERS_INVALID
+                        : ErrorCode.DATASET_MISCONFIGURED.message());
     }
 
     private static QueryAccessException queryFailure(RuntimeException cause) {

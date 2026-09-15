@@ -1,5 +1,6 @@
 package com.akkc.tensor.core.download.task;
 
+import com.akkc.tensor.plugin.api.constant.ValidationConstants;
 import com.akkc.tensor.core.catalog.DatasetCatalog;
 import com.akkc.tensor.core.registry.AdapterRegistry;
 import com.akkc.tensor.core.registry.PluginRegistry;
@@ -35,7 +36,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 
 /** Local admission and replay validation for durable download tasks. */
 public final class DownloadTaskService {
-    private static final Pattern PARAMETER_NAME = Pattern.compile("^[a-z][a-z0-9_]{1,63}$");
+    private static final Pattern PARAMETER_NAME = Pattern.compile(ValidationConstants.IDENTIFIER_REGEX);
     private static final String RANGE_UNSUPPORTED = "Range download is not supported";
     private static final String INPUT_UNAVAILABLE = "Plugin or dataset is unavailable";
 
@@ -79,7 +80,8 @@ public final class DownloadTaskService {
         }
 
         public static Settings defaults() {
-            return new Settings(true, 100, 36_600);
+            return new Settings(true, DownloadTaskConstants.DEFAULT_MAX_QUEUED_TASKS,
+                    DownloadTaskConstants.DEFAULT_MAX_RANGE_DAYS);
         }
     }
 

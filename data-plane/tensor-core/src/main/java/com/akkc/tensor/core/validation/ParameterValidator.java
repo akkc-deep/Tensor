@@ -1,5 +1,8 @@
 package com.akkc.tensor.core.validation;
 
+import com.akkc.tensor.plugin.api.constant.RequestFields;
+import com.akkc.tensor.plugin.api.constant.ValidationConstants;
+import com.akkc.tensor.plugin.api.constant.ValidationMessages;
 import com.akkc.tensor.plugin.api.descriptor.ApiDescriptor;
 import com.akkc.tensor.plugin.api.descriptor.ParameterDescriptor;
 import com.akkc.tensor.plugin.api.descriptor.ParameterType;
@@ -25,16 +28,16 @@ import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
 public final class ParameterValidator {
-    private static final Pattern PARAMETER_NAME = Pattern.compile("^[a-z][a-z0-9_]{1,63}$");
-    private static final Pattern TS_CODE = Pattern.compile("[A-Z0-9]+\\.[A-Z0-9]+");
-    private static final Pattern DATE_VALUE = Pattern.compile("[0-9]{8}");
-    private static final Pattern MONTH_VALUE = Pattern.compile("[0-9]{6}");
+    private static final Pattern PARAMETER_NAME = Pattern.compile(ValidationConstants.IDENTIFIER_REGEX);
+    private static final Pattern TS_CODE = Pattern.compile(ValidationConstants.TS_CODE_REGEX);
+    private static final Pattern DATE_VALUE = Pattern.compile(ValidationConstants.DATE_REGEX);
+    private static final Pattern MONTH_VALUE = Pattern.compile(ValidationConstants.MONTH_REGEX);
     private static final DateTimeFormatter DATE = new DateTimeFormatterBuilder()
-            .appendPattern("uuuuMMdd")
+            .appendPattern(ValidationConstants.DATE_FORMAT)
             .toFormatter(Locale.ROOT)
             .withResolverStyle(ResolverStyle.STRICT);
     private static final DateTimeFormatter MONTH = new DateTimeFormatterBuilder()
-            .appendPattern("uuuuMM")
+            .appendPattern(ValidationConstants.MONTH_FORMAT)
             .toFormatter(Locale.ROOT)
             .withResolverStyle(ResolverStyle.STRICT);
 
@@ -72,7 +75,7 @@ public final class ParameterValidator {
         List<FieldError> invalidErrors = invalidRawKeys(raw, parameters);
         for (ParameterDescriptor parameter : parameters) {
             if (invalid.contains(parameter.name())) {
-                invalidErrors.add(new FieldError(parameter.name(), "has invalid value"));
+                invalidErrors.add(new FieldError(parameter.name(), ValidationMessages.INVALID_VALUE));
             }
         }
         appendRangeErrors(parameters, normalized, invalidErrors);
@@ -139,7 +142,7 @@ public final class ParameterValidator {
         if (defaultValue != null) {
             normalized.put(parameter.name(), defaultValue);
         } else if (parameter.required()) {
-            requiredErrors.add(new FieldError(parameter.name(), "is required"));
+            requiredErrors.add(new FieldError(parameter.name(), ValidationMessages.REQUIRED));
         }
     }
 
@@ -193,7 +196,7 @@ public final class ParameterValidator {
 
         List<FieldError> errors = new ArrayList<>();
         if (unsafe) {
-            errors.add(new FieldError("params", "contains an invalid field name"));
+            errors.add(new FieldError(RequestFields.PARAMS, "contains an invalid field name"));
         }
         unknown.forEach(key -> errors.add(new FieldError(key, "is not declared")));
         return errors;
@@ -252,8 +255,8 @@ public final class ParameterValidator {
 
         private static String message(ErrorCode code) {
             return code == ErrorCode.PARAM_REQUIRED
-                    ? "Required parameters are missing"
-                    : "Parameters are invalid";
+                    ? ErrorCode.PARAM_REQUIRED.message()
+                    : ErrorCode.PARAM_INVALID.message();
         }
     }
 

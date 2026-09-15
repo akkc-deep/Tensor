@@ -1,5 +1,6 @@
 package com.akkc.tensor.web.dto;
 
+import com.akkc.tensor.plugin.api.constant.ValidationMessages;
 import com.akkc.tensor.plugin.api.download.DownloadOutcome;
 import com.akkc.tensor.plugin.api.download.DownloadResult;
 import java.util.Objects;
@@ -23,7 +24,7 @@ public record DownloadResponse(
             throw new IllegalArgumentException("download response text must not be blank");
         }
         if (sourceRowCount < 0 || insertedRows < 0 || updatedRows < 0) {
-            throw new IllegalArgumentException("row counts must be non-negative");
+            throw new IllegalArgumentException(ValidationMessages.NEGATIVE_ROW_COUNTS);
         }
         if (outcome == DownloadOutcome.EMPTY
                 && (sourceRowCount != 0 || insertedRows != 0 || updatedRows != 0)) {

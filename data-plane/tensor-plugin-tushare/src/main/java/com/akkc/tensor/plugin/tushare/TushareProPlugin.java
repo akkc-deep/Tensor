@@ -46,7 +46,7 @@ public final class TushareProPlugin implements BatchDownloadSupport {
         batches = new TushareBatchPolicies(client, definitions);
         PluginReadiness readiness = properties.readiness();
         descriptor = new PluginDescriptor(
-                PluginId.of("tushare_pro"),
+                PluginId.of(TushareConstants.PLUGIN_ID),
                 "Tushare Pro",
                 "Tushare Pro 证券数据源",
                 readiness.enabled(),

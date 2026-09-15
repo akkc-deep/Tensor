@@ -1,5 +1,6 @@
 package com.akkc.tensor.core.persistence;
 
+import com.akkc.tensor.plugin.api.constant.DatasetFields;
 import com.akkc.tensor.plugin.api.dataset.BusinessKeyMode;
 import com.akkc.tensor.plugin.api.dataset.ColumnDefinition;
 import com.akkc.tensor.plugin.api.dataset.DatasetDefinition;
@@ -20,13 +21,13 @@ public final class UpsertSqlFactory {
         policy.quote(definition.tableName().value());
         keyColumns.forEach(policy::quote);
         if (definition.businessKey().mode() == BusinessKeyMode.FINGERPRINT) {
-            insertColumns.add("business_key");
+            insertColumns.add(DatasetFields.BUSINESS_KEY);
         }
-        insertColumns.addAll(List.of("source_plugin", "source_api", "ingested_at"));
+        insertColumns.addAll(List.of(DatasetFields.SOURCE_PLUGIN, DatasetFields.SOURCE_API, DatasetFields.INGESTED_AT));
 
         List<String> updateColumns = insertColumns.stream()
                 .filter(column -> definition.businessKey().mode() == BusinessKeyMode.FINGERPRINT
-                        ? !column.equals("business_key")
+                        ? !column.equals(DatasetFields.BUSINESS_KEY)
                         : !keyColumns.contains(column))
                 .toList();
         String quotedColumns = insertColumns.stream().map(policy::quote).collect(Collectors.joining(", "));

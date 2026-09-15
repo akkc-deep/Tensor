@@ -1,5 +1,7 @@
 package com.akkc.tensor.core.query;
 
+import com.akkc.tensor.plugin.api.constant.PaginationConstants;
+import com.akkc.tensor.plugin.api.constant.ValidationMessages;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -19,13 +21,13 @@ public record DatasetPage(
         Objects.requireNonNull(columns, "columns");
         Objects.requireNonNull(items, "items");
         if (columns.isEmpty()) {
-            throw new IllegalArgumentException("columns must not be empty");
+            throw new IllegalArgumentException(ValidationMessages.COLUMNS_EMPTY);
         }
         if (columns.stream().anyMatch(Objects::isNull)) {
             throw new NullPointerException("columns must not contain null");
         }
         if (new HashSet<>(columns).size() != columns.size()) {
-            throw new IllegalArgumentException("columns must not contain duplicates");
+            throw new IllegalArgumentException(ValidationMessages.DUPLICATE_COLUMNS);
         }
         if (items.stream().anyMatch(Objects::isNull)) {
             throw new NullPointerException("items must not contain null");
@@ -41,11 +43,11 @@ public record DatasetPage(
         }
         items = List.copyOf(copiedItems);
 
-        if (page < 1) {
-            throw new IllegalArgumentException("page must be at least 1");
+        if (page < PaginationConstants.FIRST_PAGE) {
+            throw new IllegalArgumentException(PaginationConstants.INVALID_PAGE);
         }
-        if (pageSize != 20 && pageSize != 50 && pageSize != 100) {
-            throw new IllegalArgumentException("pageSize must be one of 20, 50, 100");
+        if (!PaginationConstants.PAGE_SIZES.contains(pageSize)) {
+            throw new IllegalArgumentException(PaginationConstants.INVALID_PAGE_SIZE);
         }
         if (totalElements < 0 || totalPages < 0) {
             throw new IllegalArgumentException("totals must be non-negative");
@@ -54,7 +56,7 @@ public record DatasetPage(
         if (totalPages != expectedPages) {
             throw new IllegalArgumentException("totalPages must match totalElements and pageSize");
         }
-        if (totalElements == 0 && (page != 1 || !items.isEmpty())) {
+        if (totalElements == 0 && (page != PaginationConstants.FIRST_PAGE || !items.isEmpty())) {
             throw new IllegalArgumentException("empty pages must use page 1 and no items");
         }
         if (totalElements > 0 && page > totalPages) {

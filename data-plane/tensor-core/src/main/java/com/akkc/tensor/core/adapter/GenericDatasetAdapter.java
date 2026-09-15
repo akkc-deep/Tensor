@@ -1,5 +1,6 @@
 package com.akkc.tensor.core.adapter;
 
+import com.akkc.tensor.plugin.api.constant.DatasetFields;
 import com.akkc.tensor.plugin.api.DatasetAdapter;
 import com.akkc.tensor.plugin.api.dataset.BusinessKeyMode;
 import com.akkc.tensor.plugin.api.dataset.ColumnDefinition;
@@ -19,7 +20,6 @@ import java.util.Objects;
 
 public final class GenericDatasetAdapter implements DatasetAdapter {
     private static final System.Logger LOGGER = System.getLogger(GenericDatasetAdapter.class.getName());
-    private static final String BUSINESS_KEY_COLUMN = "business_key";
 
     private final DatasetDefinition definition;
     private final ValueConverter valueConverter;
@@ -66,7 +66,7 @@ public final class GenericDatasetAdapter implements DatasetAdapter {
         List<String> batchColumns = new ArrayList<>(columns);
         boolean fingerprint = definition.businessKey().mode() == BusinessKeyMode.FINGERPRINT;
         if (fingerprint) {
-            batchColumns.add(BUSINESS_KEY_COLUMN);
+            batchColumns.add(DatasetFields.BUSINESS_KEY);
         }
         LinkedHashMap<Object, Map<String, Object>> uniqueRows = new LinkedHashMap<>();
         List<String> keyFields = definition.businessKey().fields();
@@ -86,7 +86,7 @@ public final class GenericDatasetAdapter implements DatasetAdapter {
             Object key;
             if (fingerprint) {
                 String fingerprintKey = fingerprintKeyCodec.sha256(keyFields, row);
-                row.put(BUSINESS_KEY_COLUMN, fingerprintKey);
+                row.put(DatasetFields.BUSINESS_KEY, fingerprintKey);
                 key = fingerprintKey;
             } else {
                 key = List.copyOf(keyFields.stream().map(row::get).toList());

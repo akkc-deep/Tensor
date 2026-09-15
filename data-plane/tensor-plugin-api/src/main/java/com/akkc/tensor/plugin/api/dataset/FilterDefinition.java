@@ -1,15 +1,17 @@
 package com.akkc.tensor.plugin.api.dataset;
 
+import com.akkc.tensor.plugin.api.constant.ValidationConstants;
+import com.akkc.tensor.plugin.api.constant.ValidationMessages;
 import java.util.Objects;
 import java.util.regex.Pattern;
 
 public record FilterDefinition(String field) {
-    private static final Pattern IDENTIFIER_PATTERN = Pattern.compile("^[a-z][a-z0-9_]{1,63}$");
+    private static final Pattern IDENTIFIER_PATTERN = Pattern.compile(ValidationConstants.IDENTIFIER_REGEX);
 
     public FilterDefinition {
         Objects.requireNonNull(field, "field");
         if (!IDENTIFIER_PATTERN.matcher(field).matches()) {
-            throw new IllegalArgumentException("Invalid field: " + field);
+            throw new IllegalArgumentException(ValidationMessages.INVALID_FIELD_PREFIX + field);
         }
     }
 }

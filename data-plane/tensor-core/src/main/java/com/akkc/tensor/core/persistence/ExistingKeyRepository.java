@@ -1,5 +1,7 @@
 package com.akkc.tensor.core.persistence;
 
+import com.akkc.tensor.plugin.api.constant.ValidationMessages;
+import com.akkc.tensor.plugin.api.constant.DatasetFields;
 import com.akkc.tensor.plugin.api.dataset.BusinessKeyMode;
 import com.akkc.tensor.plugin.api.dataset.ColumnDefinition;
 import com.akkc.tensor.plugin.api.dataset.DatasetDefinition;
@@ -19,7 +21,6 @@ import org.springframework.jdbc.core.JdbcTemplate;
 
 public final class ExistingKeyRepository {
     private static final int MAX_BIND_PARAMETERS = 1000;
-    private static final String FINGERPRINT_COLUMN = "business_key";
 
     private final JdbcTemplate jdbcTemplate;
 
@@ -31,7 +32,7 @@ public final class ExistingKeyRepository {
         Objects.requireNonNull(definition, "definition");
         Objects.requireNonNull(keys, "keys");
         if (keys.stream().anyMatch(Objects::isNull)) {
-            throw new IllegalArgumentException("business keys must not contain null");
+            throw new IllegalArgumentException(ValidationMessages.NULL_BUSINESS_KEY);
         }
         List<BusinessKey> copiedKeys = List.copyOf(keys);
 
@@ -123,7 +124,7 @@ public final class ExistingKeyRepository {
 
     private static List<String> physicalColumnNames(DatasetDefinition definition) {
         if (definition.businessKey().mode() == BusinessKeyMode.FINGERPRINT) {
-            return List.of(FINGERPRINT_COLUMN);
+            return List.of(DatasetFields.BUSINESS_KEY);
         }
         return definition.businessKey().fields();
     }

@@ -1,5 +1,6 @@
 package com.akkc.tensor.web;
 
+import com.akkc.tensor.plugin.api.constant.RequestFields;
 import com.akkc.tensor.plugin.api.model.RequestId;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -19,7 +20,7 @@ import java.util.regex.Pattern;
 @Order(Ordered.HIGHEST_PRECEDENCE)
 public final class RequestIdFilter extends OncePerRequestFilter {
     public static final String HEADER_NAME = "X-Request-Id";
-    public static final String MDC_KEY = "requestId";
+    public static final String MDC_KEY = RequestFields.REQUEST_ID;
 
     private static final Pattern CLIENT_REQUEST_ID = Pattern.compile(
             "[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}");

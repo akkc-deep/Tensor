@@ -1,5 +1,6 @@
 package com.akkc.tensor.observability;
 
+import com.akkc.tensor.plugin.api.constant.RequestFields;
 import com.akkc.tensor.core.download.task.DownloadTask;
 import com.akkc.tensor.core.download.task.DownloadTaskObserver;
 import com.akkc.tensor.plugin.api.error.ErrorCode;
@@ -59,9 +60,9 @@ public final class DownloadTaskOperationLogger implements DownloadTaskObserver {
         Map<String, String> previous = MDC.getCopyOfContextMap();
         try {
             MDC.clear();
-            MDC.put("taskId", taskId.toString());
-            MDC.put("pluginId", key.pluginId().value());
-            MDC.put("apiName", key.apiName().value());
+            MDC.put(RequestFields.TASK_ID, taskId.toString());
+            MDC.put(RequestFields.PLUGIN_ID, key.pluginId().value());
+            MDC.put(RequestFields.API_NAME, key.apiName().value());
             MDC.put("runGeneration", Integer.toString(generation));
             if (batchId != null) MDC.put("batchId", batchId.toString());
             log.run();

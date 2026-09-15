@@ -1,5 +1,8 @@
 package com.akkc.tensor.web;
 
+import com.akkc.tensor.plugin.api.constant.PaginationConstants;
+import com.akkc.tensor.plugin.api.constant.RequestFields;
+import com.akkc.tensor.plugin.api.constant.ValidationMessages;
 import com.akkc.tensor.core.query.DatasetPage;
 import com.akkc.tensor.core.query.DatasetQueryService;
 import com.akkc.tensor.core.query.QueryCriteria;
@@ -28,11 +31,11 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 @RestController
-@RequestMapping("/api/v1/data-sources")
+@RequestMapping(WebConstants.DATA_SOURCES_PATH)
 @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
 public final class DatasetController {
     private static final Set<String> SUPPORTED_PARAMETERS = Set.of(
-            "tsCode", "tradeDateFrom", "tradeDateTo", "annDateFrom", "annDateTo", "page", "pageSize");
+            RequestFields.TS_CODE, RequestFields.TRADE_DATE_FROM, RequestFields.TRADE_DATE_TO, RequestFields.ANN_DATE_FROM, RequestFields.ANN_DATE_TO, RequestFields.PAGE, RequestFields.PAGE_SIZE);
 
     private final DatasetQueryService datasetQueryService;
     private final OperationLogger operationLogger;
@@ -51,17 +54,17 @@ public final class DatasetController {
                 PluginId.of(request.path().pluginId()), ApiName.of(request.path().apiName()));
         String value = MDC.get(RequestIdFilter.MDC_KEY);
         if (value == null) {
-            throw new IllegalStateException("Request ID is unavailable");
+            throw new IllegalStateException(WebConstants.REQUEST_ID_UNAVAILABLE);
         }
         RequestId requestId = new RequestId(UUID.fromString(value));
-        LocalDate tradeDateFrom = date(request.tradeDate().from(), "tradeDateFrom");
-        LocalDate tradeDateTo = date(request.tradeDate().to(), "tradeDateTo");
-        LocalDate annDateFrom = date(request.annDate().from(), "annDateFrom");
-        LocalDate annDateTo = date(request.annDate().to(), "annDateTo");
-        int page = pageNumber(request.pagination().page(), 1, "page");
-        int pageSize = pageNumber(request.pagination().pageSize(), 50, "pageSize");
+        LocalDate tradeDateFrom = date(request.tradeDate().from(), RequestFields.TRADE_DATE_FROM);
+        LocalDate tradeDateTo = date(request.tradeDate().to(), RequestFields.TRADE_DATE_TO);
+        LocalDate annDateFrom = date(request.annDate().from(), RequestFields.ANN_DATE_FROM);
+        LocalDate annDateTo = date(request.annDate().to(), RequestFields.ANN_DATE_TO);
+        int page = pageNumber(request.pagination().page(), PaginationConstants.FIRST_PAGE, RequestFields.PAGE);
+        int pageSize = pageNumber(request.pagination().pageSize(), PaginationConstants.DEFAULT_DATASET_PAGE_SIZE, RequestFields.PAGE_SIZE);
         if (!SUPPORTED_PARAMETERS.containsAll(request.parameterNames())) {
-            throw new IllegalArgumentException("Query parameters are invalid");
+            throw new IllegalArgumentException(ValidationMessages.QUERY_PARAMETERS_INVALID);
         }
         QueryCriteria criteria = new QueryCriteria(
                 request.tsCode(), tradeDateFrom, tradeDateTo, annDateFrom, annDateTo, page, pageSize);

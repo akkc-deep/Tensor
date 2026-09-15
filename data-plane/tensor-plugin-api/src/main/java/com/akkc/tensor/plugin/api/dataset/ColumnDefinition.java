@@ -1,5 +1,7 @@
 package com.akkc.tensor.plugin.api.dataset;
 
+import com.akkc.tensor.plugin.api.constant.ValidationConstants;
+import com.akkc.tensor.plugin.api.constant.ValidationMessages;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
@@ -17,7 +19,7 @@ public record ColumnDefinition(
         List<String> allowedValues,
         boolean longText
 ) {
-    private static final Pattern IDENTIFIER_PATTERN = Pattern.compile("^[a-z][a-z0-9_]{1,63}$");
+    private static final Pattern IDENTIFIER_PATTERN = Pattern.compile(ValidationConstants.IDENTIFIER_REGEX);
 
     public ColumnDefinition {
         Objects.requireNonNull(name, "name");
@@ -49,7 +51,7 @@ public record ColumnDefinition(
         }
         allowedValues = List.copyOf(Objects.requireNonNull(allowedValues, "allowedValues"));
         if (allowedValues.size() != new HashSet<>(allowedValues).size()) {
-            throw new IllegalArgumentException("allowedValues must not contain duplicates");
+            throw new IllegalArgumentException(ValidationMessages.DUPLICATE_ALLOWED_VALUES);
         }
     }
 }

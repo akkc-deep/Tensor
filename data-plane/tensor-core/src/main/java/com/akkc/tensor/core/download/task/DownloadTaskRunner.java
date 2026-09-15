@@ -1,5 +1,7 @@
 package com.akkc.tensor.core.download.task;
 
+import com.akkc.tensor.plugin.api.constant.PaginationConstants;
+import com.akkc.tensor.plugin.api.constant.ValidationConstants;
 import com.akkc.tensor.core.download.task.DownloadTaskRepository.*;
 import com.akkc.tensor.core.download.task.DownloadTaskService.ExecutionDefinition;
 import com.akkc.tensor.plugin.api.BatchDownloadSupport;
@@ -52,7 +54,10 @@ public final class DownloadTaskRunner {
             }
             if (!valid) throw new IllegalArgumentException("Invalid download runner settings");
         }
-        public static Settings defaults() { return new Settings(true, 36600, 10000, 5000, Duration.ofMinutes(30), 1000000); }
+        public static Settings defaults() { return new Settings(true, DownloadTaskConstants.DEFAULT_MAX_RANGE_DAYS,
+                DownloadTaskConstants.DEFAULT_MAX_BATCH_NODES, DownloadTaskConstants.DEFAULT_MAX_REQUESTS_PER_RUN,
+                Duration.ofMinutes(DownloadTaskConstants.DEFAULT_MAX_RUN_DURATION_MINUTES),
+                DownloadTaskConstants.DEFAULT_MAX_SOURCE_ROWS_PER_TASK); }
     }
 
     public enum Disposition { IDLE, FINISHED, NEEDS_RECOVERY, PERMIT_LOST }
@@ -169,7 +174,7 @@ public final class DownloadTaskRunner {
                 policy = json.readRangePolicy(task.policySnapshot());
                 String start = (String) task.params().get(policy.startParameter());
                 String end = (String) task.params().get(policy.endParameter());
-                if (start == null || end == null || !start.matches("[0-9]{8}") || !end.matches("[0-9]{8}"))
+                if (start == null || end == null || !start.matches(ValidationConstants.DATE_REGEX) || !end.matches(ValidationConstants.DATE_REGEX))
                     throw new IllegalArgumentException();
                 requested = new DateRange(LocalDate.parse(start, DateTimeFormatter.BASIC_ISO_DATE),
                         LocalDate.parse(end, DateTimeFormatter.BASIC_ISO_DATE));
@@ -190,7 +195,7 @@ public final class DownloadTaskRunner {
                 validatePlan(planned);
                 for (int i = 0; i < planned.size(); i++) {
                     control();
-                    roots.add(newBatch(source, String.format(Locale.ROOT, "%06d", i + 1), planned.get(i)));
+                    roots.add(newBatch(source, String.format(Locale.ROOT, DownloadTaskConstants.BATCH_KEY_FORMAT, i + 1), planned.get(i)));
                 }
             }
             definition();
@@ -269,8 +274,8 @@ public final class DownloadTaskRunner {
                             && current.range().start().isBefore(current.range().end()), ErrorCode.BATCH_COMPLETENESS_UNCONFIRMED);
                     budget(read(() -> repository.counts(taskId)), 2, 0);
                     List<DateRange> halves = DateRangePlanner.split(current.range());
-                    NewBatch left = newBatch(source, current.batchKey() + "/0", halves.get(0));
-                    NewBatch right = newBatch(source, current.batchKey() + "/1", halves.get(1));
+                    NewBatch left = newBatch(source, current.batchKey() + DownloadTaskConstants.LEFT_BATCH_SUFFIX, halves.get(0));
+                    NewBatch right = newBatch(source, current.batchKey() + DownloadTaskConstants.RIGHT_BATCH_SUFFIX, halves.get(1));
                     definition();
                     control();
                     write(() -> repository.split(permit, current.batchId(), left, right, settings.maxBatchNodes(), clock.instant()));
@@ -336,7 +341,7 @@ public final class DownloadTaskRunner {
             boolean success = saved.planReady() && c.succeeded() == c.totalBatches();
             ErrorCode code = success ? null : stopped;
             if (!success && code == null) {
-                List<DownloadBatch> failed = read(() -> repository.batches(taskId, new BatchFilter(DownloadBatch.Status.FAILED, false), 1, 20)).items();
+                List<DownloadBatch> failed = read(() -> repository.batches(taskId, new BatchFilter(DownloadBatch.Status.FAILED, false), PaginationConstants.FIRST_PAGE, PaginationConstants.DEFAULT_TASK_PAGE_SIZE)).items();
                 code = failed.isEmpty() || failed.getFirst().error() == null ? ErrorCode.INTERNAL_ERROR : failed.getFirst().error().code();
             }
             DownloadTask.Status target = success ? DownloadTask.Status.SUCCEEDED : c.succeeded() > 0

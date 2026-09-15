@@ -1,5 +1,6 @@
 package com.akkc.tensor.web.dto;
 
+import com.akkc.tensor.plugin.api.constant.DatasetFields;
 import com.akkc.tensor.plugin.api.dataset.ColumnDefinition;
 import com.akkc.tensor.plugin.api.dataset.DatasetDefinition;
 import com.akkc.tensor.plugin.api.dataset.FilterDefinition;
@@ -103,8 +104,8 @@ public record DatasetDefinitionResponse(
         public static FilterResponse from(FilterDefinition definition) {
             Objects.requireNonNull(definition, "definition");
             return switch (definition.field()) {
-                case "ts_code" -> new FilterResponse("ts_code", "EQ", "TEXT");
-                case "trade_date", "ann_date" ->
+                case DatasetFields.TS_CODE -> new FilterResponse(DatasetFields.TS_CODE, "EQ", "TEXT");
+                case DatasetFields.TRADE_DATE, DatasetFields.ANN_DATE ->
                     new FilterResponse(definition.field(), "BETWEEN", "DATE_RANGE");
                 default -> throw new IllegalArgumentException("Unsupported dataset filter");
             };
