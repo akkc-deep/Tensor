@@ -90,7 +90,7 @@ public final class BatchCommitService {
 
     private static final class CommitException extends TensorException {
         private CommitException(ErrorCode code) {
-            super(code, new DownloadTaskRepository.StoredError(code).message());
+            super(code, code.message());
         }
     }
 }

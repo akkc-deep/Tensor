@@ -51,10 +51,10 @@ class OperationLoggerTest {
     private static final RequestId REQUEST = new RequestId(UUID.fromString(REQUEST_ID));
     private static final DownloadResult DOWNLOAD_SUCCESS = new DownloadResult(
             REQUEST, DownloadOutcome.SUCCESS, KNOWN.pluginId(), KNOWN.apiName(),
-            5, 2, 3, "下载成功");
+            5, 2, 3);
     private static final DownloadResult DOWNLOAD_EMPTY = new DownloadResult(
             REQUEST, DownloadOutcome.EMPTY, KNOWN.pluginId(), KNOWN.apiName(),
-            0, 0, 0, "下载成功，0 条数据");
+            0, 0, 0);
     private static final QueryCriteria CRITERIA = new QueryCriteria(
             "000001.SZ", LocalDate.of(2026, 8, 7), null,
             null, LocalDate.of(2026, 8, 8), 9, 20);

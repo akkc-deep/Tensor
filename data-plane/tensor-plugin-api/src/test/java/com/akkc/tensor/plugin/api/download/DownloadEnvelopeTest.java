@@ -30,10 +30,10 @@ class DownloadEnvelopeTest {
                 DownloadStatus.class, String.class);
         assertThat(componentNames(DownloadResult.class)).containsExactly(
                 "requestId", "outcome", "pluginId", "apiName", "sourceRowCount",
-                "insertedRows", "updatedRows", "message");
+                "insertedRows", "updatedRows");
         assertThat(componentTypes(DownloadResult.class)).containsExactly(
                 RequestId.class, DownloadOutcome.class, PluginId.class, ApiName.class,
-                long.class, long.class, long.class, String.class);
+                long.class, long.class, long.class);
     }
 
     @Test
@@ -165,45 +165,43 @@ class DownloadEnvelopeTest {
     @Test
     void validatesSuccessAndEmptyDownloadResults() {
         DownloadResult success = new DownloadResult(
-                requestId(), DownloadOutcome.SUCCESS, pluginId(), apiName(), 3, 1, 1, "downloaded");
+                requestId(), DownloadOutcome.SUCCESS, pluginId(), apiName(), 3, 1, 1);
         DownloadResult empty = new DownloadResult(
-                requestId(), DownloadOutcome.EMPTY, pluginId(), apiName(), 0, 0, 0, "no data");
+                requestId(), DownloadOutcome.EMPTY, pluginId(), apiName(), 0, 0, 0);
 
         assertThat(success.sourceRowCount()).isEqualTo(3);
         assertThat(success.insertedRows()).isEqualTo(1);
         assertThat(success.updatedRows()).isEqualTo(1);
+        assertThat(success.message()).isEqualTo("下载成功");
         assertThat(empty.outcome()).isEqualTo(DownloadOutcome.EMPTY);
+        assertThat(empty.message()).isEqualTo("下载成功，0 条数据");
 
         assertThatIllegalArgumentException().isThrownBy(
-                () -> result(DownloadOutcome.SUCCESS, 0, 0, 0, "downloaded"));
+                () -> result(DownloadOutcome.SUCCESS, 0, 0, 0));
         assertThatIllegalArgumentException().isThrownBy(
-                () -> result(DownloadOutcome.EMPTY, 1, 0, 0, "no data"));
+                () -> result(DownloadOutcome.EMPTY, 1, 0, 0));
         assertThatIllegalArgumentException().isThrownBy(
-                () -> result(DownloadOutcome.EMPTY, 0, 1, 0, "no data"));
+                () -> result(DownloadOutcome.EMPTY, 0, 1, 0));
         assertThatIllegalArgumentException().isThrownBy(
-                () -> result(DownloadOutcome.EMPTY, 0, 0, 1, "no data"));
+                () -> result(DownloadOutcome.EMPTY, 0, 0, 1));
         assertThatIllegalArgumentException().isThrownBy(
-                () -> result(DownloadOutcome.SUCCESS, -1, 0, 0, "downloaded"));
+                () -> result(DownloadOutcome.SUCCESS, -1, 0, 0));
         assertThatIllegalArgumentException().isThrownBy(
-                () -> result(DownloadOutcome.SUCCESS, 1, -1, 0, "downloaded"));
+                () -> result(DownloadOutcome.SUCCESS, 1, -1, 0));
         assertThatIllegalArgumentException().isThrownBy(
-                () -> result(DownloadOutcome.SUCCESS, 1, 0, -1, "downloaded"));
-        assertThatIllegalArgumentException().isThrownBy(
-                () -> result(DownloadOutcome.SUCCESS, 1, 0, 0, " "));
+                () -> result(DownloadOutcome.SUCCESS, 1, 0, -1));
     }
 
     @Test
     void rejectsNullDownloadResultComponents() {
         assertThatNullPointerException().isThrownBy(() -> new DownloadResult(
-                null, DownloadOutcome.EMPTY, pluginId(), apiName(), 0, 0, 0, "no data"));
+                null, DownloadOutcome.EMPTY, pluginId(), apiName(), 0, 0, 0));
         assertThatNullPointerException().isThrownBy(() -> new DownloadResult(
-                requestId(), null, pluginId(), apiName(), 0, 0, 0, "no data"));
+                requestId(), null, pluginId(), apiName(), 0, 0, 0));
         assertThatNullPointerException().isThrownBy(() -> new DownloadResult(
-                requestId(), DownloadOutcome.EMPTY, null, apiName(), 0, 0, 0, "no data"));
+                requestId(), DownloadOutcome.EMPTY, null, apiName(), 0, 0, 0));
         assertThatNullPointerException().isThrownBy(() -> new DownloadResult(
-                requestId(), DownloadOutcome.EMPTY, pluginId(), null, 0, 0, 0, "no data"));
-        assertThatNullPointerException().isThrownBy(() -> new DownloadResult(
-                requestId(), DownloadOutcome.EMPTY, pluginId(), apiName(), 0, 0, 0, null));
+                requestId(), DownloadOutcome.EMPTY, pluginId(), null, 0, 0, 0));
     }
 
     private static DownloadEnvelope successEnvelope(List<String> fields, int rowCount, List<List<Object>> data) {
@@ -218,9 +216,9 @@ class DownloadEnvelopeTest {
     }
 
     private static DownloadResult result(
-            DownloadOutcome outcome, long sourceRows, long insertedRows, long updatedRows, String message) {
+            DownloadOutcome outcome, long sourceRows, long insertedRows, long updatedRows) {
         return new DownloadResult(
-                requestId(), outcome, pluginId(), apiName(), sourceRows, insertedRows, updatedRows, message);
+                requestId(), outcome, pluginId(), apiName(), sourceRows, insertedRows, updatedRows);
     }
 
     private static List<String> dailyFields() {

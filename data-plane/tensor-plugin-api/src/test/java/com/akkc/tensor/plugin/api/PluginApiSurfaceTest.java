@@ -115,7 +115,7 @@ class PluginApiSurfaceTest {
         assertThat(ErrorCode.class.getDeclaredMethod("retryable").getReturnType())
                 .isEqualTo(boolean.class);
         assertThat(publicDeclaredMethodNames(ErrorCode.class))
-                .containsExactlyInAnyOrder("retryable", "valueOf", "values");
+                .containsExactlyInAnyOrder("message", "retryable", "valueOf", "values");
     }
 
     @Test
