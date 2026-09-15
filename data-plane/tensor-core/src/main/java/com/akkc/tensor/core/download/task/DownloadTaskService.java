@@ -459,7 +459,7 @@ public final class DownloadTaskService {
 
     static final class TaskException extends TensorException {
         TaskException(ErrorCode code) {
-            super(code, new DownloadTaskRepository.StoredError(code).message());
+            super(code, code.message());
         }
     }
 }

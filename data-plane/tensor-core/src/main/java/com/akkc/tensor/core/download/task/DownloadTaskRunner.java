@@ -388,7 +388,7 @@ public final class DownloadTaskRunner {
     private static final class Halt extends TensorException {
         private final Disposition disposition;
         Halt(Disposition disposition, ErrorCode code) {
-            super(code, new StoredError(code).message());
+            super(code, code.message());
             this.disposition = disposition;
         }
     }

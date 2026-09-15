@@ -87,8 +87,7 @@ public final class DownloadService {
         }
         if (envelope.rowCount() == 0) {
             return new DownloadResult(
-                    requestId, DownloadOutcome.EMPTY, pluginId, apiName, 0, 0, 0,
-                    "下载成功，0 条数据");
+                    requestId, DownloadOutcome.EMPTY, pluginId, apiName, 0, 0, 0);
         }
 
         AdaptedBatch batch = adapter.adapt(envelope, clock.instant());
@@ -105,8 +104,7 @@ public final class DownloadService {
                 apiName,
                 envelope.rowCount(),
                 counts.insertedRows(),
-                counts.updatedRows(),
-                "下载成功");
+                counts.updatedRows());
     }
 
     private PluginDescriptor descriptor(PluginId pluginId) {

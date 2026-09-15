@@ -212,11 +212,9 @@ class DownloadControllerIT {
 
         RequestId requestId = requestId();
         DownloadResponse empty = DownloadResponse.from(new DownloadResult(
-                requestId, DownloadOutcome.EMPTY, PLUGIN_ID, API_NAME, 0, 0, 0,
-                "下载成功，0 条数据"));
+                requestId, DownloadOutcome.EMPTY, PLUGIN_ID, API_NAME, 0, 0, 0));
         DownloadResponse success = DownloadResponse.from(new DownloadResult(
-                requestId, DownloadOutcome.SUCCESS, PLUGIN_ID, API_NAME, 1, 1, 0,
-                "下载成功"));
+                requestId, DownloadOutcome.SUCCESS, PLUGIN_ID, API_NAME, 1, 1, 0));
         assertThat(Arrays.stream(DownloadResponse.class.getRecordComponents())
                 .map(component -> component.getName()))
                 .containsExactly("requestId", "outcome", "pluginId", "apiName", "sourceRowCount",

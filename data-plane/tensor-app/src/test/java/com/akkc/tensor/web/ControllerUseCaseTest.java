@@ -27,6 +27,8 @@ import com.akkc.tensor.web.dto.DatasetRecordsRequest;
 import com.akkc.tensor.web.dto.DatasetRecordsRequest.DateRange;
 import com.akkc.tensor.web.dto.DatasetRecordsRequest.Pagination;
 import com.akkc.tensor.web.dto.DownloadRequest;
+import com.akkc.tensor.web.dto.DownloadResponse;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.util.List;
@@ -37,6 +39,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.ArgumentCaptor;
 import org.slf4j.MDC;
@@ -106,7 +109,7 @@ class ControllerUseCaseTest {
         Map<String, Object> raw = Map.of("trade_date", "20260907");
         when(parameters.toRawValues(request.params(), request.suppliedFields())).thenReturn(raw);
         DownloadResult result = new DownloadResult(REQUEST_ID, DownloadOutcome.SUCCESS,
-                KEY.pluginId(), KEY.apiName(), 3, 2, 1, "下载成功");
+                KEY.pluginId(), KEY.apiName(), 3, 2, 1);
         when(downloads.execute(KEY.pluginId(), KEY.apiName(), raw, REQUEST_ID)).thenReturn(result);
 
         var response = new DownloadController(downloads, operations, parameters).download(request);
@@ -119,6 +122,27 @@ class ControllerUseCaseTest {
         ArgumentCaptor<Duration> duration = ArgumentCaptor.forClass(Duration.class);
         verify(operations).recordDownloadSuccess(eq(REQUEST_ID), eq(KEY), eq(raw), eq(result), duration.capture());
         assertThat(duration.getValue().isNegative()).isFalse();
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+            "SUCCESS, 3, 2, 1, 下载成功",
+            "EMPTY, 0, 0, 0, 下载成功，0 条数据"
+    })
+    void preservesDownloadResponseJsonWithDerivedMessages(
+            DownloadOutcome outcome, long sourceRows, long insertedRows, long updatedRows, String message)
+            throws Exception {
+        var response = DownloadResponse.from(new DownloadResult(
+                REQUEST_ID, outcome, KEY.pluginId(), KEY.apiName(), sourceRows, insertedRows, updatedRows));
+        var mapper = new ObjectMapper();
+        String serialized = mapper.writeValueAsString(response);
+
+        assertThat(mapper.readTree(serialized)).isEqualTo(mapper.readTree("""
+                {"requestId":"c52bce3d-5aa5-4c8e-ae64-e73cb76d8f33","outcome":"%s",
+                 "pluginId":"fixture","apiName":"records","sourceRowCount":%d,
+                 "insertedRows":%d,"updatedRows":%d,"message":"%s"}
+                """.formatted(outcome, sourceRows, insertedRows, updatedRows, message)));
+        assertThat(mapper.readValue(serialized, DownloadResponse.class)).isEqualTo(response);
     }
 
     @ParameterizedTest

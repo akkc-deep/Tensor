@@ -124,7 +124,7 @@ public final class GlobalExceptionHandler {
         HttpStatus status = status(code);
         log(status, requestId, code, exception);
         return ResponseEntity.status(status).body(new ApiErrorResponse(
-                requestId, code, message(code), code.retryable(), fields));
+                requestId, code, code.message(), code.retryable(), fields));
     }
 
     private static void log(
@@ -169,37 +169,6 @@ public final class GlobalExceptionHandler {
                     SOURCE_NETWORK_ERROR,
                     SOURCE_PAYLOAD_INVALID, SOURCE_RANGE_MISMATCH -> HttpStatus.BAD_GATEWAY;
             case SOURCE_TIMEOUT -> HttpStatus.GATEWAY_TIMEOUT;
-        };
-    }
-
-    private static String message(ErrorCode code) {
-        return switch (code) {
-            case PARAM_REQUIRED -> "Required parameters are missing";
-            case PARAM_INVALID -> "Parameters are invalid";
-            case PLUGIN_DISABLED -> "Plugin is unavailable";
-            case DATASET_MISCONFIGURED -> "Dataset metadata is unavailable";
-            case SOURCE_AUTH_FAILED -> "Source authentication failed";
-            case SOURCE_PERMISSION_DENIED -> "Source permission denied";
-            case SOURCE_RATE_LIMITED -> "Source rate limit exceeded";
-            case SOURCE_UNAVAILABLE -> "Source is unavailable";
-            case SOURCE_NETWORK_ERROR -> "Source network request failed";
-            case SOURCE_TIMEOUT -> "Source request timed out";
-            case SOURCE_PAYLOAD_INVALID -> "Source returned an invalid payload";
-            case ADAPTER_FIELD_MISSING -> "Source data is missing a required field";
-            case ADAPTER_TYPE_INVALID -> "Source data contains an invalid value";
-            case PERSISTENCE_FAILED -> "Persistence failed";
-            case QUERY_FAILED -> "Query failed";
-            case INTERNAL_ERROR -> "Internal server error";
-            case TASK_NOT_FOUND -> "Download task was not found";
-            case SUBMISSION_CONFLICT -> "Submission ID belongs to a different request";
-            case TASK_STATE_CONFLICT -> "Download task state has changed";
-            case TASK_DEFINITION_CHANGED -> "Download task definition has changed";
-            case BATCH_DOWNLOAD_UNAVAILABLE -> "Batch download is unavailable";
-            case TASK_QUEUE_FULL -> "Download task queue is full";
-            case BATCH_COMPLETENESS_UNCONFIRMED -> "Batch completeness is unconfirmed";
-            case SOURCE_RANGE_MISMATCH -> "Source data is outside the requested range";
-            case TASK_LIMIT_EXCEEDED -> "Download task limit exceeded";
-            case EXECUTION_INTERRUPTED -> "Download task execution was interrupted";
         };
     }
 }
