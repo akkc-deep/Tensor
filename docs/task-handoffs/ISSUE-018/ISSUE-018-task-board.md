@@ -1,5 +1,13 @@
 # ISSUE-018 Project Task Board
 
+## 2026-09-15最终收尾
+
+2026-09-15最终验收完成：六门禁1401/524/1134/1137/15/138和独立终审通过，当前30个RANGE接口/251项纳入、四接口27项明确排除、40接口SINGLE保持。T14/T13、017/018、026及032均已按证据收尾；033仍NOT_STARTED。详见[最终报告](../../verification/ISSUE-032-range-final-closure.md)。下文早期“未开始/阻塞/母任务未关闭”均为保留的阶段记录，当前状态以任务表及最新收尾证据为准。
+
+## 2026-09-15当前范围决定
+
+按[用户明确决定](../../issues/proposals/ISSUE-026-range-scope.md)，四接口本次RANGE排除，30接口/251项纳入，原27项问题与历史保留；ISSUE-031按修订范围完成，用户要求不开始032。下文原34/278全量范围受此限定；本看板各任务状态保持，母任务仍待最终验收，不因范围调整自动完成。
+
 ## Project
 
 - **Project ID:** `ISSUE-018`。
@@ -40,8 +48,8 @@
 | 10 | ISSUE-018-T10 | 前端模式表单、任务提交与近期列表 | COMPLETED | ISSUE-018-T09 | docs/task-designs/ISSUE-018-T10-design.md | docs/task-handoffs/ISSUE-018/ISSUE-018-T10-handoff.md |
 | 11 | ISSUE-018-T11 | 任务详情、轮询与手动操作 | COMPLETED | ISSUE-018-T09, ISSUE-018-T10 | docs/task-designs/ISSUE-018-T11-design.md | docs/task-handoffs/ISSUE-018/ISSUE-018-T11-handoff.md |
 | 12 | ISSUE-018-T12 | 跨模块故障验证、浏览器闭环与交付门禁 | COMPLETED | ISSUE-018-T08, ISSUE-018-T09, ISSUE-018-T11 | docs/task-designs/ISSUE-018-T12-design.md | docs/task-handoffs/ISSUE-018/ISSUE-018-T12-handoff.md |
-| 13 | ISSUE-018-T13 | 真实接口完整性验收与逐项开放 | BLOCKED | ISSUE-018-T06, ISSUE-018-T12 | docs/task-designs/ISSUE-018-T13-design.md | docs/task-handoffs/ISSUE-018/ISSUE-018-T13-handoff.md |
-| 14 | ISSUE-018-T14 | 剩余真实验收、完整性补证与逐项开放 | BLOCKED | ISSUE-018-T13, ISSUE-018-T06, ISSUE-018-T12 | docs/task-designs/ISSUE-018-T14-design.md | docs/task-handoffs/ISSUE-018/ISSUE-018-T14-handoff.md |
+| 13 | ISSUE-018-T13 | 真实接口完整性验收与逐项开放 | COMPLETED | ISSUE-018-T06, ISSUE-018-T12 | docs/task-designs/ISSUE-018-T13-design.md | docs/task-handoffs/ISSUE-018/ISSUE-018-T13-handoff.md |
+| 14 | ISSUE-018-T14 | 剩余真实验收、完整性补证与逐项开放 | COMPLETED | ISSUE-018-T13, ISSUE-018-T06, ISSUE-018-T12 | docs/task-designs/ISSUE-018-T14-design.md | docs/task-handoffs/ISSUE-018/ISSUE-018-T14-handoff.md |
 
 ## Task Details
 
@@ -248,6 +256,12 @@
 
 ### ISSUE-018-T13
 
+- **最终收尾状态证据（2026-09-15）：** 本任务六项Acceptance、总体§6八条及017/018关闭条件逐条事实成立，详见最终报告对应表；30/4/6、251/27、SINGLE归属与历史保全明确，六门禁1401/524/1134/1137/15/138和审查通过。已消费T14完成结果；只完成原验收收尾，不重复实施。 记录IN_PROGRESS → COMPLETED；[完整验收](../../verification/ISSUE-032-range-final-closure.md)。
+
+- **最终收尾状态证据（2026-09-15）：** 用户“完成issue32”包含本次母合同收尾；按原设计仅以同批实际证据进行最终验收，不重复74 SINGLE或251 RANGE。 记录READY → IN_PROGRESS；[完整验收](../../verification/ISSUE-032-range-final-closure.md)。
+
+- **最终收尾状态证据（2026-09-15）：** 已全文消费专属设计及历史pause；019～025采用决定、031的251项清洁TASK/SQL、74 SINGLE及四接口范围决定解除本次剩余缺口，032最终门禁和独立审查完成；原失败/空/未执行保留，不重启旧来源任务。 记录BLOCKED → READY；[完整验收](../../verification/ISSUE-032-range-final-closure.md)。
+
 - **Goal:** 为每个拟开放 RANGE 接口取得真实语义与完整提取依据，形成 40 项最终处理清单及母 issue 关闭证据。
 - **Scope:** 按 §5.3 使用已授权账户开展真实 API 验收，补齐待验证依据；核对日期轴、边界、股票 / 交易所、历史可用范围与业务键计数，按证据更新策略版本 / 验证标记及对应测试。记录 34 项 RANGE 目标和 6 项仅 SINGLE 的逐项结论，关联 ISSUE-017 的 fina_mainbz 未完成项；不自行缩减范围、不凭样例猜上限、不增加类型 / VIP / 新供应商。
 - **Acceptance:** 每个开放接口有请求条件、预期覆盖、官方或可核验完整性依据、真实批次数 / 成败空批数、source / insert / update 计数及复查结果。至少覆盖 daily 多日重叠、income 公告区间、fina_indicator 报告期、repurchase 非股票、top_list 交易日、dividend 非交易日公告、disclosure_date 最新公告、trade_cal 完整日历 / 全休市范围；受控满额拆分证据与真实语义证据分别列明。11 项缺失依据未解决前保持 NEEDS_VERIFICATION，少量样例或宽窄区间暂时一致不足以开放；BJ / BSE、标停两项历史范围及 fina_mainbz 默认 type 均有明确处理依据。能力门禁更新后相关回归通过；所有纳入项满足详细设计 §6 与母 issue 关闭条件后才记录完成、更新 issue 状态。仍有待验证项时保留未完成事实；范围排除须引用已有明确决定，不能由看板自行认定。
@@ -277,6 +291,12 @@
 - **Transfer evidence:** 2026-09-13 用户明确要求将当前剩余工作新建为 T14。原六项 Remaining Work 全部转入 Order14 专属设计与交接；本项保持 BLOCKED、既有 Handoff 路径及原 Acceptance，不将转交冒充解除或完成。旧记录中的“不创建T14”仅是当时事实，已由本次明确指令替代。剩余实现、真实取证和暂停恢复在 T14 执行，本项待 T14 完整结果后只做最终验收收尾。
 
 ### ISSUE-018-T14
+
+- **最终收尾状态证据（2026-09-15）：** 本任务六项Acceptance、总体§6八条及017/018关闭条件逐条事实成立，详见最终报告对应表；30/4/6、251/27、SINGLE归属与历史保全明确，六门禁1401/524/1134/1137/15/138和审查通过。先完成T14，T13随后核对同批结果。 记录IN_PROGRESS → COMPLETED；[完整验收](../../verification/ISSUE-032-range-final-closure.md)。
+
+- **最终收尾状态证据（2026-09-15）：** 用户“完成issue32”包含本次母合同收尾；按原设计仅以同批实际证据进行最终验收，不重复74 SINGLE或251 RANGE。 记录READY → IN_PROGRESS；[完整验收](../../verification/ISSUE-032-range-final-closure.md)。
+
+- **最终收尾状态证据（2026-09-15）：** 已全文消费专属设计及历史pause；019～025采用决定、031的251项清洁TASK/SQL、74 SINGLE及四接口范围决定解除本次剩余缺口，032最终门禁和独立审查完成；原失败/空/未执行保留，不重启旧来源任务。 记录BLOCKED → READY；[完整验收](../../verification/ISSUE-032-range-final-closure.md)。
 
 - **Goal:** 完成 T13 尚未完成的全部真实验收、完整性补证和逐项开放，为 40 项结果及母 issue 关闭条件提供有效证据。
 - **Scope:** 完整迁移未提交成果并隔离源码 / 新空库；优先 daily_basic、stk_limit、moneyflow、margin_detail 新固定 SOURCE；完整 34 股票各两只 + 6 原方式的 SINGLE / SQL；11 UNKNOWN、3 含糊合同、特殊 / 历史样本、BJ / BSE、monthly、fina_mainbz 调查；逐项策略 / 版本与 RANGE / SQL；回归、运行说明、最终审查及验收。复用已审查工具，保留 40 项范围、旧失败和已成功任务，不增加范围排除或自动重试。

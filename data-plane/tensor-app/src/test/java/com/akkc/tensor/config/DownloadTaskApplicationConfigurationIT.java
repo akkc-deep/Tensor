@@ -136,8 +136,8 @@ class DownloadTaskApplicationConfigurationIT {
             List<Availability> ranges = definitions.stream().map(DatasetDefinition.class::cast)
                     .peek(definition -> assertThat(context.getBean(DatasetCatalog.class).find(definition.datasetKey())).isPresent())
                     .map(definition -> tasks.capabilities(definition.datasetKey()).range().availability()).toList();
-            assertThat(ranges.stream().filter(value -> value == Availability.AVAILABLE)).hasSize(34);
-            assertThat(ranges.stream().filter(value -> value == Availability.NEEDS_VERIFICATION)).isEmpty();
+            assertThat(ranges.stream().filter(value -> value == Availability.AVAILABLE)).hasSize(30);
+            assertThat(ranges.stream().filter(value -> value == Availability.NEEDS_VERIFICATION)).hasSize(4);
             assertThat(ranges.stream().filter(value -> value == Availability.UNSUPPORTED)).hasSize(6);
             TushareProperties tushare = context.getBean(TushareProperties.class);
             assertThat(tushare.minRequestInterval()).isEqualTo(Duration.ofMillis(1500));

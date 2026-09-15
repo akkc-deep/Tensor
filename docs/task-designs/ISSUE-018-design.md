@@ -1,5 +1,13 @@
 # ISSUE-018：日期区间批量下载详细设计
 
+## 2026-09-15最终验收结果
+
+本次批准范围已完成最终验收与状态收尾，详见[逐条结果](../verification/ISSUE-032-range-final-closure.md)。六门禁1401/524/1134/1137/15/138、111证据测试与独立终审通过；30个RANGE/251项纳入、四接口27项排除，SINGLE保持。032先完成，T14→T13→017/018→026随后完成；033未开始。下文旧阶段数字和不启动032的决定保留为历史，不作为当前未完成状态；原合同按明确范围决定解释。
+
+## 2026-09-15本次RANGE范围限定
+
+按[用户明确决定](../issues/proposals/ISSUE-026-range-scope.md)，本次排除balancesheet/cashflow/repurchase/fina_indicator的区间批量下载，目标为30个RANGE接口、251项TASK；原34/278记录按30纳入/4排除、251通过/27排除核对。此限定适用于§6及母任务关闭要求，其余SINGLE、日期/股票/键、失败、兼容和最终门禁要求保持；032不启动，母任务不关闭。
+
 状态：详细设计待复核，尚未实施（2026-09-11）。依据：[已确认的方案草稿](../issues/proposals/ISSUE-018-date-range-batch-downloads.md)、[40 项官网调研](../issues/problems/ISSUE-018-date-range-batch-downloads.md)。源码基线：`452832ed17d484f4f4b4af310546242c604d5f8d`；分支：`feat/download-by-date-range`。
 
 本文将已确认方向落实为接口和实现约束。文中新增类型、表、配置及测试均是待实施产物；官网未明确的完整性规则列为发布前待验证项，不以设计完成代替实测。

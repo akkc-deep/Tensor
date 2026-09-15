@@ -6,61 +6,74 @@ pause
 
 ## Task Link
 
-- **Task board:** [ISSUE-026/ISSUE-026-task-board.md](ISSUE-026/ISSUE-026-task-board.md)。
-- **Task ID:** ISSUE-031，Order5。
-- **Transition:** IN_PROGRESS -> BLOCKED。
-- **Design document:** [ISSUE-031-design.md](../task-designs/ISSUE-031-design.md)。
+- **Task board:** `docs/task-handoffs/ISSUE-026/ISSUE-026-task-board.md`。
+- **Task ID:** ISSUE-031。
+- **Transition:** IN_PROGRESS -> BLOCKED
 
 ## Current State
 
-2026-09-15用户要求“完成issue31”后按固定计划实测：limits28、mainbz16、calendar38均PASS，dates首项FAILED / ADAPTER_TYPE_INVALID，另34项及后六轮161项NOT_RUN。合计82 PASS / 1 FAILED / 195 NOT_RUN，没有重试或换样本。mainbz真实19个SPLIT父、35成功叶和1115原键，calendar交易所/日期/股票归属证据成立。
+2026-09-15后续最终验收：032已完成六门禁及母任务收尾，见[最终报告](../verification/ISSUE-032-range-final-closure.md)。本交接保留031当时交付状态；以下未启动032及母任务未关闭的记录不再代表当前执行状态，033继续未开始。
 
-四轮真实运行使用ISSUE-030冻结副本`/private/tmp/issue030-work-20260914T025010Z`及v2包，原身份前后保持；前三轮exit0、第四轮exit1，四轮cleanup PASS。正式索引追加至30轮943case1081请求，前26轮逐对象保持；正式10 AVAILABLE / 24 NEEDS_VERIFICATION / 6 SINGLE_ONLY。fina_indicator现已撤回为v3 / NEEDS_VERIFICATION；当前候选能力33 AVAILABLE / 1 NEEDS_VERIFICATION / 6 UNSUPPORTED。撤回不表示适配根因已修复。尚不满足278项验收，ISSUE-032不准备、不启动，母任务不关闭。
+2026-09-15后续范围决定已解除本次范围阻塞：用户明确排除balancesheet/cashflow/repurchase/fina_indicator的RANGE批量下载，并要求不开始032，见[决定](../issues/proposals/ISSUE-026-range-scope.md)。当前目标为251项，原27项保留问题且不计PASS。范围收尾及离线核对已完成，权威看板已记录ISSUE-031 COMPLETED；见[本次验收](../verification/ISSUE-031-range-live-task-verification.md#2026-09-15四接口排除与issue-031收尾)。本文件继续作为历史pause入口，以下272项阻塞、Remaining Work、Resume Task、Start Here及Blocker均为决定前快照；不再授权执行四接口修复/诊断或自动推进032，当前状态以权威看板为准。
 
-原入口交接对应ISSUE-030 → ISSUE-031的READY准备事实仍见看板准备证据及[ISSUE-030验收](../verification/ISSUE-030-range-candidate-policies.md)；本文件更新为当前阻塞交接。
+2026-09-15，用户已要求“财务指标先跳过，记录一个issue，再处理其他数据源”。ISSUE-033已登记并加入Git，状态NOT_STARTED；fina_indicator的6项原1 FAILED/5 NOT_RUN和v3撤回保留，本次未调用。当前ISSUE-031目标272项，已清洁接受251项，另3 FAILED/18 NOT_RUN分属balancesheet8、cashflow8、repurchase5；其他固定任务和最后4接口回归均已完成、审查及归档。三个接口未获准另行递延。
+
+唯一索引45轮/1217case/1362来源请求，另三个有界诊断各1请求单列。正式30 AVAILABLE/4 NEEDS_VERIFICATION/6 SINGLE_ONLY，运行能力30 AVAILABLE/4 NEEDS_VERIFICATION/6 UNSUPPORTED；四失败接口保持v3撤回，40接口SINGLE保持。所有历史失败/空/未执行、成功数据和各自冻结包身份保留。ISSUE-031不具备完成条件，ISSUE-032/033未启动，母任务未关闭。
+
+三个诊断均确认此次响应的KEY_CONFLICT，字段转换失败0。balancesheet只观察到total_share/update_flag差异，版本优先级未定。cashflow观察6行/4原键组/2冲突组，两个冲突组各有一个标记1的不同完整行，官方doc44注明1最新；尚未决定采用该版本。repurchase观察852行/15冲突组/17次不同内容比较，原ts_code,ann_date,proc键下差异仅end_date/vol/amount/high_limit/low_limit，记录身份规则未定。诊断不是TASK验收；cashflow/repurchase规范SQL前后null保持。
 
 ## Changed Files
 
-- `data-plane/tensor-plugin-tushare/src/main/java/com/akkc/tensor/plugin/tushare/batch/TushareBatchPolicies.java`：仅撤回fina_indicator候选并递增v3；原字段/业务键/内部阈值及SINGLE不变。
-- `data-plane/tensor-plugin-tushare/src/test/java/com/akkc/tensor/plugin/tushare/batch/TushareBatchPoliciesTest.java`：当前准入矩阵；受控保留阈值/日期轴/规划测试。
-- `data-plane/tensor-app/src/test/java/com/akkc/tensor/web/TushareBatchAvailabilityTest.java`：原失败参数拒绝提交、零入队/零上游，以及33候选/40 SINGLE。
-- `control-plane/e2e/ui-redesign.fixtures.js`：v3撤回能力的独立浏览器预期。
-- `control-plane/e2e/tushare-range-evidence.test.js`：实际部分结果、历史保持及重复TASK ID拒绝；保留SOURCE-only不能开放负例。
-- `docs/verification/ISSUE-031-range-live-task-verification.md`：新建并已加入Git，逐轮证据、失败与恢复条件。
-- `docs/verification/ISSUE-018-range-acceptance.json`、同名`.md`及`ISSUE-018-T14-runs.md`：追加四轮真实事实，保留旧run，更新当前接口处置。
-- `docs/verification/ISSUE-030-range-candidate-policies.md`：仅补旧runs SHA的排序序列化表达式，原hash及历史事实保持。
-- `docs/issues/problems/ISSUE-031-range-live-task-verification.md`、`docs/issues/README.md`、`docs/task-handoffs/README.md`及权威子看板：阻塞状态。
-- `docs/runbook/configuration.md`、`docs/runbook/first-run.md`：区分当前候选能力与已完成真实验收，说明fina_indicator撤回。
+- `data-plane/tensor-plugin-tushare/src/main/java/com/akkc/tensor/plugin/tushare/batch/TushareBatchPolicies.java`：四失败接口v3撤回，原参数/键/字段/精度/SINGLE保持。
+- `data-plane/tensor-plugin-tushare/src/test/java/com/akkc/tensor/plugin/tushare/batch/TushareBatchPoliciesTest.java`：撤回预期与原日期/非股票保留回归。
+- `data-plane/tensor-app/src/test/java/com/akkc/tensor/web/TushareBatchAvailabilityTest.java`：四接口原失败参数的提交前拒绝，回购无ts_code。
+- `control-plane/e2e/ui-redesign.fixtures.js`：独立能力矩阵同步。
+- `control-plane/e2e/tushare-live.spec.js`：RESPONSE_ONLY文案及先保全真实FAILED，严格成功校验保持。
+- `control-plane/e2e/tushare-range-evidence.test.js`：111项阶段/精确补验映射/历史与nullSQL保全检查。
+- `docs/verification/ISSUE-018-range-acceptance.json`：45轮真实索引及正式30/4/6；三个冲突与财务指标缺口保留。
+- `docs/verification/ISSUE-018-range-acceptance.md`：逐接口当前结论。
+- `docs/verification/ISSUE-018-T14-runs.md`、`docs/verification/ISSUE-031-range-live-task-verification.md`：预登记、实际运行/SQL、诊断及最终核对。
+- `docs/issues/problems/ISSUE-033-fina-indicator-adaptation.md`：递延财务指标的范围、失败事实与恢复要求。
+- `docs/issues/problems/ISSUE-031-range-live-task-verification.md`、`docs/issues/problems/ISSUE-026-range-task-final-acceptance.md`、`docs/issues/README.md`：当前目标与状态索引。
+- `docs/task-designs/ISSUE-031-design.md`、`docs/task-designs/ISSUE-026-design.md`：已批准财务指标递延及失败后的独立续验/有界定位合同。
+- `docs/task-handoffs/ISSUE-026/ISSUE-026-task-board.md`、`docs/task-handoffs/ISSUE-031-handoff.md`、`docs/task-handoffs/README.md`：本次阻塞交接与状态。
+- `docs/runbook/configuration.md`、`docs/runbook/first-run.md`：30/4/6能力、251/272验收与四接口撤回。
 
 ## Verification
 
-- 三个定向Java类155/155通过：`mvn -o -f data-plane/pom.xml -pl tensor-app -am -Dtest=TushareBatchAvailabilityTest,TushareBatchPoliciesTest,TushareBatchDownloadTest -Dsurefire.failIfNoSpecifiedTests=false test`，exit0，失败/错误/跳过0。新提交拒绝测试先观察AVAILABLE错误RED，再GREEN。安全日志`/private/tmp/issue031-control/withdrawal-red.log`及`withdrawal-green.log`。
-- `node --test control-plane/e2e/tushare-range-evidence.test.js`：104/104 PASS，exit0。
-- 四轮真实浏览器/SQL/日志/清理结果及构建身份见[完整验收](../verification/ISSUE-031-range-live-task-verification.md)；失败只读SQL记录`/private/tmp/issue026-range-dates-20260914T181447Z/sql-supplement.json`。
-- 新隔离`mvn -o -f data-plane/pom.xml -Pacceptance verify` exit0：后端/两包1134、前端524全部通过，0失败/错误/跳过；准确两包身份见同一验收文档。metadata浏览器40/40 PASS、exit0、零任务提交/零上游、JVM/容器/临时秘密清理通过；原v2实测不能归于新v3包。
+- `/private/tmp/issue031-repurchase-20260914T211953Z/data-plane/tensor-app/target/frontend/node/node --test control-plane/e2e/tushare-range-evidence.test.js`：111/111 PASS，exit0、0跳过；最终日志`/private/tmp/issue031-repurchase-control/final-stage-final.log`。
+- 同一Node执行`/private/tmp/issue031-repurchase-control/final-audit.mjs`：PASS，272精确参数/日期/包绑定、251/3/18、45轮、30/4/6、原26轮摘要和42轮基线保全、新三轮安全输出/输入/身份/清理均核对；报告`final-audit.json`，索引SHA `1a83add3b0288d2823c1f2bf1d862bc279ac0b8c59cd0ab912c1a2a1c2321558`。
+- `git diff --check`、`git diff --cached --check`：exit0；`git ls-files --others --exclude-standard`无输出，ISSUE-033已暂存。
+- 已供给的完整离线`mvn -o -f data-plane/pom.xml -Pacceptance verify`结果：冻结副本`/private/tmp/issue031-repurchase-20260914T211953Z`，1137后端/打包（66 suites）、524前端通过，失败/错误/跳过0；定向158通过。该包metadata4/4通过、零任务/上游/records，清理完成；不是旧包metadata40/受控页面15。
+- 冻结898文件snapshot `258b7df2a635a9cd3f53f7aaf6abb9257a55ab2551549269551bf09602da3b9b`，生产JAR `4d4f1e3985c10aca803a0ca4d8d1a535e2637909b0f68192c977d193c40735be`，验收JAR `5ecb993e13d6c1340013eb48ca87ea4a91782906dd06bd51f2108b7b51c1bfd5`。`post-live-source-audit.json`确认快照/两包稳定，422相关文件仅最终证据测试变化，运行/合同源码与真实包匹配。
+- 所有实际轮次与诊断已独立审查；最后holders8+8/regression4各exit0/cleanup PASS，凭据已移除，成功schema保留。两个holder样本均未观察同股东同报告期多公告日，不能以每期超过10行替代该场景。
+
+- 最终文档/索引/阶段测试/状态增量独立审查无阻断问题；已修正看板陈旧278范围与首次执行动作，以及四接口回归“开放”措辞。
 
 ## Remaining Work
 
-查明并修复fina_indicator适配失败；现有证据不足以区分转换失败与冲突原键。失败项需经明确恢复合同补验，另195固定TASK待执行，包含dates辅助日历、两次disclosure更新、全部RESPONSE_ONLY及四旧接口回归。保持原SOURCE/params/dateAxis；新执行不能复用已有TASK caseId，需明确新run/case映射、预算、新空schema和冻结构建。之后仍须逐轮SQL/日志/清理与独立审查，全部满足后才能完成31并准备32。
+1. 确定balancesheet/cashflow/repurchase的冲突版本保留或记录身份规则；不任意取末行、扩键、四舍五入或丢弃冲突内容。
+2. 若继续修复，按确认后的接口专属规则最小实现、定向回归并冻结新版本/两包，以新run/case和显式原SOURCE/参数映射在新schema补验21项；原失败/未执行历史保留。
+3. 只有当前目标全部成立后，才能完成ISSUE-031并按既定流程准备ISSUE-032。财务指标6项仍由ISSUE-033解决，母任务原完整关闭条件保持。
 
 ## Resume Task
 
-恢复ISSUE-031：取得278项真实TASK及全部代表场景证据，按正式合同完成验收，不以当前82PASS替代总目标。
+恢复ISSUE-031：完成当前272项固定区间任务的真实TASK/SQL验收，保留独立递延至ISSUE-033的6项及全部历史证据。
 
 ## Start Here
 
-1. [专属设计](../task-designs/ISSUE-031-design.md)及本交接、权威看板当前状态。
-2. [完整验收](../verification/ISSUE-031-range-live-task-verification.md)、[唯一索引](../verification/ISSUE-018-range-acceptance.json)、[运行登记](../verification/ISSUE-018-T14-runs.md)。
-3. `/private/tmp/issue031-control/ten-round-plan.json`（278固定项与276 SOURCE身份）、四轮私有安全产物、失败SQL与旧v2冻结副本。
-4. 当前撤回源码及`/private/tmp/issue031-control/withdrawal/`的新包身份/离线结果。
+1. `docs/task-handoffs/ISSUE-026/ISSUE-026-task-board.md`中的ISSUE-031行与状态证据。
+2. 完整阅读`docs/task-designs/ISSUE-031-design.md`。
+3. `docs/verification/ISSUE-031-range-live-task-verification.md`的当前结果、三接口诊断与最终离线核对，再读唯一JSON及T14登记。
+4. `/private/tmp/issue031-repurchase-control/`的final-audit.json、case-build-bindings.json和最终272项计划；原准备status字段是历史快照，以audit/唯一索引为准。三个诊断目录为`/private/tmp/issue031-balancesheet-diagnostic`、`/private/tmp/issue031-cashflow-diagnostic`和`/private/tmp/issue031-repurchase-diagnostic`。
 
-第一动作：从授权保留的失败载荷或脱敏复现样本获得安全适配分支证据；若没有样本，先形成原参数、仅诊断、不写业务表、不自动重试的明确取证方案并取得恢复授权。不得直接重跑TASK/SOURCE试运气。
+第一动作：依据已归档的诊断，确认三个接口可执行的冲突保留/身份规则，或取得用户对另行递延及范围变更的明确决定；记录解决证据后才进行BLOCKED -> READY，再单独开始实施。现金流量表可以讨论仅采用唯一最新版本、零/多最新仍失败的方案，但目前未决定，不能据此修改生产适配。三个诊断均已执行，不重复请求。
 
 ## Blocker
 
-- **Reason:** TASK `506ba45f-ed85-483e-91ac-a132e183a6a1` / case `issue026-issue022-indicator-000001-whole` / params `{"ts_code":"000001.SZ","start_date":"20250331","end_date":"20251231"}`实际FAILED，ADAPTER_TYPE_INVALID、1请求/1尝试、SQL0→0；现有安全日志丢失适配分支，sourceRows0不证明空响应。
-- **Resolution condition:** 可验证的安全诊断或脱敏样本区分字段转换与冲突键，并据此定向修复、受控验证、明确新版本/冻结身份和补验run/case/SOURCE映射及预算/新空schema；有明确恢复证据后才BLOCKED → READY。没有证据不放宽精度、字段或业务键。
+- **Reason:** 21项依赖的原业务键对同一响应中不同内容不能唯一确定；版本保留/记录身份合同未解决。缺少的是数据语义决定，不是Token、构建或沙箱权限。只批准财务指标递延，未批准其他三个接口递延。
+- **Resolution condition:** 三接口的冲突处理规则有明确可执行的决定及相应设计，或用户明确批准其他接口的递延和验收范围调整；恢复时逐接口保留未解决范围，不推定全部解除。
 
 ## Risks
 
-保留四个schema、全部历史数据和原v2包；本轮临时client.cnf/environment.json均已删除。十一项RESPONSE_ONLY不保证完整，候选AVAILABLE不等同正式验收。禁止自动重试、换日期、复用ID或运行旧候选writer重置现有索引。现有大量前序暂存/未暂存成果保留，没有提交、推送或发布。
+RESPONSE_ONLY只保证采集返回记录，不保证上游完整。cashflow标记规则不能推广到其他接口；诊断未保存原失败payload，不声称逐值复现。旧包/数据库/原始安全证据不可覆盖；临时目录可能丢失，缺失身份须重新准备，不能臆造结果。此次续办未commit/push；先前要求的一次远程提交已由f563bd9完成。

@@ -1,5 +1,13 @@
 # ISSUE-018 Follow-up Issues Task Board
 
+## 2026-09-15最终收尾
+
+2026-09-15最终验收完成：六门禁1401/524/1134/1137/15/138和独立终审通过，当前30个RANGE接口/251项纳入、四接口27项明确排除、40接口SINGLE保持。T14/T13、017/018、026及032均已按证据收尾；033仍NOT_STARTED。详见[最终报告](../../verification/ISSUE-032-range-final-closure.md)。下文早期“未开始/阻塞/母任务未关闭”均为保留的阶段记录，当前状态以任务表及最新收尾证据为准。
+
+## 2026-09-15当前范围决定
+
+按[用户明确决定](../../issues/proposals/ISSUE-026-range-scope.md)，四接口本次RANGE排除，30接口/251项纳入，原27项问题与历史保留；ISSUE-031按修订范围完成，用户要求不开始032。下文原34/278全量范围受此限定；本看板各任务状态保持，母任务仍待最终验收，不因范围调整自动完成。
+
 ## Project
 
 - **Project ID:** `ISSUE-018-followups`。
@@ -28,7 +36,7 @@
 | 5 | ISSUE-023 | 补齐稀疏事件与记录修订证据 | COMPLETED | None | [设计](../../task-designs/ISSUE-023-design.md) | None |
 | 6 | ISSUE-024 | 验证转融资与转融券历史范围 | COMPLETED | None | [设计](../../task-designs/ISSUE-024-design.md) | None |
 | 7 | ISSUE-025 | 明确十一接口响应采集合同与来源 | COMPLETED | None | [设计](../../task-designs/ISSUE-025-design.md) | None |
-| 8 | ISSUE-026 | 完成剩余区间任务验收与 T14 收尾 | IN_PROGRESS | ISSUE-019, ISSUE-020, ISSUE-021, ISSUE-022, ISSUE-023, ISSUE-024, ISSUE-025 | [设计](../../task-designs/ISSUE-026-design.md) | [交接](../ISSUE-026-handoff.md) |
+| 8 | ISSUE-026 | 完成剩余区间任务验收与 T14 收尾 | COMPLETED | ISSUE-019, ISSUE-020, ISSUE-021, ISSUE-022, ISSUE-023, ISSUE-024, ISSUE-025 | [设计](../../task-designs/ISSUE-026-design.md) | [交接](../ISSUE-026-handoff.md) |
 
 ## Task Details
 
@@ -140,6 +148,8 @@
 - **完成证据（2026-09-14）：** 用户明确“可以接受不完整”，采用[方案A](../../issues/proposals/ISSUE-025-extraction-contracts.md#决策记录)，已完成精确合同及T13/T14/总体设计/母issue限定修订。决定后Node78/78、87项Markdown重建绑定与UNKNOWN拒绝、全部25轮822case886请求和其他29接口保持核对通过；独立复审修正任期字段后无剩余阻断。三项验收实际成立，记录`IN_PROGRESS → COMPLETED`；[最终验收](../../verification/ISSUE-018-T14-runs.md#issue-025-方案a确认与最终验收2026-09-14)。生产和版本保持，未新增真实TASK/SQL，母issue不关闭。
 
 ### ISSUE-026
+
+- **最终收尾状态证据（2026-09-15）：** 027～032均完成；本次251纳入/27排除与30/4/6、74 SINGLE保持，六门禁1401/524/1134/1137/15/138和独立终审/清理PASS。T14、T13已合法收尾，017/018关闭条件已逐条确认并记录已解决，共享设计五项Acceptance成立；033后续问题保持未开始。 记录IN_PROGRESS → COMPLETED；[完整验收](../../verification/ISSUE-032-range-final-closure.md)。
 
 - **子任务进展（2026-09-14）：** ISSUE-027已交付后端RESPONSE_ONLY、runner匹配及只读持久摘要，287项后端/包与468项前端检查及独立审查通过；见[验收记录](../../verification/ISSUE-027-response-only-backend.md)。母任务尚余028～032，保持IN_PROGRESS，真实索引与生产准入不变。
 

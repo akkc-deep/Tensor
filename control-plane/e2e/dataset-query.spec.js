@@ -1248,6 +1248,8 @@ async function assertNoSelectedOption(combobox) {
 async function chooseTushareDownload(page, api) {
   await selectOption(page, '数据源', 'Tushare Pro')
   await selectOption(page, '数据接口', DATASETS[api].option)
+  await page.getByRole('radiogroup', { name: '下载模式', exact: true }).getByText('单次请求', { exact: true }).click()
+  await expect(page.getByRole('radio', { name: '单次请求', exact: true })).toBeChecked()
 }
 
 function definitionResponse(response, api) {

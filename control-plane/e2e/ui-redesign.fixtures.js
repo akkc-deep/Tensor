@@ -379,7 +379,7 @@ export function rangeCapability(apiName) {
         + `；https://tushare.pro/document/2?doc_id=${document}`,
     }
   }
-  const withdrawn = apiName === 'fina_indicator'
+  const withdrawn = ['fina_indicator', 'balancesheet', 'cashflow', 'repurchase'].includes(apiName)
   if (withdrawn) common.completenessRule = { kind: 'UNKNOWN', rowLimit: null, evidence: null }
   return { ...common, ...metadata, availability: withdrawn ? 'NEEDS_VERIFICATION' : 'AVAILABLE',
     policyVersion: withdrawn ? 'tushare-range-v3' : 'tushare-range-v2',

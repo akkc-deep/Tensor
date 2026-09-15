@@ -1,4 +1,88 @@
-# ISSUE-031：278项真实区间任务与SQL验收
+# ISSUE-031：真实区间任务与SQL验收（原278项，当前251项）
+
+## 2026-09-15四接口排除决定
+
+用户已明确本次不支持balancesheet、cashflow、repurchase、fina_indicator的RANGE批量下载，且不开始ISSUE-032，详见[范围决定](../issues/proposals/ISSUE-026-range-scope.md)。本设计的当前验收目标调整为其余30个RANGE接口的251项，原27项为用户明确排除，保持4 FAILED/23 NOT_RUN及全部历史。下文278/272项、仅财务指标递延及三接口阻塞均为旧阶段合同；本节限定替代这些范围要求。
+
+Acceptance 1改为251项固定任务逐项有原参数/准确SOURCE、实际页面/批次/SQL、清洁运行及各自包身份；Acceptance 2的mainbz、disclosure、日期/重叠/历史/BJ要求保持；Acceptance 3的本次RESPONSE_ONLY集合为原十一项减去balancesheet/cashflow/repurchase的八项，四排除接口保留问题；Acceptance 4核对历史保全、相关回归及既有独立运行审查后仅收尾本项。按用户要求不准备或启动032、不执行其六门禁、不关闭母任务。范围记录、JSON处置及阶段断言更新属于本项收尾，不新增真实请求或生产改动。
+
+
+## 2026-09-15用户批准的续办范围
+
+用户明确“财务指标先跳过，记录一个issue，再处理其他数据源”。此项新指令优先于下文原278项全量执行要求：fina_indicator的6项固定TASK移交[ISSUE-033](../issues/problems/ISSUE-033-fina-indicator-adaptation.md)，保留1 FAILED/5 NOT_RUN及v3撤回，当前不执行额外SOURCE诊断。ISSUE-031当前验收目标为其余33接口的272项（已通过82，待执行190）；交付时分别报告272项结果与6项递延，不把递延记为PASS或缩减母任务原完整关闭条件。
+
+- 当前dates续轮排除fina_indicator，剩29项/5 API；因这29个原TASK caseId已登记NOT_RUN，新ID固定为`issue031-resume-<原完整TASK caseId>`，参数/日期轴/准确SOURCE及相对顺序不变，新runId/新空schema。旧dates失败轮35项完整保留。原未登记的后六轮161项保持旧ID。
+- 后续仍按dates29/events37/history33/response-trade24/response-announcement42/response-holders-repurchase21/regression4依次执行。新计划和29条映射冻结在`/private/tmp/issue031-resume-control/`，每轮仍先登记、精确绑定、检查身份、5000请求/30分钟、间隔至少2000ms、零自动重试。
+- 使用已完整验证的撤回构建`/private/tmp/issue031-withdrawal-20260914T182807Z`：897文件snapshot `632a8308f20b33908542f2cb65e821a0a3037a3abba78194ae95dbda54e064cf`；生产JAR `ff30109702e240d34782618f62ab9efed4bdd977e8a691f322d05f6806838bb5`，验收JAR `6522cbbd6d02decf91136bc47766de59ec55e369b84fd3e9d00390bd47e5d7f1`。422相关源码/合同与当前已提交f563bd9的工作字节一致；旧四轮仍归原v2构建，新结果单独登记。
+- 正式接口的当前cases引用仅在新对应TASK实际通过、SQL/清理/审查合格后，移除被替代的旧NOT_RUN引用并加入新结果；原run/case对象始终保留。该映射不适用于原FAILED的fina_indicator，不改变其NEEDS_VERIFICATION/v3。
+- 新失败仍立即停止本轮、保全及按合同撤回；用户本次仅指定跳过fina_indicator，不能推定其他失败接口也获准跳过。ISSUE-033缺口仍阻止声称全部34 RANGE和母任务完整关闭。
+
+## 2026-09-15验收脚本文案修正与续验
+
+response-trade原轮 `issue031-range-response-trade-20260914T193118Z` 在首项adj_factor后停止：后端TASK/批次SUCCEEDED，1请求、source4/insert4/update0；harness在通用成功文案断言处失败，原验收case为EVIDENCE_MISSING，另23项NOT_RUN。补充只读SQL证实4个原键，未补造缺少的AFTER records/连续SQL验收。原run、原schema和冻结包保留。
+
+已定位为harness硬编码“已成功”与既有RESPONSE_ONLY页面“返回记录已采集/本次请求未返回记录”冲突；这是验收工具缺陷，没有后端候选失败证据，故不撤回adj_factor或递增业务策略版本。只修正该断言，保留完整性提示和全部后续检查；先以实际submitDownload函数的非空/空RESPONSE_ONLY、严格RANGE和SINGLE回归观察RED→GREEN，再完整离线构建并冻结新源码/两包。受影响UI合同由已有受控浏览器再核对，无新增财务指标诊断。
+
+新控制目录 `/private/tmp/issue031-harnessfix-control/` 承接尚未合格的91项。response-trade24固定新TASK ID为 `issue031-statusfix-<原完整TASK caseId>`，原参数/日期轴/完整SOURCE及顺序保持；后续announcement42/holders21/regression4原ID保持。固定新runId、新空schema、原预算/零自动重试及逐轮审查条件不变。这是已定位工具修复后的明确补验，不是未变条件下的自动重试。旧trade24和旧dates29当前引用只在对应新项全部通过后按显式映射替代；历史run/case不改。原adj_factor EVIDENCE_MISSING可移出当前引用，原fina_indicator FAILED不适用。
+
+逐case构建身份表必须分别保留原82项v2包、续办99项撤回包和本次修复后91项新包，不能把旧结果归于新包。新的真实失败仍停止保全，不推定其他数据源也可跳过。当前目标仍272项加递延ISSUE-033的6项。
+
+## 2026-09-15资产负债表失败保全与有界定位
+
+公告日期轮 `issue031-statusfix-range-response-announcement-20260914T195234Z` 实际8 PASS观察/1 FAILED/33 NOT_RUN、exit1；8项income尚不能计入清洁验收或开放接口，当前清洁通过205/272。balancesheet首项真实TASK和批次均为FAILED/ADAPTER_TYPE_INVALID，1请求/1尝试，SQL0→0；持久sourceRows0是成功适配计数，不证明来源为空。原始safe-results因成功专用校验先抛错而记EVIDENCE_MISSING，保留原件，仅依据taskObservations及只读SQL对规范索引补记真实失败；旧run/case不改。balancesheet候选与正式条目撤回至v3/NEEDS_VERIFICATION，SINGLE保持可用。
+
+下一步属于已发生适配缺陷的必要定位：以原失败包和原参数对balancesheet做至多一次只读调用，区分转换错误与原业务键冲突。它单独登记为诊断，不重验或覆盖已合格SOURCE，不计TASK/PASS，也不开放接口。该限定调整基于用户“处理其他数据源”的既有修复范围；用户仅递延fina_indicator，不能据此递延balancesheet。没有收到额外的用户诊断批准，不把可选偏好问题的等待时间视为批准。
+
+- 私有计划 `/private/tmp/issue031-balancesheet-diagnostic/registration.json`：`issue031-balancesheet-diagnostic-20260914T200411Z`；只允许balancesheet，参数 `000001.SZ/20240101/20241231`，最多1请求、150秒、零重试，不启动应用、不访问数据库、不提交任务，不调用fina_indicator。
+- 使用失败轮冻结验收包SHA `99ae75e9370a6b4fdf45391d2092524c382461106b9893622b65260eb6c1dda5` 内原client/definition/adapter；运行前核对JAR及全部提取依赖字节，登记诊断源码/类/包装器哈希，一次性启动标记拒绝再次执行。
+- 响应只在内存适配与比较。白名单结果仅含错误码、分支、行索引、已知字段名/类型及精度/小数位/长度、冲突字段名；不写Token、响应原文、财务值、业务键值或原始异常。包装器仅传必要环境，stdout/stderr先在内存检查，只有通过白名单校验的JSON可落盘；诊断失败即停，不自动重试。
+- 先独立审查该具体诊断。若需改变业务键、字段语义或有损数值处理，先形成证据及具体方案，不能靠猜测改合同。修复后重新验证/冻结；公告轮重新执行须有新ID及显式映射，保留失败轮全部历史。其余轮仍未获准跨过真实失败恢复门禁。
+- 验收工具另以真实FAILED回归修复失败事实丢失，保留成功专用严格校验，不能把失败放宽成PASS。
+
+### 已定位冲突后的独立接口恢复
+
+一次诊断已完成：原参数返回6行，原adapter确认KEY_CONFLICT；转换失败0，两组冲突行仅`total_share/update_flag`不同。公开doc36只称update_flag为“更新标识”，不足以确定版本保留规则。balancesheet保持v3撤回，其8项仍在当前272目标中，尚未另行递延；用户关于是否另记issue的偏好问题待答，不视作批准。禁止追加诊断或按返回顺序任意取值。
+
+失败轮停止、保全、撤回、根因定位已完成。其余接口没有该接口的写入依赖；为继续用户已授权的“其他数据源”，先冻结新包，将待验收的公告日期任务拆为独立34项（income8/cashflow8/fina_audit4/express6/stk_managers8）和暂挂balancesheet8，再执行其余holders/repurchase21与regression4。该顺序调整不缩小272目标，不把balancesheet记PASS或宣称全部完成；版本取舍决定只影响暂挂8项。
+
+公告日期34项的旧ID均已登记，因此固定新ID`issue031-keyconflict-<原完整TASK caseId>`，原params/dateAxis/准确SOURCE和接口内顺序不变。income旧8项虽然观察PASS，但所属exit1轮，必须全量清洁补验；仅新34项对应成功并经SQL/审查/清理后移出原当前引用，全部旧run/case保留。替代清单逐项钉住原状态/任务ID和失败run身份；原PASS只允许作为失败轮中的未接受观察被替代，原FAILED的balancesheet不适用。当前205已接受任务保持原包绑定，新59项使用新构建；balancesheet8继续保留原失败轮包和未决项。每轮仍独立新空schema、预登记/纯选择/--list、原预算和零重试；新失败再次停止该轮并保全撤回。
+
+### 现金流量表失败后的逐接口续验
+
+独立公告34项轮`issue031-keyconflict-range-response-announcement-rest-20260914T202312Z`在现金流量表首项失败后停止，实际8 PASS观察/1 FAILED/25 NOT_RUN，exit1/cleanup PASS、9请求/17 records。现金流量表原参数`000001.SZ/20240101/20241231`，ADAPTER_TYPE_INVALID，1尝试；新harness已直接保留FAILED/失败叶，未补造SQL-after。只读SQL确认income8原键、cashflow0。cashflow撤回v3，原字段/业务键/日期轴与SINGLE保持；没有额外诊断，不能由balancesheet冲突推断它的根因。
+
+当前272目标中，205项已清洁接受，balancesheet8/cashflow8暂挂且仍计入目标，另51项可独立继续。为避免再把已执行接口卷入其他接口失败轮，将剩余任务按API分为income8、fina_audit4、express6、stk_managers8、repurchase5、top10_holders8、top10_floatholders8、regression4；regression保留原4接口共同回归组。每API单独run/新空schema/预算/审查/归档，原接口内顺序与窗口保持，无跨API数据依赖。
+
+新公告26项的caseId固定为`issue031-perapi-<当前keyconflict完整caseId>`，其精确SOURCE/params/dateAxis不变；仍未登记的其余25项沿用旧ID。替代映射直接指向最终新case，保留原公告失败轮及本轮全部历史；income两批各8 PASS只是两个exit1轮中的未接受观察，只有新独立income8全清洁通过后才能移出当前引用并开放。映射例外严格限定这两个已知失败run中的income，两个原FAILED接口不适用。所有205已接受项保持原包归属，新51项使用再次冻结的新源码/两包；held16保留各自失败包/版本身份。
+
+本调整落实用户继续其他数据源的授权，不擅自扩大ISSUE-033、不新建递延issue、不缩小272目标；balancesheet版本规则/递延偏好仍待答，cashflow根因未确认。新接口失败继续停止并保全该独立run、撤回其准入，其余没有数据依赖的接口按新冻结身份继续；不自动重试失败接口或追加SOURCE诊断。
+
+### 回购失败后的剩余接口续验
+
+独立回购轮 `issue031-perapi-range-repurchase-20260914T211042Z` 首项FAILED / ADAPTER_TYPE_INVALID，1请求/1尝试/1次BEFORE records，另4项NOT_RUN，exit1/cleanup PASS。只读SQL另证回购表0；规范case的SQL前后仍null，不补造AFTER，不从成功source计数0推断来源为空。原41轮、当前失败包和schema保留；根因未定位，本轮不自动诊断或重试。
+
+按既有失败合同撤回repurchase至v3，保持原DATES参数、公告日期、业务键及SINGLE。原参数准入回归先RED，再完成策略/HTTP及独立页面能力预期的最小修改；非股票数据保留合同继续使用受控已验证策略测试。相关回归、完整隔离构建和受影响metadata通过后，冻结新包再继续top10_holders8、top10_floatholders8、regression4，共20项。三组仍逐轮新空schema、准确原SOURCE/参数/ID/顺序、预算、SQL、清理和独立审查，尚未使用的20个ID不变。
+
+新控制目录 `/private/tmp/issue031-repurchase-control` 保留272位置及既有逐case构建绑定，仅将未执行的20项绑定新冻结包；原已接受231项与held21保持各自原包身份。repurchase5与balancesheet8/cashflow8仍在272目标内，未经用户决定不另行递延，也不计PASS。新失败继续单轮停止保全、撤回和重新冻结；财务指标6项始终由ISSUE-033承接。
+
+### 现金流量表的一次有界根因定位
+
+逐接口剩余任务完成后，对仍未定位的cashflow适配失败执行一次明确登记的诊断。这是用户“处理其他数据源”范围内的缺陷定位；对上一节“不自动追加SOURCE诊断”的限定调整仅适用于下述一次调用，不重新验收旧SOURCE，不自动重试TASK，不调用财务指标或再次调用balancesheet。诊断完成不改变272目标或替代真实TASK/SQL验收。
+
+- 私有登记 `/private/tmp/issue031-cashflow-diagnostic/registration.json`，run `issue031-cashflow-diagnostic-20260914T210414Z`，登记SHA `e014e06eacf7730c06d8a587c9fc54e84a7c8c90a2db822b0386d62274d70d36`。原失败参数cashflow/000001.SZ/20240101～20241231，最多1请求、150秒、无重试；等待其他真实轮次全部结束，保持来源请求间隔≥2秒。
+- 使用原失败轮验收包 `65a809227e4c3d485799af51a9826d37943ecc623c9deaf6aed3167aed19654e` 内原client/definition/adapter及全部54个依赖；执行前校验JAR、Java、诊断源码/类/包装器及白名单输入的固定哈希。一次性execution-start标记拒绝重复执行。
+- 不启动应用、不传数据库配置、不创建TASK或写业务表。响应只在内存中转换/比较，输出白名单错误码、适配分支、行索引、字段名/类型和精度/长度元数据、冲突字段名；不保存Token、原响应、财务值、业务键值或异常原文。输出未通过校验或来源调用失败即非零退出，不重试。
+- 已完成本地编译及7项输出校验，零真实请求；实际执行前独立审查具体实现与登记。原cashflow FAILED及缺失SQL-after保持，诊断结果单独归档。若涉及版本保留、业务键或字段语义选择，先给出证据和具体方案，不以行顺序或未经证明的update_flag含义选值。
+
+执行前准备修订2：公开现金流文档doc44明确`update_flag`为“更新标志(1最新）”，保存HTML SHA `c72936927f2038160b357766e350aba40241404f02aebe6e12edac9283e17b9c`。同一次内存响应另汇总完全转换且满足原必填键约束的行数/原键组数、冲突组数，以及冲突组内标记1的不同完整行数为0/1/多个的组数；先按原adapter的Map相等规则去掉完全重复行。全部输出为固定名称非负整数，三个分箱之和必须等于冲突组数。0只表示未观察到标记1，不解释为全部过期；诊断不选行、不改合同、不写入，也不推广该规则到其他接口。
+
+修订2登记SHA `8af2822b2b0b4971a4367be71e7df03f32364cc34e183a4c2b912d4c8f772b49`，旧e014登记/源码/类保留在`revision1-prepared-not-run/`作为未执行准备历史；仍是同一个run、总计最多一次请求。编译与21项纯检查通过，包含0/1/多最新、完全重复最新行、转换不完整/必填缺失排除和严格输出校验，零真实请求。修改后身份需重新独立审查，不能沿用旧预检结论直接执行。
+
+### 回购的一次有界根因定位
+
+为落实用户继续处理其他数据源的范围，对已保全的repurchase适配失败作一次明确限定的诊断；仅调整前述“不自动诊断”边界中的这一项，不重试TASK或改参数。登记 `/private/tmp/issue031-repurchase-diagnostic/registration.json`，run `issue031-repurchase-diagnostic-20260914T212829Z`，SHA `57b870e3af74e97a5928a349c59b91d18da7341d03642c291f23f8ffe662e463`；原DATES参数20260801～20260831，无ts_code，使用原失败验收包a77d99ac…c732d3内原client/definition/adapter及54依赖。
+
+其他真实TASK结束后、独立预检通过才执行；最多1请求/150秒，无重试、不启动应用/访问DB/提交TASK。Java/原包/诊断源类/包装器/白名单输入哈希执行前核对，一次启动标记拒绝重复。仅输出原适配错误分支、行索引、已知字段名/类型/精度长度与冲突字段名；原响应、数值、业务键值和异常原文只在内存，不落盘。原FAILED及null SQL-after保持，诊断不计PASS、不开放接口。编译及7项输出校验通过，零来源请求；字段或键语义若需改变，先形成具体证据与方案，不能猜精度或覆盖冲突行。
 
 ## Goal
 

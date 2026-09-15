@@ -121,7 +121,7 @@ sh scripts/smoke-test.sh http://127.0.0.1:8080
 
 两页均由同一 JAR 提供。缺少 Token 时，数据源返回 `credentialConfigured=false`、`downloadAvailable=false`；数据源列表、数据集元数据及数据查看仍可用，Tushare 下载不可用。下载接口列表 `/api/v1/data-sources/tushare_pro/apis` 返回 HTTP 409、`PLUGIN_DISABLED`，下载页可显示“下载配置加载失败 / Plugin is unavailable”等配置不可用提示，这是缺少 Token 的预期行为。新空库没有业务记录属于正常现象。
 
-当前正式证据已有10项RANGE通过，当前本地验收候选能力为33 AVAILABLE、1 NEEDS_VERIFICATION、6 UNSUPPORTED；可提交状态不等于完成真实验收。fina_indicator因TASK失败已撤回v3，SINGLE仍可用。按实际能力选择接口和原参数；配置Token不会自动开放待验证项。当前范围及限制见[已核验日期区间](configuration.md#已核验的-tushare-日期区间)，部署须使用对应版本包。
+当前正式证据已有30项RANGE接口通过；balancesheet、cashflow、repurchase、fina_indicator按[用户决定](../issues/proposals/ISSUE-026-range-scope.md)排除本次区间批量下载，SINGLE入口保留。构建能力仍为30 AVAILABLE、4 NEEDS_VERIFICATION、6 UNSUPPORTED，四项NEEDS_VERIFICATION对应正式范围处置EXCLUDED，v3继续拒绝RANGE提交。按实际能力选择接口和原参数；配置Token不会自动开放这些接口。范围及限制见[已核验日期区间](configuration.md#已核验的-tushare-日期区间)，部署须使用对应版本包。 最终回归及母任务收尾依据见[验收报告](../verification/ISSUE-032-range-final-closure.md)。
 
 ### 任务接收、查询和人工恢复
 

@@ -92,3 +92,7 @@ SINGLE首轮bootstrap没有提交任务，74样本全NOT_RUN。导航修复后�
 新增两轮18case/18请求，exit0/cleanup PASS；仅SOURCE，无新TASK/SQL。两股票默认省略type均返回P/D/I，SINGLE各150行；2025全年RANGE分别74/110行，宽区间各150，故100并非只约束RANGE的已确认上限。报告期整段、单日及非空上下边界已补齐；本轮业务键全部唯一、跨分类共用键0，但不推定全历史无冲突。原74个SINGLE任务/SQL仍为独立既有事实。
 
 用户已明确“同意方案A（推荐）”，[决定](../issues/proposals/ISSUE-020-fina-mainbz-default-type.md#决策记录)采用默认原样返回、单次快照及100工程拆分阈值；>=100拆分，单日满额失败。决定和来源观察不当作上游完整性保证。ISSUE-020的规则/默认范围缺口按此限定修订处理，12项匹配RANGE输入交ISSUE-026，母issue保留未关闭状态。
+
+## 2026-09-15最终采用与关闭
+
+完整74 SINGLE/148查询及两股票SQL证据保留；fina_mainbz已按ISSUE-020决定保留一次上游默认分类，SINGLE不承诺全历史，RANGE100为工程拆分阈值，匹配真实任务/SQL及拆分已完成。此前本文件的默认分类未决措辞为历史状态。032六门禁与独立终审通过，017九条关闭条件逐条成立，见[最终验收](ISSUE-032-range-final-closure.md)。四接口本次只排除RANGE，全部40接口SINGLE保持。

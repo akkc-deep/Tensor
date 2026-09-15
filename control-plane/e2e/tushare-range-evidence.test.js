@@ -174,7 +174,7 @@ test('ISSUE-031 preserves SOURCE contracts and records the partial TASK outcome'
   assert.ok(candidates.every((entry) => entry.sourceStatus === 'PASS'))
   assert.equal(createHash('sha256').update(JSON.stringify(index.runs.slice(0, 26))).digest('hex'),
     '95b2e7e0a4743f982d1818540ea8075f694050b9e0ac51a13617f63529381313')
-  const rounds = index.runs.slice(26)
+  const rounds = index.runs.slice(26, 30)
   assert.deepEqual(rounds.map((run) => run.cases.length), [28, 16, 38, 35])
   assert.deepEqual(rounds.map((run) => run.exitCode), [0, 0, 0, 1])
   assert.ok(rounds.every((run) => run.cleanup.status === 'PASS'))
@@ -190,6 +190,182 @@ test('ISSUE-031 preserves SOURCE contracts and records the partial TASK outcome'
   assert.equal(failed.insertedRows, 0)
   assert.equal(failed.updatedRows, 0)
   assert.ok(tasks.filter((c) => c.status === 'NOT_RUN').every((c) => c.taskId === null))
+})
+
+test('ISSUE-031 preserves completed continuation rounds and the interrupted response-only evidence', () => {
+  const index = persistedIndex()
+  const completed = index.runs.slice(30, 33)
+  assert.deepEqual(completed.map((run) => run.cases.length), [29, 37, 33])
+  assert.deepEqual(completed.map((run) => run.cases.reduce((n, c) => n + c.requestCount, 0)), [29, 129, 33])
+  assert.ok(completed.every((run) => run.exitCode === 0 && run.cleanup.status === 'PASS'
+    && run.cases.every((c) => c.status === 'PASS' && c.apiName !== 'fina_indicator')))
+  const oldDates = index.runs[29].cases
+  for (const current of completed[0].cases) {
+    const old = oldDates.find((c) => current.caseId === `issue031-resume-${c.caseId}`)
+    assert.equal(old.status, 'NOT_RUN')
+    assert.deepEqual(current.params, old.params)
+    assert.equal(current.dateAxis, old.dateAxis)
+    const refs = index.interfaces.find((e) => e.apiName === current.apiName).cases
+    assert.ok(refs.includes(current.caseId))
+    assert.ok(!refs.includes(old.caseId))
+  }
+  const interrupted = index.runs[33]
+  assert.equal(interrupted.exitCode, 1)
+  assert.equal(interrupted.cleanup.status, 'PASS')
+  assert.equal(interrupted.cases.length, 24)
+  const first = interrupted.cases[0]
+  assert.equal(first.apiName, 'adj_factor')
+  assert.equal(first.status, 'EVIDENCE_MISSING')
+  assert.equal(first.requestCount, 1)
+  assert.equal(first.expectedCoverage, 'RESPONSE_ONLY')
+  assert.equal(first.errorCode, null)
+  assert.equal(first.sourceRowCount, null)
+  assert.equal(first.sqlAfterKeyCount, null)
+  assert.ok(first.taskId)
+  assert.ok(interrupted.cases.slice(1).every((c) => c.status === 'NOT_RUN' && c.taskId === null))
+})
+
+test('ISSUE-031 preserves response-only recovery and the actual balancesheet failure', () => {
+  const index = persistedIndex()
+  const recovered = index.runs[34]
+  assert.equal(recovered.runId, 'issue031-statusfix-range-response-trade-20260914T194412Z')
+  assert.equal(recovered.exitCode, 0)
+  assert.equal(recovered.cleanup.status, 'PASS')
+  assert.equal(recovered.cases.length, 24)
+  for (const current of recovered.cases) {
+    assert.equal(current.status, 'PASS')
+    const old = index.runs[33].cases.find((c) => current.caseId === `issue031-statusfix-${c.caseId}`)
+    assert.ok(old)
+    assert.deepEqual(current.params, old.params)
+    assert.equal(current.dateAxis, old.dateAxis)
+    const refs = index.interfaces.find((e) => e.apiName === current.apiName).cases
+    assert.ok(refs.includes(current.caseId))
+    assert.ok(!refs.includes(old.caseId))
+  }
+  const failedRun = index.runs[35]
+  assert.equal(failedRun.runId, 'issue031-statusfix-range-response-announcement-20260914T195234Z')
+  assert.equal(failedRun.exitCode, 1)
+  assert.equal(failedRun.cleanup.status, 'PASS')
+  assert.equal(failedRun.cases.length, 42)
+  assert.ok(failedRun.cases.slice(0, 8).every((c) => c.apiName === 'income' && c.status === 'PASS'))
+  const income = index.interfaces.find((e) => e.apiName === 'income')
+  assert.equal(income.disposition, 'AVAILABLE')
+  const failedOnly = structuredClone(index)
+  const entry = failedOnly.interfaces.find((e) => e.apiName === 'income')
+  const byId = new Map(index.runs.flatMap((r) => r.cases.map((c) => [c.caseId, c])))
+  entry.cases = entry.cases.filter((id) => byId.get(id).phase !== 'TASK' || byId.get(id).mode !== 'RANGE')
+  entry.cases.push(...failedRun.cases.slice(0, 8).map((c) => c.caseId))
+  expectRejected(failedOnly) // Successful observations in an exit1 run cannot replace clean acceptance.
+  const failed = failedRun.cases[8]
+  assert.equal(failed.apiName, 'balancesheet')
+  assert.equal(failed.status, 'FAILED')
+  assert.equal(failed.errorCode, 'ADAPTER_TYPE_INVALID')
+  assert.equal(failed.requestCount, 1)
+  assert.equal(failed.failedLeafCount, 1)
+  assert.equal(failed.succeededLeafCount, 0)
+  assert.equal(failed.emptyLeafCount, 0)
+  assert.equal(failed.sqlBeforeKeyCount, 0)
+  assert.equal(failed.sqlAfterKeyCount, 0)
+  assert.ok(failedRun.cases.slice(9).every((c) => c.status === 'NOT_RUN' && c.taskId === null))
+})
+
+test('ISSUE-031 retains the cashflow failure without inventing AFTER evidence', () => {
+  const index = persistedIndex()
+  const run = index.runs[36]
+  assert.equal(run.runId, 'issue031-keyconflict-range-response-announcement-rest-20260914T202312Z')
+  assert.equal(run.exitCode, 1)
+  assert.equal(run.cleanup.status, 'PASS')
+  assert.equal(run.cases.length, 34)
+  assert.ok(run.cases.slice(0, 8).every((c) => c.apiName === 'income' && c.status === 'PASS'))
+  const failed = run.cases[8]
+  assert.equal(failed.apiName, 'cashflow')
+  assert.equal(failed.status, 'FAILED')
+  assert.equal(failed.errorCode, 'ADAPTER_TYPE_INVALID')
+  assert.equal(failed.requestCount, 1)
+  assert.equal(failed.failedLeafCount, 1)
+  assert.equal(failed.succeededLeafCount, 0)
+  assert.equal(failed.emptyLeafCount, 0)
+  assert.equal(failed.sqlBeforeKeyCount, null)
+  assert.equal(failed.sqlAfterKeyCount, null)
+  assert.ok(run.cases.slice(9).every((c) => c.status === 'NOT_RUN' && c.taskId === null))
+  const entry = index.interfaces.find((e) => e.apiName === 'cashflow')
+  assert.equal(entry.policyVersion, 'tushare-range-v3')
+  assert.equal(entry.disposition, 'EXCLUDED')
+})
+
+test('ISSUE-031 accepts independent announcement runs while preserving their failed-run predecessors', () => {
+  const index = persistedIndex()
+  const runs = index.runs.slice(37, 41)
+  assert.deepEqual(runs.map((r) => [r.cases[0].apiName, r.cases.length]),
+    [['income', 8], ['fina_audit', 4], ['express', 6], ['stk_managers', 8]])
+  for (const run of runs) {
+    assert.equal(run.exitCode, 0)
+    assert.equal(run.cleanup.status, 'PASS')
+    assert.equal(run.acceptanceJarSha256, 'a77d99aca450fe0345869a89392a9889480753f23c41c814bf81ef6f70c732d3')
+    for (const current of run.cases) {
+      assert.equal(current.status, 'PASS')
+      assert.equal(current.requestCount, 1)
+      assert.equal(current.expectedCoverage, 'RESPONSE_ONLY')
+      const entry = index.interfaces.find((e) => e.apiName === current.apiName)
+      assert.equal(entry.disposition, 'AVAILABLE')
+      assert.ok(entry.cases.includes(current.caseId))
+      for (const [offset, prefix] of [[35, 'issue031-perapi-issue031-keyconflict-'], [36, 'issue031-perapi-']]) {
+        const old = index.runs[offset].cases.find((c) => `${prefix}${c.caseId}` === current.caseId)
+        assert.ok(old)
+        assert.equal(old.status, current.apiName === 'income' ? 'PASS' : 'NOT_RUN')
+        assert.deepEqual(current.params, old.params)
+        assert.equal(current.dateAxis, old.dateAxis)
+        assert.ok(!entry.cases.includes(old.caseId))
+      }
+    }
+  }
+})
+
+test('ISSUE-031 preserves the repurchase failure and four unexecuted tasks', () => {
+  const index = persistedIndex()
+  const run = index.runs[41]
+  assert.equal(run.runId, 'issue031-perapi-range-repurchase-20260914T211042Z')
+  assert.equal(run.exitCode, 1)
+  assert.equal(run.cleanup.status, 'PASS')
+  assert.equal(run.cases.length, 5)
+  const failed = run.cases[0]
+  assert.equal(failed.apiName, 'repurchase')
+  assert.deepEqual(failed.params, {start_date: '20260801', end_date: '20260831'})
+  assert.equal(failed.status, 'FAILED')
+  assert.equal(failed.errorCode, 'ADAPTER_TYPE_INVALID')
+  assert.equal(failed.requestCount, 1)
+  assert.equal(failed.failedLeafCount, 1)
+  assert.equal(failed.succeededLeafCount, 0)
+  assert.equal(failed.emptyLeafCount, 0)
+  assert.equal(failed.sqlBeforeKeyCount, null)
+  assert.equal(failed.sqlAfterKeyCount, null)
+  assert.ok(run.cases.slice(1).every((c) => c.status === 'NOT_RUN' && c.taskId === null))
+  const entry = index.interfaces.find((e) => e.apiName === 'repurchase')
+  assert.equal(entry.policyVersion, 'tushare-range-v3')
+  assert.equal(entry.disposition, 'EXCLUDED')
+})
+
+test('ISSUE-031 records both holder runs and the four original-range regressions under their new build', () => {
+  const index = persistedIndex()
+  const runs = index.runs.slice(42, 45)
+  assert.deepEqual(runs.map((r) => r.cases.length), [8, 8, 4])
+  for (const run of runs) {
+    assert.equal(run.exitCode, 0)
+    assert.equal(run.cleanup.status, 'PASS')
+    assert.equal(run.acceptanceJarSha256, '5ecb993e13d6c1340013eb48ca87ea4a91782906dd06bd51f2108b7b51c1bfd5')
+    assert.ok(run.cases.every((c) => c.status === 'PASS' && c.requestCount === 1
+      && c.sqlBeforeKeyCount !== null && c.sqlAfterKeyCount !== null))
+  }
+  for (const [offset, api] of ['top10_holders', 'top10_floatholders'].entries()) {
+    const cases = runs[offset].cases
+    assert.ok(cases.every((c) => c.apiName === api && c.dateAxis === 'REPORT_PERIOD'
+      && c.expectedCoverage === 'RESPONSE_ONLY'))
+    assert.equal(cases.at(-1).sqlAfterKeyCount, 100)
+    assert.ok(cases.some((c) => c.sourceRowCount > 10))
+    assert.equal(index.interfaces.find((e) => e.apiName === api).disposition, 'AVAILABLE')
+  }
+  assert.deepEqual(runs[2].cases.map((c) => [c.apiName, c.sourceRowCount, c.sqlAfterKeyCount]),
+    [['daily_basic', 4, 4], ['moneyflow', 6, 6], ['stk_limit', 6, 6], ['margin_detail', 6, 6]])
 })
 
 test('ISSUE-030 independent mother-issue inputs preserve exact group counts and four new mainbz cases', () => {
@@ -232,6 +408,8 @@ test('candidate rebuild preserves all runs, rejects reused TASK IDs and verifies
   assert.throws(() => liveContract.selectTaskCases('range', plan, index, new Map()), { message: SAFE_ERROR })
   const historical = structuredClone(index)
   historical.runs = historical.runs.slice(0, 26)
+  const historicalIds = new Set(historical.runs.flatMap((run) => run.cases.map((c) => c.caseId)))
+  for (const entry of historical.interfaces) entry.cases = entry.cases.filter((id) => historicalIds.has(id))
   assert.equal(validateEvidence(historical), historical)
   assert.equal(liveContract.selectTaskCases('range', plan, historical, bindings).length, 272)
   assert.equal(bindings.size, 272)
@@ -322,7 +500,7 @@ test('ISSUE-030 SOURCE-only candidates cannot become formal AVAILABLE interfaces
   assert.throws(() => validateEvidence(index), { message: SAFE_ERROR })
 })
 
-test('persisted contracts retain ten accepted ranges and withdraw the failed candidate', () => {
+test('persisted contracts retain accepted ranges and explicitly exclude four RANGE APIs', () => {
   const index = persistedIndex()
   const limits = { weekly: 6000, monthly: 4500, daily_basic: 6000, stk_limit: 5800,
     moneyflow: 6000, margin: 4000, margin_detail: 6000, block_trade: 1000, slb_len: 5000,
@@ -334,7 +512,11 @@ test('persisted contracts retain ten accepted ranges and withdraw the failed can
   const unknown = ['pledge_stat', 'stk_rewards', 'stock_basic', 'stock_company',
     'index_classify', 'index_member_all']
   const available = new Set(['daily_basic', 'stk_limit', 'moneyflow', 'margin_detail',
-    'daily', 'forecast', 'dividend', 'fina_mainbz', 'margin', 'top_list'])
+    'daily', 'forecast', 'dividend', 'fina_mainbz', 'margin', 'top_list',
+    'stk_holdernumber', 'trade_cal', 'weekly', 'monthly', 'new_share',
+    'block_trade', 'disclosure_date', 'stk_holdertrade', 'pledge_detail',
+    'slb_len', 'slb_sec', 'slb_sec_detail', 'adj_factor', 'suspend_d',
+    'income', 'fina_audit', 'express', 'stk_managers', 'top10_holders', 'top10_floatholders'])
 
   assert.deepEqual(Object.fromEntries(index.interfaces.filter((i) => i.completeness.kind === 'ROW_LIMIT')
     .map((i) => [i.apiName, i.completeness.rowLimit])), limits)
@@ -345,16 +527,22 @@ test('persisted contracts retain ten accepted ranges and withdraw the failed can
   assert.deepEqual(index.interfaces.filter((i) => i.completeness.kind === 'CALENDAR_COVERAGE')
     .map((i) => [i.apiName, i.completeness.rowLimit]), [['trade_cal', null]])
 
+  assert.deepEqual(index.interfaces.filter((entry) => entry.disposition === 'EXCLUDED')
+    .map((entry) => entry.apiName).sort(), ['balancesheet', 'cashflow', 'fina_indicator', 'repurchase'])
+  for (const entry of index.interfaces.filter((entry) => entry.disposition === 'EXCLUDED')) {
+    assert.ok(entry.completeness.evidenceRefs
+      .includes('docs/issues/proposals/ISSUE-026-range-scope.md#决策记录'))
+  }
+
   for (const entry of index.interfaces) {
     const accepted = available.has(entry.apiName)
     assert.equal(entry.disposition,
-      accepted ? 'AVAILABLE' : entry.rangeTarget ? 'NEEDS_VERIFICATION' : 'SINGLE_ONLY')
-    assert.equal(entry.policyVersion, entry.apiName === 'fina_indicator' ? 'tushare-range-v3'
+      accepted ? 'AVAILABLE' : entry.rangeTarget ? 'EXCLUDED' : 'SINGLE_ONLY')
+    assert.equal(entry.policyVersion, ['fina_indicator', 'balancesheet', 'cashflow', 'repurchase'].includes(entry.apiName) ? 'tushare-range-v3'
       : entry.rangeTarget ? 'tushare-range-v2' : null)
     if (!entry.rangeTarget) continue
     assert.equal(entry.sourceStatus, 'PASS')
-    assert.equal(entry.taskStatus, entry.apiName === 'fina_indicator' ? 'FAILED'
-      : ['trade_cal', 'weekly', 'monthly', 'stk_holdernumber', 'new_share'].includes(entry.apiName) ? 'EVIDENCE_MISSING' : 'PASS')
+    assert.equal(entry.taskStatus, ['fina_indicator', 'balancesheet', 'cashflow', 'repurchase'].includes(entry.apiName) ? 'FAILED' : 'PASS')
     assert.ok(entry.completeness.evidenceRefs
       .includes(`docs/verification/ISSUE-018-range-acceptance.md#${entry.apiName}`))
     if (!accepted) assert.ok(entry.completeness.evidenceRefs.includes(entry.officialUrl))
@@ -365,7 +553,7 @@ test('persisted contracts retain ten accepted ranges and withdraw the failed can
     }
   }
   assert.equal(index.runs.flatMap((run) => run.cases)
-    .filter((evidence) => evidence.phase === 'TASK' && evidence.mode === 'RANGE').length, 142)
+    .filter((evidence) => evidence.phase === 'TASK' && evidence.mode === 'RANGE').length, 416)
   assert.equal(validateEvidence(index), index)
 })
 
@@ -2204,6 +2392,102 @@ test('runtime RESPONSE_ONLY contract checks persisted extraction and one whole-w
     [task, [leaf, { ...leaf, batchId: 'second' }]],
   ]) assert.throws(() => liveContract.validateTaskRuntime(candidate, params, changedTask, batches),
     { message: SAFE_ERROR })
+})
+
+test('imperative submission preserves failed evidence and accepts exact success outcomes', async () => {
+  for (const [mode, kind, sourceRows, label, failed = false] of [
+    ['RANGE', 'RESPONSE_ONLY', 4n, '返回记录已采集'],
+    ['RANGE', 'RESPONSE_ONLY', 0n, '本次请求未返回记录'],
+    ['RANGE', 'ROW_LIMIT', 4n, '已成功'],
+    ['SINGLE', null, 4n, '已成功'],
+    ['RANGE', 'RESPONSE_ONLY', 0n, '失败', true],
+  ]) {
+    const params = mode === 'RANGE'
+      ? { ts_code: '000001.SZ', start_date: '20251229', end_date: '20260105' }
+      : SINGLE_PARAMS.adj_factor
+    const request = { submissionId: '22222222-2222-4222-8222-222222222222',
+      pluginId: 'tushare_pro', apiName: 'adj_factor', mode, params }
+    const receipt = { requestId: TASK_QUERY_ID, taskId: TASK_QUERY_CONTEXT.taskId,
+      status: 'QUEUED', version: 1, createdAt: '2026-09-12T01:00:00Z' }
+    const candidate = { apiName: 'adj_factor', policyVersion: 'tushare-range-v2',
+      planningMode: 'NATIVE_RANGE', completeness: { kind, rowLimit: kind === 'ROW_LIMIT' ? 6000 : null } }
+    const task = { ...request, taskId: receipt.taskId, status: 'SUCCEEDED', requestCount: 1n,
+      planReady: true, lastError: null, canRetry: false, canResume: false,
+      extraction: mode === 'RANGE' ? { policyVersion: candidate.policyVersion,
+        ruleKind: kind === 'ROW_LIMIT' ? 'CONFIRMED_ROW_LIMIT' : kind } : null,
+      counts: { totalBatches: 1n, pendingBatches: 0n, runningBatches: 0n,
+        succeededBatches: 1n, failedBatches: 0n, splitBatches: 0n,
+        sourceRows, insertedRows: sourceRows, updatedRows: 0n } }
+    const leaf = { batchId: 'leaf', parentBatchId: null, status: 'SUCCEEDED', attemptCount: 1,
+      rangeStart: mode === 'RANGE' ? '2025-12-29' : null,
+      rangeEnd: mode === 'RANGE' ? '2026-01-05' : null,
+      sourceRows, insertedRows: sourceRows, updatedRows: 0n, error: null }
+    if (failed) {
+      task.status = leaf.status = 'FAILED'
+      task.lastError = leaf.error = { code: 'ADAPTER_TYPE_INVALID' }
+      task.counts.succeededBatches = 0n
+      task.counts.failedBatches = 1n
+    }
+    let posts = 0, reads = 0, statusChecks = 0
+    const visible = []
+    const control = { click: async () => {}, getByRole: () => control,
+      getByText: (text) => ({ text }) }
+    const response = { status: () => 202,
+      headers: () => ({ location: taskQueryRoute, 'x-request-id': TASK_QUERY_ID }),
+      request: () => ({ postDataJSON: () => request, headers: () => ({ 'x-request-id': TASK_QUERY_ID }) }) }
+    const page = { waitForResponse: async () => response,
+      getByRole: (role, options) => options.name === '提交任务'
+        ? { click: async () => { posts += 1 } } : control,
+      locator: (selector) => selector === '[data-task-status]' ? { text: label } : control }
+    const pageExpect = (actual) => ({
+      toBeVisible: async () => { if (actual.text) visible.push(actual.text) },
+      toBeEnabled: async () => {}, toHaveURL: async () => {},
+      toHaveText: async (expected) => { statusChecks += 1; assert.equal(actual.text, expected) },
+    })
+    const evidence = { downloads: [] }, observedTasks = []
+    const submit = harnessFunction('submitDownload', {
+      safeCheck: check, rateLimit: async () => {}, runDeadline: Number.MAX_SAFE_INTEGER,
+      sourceRequests: 0, phase: mode.toLowerCase(), runtimeFailure: undefined,
+      ledger: { expectDownload() {}, rememberRequestId() {} }, safeJson: async () => receipt,
+      validateTaskAcceptance: liveContract.validateTaskAcceptance, ownedTaskIds: new Set(), observedTasks,
+      evidenceInteger: liveContract.evidenceInteger, expect: pageExpect, candidateIndex: { interfaces: [candidate] },
+      parseDownloadTask() {}, parseDownloadBatchPage() {},
+      readTaskApi: async () => reads++ === 0 ? task : { page: 1, pageSize: 100, total: 1n, items: [leaf] },
+      validateTaskRuntime: liveContract.validateTaskRuntime,
+      summarizeTaskBatches: liveContract.summarizeTaskBatches,
+      safeCaseEvidence: liveContract.safeCaseEvidence,
+      evidence, lastDownloadFinishedAt: undefined, assertPageSafe: async () => {},
+      assertResponseOnlyPage: harnessFunction('assertResponseOnlyPage', { expect: pageExpect }),
+    })
+    const evidenceCase = { caseId: 'status-regression', apiName: 'adj_factor', mode, params,
+      status: 'EVIDENCE_MISSING' }
+    const submission = submit(page, { downloads: () => posts, drain: async () => {} },
+      'tushare_pro', { apiName: 'adj_factor' }, params, false, evidenceCase)
+    if (failed) {
+      await assert.rejects(submission, { message: SAFE_ERROR })
+      assert.equal(evidence.downloads.length, 1)
+      assert.equal(evidenceCase.status, 'FAILED')
+      assert.equal(evidenceCase.errorCode, 'ADAPTER_TYPE_INVALID')
+      assert.equal(evidenceCase.failedLeafCount, 1)
+      assert.equal(evidenceCase.succeededLeafCount, 0)
+      assert.equal(evidenceCase.emptyLeafCount, 0)
+      assert.equal(evidenceCase.sqlAfterKeyCount, null)
+      assert.equal(evidenceCase.batchNodes[0].status, 'FAILED')
+      assert.equal(observedTasks[0].task.status, 'FAILED')
+      assert.equal(posts, 1)
+      assert.equal(reads, 2)
+      assert.equal(statusChecks, 0)
+      continue
+    }
+    const result = await submission
+    assert.equal(result.body.sourceRowCount, Number(sourceRows))
+    assert.equal(result.task.status, 'SUCCEEDED')
+    assert.equal(posts, 1)
+    assert.equal(reads, 2)
+    assert.equal(statusChecks, 1)
+    assert.equal(visible.includes('数据完整性未确认，可能存在上游截断'), kind === 'RESPONSE_ONLY')
+    assert.ok(visible.includes(`来源行数 ${sourceRows}`))
+  }
 })
 
 test('RESPONSE_ONLY task page checks exact outcome and persistent truncation notice', async () => {

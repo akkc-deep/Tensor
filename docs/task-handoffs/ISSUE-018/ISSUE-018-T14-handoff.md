@@ -13,6 +13,8 @@ pause
 
 ## Current State
 
+2026-09-15后续最终验收已完成，本任务权威看板记录COMPLETED，见[032最终报告](../../verification/ISSUE-032-range-final-closure.md)。本文件继续保留为历史pause入口；以下Current State旧正文、Remaining Work、Resume Task及Blocker均是当时快照，不再是当前执行指令。四接口范围排除及全部原失败事实保留。
+
 2026-09-13 用户要求“完成issue18的t14任务”后实施。本交接替换原READY入口快照；原转交与启动事实保留在看板，T13历史交接不改。下述为实际成果，T14全部Acceptance尚未成立。
 
 - 已隔离并逐文件验证822个Git管理文件，重建两包；新的账户SINGLE/RANGE各用独立初始0表schema，8迁移/52表已核实。原工作树、T13暂存成果、旧三轮329case及15个成功任务保留。

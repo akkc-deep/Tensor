@@ -59,9 +59,9 @@ Tushare 客户端还使用下列固定属性；同一客户端上的旧同步入
 
 原始行数小于上界才可认定该叶子完整；等于或超过上界继续按日期拆分，最小单日仍满额则报告完整性未确认，不把部分结果算作完整成功。官方依据与完整case引用见 [40项验收](../verification/ISSUE-018-range-acceptance.md)，25项真实RANGE TASK/SQL见 [T14运行](../verification/ISSUE-018-T14-runs.md#四接口-range-task-实际结果)。
 
-2026-09-15 ISSUE-031又完成`daily`、`forecast`、`dividend`、`fina_mainbz`、`margin`、`top_list`的固定TASK/SQL验收，正式证据共10 AVAILABLE、24 NEEDS_VERIFICATION、6 SINGLE_ONLY，详情见[当前验收](../verification/ISSUE-031-range-live-task-verification.md)。任务整体在fina_indicator首次失败后停止；该接口RANGE已撤回为v3 / NEEDS_VERIFICATION，SINGLE仍可用。
+2026-09-15本次交付范围为30个RANGE接口、251项已通过TASK/SQL验收；balancesheet、cashflow、repurchase、fina_indicator按[用户决定](../issues/proposals/ISSUE-026-range-scope.md)排除本次区间批量下载。正式处置为30 AVAILABLE、4 EXCLUDED、6 SINGLE_ONLY；原27项失败/未运行及问题保留，不计PASS。四接口RANGE仍为v3 / NEEDS_VERIFICATION并拒绝提交，SINGLE入口保留。032最终回归与母任务收尾已完成，详见[最终验收](../verification/ISSUE-032-range-final-closure.md)；该结论不表示已部署。
 
-当前构建延续本地验收候选，能力为33 AVAILABLE、1 NEEDS_VERIFICATION、6 UNSUPPORTED；其中23项尚未完成正式TASK验收，页面可提交不等于已有完整验收。十一项RESPONSE_ONLY只收集本次响应，完整性未确认。BJ top_list保留BJ证券并参照SSE日历，直接trade_cal BSE仍拒绝；margin支持三exchange_id。配置Token不会绕过准入。版本变化后旧任务若返回TASK_DEFINITION_CHANGED，应核实原任务口径，不能盲目retry/resume。
+当前构建能力为30 AVAILABLE、4 NEEDS_VERIFICATION、6 UNSUPPORTED，其中四项NEEDS_VERIFICATION对应本次EXCLUDED范围；六项UNSUPPORTED只限制RANGE，仍支持SINGLE。十一项RESPONSE_ONLY的采集合同只覆盖本次响应，完整性未确认；其中三个冲突接口保持撤回。BJ top_list保留BJ证券并参照SSE日历，直接trade_cal BSE仍拒绝；margin支持三exchange_id。配置Token不会绕过准入。版本变化后旧任务若返回TASK_DEFINITION_CHANGED，应核实原任务口径，不能盲目retry/resume。
 
 
 ## 秘密注入

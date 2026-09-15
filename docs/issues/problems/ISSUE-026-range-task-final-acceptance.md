@@ -1,8 +1,18 @@
 # ISSUE-026：完成剩余区间任务验收与 T14 收尾
 
+## 2026-09-15最终结果
+
+本次批准范围已解决，当前结论及逐条关闭依据见下方“当前状态”和[最终报告](../../verification/ISSUE-032-range-final-closure.md)；此前暂不开始032的时序要求已由最新完成指令取代，四接口范围排除继续有效。
+
+2026-09-15最新[用户范围决定](../proposals/ISSUE-026-range-scope.md)：本次排除balancesheet/cashflow/repurchase/fina_indicator的RANGE批量下载，30个RANGE接口的251项纳入，原27项保留问题且不计PASS。下文34/278及272+6为旧输入/阶段记录，当前关闭要求按新范围限定；032不开始。
+
 ## 当前状态
 
-IN_PROGRESS（2026-09-14）。用户要求“完成issue27”，母任务随首个子issue实际启动。ISSUE-027后端采集实现及受控验收已完成；HTTP/页面、候选、278项真实任务及最终门禁继续由ISSUE-028～032承担。准确状态见[后续看板](../../task-handoffs/ISSUE-018/ISSUE-018-followups-task-board.md)及[子issue看板](../../task-handoffs/ISSUE-026/ISSUE-026-task-board.md)。[共享设计](../../task-designs/ISSUE-026-design.md)和[入口交接](../../task-handoffs/ISSUE-026-handoff.md)继续适用。下文NOT_STARTED是各输入交付当时的快照；原真实SOURCE/TASK/SQL及生产准入没有因后端局部完成而改写。
+COMPLETED（2026-09-15，本次批准范围）。027～032、T14/T13及017/018已按实际合同和合法状态收尾；30个RANGE/251项通过、四接口27项明确排除。最终六门禁1401/524/1134/1137/15/138、111证据测试、历史/身份审计及独立终审通过，见[最终验收](../../verification/ISSUE-032-range-final-closure.md)。033仍未开始，未提交、推送或发布。
+
+## 历史阶段状态
+
+IN_PROGRESS（2026-09-15）。ISSUE-027～030已完成；031按用户批准的251项范围已完成，四接口27项不再阻塞本次。032保持NOT_STARTED，033本次跳过，母任务仍待最终回归和终审，未关闭。准确状态见[后续看板](../../task-handoffs/ISSUE-018/ISSUE-018-followups-task-board.md)和[子看板](../../task-handoffs/ISSUE-026/ISSUE-026-task-board.md)。下文旧阶段事实及历史证据保留。
 
 ## 目标与范围
 

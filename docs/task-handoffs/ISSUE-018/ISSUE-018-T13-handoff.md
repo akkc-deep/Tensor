@@ -15,6 +15,8 @@ pause
 
 ## Current State
 
+2026-09-15后续最终验收已完成，本任务权威看板记录COMPLETED，见[032最终报告](../../verification/ISSUE-032-range-final-closure.md)。本文件继续保留为历史pause入口；以下Current State旧正文、Remaining Work、Resume Task及Blocker均是当时快照，不再是当前执行指令。四接口范围排除及全部原失败事实保留。
+
 2026-09-13：证据校验器、测试侧SOURCE Probe、真实task API/批次/SQL账户harness及离线修复已完成逐项审查。导航入口和MySQL字符集缺陷已修复；未来income/fina_indicator同一行跨日期比较及repurchase证券数量安全投影已实现，不回填旧run。40页官方正文及189条引文已复核。整体审查另发现公开规则未进入索引、TASK_QUERY错误证据缺失，两项已修复；查询错误现在核对sent/header/body请求身份并关联已有task/route/case，不改写任务状态。
 
 真实验收仍不完整：索引含40接口、3轮、329个case、0 AVAILABLE。公开规则与运行结果分别记录；19项已公布数值上界及独立日历覆盖合同不代表实际适用性与任务验收已完成，fina_mainbz默认type及150对100疑点仍保留。34项生产RANGE保持NEEDS_VERIFICATION，6项SINGLE_ONLY，未修改策略版本、生产代码或业务键，未执行RANGE任务。ISSUE-017只追加部分证据；T13与两项母issue均未完成。

@@ -1,10 +1,10 @@
 # ISSUE-018 RANGE 真实接口验收
 
-2026-09-15 ISSUE-031已阻塞：82 PASS / 1 FAILED / 195 NOT_RUN；首个fina_indicator任务ADAPTER_TYPE_INVALID后停止。正式处置10 AVAILABLE/24 NEEDS_VERIFICATION/6 SINGLE_ONLY；当前候选能力33 AVAILABLE/1 NEEDS_VERIFICATION/6 UNSUPPORTED，fina_indicator已撤回v3。旧74 SINGLE和25 RANGE任务保留，详见[ISSUE-031验收](ISSUE-031-range-live-task-verification.md)，母任务尚未关闭。
+2026-09-15按[用户明确范围决定](../issues/proposals/ISSUE-026-range-scope.md)，本次30个RANGE接口、251项TASK纳入且已有PASS证据；balancesheet/cashflow/repurchase/fina_indicator四接口27项排除，原4 FAILED/23 NOT_RUN保留。正式处置30 AVAILABLE/4 EXCLUDED/6 SINGLE_ONLY；运行能力仍30 AVAILABLE/4 NEEDS_VERIFICATION/6 UNSUPPORTED，四接口RANGE继续拒绝。032最终验收及母任务收尾已完成，见[最终报告](ISSUE-032-range-final-closure.md)；真实任务明细仍见[031验收](ISSUE-031-range-live-task-verification.md)。
 
 ## 范围与构建身份
 
-权威状态见 [ISSUE-018看板](../task-handoffs/ISSUE-018/ISSUE-018-task-board.md)。40接口、34 RANGE/6 SINGLE_ONLY、31原生RANGE/3逐日RANGE不变；唯一结果为 [JSON索引](ISSUE-018-range-acceptance.json)，现有30轮/943个case、累计1081次Tushare请求，fixture另计。schema 2当前规则分布为22个ROW_LIMIT、11个RESPONSE_ONLY、1个CALENDAR_COVERAGE及6个SINGLE_ONLY UNKNOWN。旧T13三轮/329case及15个成功任务原样保留，新运行不追认旧失败。
+权威状态见 [ISSUE-018看板](../task-handoffs/ISSUE-018/ISSUE-018-task-board.md)。40接口、34 RANGE/6 SINGLE_ONLY、31原生RANGE/3逐日RANGE不变；唯一结果为 [JSON索引](ISSUE-018-range-acceptance.json)，现有45轮/1217个case、累计1362次Tushare请求，fixture另计。schema 2当前规则分布为22个ROW_LIMIT、11个RESPONSE_ONLY、1个CALENDAR_COVERAGE及6个SINGLE_ONLY UNKNOWN。旧T13三轮/329case及15个成功任务原样保留，新运行不追认旧失败。
 
 T14从HEAD `34f3e283c0ee7f58c19bf72e8a470c1c858ac26d` 的完整未提交成果建立独立源码快照，实际重建两包并用新空schema验收。T14当时候选生产包SHA-256 `b6f1a90dc9fbe54916895fe1c896a7b69e1982dd3a2c8e26124e7e6451811cfa`，验收包 `cb6c7a750c0e75768ee54ad89cf5ed368690edd00f7210ac10dff33a1cdc1a5f`。固定输入、每轮源码指纹、初始SINGLE包与最终RANGE包区别、清理及门禁见 [T14运行登记](ISSUE-018-T14-runs.md)。
 
@@ -86,6 +86,8 @@ SOURCE run `issue018-t13-source-20260912T123840Z`：UTC `2026-09-12T17:18:49.462
 - 设计范围：S/N，输出轴 `ann_date`。待核对：公告区间，普通单股票；补完整提取规则
 - T14早期结论（历史）：NEEDS_VERIFICATION；新完整SINGLE及SQL通过，RANGE未验收。两股票新SOURCE各2行均已证明ann_date在区间、end_date在区间外；完整性仍UNKNOWN，尚缺有效整段/两端全套SOURCE及RANGE TASK。旧失败SOURCE身份仍保留，不能复用其PASS子集作为清洁整轮。
 
+- ISSUE-031当前结论：AVAILABLE / tushare-range-v2；本接口全部当前固定TASK、SQL、代表场景与清洁身份/独立审查成立，见[续办验收](ISSUE-031-range-live-task-verification.md)。原NOT_RUN/工具缺证据项若有显式对应替代仅移出当前引用，历史run不变。
+
 ### balancesheet
 
 - 官方来源：[balancesheet](https://tushare.pro/document/2?doc_id=36)；本次获取 UTC `2026-09-12T12:10:55.725475+00:00`；HTTP GET成功（curl退出0），已取得接口正文。
@@ -95,7 +97,12 @@ SOURCE run `issue018-t13-source-20260912T123840Z`：UTC `2026-09-12T17:18:49.462
 - 设计范围：S/N，输出轴 `ann_date`。待核对：公告区间与报告期区分；补完整性
 - T14早期结论（历史）：NEEDS_VERIFICATION；新完整SINGLE及SQL通过，RANGE未验收。公告窗2行；两股票SINGLE与两端为空。旧失败SOURCE身份仍保留，不能复用其PASS子集作为清洁整轮。
 
+- ISSUE-031排除前结论（历史）：NEEDS_VERIFICATION / tushare-range-v3；原2024公告窗首项TASK实际FAILED/ADAPTER_TYPE_INVALID，SQL0→0，失败轮完整保留。一次原包/原参数只读诊断复现同原业务键的total_share/update_flag冲突，转换异常0；版本保留规则待定，不能随意取末行或改键。其8项尚在272目标中待处理，SOURCE PASS不构成适配/SQL通过，详见[当前验收](ISSUE-031-range-live-task-verification.md)。
+
+- 当前范围处置：EXCLUDED；用户明确本次不支持`balancesheet`的RANGE批量下载，见[范围决定](../issues/proposals/ISSUE-026-range-scope.md)。上述失败/诊断及SINGLE保留，运行能力仍NEEDS_VERIFICATION/v3，本次不修复或补验。
+
 ### cashflow
+
 
 - 官方来源：[cashflow](https://tushare.pro/document/2?doc_id=44)；本次获取 UTC `2026-09-12T12:10:55.728926+00:00`；HTTP GET成功（curl退出0），已取得接口正文。
 - 正文 SHA-256：`6e6a62784b8262dde66bc49cea73e737696baac0ce55a54004918e81978ef0b6`；HTML SHA-256：`906e819056eb2ab63f73c904756bcb5a559105054cbd242ba058a3dde6c7fb80`。正文指 `div.content.col-md-9` 的空格规范化文本，不含导航；本机原件 `/tmp/issue018-t13-official/cashflow.html`，缓存不保证永久保留。
@@ -103,6 +110,10 @@ SOURCE run `issue018-t13-source-20260912T123840Z`：UTC `2026-09-12T17:18:49.462
 - 输入表准确引文：ts_code str Y 股票代码；ann_date str N 公告日期（YYYYMMDD格式，下同）；start_date str N 公告日开始日期；end_date str N 公告日结束日期；period str N 报告期(每个季度最后一天的日期，比如20171231表示年报，20170630半年报，20170930三季报)
 - 设计范围：S/N，输出轴 `ann_date`。待核对：不用f_ann_date代替ann_date；补完整性
 - T14早期结论（历史）：NEEDS_VERIFICATION；新完整SINGLE及SQL通过，RANGE未验收。公告窗1行；两股票SINGLE与两端为空，未观察f_ann_date对照。旧失败SOURCE身份仍保留，不能复用其PASS子集作为清洁整轮。
+
+- ISSUE-031排除前结论（历史）：NEEDS_VERIFICATION / tushare-range-v3；原2024公告窗首项TASK为FAILED/ADAPTER_TYPE_INVALID，规范SQL前后均null，补充表0不替代AFTER。一次原包/原参数诊断观察6行、4个原键组、2个内容冲突组、转换失败0；两冲突组各有一个标记1的不同完整行。官方doc44注明1最新，但尚未批准据此丢弃其他版本，8项仍在272目标内。SINGLE保持，诊断不算TASK验收，详见[诊断结果](ISSUE-031-range-live-task-verification.md#三接口冲突诊断与剩余阻塞)。
+
+- 当前范围处置：EXCLUDED；用户明确本次不支持`cashflow`的RANGE批量下载，见[范围决定](../issues/proposals/ISSUE-026-range-scope.md)。上述失败/诊断及SINGLE保留，运行能力仍NEEDS_VERIFICATION/v3，本次不修复或补验。
 
 ### fina_indicator
 
@@ -113,7 +124,9 @@ SOURCE run `issue018-t13-source-20260912T123840Z`：UTC `2026-09-12T17:18:49.462
 - 设计范围：S/N，输出轴 `end_date`。待核对：报告期；ann_date在区间外合法；满额证据分层
 - ISSUE-031前记录（历史）：NEEDS_VERIFICATION；ISSUE-022两股票整段5/4行、两端均非空，报告期在内公告在外同一行证据成立；000001.SZ下端2行保留不按报告期去重。候选策略及RANGE TASK/SQL交ISSUE-026。 新完整SINGLE及SQL通过，旧SOURCE失败/空观察仍保存在原runs。
 
-- ISSUE-031当前结论：NEEDS_VERIFICATION / tushare-range-v3；真实v2 TASK失败ADAPTER_TYPE_INVALID且SQL零写入，根因未确证，候选已撤回。报告期/原字段/业务键/内部100阈值保留；不得将来源PASS或空SINGLE当作修复证据，见[失败保全与撤回](ISSUE-031-range-live-task-verification.md#失败保全与撤回)。
+- ISSUE-031排除前结论（历史）：NEEDS_VERIFICATION / tushare-range-v3；真实v2 TASK失败ADAPTER_TYPE_INVALID且SQL零写入，根因未确证，候选已撤回。报告期/原字段/业务键/内部100阈值保留；不得将来源PASS或空SINGLE当作修复证据，见[失败保全与撤回](ISSUE-031-range-live-task-verification.md#失败保全与撤回)。
+
+- 当前范围处置：EXCLUDED；用户明确本次不支持`fina_indicator`的RANGE批量下载，见[范围决定](../issues/proposals/ISSUE-026-range-scope.md)。上述失败/诊断及SINGLE保留，运行能力仍NEEDS_VERIFICATION/v3，本次不修复或补验。
 
 ### fina_audit
 
@@ -123,6 +136,8 @@ SOURCE run `issue018-t13-source-20260912T123840Z`：UTC `2026-09-12T17:18:49.462
 - 输入表准确引文：ts_code str Y 股票代码；ann_date str N 公告日期；start_date str N 公告开始日期；end_date str N 公告结束日期；period str N 报告期(每个季度最后一天的日期,比如20171231表示年报)
 - 设计范围：S/N，输出轴 `ann_date`。待核对：公告区间不传period；补完整性
 - T14早期结论（历史）：NEEDS_VERIFICATION；新完整SINGLE及SQL通过，RANGE未验收。全部固定样本为空。旧失败SOURCE身份仍保留，不能复用其PASS子集作为清洁整轮。
+
+- ISSUE-031当前结论：AVAILABLE / tushare-range-v2；本接口全部当前固定TASK、SQL、代表场景与清洁身份/独立审查成立，见[续办验收](ISSUE-031-range-live-task-verification.md)。原NOT_RUN/工具缺证据项若有显式对应替代仅移出当前引用，历史run不变。
 
 ### fina_mainbz
 
@@ -155,6 +170,8 @@ SOURCE run `issue018-t13-source-20260912T123840Z`：UTC `2026-09-12T17:18:49.462
 - 设计范围：S/N，输出轴 `ann_date`。待核对：区间end_date、输入enddate和输出截止日不同义
 - T14早期结论（历史）：NEEDS_VERIFICATION；ISSUE-022两股票公告日20260815/20260828，整段、单日及事件位于上下边界共8项非空；同一行ann_date在内、截止日end_date在外，输入enddate未加入。候选策略及RANGE TASK/SQL交ISSUE-026。 新完整SINGLE及SQL通过，旧SOURCE失败/空观察仍保存在原runs。
 
+- ISSUE-031当前结论：AVAILABLE / tushare-range-v2；本接口全部当前固定TASK、SQL、代表场景与清洁身份/独立审查成立，见[续办验收](ISSUE-031-range-live-task-verification.md)。原NOT_RUN若有对应替代仅移出当前引用，历史run不变。
+
 ### trade_cal
 
 - 官方来源：[trade_cal](https://tushare.pro/document/2?doc_id=26)；本次获取 UTC `2026-09-12T12:10:55.589565+00:00`；HTTP GET成功（curl退出0），已取得接口正文。
@@ -165,6 +182,8 @@ SOURCE run `issue018-t13-source-20260912T123840Z`：UTC `2026-09-12T17:18:49.462
 - T14收尾结论（历史）：NEEDS_VERIFICATION；新完整SINGLE及SQL通过，RANGE未验收。trade_cal-bse-direct在1次请求后BATCH_COMPLETENESS_UNCONFIRMED；不能据安全计数断言原响应为空或HTTP不支持；原2026年SSE/SZSE整段/两端来自失败SOURCE轮；新增SSE20180928–30完整3天及top_list日历观察不能补齐两交易所当前完整边界与BSE证据；官网有BJ参照沪深语义，但未列BSE直接输入；确定的BJ映射及实际BJ规划仍未验证，生产拒绝不变。旧失败SOURCE身份仍保留，不能复用其PASS子集作为清洁整轮。
 
 - ISSUE-021当前结论：NEEDS_VERIFICATION/v1；14项新SSE/SZSE完整日历SOURCE覆盖整段、两端、国庆全休市、跨年和BJ参照窗口，成对开市日期一致。独立BSE新请求结构合法但0行，完整性失败，保留FAILED；不能据此断言HTTP不支持。BJ→SSE测试候选已实际非空验证，生产映射及TASK/SQL交ISSUE-026；直接BSE继续拒绝。 详见[三轮固定计划与事实](ISSUE-018-T14-runs.md#issue-021-日历交易所与交易日独立取证)和[任务输入](../issues/problems/ISSUE-026-range-task-final-acceptance.md#issue-021-已交付输入)。
+
+- ISSUE-031当前结论：AVAILABLE / tushare-range-v2；本接口全部当前固定TASK、SQL、代表场景与清洁身份/独立审查成立，见[续办验收](ISSUE-031-range-live-task-verification.md)。原NOT_RUN若有对应替代仅移出当前引用，历史run不变。
 
 ### margin
 
@@ -200,6 +219,8 @@ SOURCE run `issue018-t13-source-20260912T123840Z`：UTC `2026-09-12T17:18:49.462
 - 设计范围：S/N，输出轴 `trade_date`。待核对：实际每周最后交易日，不能固定周五
 - T14早期结论（历史）：NEEDS_VERIFICATION；ISSUE-022两股票整段各3行、两端及20240930周一最后交易日均非空，完整日历核对一致；2个休市周五空对照保留。候选策略及RANGE TASK/SQL交ISSUE-026。 新完整SINGLE及SQL通过，旧SOURCE失败/空观察仍保存在原runs。
 
+- ISSUE-031当前结论：AVAILABLE / tushare-range-v2；本接口全部当前固定TASK、SQL、代表场景与清洁身份/独立审查成立，见[续办验收](ISSUE-031-range-live-task-verification.md)。原NOT_RUN若有对应替代仅移出当前引用，历史run不变。
+
 ### monthly
 
 - 官方来源：[monthly](https://tushare.pro/document/2?doc_id=145)；本次获取 UTC `2026-09-12T12:10:55.048746+00:00`；HTTP GET成功（curl退出0），已取得接口正文。
@@ -208,6 +229,8 @@ SOURCE run `issue018-t13-source-20260912T123840Z`：UTC `2026-09-12T17:18:49.462
 - 输入表准确引文：ts_code str N TS代码 （ts_code,trade_date两个参数任选一）；trade_date str N 交易日期 （每月最后一个交易日日期，YYYYMMDD格式）；start_date str N 开始日期；end_date str N 结束日期
 - 设计范围：S/N，输出轴 `trade_date`。待核对：实际每月最后交易日，不能固定自然月末；官方正文与同页非交易日月末样例冲突，尚未实测裁决
 - T14早期结论（历史）：NEEDS_VERIFICATION；ISSUE-022两股票20180928/20181031整段和两端有效，与两月完整日历最后开市日一致；2个20180930空对照保留，旧官网样例不作当前日期规范。候选策略及RANGE TASK/SQL交ISSUE-026。 新完整SINGLE及SQL通过，旧SOURCE失败/空观察仍保存在原runs。
+
+- ISSUE-031当前结论：AVAILABLE / tushare-range-v2；本接口全部当前固定TASK、SQL、代表场景与清洁身份/独立审查成立，见[续办验收](ISSUE-031-range-live-task-verification.md)。原NOT_RUN若有对应替代仅移出当前引用，历史run不变。
 
 ### adj_factor
 
@@ -218,6 +241,8 @@ SOURCE run `issue018-t13-source-20260912T123840Z`：UTC `2026-09-12T17:18:49.462
 - 设计范围：S/N，输出轴 `trade_date`。待核对：全历史声明不等于无限量；补完整提取规则
 - T14早期结论（历史）：NEEDS_VERIFICATION；新完整SINGLE及SQL通过，RANGE未验收。全部历史查询能力声明没有完整提取规则；非空样本不能补齐该合同。旧失败SOURCE身份仍保留，不能复用其PASS子集作为清洁整轮。
 
+- ISSUE-031当前结论：AVAILABLE / tushare-range-v2；本接口全部当前固定TASK、SQL、代表场景与清洁身份/独立审查成立，见[续办验收](ISSUE-031-range-live-task-verification.md)。原NOT_RUN/工具缺证据项若有显式对应替代仅移出当前引用，历史run不变。
+
 ### suspend_d
 
 - 官方来源：[suspend_d](https://tushare.pro/document/2?doc_id=214)；本次获取 UTC `2026-09-12T12:10:55.260719+00:00`；HTTP GET成功（curl退出0），已取得接口正文。
@@ -226,6 +251,8 @@ SOURCE run `issue018-t13-source-20260912T123840Z`：UTC `2026-09-12T17:18:49.462
 - 输入表准确引文：ts_code str N 股票代码(可输入多值)；trade_date str N 交易日日期；start_date str N 停复牌查询开始日期；end_date str N 停复牌查询结束日期
 - 设计范围：S/N，输出轴 `trade_date`。待核对：停复牌事件稀疏；补完整性，空样本不证明持续支持
 - T14早期结论（历史）：NEEDS_VERIFICATION；新完整SINGLE及SQL通过，RANGE未验收。全部固定样本为空，缺停牌连续覆盖的实际样本。旧失败SOURCE身份仍保留，不能复用其PASS子集作为清洁整轮。
+
+- ISSUE-031当前结论：AVAILABLE / tushare-range-v2；本接口全部当前固定TASK、SQL、代表场景与清洁身份/独立审查成立，见[续办验收](ISSUE-031-range-live-task-verification.md)。原NOT_RUN/工具缺证据项若有显式对应替代仅移出当前引用，历史run不变。
 
 ### daily_basic
 
@@ -236,6 +263,8 @@ SOURCE run `issue018-t13-source-20260912T123840Z`：UTC `2026-09-12T17:18:49.462
 - 设计范围：S/N，输出轴 `trade_date`。待核对：股票条件与交易日期都有效，确认截断合同
 - T14早期结论（历史）：AVAILABLE / tushare-range-v2；官方明确上界、干净优先SOURCE、完整SINGLE及同参数RANGE TASK/SQL均通过。整段与两端覆盖两股票；daily_basic另含跨年。见 [T14 RANGE结果](ISSUE-018-T14-runs.md#四接口-range-task-实际结果)。
 
+- ISSUE-031当前结论：AVAILABLE / tushare-range-v2；本接口全部当前固定TASK、SQL、代表场景与清洁身份/独立审查成立，见[续办验收](ISSUE-031-range-live-task-verification.md)。原NOT_RUN/工具缺证据项若有显式对应替代仅移出当前引用，历史run不变。
+
 ### moneyflow
 
 - 官方来源：[moneyflow](https://tushare.pro/document/2?doc_id=170)；本次获取 UTC `2026-09-12T12:10:55.265447+00:00`；HTTP GET成功（curl退出0），已取得接口正文。
@@ -245,6 +274,8 @@ SOURCE run `issue018-t13-source-20260912T123840Z`：UTC `2026-09-12T17:18:49.462
 - 设计范围：S/N，输出轴 `trade_date`。待核对：2010起历史说明与实际样本范围
 - T14早期结论（历史）：AVAILABLE / tushare-range-v2；官方明确上界、干净优先SOURCE、完整SINGLE及同参数RANGE TASK/SQL均通过。整段与两端覆盖两股票；daily_basic另含跨年。见 [T14 RANGE结果](ISSUE-018-T14-runs.md#四接口-range-task-实际结果)。
 
+- ISSUE-031当前结论：AVAILABLE / tushare-range-v2；本接口全部当前固定TASK、SQL、代表场景与清洁身份/独立审查成立，见[续办验收](ISSUE-031-range-live-task-verification.md)。原NOT_RUN/工具缺证据项若有显式对应替代仅移出当前引用，历史run不变。
+
 ### stk_limit
 
 - 官方来源：[stk_limit](https://tushare.pro/document/2?doc_id=183)；本次获取 UTC `2026-09-12T12:10:55.260580+00:00`；HTTP GET成功（curl退出0），已取得接口正文。
@@ -253,6 +284,8 @@ SOURCE run `issue018-t13-source-20260912T123840Z`：UTC `2026-09-12T17:18:49.462
 - 输入表准确引文：ts_code str N 股票代码；trade_date str N 交易日期；start_date str N 开始日期；end_date str N 结束日期
 - 设计范围：S/N，输出轴 `trade_date`。待核对：循环获取声明与每片截断规则分别核对
 - T14早期结论（历史）：AVAILABLE / tushare-range-v2；官方明确上界、干净优先SOURCE、完整SINGLE及同参数RANGE TASK/SQL均通过。整段与两端覆盖两股票；daily_basic另含跨年。见 [T14 RANGE结果](ISSUE-018-T14-runs.md#四接口-range-task-实际结果)。
+
+- ISSUE-031当前结论：AVAILABLE / tushare-range-v2；本接口全部当前固定TASK、SQL、代表场景与清洁身份/独立审查成立，见[续办验收](ISSUE-031-range-live-task-verification.md)。原NOT_RUN/工具缺证据项若有显式对应替代仅移出当前引用，历史run不变。
 
 ### top_list
 
@@ -276,6 +309,8 @@ SOURCE run `issue018-t13-source-20260912T123840Z`：UTC `2026-09-12T17:18:49.462
 - 设计范围：S/N，输出轴 `trade_date`。待核对：股票/日期与业务键归属
 - T14早期结论（历史）：AVAILABLE / tushare-range-v2；官方明确上界、干净优先SOURCE、完整SINGLE及同参数RANGE TASK/SQL均通过。整段与两端覆盖两股票；daily_basic另含跨年。见 [T14 RANGE结果](ISSUE-018-T14-runs.md#四接口-range-task-实际结果)。
 
+- ISSUE-031当前结论：AVAILABLE / tushare-range-v2；本接口全部当前固定TASK、SQL、代表场景与清洁身份/独立审查成立，见[续办验收](ISSUE-031-range-live-task-verification.md)。原NOT_RUN/工具缺证据项若有显式对应替代仅移出当前引用，历史run不变。
+
 ### block_trade
 
 - 官方来源：[block_trade](https://tushare.pro/document/2?doc_id=161)；本次获取 UTC `2026-09-12T12:10:55.445059+00:00`；HTTP GET成功（curl退出0），已取得接口正文。
@@ -284,6 +319,8 @@ SOURCE run `issue018-t13-source-20260912T123840Z`：UTC `2026-09-12T17:18:49.462
 - 输入表准确引文：ts_code str N TS代码（股票代码和日期至少输入一个参数）；trade_date str N 交易日期（格式：YYYYMMDD，下同）；start_date str N 开始日期；end_date str N 结束日期
 - 设计范围：S/N，输出轴 `trade_date`。待核对：同股同日多条，不按股票日期先去重
 - T14早期结论（历史）：NEEDS_VERIFICATION；ISSUE-023两基准股票各4个整段/单日/上下边界窗口均2行2键；官网20181227单日5行5键5种买卖方组合，保留同股同日多笔。真实RANGE TASK/SQL交ISSUE-026。 新完整SINGLE及SQL通过，旧失败/空SOURCE保存在原runs；当前不提前开放。
+
+- ISSUE-031当前结论：AVAILABLE / tushare-range-v2；本接口全部当前固定TASK、SQL、代表场景与清洁身份/独立审查成立，见[续办验收](ISSUE-031-range-live-task-verification.md)。原NOT_RUN若有对应替代仅移出当前引用，历史run不变。
 
 ### slb_len
 
@@ -294,6 +331,8 @@ SOURCE run `issue018-t13-source-20260912T123840Z`：UTC `2026-09-12T17:18:49.462
 - 设计范围：D/N，输出轴 `trade_date`。待核对：无股票输入，融资汇总行不套股票校验；官网输出未含期限字段，实际行数由SOURCE核对
 - T14早期结论（历史）：NEEDS_VERIFICATION；新完整SINGLE及SQL通过，RANGE未验收。全部固定样本为空，融资汇总实际基数未观察；官方输出没有期限字段。旧失败SOURCE身份仍保留，不能复用其PASS子集作为清洁整轮。
 
+- ISSUE-031当前结论：AVAILABLE / tushare-range-v2；本接口全部当前固定TASK、SQL、代表场景与清洁身份/独立审查成立，见[续办验收](ISSUE-031-range-live-task-verification.md)。原NOT_RUN若有对应替代仅移出当前引用，历史run不变。
+
 ### slb_sec
 
 - 官方来源：[slb_sec](https://tushare.pro/document/2?doc_id=332)；本次获取 UTC `2026-09-12T12:10:55.563824+00:00`；HTTP GET成功（curl退出0），已取得接口正文。
@@ -303,6 +342,8 @@ SOURCE run `issue018-t13-source-20260912T123840Z`：UTC `2026-09-12T17:18:49.462
 - 设计范围：S/N，输出轴 `trade_date`。待核对：官网标停；记录有依据的历史窗口和实际可用范围
 - T14早期结论（历史）：NEEDS_VERIFICATION；新完整SINGLE及SQL通过，RANGE未验收。新000001.SZ/20240620历史单日1行；仍缺两股票整段/两端及RANGE TASK，官方标停后的API可访问历史边界尚未核定；证监会2024-07-11业务暂停和2024-09-30存量了结不是Tushare API历史截止合同。旧失败SOURCE身份仍保留，不能复用其PASS子集作为清洁整轮。
 
+- ISSUE-031当前结论：AVAILABLE / tushare-range-v2；本接口全部当前固定TASK、SQL、代表场景与清洁身份/独立审查成立，见[续办验收](ISSUE-031-range-live-task-verification.md)。原NOT_RUN若有对应替代仅移出当前引用，历史run不变。
+
 ### slb_sec_detail
 
 - 官方来源：[slb_sec_detail](https://tushare.pro/document/2?doc_id=333)；本次获取 UTC `2026-09-12T12:10:55.565463+00:00`；HTTP GET成功（curl退出0），已取得接口正文。
@@ -311,6 +352,8 @@ SOURCE run `issue018-t13-source-20260912T123840Z`：UTC `2026-09-12T17:18:49.462
 - 输入表准确引文：trade_date str N 交易日期（YYYYMMDD格式，下同）；ts_code str N 股票代码；start_date str N 开始日期；end_date str N 结束日期
 - 设计范围：S/N，输出轴 `trade_date`。待核对：同上；当前空结果不能证明历史或持续更新
 - T14早期结论（历史）：NEEDS_VERIFICATION；新完整SINGLE及SQL通过，RANGE未验收。新000001.SZ/20240620历史单日1行且字段通过；仍缺两股票整段/两端及RANGE TASK、期限/费率差异的代表样本和API可访问历史边界；证监会2024-07-11业务暂停和2024-09-30存量了结不是Tushare API历史截止合同。旧失败SOURCE身份仍保留，不能复用其PASS子集作为清洁整轮。
+
+- ISSUE-031当前结论：AVAILABLE / tushare-range-v2；本接口全部当前固定TASK、SQL、代表场景与清洁身份/独立审查成立，见[续办验收](ISSUE-031-range-live-task-verification.md)。原NOT_RUN若有对应替代仅移出当前引用，历史run不变。
 
 ### forecast
 
@@ -333,6 +376,8 @@ SOURCE run `issue018-t13-source-20260912T123840Z`：UTC `2026-09-12T17:18:49.462
 - 设计范围：S/N，输出轴 `ann_date`。待核对：普通单股票；补完整提取规则
 - T14早期结论（历史）：NEEDS_VERIFICATION；新完整SINGLE及SQL通过，RANGE未验收。全部固定样本为空。旧失败SOURCE身份仍保留，不能复用其PASS子集作为清洁整轮。
 
+- ISSUE-031当前结论：AVAILABLE / tushare-range-v2；本接口全部当前固定TASK、SQL、代表场景与清洁身份/独立审查成立，见[续办验收](ISSUE-031-range-live-task-verification.md)。原NOT_RUN/工具缺证据项若有显式对应替代仅移出当前引用，历史run不变。
+
 ### dividend
 
 - 官方来源：[dividend](https://tushare.pro/document/2?doc_id=103)；本次获取 UTC `2026-09-12T12:10:56.470250+00:00`；HTTP GET成功（curl退出0），已取得接口正文。
@@ -354,6 +399,8 @@ SOURCE run `issue018-t13-source-20260912T123840Z`：UTC `2026-09-12T17:18:49.462
 - 设计范围：S/C，输出轴 `ann_date`。待核对：最新披露公告，不承诺所有历史计划修改版本
 - T14早期结论（历史）：NEEDS_VERIFICATION；ISSUE-023两基准最新公告20241009/20240813及两端、原报告期键重复复查成立，当前五列摘要匹配公开修订后预约日期；modify_date为空，未观察到跨时点变化，不承诺历史每版。实际更新入库交ISSUE-026。 新完整SINGLE及SQL通过，旧失败/空SOURCE保存在原runs；当前不提前开放。
 
+- ISSUE-031当前结论：AVAILABLE / tushare-range-v2；本接口全部当前固定TASK、SQL、代表场景与清洁身份/独立审查成立，见[续办验收](ISSUE-031-range-live-task-verification.md)。原NOT_RUN若有对应替代仅移出当前引用，历史run不变。
+
 ### repurchase
 
 - 官方来源：[repurchase](https://tushare.pro/document/2?doc_id=124)；本次获取 UTC `2026-09-12T12:10:55.944858+00:00`；HTTP GET成功（curl退出0），已取得接口正文。
@@ -362,6 +409,10 @@ SOURCE run `issue018-t13-source-20260912T123840Z`：UTC `2026-09-12T17:18:49.462
 - 输入表准确引文：ann_date str N 公告日期（任意填参数，如果都不填，单次默认返回2000条）；start_date str N 公告开始日期；end_date str N 公告结束日期
 - 设计范围：D/N，输出轴 `ann_date`。待核对：默认无参数2000不是区间硬上限；合法多股票保留
 - T14早期结论（历史）：NEEDS_VERIFICATION；新完整SINGLE及SQL通过，RANGE未验收。新SOURCE852行/585只股票，合法证券代码852、不可用0，多股票数量已观察；默认2000仅适用不传参，当前带日期请求完整性仍UNKNOWN，完整边界及RANGE TASK未闭环。旧失败SOURCE身份仍保留，不能复用其PASS子集作为清洁整轮。
+
+- ISSUE-031排除前结论（历史）：NEEDS_VERIFICATION / tushare-range-v3；原无股票202608公告窗首项TASK为FAILED/ADAPTER_TYPE_INVALID，规范SQL前后均null，另4项NOT_RUN。一次原包/原参数诊断观察852行、转换失败0、15个冲突组（相对各组首行17次差异比较）；差异仅end_date/vol/amount/high_limit/low_limit，原键ts_code,ann_date,proc的记录身份规则待定，5项仍在272目标内。SINGLE保持，诊断不算TASK验收，详见[诊断结果](ISSUE-031-range-live-task-verification.md#三接口冲突诊断与剩余阻塞)。
+
+- 当前范围处置：EXCLUDED；用户明确本次不支持`repurchase`的RANGE批量下载，见[范围决定](../issues/proposals/ISSUE-026-range-scope.md)。上述失败/诊断及SINGLE保留，运行能力仍NEEDS_VERIFICATION/v3，本次不修复或补验。
 
 ### stk_holdertrade
 
@@ -372,6 +423,8 @@ SOURCE run `issue018-t13-source-20260912T123840Z`：UTC `2026-09-12T17:18:49.462
 - 设计范围：S/N，输出轴 `ann_date`。待核对：不按实际增减持起止日期校验
 - T14早期结论（历史）：NEEDS_VERIFICATION；ISSUE-023两基准公告20210907/20241220各4窗口非空，单日中业务起止日均在公告范围外；原业务键不变。真实RANGE TASK/SQL交ISSUE-026。 新完整SINGLE及SQL通过，旧失败/空SOURCE保存在原runs；当前不提前开放。
 
+- ISSUE-031当前结论：AVAILABLE / tushare-range-v2；本接口全部当前固定TASK、SQL、代表场景与清洁身份/独立审查成立，见[续办验收](ISSUE-031-range-live-task-verification.md)。原NOT_RUN若有对应替代仅移出当前引用，历史run不变。
+
 ### top10_holders
 
 - 官方来源：[top10_holders](https://tushare.pro/document/2?doc_id=61)；本次获取 UTC `2026-09-12T12:10:56.308423+00:00`；HTTP GET成功（curl退出0），已取得接口正文。
@@ -380,6 +433,8 @@ SOURCE run `issue018-t13-source-20260912T123840Z`：UTC `2026-09-12T17:18:49.462
 - 输入表准确引文：ts_code str Y TS代码；period str N 报告期（YYYYMMDD格式，一般为每个季度最后一天）；ann_date str N 公告日期；start_date str N 报告期开始日期；end_date str N 报告期结束日期
 - 设计范围：S/N，输出轴 `end_date`。待核对：报告期，公告日可越出区间；补完整性
 - T14早期结论（历史）：NEEDS_VERIFICATION；新完整SINGLE及SQL通过，RANGE未验收。报告窗40行、上端10行；两股票SINGLE与下端为空，典型10条不能构造完整性规则。旧失败SOURCE身份仍保留，不能复用其PASS子集作为清洁整轮。
+
+- ISSUE-031当前结论：AVAILABLE / tushare-range-v2；本接口全部当前固定TASK、SQL、代表场景与清洁身份/独立审查成立，见[续办验收](ISSUE-031-range-live-task-verification.md)。原NOT_RUN/工具缺证据项若有显式对应替代仅移出当前引用，历史run不变。
 
 ### top10_floatholders
 
@@ -390,6 +445,8 @@ SOURCE run `issue018-t13-source-20260912T123840Z`：UTC `2026-09-12T17:18:49.462
 - 设计范围：S/N，输出轴 `end_date`。待核对：同上
 - T14早期结论（历史）：NEEDS_VERIFICATION；新完整SINGLE及SQL通过，RANGE未验收。报告窗40行、上端10行；两股票SINGLE与下端为空，典型10条不能构造完整性规则。旧失败SOURCE身份仍保留，不能复用其PASS子集作为清洁整轮。
 
+- ISSUE-031当前结论：AVAILABLE / tushare-range-v2；本接口全部当前固定TASK、SQL、代表场景与清洁身份/独立审查成立，见[续办验收](ISSUE-031-range-live-task-verification.md)。原NOT_RUN/工具缺证据项若有显式对应替代仅移出当前引用，历史run不变。
+
 ### new_share
 
 - 官方来源：[new_share](https://tushare.pro/document/2?doc_id=123)；本次获取 UTC `2026-09-12T12:10:55.620200+00:00`；HTTP GET成功（curl退出0），已取得接口正文。
@@ -399,6 +456,8 @@ SOURCE run `issue018-t13-source-20260912T123840Z`：UTC `2026-09-12T17:18:49.462
 - 设计范围：D/N，输出轴 `ipo_date`。待核对：上网发行日期，不能用issue_date上市日期
 - T14早期结论（历史）：NEEDS_VERIFICATION；ISSUE-022原非股票请求20180905～20180927整段10行、两端1/2行；同一行ipo_date申购与issue_date上市均不同，整段2行上市在外。候选策略及RANGE TASK/SQL交ISSUE-026。 新完整SINGLE及SQL通过，旧SOURCE失败/空观察仍保存在原runs。
 
+- ISSUE-031当前结论：AVAILABLE / tushare-range-v2；本接口全部当前固定TASK、SQL、代表场景与清洁身份/独立审查成立，见[续办验收](ISSUE-031-range-live-task-verification.md)。原NOT_RUN若有对应替代仅移出当前引用，历史run不变。
+
 ### stk_managers
 
 - 官方来源：[stk_managers](https://tushare.pro/document/2?doc_id=193)；本次获取 UTC `2026-09-12T12:10:55.945035+00:00`；HTTP GET成功（curl退出0），已取得接口正文。
@@ -407,6 +466,8 @@ SOURCE run `issue018-t13-source-20260912T123840Z`：UTC `2026-09-12T17:18:49.462
 - 输入表准确引文：ts_code str N 股票代码，支持单个或多个股票输入；ann_date str N 公告日期（YYYYMMDD格式，下同）；start_date str N 公告开始日期；end_date str N 公告结束日期
 - 设计范围：S/N，输出轴 `ann_date`。待核对：snapshot SINGLE之外的公告区间需真实证明
 - T14早期结论（历史）：NEEDS_VERIFICATION；新完整SINGLE及SQL通过，RANGE未验收。公告窗上端为空；两股票snapshot不能替代两股票RANGE边界证据。旧失败SOURCE身份仍保留，不能复用其PASS子集作为清洁整轮。
+
+- ISSUE-031当前结论：AVAILABLE / tushare-range-v2；本接口全部当前固定TASK、SQL、代表场景与清洁身份/独立审查成立，见[续办验收](ISSUE-031-range-live-task-verification.md)。原NOT_RUN/工具缺证据项若有显式对应替代仅移出当前引用，历史run不变。
 
 ### pledge_stat
 
@@ -425,6 +486,8 @@ SOURCE run `issue018-t13-source-20260912T123840Z`：UTC `2026-09-12T17:18:49.462
 - 输入表准确引文：ts_code str N 股票代码；ann_date str N 公告日期；start_date str N 公告开始日期；end_date str N 公告结束日期
 - 设计范围：S/N，输出轴 `ann_date`。待核对：输出start_date/end_date为质押业务日期
 - T14早期结论（历史）：NEEDS_VERIFICATION；ISSUE-023经用户同意以000014.SZ/600000.SH完成非空整段和边界，公告与质押开始/结束/解押日期同一行对照成立；000001.SZ固定SINGLE仍0行并保留。此前“两股票各2行”为汇总错误，实际旧SINGLE源行数0/2。TASK/SQL交ISSUE-026。 新完整SINGLE及SQL通过，旧失败/空SOURCE保存在原runs；当前不提前开放。
+
+- ISSUE-031当前结论：AVAILABLE / tushare-range-v2；本接口全部当前固定TASK、SQL、代表场景与清洁身份/独立审查成立，见[续办验收](ISSUE-031-range-live-task-verification.md)。原NOT_RUN若有对应替代仅移出当前引用，历史run不变。
 
 ### index_classify
 
@@ -452,42 +515,42 @@ SOURCE run `issue018-t13-source-20260912T123840Z`：UTC `2026-09-12T17:18:49.462
 | --- | --- | --- | --- | --- |
 | stock_basic | PASS | PASS | 不适用 | SINGLE_ONLY |
 | stock_company | PASS | PASS | 不适用 | SINGLE_ONLY |
-| income | PASS | PASS | NOT_RUN | NEEDS_VERIFICATION |
-| balancesheet | PASS | PASS | NOT_RUN | NEEDS_VERIFICATION |
-| cashflow | PASS | PASS | NOT_RUN | NEEDS_VERIFICATION |
-| fina_indicator | PASS | PASS | FAILED | NEEDS_VERIFICATION |
-| fina_audit | PASS | PASS | NOT_RUN | NEEDS_VERIFICATION |
+| income | PASS | PASS | PASS | AVAILABLE |
+| balancesheet | PASS | PASS | FAILED | EXCLUDED |
+| cashflow | PASS | PASS | FAILED | EXCLUDED |
+| fina_indicator | PASS | PASS | FAILED | EXCLUDED |
+| fina_audit | PASS | PASS | PASS | AVAILABLE |
 | fina_mainbz | PASS | PASS | PASS | AVAILABLE |
 | stk_rewards | PASS | PASS | 不适用 | SINGLE_ONLY |
-| stk_holdernumber | PASS | PASS | NOT_RUN | NEEDS_VERIFICATION |
-| trade_cal | PASS | PASS | EVIDENCE_MISSING | NEEDS_VERIFICATION |
+| stk_holdernumber | PASS | PASS | PASS | AVAILABLE |
+| trade_cal | PASS | PASS | PASS | AVAILABLE |
 | margin | PASS | PASS | PASS | AVAILABLE |
 | daily | PASS | PASS | PASS | AVAILABLE |
-| weekly | PASS | PASS | NOT_RUN | NEEDS_VERIFICATION |
-| monthly | PASS | PASS | NOT_RUN | NEEDS_VERIFICATION |
-| adj_factor | PASS | PASS | NOT_RUN | NEEDS_VERIFICATION |
-| suspend_d | PASS | PASS | NOT_RUN | NEEDS_VERIFICATION |
+| weekly | PASS | PASS | PASS | AVAILABLE |
+| monthly | PASS | PASS | PASS | AVAILABLE |
+| adj_factor | PASS | PASS | PASS | AVAILABLE |
+| suspend_d | PASS | PASS | PASS | AVAILABLE |
 | daily_basic | PASS | PASS | PASS | AVAILABLE |
 | moneyflow | PASS | PASS | PASS | AVAILABLE |
 | stk_limit | PASS | PASS | PASS | AVAILABLE |
 | top_list | PASS | PASS | PASS | AVAILABLE |
 | margin_detail | PASS | PASS | PASS | AVAILABLE |
-| block_trade | PASS | PASS | NOT_RUN | NEEDS_VERIFICATION |
-| slb_len | PASS | PASS | NOT_RUN | NEEDS_VERIFICATION |
-| slb_sec | PASS | PASS | NOT_RUN | NEEDS_VERIFICATION |
-| slb_sec_detail | PASS | PASS | NOT_RUN | NEEDS_VERIFICATION |
+| block_trade | PASS | PASS | PASS | AVAILABLE |
+| slb_len | PASS | PASS | PASS | AVAILABLE |
+| slb_sec | PASS | PASS | PASS | AVAILABLE |
+| slb_sec_detail | PASS | PASS | PASS | AVAILABLE |
 | forecast | PASS | PASS | PASS | AVAILABLE |
-| express | PASS | PASS | NOT_RUN | NEEDS_VERIFICATION |
+| express | PASS | PASS | PASS | AVAILABLE |
 | dividend | PASS | PASS | PASS | AVAILABLE |
-| disclosure_date | PASS | PASS | NOT_RUN | NEEDS_VERIFICATION |
-| repurchase | PASS | PASS | NOT_RUN | NEEDS_VERIFICATION |
-| stk_holdertrade | PASS | PASS | NOT_RUN | NEEDS_VERIFICATION |
-| top10_holders | PASS | PASS | NOT_RUN | NEEDS_VERIFICATION |
-| top10_floatholders | PASS | PASS | NOT_RUN | NEEDS_VERIFICATION |
-| new_share | PASS | PASS | NOT_RUN | NEEDS_VERIFICATION |
-| stk_managers | PASS | PASS | NOT_RUN | NEEDS_VERIFICATION |
+| disclosure_date | PASS | PASS | PASS | AVAILABLE |
+| repurchase | PASS | PASS | FAILED | EXCLUDED |
+| stk_holdertrade | PASS | PASS | PASS | AVAILABLE |
+| top10_holders | PASS | PASS | PASS | AVAILABLE |
+| top10_floatholders | PASS | PASS | PASS | AVAILABLE |
+| new_share | PASS | PASS | PASS | AVAILABLE |
+| stk_managers | PASS | PASS | PASS | AVAILABLE |
 | pledge_stat | PASS | PASS | 不适用 | SINGLE_ONLY |
-| pledge_detail | PASS | PASS | NOT_RUN | NEEDS_VERIFICATION |
+| pledge_detail | PASS | PASS | PASS | AVAILABLE |
 | index_classify | PASS | PASS | 不适用 | SINGLE_ONLY |
 | index_member_all | PASS | PASS | 不适用 | SINGLE_ONLY |
 
@@ -721,3 +784,7 @@ fina_mainbz保留母issue指定旧12项，并新增`issue026-mainbz-split-source
 重建工具用`validateEvidence`、`validateCasePlan`和`selectTaskCases`逐项验证272项计划，并保存恰一个完整SOURCE引用的`sourceBindings`。错误run、同参数无身份歧义、旧满额、未引用SOURCE、RESPONSE_ONLY缺完整身份均拒绝；仅有SOURCE时不能将正式接口改为AVAILABLE。私有固定输入位于`/private/tmp/issue030-control/`，目录权限0700、文件0600：`candidate-inputs.json` SHA-256 `9c2cb2a9daab04c13bf9aeed5ac69a0d403453611c4a3b40b85d8685837c7b3d`，`source-bindings.json` SHA-256 `a4ce0c747643c91745726b87b4ea5ae682152ac2e542a6783bcd0402acbbba02`。历史runs对象摘要为`95b2e7e0a4743f982d1818540ea8075f694050b9e0ac51a13617f63529381313`，仍为26轮/826 case/928次请求。
 
 本节没有新建或修改run/case事实，没有提交真实TASK、查询业务数据库或生成TASK/SQL结论。272项只是ISSUE-031可冻结输入；真实RANGE TASK/SQL失败时仍须保存事实并按后继合同撤回候选。
+
+### 回购当前撤回说明
+
+repurchase首个独立TASK适配失败，当前tushare-range-v3 / NEEDS_VERIFICATION；原字段、业务键与SINGLE保持。SQL-after缺失仍保留null，补充表0不替代任务闭环；详细证据见[当前验收](ISSUE-031-range-live-task-verification.md#回购失败保全与续验范围)。

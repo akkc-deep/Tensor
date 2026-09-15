@@ -45,6 +45,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.web.client.RestClient;
 
@@ -54,17 +56,20 @@ class TushareBatchAvailabilityTest {
             new TusharePluginConfiguration().tushareDatasetDefinitions();
     private static final Set<String> SINGLE_ONLY = Set.of(
             "pledge_stat", "stk_rewards", "stock_basic", "stock_company", "index_classify", "index_member_all");
+    private static final Set<String> WITHDRAWN = Set.of("fina_indicator", "balancesheet", "cashflow", "repurchase");
     private static final Map<String, RangeExpectation> RANGE = rangeExpectations();
     private static final Map<String, String> VALUES = Map.of(
             "ts_code", "000001.SZ", "trade_date", "20260903", "ann_date", "20260903",
             "exchange", "SSE", "exchange_id", "SSE", "start_date", "20260901",
             "end_date", "20260903", "list_status", "L");
 
-    @Test
-    void failedFinancialIndicatorRangeIsWithdrawnBeforeQueueOrSourceAccess() {
+    @ParameterizedTest
+    @CsvSource({"fina_indicator,20250331,20251231", "balancesheet,20240101,20241231",
+            "cashflow,20240101,20241231", "repurchase,20260801,20260831"})
+    void failedRangesAreWithdrawnBeforeQueueOrSourceAccess(String apiName, String start, String end) {
         var h = harness();
         var key = DEFINITIONS.stream().map(DatasetDefinition::datasetKey)
-                .filter(k -> k.apiName().value().equals("fina_indicator")).findFirst().orElseThrow();
+                .filter(k -> k.apiName().value().equals(apiName)).findFirst().orElseThrow();
         var capabilities = h.service().capabilities(key);
         assertThat(capabilities.single().available()).isTrue();
         assertThat(capabilities.range().availability()).isEqualTo(Availability.NEEDS_VERIFICATION);
@@ -72,7 +77,8 @@ class TushareBatchAvailabilityTest {
         assertThat(capabilities.range().completenessRule().kind()).isEqualTo(Kind.UNKNOWN);
         assertThatThrownBy(() -> h.service().submit(new DownloadTaskService.Submission(
                 UUID.randomUUID(), key, DownloadMode.RANGE,
-                Map.of("ts_code", "000001.SZ", "start_date", "20250331", "end_date", "20251231"))))
+                apiName.equals("repurchase") ? Map.of("start_date", start, "end_date", end)
+                        : Map.of("ts_code", "000001.SZ", "start_date", start, "end_date", end))))
                 .isInstanceOfSatisfying(TensorException.class,
                         error -> assertThat(error.code()).isEqualTo(ErrorCode.BATCH_DOWNLOAD_UNAVAILABLE));
         verify(h.repository(), never()).queuedCount();
@@ -81,7 +87,7 @@ class TushareBatchAvailabilityTest {
     }
 
     @Test
-    void exposesThirtyThreeCandidatesAndTheWithdrawnRange() {
+    void exposesCandidatesAndWithdrawnRanges() {
         var h = harness();
         var candidates = new ArrayList<String>();
         for (var definition : DEFINITIONS) {
@@ -94,7 +100,7 @@ class TushareBatchAvailabilityTest {
             } else {
                 String name = key.apiName().value(); var expected = RANGE.get(name); var range = capability.range();
                 assertThat(expected).as(name).isNotNull();
-                boolean withdrawn = name.equals("fina_indicator");
+                boolean withdrawn = WITHDRAWN.contains(name);
                 assertThat(range.availability()).as(name).isEqualTo(withdrawn ? Availability.NEEDS_VERIFICATION : Availability.AVAILABLE);
                 assertThat(range.policyVersion()).as(name).isEqualTo(withdrawn ? "tushare-range-v3" : "tushare-range-v2");
                 assertThat(range.dateAxis()).as(name).isEqualTo(expected.dateAxis());
@@ -124,13 +130,13 @@ class TushareBatchAvailabilityTest {
     }
 
     @Test
-    void acceptsThirtyThreeCandidatesAsQueuedWithoutCallingUpstream() {
+    void acceptsThirtyCandidatesAsQueuedWithoutCallingUpstream() {
         var h = harness();
         queuedInserts(h);
         var accepted = new ArrayList<String>();
         for (var definition : DEFINITIONS) {
             String apiName = definition.datasetKey().apiName().value();
-            if (!RANGE.containsKey(apiName) || apiName.equals("fina_indicator")) continue;
+            if (!RANGE.containsKey(apiName) || WITHDRAWN.contains(apiName)) continue;
             var range = h.service().capabilities(definition.datasetKey()).range();
             var variants = apiName.equals("trade_cal") ? List.of("SSE", "SZSE")
                     : apiName.equals("margin") ? List.of("SSE", "SZSE", "BSE")
@@ -154,8 +160,8 @@ class TushareBatchAvailabilityTest {
             }
             accepted.add(apiName);
         }
-        assertThat(accepted).hasSize(33).containsExactlyInAnyOrderElementsOf(
-                RANGE.keySet().stream().filter(n -> !n.equals("fina_indicator")).toList());
+        assertThat(accepted).hasSize(30).containsExactlyInAnyOrderElementsOf(
+                RANGE.keySet().stream().filter(n -> !WITHDRAWN.contains(n)).toList());
         h.upstream().verify();
     }
 

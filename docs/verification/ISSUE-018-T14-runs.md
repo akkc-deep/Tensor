@@ -1892,3 +1892,727 @@ weekly另据ISSUE-021两交易所20240930～20241007真实完整日历（仅0930
 新隔离包身份及定向155、Node104、完整acceptance后端/两包1134和前端524通过见[撤回后验证](ISSUE-031-range-live-task-verification.md#撤回后离线验证与新身份)。本记录不把旧v2实测归于新v3包，ISSUE-031保持BLOCKED，尚无最终收尾或发布结果。
 
 撤回新包metadata普通浏览器40/40 PASS、exit0；安全汇总零TASK/零上游，JVM/容器/临时秘密清理通过，前后验收包身份不变。安全原件及SHA见上述ISSUE-031验收。
+
+## ISSUE-031 dates 真实TASK预登记（20260914T185851Z）
+
+- runId `issue031-range-dates-20260914T185851Z`；固定29 TASK、API `stk_holdernumber, trade_cal, weekly, monthly, new_share`，完整清单 `/private/tmp/issue031-range-dates-20260914T185851Z/inputs/cases.json`。原参数/日期轴/来源身份不变；本段登记时尚未启动真实任务。
+- SOURCE既有观察合计29请求，仅用于预算；实际TASK请求数待实测，潜在日期二分仍受5000请求/30分钟硬限约束（最坏树可能超过预算，不保证全部完成）。每请求间隔≥2000ms、workers=1、retries=0，trace/screenshot/video关闭。fixture另2提交/3查询，目标records查询58次。
+- 新空schema计划 `tensor_m14_t05_ed76a36414a553d2`，MySQL8.4.6；创建后核对0表、单库最小权限与UTF-8，应用启动后核对8迁移/52业务与任务表。全部成功数据库保留；只管理本轮JVM，固定HTTPS。
+- 私有输入父目录0700/文件0600，索引仅按本轮快照消费；hash：`cases.json` `9467f95c51bb18e5112f79f1d13da5ce95c51764fd2d624c38d6becca03a59eb`；`evidence-index.json` `0ce5418cb1bd1df6862a704db43b0e00041733dd9206e53a2fdb2d1b68554e3d`；`source-bindings.json` `9318be567fce0418d7e265634ee15140a524409c56e16e15a9d8bf95ed7c2c58`。
+- 源码/两包沿用ISSUE-031撤回构建冻结897文件snapshot `632a8308f20b33908542f2cb65e821a0a3037a3abba78194ae95dbda54e064cf`，422相关源码与工作树相同；生产 `ff30109702e240d34782618f62ab9efed4bdd977e8a691f322d05f6806838bb5` / 验收 `6522cbbd6d02decf91136bc47766de59ec55e369b84fd3e9d00390bd47e5d7f1`；其余身份见本轮wrapper记录和ISSUE-031撤回构建登记。
+- SOURCE→TASK逐项绑定 `/private/tmp/issue031-range-dates-20260914T185851Z/inputs/source-bindings.json`；每项均核对页面→202/Location→详情/全部批次→两次records→SQL原键/归属/实际source、insert、update/日志与清理。失败或输入变化停止，无自动重试或换日期；结果随后追加。
+
+### ISSUE-031 dates 实际结果（issue031-range-dates-20260914T185851Z）
+
+- 浏览器exit0，cleanup PASS；29计划项，状态{"PASS":29,"FAILED":0,"EVIDENCE_MISSING":0,"NOT_RUN":0}。实际来源29请求、records 58次；fixture另2提交/3查询。source 205行、insert 186次、update 19次，最终SQL键数按API单独记录。
+- 完整本轮安全输出`/private/tmp/issue031-range-dates-20260914T185851Z/artifacts/run/safe-results.json` SHA `bfcef88e148ddc2a9b14e993985f27eb9667095038beb89ceeeee0b18bcdaa46`；wrapper身份`/private/tmp/issue031-range-dates-20260914T185851Z/artifacts/task-run-identity.json` SHA `dc8036f008c778f7badca4d25ef6ad407f4858e14fb6e2cef04e1bd90fb56a39`。冻结源码/897 snapshot/两包/输入/私有权限前后保持，日志安全、自有进程回收、网络与任务日志关联通过情况以原产物为准；SQL安全汇总`/private/tmp/issue031-range-dates-20260914T185851Z/sql-supplement.json`。新库成功数据保留；临时client.cnf/environment.json已删除，实际清理见本轮secret-cleanup.json。
+- 旧30轮逐对象保持，唯一索引追加后31轮/972case/1110请求。逐项来源绑定与持久策略在harness核对；本轮经独立运行审查后开放接口：stk_holdernumber、trade_cal、weekly、monthly、new_share。
+
+| TASK caseId | 状态 | 请求 | source | insert | update | SQL前→后键数 | 成功叶/总叶 |
+| --- | --- | ---: | ---: | ---: | ---: | --- | --- |
+| `issue031-resume-issue026-issue022-holder-000001-whole` | PASS | 1 | 1 | 1 | 0 | 0→1 | 1/1 |
+| `issue031-resume-issue026-issue022-holder-000001-event` | PASS | 1 | 1 | 0 | 1 | 1→1 | 1/1 |
+| `issue031-resume-issue026-issue022-holder-000001-lower-edge` | PASS | 1 | 1 | 0 | 1 | 1→1 | 1/1 |
+| `issue031-resume-issue026-issue022-holder-000001-upper-edge` | PASS | 1 | 1 | 0 | 1 | 1→1 | 1/1 |
+| `issue031-resume-issue026-issue022-holder-600000-whole` | PASS | 1 | 1 | 1 | 0 | 1→2 | 1/1 |
+| `issue031-resume-issue026-issue022-holder-600000-event` | PASS | 1 | 1 | 0 | 1 | 2→2 | 1/1 |
+| `issue031-resume-issue026-issue022-holder-600000-lower-edge` | PASS | 1 | 1 | 0 | 1 | 2→2 | 1/1 |
+| `issue031-resume-issue026-issue022-holder-600000-upper-edge` | PASS | 1 | 1 | 0 | 1 | 2→2 | 1/1 |
+| `issue031-resume-issue026-issue022-cal-week-SSE` | PASS | 1 | 21 | 21 | 0 | 0→21 | 1/1 |
+| `issue031-resume-issue026-issue022-cal-month-SSE` | PASS | 1 | 61 | 61 | 0 | 21→82 | 1/1 |
+| `issue031-resume-issue026-issue022-cal-week-SZSE` | PASS | 1 | 21 | 21 | 0 | 82→103 | 1/1 |
+| `issue031-resume-issue026-issue022-cal-month-SZSE` | PASS | 1 | 61 | 61 | 0 | 103→164 | 1/1 |
+| `issue031-resume-issue026-issue022-weekly-000001-whole` | PASS | 1 | 3 | 3 | 0 | 0→3 | 1/1 |
+| `issue031-resume-issue026-issue022-weekly-000001-lower` | PASS | 1 | 1 | 0 | 1 | 3→3 | 1/1 |
+| `issue031-resume-issue026-issue022-weekly-000001-upper` | PASS | 1 | 1 | 0 | 1 | 3→3 | 1/1 |
+| `issue031-resume-issue026-issue022-weekly-000001-holiday-last` | PASS | 1 | 1 | 0 | 1 | 3→3 | 1/1 |
+| `issue031-resume-issue026-issue022-weekly-600000-whole` | PASS | 1 | 3 | 3 | 0 | 3→6 | 1/1 |
+| `issue031-resume-issue026-issue022-weekly-600000-lower` | PASS | 1 | 1 | 0 | 1 | 6→6 | 1/1 |
+| `issue031-resume-issue026-issue022-weekly-600000-upper` | PASS | 1 | 1 | 0 | 1 | 6→6 | 1/1 |
+| `issue031-resume-issue026-issue022-weekly-600000-holiday-last` | PASS | 1 | 1 | 0 | 1 | 6→6 | 1/1 |
+| `issue031-resume-issue026-issue022-monthly-000001-whole` | PASS | 1 | 2 | 2 | 0 | 0→2 | 1/1 |
+| `issue031-resume-issue026-issue022-monthly-000001-lower` | PASS | 1 | 1 | 0 | 1 | 2→2 | 1/1 |
+| `issue031-resume-issue026-issue022-monthly-000001-upper` | PASS | 1 | 1 | 0 | 1 | 2→2 | 1/1 |
+| `issue031-resume-issue026-issue022-monthly-600000-whole` | PASS | 1 | 2 | 2 | 0 | 2→4 | 1/1 |
+| `issue031-resume-issue026-issue022-monthly-600000-lower` | PASS | 1 | 1 | 0 | 1 | 4→4 | 1/1 |
+| `issue031-resume-issue026-issue022-monthly-600000-upper` | PASS | 1 | 1 | 0 | 1 | 4→4 | 1/1 |
+| `issue031-resume-issue026-issue022-ipo-whole` | PASS | 1 | 10 | 10 | 0 | 0→10 | 1/1 |
+| `issue031-resume-issue026-issue022-ipo-lower` | PASS | 1 | 1 | 0 | 1 | 10→10 | 1/1 |
+| `issue031-resume-issue026-issue022-ipo-upper` | PASS | 1 | 2 | 0 | 2 | 10→10 | 1/1 |
+
+## ISSUE-031 events 真实TASK预登记（20260914T191040Z）
+
+- runId `issue031-range-events-20260914T191040Z`；固定37 TASK、API `block_trade, disclosure_date, stk_holdertrade, pledge_detail`，完整清单 `/private/tmp/issue031-range-events-20260914T191040Z/inputs/cases.json`。原参数/日期轴/来源身份不变；本段登记时尚未启动真实任务。
+- SOURCE既有观察合计129请求，仅用于预算；实际TASK请求数待实测，潜在日期二分仍受5000请求/30分钟硬限约束（最坏树可能超过预算，不保证全部完成）。每请求间隔≥2000ms、workers=1、retries=0，trace/screenshot/video关闭。fixture另2提交/3查询，目标records查询74次。
+- 新空schema计划 `tensor_m14_t05_45615ec0a5c947d1`，MySQL8.4.6；创建后核对0表、单库最小权限与UTF-8，应用启动后核对8迁移/52业务与任务表。全部成功数据库保留；只管理本轮JVM，固定HTTPS。
+- 私有输入父目录0700/文件0600，索引仅按本轮快照消费；hash：`cases.json` `ad95f8d7701f5e1a5c19be2ac3ac7e8fa9f9f19a63f5f08df7c11397fcff4e55`；`evidence-index.json` `ca122ea073edd475b07cc1010a8f56a2eb23e14084cfdc5d590d590767b6f9db`；`source-bindings.json` `4c33705e82fac4bae645f10dc579abbd252dc979888f52cec2542c133c90f0b4`。
+- 源码/两包沿用ISSUE-031撤回构建冻结897文件snapshot `632a8308f20b33908542f2cb65e821a0a3037a3abba78194ae95dbda54e064cf`，422相关源码与工作树相同；生产 `ff30109702e240d34782618f62ab9efed4bdd977e8a691f322d05f6806838bb5` / 验收 `6522cbbd6d02decf91136bc47766de59ec55e369b84fd3e9d00390bd47e5d7f1`；其余身份见本轮wrapper记录和ISSUE-031撤回构建登记。
+- SOURCE→TASK逐项绑定 `/private/tmp/issue031-range-events-20260914T191040Z/inputs/source-bindings.json`；每项均核对页面→202/Location→详情/全部批次→两次records→SQL原键/归属/实际source、insert、update/日志与清理。失败或输入变化停止，无自动重试或换日期；结果随后追加。
+
+### ISSUE-031 events 实际结果（issue031-range-events-20260914T191040Z）
+
+- 浏览器exit0，cleanup PASS；37计划项，状态{"PASS":37,"FAILED":0,"EVIDENCE_MISSING":0,"NOT_RUN":0}。实际来源129请求、records 74次；fixture另2提交/3查询。source 98行、insert 40次、update 58次，最终SQL键数按API单独记录。
+- 完整本轮安全输出`/private/tmp/issue031-range-events-20260914T191040Z/artifacts/run/safe-results.json` SHA `f924471179792c3c2a50f5168b5ebd3b86a674b05e9845253bc3eabfad9a45e3`；wrapper身份`/private/tmp/issue031-range-events-20260914T191040Z/artifacts/task-run-identity.json` SHA `fd87712427f11803cb78ce0a87efb129150ae6142c7c6277d4c12e22d2258ccf`。冻结源码/897 snapshot/两包/输入/私有权限前后保持，日志安全、自有进程回收、网络与任务日志关联通过情况以原产物为准；SQL安全汇总`/private/tmp/issue031-range-events-20260914T191040Z/sql-supplement.json`。新库成功数据保留；临时client.cnf/environment.json已删除，实际清理见本轮secret-cleanup.json。
+- 旧31轮逐对象保持，唯一索引追加后32轮/1009case/1239请求。逐项来源绑定与持久策略在harness核对；本轮经独立运行审查后开放接口：block_trade、disclosure_date、stk_holdertrade、pledge_detail。
+
+| TASK caseId | 状态 | 请求 | source | insert | update | SQL前→后键数 | 成功叶/总叶 |
+| --- | --- | ---: | ---: | ---: | ---: | --- | --- |
+| `issue026-issue023-source-20260913T144308Z-block-official` | PASS | 1 | 14 | 14 | 0 | 0→14 | 1/1 |
+| `issue026-issue023-boundary-source-20260913T145716Z-block-official-event` | PASS | 1 | 5 | 0 | 5 | 14→14 | 1/1 |
+| `issue026-issue023-source-20260913T144308Z-block-000001-whole` | PASS | 1 | 2 | 2 | 0 | 14→16 | 1/1 |
+| `issue026-issue023-source-20260913T144308Z-block-000001-event` | PASS | 1 | 2 | 0 | 2 | 16→16 | 1/1 |
+| `issue026-issue023-source-20260913T144308Z-block-000001-lower-edge` | PASS | 1 | 2 | 0 | 2 | 16→16 | 1/1 |
+| `issue026-issue023-source-20260913T144308Z-block-000001-upper-edge` | PASS | 1 | 2 | 0 | 2 | 16→16 | 1/1 |
+| `issue026-issue023-source-20260913T144308Z-block-600000-whole` | PASS | 1 | 2 | 2 | 0 | 16→18 | 1/1 |
+| `issue026-issue023-source-20260913T144308Z-block-600000-event` | PASS | 1 | 2 | 0 | 2 | 18→18 | 1/1 |
+| `issue026-issue023-source-20260913T144308Z-block-600000-lower-edge` | PASS | 1 | 2 | 0 | 2 | 18→18 | 1/1 |
+| `issue026-issue023-source-20260913T144308Z-block-600000-upper-edge` | PASS | 1 | 2 | 0 | 2 | 18→18 | 1/1 |
+| `issue026-issue023-source-20260913T144308Z-disclosure-official` | PASS | 3 | 1 | 1 | 0 | 0→1 | 3/3 |
+| `issue026-issue023-events-source-20260913T145005Z-disclosure-000001-revision-window` | PASS | 27 | 1 | 1 | 0 | 1→2 | 27/27 |
+| `issue026-issue023-boundary-source-20260913T145716Z-disclosure-000001-event` | PASS | 1 | 1 | 0 | 1 | 2→2 | 1/1 |
+| `issue026-disclosure-000001-update-recheck` | PASS | 1 | 1 | 0 | 1 | 2→2 | 1/1 |
+| `issue026-issue023-boundary-source-20260913T145716Z-disclosure-000001-lower-edge` | PASS | 2 | 1 | 0 | 1 | 2→2 | 2/2 |
+| `issue026-issue023-boundary-source-20260913T145716Z-disclosure-000001-upper-edge` | PASS | 2 | 1 | 0 | 1 | 2→2 | 2/2 |
+| `issue026-issue023-events-source-20260913T145005Z-disclosure-600000-revision-window` | PASS | 61 | 1 | 1 | 0 | 2→3 | 61/61 |
+| `issue026-issue023-boundary-source-20260913T145716Z-disclosure-600000-event` | PASS | 1 | 1 | 0 | 1 | 3→3 | 1/1 |
+| `issue026-disclosure-600000-update-recheck` | PASS | 1 | 1 | 0 | 1 | 3→3 | 1/1 |
+| `issue026-issue023-boundary-source-20260913T145716Z-disclosure-600000-lower-edge` | PASS | 2 | 1 | 0 | 1 | 3→3 | 2/2 |
+| `issue026-issue023-boundary-source-20260913T145716Z-disclosure-600000-upper-edge` | PASS | 2 | 1 | 0 | 1 | 3→3 | 2/2 |
+| `issue026-issue023-source-20260913T144308Z-holder-official` | PASS | 1 | 2 | 2 | 0 | 0→2 | 1/1 |
+| `issue026-issue023-events-source-20260913T145005Z-holder-000001-whole` | PASS | 1 | 6 | 6 | 0 | 2→8 | 1/1 |
+| `issue026-issue023-events-source-20260913T145005Z-holder-000001-event` | PASS | 1 | 6 | 0 | 6 | 8→8 | 1/1 |
+| `issue026-issue023-events-source-20260913T145005Z-holder-000001-lower-edge` | PASS | 1 | 6 | 0 | 6 | 8→8 | 1/1 |
+| `issue026-issue023-events-source-20260913T145005Z-holder-000001-upper-edge` | PASS | 1 | 6 | 0 | 6 | 8→8 | 1/1 |
+| `issue026-issue023-events-source-20260913T145005Z-holder-600000-whole` | PASS | 1 | 1 | 1 | 0 | 8→9 | 1/1 |
+| `issue026-issue023-events-source-20260913T145005Z-holder-600000-event` | PASS | 1 | 1 | 0 | 1 | 9→9 | 1/1 |
+| `issue026-issue023-events-source-20260913T145005Z-holder-600000-lower-edge` | PASS | 1 | 1 | 0 | 1 | 9→9 | 1/1 |
+| `issue026-issue023-events-source-20260913T145005Z-holder-600000-upper-edge` | PASS | 1 | 1 | 0 | 1 | 9→9 | 1/1 |
+| `issue026-issue023-source-20260913T144308Z-pledge-official` | PASS | 1 | 8 | 8 | 0 | 0→8 | 1/1 |
+| `issue026-issue023-boundary-source-20260913T145716Z-pledge-000014-lower` | PASS | 1 | 2 | 0 | 2 | 8→8 | 1/1 |
+| `issue026-issue023-boundary-source-20260913T145716Z-pledge-000014-upper` | PASS | 1 | 4 | 0 | 4 | 8→8 | 1/1 |
+| `issue026-issue023-boundary-source-20260913T145716Z-pledge-600000-whole` | PASS | 1 | 2 | 2 | 0 | 8→10 | 1/1 |
+| `issue026-issue023-boundary-source-20260913T145716Z-pledge-600000-event` | PASS | 1 | 2 | 0 | 2 | 10→10 | 1/1 |
+| `issue026-issue023-boundary-source-20260913T145716Z-pledge-600000-lower-edge` | PASS | 1 | 2 | 0 | 2 | 10→10 | 1/1 |
+| `issue026-issue023-boundary-source-20260913T145716Z-pledge-600000-upper-edge` | PASS | 1 | 2 | 0 | 2 | 10→10 | 1/1 |
+
+## ISSUE-031 history 真实TASK预登记（20260914T192313Z）
+
+- runId `issue031-range-history-20260914T192313Z`；固定33 TASK、API `slb_len, slb_sec, slb_sec_detail`，完整清单 `/private/tmp/issue031-range-history-20260914T192313Z/inputs/cases.json`。原参数/日期轴/来源身份不变；本段登记时尚未启动真实任务。
+- SOURCE既有观察合计33请求，仅用于预算；实际TASK请求数待实测，潜在日期二分仍受5000请求/30分钟硬限约束（最坏树可能超过预算，不保证全部完成）。每请求间隔≥2000ms、workers=1、retries=0，trace/screenshot/video关闭。fixture另2提交/3查询，目标records查询66次。
+- 新空schema计划 `tensor_m14_t05_e08fdccc0312a3fa`，MySQL8.4.6；创建后核对0表、单库最小权限与UTF-8，应用启动后核对8迁移/52业务与任务表。全部成功数据库保留；只管理本轮JVM，固定HTTPS。
+- 私有输入父目录0700/文件0600，索引仅按本轮快照消费；hash：`cases.json` `7b255fad17d3f39820370cd9fdd3437dae5d0de77d79ed0174f14ba8505bf0c8`；`evidence-index.json` `0cf3cc2b1c16b441a01bf11a9993f4fe23e97ddf1b2a315dca2f0688e8c1b5f5`；`source-bindings.json` `7338361fa951b4fb255d60f9e3f7344730efa98605a1f66dec6b9d8c5977e871`。
+- 源码/两包沿用ISSUE-031撤回构建冻结897文件snapshot `632a8308f20b33908542f2cb65e821a0a3037a3abba78194ae95dbda54e064cf`，422相关源码与工作树相同；生产 `ff30109702e240d34782618f62ab9efed4bdd977e8a691f322d05f6806838bb5` / 验收 `6522cbbd6d02decf91136bc47766de59ec55e369b84fd3e9d00390bd47e5d7f1`；其余身份见本轮wrapper记录和ISSUE-031撤回构建登记。
+- SOURCE→TASK逐项绑定 `/private/tmp/issue031-range-history-20260914T192313Z/inputs/source-bindings.json`；每项均核对页面→202/Location→详情/全部批次→两次records→SQL原键/归属/实际source、insert、update/日志与清理。失败或输入变化停止，无自动重试或换日期；结果随后追加。
+
+### ISSUE-031 history 实际结果（issue031-range-history-20260914T192313Z）
+
+- 浏览器exit0，cleanup PASS；33计划项，状态{"PASS":33,"FAILED":0,"EVIDENCE_MISSING":0,"NOT_RUN":0}。实际来源33请求、records 66次；fixture另2提交/3查询。source 563行、insert 511次、update 52次，最终SQL键数按API单独记录。
+- 完整本轮安全输出`/private/tmp/issue031-range-history-20260914T192313Z/artifacts/run/safe-results.json` SHA `49a0f6ab0409719d0f147674673de3b7998afa4ed0d2264eb54e96083e846e5f`；wrapper身份`/private/tmp/issue031-range-history-20260914T192313Z/artifacts/task-run-identity.json` SHA `b508bddbe69f4e1214d4cafd3bacf1b6095a59956222059b61eb3c9e82811ff7`。冻结源码/897 snapshot/两包/输入/私有权限前后保持，日志安全、自有进程回收、网络与任务日志关联通过情况以原产物为准；SQL安全汇总`/private/tmp/issue031-range-history-20260914T192313Z/sql-supplement.json`。新库成功数据保留；临时client.cnf/environment.json已删除，实际清理见本轮secret-cleanup.json。
+- 旧32轮逐对象保持，唯一索引追加后33轮/1042case/1272请求。逐项来源绑定与持久策略在harness核对；本轮经独立运行审查后开放接口：slb_len、slb_sec、slb_sec_detail。
+
+| TASK caseId | 状态 | 请求 | source | insert | update | SQL前→后键数 | 成功叶/总叶 |
+| --- | --- | ---: | ---: | ---: | ---: | --- | --- |
+| `issue026-issue024-source-20260913T153146Z-len-whole` | PASS | 1 | 13 | 13 | 0 | 0→13 | 1/1 |
+| `issue026-issue024-source-20260913T153146Z-len-lower` | PASS | 1 | 1 | 0 | 1 | 13→13 | 1/1 |
+| `issue026-issue024-source-20260913T153146Z-len-upper` | PASS | 1 | 1 | 0 | 1 | 13→13 | 1/1 |
+| `issue026-issue024-source-20260913T153146Z-slb_len-all-suspension` | PASS | 1 | 9 | 9 | 0 | 13→22 | 1/1 |
+| `issue026-issue024-source-20260913T153146Z-slb_len-all-settlement` | PASS | 1 | 1 | 1 | 0 | 22→23 | 1/1 |
+| `issue026-issue024-source-20260913T153146Z-slb_sec-000001-whole` | PASS | 1 | 13 | 13 | 0 | 0→13 | 1/1 |
+| `issue026-issue024-source-20260913T153146Z-slb_sec-000001-official-day` | PASS | 1 | 1 | 0 | 1 | 13→13 | 1/1 |
+| `issue026-issue024-source-20260913T153146Z-slb_sec-000001-suspension` | PASS | 1 | 9 | 9 | 0 | 13→22 | 1/1 |
+| `issue026-issue024-boundary-source-20260913T153639Z-slb_sec-000001-lower` | PASS | 1 | 1 | 0 | 1 | 22→22 | 1/1 |
+| `issue026-issue024-boundary-source-20260913T153639Z-slb_sec-000001-lower-edge` | PASS | 1 | 13 | 0 | 13 | 22→22 | 1/1 |
+| `issue026-issue024-boundary-source-20260913T153639Z-slb_sec-000001-20240710` | PASS | 1 | 1 | 0 | 1 | 22→22 | 1/1 |
+| `issue026-issue024-boundary-source-20260913T153639Z-slb_sec-000001-20240711` | PASS | 1 | 1 | 0 | 1 | 22→22 | 1/1 |
+| `issue026-issue024-source-20260913T153146Z-slb_sec-600000-whole` | PASS | 1 | 13 | 13 | 0 | 22→35 | 1/1 |
+| `issue026-issue024-source-20260913T153146Z-slb_sec-600000-official-day` | PASS | 1 | 1 | 0 | 1 | 35→35 | 1/1 |
+| `issue026-issue024-source-20260913T153146Z-slb_sec-600000-suspension` | PASS | 1 | 9 | 9 | 0 | 35→44 | 1/1 |
+| `issue026-issue024-boundary-source-20260913T153639Z-slb_sec-600000-lower` | PASS | 1 | 1 | 0 | 1 | 44→44 | 1/1 |
+| `issue026-issue024-boundary-source-20260913T153639Z-slb_sec-600000-lower-edge` | PASS | 1 | 13 | 0 | 13 | 44→44 | 1/1 |
+| `issue026-issue024-boundary-source-20260913T153639Z-slb_sec-600000-20240710` | PASS | 1 | 1 | 0 | 1 | 44→44 | 1/1 |
+| `issue026-issue024-boundary-source-20260913T153639Z-slb_sec-600000-20240711` | PASS | 1 | 1 | 0 | 1 | 44→44 | 1/1 |
+| `issue026-issue024-source-20260913T153146Z-slb_sec_detail-000001-whole` | PASS | 1 | 2 | 2 | 0 | 0→2 | 1/1 |
+| `issue026-issue024-source-20260913T153146Z-detail-000001-long` | PASS | 1 | 242 | 240 | 2 | 2→242 | 1/1 |
+| `issue026-issue024-source-20260913T153146Z-slb_sec_detail-000001-official-day` | PASS | 1 | 1 | 0 | 1 | 242→242 | 1/1 |
+| `issue026-issue024-source-20260913T153146Z-slb_sec_detail-000001-suspension` | PASS | 1 | 7 | 7 | 0 | 242→249 | 1/1 |
+| `issue026-issue024-boundary-source-20260913T153639Z-slb_sec_detail-000001-lower` | PASS | 1 | 1 | 0 | 1 | 249→249 | 1/1 |
+| `issue026-issue024-boundary-source-20260913T153639Z-slb_sec_detail-000001-lower-edge` | PASS | 1 | 2 | 0 | 2 | 249→249 | 1/1 |
+| `issue026-issue024-boundary-source-20260913T153639Z-slb_sec_detail-000001-20240710` | PASS | 1 | 1 | 0 | 1 | 249→249 | 1/1 |
+| `issue026-issue024-source-20260913T153146Z-slb_sec_detail-600000-whole` | PASS | 1 | 3 | 3 | 0 | 249→252 | 1/1 |
+| `issue026-issue024-source-20260913T153146Z-detail-600000-long` | PASS | 1 | 190 | 187 | 3 | 252→439 | 1/1 |
+| `issue026-issue024-source-20260913T153146Z-slb_sec_detail-600000-official-day` | PASS | 1 | 1 | 0 | 1 | 439→439 | 1/1 |
+| `issue026-issue024-source-20260913T153146Z-slb_sec_detail-600000-suspension` | PASS | 1 | 5 | 5 | 0 | 439→444 | 1/1 |
+| `issue026-issue024-boundary-source-20260913T153639Z-slb_sec_detail-600000-lower` | PASS | 1 | 1 | 0 | 1 | 444→444 | 1/1 |
+| `issue026-issue024-boundary-source-20260913T153639Z-slb_sec_detail-600000-lower-edge` | PASS | 1 | 3 | 0 | 3 | 444→444 | 1/1 |
+| `issue026-issue024-boundary-source-20260913T153639Z-slb_sec_detail-600000-20240710` | PASS | 1 | 1 | 0 | 1 | 444→444 | 1/1 |
+
+历史窗口专项只读SQL补充：`/private/tmp/issue031-range-history-20260914T192313Z/history-sql.json` SHA `e08afd89421634726547a96e07ef32deda0f355e14ba39002d9b5863306b5a44`。33项最终窗口日期集合/原键基数/同日多键组均匹配准确SOURCE；len23、sec44（两股各22）、detail444（249/195）最终键保留。明细两长窗242/190键、196/150日期、41/33同日多键组、9/7期限、54/39费率；早期窗口及另一股票持续保留。独立审查PASS；这些观察不构成上游历史起止或持续保留保证。
+
+## ISSUE-031 response-trade 真实TASK预登记（20260914T193118Z）
+
+- runId `issue031-range-response-trade-20260914T193118Z`；固定24 TASK、API `adj_factor, suspend_d`，完整清单 `/private/tmp/issue031-range-response-trade-20260914T193118Z/inputs/cases.json`。原参数/日期轴/来源身份不变；本段登记时尚未启动真实任务。
+- SOURCE既有观察合计24请求，仅用于预算；实际TASK请求数待实测，潜在日期二分仍受5000请求/30分钟硬限约束（最坏树可能超过预算，不保证全部完成）。每请求间隔≥2000ms、workers=1、retries=0，trace/screenshot/video关闭。fixture另2提交/3查询，目标records查询48次。
+- 新空schema计划 `tensor_m14_t05_74bc9d13757ffc1e`，MySQL8.4.6；创建后核对0表、单库最小权限与UTF-8，应用启动后核对8迁移/52业务与任务表。全部成功数据库保留；只管理本轮JVM，固定HTTPS。
+- 私有输入父目录0700/文件0600，索引仅按本轮快照消费；hash：`cases.json` `18dca2aa4fac03351a2b4cfe10f66018ffb508f9df47bd12b73086db01921bff`；`evidence-index.json` `3a2fbec19ae4f30ac3cebef8ab75b87fb68bcf03889533c732234fa4ad895ef2`；`source-bindings.json` `041157e66a9f569c0f7e62537cfdfe7a23e4fd405b7a0d85a5d6bca75b971ce1`。
+- 源码/两包沿用ISSUE-031撤回构建冻结897文件snapshot `632a8308f20b33908542f2cb65e821a0a3037a3abba78194ae95dbda54e064cf`，422相关源码与工作树相同；生产 `ff30109702e240d34782618f62ab9efed4bdd977e8a691f322d05f6806838bb5` / 验收 `6522cbbd6d02decf91136bc47766de59ec55e369b84fd3e9d00390bd47e5d7f1`；其余身份见本轮wrapper记录和ISSUE-031撤回构建登记。
+- SOURCE→TASK逐项绑定 `/private/tmp/issue031-range-response-trade-20260914T193118Z/inputs/source-bindings.json`；每项均核对页面→202/Location→详情/全部批次→两次records→SQL原键/归属/实际source、insert、update/日志与清理。失败或输入变化停止，无自动重试或换日期；结果随后追加。
+
+### ISSUE-031 response-trade 实际结果（issue031-range-response-trade-20260914T193118Z）
+
+- 浏览器exit1，cleanup PASS；24计划项，状态{"PASS":0,"FAILED":0,"EVIDENCE_MISSING":1,"NOT_RUN":23}。实际来源1请求、records 1次；fixture另2提交/3查询。source 0行、insert 0次、update 0次，最终SQL键数按API单独记录。
+- 完整本轮安全输出`/private/tmp/issue031-range-response-trade-20260914T193118Z/artifacts/run/safe-results.json` SHA `544fdf650def75c8a25b90b71c1f5c63f4ea566ef395aec731c159430d0370a9`；wrapper身份`/private/tmp/issue031-range-response-trade-20260914T193118Z/artifacts/task-run-identity.json` SHA `6a5f10bf86afd3c3d44343830690ad8c5f682e989224a868a0c98d5c31b975ea`。冻结源码/897 snapshot/两包/输入/私有权限前后保持，日志安全、自有进程回收、网络与任务日志关联通过情况以原产物为准；SQL安全汇总`/private/tmp/issue031-range-response-trade-20260914T193118Z/sql-supplement.json`。新库成功数据保留；临时client.cnf/environment.json已删除，实际清理见本轮secret-cleanup.json。
+- 旧33轮逐对象保持，唯一索引追加后34轮/1066case/1273请求。逐项来源绑定与持久策略在harness核对；本轮经独立运行审查后开放接口：无（尚有跨轮任务或证据缺口）。
+
+| TASK caseId | 状态 | 请求 | source | insert | update | SQL前→后键数 | 成功叶/总叶 |
+| --- | --- | ---: | ---: | ---: | ---: | --- | --- |
+| `issue026-issue025-source-20260913T162759Z-adj_factor-000001-whole` | EVIDENCE_MISSING | 1 | — | — | — | —→— | —/— |
+| `issue026-issue025-boundaries-20260913T163148Z-adj_factor-000001-lower` | NOT_RUN | — | — | — | — | —→— | —/— |
+| `issue026-issue025-boundaries-20260913T163148Z-adj_factor-000001-upper` | NOT_RUN | — | — | — | — | —→— | —/— |
+| `issue026-issue025-boundaries-20260913T163148Z-adj_factor-000001-after` | NOT_RUN | — | — | — | — | —→— | —/— |
+| `issue026-issue025-source-20260913T162759Z-adj_factor-600000-whole` | NOT_RUN | — | — | — | — | —→— | —/— |
+| `issue026-issue025-boundaries-20260913T163148Z-adj_factor-600000-lower` | NOT_RUN | — | — | — | — | —→— | —/— |
+| `issue026-issue025-boundaries-20260913T163148Z-adj_factor-600000-upper` | NOT_RUN | — | — | — | — | —→— | —/— |
+| `issue026-issue025-boundaries-20260913T163148Z-adj_factor-600000-after` | NOT_RUN | — | — | — | — | —→— | —/— |
+| `issue026-issue025-source-20260913T162759Z-suspend_d-000001-whole` | NOT_RUN | — | — | — | — | —→— | —/— |
+| `issue026-issue025-boundaries-20260913T163148Z-suspend_d-000001-bounded` | NOT_RUN | — | — | — | — | —→— | —/— |
+| `issue026-issue025-boundaries-20260913T163148Z-suspend_d-000001-lower` | NOT_RUN | — | — | — | — | —→— | —/— |
+| `issue026-issue025-boundaries-20260913T163148Z-suspend_d-000001-upper` | NOT_RUN | — | — | — | — | —→— | —/— |
+| `issue026-issue025-boundaries-20260913T163148Z-suspend_d-000001-consecutive` | NOT_RUN | — | — | — | — | —→— | —/— |
+| `issue026-issue025-source-20260913T162759Z-suspend_d-600000-whole` | NOT_RUN | — | — | — | — | —→— | —/— |
+| `issue026-issue025-boundaries-20260913T163148Z-suspend_d-600000-bounded` | NOT_RUN | — | — | — | — | —→— | —/— |
+| `issue026-issue025-boundaries-20260913T163148Z-suspend_d-600000-lower` | NOT_RUN | — | — | — | — | —→— | —/— |
+| `issue026-issue025-boundaries-20260913T163148Z-suspend_d-600000-upper` | NOT_RUN | — | — | — | — | —→— | —/— |
+| `issue026-issue025-boundaries-20260913T163148Z-suspend_d-600000-consecutive` | NOT_RUN | — | — | — | — | —→— | —/— |
+| `issue026-issue025-source-20260913T162759Z-suspend_d-000029-whole` | NOT_RUN | — | — | — | — | —→— | —/— |
+| `issue026-issue025-boundaries-20260913T163148Z-suspend_d-000029-lower` | NOT_RUN | — | — | — | — | —→— | —/— |
+| `issue026-issue025-boundaries-20260913T163148Z-suspend_d-000029-upper` | NOT_RUN | — | — | — | — | —→— | —/— |
+| `issue026-issue025-source-20260913T162759Z-suspend_d-600310-whole` | NOT_RUN | — | — | — | — | —→— | —/— |
+| `issue026-issue025-boundaries-20260913T163148Z-suspend_d-600310-lower` | NOT_RUN | — | — | — | — | —→— | —/— |
+| `issue026-issue025-boundaries-20260913T163148Z-suspend_d-600310-upper` | NOT_RUN | — | — | — | — | —→— | —/— |
+
+本轮中断说明：上表null字段汇总为0仅表示未完成验收计数，不能解释为零来源/零写入。实际adj_factor TASK `74417c73-0f69-4bb7-82f0-10c8238881e3` 与批次SUCCEEDED，1请求/1尝试/source4/insert4/update0；只读SQL原键0→4，日期20251229、20251230、20251231、20260105，suspend_d仍0记录。harness在成功状态文案处使用过期“已成功”断言，早于RESPONSE_ONLY检查及AFTER records/SQL；保留1 EVIDENCE_MISSING/23 NOT_RUN，exit1，不计清洁合格TASK。独立审查确认工具缺陷、原33轮/策略与清理保持；没有数据源失败，不撤回候选或递增策略。本轮sql-supplement.json为中断后只读观察，不能补造缺少的浏览器闭环。修复/重新冻结和明确24项新ID补验见ISSUE-031设计修订。
+
+## ISSUE-031验收脚本文案修复构建与续验身份
+
+最小harness修复已独立审查：通用SUCCEEDED状态按RESPONSE_ONLY非空/空使用既有正确文案，严格RANGE/SINGLE仍为“已成功”；保留提示/计数/SQL。实际submitDownload路径新回归先出现“返回记录已采集 !== 已成功”RED，再四场景GREEN。阶段证据同步后Node106/106通过（0失败/跳过）；日志`/private/tmp/issue031-resume-control/response-fix-full-green.log`。
+
+隔离副本 `/private/tmp/issue031-harnessfix-20260914T194130Z`，898文件snapshot `c67cff6a43c75b35344ab78806e67bae0dfcd4d0fefb3a97f26af044f643ee21`，422相关源码与当前工作字节一致。完整离线 `mvn -o -f data-plane/pom.xml -Pacceptance verify` exit0，后端/两包1134、前端524通过，0失败/错误/跳过；受控download-tasks浏览器15/15 PASS、exit0，自有Vite已停止，未给测试提供真实上游令牌。日志/汇总位于 `/private/tmp/issue031-harnessfix-control/build/`。
+
+- sourceDiffSha256：`9e1f478b96a08497338274972d77b5f73d89d4670e9a92066ddefa6e4fb96cc4`。
+- productionJarSha256：`c3369f07a44a3da401984f6ce6206715c2616216b0e44fe552ae6d1ca9f5e442`。
+- acceptanceJarSha256：`99ae75e9370a6b4fdf45391d2092524c382461106b9893622b65260eb6c1dda5`。
+- manifestSha256：`386f46a99b6605e203129836d7a744b96b65304307f52991dd8bba6fd1870984`。
+- requestExamplesSha256：`6d4c74a1a539b59ac20fb0cbd3ba1fba0954c40ef1209b652f7dcc2192ec932f`。
+
+剩余91项按trade24/announcement42/holders21/regression4串行；24项明确新ID，原33项历史轮与其他旧记录不变。53条总替代映射（dates29+trade24）含原状态/任务ID约束，逐case构建表分别绑定旧82、续办99、本次91，禁止把旧TASK算成新包结果。纯选择91绑定通过；实际任务仍待执行。
+- `/private/tmp/issue031-harnessfix-control/ten-round-plan.json` SHA `e319702b4cdc9d890221db48def5efc252be536e6c1810465b8613dc9c213dbe`。
+- `/private/tmp/issue031-harnessfix-control/replacement-mapping.json` SHA `e1aea36a98761efd30c81946e240482186441c936b21d1abd6bf263b068ae1e9`。
+- `/private/tmp/issue031-harnessfix-control/replacement-statuses.json` SHA `05b14537582f71f196d547bedf7344f613194b6c6fe54e95f1a3b1f0b1517833`。
+- `/private/tmp/issue031-harnessfix-control/case-build-bindings.json` SHA `6f58ece6668ecf97d30f212681410228d7a6dfe86dc01ce1487a28f08f51abe4`。
+
+## ISSUE-031 response-trade 真实TASK预登记（20260914T194412Z）
+
+- runId `issue031-statusfix-range-response-trade-20260914T194412Z`；固定24 TASK、API `adj_factor, suspend_d`，完整清单 `/private/tmp/issue031-statusfix-range-response-trade-20260914T194412Z/inputs/cases.json`。原参数/日期轴/来源身份不变；本段登记时尚未启动真实任务。
+- SOURCE既有观察合计24请求，仅用于预算；实际TASK请求数待实测，潜在日期二分仍受5000请求/30分钟硬限约束（最坏树可能超过预算，不保证全部完成）。每请求间隔≥2000ms、workers=1、retries=0，trace/screenshot/video关闭。fixture另2提交/3查询，目标records查询48次。
+- 新空schema计划 `tensor_m14_t05_831cc2e3a03be024`，MySQL8.4.6；创建后核对0表、单库最小权限与UTF-8，应用启动后核对8迁移/52业务与任务表。全部成功数据库保留；只管理本轮JVM，固定HTTPS。
+- 私有输入父目录0700/文件0600，索引仅按本轮快照消费；hash：`cases.json` `12226d0e7f0e2355aa50d8633891904107660f2b9a2efc861439a4a2148dba28`；`evidence-index.json` `336c2a0cb3845451b2b63e17e1d1b948ed139a7ea3e02e23b673b312af77d1a8`；`source-bindings.json` `73251b5d92c4ff7deff076fa2f031b86dc151c85bbb4d6ab19621e5d35f654ce`。
+- 源码/两包沿用ISSUE-031验收脚本文案修复构建冻结898文件snapshot `c67cff6a43c75b35344ab78806e67bae0dfcd4d0fefb3a97f26af044f643ee21`，422相关源码与工作树相同；生产 `c3369f07a44a3da401984f6ce6206715c2616216b0e44fe552ae6d1ca9f5e442` / 验收 `99ae75e9370a6b4fdf45391d2092524c382461106b9893622b65260eb6c1dda5`；其余身份见本轮wrapper记录和ISSUE-031验收脚本文案修复构建登记。
+- SOURCE→TASK逐项绑定 `/private/tmp/issue031-statusfix-range-response-trade-20260914T194412Z/inputs/source-bindings.json`；每项均核对页面→202/Location→详情/全部批次→两次records→SQL原键/归属/实际source、insert、update/日志与清理。失败或输入变化停止，无自动重试或换日期；结果随后追加。
+
+### ISSUE-031 response-trade 实际结果（issue031-statusfix-range-response-trade-20260914T194412Z）
+
+- 浏览器exit0，cleanup PASS；24计划项，状态{"PASS":24,"FAILED":0,"EVIDENCE_MISSING":0,"NOT_RUN":0}。实际来源24请求、records 48次；fixture另2提交/3查询。source 776行、insert 387次、update 389次，最终SQL键数按API单独记录。
+- 完整本轮安全输出`/private/tmp/issue031-statusfix-range-response-trade-20260914T194412Z/artifacts/run/safe-results.json` SHA `02b41ac83b1d2d99d3dda92a7e02666f0846008c184bc0aae7b9536b2618714c`；wrapper身份`/private/tmp/issue031-statusfix-range-response-trade-20260914T194412Z/artifacts/task-run-identity.json` SHA `9711d9409755e6c26f9395a1a120649d92e663f3ad82302ce877d678d9dfb513`。冻结源码/898 snapshot/两包/输入/私有权限前后保持，日志安全、自有进程回收、网络与任务日志关联通过情况以原产物为准；SQL安全汇总`/private/tmp/issue031-statusfix-range-response-trade-20260914T194412Z/sql-supplement.json`。新库成功数据保留；临时client.cnf/environment.json已删除，实际清理见本轮secret-cleanup.json。
+- 旧34轮逐对象保持，唯一索引追加后35轮/1090case/1297请求。逐项来源绑定与持久策略在harness核对；本轮经独立运行审查后开放接口：adj_factor、suspend_d。
+
+| TASK caseId | 状态 | 请求 | source | insert | update | SQL前→后键数 | 成功叶/总叶 |
+| --- | --- | ---: | ---: | ---: | ---: | --- | --- |
+| `issue031-statusfix-issue026-issue025-source-20260913T162759Z-adj_factor-000001-whole` | PASS | 1 | 4 | 4 | 0 | 0→4 | 1/1 |
+| `issue031-statusfix-issue026-issue025-boundaries-20260913T163148Z-adj_factor-000001-lower` | PASS | 1 | 1 | 0 | 1 | 4→4 | 1/1 |
+| `issue031-statusfix-issue026-issue025-boundaries-20260913T163148Z-adj_factor-000001-upper` | PASS | 1 | 1 | 0 | 1 | 4→4 | 1/1 |
+| `issue031-statusfix-issue026-issue025-boundaries-20260913T163148Z-adj_factor-000001-after` | PASS | 1 | 1 | 1 | 0 | 4→5 | 1/1 |
+| `issue031-statusfix-issue026-issue025-source-20260913T162759Z-adj_factor-600000-whole` | PASS | 1 | 4 | 4 | 0 | 5→9 | 1/1 |
+| `issue031-statusfix-issue026-issue025-boundaries-20260913T163148Z-adj_factor-600000-lower` | PASS | 1 | 1 | 0 | 1 | 9→9 | 1/1 |
+| `issue031-statusfix-issue026-issue025-boundaries-20260913T163148Z-adj_factor-600000-upper` | PASS | 1 | 1 | 0 | 1 | 9→9 | 1/1 |
+| `issue031-statusfix-issue026-issue025-boundaries-20260913T163148Z-adj_factor-600000-after` | PASS | 1 | 1 | 1 | 0 | 9→10 | 1/1 |
+| `issue031-statusfix-issue026-issue025-source-20260913T162759Z-suspend_d-000001-whole` | PASS | 1 | 220 | 220 | 0 | 0→220 | 1/1 |
+| `issue031-statusfix-issue026-issue025-boundaries-20260913T163148Z-suspend_d-000001-bounded` | PASS | 1 | 220 | 0 | 220 | 220→220 | 1/1 |
+| `issue031-statusfix-issue026-issue025-boundaries-20260913T163148Z-suspend_d-000001-lower` | PASS | 1 | 1 | 0 | 1 | 220→220 | 1/1 |
+| `issue031-statusfix-issue026-issue025-boundaries-20260913T163148Z-suspend_d-000001-upper` | PASS | 1 | 1 | 0 | 1 | 220→220 | 1/1 |
+| `issue031-statusfix-issue026-issue025-boundaries-20260913T163148Z-suspend_d-000001-consecutive` | PASS | 1 | 5 | 0 | 5 | 220→220 | 1/1 |
+| `issue031-statusfix-issue026-issue025-source-20260913T162759Z-suspend_d-600000-whole` | PASS | 1 | 147 | 147 | 0 | 220→367 | 1/1 |
+| `issue031-statusfix-issue026-issue025-boundaries-20260913T163148Z-suspend_d-600000-bounded` | PASS | 1 | 147 | 0 | 147 | 367→367 | 1/1 |
+| `issue031-statusfix-issue026-issue025-boundaries-20260913T163148Z-suspend_d-600000-lower` | PASS | 1 | 1 | 0 | 1 | 367→367 | 1/1 |
+| `issue031-statusfix-issue026-issue025-boundaries-20260913T163148Z-suspend_d-600000-upper` | PASS | 1 | 1 | 0 | 1 | 367→367 | 1/1 |
+| `issue031-statusfix-issue026-issue025-boundaries-20260913T163148Z-suspend_d-600000-consecutive` | PASS | 1 | 5 | 0 | 5 | 367→367 | 1/1 |
+| `issue031-statusfix-issue026-issue025-source-20260913T162759Z-suspend_d-000029-whole` | PASS | 1 | 5 | 5 | 0 | 367→372 | 1/1 |
+| `issue031-statusfix-issue026-issue025-boundaries-20260913T163148Z-suspend_d-000029-lower` | PASS | 1 | 1 | 0 | 1 | 372→372 | 1/1 |
+| `issue031-statusfix-issue026-issue025-boundaries-20260913T163148Z-suspend_d-000029-upper` | PASS | 1 | 1 | 0 | 1 | 372→372 | 1/1 |
+| `issue031-statusfix-issue026-issue025-source-20260913T162759Z-suspend_d-600310-whole` | PASS | 1 | 5 | 5 | 0 | 372→377 | 1/1 |
+| `issue031-statusfix-issue026-issue025-boundaries-20260913T163148Z-suspend_d-600310-lower` | PASS | 1 | 1 | 0 | 1 | 377→377 | 1/1 |
+| `issue031-statusfix-issue026-issue025-boundaries-20260913T163148Z-suspend_d-600310-upper` | PASS | 1 | 1 | 0 | 1 | 377→377 | 1/1 |
+
+交易日期窗口专项SQL：`/private/tmp/issue031-statusfix-range-response-trade-20260914T194412Z/trade-window-sql.json` SHA `ea67c3c2641082cc67b4b9bbcf9fbd8a65c952cecc170abab4b89031dce62b09`。24项各自日期集合、逐股票原键数/摘要和最终窗口并集一致；adj_factor10键（两股各5），suspend_d377键（000001=220、600000=147、000029=5、600310=5），较早窗口保留。独立审查PASS。新24项完整通过后按显式映射移除中断轮的1 EVIDENCE_MISSING/23 NOT_RUN当前引用；原24个run/case对象完整保留，未将后端成功追认为旧轮验收PASS。RESPONSE_ONLY仍不保证上游完整性。
+
+## ISSUE-031 response-announcement 真实TASK预登记（20260914T195234Z）
+
+- runId `issue031-statusfix-range-response-announcement-20260914T195234Z`；固定42 TASK、API `income, balancesheet, cashflow, fina_audit, express, stk_managers`，完整清单 `/private/tmp/issue031-statusfix-range-response-announcement-20260914T195234Z/inputs/cases.json`。原参数/日期轴/来源身份不变；本段登记时尚未启动真实任务。
+- SOURCE既有观察合计42请求，仅用于预算；实际TASK请求数待实测，潜在日期二分仍受5000请求/30分钟硬限约束（最坏树可能超过预算，不保证全部完成）。每请求间隔≥2000ms、workers=1、retries=0，trace/screenshot/video关闭。fixture另2提交/3查询，目标records查询84次。
+- 新空schema计划 `tensor_m14_t05_e555dda5dd7209fe`，MySQL8.4.6；创建后核对0表、单库最小权限与UTF-8，应用启动后核对8迁移/52业务与任务表。全部成功数据库保留；只管理本轮JVM，固定HTTPS。
+- 私有输入父目录0700/文件0600，索引仅按本轮快照消费；hash：`cases.json` `0cedee1dfd4c967c8ca2601ec016f97e06553133c62ea0e07f66f8994e9e7185`；`evidence-index.json` `b227aee36ab409a7ac731d7605450862c78fc2c9a1d8ce39e1ba11a52726756a`；`source-bindings.json` `f6a1b5570cf58dc5b26625953e39aecc239532b03fa6da5f62c2f7d45f8746c0`。
+- 源码/两包沿用ISSUE-031验收脚本文案修复构建冻结898文件snapshot `c67cff6a43c75b35344ab78806e67bae0dfcd4d0fefb3a97f26af044f643ee21`，422相关源码与工作树相同；生产 `c3369f07a44a3da401984f6ce6206715c2616216b0e44fe552ae6d1ca9f5e442` / 验收 `99ae75e9370a6b4fdf45391d2092524c382461106b9893622b65260eb6c1dda5`；其余身份见本轮wrapper记录和ISSUE-031验收脚本文案修复构建登记。
+- SOURCE→TASK逐项绑定 `/private/tmp/issue031-statusfix-range-response-announcement-20260914T195234Z/inputs/source-bindings.json`；每项均核对页面→202/Location→详情/全部批次→两次records→SQL原键/归属/实际source、insert、update/日志与清理。失败或输入变化停止，无自动重试或换日期；结果随后追加。
+
+### ISSUE-031 response-announcement 实际结果（issue031-statusfix-range-response-announcement-20260914T195234Z）
+
+- 浏览器exit1，cleanup PASS；42计划项，状态{"PASS":8,"FAILED":1,"EVIDENCE_MISSING":0,"NOT_RUN":33}。实际来源9请求、records 17次；fixture另2提交/3查询。source 21行、insert 8次、update 13次，最终SQL键数按API单独记录。
+- 完整本轮安全输出`/private/tmp/issue031-statusfix-range-response-announcement-20260914T195234Z/artifacts/run/safe-results.json` SHA `10dde355950e4476b812fc67b81967a2a41ba4e15a0d6432ad91b4c47ec80667`；wrapper身份`/private/tmp/issue031-statusfix-range-response-announcement-20260914T195234Z/artifacts/task-run-identity.json` SHA `641980e0c067ef5b1f4fd89964789d868bf5c446c132c757b66eee508e4c100a`。冻结源码/898 snapshot/两包/输入/私有权限前后保持，日志安全、自有进程回收、网络与任务日志关联通过情况以原产物为准；SQL安全汇总`/private/tmp/issue031-statusfix-range-response-announcement-20260914T195234Z/sql-supplement.json`。新库成功数据保留；临时client.cnf/environment.json已删除，实际清理见本轮secret-cleanup.json。
+- 旧35轮逐对象保持，唯一索引追加后36轮/1132case/1306请求。逐项来源绑定与持久策略在harness核对；本轮经独立运行审查后开放接口：无（尚有跨轮任务或证据缺口）。
+
+| TASK caseId | 状态 | 请求 | source | insert | update | SQL前→后键数 | 成功叶/总叶 |
+| --- | --- | ---: | ---: | ---: | ---: | --- | --- |
+| `issue026-issue025-source-20260913T162759Z-income-000001-whole` | PASS | 1 | 4 | 4 | 0 | 0→4 | 1/1 |
+| `issue026-issue025-boundaries-20260913T163148Z-income-000001-bounded` | PASS | 1 | 4 | 0 | 4 | 4→4 | 1/1 |
+| `issue026-issue025-boundaries-20260913T163148Z-income-000001-lower` | PASS | 1 | 1 | 0 | 1 | 4→4 | 1/1 |
+| `issue026-issue025-boundaries-20260913T163148Z-income-000001-upper` | PASS | 1 | 1 | 0 | 1 | 4→4 | 1/1 |
+| `issue026-issue025-source-20260913T162759Z-income-600000-whole` | PASS | 1 | 4 | 4 | 0 | 4→8 | 1/1 |
+| `issue026-issue025-boundaries-20260913T163148Z-income-600000-bounded` | PASS | 1 | 4 | 0 | 4 | 8→8 | 1/1 |
+| `issue026-issue025-boundaries-20260913T163148Z-income-600000-lower` | PASS | 1 | 2 | 0 | 2 | 8→8 | 1/1 |
+| `issue026-issue025-boundaries-20260913T163148Z-income-600000-upper` | PASS | 1 | 1 | 0 | 1 | 8→8 | 1/1 |
+| `issue026-issue025-source-20260913T162759Z-balancesheet-000001-whole` | FAILED | 1 | 0 | 0 | 0 | 0→0 | 0/1 |
+| `issue026-issue025-boundaries-20260913T163148Z-balancesheet-000001-bounded` | NOT_RUN | — | — | — | — | —→— | —/— |
+| `issue026-issue025-boundaries-20260913T163148Z-balancesheet-000001-lower` | NOT_RUN | — | — | — | — | —→— | —/— |
+| `issue026-issue025-boundaries-20260913T163148Z-balancesheet-000001-upper` | NOT_RUN | — | — | — | — | —→— | —/— |
+| `issue026-issue025-source-20260913T162759Z-balancesheet-600000-whole` | NOT_RUN | — | — | — | — | —→— | —/— |
+| `issue026-issue025-boundaries-20260913T163148Z-balancesheet-600000-bounded` | NOT_RUN | — | — | — | — | —→— | —/— |
+| `issue026-issue025-boundaries-20260913T163148Z-balancesheet-600000-lower` | NOT_RUN | — | — | — | — | —→— | —/— |
+| `issue026-issue025-boundaries-20260913T163148Z-balancesheet-600000-upper` | NOT_RUN | — | — | — | — | —→— | —/— |
+| `issue026-issue025-source-20260913T162759Z-cashflow-000001-whole` | NOT_RUN | — | — | — | — | —→— | —/— |
+| `issue026-issue025-boundaries-20260913T163148Z-cashflow-000001-bounded` | NOT_RUN | — | — | — | — | —→— | —/— |
+| `issue026-issue025-boundaries-20260913T163148Z-cashflow-000001-lower` | NOT_RUN | — | — | — | — | —→— | —/— |
+| `issue026-issue025-boundaries-20260913T163148Z-cashflow-000001-upper` | NOT_RUN | — | — | — | — | —→— | —/— |
+| `issue026-issue025-source-20260913T162759Z-cashflow-600000-whole` | NOT_RUN | — | — | — | — | —→— | —/— |
+| `issue026-issue025-boundaries-20260913T163148Z-cashflow-600000-bounded` | NOT_RUN | — | — | — | — | —→— | —/— |
+| `issue026-issue025-boundaries-20260913T163148Z-cashflow-600000-lower` | NOT_RUN | — | — | — | — | —→— | —/— |
+| `issue026-issue025-boundaries-20260913T163148Z-cashflow-600000-upper` | NOT_RUN | — | — | — | — | —→— | —/— |
+| `issue026-issue025-source-20260913T162759Z-fina_audit-000001-whole` | NOT_RUN | — | — | — | — | —→— | —/— |
+| `issue026-issue025-boundaries-20260913T163148Z-fina_audit-000001-bounded` | NOT_RUN | — | — | — | — | —→— | —/— |
+| `issue026-issue025-source-20260913T162759Z-fina_audit-600000-whole` | NOT_RUN | — | — | — | — | —→— | —/— |
+| `issue026-issue025-boundaries-20260913T163148Z-fina_audit-600000-bounded` | NOT_RUN | — | — | — | — | —→— | —/— |
+| `issue026-issue025-source-20260913T162759Z-express-600000-whole` | NOT_RUN | — | — | — | — | —→— | —/— |
+| `issue026-issue025-boundaries-20260913T163148Z-express-600000-bounded` | NOT_RUN | — | — | — | — | —→— | —/— |
+| `issue026-issue025-express-20260913T163418Z-whole` | NOT_RUN | — | — | — | — | —→— | —/— |
+| `issue026-issue025-express-20260913T163418Z-day` | NOT_RUN | — | — | — | — | —→— | —/— |
+| `issue026-issue025-express-20260913T163418Z-lower-window` | NOT_RUN | — | — | — | — | —→— | —/— |
+| `issue026-issue025-express-20260913T163418Z-upper-window` | NOT_RUN | — | — | — | — | —→— | —/— |
+| `issue026-issue025-source-20260913T162759Z-stk_managers-000001-whole` | NOT_RUN | — | — | — | — | —→— | —/— |
+| `issue026-issue025-boundaries-20260913T163148Z-stk_managers-000001-bounded` | NOT_RUN | — | — | — | — | —→— | —/— |
+| `issue026-issue025-boundaries-20260913T163148Z-stk_managers-000001-lower` | NOT_RUN | — | — | — | — | —→— | —/— |
+| `issue026-issue025-boundaries-20260913T163148Z-stk_managers-000001-upper` | NOT_RUN | — | — | — | — | —→— | —/— |
+| `issue026-issue025-source-20260913T162759Z-stk_managers-600000-whole` | NOT_RUN | — | — | — | — | —→— | —/— |
+| `issue026-issue025-boundaries-20260913T163148Z-stk_managers-600000-bounded` | NOT_RUN | — | — | — | — | —→— | —/— |
+| `issue026-issue025-boundaries-20260913T163148Z-stk_managers-600000-lower` | NOT_RUN | — | — | — | — | —→— | —/— |
+| `issue026-issue025-boundaries-20260913T163148Z-stk_managers-600000-upper` | NOT_RUN | — | — | — | — | —→— | —/— |
+
+## ISSUE-031 资产负债表单次只读诊断（2026-09-15）
+
+`issue031-balancesheet-diagnostic-20260914T200411Z`：按[具体计划](../task-designs/ISSUE-031-design.md#2026-09-15资产负债表失败保全与有界定位)完成一次原参数调用，1请求/exit0，adapter实际失败KEY_CONFLICT；6行逐字段转换异常0，两对零基行2/3及4/5仅total_share/update_flag不同。诊断包装器将ADAPTER_FAILED与执行错误区分，异常/超时/来源失败返回非零，不自动重试；未访问DB、提交TASK或持久化原始财务数据。
+
+失败轮冻结验收包`99ae75e9370a6b4fdf45391d2092524c382461106b9893622b65260eb6c1dda5`及54个提取依赖字节一致，诊断源码/两class/包装器4项哈希在一次性execution-start中固定；私有目录`/private/tmp/issue031-balancesheet-diagnostic/`。safe-result SHA `473cc864541a24ecdcb53fc703fc28516995b54a026b34218bab3655e2d197bf`、execution-start SHA `2e0aa4672fc8772b4db05500a66c39705c5dd7072eead3cf0fd9121bf06b65c7`。独立实际产物审查PASS；原错误响应未保留，不能推断与本次逐值相同。官方doc36只说明“更新标识”，版本保留规则待决定，balancesheet保持v3撤回。
+
+本次独立诊断不追加SOURCE/TASK验收case，不开放接口，不覆盖原成功来源或失败任务。唯一索引仍36轮/1132case/1306请求，另诊断1次单列。fina_indicator继续递延ISSUE-033，全程未调用。
+
+## ISSUE-031 response-announcement-rest 真实TASK预登记（20260914T202312Z）
+
+- runId `issue031-keyconflict-range-response-announcement-rest-20260914T202312Z`；固定34 TASK、API `income, cashflow, fina_audit, express, stk_managers`，完整清单 `/private/tmp/issue031-keyconflict-range-response-announcement-rest-20260914T202312Z/inputs/cases.json`。原参数/日期轴/来源身份不变；本段登记时尚未启动真实任务。
+- SOURCE既有观察合计34请求，仅用于预算；实际TASK请求数待实测，潜在日期二分仍受5000请求/30分钟硬限约束（最坏树可能超过预算，不保证全部完成）。每请求间隔≥2000ms、workers=1、retries=0，trace/screenshot/video关闭。fixture另2提交/3查询，目标records查询68次。
+- 新空schema计划 `tensor_m14_t05_a3a779445b7cc7a5`，MySQL8.4.6；创建后核对0表、单库最小权限与UTF-8，应用启动后核对8迁移/52业务与任务表。全部成功数据库保留；只管理本轮JVM，固定HTTPS。
+- 私有输入父目录0700/文件0600，索引仅按本轮快照消费；hash：`cases.json` `5b8ec03889431d6feb30a2550277a3c1d234b19a7b167e6424a1ca3f23114940`；`evidence-index.json` `923217282533023e5030a7b7f6692532b9030f3d3babb210852487cd7918a593`；`source-bindings.json` `d1d9a54c42384498c699e96d8abfd39726bd0609e135619126a0944c07a94f57`。
+- 源码/两包使用ISSUE-031冲突保全构建；准确snapshot/两包/源码身份见本轮registration.buildIdentity及wrapper记录，运行前逐文件核验。
+- SOURCE→TASK逐项绑定 `/private/tmp/issue031-keyconflict-range-response-announcement-rest-20260914T202312Z/inputs/source-bindings.json`；每项均核对页面→202/Location→详情/全部批次→两次records→SQL原键/归属/实际source、insert、update/日志与清理。失败或输入变化停止，无自动重试或换日期；结果随后追加。
+
+## ISSUE-031 冲突保全后构建与独立续验准备（2026-09-15）
+
+资产负债表仍撤回且保留8项未决；其余59项按更新设计独立恢复，财务指标6项仍递延033。公告日期34项新ID/完整SOURCE绑定，holders21与regression4原ID未使用。计划仍272项，205旧接受项按原包归属，held8仍保留原失败轮包；替代映射87条（旧53加公告34），income的原8观察PASS只在指定exit1轮中按显式映射替代，原FAILED不适用。纯validateEvidence/validateCasePlan/selectTaskCases共59项通过，未发出任务请求。
+
+新冻结副本`/private/tmp/issue031-keyconflict-20260914T201740Z`，898文件snapshot `c0d0c13144763d9866281566b362aa4f393df554f797140a2e1ffb619aa7d28f`。完整acceptance构建exit0：后端/两包1135、前端524项通过；Node107、受控任务页面15与新包metadata40项通过，失败/错误/跳过0。metadata零TASK/同步下载/records/上游，JVM/sentinel/日志检查true，外层自有容器与临时凭据已清理。安全原件`/var/folders/s5/h3vynqy544lc7vwtz0zjy39m0000gn/T/tensor-m14-t04-bcWZro/metadata-evidence.json` SHA `ad7742c1ed0a089f147877217891c16d33927fc215db9276126e5076ec999bff`；各日志与摘要位于`/private/tmp/issue031-keyconflict-control/build/`。
+
+- sourceDiffSha256: `88e5fa50483860f7b20168fee0beef11c1b3aff920e24de7cc6ba03441852c27`。
+- productionJarSha256: `b975e8a68810fb792b7e02fb2ac7dfc6bdd74583adf0e47ccb4e1757083fc4f5`。
+- acceptanceJarSha256: `65a809227e4c3d485799af51a9826d37943ecc623c9deaf6aed3167aed19654e`。
+- manifestSha256: `386f46a99b6605e203129836d7a744b96b65304307f52991dd8bba6fd1870984`。
+- requestExamplesSha256: `6d4c74a1a539b59ac20fb0cbd3ba1fba0954c40ef1209b652f7dcc2192ec932f`。
+- `/private/tmp/issue031-keyconflict-control/ten-round-plan.json` SHA `c58ec57b6395b744a071ea594f948b0a20b36e09875edbf8672af2063c5617ef`。
+- `/private/tmp/issue031-keyconflict-control/replacement-mapping.json` SHA `5189b9fa888918bbb5d448ce60810fcaaecdb6b1dbfd196dbd71bdc06b26db94`。
+- `/private/tmp/issue031-keyconflict-control/replacement-statuses.json` SHA `34e87bafbd4003ffb6728efb86957efd7d88678cc01f0c32cf798f2fe3788e99`。
+- `/private/tmp/issue031-keyconflict-control/case-build-bindings.json` SHA `faf1727914e00c140b79db4e253b2c16ec5ab426eee5146a74ed04a6e118dcee`。
+
+运行包装器从新config读取snapshot；运行前与registration、运行后collector均交叉核对同一snapshot和五项构建身份。旧包、旧run及原参数/日期轴/业务键保持；本准备不表示59项真实验收已经通过。
+
+### ISSUE-031 response-announcement-rest 实际结果（issue031-keyconflict-range-response-announcement-rest-20260914T202312Z）
+
+- 浏览器exit1，cleanup PASS；34计划项，状态{"PASS":8,"FAILED":1,"EVIDENCE_MISSING":0,"NOT_RUN":25}。实际来源9请求、records 17次；fixture另2提交/3查询。source 21行、insert 8次、update 13次，最终SQL键数按API单独记录。
+- 完整本轮安全输出`/private/tmp/issue031-keyconflict-range-response-announcement-rest-20260914T202312Z/artifacts/run/safe-results.json` SHA `92271d5a02e8c4209e3f6ff94787cc32746cc1e8f20375a455ac943f2f4372e2`；wrapper身份`/private/tmp/issue031-keyconflict-range-response-announcement-rest-20260914T202312Z/artifacts/task-run-identity.json` SHA `9b1a715ac1d60915ba45037887a50bcf8b0aa7dd2f02dc900a611401757d7440`。冻结源码/898 snapshot/两包/输入/私有权限前后保持，日志安全、自有进程回收、网络与任务日志关联通过情况以原产物为准；SQL安全汇总`/private/tmp/issue031-keyconflict-range-response-announcement-rest-20260914T202312Z/sql-supplement.json`。新库成功数据保留；临时client.cnf/environment.json已删除，实际清理见本轮secret-cleanup.json。
+- 旧36轮逐对象保持，唯一索引追加后37轮/1166case/1315请求。逐项来源绑定与持久策略在harness核对；本轮经独立运行审查后开放接口：无（尚有跨轮任务或证据缺口）。
+
+| TASK caseId | 状态 | 请求 | source | insert | update | SQL前→后键数 | 成功叶/总叶 |
+| --- | --- | ---: | ---: | ---: | ---: | --- | --- |
+| `issue031-keyconflict-issue026-issue025-source-20260913T162759Z-income-000001-whole` | PASS | 1 | 4 | 4 | 0 | 0→4 | 1/1 |
+| `issue031-keyconflict-issue026-issue025-boundaries-20260913T163148Z-income-000001-bounded` | PASS | 1 | 4 | 0 | 4 | 4→4 | 1/1 |
+| `issue031-keyconflict-issue026-issue025-boundaries-20260913T163148Z-income-000001-lower` | PASS | 1 | 1 | 0 | 1 | 4→4 | 1/1 |
+| `issue031-keyconflict-issue026-issue025-boundaries-20260913T163148Z-income-000001-upper` | PASS | 1 | 1 | 0 | 1 | 4→4 | 1/1 |
+| `issue031-keyconflict-issue026-issue025-source-20260913T162759Z-income-600000-whole` | PASS | 1 | 4 | 4 | 0 | 4→8 | 1/1 |
+| `issue031-keyconflict-issue026-issue025-boundaries-20260913T163148Z-income-600000-bounded` | PASS | 1 | 4 | 0 | 4 | 8→8 | 1/1 |
+| `issue031-keyconflict-issue026-issue025-boundaries-20260913T163148Z-income-600000-lower` | PASS | 1 | 2 | 0 | 2 | 8→8 | 1/1 |
+| `issue031-keyconflict-issue026-issue025-boundaries-20260913T163148Z-income-600000-upper` | PASS | 1 | 1 | 0 | 1 | 8→8 | 1/1 |
+| `issue031-keyconflict-issue026-issue025-source-20260913T162759Z-cashflow-000001-whole` | FAILED | 1 | 0 | 0 | 0 | —→— | 0/1 |
+| `issue031-keyconflict-issue026-issue025-boundaries-20260913T163148Z-cashflow-000001-bounded` | NOT_RUN | — | — | — | — | —→— | —/— |
+| `issue031-keyconflict-issue026-issue025-boundaries-20260913T163148Z-cashflow-000001-lower` | NOT_RUN | — | — | — | — | —→— | —/— |
+| `issue031-keyconflict-issue026-issue025-boundaries-20260913T163148Z-cashflow-000001-upper` | NOT_RUN | — | — | — | — | —→— | —/— |
+| `issue031-keyconflict-issue026-issue025-source-20260913T162759Z-cashflow-600000-whole` | NOT_RUN | — | — | — | — | —→— | —/— |
+| `issue031-keyconflict-issue026-issue025-boundaries-20260913T163148Z-cashflow-600000-bounded` | NOT_RUN | — | — | — | — | —→— | —/— |
+| `issue031-keyconflict-issue026-issue025-boundaries-20260913T163148Z-cashflow-600000-lower` | NOT_RUN | — | — | — | — | —→— | —/— |
+| `issue031-keyconflict-issue026-issue025-boundaries-20260913T163148Z-cashflow-600000-upper` | NOT_RUN | — | — | — | — | —→— | —/— |
+| `issue031-keyconflict-issue026-issue025-source-20260913T162759Z-fina_audit-000001-whole` | NOT_RUN | — | — | — | — | —→— | —/— |
+| `issue031-keyconflict-issue026-issue025-boundaries-20260913T163148Z-fina_audit-000001-bounded` | NOT_RUN | — | — | — | — | —→— | —/— |
+| `issue031-keyconflict-issue026-issue025-source-20260913T162759Z-fina_audit-600000-whole` | NOT_RUN | — | — | — | — | —→— | —/— |
+| `issue031-keyconflict-issue026-issue025-boundaries-20260913T163148Z-fina_audit-600000-bounded` | NOT_RUN | — | — | — | — | —→— | —/— |
+| `issue031-keyconflict-issue026-issue025-source-20260913T162759Z-express-600000-whole` | NOT_RUN | — | — | — | — | —→— | —/— |
+| `issue031-keyconflict-issue026-issue025-boundaries-20260913T163148Z-express-600000-bounded` | NOT_RUN | — | — | — | — | —→— | —/— |
+| `issue031-keyconflict-issue026-issue025-express-20260913T163418Z-whole` | NOT_RUN | — | — | — | — | —→— | —/— |
+| `issue031-keyconflict-issue026-issue025-express-20260913T163418Z-day` | NOT_RUN | — | — | — | — | —→— | —/— |
+| `issue031-keyconflict-issue026-issue025-express-20260913T163418Z-lower-window` | NOT_RUN | — | — | — | — | —→— | —/— |
+| `issue031-keyconflict-issue026-issue025-express-20260913T163418Z-upper-window` | NOT_RUN | — | — | — | — | —→— | —/— |
+| `issue031-keyconflict-issue026-issue025-source-20260913T162759Z-stk_managers-000001-whole` | NOT_RUN | — | — | — | — | —→— | —/— |
+| `issue031-keyconflict-issue026-issue025-boundaries-20260913T163148Z-stk_managers-000001-bounded` | NOT_RUN | — | — | — | — | —→— | —/— |
+| `issue031-keyconflict-issue026-issue025-boundaries-20260913T163148Z-stk_managers-000001-lower` | NOT_RUN | — | — | — | — | —→— | —/— |
+| `issue031-keyconflict-issue026-issue025-boundaries-20260913T163148Z-stk_managers-000001-upper` | NOT_RUN | — | — | — | — | —→— | —/— |
+| `issue031-keyconflict-issue026-issue025-source-20260913T162759Z-stk_managers-600000-whole` | NOT_RUN | — | — | — | — | —→— | —/— |
+| `issue031-keyconflict-issue026-issue025-boundaries-20260913T163148Z-stk_managers-600000-bounded` | NOT_RUN | — | — | — | — | —→— | —/— |
+| `issue031-keyconflict-issue026-issue025-boundaries-20260913T163148Z-stk_managers-600000-lower` | NOT_RUN | — | — | — | — | —→— | —/— |
+| `issue031-keyconflict-issue026-issue025-boundaries-20260913T163148Z-stk_managers-600000-upper` | NOT_RUN | — | — | — | — | —→— | —/— |
+
+## ISSUE-031 income 真实TASK预登记（20260914T204158Z）
+
+- runId `issue031-perapi-range-income-20260914T204158Z`；固定8 TASK、API `income`，完整清单 `/private/tmp/issue031-perapi-range-income-20260914T204158Z/inputs/cases.json`。原参数/日期轴/来源身份不变；本段登记时尚未启动真实任务。
+- SOURCE既有观察合计8请求，仅用于预算；实际TASK请求数待实测，潜在日期二分仍受5000请求/30分钟硬限约束（最坏树可能超过预算，不保证全部完成）。每请求间隔≥2000ms、workers=1、retries=0，trace/screenshot/video关闭。fixture另2提交/3查询，目标records查询16次。
+- 新空schema计划 `tensor_m14_t05_14f56bb775a18dbf`，MySQL8.4.6；创建后核对0表、单库最小权限与UTF-8，应用启动后核对8迁移/52业务与任务表。全部成功数据库保留；只管理本轮JVM，固定HTTPS。
+- 私有输入父目录0700/文件0600，索引仅按本轮快照消费；hash：`cases.json` `2c3b2fb79ea5c3a9a64e44a87609d18b2289c5cef0d794c523f2e394144227e6`；`evidence-index.json` `a6ca477127bca2ec4d708c696fbc971357c773945d486ccaf0502a1c6c909278`；`source-bindings.json` `48d742a6072290d5bcb6f1ac7d003fdf241deb9bd73a75ef05e904d2d5f1f9f7`。
+- 源码/两包使用ISSUE-031冲突保全构建；准确snapshot/两包/源码身份见本轮registration.buildIdentity及wrapper记录，运行前逐文件核验。
+- SOURCE→TASK逐项绑定 `/private/tmp/issue031-perapi-range-income-20260914T204158Z/inputs/source-bindings.json`；每项均核对页面→202/Location→详情/全部批次→两次records→SQL原键/归属/实际source、insert、update/日志与清理。失败或输入变化停止，无自动重试或换日期；结果随后追加。
+
+### cashflow失败保全与逐接口续验准备
+
+`issue031-keyconflict-range-response-announcement-rest-20260914T202312Z`已按失败归档，未开放接口。cashflow TASK `4675518e-eba7-4d86-bc62-e6d613f54843` / batch `4398c8d3-1d5d-4444-9395-21c515c82acf`，原参数000001.SZ/20240101/20241231，FAILED/ADAPTER_TYPE_INVALID、1请求/1尝试，失败叶1/成功叶0/空叶0。新harness原始case直接保留FAILED，SQL-before/after字段均null；safe.sql保留BEFORE0、AFTER缺失，只有BEFORE records。后续只读SQL确认表0，单列不补造AFTER验收。实际上游行数未知，也不能借balancesheet诊断判定本次根因。
+
+安全输出SHA `92271d5a02e8c4209e3f6ff94787cc32746cc1e8f20375a455ac943f2f4372e2`，SQL SHA `aa357d54b20b58f827cf9e9af70bb354b7e4c75038f75dc4d0c002073693e509`，income SQL SHA `3844ce14d76d2260ed0ec5c9e707d2bc7f5550d4e39d12fc4043e6f763b71a19`，均位于本轮同名私有目录；后者确认8个原键、两股历史保留及21source/8insert/13update。独立审查、进程/秘密清理通过，37个run共1166case/1315请求，另balancesheet诊断1次单列。income同8个计划位置在两个exit1轮各观察PASS，尚不计清洁接受。
+
+cashflow撤回v3/NEEDS_VERIFICATION，SINGLE保持；现候选31 AVAILABLE/3 NEEDS_VERIFICATION/6 UNSUPPORTED，正式仍24/10/6。原参数拒绝测试先RED（实际AVAILABLE），随后157个定向Java回归通过；现金流量表f_ann_date日期轴的原规则改用已有受控策略验证，生产撤回另验，规则未放宽。Node108项通过，所有旧run和SQL缺失事实保持。日志`/private/tmp/issue031-control/cashflow-withdrawal-red.log`、`cashflow-withdrawal-green2.log`、`evidence-current37.log`。
+
+剩余51项按[逐接口续验计划](../task-designs/ISSUE-031-design.md#现金流量表失败后的逐接口续验)独立运行，balancesheet8/cashflow8暂挂且仍在272目标内，财务指标033仍未调用。新副本`/private/tmp/issue031-perapi-20260914T203858Z`，898文件snapshot `49f9c70bc960af962fbf0d2504c678c06a0e98a76eaec275eb45eb9c18537723`；完整构建exit0，后端/两包1136、前端524、Node108通过。新包定向metadata仅3项（两旧撤回加cashflow），3/3通过、零上游/任务/records、JVM/sentinel/日志安全和自有容器/秘密清理通过；原件 `/var/folders/s5/h3vynqy544lc7vwtz0zjy39m0000gn/T/tensor-m14-t04-6GXj4G/metadata-evidence.json` SHA `a4d97938cf973be3650b8e5ee1a2904f039df8a488ddd37c0e2de17a875b3d5c`。上一包40metadata/15受控页面属于历史适用检查，未冒称新包跑了40项。
+
+- sourceDiffSha256: `962c28560ae2bc6811c0fbc936a33d35930bcd9c567a3730f15560da47d5f87a`。
+- productionJarSha256: `586020fa2d294b7a9d7d46d22199239fd0fbb646b26a54b2554bdd4615ced533`。
+- acceptanceJarSha256: `a77d99aca450fe0345869a89392a9889480753f23c41c814bf81ef6f70c732d3`。
+- manifestSha256: `386f46a99b6605e203129836d7a744b96b65304307f52991dd8bba6fd1870984`。
+- requestExamplesSha256: `6d4c74a1a539b59ac20fb0cbd3ba1fba0954c40ef1209b652f7dcc2192ec932f`。
+- `/private/tmp/issue031-perapi-control/ten-round-plan.json` SHA `b6c0e943f191d8ed272f68cd38a519013a117342ebcc3395b0b278e8b40aaaf9`。
+- `/private/tmp/issue031-perapi-control/replacement-mapping.json` SHA `338b0c5fe86fa0f6fccb66d56cad5c7e387373df7264075e931d98907f804aac`。
+- `/private/tmp/issue031-perapi-control/replacement-statuses.json` SHA `ef132fa8670141fbe4dc49647bafb2f1b0bcf19ad00cdb83972305d6651ff3ce`。
+- `/private/tmp/issue031-perapi-control/case-build-bindings.json` SHA `e351fe41832a36893e5873dff283172a73c4f8dbaabf71359b20299f23229a06`。
+
+纯选择51绑定通过，26个公告新ID、25个未用旧ID、held16及旧205身份分别核对；113条替代映射直接指向最终case，旧PASS例外只限两个固定失败run的income观察，原FAILED不适用。此处仅准备事实，尚未执行逐接口真实任务。
+
+### ISSUE-031 income 实际结果（issue031-perapi-range-income-20260914T204158Z）
+
+- 浏览器exit0，cleanup PASS；8计划项，状态{"PASS":8,"FAILED":0,"EVIDENCE_MISSING":0,"NOT_RUN":0}。实际来源8请求、records 16次；fixture另2提交/3查询。source 21行、insert 8次、update 13次，最终SQL键数按API单独记录。
+- 完整本轮安全输出`/private/tmp/issue031-perapi-range-income-20260914T204158Z/artifacts/run/safe-results.json` SHA `30e0d3d058eb10a22924bc7b30b7a730e0e8e261a8cd453b4ae802c95c3e1e1e`；wrapper身份`/private/tmp/issue031-perapi-range-income-20260914T204158Z/artifacts/task-run-identity.json` SHA `60435fd4b00fbfefe29b044423baf88999e200aa49bdf8bcd078e5251c508127`。冻结源码/898 snapshot/两包/输入/私有权限前后保持，日志安全、自有进程回收、网络与任务日志关联通过情况以原产物为准；SQL安全汇总`/private/tmp/issue031-perapi-range-income-20260914T204158Z/sql-supplement.json`。新库成功数据保留；临时client.cnf/environment.json已删除，实际清理见本轮secret-cleanup.json。
+- 旧37轮逐对象保持，唯一索引追加后38轮/1174case/1323请求。逐项来源绑定与持久策略在harness核对；本轮经独立运行审查后开放接口：income。
+
+| TASK caseId | 状态 | 请求 | source | insert | update | SQL前→后键数 | 成功叶/总叶 |
+| --- | --- | ---: | ---: | ---: | ---: | --- | --- |
+| `issue031-perapi-issue031-keyconflict-issue026-issue025-source-20260913T162759Z-income-000001-whole` | PASS | 1 | 4 | 4 | 0 | 0→4 | 1/1 |
+| `issue031-perapi-issue031-keyconflict-issue026-issue025-boundaries-20260913T163148Z-income-000001-bounded` | PASS | 1 | 4 | 0 | 4 | 4→4 | 1/1 |
+| `issue031-perapi-issue031-keyconflict-issue026-issue025-boundaries-20260913T163148Z-income-000001-lower` | PASS | 1 | 1 | 0 | 1 | 4→4 | 1/1 |
+| `issue031-perapi-issue031-keyconflict-issue026-issue025-boundaries-20260913T163148Z-income-000001-upper` | PASS | 1 | 1 | 0 | 1 | 4→4 | 1/1 |
+| `issue031-perapi-issue031-keyconflict-issue026-issue025-source-20260913T162759Z-income-600000-whole` | PASS | 1 | 4 | 4 | 0 | 4→8 | 1/1 |
+| `issue031-perapi-issue031-keyconflict-issue026-issue025-boundaries-20260913T163148Z-income-600000-bounded` | PASS | 1 | 4 | 0 | 4 | 8→8 | 1/1 |
+| `issue031-perapi-issue031-keyconflict-issue026-issue025-boundaries-20260913T163148Z-income-600000-lower` | PASS | 1 | 2 | 0 | 2 | 8→8 | 1/1 |
+| `issue031-perapi-issue031-keyconflict-issue026-issue025-boundaries-20260913T163148Z-income-600000-upper` | PASS | 1 | 1 | 0 | 1 | 8→8 | 1/1 |
+
+## ISSUE-031 fina_audit 真实TASK预登记（20260914T205049Z）
+
+- runId `issue031-perapi-range-fina_audit-20260914T205049Z`；固定4 TASK、API `fina_audit`，完整清单 `/private/tmp/issue031-perapi-range-fina_audit-20260914T205049Z/inputs/cases.json`。原参数/日期轴/来源身份不变；本段登记时尚未启动真实任务。
+- SOURCE既有观察合计4请求，仅用于预算；实际TASK请求数待实测，潜在日期二分仍受5000请求/30分钟硬限约束（最坏树可能超过预算，不保证全部完成）。每请求间隔≥2000ms、workers=1、retries=0，trace/screenshot/video关闭。fixture另2提交/3查询，目标records查询8次。
+- 新空schema计划 `tensor_m14_t05_e65dd1eea20cc684`，MySQL8.4.6；创建后核对0表、单库最小权限与UTF-8，应用启动后核对8迁移/52业务与任务表。全部成功数据库保留；只管理本轮JVM，固定HTTPS。
+- 私有输入父目录0700/文件0600，索引仅按本轮快照消费；hash：`cases.json` `0f8f2d356c7d5275504bea98270ab72b98fe63cbf4aa1006cc9bce801061f185`；`evidence-index.json` `2550b0d61d83df75edd14081d213453ee15b6392eeb5db5f57c7d2b1bbea4d57`；`source-bindings.json` `2aeaf20e7ca666086ca9704ccf654a2660f4bd4ca79b4b605f40c897551bfec4`。
+- 源码/两包使用ISSUE-031冲突保全构建；准确snapshot/两包/源码身份见本轮registration.buildIdentity及wrapper记录，运行前逐文件核验。
+- SOURCE→TASK逐项绑定 `/private/tmp/issue031-perapi-range-fina_audit-20260914T205049Z/inputs/source-bindings.json`；每项均核对页面→202/Location→详情/全部批次→两次records→SQL原键/归属/实际source、insert、update/日志与清理。失败或输入变化停止，无自动重试或换日期；结果随后追加。
+
+### ISSUE-031 fina_audit 实际结果（issue031-perapi-range-fina_audit-20260914T205049Z）
+
+- 浏览器exit0，cleanup PASS；4计划项，状态{"PASS":4,"FAILED":0,"EVIDENCE_MISSING":0,"NOT_RUN":0}。实际来源4请求、records 8次；fixture另2提交/3查询。source 4行、insert 2次、update 2次，最终SQL键数按API单独记录。
+- 完整本轮安全输出`/private/tmp/issue031-perapi-range-fina_audit-20260914T205049Z/artifacts/run/safe-results.json` SHA `0bb6a9be26c1c140fcb04b5e9b57107536ab6018aedda3bdddc9f3c49433278c`；wrapper身份`/private/tmp/issue031-perapi-range-fina_audit-20260914T205049Z/artifacts/task-run-identity.json` SHA `e78f7d2c2f4b5e0e91ad99611060e7f2f37e21a8f4ccfa13d78aec910c80fbb6`。冻结源码/898 snapshot/两包/输入/私有权限前后保持，日志安全、自有进程回收、网络与任务日志关联通过情况以原产物为准；SQL安全汇总`/private/tmp/issue031-perapi-range-fina_audit-20260914T205049Z/sql-supplement.json`。新库成功数据保留；临时client.cnf/environment.json已删除，实际清理见本轮secret-cleanup.json。
+- 旧38轮逐对象保持，唯一索引追加后39轮/1178case/1327请求。逐项来源绑定与持久策略在harness核对；本轮经独立运行审查后开放接口：fina_audit。
+
+| TASK caseId | 状态 | 请求 | source | insert | update | SQL前→后键数 | 成功叶/总叶 |
+| --- | --- | ---: | ---: | ---: | ---: | --- | --- |
+| `issue031-perapi-issue031-keyconflict-issue026-issue025-source-20260913T162759Z-fina_audit-000001-whole` | PASS | 1 | 1 | 1 | 0 | 0→1 | 1/1 |
+| `issue031-perapi-issue031-keyconflict-issue026-issue025-boundaries-20260913T163148Z-fina_audit-000001-bounded` | PASS | 1 | 1 | 0 | 1 | 1→1 | 1/1 |
+| `issue031-perapi-issue031-keyconflict-issue026-issue025-source-20260913T162759Z-fina_audit-600000-whole` | PASS | 1 | 1 | 1 | 0 | 1→2 | 1/1 |
+| `issue031-perapi-issue031-keyconflict-issue026-issue025-boundaries-20260913T163148Z-fina_audit-600000-bounded` | PASS | 1 | 1 | 0 | 1 | 2→2 | 1/1 |
+
+## ISSUE-031 express 真实TASK预登记（20260914T205520Z）
+
+- runId `issue031-perapi-range-express-20260914T205520Z`；固定6 TASK、API `express`，完整清单 `/private/tmp/issue031-perapi-range-express-20260914T205520Z/inputs/cases.json`。原参数/日期轴/来源身份不变；本段登记时尚未启动真实任务。
+- SOURCE既有观察合计6请求，仅用于预算；实际TASK请求数待实测，潜在日期二分仍受5000请求/30分钟硬限约束（最坏树可能超过预算，不保证全部完成）。每请求间隔≥2000ms、workers=1、retries=0，trace/screenshot/video关闭。fixture另2提交/3查询，目标records查询12次。
+- 新空schema计划 `tensor_m14_t05_f67700690c9e7b51`，MySQL8.4.6；创建后核对0表、单库最小权限与UTF-8，应用启动后核对8迁移/52业务与任务表。全部成功数据库保留；只管理本轮JVM，固定HTTPS。
+- 私有输入父目录0700/文件0600，索引仅按本轮快照消费；hash：`cases.json` `3a5c3f8b320b9806076c0cf854d34308cb46573d052aa799cca634b144831e8d`；`evidence-index.json` `9f37012aa70217a3f5cca738ac9ab9218fc1166e6672e8ddd532a6c86afb7817`；`source-bindings.json` `5401b542d54960d21e13990c06d258f5aea4132a65405c7c9dc406d638ca57ba`。
+- 源码/两包使用ISSUE-031冲突保全构建；准确snapshot/两包/源码身份见本轮registration.buildIdentity及wrapper记录，运行前逐文件核验。
+- SOURCE→TASK逐项绑定 `/private/tmp/issue031-perapi-range-express-20260914T205520Z/inputs/source-bindings.json`；每项均核对页面→202/Location→详情/全部批次→两次records→SQL原键/归属/实际source、insert、update/日志与清理。失败或输入变化停止，无自动重试或换日期；结果随后追加。
+
+### ISSUE-031 express 实际结果（issue031-perapi-range-express-20260914T205520Z）
+
+- 浏览器exit0，cleanup PASS；6计划项，状态{"PASS":6,"FAILED":0,"EVIDENCE_MISSING":0,"NOT_RUN":0}。实际来源6请求、records 12次；fixture另2提交/3查询。source 6行、insert 2次、update 4次，最终SQL键数按API单独记录。
+- 完整本轮安全输出`/private/tmp/issue031-perapi-range-express-20260914T205520Z/artifacts/run/safe-results.json` SHA `4425671e736739e9f9498a439276bcbe594024c46f28065b23caa439a42f41d2`；wrapper身份`/private/tmp/issue031-perapi-range-express-20260914T205520Z/artifacts/task-run-identity.json` SHA `59a5b4e377a586b707259c0d2342c2e99b679bf50fc0986847d0bcc61d7f87ab`。冻结源码/898 snapshot/两包/输入/私有权限前后保持，日志安全、自有进程回收、网络与任务日志关联通过情况以原产物为准；SQL安全汇总`/private/tmp/issue031-perapi-range-express-20260914T205520Z/sql-supplement.json`。新库成功数据保留；临时client.cnf/environment.json已删除，实际清理见本轮secret-cleanup.json。
+- 旧39轮逐对象保持，唯一索引追加后40轮/1184case/1333请求。逐项来源绑定与持久策略在harness核对；本轮经独立运行审查后开放接口：express。
+
+| TASK caseId | 状态 | 请求 | source | insert | update | SQL前→后键数 | 成功叶/总叶 |
+| --- | --- | ---: | ---: | ---: | ---: | --- | --- |
+| `issue031-perapi-issue031-keyconflict-issue026-issue025-source-20260913T162759Z-express-600000-whole` | PASS | 1 | 1 | 1 | 0 | 0→1 | 1/1 |
+| `issue031-perapi-issue031-keyconflict-issue026-issue025-boundaries-20260913T163148Z-express-600000-bounded` | PASS | 1 | 1 | 0 | 1 | 1→1 | 1/1 |
+| `issue031-perapi-issue031-keyconflict-issue026-issue025-express-20260913T163418Z-whole` | PASS | 1 | 1 | 1 | 0 | 1→2 | 1/1 |
+| `issue031-perapi-issue031-keyconflict-issue026-issue025-express-20260913T163418Z-day` | PASS | 1 | 1 | 0 | 1 | 2→2 | 1/1 |
+| `issue031-perapi-issue031-keyconflict-issue026-issue025-express-20260913T163418Z-lower-window` | PASS | 1 | 1 | 0 | 1 | 2→2 | 1/1 |
+| `issue031-perapi-issue031-keyconflict-issue026-issue025-express-20260913T163418Z-upper-window` | PASS | 1 | 1 | 0 | 1 | 2→2 | 1/1 |
+
+## ISSUE-031 stk_managers 真实TASK预登记（20260914T210252Z）
+
+- runId `issue031-perapi-range-stk_managers-20260914T210252Z`；固定8 TASK、API `stk_managers`，完整清单 `/private/tmp/issue031-perapi-range-stk_managers-20260914T210252Z/inputs/cases.json`。原参数/日期轴/来源身份不变；本段登记时尚未启动真实任务。
+- SOURCE既有观察合计8请求，仅用于预算；实际TASK请求数待实测，潜在日期二分仍受5000请求/30分钟硬限约束（最坏树可能超过预算，不保证全部完成）。每请求间隔≥2000ms、workers=1、retries=0，trace/screenshot/video关闭。fixture另2提交/3查询，目标records查询16次。
+- 新空schema计划 `tensor_m14_t05_872c5dd80b68cf35`，MySQL8.4.6；创建后核对0表、单库最小权限与UTF-8，应用启动后核对8迁移/52业务与任务表。全部成功数据库保留；只管理本轮JVM，固定HTTPS。
+- 私有输入父目录0700/文件0600，索引仅按本轮快照消费；hash：`cases.json` `2c6a32f970f1137f5dfe1ed4b320e0af1692a4e2189a83a84efcef7ba2680456`；`evidence-index.json` `8c1c99e4fe66de56bd0e1734eab7d6e7c364f44807ae9f4c775df94385dbdbbe`；`source-bindings.json` `09f2d3283b806bb5a9386d0ede6e0faf9d62a7c93ad0270cfa8ce70c3e7fc03a`。
+- 源码/两包使用ISSUE-031冲突保全构建；准确snapshot/两包/源码身份见本轮registration.buildIdentity及wrapper记录，运行前逐文件核验。
+- SOURCE→TASK逐项绑定 `/private/tmp/issue031-perapi-range-stk_managers-20260914T210252Z/inputs/source-bindings.json`；每项均核对页面→202/Location→详情/全部批次→两次records→SQL原键/归属/实际source、insert、update/日志与清理。失败或输入变化停止，无自动重试或换日期；结果随后追加。
+
+## ISSUE-031现金流量表一次诊断预登记
+
+- run `issue031-cashflow-diagnostic-20260914T210414Z`，当前PREPARED_NOT_RUN。原cashflow/000001.SZ/20240101～20241231，仅一次来源调用，150秒、零重试；其他真实验收全部结束并独立审查后才执行。无TASK/SQL，不计入272通过数或唯一TASK索引。
+- 原失败包SHA `65a809227e4c3d485799af51a9826d37943ecc623c9deaf6aed3167aed19654e`；诊断目录 `/private/tmp/issue031-cashflow-diagnostic`，registration SHA `e014e06eacf7730c06d8a587c9fc54e84a7c8c90a2db822b0386d62274d70d36`。原client/definition/adapter及54依赖、Java/源码/类/包装器/白名单输入执行前核验；一次启动标记防止重跑。
+- 本地编译及7项输出白名单检查通过，来源请求0；只输出安全分支元数据，不持久化原响应、财务值、业务键值或原异常。不会调用fina_indicator或再次诊断balancesheet；设计依据见[现金流量表定位](../task-designs/ISSUE-031-design.md#现金流量表的一次有界根因定位)。
+
+### ISSUE-031 stk_managers 实际结果（issue031-perapi-range-stk_managers-20260914T210252Z）
+
+- 浏览器exit0，cleanup PASS；8计划项，状态{"PASS":8,"FAILED":0,"EVIDENCE_MISSING":0,"NOT_RUN":0}。实际来源8请求、records 16次；fixture另2提交/3查询。source 37行、insert 13次、update 24次，最终SQL键数按API单独记录。
+- 完整本轮安全输出`/private/tmp/issue031-perapi-range-stk_managers-20260914T210252Z/artifacts/run/safe-results.json` SHA `7714f8ca9f691f5a7a3534831d2e53c081049ee76438dde1f4bf538619f32c61`；wrapper身份`/private/tmp/issue031-perapi-range-stk_managers-20260914T210252Z/artifacts/task-run-identity.json` SHA `415558adee861eb482e3b0673207d2357d4cff9edf4140ad9dccd97242519374`。冻结源码/898 snapshot/两包/输入/私有权限前后保持，日志安全、自有进程回收、网络与任务日志关联通过情况以原产物为准；SQL安全汇总`/private/tmp/issue031-perapi-range-stk_managers-20260914T210252Z/sql-supplement.json`。新库成功数据保留；临时client.cnf/environment.json已删除，实际清理见本轮secret-cleanup.json。
+- 旧40轮逐对象保持，唯一索引追加后41轮/1192case/1341请求。逐项来源绑定与持久策略在harness核对；本轮经独立运行审查后开放接口：stk_managers。
+
+| TASK caseId | 状态 | 请求 | source | insert | update | SQL前→后键数 | 成功叶/总叶 |
+| --- | --- | ---: | ---: | ---: | ---: | --- | --- |
+| `issue031-perapi-issue031-keyconflict-issue026-issue025-source-20260913T162759Z-stk_managers-000001-whole` | PASS | 1 | 5 | 5 | 0 | 0→5 | 1/1 |
+| `issue031-perapi-issue031-keyconflict-issue026-issue025-boundaries-20260913T163148Z-stk_managers-000001-bounded` | PASS | 1 | 5 | 0 | 5 | 5→5 | 1/1 |
+| `issue031-perapi-issue031-keyconflict-issue026-issue025-boundaries-20260913T163148Z-stk_managers-000001-lower` | PASS | 1 | 3 | 0 | 3 | 5→5 | 1/1 |
+| `issue031-perapi-issue031-keyconflict-issue026-issue025-boundaries-20260913T163148Z-stk_managers-000001-upper` | PASS | 1 | 2 | 0 | 2 | 5→5 | 1/1 |
+| `issue031-perapi-issue031-keyconflict-issue026-issue025-source-20260913T162759Z-stk_managers-600000-whole` | PASS | 1 | 8 | 8 | 0 | 5→13 | 1/1 |
+| `issue031-perapi-issue031-keyconflict-issue026-issue025-boundaries-20260913T163148Z-stk_managers-600000-bounded` | PASS | 1 | 8 | 0 | 8 | 13→13 | 1/1 |
+| `issue031-perapi-issue031-keyconflict-issue026-issue025-boundaries-20260913T163148Z-stk_managers-600000-lower` | PASS | 1 | 1 | 0 | 1 | 13→13 | 1/1 |
+| `issue031-perapi-issue031-keyconflict-issue026-issue025-boundaries-20260913T163148Z-stk_managers-600000-upper` | PASS | 1 | 5 | 0 | 5 | 13→13 | 1/1 |
+
+## ISSUE-031 repurchase 真实TASK预登记（20260914T211042Z）
+
+- runId `issue031-perapi-range-repurchase-20260914T211042Z`；固定5 TASK、API `repurchase`，完整清单 `/private/tmp/issue031-perapi-range-repurchase-20260914T211042Z/inputs/cases.json`。原参数/日期轴/来源身份不变；本段登记时尚未启动真实任务。
+- SOURCE既有观察合计5请求，仅用于预算；实际TASK请求数待实测，潜在日期二分仍受5000请求/30分钟硬限约束（最坏树可能超过预算，不保证全部完成）。每请求间隔≥2000ms、workers=1、retries=0，trace/screenshot/video关闭。fixture另2提交/3查询，目标records查询10次。
+- 新空schema计划 `tensor_m14_t05_fd49169929ec1885`，MySQL8.4.6；创建后核对0表、单库最小权限与UTF-8，应用启动后核对8迁移/52业务与任务表。全部成功数据库保留；只管理本轮JVM，固定HTTPS。
+- 私有输入父目录0700/文件0600，索引仅按本轮快照消费；hash：`cases.json` `ef13e28d929eef3dbe0a776e0af01a8ae2a2d2381783879b301eb3a7d997f972`；`evidence-index.json` `0c115885fa9014eb339dcd579c350f7fde20cb62a71e26712528eb6117e4ed7c`；`source-bindings.json` `5e4236b03fb10d6494d04a507631b2f87c6f0ce85702d5a0fdf73b2a525c8e35`。
+- 源码/两包使用ISSUE-031冲突保全构建；准确snapshot/两包/源码身份见本轮registration.buildIdentity及wrapper记录，运行前逐文件核验。
+- SOURCE→TASK逐项绑定 `/private/tmp/issue031-perapi-range-repurchase-20260914T211042Z/inputs/source-bindings.json`；每项均核对页面→202/Location→详情/全部批次→两次records→SQL原键/归属/实际source、insert、update/日志与清理。失败或输入变化停止，无自动重试或换日期；结果随后追加。
+
+### ISSUE-031 repurchase 实际结果（issue031-perapi-range-repurchase-20260914T211042Z）
+
+- 浏览器exit1，cleanup PASS；5计划项，状态{"PASS":0,"FAILED":1,"EVIDENCE_MISSING":0,"NOT_RUN":4}。实际来源1请求、records 1次；fixture另2提交/3查询。source 0行、insert 0次、update 0次，最终SQL键数按API单独记录。
+- 完整本轮安全输出`/private/tmp/issue031-perapi-range-repurchase-20260914T211042Z/artifacts/run/safe-results.json` SHA `7c491eeccd94ecbdd6398cc786acff6d5ef856a62f9766f00db3ed1fbfdc9d88`；wrapper身份`/private/tmp/issue031-perapi-range-repurchase-20260914T211042Z/artifacts/task-run-identity.json` SHA `f0c28e42d71e8952994bee4bfae545fda14c7ad4165131f17a166a28c5f06750`。冻结源码/898 snapshot/两包/输入/私有权限前后保持，日志安全、自有进程回收、网络与任务日志关联通过情况以原产物为准；SQL安全汇总`/private/tmp/issue031-perapi-range-repurchase-20260914T211042Z/sql-supplement.json`。新库成功数据保留；临时client.cnf/environment.json已删除，实际清理见本轮secret-cleanup.json。
+- 旧41轮逐对象保持，唯一索引追加后42轮/1197case/1342请求。逐项来源绑定与持久策略在harness核对；本轮经独立运行审查后开放接口：无（尚有跨轮任务或证据缺口）。
+
+| TASK caseId | 状态 | 请求 | source | insert | update | SQL前→后键数 | 成功叶/总叶 |
+| --- | --- | ---: | ---: | ---: | ---: | --- | --- |
+| `issue026-issue025-source-20260913T162759Z-repurchase-all-whole` | FAILED | 1 | 0 | 0 | 0 | —→— | 0/1 |
+| `issue026-issue025-boundaries-20260913T163148Z-repurchase-all-lower` | NOT_RUN | — | — | — | — | —→— | —/— |
+| `issue026-issue025-boundaries-20260913T163148Z-repurchase-all-upper` | NOT_RUN | — | — | — | — | —→— | —/— |
+| `issue026-issue025-boundaries-20260913T163148Z-repurchase-all-before` | NOT_RUN | — | — | — | — | —→— | —/— |
+| `issue026-issue025-boundaries-20260913T163148Z-repurchase-all-after` | NOT_RUN | — | — | — | — | —→— | —/— |
+
+### 回购失败保全与续验范围
+
+`issue031-perapi-range-repurchase-20260914T211042Z`：原DATES参数20260801～20260831、无ts_code。task `938ab8cc-0b39-476d-bb77-abbfd683285e` / batch `31115b76-6521-4185-8f16-264121f4f557` 实际FAILED / ADAPTER_TYPE_INVALID，1请求/1尝试；1次BEFORE records，AFTER缺失，规范case的SQL前后均null。上文source/insert/update0仅为成功计数，不证明来源为空。补充只读SQL确认回购表0，未冒充完整TASK闭环。其余4项NOT_RUN，exit1/cleanup PASS；独立审查通过，失败schema保留、临时凭据已清理，旧41轮和其他接口不变。
+
+仅repurchase当前准入撤回v3，SINGLE保持；根因尚未确定，无诊断或自动重试。当前231/272清洁接受，3 FAILED/38 NOT_RUN；其中balancesheet8、cashflow8、repurchase5暂挂，剩余holders16和regression4按新冻结包继续，21项暂挂没有另行递延。财务指标另6项仍归ISSUE-033。当前正式28 AVAILABLE/6 NEEDS_VERIFICATION/6 SINGLE_ONLY；候选30 AVAILABLE/4 NEEDS_VERIFICATION/6 UNSUPPORTED。
+
+### 现金流诊断准备修订2（仍未执行）
+
+公开doc44明确更新标志1为最新，仅据此增加同一次响应的安全聚合版本计数，不选行/不写入、不增加请求。登记现SHA `8af2822b2b0b4971a4367be71e7df03f32364cc34e183a4c2b912d4c8f772b49`；旧e014版本保存在诊断目录`revision1-prepared-not-run/`。21项纯检查通过、零真实请求；源码/类/runner哈希和实际输出口径见registration与[设计修订](../task-designs/ISSUE-031-design.md#现金流量表的一次有界根因定位)，执行前再次复核。
+
+### 回购撤回后的新冻结构建
+
+隔离副本`/private/tmp/issue031-repurchase-20260914T211953Z`，898文件snapshot `258b7df2a635a9cd3f53f7aaf6abb9257a55ab2551549269551bf09602da3b9b`；sourceDiff `453a552545163b0b18ccfeab043241ab86bb3bee6f4f8f651ddfcb6e07f1cc7c`，生产JAR `4d4f1e3985c10aca803a0ca4d8d1a535e2637909b0f68192c977d193c40735be`，验收JAR `5ecb993e13d6c1340013eb48ca87ea4a91782906dd06bd51f2108b7b51c1bfd5`。完整离线acceptance构建1137后端/打包、524前端，失败/错误/跳过0；定向158和当前阶段Node110均PASS。旧包和旧结果保持。
+
+新包metadata核对4个撤回接口4/4 PASS，TASK提交/同步下载/records/上游调用均0，内部JVM/sentinel/日志检查及外层临时容器/凭据清理完成。原件`/var/folders/s5/h3vynqy544lc7vwtz0zjy39m0000gn/T/tensor-m14-t04-wI3ns8/metadata-evidence.json` SHA `afd24914aa306d58e3bbc633d73c96188042b6eefb4968966d3491139b7df8c8`；这是本包4接口检查，不将旧metadata40/受控页面15冒充新包结果。构建报告与准确身份见`/private/tmp/issue031-repurchase-control/build/`。
+
+272逐case构建绑定中只更新未用的holders8+8/regression4共20项为新包，252个既有绑定保持各自历史包；20项纯选择与完整SOURCE绑定通过、尚未新增真实请求。两个运行包装器已指新副本，冻结前后源码/包/输入门禁保持。实际运行须逐轮预登记、列表/新空schema检查和独立复核后再执行。
+
+## ISSUE-031 top10_holders 真实TASK预登记（20260914T212506Z）
+
+- runId `issue031-repurchase-range-top10_holders-20260914T212506Z`；固定8 TASK、API `top10_holders`，完整清单 `/private/tmp/issue031-repurchase-range-top10_holders-20260914T212506Z/inputs/cases.json`。原参数/日期轴/来源身份不变；本段登记时尚未启动真实任务。
+- SOURCE既有观察合计8请求，仅用于预算；实际TASK请求数待实测，潜在日期二分仍受5000请求/30分钟硬限约束（最坏树可能超过预算，不保证全部完成）。每请求间隔≥2000ms、workers=1、retries=0，trace/screenshot/video关闭。fixture另2提交/3查询，目标records查询16次。
+- 新空schema计划 `tensor_m14_t05_00aa3f7984eb2044`，MySQL8.4.6；创建后核对0表、单库最小权限与UTF-8，应用启动后核对8迁移/52业务与任务表。全部成功数据库保留；只管理本轮JVM，固定HTTPS。
+- 私有输入父目录0700/文件0600，索引仅按本轮快照消费；hash：`cases.json` `651a5a3a1e209260ee2a00b66ccfad56e8196034811c144d6ea4e0b4fbdc2801`；`evidence-index.json` `0bfb7c102c72fb600d77d607f56c8b612bf07631853e8bb6a0b9f31673502c7f`；`source-bindings.json` `70ee02eafb7a5fced137b62c36234f703b3175931fefb5c5293b5338f2286406`。
+- 源码/两包使用ISSUE-031冲突保全构建；准确snapshot/两包/源码身份见本轮registration.buildIdentity及wrapper记录，运行前逐文件核验。
+- SOURCE→TASK逐项绑定 `/private/tmp/issue031-repurchase-range-top10_holders-20260914T212506Z/inputs/source-bindings.json`；每项均核对页面→202/Location→详情/全部批次→两次records→SQL原键/归属/实际source、insert、update/日志与清理。失败或输入变化停止，无自动重试或换日期；结果随后追加。
+
+## ISSUE-031回购一次诊断预登记（尚未执行）
+
+`issue031-repurchase-diagnostic-20260914T212829Z`，私有目录`/private/tmp/issue031-repurchase-diagnostic`；registration SHA `57b870e3af74e97a5928a349c59b91d18da7341d03642c291f23f8ffe662e463`。原repurchase/20260801～20260831/无stock，原失败a77d99ac…验收包，最多1请求150秒、无重试/DB/TASK；其他TASK结束且独立复核后执行。编译+7项输出校验PASS/0请求；仅元数据白名单，不持久化原响应或字段值。详见[有界诊断设计](../task-designs/ISSUE-031-design.md#回购的一次有界根因定位)。
+
+### ISSUE-031 top10_holders 实际结果（issue031-repurchase-range-top10_holders-20260914T212506Z）
+
+- 浏览器exit0，cleanup PASS；8计划项，状态{"PASS":8,"FAILED":0,"EVIDENCE_MISSING":0,"NOT_RUN":0}。实际来源8请求、records 16次；fixture另2提交/3查询。source 240行、insert 100次、update 140次，最终SQL键数按API单独记录。
+- 完整本轮安全输出`/private/tmp/issue031-repurchase-range-top10_holders-20260914T212506Z/artifacts/run/safe-results.json` SHA `961e550ac22dc1c11ff967d62b5dc44cd0523c72f26837153d534872b71832ab`；wrapper身份`/private/tmp/issue031-repurchase-range-top10_holders-20260914T212506Z/artifacts/task-run-identity.json` SHA `3b5236b3f073dfe0c3c74707fab3b8164186823a49ed7fa217b2926ce8d53fc7`。冻结源码/898 snapshot/两包/输入/私有权限前后保持，日志安全、自有进程回收、网络与任务日志关联通过情况以原产物为准；SQL安全汇总`/private/tmp/issue031-repurchase-range-top10_holders-20260914T212506Z/sql-supplement.json`。新库成功数据保留；临时client.cnf/environment.json已删除，实际清理见本轮secret-cleanup.json。
+- 旧42轮逐对象保持，唯一索引追加后43轮/1205case/1350请求。逐项来源绑定与持久策略在harness核对；本轮经独立运行审查后开放接口：top10_holders。
+
+| TASK caseId | 状态 | 请求 | source | insert | update | SQL前→后键数 | 成功叶/总叶 |
+| --- | --- | ---: | ---: | ---: | ---: | --- | --- |
+| `issue026-issue025-source-20260913T162759Z-top10_holders-000001-whole` | PASS | 1 | 40 | 40 | 0 | 0→40 | 1/1 |
+| `issue026-issue025-boundaries-20260913T163148Z-top10_holders-000001-bounded` | PASS | 1 | 40 | 0 | 40 | 40→40 | 1/1 |
+| `issue026-issue025-boundaries-20260913T163148Z-top10_holders-000001-lower` | PASS | 1 | 10 | 0 | 10 | 40→40 | 1/1 |
+| `issue026-issue025-boundaries-20260913T163148Z-top10_holders-000001-upper` | PASS | 1 | 10 | 0 | 10 | 40→40 | 1/1 |
+| `issue026-issue025-source-20260913T162759Z-top10_holders-600000-whole` | PASS | 1 | 60 | 60 | 0 | 40→100 | 1/1 |
+| `issue026-issue025-boundaries-20260913T163148Z-top10_holders-600000-bounded` | PASS | 1 | 60 | 0 | 60 | 100→100 | 1/1 |
+| `issue026-issue025-boundaries-20260913T163148Z-top10_holders-600000-lower` | PASS | 1 | 10 | 0 | 10 | 100→100 | 1/1 |
+| `issue026-issue025-boundaries-20260913T163148Z-top10_holders-600000-upper` | PASS | 1 | 10 | 0 | 10 | 100→100 | 1/1 |
+
+## ISSUE-031 top10_floatholders 真实TASK预登记（20260914T213321Z）
+
+- runId `issue031-repurchase-range-top10_floatholders-20260914T213321Z`；固定8 TASK、API `top10_floatholders`，完整清单 `/private/tmp/issue031-repurchase-range-top10_floatholders-20260914T213321Z/inputs/cases.json`。原参数/日期轴/来源身份不变；本段登记时尚未启动真实任务。
+- SOURCE既有观察合计8请求，仅用于预算；实际TASK请求数待实测，潜在日期二分仍受5000请求/30分钟硬限约束（最坏树可能超过预算，不保证全部完成）。每请求间隔≥2000ms、workers=1、retries=0，trace/screenshot/video关闭。fixture另2提交/3查询，目标records查询16次。
+- 新空schema计划 `tensor_m14_t05_62b07759774bc742`，MySQL8.4.6；创建后核对0表、单库最小权限与UTF-8，应用启动后核对8迁移/52业务与任务表。全部成功数据库保留；只管理本轮JVM，固定HTTPS。
+- 私有输入父目录0700/文件0600，索引仅按本轮快照消费；hash：`cases.json` `0c7f969099645bcc016923d64ff304e5ecd70dfb9e3ca8ae3551902b0a6255ae`；`evidence-index.json` `0306407c1beba6f6e7bde39c49fdb533a362c252f001d3b3309a48a886caaba9`；`source-bindings.json` `27d7642bc99c7b414594af57688ef3cc0c3c7fac26c0a0aab87cfeaad2f9b96e`。
+- 源码/两包使用ISSUE-031冲突保全构建；准确snapshot/两包/源码身份见本轮registration.buildIdentity及wrapper记录，运行前逐文件核验。
+- SOURCE→TASK逐项绑定 `/private/tmp/issue031-repurchase-range-top10_floatholders-20260914T213321Z/inputs/source-bindings.json`；每项均核对页面→202/Location→详情/全部批次→两次records→SQL原键/归属/实际source、insert、update/日志与清理。失败或输入变化停止，无自动重试或换日期；结果随后追加。
+
+### ISSUE-031 top10_floatholders 实际结果（issue031-repurchase-range-top10_floatholders-20260914T213321Z）
+
+- 浏览器exit0，cleanup PASS；8计划项，状态{"PASS":8,"FAILED":0,"EVIDENCE_MISSING":0,"NOT_RUN":0}。实际来源8请求、records 16次；fixture另2提交/3查询。source 247行、insert 100次、update 147次，最终SQL键数按API单独记录。
+- 完整本轮安全输出`/private/tmp/issue031-repurchase-range-top10_floatholders-20260914T213321Z/artifacts/run/safe-results.json` SHA `1e597360f2d5d1bf1c35a8e085504b71e116df6af369e183b4a16f0efb2c35c2`；wrapper身份`/private/tmp/issue031-repurchase-range-top10_floatholders-20260914T213321Z/artifacts/task-run-identity.json` SHA `045080c9f64d017c8ee69f458e9926babe739120f248daa8beea1699cf26b33a`。冻结源码/898 snapshot/两包/输入/私有权限前后保持，日志安全、自有进程回收、网络与任务日志关联通过情况以原产物为准；SQL安全汇总`/private/tmp/issue031-repurchase-range-top10_floatholders-20260914T213321Z/sql-supplement.json`。新库成功数据保留；临时client.cnf/environment.json已删除，实际清理见本轮secret-cleanup.json。
+- 旧43轮逐对象保持，唯一索引追加后44轮/1213case/1358请求。逐项来源绑定与持久策略在harness核对；本轮经独立运行审查后开放接口：top10_floatholders。
+
+| TASK caseId | 状态 | 请求 | source | insert | update | SQL前→后键数 | 成功叶/总叶 |
+| --- | --- | ---: | ---: | ---: | ---: | --- | --- |
+| `issue026-issue025-source-20260913T162759Z-top10_floatholders-000001-whole` | PASS | 1 | 54 | 54 | 0 | 0→54 | 1/1 |
+| `issue026-issue025-boundaries-20260913T163148Z-top10_floatholders-000001-bounded` | PASS | 1 | 54 | 0 | 54 | 54→54 | 1/1 |
+| `issue026-issue025-boundaries-20260913T163148Z-top10_floatholders-000001-lower` | PASS | 1 | 15 | 0 | 15 | 54→54 | 1/1 |
+| `issue026-issue025-boundaries-20260913T163148Z-top10_floatholders-000001-upper` | PASS | 1 | 10 | 0 | 10 | 54→54 | 1/1 |
+| `issue026-issue025-source-20260913T162759Z-top10_floatholders-600000-whole` | PASS | 1 | 46 | 46 | 0 | 54→100 | 1/1 |
+| `issue026-issue025-boundaries-20260913T163148Z-top10_floatholders-600000-bounded` | PASS | 1 | 46 | 0 | 46 | 100→100 | 1/1 |
+| `issue026-issue025-boundaries-20260913T163148Z-top10_floatholders-600000-lower` | PASS | 1 | 12 | 0 | 12 | 100→100 | 1/1 |
+| `issue026-issue025-boundaries-20260913T163148Z-top10_floatholders-600000-upper` | PASS | 1 | 10 | 0 | 10 | 100→100 | 1/1 |
+
+## ISSUE-031 regression 真实TASK预登记（20260914T213809Z）
+
+- runId `issue031-repurchase-range-regression-20260914T213809Z`；固定4 TASK、API `daily_basic, moneyflow, stk_limit, margin_detail`，完整清单 `/private/tmp/issue031-repurchase-range-regression-20260914T213809Z/inputs/cases.json`。原参数/日期轴/来源身份不变；本段登记时尚未启动真实任务。
+- SOURCE既有观察合计4请求，仅用于预算；实际TASK请求数待实测，潜在日期二分仍受5000请求/30分钟硬限约束（最坏树可能超过预算，不保证全部完成）。每请求间隔≥2000ms、workers=1、retries=0，trace/screenshot/video关闭。fixture另2提交/3查询，目标records查询8次。
+- 新空schema计划 `tensor_m14_t05_bd8a47b0e5d27d9d`，MySQL8.4.6；创建后核对0表、单库最小权限与UTF-8，应用启动后核对8迁移/52业务与任务表。全部成功数据库保留；只管理本轮JVM，固定HTTPS。
+- 私有输入父目录0700/文件0600，索引仅按本轮快照消费；hash：`cases.json` `0f9375625f4690b0bf9a6a141a0f011d5187a7901feeb12f22b0e7c60f3bccc9`；`evidence-index.json` `c7d0067c818fd25a4205120c1623e07d609f41836e276c61721fe8476bbb3f2f`；`source-bindings.json` `432c6c47bba61474ac41936f30f7822fd543fff0feed1da7899bc6f3095cfb26`。
+- 源码/两包使用ISSUE-031冲突保全构建；准确snapshot/两包/源码身份见本轮registration.buildIdentity及wrapper记录，运行前逐文件核验。
+- SOURCE→TASK逐项绑定 `/private/tmp/issue031-repurchase-range-regression-20260914T213809Z/inputs/source-bindings.json`；每项均核对页面→202/Location→详情/全部批次→两次records→SQL原键/归属/实际source、insert、update/日志与清理。失败或输入变化停止，无自动重试或换日期；结果随后追加。
+
+### ISSUE-031 regression 实际结果（issue031-repurchase-range-regression-20260914T213809Z）
+
+- 浏览器exit0，cleanup PASS；4计划项，状态{"PASS":4,"FAILED":0,"EVIDENCE_MISSING":0,"NOT_RUN":0}。实际来源4请求、records 8次；fixture另2提交/3查询。source 22行、insert 22次、update 0次，最终SQL键数按API单独记录。
+- 完整本轮安全输出`/private/tmp/issue031-repurchase-range-regression-20260914T213809Z/artifacts/run/safe-results.json` SHA `34c8469556cae3788b549a2b7bd592dc1c655c7ab507a2cb7fd4419233b70aff`；wrapper身份`/private/tmp/issue031-repurchase-range-regression-20260914T213809Z/artifacts/task-run-identity.json` SHA `1939bfbf34c616b1053f393dc3bbab47da68312c15eb986b08dedab566916484`。冻结源码/898 snapshot/两包/输入/私有权限前后保持，日志安全、自有进程回收、网络与任务日志关联通过情况以原产物为准；SQL安全汇总`/private/tmp/issue031-repurchase-range-regression-20260914T213809Z/sql-supplement.json`。新库成功数据保留；临时client.cnf/environment.json已删除，实际清理见本轮secret-cleanup.json。
+- 旧44轮逐对象保持，唯一索引追加后45轮/1217case/1362请求。逐项来源绑定与持久策略在harness核对；本轮经独立运行审查，daily_basic、moneyflow、stk_limit、margin_detail回归通过，维持原AVAILABLE。
+
+| TASK caseId | 状态 | 请求 | source | insert | update | SQL前→后键数 | 成功叶/总叶 |
+| --- | --- | ---: | ---: | ---: | ---: | --- | --- |
+| `issue026-regression-issue018-t14-priority-source-20260913T092938Z-daily_basic-cross-year` | PASS | 1 | 4 | 4 | 0 | 0→4 | 1/1 |
+| `issue026-regression-issue018-t14-priority-source-20260913T092938Z-moneyflow-range` | PASS | 1 | 6 | 6 | 0 | 0→6 | 1/1 |
+| `issue026-regression-issue018-t14-priority-source-20260913T092938Z-stk_limit-range` | PASS | 1 | 6 | 6 | 0 | 0→6 | 1/1 |
+| `issue026-regression-issue018-t14-priority-source-20260913T092938Z-margin_detail-range` | PASS | 1 | 6 | 6 | 0 | 0→6 | 1/1 |
+
+## 三接口冲突诊断与剩余阻塞
+
+2026-09-15，其他可独立验收的任务已结束；当前目标272 = 251清洁PASS + 3 FAILED + 18 NOT_RUN。唯一索引45轮/1217case/1362来源请求，另三个有界诊断各1请求单独登记，不加入TASK/SOURCE验收。正式30 AVAILABLE/4 NEEDS_VERIFICATION/6 SINGLE_ONLY；构建能力30 AVAILABLE/4 NEEDS_VERIFICATION/6 UNSUPPORTED。fina_indicator另6项递延ISSUE-033，本次未调用。
+
+| 当前受阻接口 | FAILED / NOT_RUN | 已观察的原因 | 尚缺的规则 |
+| --- | ---: | --- | --- |
+| balancesheet | 1 / 7 | 原键下total_share/update_flag不同，转换失败0 | doc36只称更新标识，版本保留优先级未定 |
+| cashflow | 1 / 7 | 原键下两组内容冲突，转换失败0 | 是否采用唯一最新版本；无最新/多最新如何处理 |
+| repurchase | 1 / 4 | 原键下15组内容冲突，转换失败0 | 如何识别不同回购记录或版本并保留数据 |
+
+### 现金流量表诊断实际结果
+
+`issue031-cashflow-diagnostic-20260914T210414Z`已按修订2登记执行并独立审查PASS。私有目录`/private/tmp/issue031-cashflow-diagnostic`，登记SHA `8af2822b2b0b4971a4367be71e7df03f32364cc34e183a4c2b912d4c8f772b49`；原失败验收JAR `65a809227e4c3d485799af51a9826d37943ecc623c9deaf6aed3167aed19654e`，原000001.SZ/20240101～20241231参数，1请求返回6行。原adapter结果ADAPTER_FAILED/ADAPTER_TYPE_INVALID/KEY_CONFLICT，字段转换失败0。6行完整转换为4个原键组，其中2个冲突组；每组恰有1个update_flag字符串为1的不同完整行，无最新组0、多最新组0。零基行1/2差异为end_type/prov_depr_assets/oth_loss_asset/update_flag，4/5为prov_depr_assets/oth_loss_asset/update_flag。原键保持ts_code,end_date,report_type,ann_date。
+
+官方[doc44](https://tushare.pro/document/2?doc_id=44)写明update_flag为“更新标志(1最新）”；保存的official-doc44.html SHA `c72936927f2038160b357766e350aba40241404f02aebe6e12edac9283e17b9c`。这支持提出cashflow专属方案：冲突组只有一个不同的最新完整行时采用该版本，无最新或多个最新仍失败。该方案尚未决定或实现，不能推广到资产负债表和回购。safe-result.json SHA `6867e1802f09d1ddeb3ce64a482e0c19f7b3253deb8ee49bfcd27b7171e6e491`；execution-start.json SHA `9888e2fb812f2ae77e664d0b5e407253822c56593778913d0a9550bc00513d62`。修订1留在revision1-prepared-not-run/，从未执行。
+
+### 回购诊断实际结果
+
+`issue031-repurchase-diagnostic-20260914T212829Z`已执行并独立审查PASS。私有目录`/private/tmp/issue031-repurchase-diagnostic`，登记SHA `57b870e3af74e97a5928a349c59b91d18da7341d03642c291f23f8ffe662e463`；原失败验收JAR `a77d99aca450fe0345869a89392a9889480753f23c41c814bf81ef6f70c732d3`，原DATES参数20260801～20260831、无ts_code，1请求返回852行。原adapter结果ADAPTER_FAILED/ADAPTER_TYPE_INVALID/KEY_CONFLICT，转换失败0；按不同firstRowIndex得到15个冲突组，相对各组首行共有17次不同内容比较。差异字段仅end_date/vol/amount/high_limit/low_limit，原键保持ts_code,ann_date,proc。没有最新版本统计，也未单独计数完全重复行，不能用852减17推算唯一键数。
+
+safe-result.json SHA `e4b9c1395f037ec258411b173a0ee8e67a53405998a7363c63a020cb058d73e8`；execution-start.json SHA `9e8fd714f432e4d3ad2528002fe4abff40dd352911d98362f1be5b107233b049`。
+
+两次新诊断均在最后regression真实轮结束后串行执行。独立复核原包/Java/源码/类/包装器/54依赖及白名单输入身份通过；无DB/TASK、无原响应或字段值持久化、无重试。原失败响应未保留，结论仅描述原包/原参数下此次诊断观察，不声称重现了完全相同的原始payload。cashflow和repurchase原FAILED及规范SQL前后null保持，补充表0没有补成AFTER验收。
+
+此前balancesheet诊断`issue031-balancesheet-diagnostic-20260914T200411Z`保持唯一一次请求：6行、KEY_CONFLICT、转换失败0、零基行2/3和4/5仅total_share/update_flag不同；没有测得最新标记或唯一键总数。safe SHA `473cc864541a24ecdcb53fc703fc28516995b54a026b34218bab3655e2d197bf`。三个接口保持v3撤回，原参数/字段/精度/键/SINGLE均未改变。只更新cashflow和repurchase当前未决原因为版本/身份规则未解决，全部45轮原case对象保持。
+
+三个接口的21项仍在ISSUE-031目标中，尚未获准另行递延；ISSUE-031不能完成，ISSUE-032不启动。恢复条件是明确各接口可执行的冲突保留/身份规则并据此修订设计，或用户明确批准另行递延和目标变更；诊断请求不重复执行。
+
+## 独立续验的专项SQL汇总
+
+income8/fina_audit4/express6/stk_managers8四个独立成功轮按各自原业务键最终保留8/2/2/13键；income和express分别两股4+4及1+1，managers为5+8。managers原八字段元组与fingerprint计数匹配，没有独立重算fingerprint编码。对应各轮announcement-sql.json已与通用SQL一并审查；SHA依次为`4ec8ecc4b0e6ccdf2d821142f3f00d3fff3d5155255f45d732108e7f48aaeb74`、`01c290c52c75d5af6cae5fd80957a0b5890525f3745facb944db8f9ac6046b74`、`986928555dce15f97a9906b8d304353a115bfbf43f0742594b1b30290e904874`、`3c69261d144bc3a1d2abb75b0e3883310b8168e202896c5e036103e88f644393`。
+
+top10_holders8与top10_floatholders8均保留原四字段键ts_code,end_date,holder_name,ann_date，最终各100键，股票分布分别40+60、54+46；后股票写入没有覆盖前股票。holders的600000额外保留20170831/20170904报告期各10键；floatholders两股各报告期键数分别15/15/14/10和12/12/12/10。两个接口各8项的“同股东同报告期不同公告日”组数都为0；部分报告期超过10行不能证明观察到了同一股东的多公告版本。各轮holders-sql.json SHA分别`5e6ba250e85474885f9c4d2d7d92da882219ef73a39f134f678a4c5245e9f916`和`338238115ac35f114cbbcbf59acf2612a12038960d73e561cfa0b89a8b0e8b9e`；最终键摘要分别`4b457f387aa7db4254ff5683e4eea3a63791291aca3cc48e001c6fab4af5dde3`和`e98f2805ed7a3ad1434cd5cf0af409bf37ba38964c0e06c64e0e213a97f9007f`。
+
+regression4依次为daily_basic/moneyflow/stk_limit/margin_detail，最终键数4/6/6/6，来源及插入各22、更新0。SQL键摘要由准确SOURCE日期、股票和原字段顺序独立重算一致；保持原v2、6000/5800阈值、TRADE_DATE及NATIVE_RANGE/可拆合同。sql-supplement.json SHA `ec1f55a08737f5a8fbd76f2df798e536ed83fbe6911c214da252f73be46faf09`。上述三轮在5ecb993e…验收包上完成并清理秘密，数据库保留；没有把前四轮a77d99ac…包结果归到新包。
+
+## 本次续办最终离线核对
+
+真实调用全部结束后，使用当前唯一索引执行以下命令，exit0，111/111 PASS、失败/取消/跳过0；日志`/private/tmp/issue031-repurchase-control/final-stage-final.log`。阶段断言此前先出现109/110（旧阶段预期失败），按真实新结果更新并增加三轮绑定/历史保全检查后通过111项；没有修改生产运行代码或重置索引。
+
+```sh
+/private/tmp/issue031-repurchase-20260914T211953Z/data-plane/tensor-app/target/frontend/node/node --test control-plane/e2e/tushare-range-evidence.test.js
+/private/tmp/issue031-repurchase-20260914T211953Z/data-plane/tensor-app/target/frontend/node/node /private/tmp/issue031-repurchase-control/final-audit.mjs
+git diff --check
+git diff --cached --check
+```
+
+最终audit为PASS：272精确计划/参数/日期轴/逐case构建匹配，251/3/18和正式30/4/6吻合；原26轮哈希`95b2e7e0a4743f982d1818540ea8075f694050b9e0ac51a13617f63529381313`及全部42轮基线对象保持，新三轮原始/规范输出、冻结身份、输入、清理和凭据文件移除均核对。报告`/private/tmp/issue031-repurchase-control/final-audit.json`，当前索引SHA `1a83add3b0288d2823c1f2bf1d862bc279ac0b8c59cd0ab912c1a2a1c2321558`。
+
+`post-live-source-audit.json`同目录：原898文件冻结快照及两JAR保持；422相关源码/合同中，当前工作树相对真实运行包只有tushare-range-evidence.test.js阶段断言变化，生产与合同源码一致。登记文档另有更新，不能宣称最终工作树全部字节等同旧快照。适用完整acceptance构建为此前同一冻结包的1137后端/打包（66 suites）与524前端，定向158通过；新包metadata只做4个撤回接口，4/4通过且零上游/TASK/records，清理通过。旧包metadata40/受控页面15不计作本包检查，本次文档/证据测试变更不重复完整构建或真实请求。
+
+ISSUE-031以251/272及三接口21项原键冲突暂停，按[暂停交接](../task-handoffs/ISSUE-031-handoff.md)记录IN_PROGRESS → BLOCKED。ISSUE-032与ISSUE-033保持NOT_STARTED，母任务未关闭；财务指标已按用户要求单独登记并加入Git。此次续办变更未commit/push，先前要求的一次远程提交已由f563bd9完成。
+
+最终增量独立审查未发现阻断问题；审查指出的看板旧278范围/首次执行动作及回归四接口“开放”措辞均已修正。当前文档、索引未决原因、阶段测试与BLOCKED状态一致，未扩大诊断、递延或实现范围。
+
+## 2026-09-15四接口排除与ISSUE-031收尾
+
+用户明确本次不支持balancesheet/cashflow/repurchase/fina_indicator的RANGE批量下载，并要求不开始032；[范围决定](../issues/proposals/ISSUE-026-range-scope.md)限定替代原34/278全量要求。当前30个RANGE接口、251项固定TASK全部有既有合格证据，原27项排除并保留4 FAILED/23 NOT_RUN；没有将其改为PASS或删除原run。
+
+本次仅修改范围文档、四接口的正式EXCLUDED处置/依据引用及现有证据测试的阶段预期。JSON中原45轮/1217case/1362来源请求逐对象保持，原inputHashes与其余36个接口逐对象保持；四接口的SOURCE/TASK状态、日期/参数、cases、unresolved、原提取规则和v3均保留。RESPONSE_ONLY的decisionRef继续指向已补充本次排除决定的ISSUE-025决策节，另在四接口evidenceRefs加入本次精确范围引用；财务指标decisionRef指向本决定，其原规则依据仍保留。
+
+本次离线验证：
+
+- `data-plane/tensor-app/target/frontend/node/node --test control-plane/e2e/tushare-range-evidence.test.js`：111/111通过，失败/取消/跳过0、exit0。日志`/private/tmp/issue031-scope-6edtmtx5/evidence-tests.log`。
+- 同一Node执行`/private/tmp/issue031-scope-6edtmtx5/scope-audit.mjs`：PASS，exit0。机械核对原272项的参数/日期轴/包绑定，排除三个接口21项后精确剩251项、30 API，均PASS且原所属run清洁；另核对财务指标6项，合计27项排除及原状态。45轮逐对象、最后三轮原始安全结果/清单/身份/清理及当前30 AVAILABLE/4 EXCLUDED/6 SINGLE_ONLY通过。报告`scope-audit.json`，唯一索引SHA `6ef89b6692fdef4791b0ead64c8646ecde7646115e9aae2e907eac0850399cb3`。
+- 422个运行/合同相关文件对比原冻结副本，仅证据测试变化；生产与合同源码保持，未构建新包或重写旧任务包归属。本次真实SOURCE/TASK/SQL新增均0。
+
+| ISSUE-031修订后Acceptance | 结果与依据 |
+| --- | --- |
+| 1 固定纳入任务、SQL及历史保全 | 251/251 PASS，各自原SOURCE/参数/包、SQL及清洁身份已归档；本次scope-audit复核，原27排除项历史保持 |
+| 2 mainbz、disclosure与日期/历史/BJ场景 | 原mainbz16项（含四新TASK）共19父/35成功叶、父零写入，四新TASK中三项实际SPLIT；两次disclosure重下及日期/历史/BJ的原SQL与独立运行审查保留，见前文对应轮次与专项SQL汇总 |
+| 3 纳入的响应采集与逐接口准入 | 八个纳入的RESPONSE_ONLY及其余22个严格规则接口有实际TASK/SQL/页面和清洁证据；四排除接口保持失败与v3拒绝，不声称修复 |
+| 4 相关回归、审查与准确汇总 | 111项证据回归和本次离线审计通过；此前各真实轮的独立审查保留，当前范围/能力/手册一致 |
+
+据此仅完成修订范围内的ISSUE-031，记录IN_PROGRESS → COMPLETED。四接口问题继续保留，本次不处理；ISSUE-033保持NOT_STARTED。遵循用户“不开始32”，ISSUE-032保持NOT_STARTED、无后继交接、无六门禁执行；ISSUE-026/T13/T14/母issue均未关闭，不提交、推送或发布。
+
+## 2026-09-15 ISSUE-032最终门禁与母任务收尾
+
+本次没有新增账户SOURCE/TASK、账户SQL写入或真实run/case，唯一45轮/1217case/1362请求保持原字节。固定251项通过/27排除及各自原包再审通过；六门禁1401/524/1134/1137/15/138、111证据测试及独立终审通过，清理完成。首轮G1的陈旧能力断言、后续浏览器失败和各自诊断/修正/复验均按最终报告保留；最终冻结源码从G1重新按序验证。完整命令、时间、两包、历史保全与母合同逐条表见[最终报告](ISSUE-032-range-final-closure.md)。按032→T14→T13→017/018→026顺序收尾，033仍未开始；完整发布脚本未运行，未提交或发布。

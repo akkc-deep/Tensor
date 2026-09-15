@@ -1401,7 +1401,6 @@ async function submitDownload(page, monitor, pluginId, contract, params, fixture
     batches.push(...batchPage.items)
     if (batches.length === total) break
   }
-  if (candidate) validateTaskRuntime(candidate, params, task, batches)
   const summary = summarizeTaskBatches(task, batches)
   if (expectedBody.mode === 'SINGLE' && task.status === 'SUCCEEDED') safeCheck(requestCount === 1 && summary.leafCount === 1 && batches[0].attemptCount === 1, 'one SINGLE source attempt')
   const body = { apiName: contract.apiName, outcome: task.status === 'SUCCEEDED'
@@ -1409,11 +1408,17 @@ async function submitDownload(page, monitor, pluginId, contract, params, fixture
     taskId: receipt.taskId, submissionId, requestId: receipt.requestId, requestCount,
     ...summary, status: task.status, errorCode: task.lastError?.code ?? null }
   evidence[fixture ? 'fixture' : 'downloads'].push(body)
+  if (evidenceCase && task.status === 'FAILED') Object.assign(evidenceCase,
+    safeCaseEvidence({ ...evidenceCase, ...body, status: 'FAILED' }))
+  if (candidate) validateTaskRuntime(candidate, params, task, batches)
   if (!fixture) lastDownloadFinishedAt = Date.now()
   await assertPageSafe(page, 'task result')
   if (task.status === 'SUCCEEDED') {
     safeCheck(task.planReady && task.lastError === null, 'successful planned task')
-    await expect(page.locator('[data-task-status]')).toHaveText('已成功')
+    const statusLabel = candidate?.completeness.kind === 'RESPONSE_ONLY'
+      ? task.counts.sourceRows > 0n ? '返回记录已采集' : '本次请求未返回记录'
+      : '已成功'
+    await expect(page.locator('[data-task-status]')).toHaveText(statusLabel)
     safeCheck(!task.canRetry && !task.canResume, 'successful task cannot be replayed')
     const progress = page.locator('.task-detail__counts')
     await expect(progress.getByText(`来源行数 ${task.counts.sourceRows}`, { exact: true })).toBeVisible()

@@ -323,7 +323,7 @@ public final class TushareBatchPolicies {
         RuleKind rule = name.equals("trade_cal") ? RuleKind.CALENDAR_COVERAGE
                 : RESPONSE_ONLY.contains(name) ? RuleKind.RESPONSE_ONLY : limit == null ? RuleKind.UNKNOWN : RuleKind.ROW_LIMIT;
         CandidateEvidence candidate = CANDIDATES.get(name);
-        boolean withdrawn = name.equals("fina_indicator"); // ISSUE-031: actual RANGE TASK failed adaptation.
+        boolean withdrawn = Set.of("fina_indicator", "balancesheet", "cashflow", "repurchase").contains(name); // ISSUE-031: actual RANGE TASKs failed adaptation.
         boolean verified = !withdrawn && (sourceCases.length > 0 || candidate != null);
         String sourceRun = "issue018-t14-priority-source-20260913T092938Z";
         String evidence = sourceCases.length > 0 ? "docs/verification/ISSUE-018-range-acceptance.md#" + name + "；SOURCE " + sourceRun + "；"

@@ -774,6 +774,8 @@ async function chooseFixtureDownload(page) {
 async function chooseTushareDownload(page, api = DAILY_OPTION) {
   await selectOption(page, '数据源', 'Tushare Pro')
   await selectOption(page, '数据接口', api)
+  await page.getByRole('radiogroup', { name: '下载模式', exact: true }).getByText('单次请求', { exact: true }).click()
+  await expect(page.getByRole('radio', { name: '单次请求', exact: true })).toBeChecked()
 }
 
 async function chooseDataset(page, plugin, api) {

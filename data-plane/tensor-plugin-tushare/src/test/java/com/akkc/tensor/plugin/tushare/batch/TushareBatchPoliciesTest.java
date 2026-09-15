@@ -64,7 +64,8 @@ class TushareBatchPoliciesTest {
         """.strip().lines(); }
     static final List<String> SINGLE_ONLY = List.of("pledge_stat", "stk_rewards", "stock_basic", "stock_company", "index_classify", "index_member_all");
     static final Set<String> LEGACY_SOURCE_VERIFIED = Set.of("daily_basic", "stk_limit", "moneyflow", "margin_detail");
-    static final Set<String> SOURCE_VERIFIED = rows().map(r -> r.split(" ")[0]).filter(n -> !n.equals("fina_indicator")).collect(java.util.stream.Collectors.toUnmodifiableSet());
+    static final Set<String> WITHDRAWN = Set.of("fina_indicator", "balancesheet", "cashflow", "repurchase");
+    static final Set<String> SOURCE_VERIFIED = rows().map(r -> r.split(" ")[0]).filter(n -> !WITHDRAWN.contains(n)).collect(java.util.stream.Collectors.toUnmodifiableSet());
     static final Map<String, String> CANDIDATE_SOURCE = Map.ofEntries(
             Map.entry("daily", "issue019-source-20260913T122126Z/issue019-source-20260913T122126Z-daily-000001-whole"),
             Map.entry("forecast", "issue019-source-20260913T122126Z/issue019-source-20260913T122126Z-forecast-000001-whole"),
@@ -122,7 +123,7 @@ class TushareBatchPoliciesTest {
         assertThat(p.documentedRowLimit()).isEqualTo(r[6].matches("[0-9]+") ? Long.valueOf(r[6]) : null);
         assertThat(p.officialUrl()).isEqualTo("https://tushare.pro/document/2?doc_id=" + r[7]);
         assertThat(p.documentationCheckedOn()).isEqualTo(LocalDate.of(2026,9,LEGACY_SOURCE_VERIFIED.contains(name) ? 13 : 14));
-        boolean withdrawn = name.equals("fina_indicator");
+        boolean withdrawn = WITHDRAWN.contains(name);
         assertThat(p.policyVersion()).isEqualTo(withdrawn ? "tushare-range-v3" : "tushare-range-v2");
         assertThat(p.documentationNote()).isNotBlank();
         assertThat(p.sourceVerified()).isEqualTo(!withdrawn);
@@ -143,7 +144,7 @@ class TushareBatchPoliciesTest {
             assertThat(p.verificationEvidence()).contains("docs/verification/ISSUE-018-range-acceptance.json#" + CANDIDATE_SOURCE.get(name));
         }
         if (r[5].equals("RESPONSE")) {
-            assertThat(p.verificationEvidence()).contains("docs/issues/proposals/ISSUE-025-extraction-contracts.md#决策记录");
+            if (!withdrawn) assertThat(p.verificationEvidence()).contains("docs/issues/proposals/ISSUE-025-extraction-contracts.md#决策记录");
             assertThat(p.documentationNote()).contains("允许不完整", "响应采集");
         } else if (name.startsWith("slb_")) {
             assertThat(p.verificationEvidence()).contains("docs/issues/proposals/ISSUE-024-historical-support.md#决策记录");
@@ -257,7 +258,7 @@ class TushareBatchPoliciesTest {
     @ParameterizedTest @MethodSource("rows")
     void pureMappingAndProductionGateCoverEveryPolicy(String specification) {
         String[] r=specification.split(" "); String name=r[0]; var input=params(name); var before=Map.copyOf(input);
-        var p=name.equals("fina_indicator") ? verified(name) : production(); var slice=range("2024-02-29","2024-03-01");
+        var p=WITHDRAWN.contains(name) ? verified(name) : production(); var slice=range("2024-02-29","2024-03-01");
         Map<String,Object> expected=new HashMap<>(input);
         if(r[2].equals("N")) expected.put("start_date","20240229");
         else { expected.remove("start_date"); expected.remove("end_date"); expected.put(r[4],"20240229"); }
@@ -319,7 +320,7 @@ class TushareBatchPoliciesTest {
     void confirmedThresholdUsesRawRowsIncludingEqualityAndSingleDay(String specification) {
         String[] r=specification.split(" "); if(!r[5].equals("ROW"))return;
         String name=r[0]; int limit=Integer.parseInt(r[6]);
-        var p=name.equals("fina_indicator") ? verified(name) : production(); DateRange day=new DateRange(RANGE.start(),RANGE.start());
+        var p=WITHDRAWN.contains(name) ? verified(name) : production(); DateRange day=new DateRange(RANGE.start(),RANGE.start());
         var source=p.sourceParameters(api(name),params(name),day);
         for(int size:new int[]{0,limit-1,limit,limit+1}) assertThat(p.assess(api(name),day,envelope(name,source,Collections.nCopies(size,row(name,"20240228")))))
                 .as(name+" rows="+size).isEqualTo(size<limit?BatchAssessment.COMPLETE:BatchAssessment.SPLIT_REQUIRED);
@@ -354,7 +355,7 @@ class TushareBatchPoliciesTest {
 
     @Test void onlySelectedDateAxisControlsRangeAndNonStockRowsAreNotFiltered() {
         for(String name:List.of("fina_indicator","fina_mainbz","top10_holders","top10_floatholders")) {
-            var p=name.equals("fina_indicator") ? verified(name) : production();
+            var p=WITHDRAWN.contains(name) ? verified(name) : production();
             var source=p.sourceParameters(api(name),params(name),RANGE);
             var inside=row(name,"20240229");
             if (!name.equals("fina_mainbz")) inside=with(name,inside,"ann_date","20250101");
@@ -365,12 +366,14 @@ class TushareBatchPoliciesTest {
             code(() -> p.assess(api(name),RANGE,envelope(name,source,List.of(outsideRow))),ErrorCode.SOURCE_RANGE_MISMATCH);
         }
         for(String[] pair:new String[][]{{"new_share","issue_date"},{"cashflow","f_ann_date"},{"pledge_detail","start_date"},{"stk_holdernumber","end_date"}}) {
-            String name=pair[0];var source=production().sourceParameters(api(name),params(name),RANGE);
-            assertThat(production().assess(api(name),RANGE,envelope(name,source,List.of(with(name,row(name,"20240229"),pair[1],"20250101"))))).isEqualTo(expectedAssessment(name));
+            String name=pair[0];var p=WITHDRAWN.contains(name) ? verified(name) : production();
+            var source=p.sourceParameters(api(name),params(name),RANGE);
+            assertThat(p.assess(api(name),RANGE,envelope(name,source,List.of(with(name,row(name,"20240229"),pair[1],"20250101"))))).isEqualTo(expectedAssessment(name));
         }
         for(String name:List.of("new_share","repurchase")) {
-            var source=production().sourceParameters(api(name),params(name),RANGE);
-            assertThat(production().assess(api(name),RANGE,envelope(name,source,List.of(row(name,"20240229"),with(name,row(name,"20240229"),"ts_code","600000.SH"))))).isEqualTo(expectedAssessment(name));
+            var p=WITHDRAWN.contains(name) ? verified(name) : production();
+            var source=p.sourceParameters(api(name),params(name),RANGE);
+            assertThat(p.assess(api(name),RANGE,envelope(name,source,List.of(row(name,"20240229"),with(name,row(name,"20240229"),"ts_code","600000.SH"))))).isEqualTo(expectedAssessment(name));
         }
     }
 
@@ -390,7 +393,7 @@ class TushareBatchPoliciesTest {
             "cashflow", "fina_audit", "express", "repurchase", "stk_managers", "top10_holders", "top10_floatholders"})
     void responseOnlyCollectsValidatedRowsAndEmptyResponsesWithoutClaimingCompleteness(String name) {
         assertThat(RuleKind.values()).extracting(Enum::name).contains("RESPONSE_ONLY");
-        var p = production(); var input = params(name); var context = new Context();
+        var p = WITHDRAWN.contains(name) ? verified(name) : production(); var input = params(name); var context = new Context();
         var descriptor = p.batchDescriptor(api(name)).orElseThrow();
         assertThat(descriptor.completenessRule().kind()).isEqualTo(CompletenessRule.Kind.RESPONSE_ONLY);
         assertThat(descriptor.completenessRule().rowLimit()).isNull(); assertThat(descriptor.splittable()).isFalse();

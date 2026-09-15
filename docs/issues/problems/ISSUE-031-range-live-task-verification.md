@@ -1,14 +1,14 @@
-# ISSUE-031：完成278项真实区间任务与SQL验收
+# ISSUE-031：完成真实区间任务与SQL验收
 
 ## 当前状态
 
-BLOCKED（2026-09-15）。82 PASS / 1 FAILED / 195 NOT_RUN；fina_indicator首次TASK发生ADAPTER_TYPE_INVALID后停止，候选撤回v3。失败、SQL零写入、历史保留及恢复条件见[验收记录](../../verification/ISSUE-031-range-live-task-verification.md)和[阻塞交接](../../task-handoffs/ISSUE-031-handoff.md)。
+COMPLETED（2026-09-15，按修订后的本次范围）。按[用户明确决定](../proposals/ISSUE-026-range-scope.md)，本次排除balancesheet、cashflow、repurchase、fina_indicator的RANGE批量下载；当前251项均已有清洁通过证据，原27项保留4 FAILED/23 NOT_RUN，不计PASS。范围与历史保全核对通过，111项证据测试通过，本项按251项范围完成；032保持NOT_STARTED，不准备或启动。
 
 ## 目标与范围
 
-按已批准的十轮固定计划，取得278项真实任务的页面、批次、数据库和日志验收证据。
+原计划278项保留总追踪；本次按[范围决定](../proposals/ISSUE-026-range-scope.md)纳入30个RANGE接口的251项，排除四接口27项。准确输入、续验映射、各自构建身份和原失败均保留，见[更新设计](../../task-designs/ISSUE-031-design.md)。
 
-- 复用ISSUE-029工具和ISSUE-030稳定候选，执行10轮：28/16/38/35/37/33/24/42/21/4项，共278 TASK；10轮仅为内部检查点，不再创建额外issue。
+- 复用ISSUE-029工具及已验证候选。原十轮28/16/38/35/37/33/24/42/21/4项作为固定输入基线；延期与实际失败后的独立续验按更新设计执行，保留全部原始记录。
 - 覆盖268既有输入、四项mainbz全年/六年宽窗TASK、两项disclosure_date重下及四个已开放接口回归；精确来源身份与参数不得自行替换。
 - 各轮新空schema、固定清单/身份/预算，核对页面、202/Location、全部批次、records、原键/归属/实际写入/摘要及日志；保留成功数据和旧SINGLE结果。
 - 逐轮追加唯一验收索引/登记；失败或环境变化停止并记录实际结果，按母设计撤回失败接口候选且递增版本，不自动重试或换日期求通过。
@@ -21,13 +21,13 @@ BLOCKED（2026-09-15）。82 PASS / 1 FAILED / 195 NOT_RUN；fina_indicator首�
 
 - 直接子issue前置：ISSUE-029, ISSUE-030；共享ISSUE-019～025采用决定与来源作为母任务已交付输入，不能推定未来新来源已成功。
 - 串行顺序：ISSUE-027 → ISSUE-028 → ISSUE-029 → ISSUE-030 → ISSUE-031 → ISSUE-032；编号顺序不代替依赖的实际验收。
-- 第一动作：消费已完成专属设计，只读核对冻结源码/包/输入，机械扩展272绑定为278项十轮清单并校验计数/身份/顺序，再预登记第一轮和新空schema条件。
+- [原暂停交接](../../task-handoffs/ISSUE-031-handoff.md)保留为历史。四接口已获明确范围排除，本次仅完成范围收尾，不再诊断/修复/补验；用户要求不开始032。
 
 ## 关闭条件
 
-- 278计划项均有实际合格结果和清洁运行身份，source/insert/update与最终业务键数分开；整段/两端/股票保留和各代表场景有证据，未运行不冒充通过。
+- 当前251个纳入计划项均有实际合格结果和清洁运行身份，source/insert/update与最终业务键数分开；整段/两端/股票保留和代表场景有证据。原27项按明确范围决定排除，不计PASS；不再要求ISSUE-033作为本次RANGE关闭前置。
 - mainbz四TASK绑定新四SOURCE，至少一项真实观察到SPLIT父与完整成功子树；父无写入，原单日满额仍失败，受控拆分不能替代。
-- 两次disclosure重下核对实际更新操作和SQL原键；11项RESPONSE_ONLY按响应采集合同验证，意外空任务的真实终态与非空代表性缺口分开记录。
+- 两次disclosure重下核对实际更新操作和SQL原键；本次纳入的8项RESPONSE_ONLY按响应采集合同验证，意外空任务的真实终态与非空代表性缺口分开记录。
 - 所有拟标AVAILABLE的接口均有采用合同、有效SOURCE、匹配候选包TASK/SQL与清洁日志；局部核对/运行审查通过，交ISSUE-032统一回归和关闭，不提前关闭母issue。
 
 ## 实施落点与验证
