@@ -19,8 +19,8 @@ const retryable = task => ['FAILED', 'PARTIAL_FAILED', 'INTERRUPTED'].includes(t
     <div v-if="!tasks.length" class="empty-state"><Clock /><h3>这里暂时没有任务</h3><p>新建一个下载，或切换其他状态查看。</p><button class="text-button" @click="filter = 'all'">查看全部任务 <ArrowRight /></button></div>
     <div v-else class="task-items">
       <article v-for="task in tasks" :key="task.id" class="task-row">
-        <button class="task-name" @click="demo.detail = task">{{ task.name }}<span>{{ task.apiName }} <span class="task-time">{{ task.time }}</span></span></button>
-        <div class="task-trailing"><span class="status" :class="task.status">{{ statusLabels[task.status] }}</span><button v-if="retryable(task)" class="text-button" :aria-label="`${actionLabel(task)}${task.name}`" @click="demo.retry(task)"><RefreshRight />{{ actionLabel(task) }}</button><small v-else>{{ task.status === 'SUCCEEDED' ? `${task.rows} 行已写入` : '等待完成' }}</small></div>
+        <button class="task-name" @click="demo.detail = task">{{ task.name }}<span>{{ task.apiName }} <span class="task-time">{{ task.time }}</span></span><small v-if="task.mode === 'RANGE'" class="task-batch-count">批量 · {{ task.batches.filter(batch => batch.status === 'SUCCEEDED').length }} / {{ task.batches.length }} 批完成</small></button>
+        <div class="task-trailing"><span class="status" :class="task.status">{{ statusLabels[task.status] }}</span><button v-if="retryable(task)" class="text-button" :aria-label="`${actionLabel(task)}${task.name}`" @click="demo.retry(task)"><RefreshRight />{{ actionLabel(task) }}</button><small v-else>{{ task.status === 'SUCCEEDED' ? `${task.rows} 行已${task.responseOnly ? '采集' : '写入'}` : task.mode === 'RANGE' ? '按批次处理' : '等待完成' }}</small></div>
       </article>
     </div>
     <footer v-if="tasks.length" class="task-footer"><span>共 {{ tasks.length }} 个示例任务</span><span>点击名称查看详情</span></footer>

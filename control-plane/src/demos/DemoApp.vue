@@ -15,7 +15,7 @@ const category = ref('全部')
 const visibleCatalog = computed(() => demo.catalog.filter(item => (category.value === '全部' || item.category === category.value) && `${item.name} ${item.id}`.toLowerCase().includes(search.value.toLowerCase())))
 const detailDialog = ref(null)
 const main = ref(null)
-const keyboardFocus = ref(false)
+const completedBatches = computed(() => demo.detail?.batches.filter(batch => batch.status === 'SUCCEEDED').length ?? 0)
 function navigate(id) { demo.page = id; nextTick(() => main.value?.focus()) }
 watch(() => demo.detail, async value => {
   if (value) { await nextTick(); detailDialog.value?.showModal() }
@@ -25,7 +25,7 @@ onBeforeUnmount(demo.dispose)
 </script>
 
 <template>
-  <div class="demo-root theme-studio" :style="demo.settingsColor ? { '--accent': demo.settingsColor } : {}" :data-keyboard-focus="keyboardFocus" @keydown.tab="keyboardFocus = true" @pointerdown="keyboardFocus = false">
+  <div class="demo-root theme-studio" :style="demo.settingsColor ? { '--accent': demo.settingsColor } : {}">
     <a href="#demo-workspace" class="skip-link">跳转到工作区</a>
     <header class="demo-banner">
       <a class="demo-label" href="/ui-demos.html"><span class="demo-label-mark">T</span><span>工作台设计<span class="demo-label-sub">交互 Demo</span></span></a>
@@ -79,7 +79,38 @@ onBeforeUnmount(demo.dispose)
     <div v-if="demo.notice" class="toast" role="status"><Check />{{ demo.notice }}<button class="icon-button" aria-label="关闭提示" @click="demo.notice = ''"><Close /></button></div>
 
     <dialog ref="detailDialog" class="detail-dialog" aria-labelledby="detail-title" @close="demo.detail = null" @click="event => { if (event.target === detailDialog) demo.detail = null }">
-      <template v-if="demo.detail"><header><div><span class="muted">示例任务 {{ demo.detail.id }}</span><h2 id="detail-title">{{ demo.detail.name }}</h2></div><button class="icon-button" aria-label="关闭任务详情" autofocus @click="demo.detail = null"><Close /></button></header><span class="status" :class="demo.detail.status">{{ statusLabels[demo.detail.status] }}</span><dl class="confirmation"><div><dt>数据源</dt><dd>Tushare Pro</dd></div><div><dt>数据接口</dt><dd><code>{{ demo.detail.apiName }}</code></dd></div><div><dt>下载方式</dt><dd>单次下载</dd></div><div v-for="(value, key) in demo.detail.params" :key="key"><dt>{{ key }}</dt><dd>{{ value }}</dd></div><div><dt>写入行数</dt><dd>{{ demo.detail.rows }}</dd></div></dl><div v-if="['FAILED', 'PARTIAL_FAILED', 'INTERRUPTED'].includes(demo.detail.status)" class="task-error"><h3>{{ demo.detail.status === 'INTERRUPTED' ? '任务执行已中断' : '数据源暂时未响应' }}</h3><p>这是异常状态示例。{{ demo.detail.status === 'INTERRUPTED' ? '恢复后将继续处理未完成的批次。' : '可以重新尝试这次下载。' }}</p><button class="button primary" @click="demo.retry(demo.detail)"><RefreshRight />{{ demo.detail.status === 'INTERRUPTED' ? '恢复任务' : '重试任务' }}</button></div><div class="batch-preview"><h3>批次明细 <span class="count">1</span></h3><div><code>batch-001</code><span class="status" :class="demo.detail.status">{{ statusLabels[demo.detail.status] }}</span><span>{{ demo.detail.rows }} 行</span></div></div><p class="detail-footnote">这是本地交互演示，任务及进度均为示例。</p></template>
+      <template v-if="demo.detail">
+        <header><div><span class="muted">示例任务 {{ demo.detail.id }}</span><h2 id="detail-title">{{ demo.detail.name }}</h2></div><button class="icon-button" aria-label="关闭任务详情" autofocus @click="demo.detail = null"><Close /></button></header>
+        <span class="status" :class="demo.detail.status">{{ statusLabels[demo.detail.status] }}</span>
+        <dl class="confirmation">
+          <div><dt>数据源</dt><dd>Tushare Pro</dd></div>
+          <div><dt>数据接口</dt><dd><code>{{ demo.detail.apiName }}</code></dd></div>
+          <div><dt>下载方式</dt><dd>{{ demo.detail.mode === 'RANGE' ? '批量下载 · 日期范围' : '单次下载' }}</dd></div>
+          <div v-for="(value, key) in demo.detail.params" :key="key"><dt>{{ { ts_code: '股票代码', start_date: '开始日期', end_date: '结束日期' }[key] || key }}</dt><dd>{{ value }}</dd></div>
+          <div><dt>{{ demo.detail.responseOnly ? '采集行数' : '写入行数' }}</dt><dd>{{ demo.detail.rows }}</dd></div>
+        </dl>
+        <div v-if="demo.detail.mode === 'RANGE'" class="detail-progress">
+          <div><span>批次进度</span><strong>{{ completedBatches }} / {{ demo.detail.batches.length }} 批完成</strong></div>
+          <progress :value="completedBatches" :max="demo.detail.batches.length" aria-label="批次完成进度"></progress>
+        </div>
+        <div v-if="['FAILED', 'PARTIAL_FAILED', 'INTERRUPTED'].includes(demo.detail.status)" class="task-error">
+          <h3>{{ demo.detail.status === 'INTERRUPTED' ? '任务执行已中断' : demo.detail.status === 'PARTIAL_FAILED' ? '部分批次需要重试' : '数据源暂时未响应' }}</h3>
+          <p>{{ demo.detail.mode === 'RANGE' ? '已完成的批次会保留，仅继续处理未完成的批次。' : '这是异常状态示例，可以重新尝试这次下载。' }}</p>
+          <button class="button primary" @click="demo.retry(demo.detail)"><RefreshRight />{{ demo.detail.status === 'INTERRUPTED' ? '恢复下载' : demo.detail.mode === 'RANGE' ? '重试失败批次' : '重试任务' }}</button>
+        </div>
+        <section class="batch-preview" aria-label="批次明细">
+          <h3>批次明细 <span class="count">{{ demo.detail.batches.length }}</span></h3>
+          <ol><li v-for="batch in demo.detail.batches" :key="batch.id">
+            <div><code>{{ batch.id }}</code><span class="status" :class="batch.status">{{ statusLabels[batch.status] }}</span></div>
+            <p v-if="batch.start">{{ batch.start }} — {{ batch.end }}</p>
+            <div class="batch-meta"><span>{{ batch.attempts ? `已尝试 ${batch.attempts} 次` : '尚未执行' }}</span><span>{{ batch.rows }} 行</span></div>
+            <p v-if="batch.status === 'FAILED'" class="batch-error">示例：数据源暂未响应，可重试。</p>
+            <p v-else-if="batch.status === 'INTERRUPTED'" class="batch-error">示例：执行已中断，可恢复。</p>
+          </li></ol>
+        </section>
+        <p v-if="demo.detail.responseOnly" class="detail-footnote">此接口仅采集返回记录，完成状态不代表区间数据完整。</p>
+        <p class="detail-footnote">{{ demo.detail.mode === 'RANGE' ? '这是本地交互演示，示例批次按自然月划分；正式下载按接口策略规划。' : '这是本地交互演示，任务及进度均为示例。' }}</p>
+      </template>
     </dialog>
   </div>
 </template>
