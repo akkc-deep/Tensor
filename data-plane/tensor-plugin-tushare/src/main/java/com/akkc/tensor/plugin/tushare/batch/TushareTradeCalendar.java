@@ -1,13 +1,13 @@
 package com.akkc.tensor.plugin.tushare.batch;
 
-import com.akkc.tensor.plugin.api.constant.DatasetFields;
-import com.akkc.tensor.plugin.tushare.TushareConstants;
 import static com.akkc.tensor.plugin.api.error.ErrorCode.*;
 import static com.akkc.tensor.plugin.tushare.batch.TushareBatchPolicies.*;
 
+import com.akkc.tensor.plugin.api.constant.DatasetFields;
 import com.akkc.tensor.plugin.api.download.DownloadEnvelope;
 import com.akkc.tensor.plugin.api.download.batch.DateRange;
 import com.akkc.tensor.plugin.api.model.ApiName;
+import com.akkc.tensor.plugin.tushare.TushareConstants;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.time.LocalDate;
@@ -15,6 +15,8 @@ import java.util.*;
 
 /** Validates complete natural-day coverage before treating open dates as planning evidence. */
 final class TushareTradeCalendar {
+    private static final int IS_OPEN_COLUMN_INDEX = 2;
+
     private TushareTradeCalendar() {}
 
     static List<LocalDate> openDays(DateRange range, String exchange, DownloadEnvelope envelope) {
@@ -27,7 +29,7 @@ final class TushareTradeCalendar {
             if (!exchange.equals(row.get(0))) throw failure(SOURCE_RANGE_MISMATCH);
             LocalDate date = date(row.get(1), SOURCE_PAYLOAD_INVALID);
             within(date, range);
-            boolean open = isOpen(row.get(2));
+            boolean open = isOpen(row.get(IS_OPEN_COLUMN_INDEX));
             if (days.put(date, open) != null) duplicate = true;
         }
         if (duplicate) throw failure(BATCH_COMPLETENESS_UNCONFIRMED);

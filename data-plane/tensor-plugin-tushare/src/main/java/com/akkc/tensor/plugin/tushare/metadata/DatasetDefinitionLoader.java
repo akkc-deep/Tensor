@@ -1,6 +1,5 @@
 package com.akkc.tensor.plugin.tushare.metadata;
 
-import com.akkc.tensor.plugin.tushare.TushareConstants;
 import com.akkc.tensor.plugin.api.dataset.BusinessKeyDefinition;
 import com.akkc.tensor.plugin.api.dataset.BusinessKeyMode;
 import com.akkc.tensor.plugin.api.dataset.ColumnDefinition;
@@ -16,6 +15,7 @@ import com.akkc.tensor.plugin.api.model.ApiName;
 import com.akkc.tensor.plugin.api.model.DatasetKey;
 import com.akkc.tensor.plugin.api.model.PluginId;
 import com.akkc.tensor.plugin.api.model.TableName;
+import com.akkc.tensor.plugin.tushare.TushareConstants;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.StreamReadFeature;
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -42,9 +42,6 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.ResourcePatternResolver;
 
 public final class DatasetDefinitionLoader {
-    private static final String RESOURCE_UNREADABLE = "resource cannot be read";
-    private static final String PATTERN_RESOURCE = "<pattern>";
-
     private static final String SCHEMA_RESOURCE = "contracts/dataset-definition.schema.json";
     private static final String SCHEMA_NAME = "dataset-definition.schema.json";
     private static final String TUSHARE_PRO = TushareConstants.PLUGIN_ID;
@@ -70,11 +67,11 @@ public final class DatasetDefinitionLoader {
         try {
             resources = resolver.getResources(pattern);
         } catch (IOException exception) {
-            diagnostics.add(new Diagnostic(PATTERN_RESOURCE, RESOURCE_UNREADABLE));
+            diagnostics.add(new Diagnostic("<pattern>", "resource cannot be read"));
             throw misconfigured(diagnostics);
         }
         if (resources.length == 0) {
-            diagnostics.add(new Diagnostic(PATTERN_RESOURCE, "no resources matched"));
+            diagnostics.add(new Diagnostic("<pattern>", "no resources matched"));
             throw misconfigured(diagnostics);
         }
 
@@ -95,7 +92,7 @@ public final class DatasetDefinitionLoader {
     private JsonSchema loadSchema(List<Diagnostic> diagnostics) {
         try (InputStream input = DatasetDefinitionLoader.class.getClassLoader().getResourceAsStream(SCHEMA_RESOURCE)) {
             if (input == null) {
-                diagnostics.add(new Diagnostic(SCHEMA_NAME, RESOURCE_UNREADABLE));
+                diagnostics.add(new Diagnostic(SCHEMA_NAME, "resource cannot be read"));
                 return null;
             }
             return schemaFactory().getSchema(JSON.readTree(input));
@@ -219,7 +216,7 @@ public final class DatasetDefinitionLoader {
         if (exception instanceof JsonProcessingException) {
             return safeReason(exception);
         }
-        return RESOURCE_UNREADABLE;
+        return "resource cannot be read";
     }
 
     private static JsonSchemaFactory schemaFactory() {
@@ -234,7 +231,7 @@ public final class DatasetDefinitionLoader {
         if (exception instanceof JsonProcessingException) {
             return safeReason(exception);
         }
-        return RESOURCE_UNREADABLE;
+        return "resource cannot be read";
     }
 
     private static String safeReason(Exception exception) {
@@ -242,7 +239,7 @@ public final class DatasetDefinitionLoader {
             return normalize(processingException.getOriginalMessage());
         }
         String message = exception.getMessage();
-        return message == null || message.isBlank() ? RESOURCE_UNREADABLE : normalize(message);
+        return message == null || message.isBlank() ? "resource cannot be read" : normalize(message);
     }
 
     private static String normalize(String value) {

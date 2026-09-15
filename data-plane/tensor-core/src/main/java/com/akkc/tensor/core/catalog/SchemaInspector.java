@@ -1,6 +1,5 @@
 package com.akkc.tensor.core.catalog;
 
-import com.akkc.tensor.plugin.api.constant.ValidationMessages;
 import com.akkc.tensor.plugin.api.model.TableName;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
@@ -114,7 +113,7 @@ public final class SchemaInspector {
     private static String requireName(String value, String component) {
         Objects.requireNonNull(value, component);
         if (value.isBlank()) {
-            throw new IllegalArgumentException(component + ValidationMessages.MUST_NOT_BE_BLANK);
+            throw new IllegalArgumentException(component + " must not be blank");
         }
         return value;
     }

@@ -1,5 +1,6 @@
 package com.akkc.tensor.config;
 
+import com.akkc.tensor.plugin.api.constant.StringConstants;
 import com.akkc.tensor.web.RequestIdFilter;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Value;
@@ -33,8 +34,8 @@ public final class SpaWebConfiguration implements WebMvcConfigurer {
     @Override
     public void addCorsMappings(CorsRegistry registry) {
         if (devAllowedOrigin.isBlank()
-                || devAllowedOrigin.contains(",")
-                || devAllowedOrigin.endsWith("/")) {
+                || devAllowedOrigin.contains(StringConstants.COMMA)
+                || devAllowedOrigin.endsWith(StringConstants.SLASH)) {
             return;
         }
         registry.addMapping("/api/v1/**")
@@ -49,9 +50,9 @@ public final class SpaWebConfiguration implements WebMvcConfigurer {
     @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
     static final class SpaForwardController {
         @GetMapping({
-            "/",
-            "/" + UI_FIRST_SEGMENT,
-            "/" + UI_FIRST_SEGMENT + "/{*rest}"
+            StringConstants.SLASH,
+            StringConstants.SLASH + UI_FIRST_SEGMENT,
+            StringConstants.SLASH + UI_FIRST_SEGMENT + "/{*rest}"
         })
         String forward(
                 @PathVariable(name = "rest", required = false) String rest,

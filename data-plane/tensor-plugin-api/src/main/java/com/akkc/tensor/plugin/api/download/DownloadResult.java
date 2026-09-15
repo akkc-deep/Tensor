@@ -1,6 +1,5 @@
 package com.akkc.tensor.plugin.api.download;
 
-import com.akkc.tensor.plugin.api.constant.ValidationMessages;
 import com.akkc.tensor.plugin.api.model.ApiName;
 import com.akkc.tensor.plugin.api.model.PluginId;
 import com.akkc.tensor.plugin.api.model.RequestId;
@@ -21,7 +20,7 @@ public record DownloadResult(
         Objects.requireNonNull(pluginId, "pluginId");
         Objects.requireNonNull(apiName, "apiName");
         if (sourceRowCount < 0 || insertedRows < 0 || updatedRows < 0) {
-            throw new IllegalArgumentException(ValidationMessages.NEGATIVE_ROW_COUNTS);
+            throw new IllegalArgumentException("row counts must be non-negative");
         }
         if (outcome == DownloadOutcome.EMPTY
                 && (sourceRowCount != 0 || insertedRows != 0 || updatedRows != 0)) {

@@ -1,7 +1,6 @@
 package com.akkc.tensor.plugin.api.dataset;
 
 import com.akkc.tensor.plugin.api.constant.ValidationConstants;
-import com.akkc.tensor.plugin.api.constant.ValidationMessages;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
@@ -14,14 +13,14 @@ public record BusinessKeyDefinition(BusinessKeyMode mode, List<String> fields) {
         Objects.requireNonNull(mode, "mode");
         fields = List.copyOf(Objects.requireNonNull(fields, "fields"));
         if (fields.isEmpty()) {
-            throw new IllegalArgumentException(ValidationMessages.FIELDS_EMPTY);
+            throw new IllegalArgumentException("fields must not be empty");
         }
         if (fields.size() != new HashSet<>(fields).size()) {
-            throw new IllegalArgumentException(ValidationMessages.DUPLICATE_FIELDS);
+            throw new IllegalArgumentException("fields must not contain duplicates");
         }
         for (String field : fields) {
             if (!IDENTIFIER_PATTERN.matcher(field).matches()) {
-                throw new IllegalArgumentException(ValidationMessages.INVALID_FIELD_PREFIX + field);
+                throw new IllegalArgumentException("Invalid field: " + field);
             }
         }
     }

@@ -2,6 +2,8 @@ package com.akkc.tensor.plugin.api.constant;
 
 /** Shared lexical rules; date parsing retains each caller's resolver style. */
 public final class ValidationConstants {
+    public static final int MAX_DISPLAY_NAME_LENGTH = 128;
+
     public static final String IDENTIFIER_REGEX = "^[a-z][a-z0-9_]{1,63}$";
     public static final String TS_CODE_REGEX = "[A-Z0-9]+\\.[A-Z0-9]+";
     public static final String DATE_REGEX = "[0-9]{8}";

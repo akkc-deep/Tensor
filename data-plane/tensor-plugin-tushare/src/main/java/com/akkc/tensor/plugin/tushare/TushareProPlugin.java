@@ -38,7 +38,7 @@ public final class TushareProPlugin implements BatchDownloadSupport {
         this.properties = Objects.requireNonNull(properties, "properties");
         this.client = Objects.requireNonNull(client, "client");
         definitions = List.copyOf(Objects.requireNonNull(definitions, "definitions"));
-        if (definitions.size() != 40) {
+        if (definitions.size() != TushareConstants.API_COUNT) {
             throw new IllegalArgumentException("definitions must contain exactly 40 datasets");
         }
         definitionsByApi = definitions.stream().collect(Collectors.toUnmodifiableMap(

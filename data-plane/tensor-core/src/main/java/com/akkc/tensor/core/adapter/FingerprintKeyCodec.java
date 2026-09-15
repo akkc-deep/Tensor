@@ -1,6 +1,5 @@
 package com.akkc.tensor.core.adapter;
 
-import com.akkc.tensor.plugin.api.constant.ValidationMessages;
 import java.io.ByteArrayOutputStream;
 import java.math.BigDecimal;
 import java.nio.ByteBuffer;
@@ -10,6 +9,7 @@ import java.security.NoSuchAlgorithmException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.HashSet;
+import java.util.HexFormat;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -23,7 +23,7 @@ public final class FingerprintKeyCodec {
         Objects.requireNonNull(fields, "fields");
         Objects.requireNonNull(row, "row");
         if (fields.isEmpty()) {
-            throw new IllegalArgumentException(ValidationMessages.FIELDS_EMPTY);
+            throw new IllegalArgumentException("fields must not be empty");
         }
         Set<String> names = new HashSet<>();
         for (String field : fields) {
@@ -31,7 +31,7 @@ public final class FingerprintKeyCodec {
                 throw new IllegalArgumentException("fields must not contain null");
             }
             if (!names.add(field)) {
-                throw new IllegalArgumentException(ValidationMessages.DUPLICATE_FIELDS);
+                throw new IllegalArgumentException("fields must not contain duplicates");
             }
             if (!row.containsKey(field)) {
                 throw new IllegalArgumentException("row must contain fields");
@@ -50,7 +50,7 @@ public final class FingerprintKeyCodec {
                 bytes.writeBytes(text);
             }
         }
-        return hex(digest(bytes.toByteArray()));
+        return HexFormat.of().formatHex(digest(bytes.toByteArray()));
     }
 
     private String canonicalText(Object value) {
@@ -75,16 +75,5 @@ public final class FingerprintKeyCodec {
         } catch (NoSuchAlgorithmException exception) {
             throw new IllegalStateException("SHA-256 unavailable");
         }
-    }
-
-    private String hex(byte[] bytes) {
-        char[] result = new char[bytes.length * 2];
-        char[] digits = "0123456789abcdef".toCharArray();
-        for (int index = 0; index < bytes.length; index++) {
-            int value = bytes[index] & 0xff;
-            result[index * 2] = digits[value >>> 4];
-            result[index * 2 + 1] = digits[value & 0x0f];
-        }
-        return new String(result);
     }
 }

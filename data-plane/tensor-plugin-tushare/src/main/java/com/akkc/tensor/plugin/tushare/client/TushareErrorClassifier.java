@@ -1,6 +1,7 @@
 package com.akkc.tensor.plugin.tushare.client;
 
-import com.akkc.tensor.plugin.api.constant.ValidationMessages;
+import com.akkc.tensor.plugin.api.constant.RequestFields;
+import com.akkc.tensor.plugin.api.constant.StringConstants;
 import com.akkc.tensor.plugin.api.error.ErrorCode;
 import com.akkc.tensor.plugin.api.error.SourceException;
 import java.net.ConnectException;
@@ -27,8 +28,8 @@ final class TushareErrorClassifier {
     }
 
     static SourceException classifyBusiness(String message) {
-        String normalized = message == null ? "" : message.toLowerCase(Locale.ROOT);
-        if (normalized.contains("token")
+        String normalized = message == null ? StringConstants.EMPTY : message.toLowerCase(Locale.ROOT);
+        if (normalized.contains(RequestFields.TOKEN)
                 || normalized.contains("认证")
                 || normalized.contains("用户不存在")) {
             return failure(ErrorCode.SOURCE_AUTH_FAILED);
@@ -82,7 +83,7 @@ final class TushareErrorClassifier {
             case SOURCE_NETWORK_ERROR -> "Tushare could not be reached";
             case SOURCE_TIMEOUT -> "Tushare response timed out";
             case SOURCE_PAYLOAD_INVALID -> "Tushare returned an invalid payload";
-            default -> throw new IllegalArgumentException(ValidationMessages.INVALID_SOURCE_FAILURE_CODE);
+            default -> throw new IllegalArgumentException("code must identify a source failure");
         };
         return new SourceException(code, message);
     }

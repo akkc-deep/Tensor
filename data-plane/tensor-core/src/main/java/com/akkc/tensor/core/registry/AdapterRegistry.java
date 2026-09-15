@@ -10,8 +10,6 @@ import java.util.Objects;
 import java.util.Optional;
 
 public final class AdapterRegistry {
-    private static final String INVALID_DATASET_KEY = "Skipping adapter with invalid dataset key";
-
     private static final System.Logger LOGGER = System.getLogger(AdapterRegistry.class.getName());
 
     private final Map<DatasetKey, DatasetAdapter> adapters;
@@ -21,14 +19,14 @@ public final class AdapterRegistry {
         Map<DatasetKey, List<DatasetAdapter>> candidatesByKey = new LinkedHashMap<>();
         for (DatasetAdapter adapter : adapters) {
             if (adapter == null) {
-                LOGGER.log(System.Logger.Level.WARNING, INVALID_DATASET_KEY);
+                LOGGER.log(System.Logger.Level.WARNING, "Skipping adapter with invalid dataset key");
                 continue;
             }
             try {
                 DatasetKey datasetKey = Objects.requireNonNull(adapter.datasetKey(), "datasetKey");
                 candidatesByKey.computeIfAbsent(datasetKey, ignored -> new ArrayList<>()).add(adapter);
             } catch (RuntimeException exception) {
-                LOGGER.log(System.Logger.Level.WARNING, INVALID_DATASET_KEY);
+                LOGGER.log(System.Logger.Level.WARNING, "Skipping adapter with invalid dataset key");
             }
         }
 

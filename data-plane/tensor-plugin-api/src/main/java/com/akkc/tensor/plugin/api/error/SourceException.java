@@ -1,6 +1,5 @@
 package com.akkc.tensor.plugin.api.error;
 
-import com.akkc.tensor.plugin.api.constant.ValidationMessages;
 import java.util.Objects;
 
 public final class SourceException extends TensorException {
@@ -18,7 +17,7 @@ public final class SourceException extends TensorException {
                 && code != ErrorCode.SOURCE_TIMEOUT
                 && code != ErrorCode.SOURCE_PAYLOAD_INVALID
                 && code != ErrorCode.SOURCE_RANGE_MISMATCH) {
-            throw new IllegalArgumentException(ValidationMessages.INVALID_SOURCE_FAILURE_CODE);
+            throw new IllegalArgumentException("code must identify a source failure");
         }
         return code;
     }

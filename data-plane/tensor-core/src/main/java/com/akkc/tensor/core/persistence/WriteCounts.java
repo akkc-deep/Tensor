@@ -1,6 +1,5 @@
 package com.akkc.tensor.core.persistence;
 
-import com.akkc.tensor.plugin.api.constant.ValidationMessages;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Objects;
@@ -17,7 +16,7 @@ public record WriteCounts(long insertedRows, long updatedRows) {
         Objects.requireNonNull(keys, "keys");
         Objects.requireNonNull(existingKeys, "existingKeys");
         if (keys.stream().anyMatch(Objects::isNull) || existingKeys.stream().anyMatch(Objects::isNull)) {
-            throw new IllegalArgumentException(ValidationMessages.NULL_BUSINESS_KEY);
+            throw new IllegalArgumentException("business keys must not contain null");
         }
 
         Set<BusinessKey> distinctKeys = new LinkedHashSet<>(keys);

@@ -73,7 +73,7 @@ public final class MetadataQueryService {
                 code,
                 code == ErrorCode.PLUGIN_DISABLED
                         ? "Plugin metadata is unavailable"
-                        : ErrorCode.DATASET_MISCONFIGURED.message());
+                        : "Dataset metadata is unavailable");
     }
 
     private static final class MetadataAccessException extends TensorException {

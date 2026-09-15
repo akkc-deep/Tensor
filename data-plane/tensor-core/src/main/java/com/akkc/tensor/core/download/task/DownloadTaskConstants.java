@@ -2,6 +2,9 @@ package com.akkc.tensor.core.download.task;
 
 /** Defaults shared by task settings and application property binding. */
 public final class DownloadTaskConstants {
+    public static final int SPLIT_CHILD_COUNT = 2;
+    public static final int MAX_BATCH_KEY_LENGTH = 128;
+
     public static final int DEFAULT_MAX_QUEUED_TASKS = 100;
     public static final int DEFAULT_MAX_RANGE_DAYS = 36_600;
     public static final int DEFAULT_MAX_BATCH_NODES = 10_000;

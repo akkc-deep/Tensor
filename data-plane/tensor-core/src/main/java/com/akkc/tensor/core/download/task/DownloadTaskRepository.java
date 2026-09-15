@@ -1,7 +1,9 @@
 package com.akkc.tensor.core.download.task;
 
+import com.akkc.tensor.core.persistence.SqlConstants;
 import com.akkc.tensor.plugin.api.constant.PaginationConstants;
 import com.akkc.tensor.plugin.api.constant.RequestFields;
+import com.akkc.tensor.plugin.api.constant.StringConstants;
 import com.akkc.tensor.plugin.api.constant.ValidationConstants;
 import com.akkc.tensor.plugin.api.download.batch.DateRange;
 import com.akkc.tensor.plugin.api.download.batch.DownloadMode;
@@ -11,16 +13,6 @@ import com.akkc.tensor.plugin.api.model.ApiName;
 import com.akkc.tensor.plugin.api.model.DatasetKey;
 import com.akkc.tensor.plugin.api.model.PluginId;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
-import org.springframework.dao.DataAccessException;
-import org.springframework.dao.DuplicateKeyException;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.TransactionDefinition;
-import org.springframework.transaction.support.TransactionSynchronization;
-import org.springframework.transaction.support.TransactionSynchronizationManager;
-import org.springframework.transaction.support.TransactionTemplate;
-
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.Instant;
@@ -39,9 +31,27 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.function.Supplier;
+import org.springframework.dao.DataAccessException;
+import org.springframework.dao.DuplicateKeyException;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionDefinition;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
+import org.springframework.transaction.support.TransactionTemplate;
 
 /** Fixed task operations; task rows are always locked before batch rows. */
 public final class DownloadTaskRepository {
+    private static final int TOTAL_BATCHES_INDEX = 1;
+    private static final int PENDING_INDEX = 2;
+    private static final int RUNNING_INDEX = 3;
+    private static final int SUCCEEDED_INDEX = 4;
+    private static final int FAILED_INDEX = 5;
+    private static final int SPLIT_BATCHES_INDEX = 6;
+    private static final int SOURCE_ROWS_INDEX = 7;
+    private static final int INSERTED_ROWS_INDEX = 8;
+    private static final int UPDATED_ROWS_INDEX = 9;
+
     private static final String UPDATE_BATCH = "UPDATE tensor_download_batch SET";
     private static final String UPDATE_TASK = "UPDATE tensor_download_task SET";
     private static final String BATCH_WHERE = " WHERE batch_id=?";
@@ -75,9 +85,9 @@ public final class DownloadTaskRepository {
         this.json = Objects.requireNonNull(json);
         this.observer = Objects.requireNonNull(observer);
         write = new TransactionTemplate(transactions);
-        write.setTimeout(60);
+        write.setTimeout(SqlConstants.TRANSACTION_TIMEOUT_SECONDS);
         read = new TransactionTemplate(transactions);
-        read.setTimeout(60);
+        read.setTimeout(SqlConstants.TRANSACTION_TIMEOUT_SECONDS);
         read.setReadOnly(true);
         read.setIsolationLevel(TransactionDefinition.ISOLATION_REPEATABLE_READ);
     }
@@ -430,7 +440,7 @@ public final class DownloadTaskRepository {
                                     && right.range()
                                             .start()
                                             .equals(left.range().end().plusDays(1)));
-                    limit(maxNodes >= 0 && nodes(p.taskId()) <= (long) maxNodes - 2);
+                    limit(maxNodes >= 0 && nodes(p.taskId()) <= (long) maxNodes - DownloadTaskConstants.SPLIT_CHILD_COUNT);
                     update(
                             UPDATE_BATCH
                                 + " status='SPLIT',finished_at=?,updated_at=?,source_rows=0,inserted_rows=0,updated_rows=0"
@@ -504,7 +514,7 @@ public final class DownloadTaskRepository {
                                 + " WHERE task_id=? AND status='FAILED'"
                                     + (mode == RequeueMode.RESUME
                                             ? " AND error_code='EXECUTION_INTERRUPTED'"
-                                            : ""),
+                                            : StringConstants.EMPTY),
                             time(now),
                             id);
                     update(
@@ -706,7 +716,7 @@ public final class DownloadTaskRepository {
                 b != null
                         && b.batchId() != null
                         && b.batchKey() != null
-                        && b.batchKey().length() <= 128
+                        && b.batchKey().length() <= DownloadTaskConstants.MAX_BATCH_KEY_LENGTH
                         && b.batchKey().matches("[0-9]{6}(?:/[01])*"));
         json.writeBatchParams(b.sourceParams());
         if (t.mode() == DownloadMode.SINGLE)
@@ -767,15 +777,15 @@ public final class DownloadTaskRepository {
                                     + TASK_WHERE,
                                 (r, n) ->
                                         new Counts(
-                                                r.getLong(1),
-                                                r.getLong(2),
-                                                r.getLong(3),
-                                                r.getLong(4),
-                                                r.getLong(5),
-                                                r.getLong(6),
-                                                r.getBigDecimal(7).longValueExact(),
-                                                r.getBigDecimal(8).longValueExact(),
-                                                r.getBigDecimal(9).longValueExact()),
+                                                r.getLong(TOTAL_BATCHES_INDEX),
+                                                r.getLong(PENDING_INDEX),
+                                                r.getLong(RUNNING_INDEX),
+                                                r.getLong(SUCCEEDED_INDEX),
+                                                r.getLong(FAILED_INDEX),
+                                                r.getLong(SPLIT_BATCHES_INDEX),
+                                                r.getBigDecimal(SOURCE_ROWS_INDEX).longValueExact(),
+                                                r.getBigDecimal(INSERTED_ROWS_INDEX).longValueExact(),
+                                                r.getBigDecimal(UPDATED_ROWS_INDEX).longValueExact()),
                                 id.toString()));
     }
 
@@ -784,8 +794,8 @@ public final class DownloadTaskRepository {
         return tasksQuery(
                         "SELECT * FROM tensor_download_task WHERE "
                                 + column
-                                + "=?"
-                                + (lock ? " FOR UPDATE" : ""),
+                                + SqlConstants.EQUALS_PARAMETER
+                                + (lock ? SqlConstants.FOR_UPDATE : StringConstants.EMPTY),
                         id)
                 .stream()
                 .findFirst();
@@ -799,7 +809,7 @@ public final class DownloadTaskRepository {
         require(id != null);
         return batchQuery(
                         "SELECT * FROM tensor_download_batch WHERE batch_id=? AND task_id=?"
-                                + (lock ? " FOR UPDATE" : ""),
+                                + (lock ? SqlConstants.FOR_UPDATE : StringConstants.EMPTY),
                         id,
                         task)
                 .stream()
@@ -927,7 +937,7 @@ public final class DownloadTaskRepository {
     }
 
     private static void clause(StringBuilder sql, List<Object> args, String column, Object value) {
-        sql.append(" AND ").append(column).append("=?");
+        sql.append(SqlConstants.AND).append(column).append(SqlConstants.EQUALS_PARAMETER);
         args.add(value);
     }
 

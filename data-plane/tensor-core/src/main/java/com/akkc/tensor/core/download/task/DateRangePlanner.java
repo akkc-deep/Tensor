@@ -13,7 +13,7 @@ public final class DateRangePlanner {
     public static List<DateRange> split(DateRange range) {
         Objects.requireNonNull(range, "range");
         if (range.start().equals(range.end())) throw new IllegalArgumentException("Range cannot be split");
-        LocalDate middle = range.start().plusDays(ChronoUnit.DAYS.between(range.start(), range.end()) / 2);
+        LocalDate middle = range.start().plusDays(ChronoUnit.DAYS.between(range.start(), range.end()) / DownloadTaskConstants.SPLIT_CHILD_COUNT);
         return List.of(new DateRange(range.start(), middle), new DateRange(middle.plusDays(1), range.end()));
     }
 

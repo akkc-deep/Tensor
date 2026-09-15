@@ -128,7 +128,7 @@ public final class DownloadService {
 
     private static SourceException invalidPayload() {
         return new SourceException(
-                ErrorCode.SOURCE_PAYLOAD_INVALID, ErrorCode.SOURCE_PAYLOAD_INVALID.message());
+                ErrorCode.SOURCE_PAYLOAD_INVALID, "Source returned an invalid payload");
     }
 
     private static PersistenceException persistenceFailure(RuntimeException cause) {

@@ -9,6 +9,6 @@ public final class SqlIdentifierPolicy {
         if (!identifier.matches(ValidationConstants.IDENTIFIER_REGEX)) {
             throw new IllegalArgumentException("Invalid SQL identifier");
         }
-        return "`" + identifier + "`";
+        return SqlConstants.IDENTIFIER_QUOTE + identifier + SqlConstants.IDENTIFIER_QUOTE;
     }
 }

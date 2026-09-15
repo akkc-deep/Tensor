@@ -1,7 +1,6 @@
 package com.akkc.tensor.plugin.api.descriptor;
 
 import com.akkc.tensor.plugin.api.constant.ValidationConstants;
-import com.akkc.tensor.plugin.api.constant.ValidationMessages;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
@@ -29,7 +28,7 @@ public record ParameterDescriptor(
         Objects.requireNonNull(type, "type");
         allowedValues = List.copyOf(Objects.requireNonNull(allowedValues, "allowedValues"));
         if (allowedValues.size() != new HashSet<>(allowedValues).size()) {
-            throw new IllegalArgumentException(ValidationMessages.DUPLICATE_ALLOWED_VALUES);
+            throw new IllegalArgumentException("allowedValues must not contain duplicates");
         }
         if (type == ParameterType.ENUM && allowedValues.isEmpty()) {
             throw new IllegalArgumentException("ENUM parameters require allowedValues");
@@ -57,7 +56,7 @@ public record ParameterDescriptor(
     private static void requireNonBlank(String value, String component) {
         Objects.requireNonNull(value, component);
         if (value.isBlank()) {
-            throw new IllegalArgumentException(component + ValidationMessages.MUST_NOT_BE_BLANK);
+            throw new IllegalArgumentException(component + " must not be blank");
         }
     }
 }

@@ -1,10 +1,11 @@
 package com.akkc.tensor.plugin.fixture;
 
-import com.akkc.tensor.plugin.api.constant.DatasetFields;
 import com.akkc.tensor.core.adapter.FingerprintKeyCodec;
 import com.akkc.tensor.core.adapter.GenericDatasetAdapter;
 import com.akkc.tensor.core.adapter.ValueConverter;
 import com.akkc.tensor.plugin.api.DatasetAdapter;
+import com.akkc.tensor.plugin.api.constant.DatasetFields;
+import com.akkc.tensor.plugin.api.constant.StringConstants;
 import com.akkc.tensor.plugin.api.dataset.BusinessKeyDefinition;
 import com.akkc.tensor.plugin.api.dataset.BusinessKeyMode;
 import com.akkc.tensor.plugin.api.dataset.ColumnDefinition;
@@ -29,7 +30,7 @@ import org.springframework.context.annotation.Profile;
 @ConditionalOnProperty(
         prefix = "tensor.plugins.fixture",
         name = "enabled",
-        havingValue = "true")
+        havingValue = StringConstants.TRUE)
 public final class FixtureConfiguration {
     private static final DatasetDefinition DEFINITION = definition();
 
@@ -62,10 +63,10 @@ public final class FixtureConfiguration {
                         null)),
                 TableName.from(key),
                 List.of(
-                        column(DatasetFields.TS_CODE, LogicalType.STRING, false, 0, 64, null, null),
+                        column(DatasetFields.TS_CODE, LogicalType.STRING, false, 0, FixtureConstants.TS_CODE_MAX_LENGTH, null, null),
                         column(DatasetFields.TRADE_DATE, LogicalType.DATE, false, 1, null, null, null),
-                        column(FixtureConstants.AMOUNT, LogicalType.DECIMAL, false, 2, null, 38, 18),
-                        column(FixtureConstants.NOTE, LogicalType.STRING, true, 3, 255, null, null)),
+                        column(FixtureConstants.AMOUNT, LogicalType.DECIMAL, false, FixtureConstants.AMOUNT_DISPLAY_ORDER, null, 38, 18),
+                        column(FixtureConstants.NOTE, LogicalType.STRING, true, FixtureConstants.NOTE_DISPLAY_ORDER, FixtureConstants.NOTE_MAX_LENGTH, null, null)),
                 new BusinessKeyDefinition(BusinessKeyMode.COMPOSITE, List.of(DatasetFields.TS_CODE, DatasetFields.TRADE_DATE)),
                 List.of(new FilterDefinition(DatasetFields.TS_CODE)),
                 DatasetFields.TS_CODE);

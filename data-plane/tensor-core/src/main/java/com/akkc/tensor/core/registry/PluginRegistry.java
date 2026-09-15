@@ -13,8 +13,6 @@ import java.util.Objects;
 import java.util.Optional;
 
 public final class PluginRegistry {
-    private static final String INVALID_DESCRIPTOR = "Skipping plugin with invalid descriptor";
-
     private static final System.Logger LOGGER = System.getLogger(PluginRegistry.class.getName());
 
     private final Map<PluginId, DataSourcePlugin> plugins;
@@ -65,14 +63,14 @@ public final class PluginRegistry {
 
     private static Candidate candidate(DataSourcePlugin plugin) {
         if (plugin == null) {
-            LOGGER.log(System.Logger.Level.WARNING, INVALID_DESCRIPTOR);
+            LOGGER.log(System.Logger.Level.WARNING, "Skipping plugin with invalid descriptor");
             return null;
         }
         PluginDescriptor descriptor;
         try {
             descriptor = Objects.requireNonNull(plugin.descriptor(), "descriptor");
         } catch (RuntimeException exception) {
-            LOGGER.log(System.Logger.Level.WARNING, INVALID_DESCRIPTOR);
+            LOGGER.log(System.Logger.Level.WARNING, "Skipping plugin with invalid descriptor");
             return null;
         }
         try {

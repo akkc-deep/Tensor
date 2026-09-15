@@ -1,6 +1,5 @@
 package com.akkc.tensor.web.dto;
 
-import com.akkc.tensor.plugin.api.constant.ValidationMessages;
 import com.akkc.tensor.plugin.api.error.ErrorCode;
 import java.util.List;
 import java.util.Objects;
@@ -20,7 +19,7 @@ public record ApiErrorResponse(
             throw new IllegalArgumentException("requestId must not be blank");
         }
         if (message.isBlank()) {
-            throw new IllegalArgumentException(ValidationMessages.MESSAGE_BLANK);
+            throw new IllegalArgumentException("message must not be blank");
         }
         if (retryable != code.retryable()) {
             throw new IllegalArgumentException("retryable must match code");

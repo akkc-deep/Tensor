@@ -2,7 +2,6 @@ package com.akkc.tensor.core.validation;
 
 import com.akkc.tensor.plugin.api.constant.RequestFields;
 import com.akkc.tensor.plugin.api.constant.ValidationConstants;
-import com.akkc.tensor.plugin.api.constant.ValidationMessages;
 import com.akkc.tensor.plugin.api.descriptor.ApiDescriptor;
 import com.akkc.tensor.plugin.api.descriptor.ParameterDescriptor;
 import com.akkc.tensor.plugin.api.descriptor.ParameterType;
@@ -75,7 +74,7 @@ public final class ParameterValidator {
         List<FieldError> invalidErrors = invalidRawKeys(raw, parameters);
         for (ParameterDescriptor parameter : parameters) {
             if (invalid.contains(parameter.name())) {
-                invalidErrors.add(new FieldError(parameter.name(), ValidationMessages.INVALID_VALUE));
+                invalidErrors.add(new FieldError(parameter.name(), "has invalid value"));
             }
         }
         appendRangeErrors(parameters, normalized, invalidErrors);
@@ -142,7 +141,7 @@ public final class ParameterValidator {
         if (defaultValue != null) {
             normalized.put(parameter.name(), defaultValue);
         } else if (parameter.required()) {
-            requiredErrors.add(new FieldError(parameter.name(), ValidationMessages.REQUIRED));
+            requiredErrors.add(new FieldError(parameter.name(), "is required"));
         }
     }
 
@@ -255,8 +254,8 @@ public final class ParameterValidator {
 
         private static String message(ErrorCode code) {
             return code == ErrorCode.PARAM_REQUIRED
-                    ? ErrorCode.PARAM_REQUIRED.message()
-                    : ErrorCode.PARAM_INVALID.message();
+                    ? "Required parameters are missing"
+                    : "Parameters are invalid";
         }
     }
 

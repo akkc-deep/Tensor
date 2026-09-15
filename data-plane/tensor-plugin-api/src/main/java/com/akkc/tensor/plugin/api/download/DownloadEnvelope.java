@@ -1,7 +1,6 @@
 package com.akkc.tensor.plugin.api.download;
 
 import com.akkc.tensor.plugin.api.constant.ValidationConstants;
-import com.akkc.tensor.plugin.api.constant.ValidationMessages;
 import com.akkc.tensor.plugin.api.model.ApiName;
 import com.akkc.tensor.plugin.api.model.PluginId;
 import java.util.ArrayList;
@@ -41,11 +40,11 @@ public record DownloadEnvelope(
 
         fields = List.copyOf(fields);
         if (fields.size() != new HashSet<>(fields).size()) {
-            throw new IllegalArgumentException(ValidationMessages.DUPLICATE_FIELDS);
+            throw new IllegalArgumentException("fields must not contain duplicates");
         }
         for (String field : fields) {
             if (!IDENTIFIER_PATTERN.matcher(field).matches()) {
-                throw new IllegalArgumentException(ValidationMessages.INVALID_FIELD_PREFIX + field);
+                throw new IllegalArgumentException("Invalid field: " + field);
             }
         }
 

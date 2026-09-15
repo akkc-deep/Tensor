@@ -1,5 +1,6 @@
 package com.akkc.tensor.config;
 
+import com.akkc.tensor.plugin.api.constant.StringConstants;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -64,7 +65,7 @@ public final class WebSecurityHeadersConfiguration {
         if (path.startsWith("/assets/")) {
             return "public, max-age=31536000, immutable";
         }
-        if ("/".equals(path)
+        if (StringConstants.SLASH.equals(path)
                 || "/index.html".equals(path)
                 || path.startsWith("/api/")
                 || "/actuator".equals(path)

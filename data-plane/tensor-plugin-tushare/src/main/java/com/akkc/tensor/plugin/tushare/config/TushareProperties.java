@@ -1,5 +1,6 @@
 package com.akkc.tensor.plugin.tushare.config;
 
+import com.akkc.tensor.plugin.api.constant.StringConstants;
 import com.akkc.tensor.plugin.api.descriptor.PluginReadiness;
 import com.akkc.tensor.plugin.tushare.TushareConstants;
 import java.net.URI;
@@ -10,18 +11,17 @@ import org.springframework.boot.context.properties.bind.DefaultValue;
 
 @ConfigurationProperties("tensor.plugins.tushare-pro")
 public record TushareProperties(
-        @DefaultValue("true") boolean enabled,
+        @DefaultValue(StringConstants.TRUE) boolean enabled,
         @DefaultValue("https://api.tushare.pro") URI baseUrl,
-        @DefaultValue("") Credential token,
+        @DefaultValue(StringConstants.EMPTY) Credential token,
         @DefaultValue("5s") Duration connectTimeout,
         @DefaultValue(TushareConstants.MAX_READ_TIMEOUT_SECONDS + "s") Duration readTimeout,
-        @DefaultValue("" + TushareConstants.MAX_RESPONSE_BYTES) int maxResponseBytes,
+        @DefaultValue(StringConstants.EMPTY + TushareConstants.MAX_RESPONSE_BYTES) int maxResponseBytes,
         @DefaultValue(TushareConstants.DEFAULT_MIN_REQUEST_INTERVAL_MILLIS + "ms") Duration minRequestInterval) {
-    private static final String INVALID_REQUEST_INTERVAL = "minRequestInterval must be non-negative and fit in nanoseconds";
 
     @ConstructorBinding
     public TushareProperties {
-        token = token == null ? new Credential("") : token;
+        token = token == null ? new Credential(StringConstants.EMPTY) : token;
         if (!validBaseUrl(baseUrl)) {
             throw new IllegalArgumentException("baseUrl must be an absolute HTTP(S) URI without credentials, query, or fragment");
         }
@@ -36,12 +36,12 @@ public record TushareProperties(
             throw new IllegalArgumentException("maxResponseBytes must be between 1 and 67108864");
         }
         if (minRequestInterval == null || minRequestInterval.isNegative()) {
-            throw new IllegalArgumentException(INVALID_REQUEST_INTERVAL);
+            throw new IllegalArgumentException("minRequestInterval must be non-negative and fit in nanoseconds");
         }
         try {
             minRequestInterval.toNanos();
         } catch (ArithmeticException exception) {
-            throw new IllegalArgumentException(INVALID_REQUEST_INTERVAL);
+            throw new IllegalArgumentException("minRequestInterval must be non-negative and fit in nanoseconds");
         }
     }
 
@@ -72,7 +72,7 @@ public record TushareProperties(
 
     public record Credential(String value) {
         public Credential {
-            value = value == null ? "" : value;
+            value = value == null ? StringConstants.EMPTY : value;
         }
 
         public boolean configured() {

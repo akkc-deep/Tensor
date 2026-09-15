@@ -1,12 +1,11 @@
 package com.akkc.tensor.web;
 
-import com.akkc.tensor.plugin.api.constant.PaginationConstants;
-import com.akkc.tensor.plugin.api.constant.RequestFields;
-import com.akkc.tensor.plugin.api.constant.ValidationMessages;
 import com.akkc.tensor.core.query.DatasetPage;
 import com.akkc.tensor.core.query.DatasetQueryService;
 import com.akkc.tensor.core.query.QueryCriteria;
 import com.akkc.tensor.observability.OperationLogger;
+import com.akkc.tensor.plugin.api.constant.PaginationConstants;
+import com.akkc.tensor.plugin.api.constant.RequestFields;
 import com.akkc.tensor.plugin.api.model.ApiName;
 import com.akkc.tensor.plugin.api.model.DatasetKey;
 import com.akkc.tensor.plugin.api.model.PluginId;
@@ -54,7 +53,7 @@ public final class DatasetController {
                 PluginId.of(request.path().pluginId()), ApiName.of(request.path().apiName()));
         String value = MDC.get(RequestIdFilter.MDC_KEY);
         if (value == null) {
-            throw new IllegalStateException(WebConstants.REQUEST_ID_UNAVAILABLE);
+            throw new IllegalStateException("Request ID is unavailable");
         }
         RequestId requestId = new RequestId(UUID.fromString(value));
         LocalDate tradeDateFrom = date(request.tradeDate().from(), RequestFields.TRADE_DATE_FROM);
@@ -64,7 +63,7 @@ public final class DatasetController {
         int page = pageNumber(request.pagination().page(), PaginationConstants.FIRST_PAGE, RequestFields.PAGE);
         int pageSize = pageNumber(request.pagination().pageSize(), PaginationConstants.DEFAULT_DATASET_PAGE_SIZE, RequestFields.PAGE_SIZE);
         if (!SUPPORTED_PARAMETERS.containsAll(request.parameterNames())) {
-            throw new IllegalArgumentException(ValidationMessages.QUERY_PARAMETERS_INVALID);
+            throw new IllegalArgumentException("Query parameters are invalid");
         }
         QueryCriteria criteria = new QueryCriteria(
                 request.tsCode(), tradeDateFrom, tradeDateTo, annDateFrom, annDateTo, page, pageSize);

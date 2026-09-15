@@ -2,7 +2,6 @@ package com.akkc.tensor.web.download;
 
 import com.akkc.tensor.plugin.api.constant.RequestFields;
 import com.akkc.tensor.plugin.api.constant.ValidationConstants;
-import com.akkc.tensor.plugin.api.constant.ValidationMessages;
 import com.akkc.tensor.plugin.api.error.ErrorCode;
 import com.akkc.tensor.plugin.api.model.ApiName;
 import com.akkc.tensor.plugin.api.model.DatasetKey;
@@ -40,7 +39,7 @@ public final class DownloadRequestDeserializer extends JsonDeserializer<Download
             ErrorCode code = errors.containsValue(true) ? ErrorCode.PARAM_INVALID : ErrorCode.PARAM_REQUIRED;
             List<FieldErrorResponse> fields = errors.entrySet().stream()
                     .map(entry -> new FieldErrorResponse(entry.getKey(),
-                            entry.getValue() ? ValidationMessages.INVALID_VALUE : ValidationMessages.REQUIRED)).toList();
+                            entry.getValue() ? "has invalid value" : "is required")).toList();
             throw new DownloadBindingException(code, fields);
         }
         DatasetKey dataset = DatasetKey.of(PluginId.of(pluginId), ApiName.of(apiName));

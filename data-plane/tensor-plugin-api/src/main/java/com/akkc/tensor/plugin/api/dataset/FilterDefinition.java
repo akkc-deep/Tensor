@@ -1,7 +1,6 @@
 package com.akkc.tensor.plugin.api.dataset;
 
 import com.akkc.tensor.plugin.api.constant.ValidationConstants;
-import com.akkc.tensor.plugin.api.constant.ValidationMessages;
 import java.util.Objects;
 import java.util.regex.Pattern;
 
@@ -11,7 +10,7 @@ public record FilterDefinition(String field) {
     public FilterDefinition {
         Objects.requireNonNull(field, "field");
         if (!IDENTIFIER_PATTERN.matcher(field).matches()) {
-            throw new IllegalArgumentException(ValidationMessages.INVALID_FIELD_PREFIX + field);
+            throw new IllegalArgumentException("Invalid field: " + field);
         }
     }
 }

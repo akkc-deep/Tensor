@@ -14,8 +14,6 @@ import java.util.Map;
 import java.util.Objects;
 
 public final class FixturePlugin implements DataSourcePlugin {
-    private static final String UNKNOWN_SCENARIO = "Unknown Fixture scenario";
-
     private static final DatasetKey DATASET_KEY =
             DatasetKey.of(PluginId.of(FixtureConstants.PLUGIN_ID), ApiName.of(FixtureConstants.API_NAME));
     private final FixtureEnvelopeFactory envelopeFactory;
@@ -66,13 +64,13 @@ public final class FixturePlugin implements DataSourcePlugin {
         }
         Object scenarioValue = params.get(FixtureConstants.SCENARIO);
         if (!(scenarioValue instanceof String scenarioName)) {
-            throw new IllegalArgumentException(UNKNOWN_SCENARIO);
+            throw new IllegalArgumentException("Unknown Fixture scenario");
         }
         FixtureScenario scenario;
         try {
             scenario = FixtureScenario.valueOf(scenarioName);
         } catch (IllegalArgumentException exception) {
-            throw new IllegalArgumentException(UNKNOWN_SCENARIO);
+            throw new IllegalArgumentException("Unknown Fixture scenario");
         }
         return envelopeFactory.create(scenario, params);
     }

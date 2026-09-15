@@ -30,12 +30,12 @@ public final class UpsertSqlFactory {
                         ? !column.equals(DatasetFields.BUSINESS_KEY)
                         : !keyColumns.contains(column))
                 .toList();
-        String quotedColumns = insertColumns.stream().map(policy::quote).collect(Collectors.joining(", "));
-        String placeholders = insertColumns.stream().map(column -> "?").collect(Collectors.joining(", "));
+        String quotedColumns = insertColumns.stream().map(policy::quote).collect(Collectors.joining(SqlConstants.COLUMN_SEPARATOR));
+        String placeholders = insertColumns.stream().map(column -> SqlConstants.PARAMETER).collect(Collectors.joining(SqlConstants.COLUMN_SEPARATOR));
         String updates = updateColumns.stream()
                 .map(policy::quote)
-                .map(column -> column + " = VALUES(" + column + ")")
-                .collect(Collectors.joining(", "));
+                .map(column -> column + " = VALUES(" + column + SqlConstants.CLOSE_PARENTHESIS)
+                .collect(Collectors.joining(SqlConstants.COLUMN_SEPARATOR));
 
         return "INSERT INTO " + policy.quote(definition.tableName().value()) + " (" + quotedColumns + ") VALUES ("
                 + placeholders + ") ON DUPLICATE KEY UPDATE " + updates;

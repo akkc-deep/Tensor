@@ -1,7 +1,6 @@
 package com.akkc.tensor.core.query;
 
 import com.akkc.tensor.plugin.api.constant.PaginationConstants;
-import com.akkc.tensor.plugin.api.constant.ValidationMessages;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -21,13 +20,13 @@ public record DatasetPage(
         Objects.requireNonNull(columns, "columns");
         Objects.requireNonNull(items, "items");
         if (columns.isEmpty()) {
-            throw new IllegalArgumentException(ValidationMessages.COLUMNS_EMPTY);
+            throw new IllegalArgumentException("columns must not be empty");
         }
         if (columns.stream().anyMatch(Objects::isNull)) {
             throw new NullPointerException("columns must not contain null");
         }
         if (new HashSet<>(columns).size() != columns.size()) {
-            throw new IllegalArgumentException(ValidationMessages.DUPLICATE_COLUMNS);
+            throw new IllegalArgumentException("columns must not contain duplicates");
         }
         if (items.stream().anyMatch(Objects::isNull)) {
             throw new NullPointerException("items must not contain null");
@@ -44,10 +43,10 @@ public record DatasetPage(
         items = List.copyOf(copiedItems);
 
         if (page < PaginationConstants.FIRST_PAGE) {
-            throw new IllegalArgumentException(PaginationConstants.INVALID_PAGE);
+            throw new IllegalArgumentException("page must be at least 1");
         }
         if (!PaginationConstants.PAGE_SIZES.contains(pageSize)) {
-            throw new IllegalArgumentException(PaginationConstants.INVALID_PAGE_SIZE);
+            throw new IllegalArgumentException("pageSize must be one of 20, 50, 100");
         }
         if (totalElements < 0 || totalPages < 0) {
             throw new IllegalArgumentException("totals must be non-negative");

@@ -1,13 +1,13 @@
 package com.akkc.tensor.plugin.tushare.client;
 
-import com.akkc.tensor.plugin.tushare.TushareConstants;
 import com.akkc.tensor.plugin.api.constant.RequestFields;
+import com.akkc.tensor.plugin.tushare.TushareConstants;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import java.util.Map;
 import java.util.Objects;
 
-@JsonPropertyOrder({TushareConstants.API_NAME_FIELD, "token", RequestFields.PARAMS, "fields"})
+@JsonPropertyOrder({TushareConstants.API_NAME_FIELD, RequestFields.TOKEN, RequestFields.PARAMS, RequestFields.FIELDS})
 record TushareRequest(
         @JsonProperty(TushareConstants.API_NAME_FIELD) String apiName,
         String token,

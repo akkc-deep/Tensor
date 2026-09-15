@@ -1,6 +1,5 @@
 package com.akkc.tensor.plugin.api.error;
 
-import com.akkc.tensor.plugin.api.constant.ValidationMessages;
 import java.util.Objects;
 
 public abstract class TensorException extends RuntimeException {
@@ -22,7 +21,7 @@ public abstract class TensorException extends RuntimeException {
     private static String requireMessage(String message) {
         Objects.requireNonNull(message, "message");
         if (message.isBlank()) {
-            throw new IllegalArgumentException(ValidationMessages.MESSAGE_BLANK);
+            throw new IllegalArgumentException("message must not be blank");
         }
         return message;
     }

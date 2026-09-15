@@ -1,5 +1,6 @@
 package com.akkc.tensor.plugin.tushare.client;
 
+import com.akkc.tensor.plugin.api.constant.StringConstants;
 import com.akkc.tensor.plugin.api.dataset.ColumnDefinition;
 import com.akkc.tensor.plugin.api.dataset.DatasetDefinition;
 import com.akkc.tensor.plugin.api.download.DownloadEnvelope;
@@ -69,7 +70,7 @@ public final class TushareProClient {
 
         String fields = definition.columns().stream()
                 .map(ColumnDefinition::name)
-                .collect(Collectors.joining(","));
+                .collect(Collectors.joining(StringConstants.COMMA));
         TushareRequest request = new TushareRequest(
                 definition.datasetKey().apiName().value(),
                 properties.token().value(),
@@ -138,7 +139,7 @@ public final class TushareProClient {
                                       byte[] requestBody, BatchCallContext context) {
         try {
             return restClient.post()
-                    .uri("")
+                    .uri(StringConstants.EMPTY)
                     .contentType(MediaType.APPLICATION_JSON)
                     .accept(MediaType.APPLICATION_JSON)
                     .attribute(TushareRestClientFactory.CONTROL_ATTRIBUTE,

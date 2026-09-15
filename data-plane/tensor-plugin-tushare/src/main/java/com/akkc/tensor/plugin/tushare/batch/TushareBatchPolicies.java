@@ -1,11 +1,11 @@
 package com.akkc.tensor.plugin.tushare.batch;
 
-import com.akkc.tensor.plugin.api.constant.DatasetFields;
-import com.akkc.tensor.plugin.api.constant.ValidationConstants;
-import com.akkc.tensor.plugin.tushare.TushareConstants;
 import static com.akkc.tensor.plugin.api.download.batch.BatchDownloadDescriptor.*;
 import static com.akkc.tensor.plugin.api.error.ErrorCode.*;
 
+import com.akkc.tensor.plugin.api.constant.DatasetFields;
+import com.akkc.tensor.plugin.api.constant.StringConstants;
+import com.akkc.tensor.plugin.api.constant.ValidationConstants;
 import com.akkc.tensor.plugin.api.dataset.ColumnDefinition;
 import com.akkc.tensor.plugin.api.dataset.DatasetDefinition;
 import com.akkc.tensor.plugin.api.descriptor.ParameterDescriptor;
@@ -17,6 +17,7 @@ import com.akkc.tensor.plugin.api.error.ErrorCode;
 import com.akkc.tensor.plugin.api.error.SourceException;
 import com.akkc.tensor.plugin.api.error.TensorException;
 import com.akkc.tensor.plugin.api.model.ApiName;
+import com.akkc.tensor.plugin.tushare.TushareConstants;
 import com.akkc.tensor.plugin.tushare.client.TushareProClient;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
@@ -25,6 +26,10 @@ import java.util.*;
 
 /** Local range semantics. Documented candidates remain closed until source verification. */
 public final class TushareBatchPolicies {
+    private static final String DATE_LABEL_SUFFIX = "日期";
+
+    private static final String EVIDENCE_SEPARATOR = "；";
+    private static final String SOURCE_ID_SEPARATOR = "-";
     private static final String SUSPENDED_SUPPORT_NOTE = "标停；保留未知起止及持续可访问承诺";
     private static final String SINGLE_000001_CASE = "single-000001";
     private static final String SINGLE_600000_CASE = "single-600000";
@@ -70,7 +75,7 @@ public final class TushareBatchPolicies {
                 if (!definition.datasetKey().pluginId().value().equals(TushareConstants.PLUGIN_ID)
                         || index.put(definition.datasetKey().apiName(), definition) != null) throw invalidPolicies();
             }
-            if (index.size() != 40 || !policies.keySet().equals(PRODUCTION.keySet())) throw invalidPolicies();
+            if (index.size() != TushareConstants.API_COUNT || !policies.keySet().equals(PRODUCTION.keySet())) throw invalidPolicies();
             for (var entry : policies.entrySet()) {
                 Policy p = Objects.requireNonNull(entry.getValue());
                 var definition = index.get(entry.getKey());
@@ -113,18 +118,18 @@ public final class TushareBatchPolicies {
                 p.parameterShape() == ParameterShape.STOCK ? "股票代码" : "交易所", null,
                 p.parameterShape() == ParameterShape.STOCK ? ParameterType.TS_CODE : ParameterType.ENUM,
                 true, null, p.parameterShape() == ParameterShape.STOCK ? List.of() : EXCHANGES, null, null));
-        String label = p.dateLabel().endsWith("日期") ? p.dateLabel().substring(0, p.dateLabel().length() - 2) : p.dateLabel();
+        String label = p.dateLabel().endsWith(DATE_LABEL_SUFFIX) ? p.dateLabel().substring(0, p.dateLabel().length() - DATE_LABEL_SUFFIX.length()) : p.dateLabel();
         parameters.add(endpoint(DatasetFields.START_DATE, label + "开始日期", DatasetFields.END_DATE));
         parameters.add(endpoint(DatasetFields.END_DATE, label + "结束日期", DatasetFields.START_DATE));
         String reason = p.sourceVerified() ? null : "区间参数语义与完整性尚待真实接口验证"
-                + (p.ruleKind() == RuleKind.UNKNOWN ? "；尚无可确认的完整提取依据" : "");
+                + (p.ruleKind() == RuleKind.UNKNOWN ? "；尚无可确认的完整提取依据" : StringConstants.EMPTY);
         var rule = !p.sourceVerified() ? new CompletenessRule(CompletenessRule.Kind.UNKNOWN, null, null)
                 : new CompletenessRule(switch (p.ruleKind()) {
                     case ROW_LIMIT -> CompletenessRule.Kind.CONFIRMED_ROW_LIMIT;
                     case CALENDAR_COVERAGE -> CompletenessRule.Kind.VERIFIED_RULE;
                     case RESPONSE_ONLY -> CompletenessRule.Kind.RESPONSE_ONLY;
                     case UNKNOWN -> throw invalidPolicies();
-                }, p.documentedRowLimit(), p.verificationEvidence() + "；" + p.officialUrl());
+                }, p.documentedRowLimit(), p.verificationEvidence() + EVIDENCE_SEPARATOR + p.officialUrl());
         return Optional.of(new BatchDownloadDescriptor(parameters, DatasetFields.START_DATE, DatasetFields.END_DATE, p.dateAxis(),
                 p.dateLabel(), p.planningMode(), p.splittable(), p.sourceVerified() ? Availability.AVAILABLE
                 : Availability.NEEDS_VERIFICATION, reason, p.policyVersion(), rule));
@@ -231,8 +236,8 @@ public final class TushareBatchPolicies {
             case BATCH_COMPLETENESS_UNCONFIRMED -> "Tushare calendar coverage is unconfirmed";
             case SOURCE_PAYLOAD_INVALID -> "Invalid Tushare range response";
             case SOURCE_RANGE_MISMATCH -> "Tushare response does not match requested range";
-            case EXECUTION_INTERRUPTED -> ErrorCode.EXECUTION_INTERRUPTED.message();
-            case TASK_LIMIT_EXCEEDED -> ErrorCode.TASK_LIMIT_EXCEEDED.message();
+            case EXECUTION_INTERRUPTED -> "Download task execution was interrupted";
+            case TASK_LIMIT_EXCEEDED -> "Download task limit exceeded";
             default -> throw new IllegalArgumentException("Invalid Tushare batch error");
         };
         return code == SOURCE_PAYLOAD_INVALID || code == SOURCE_RANGE_MISMATCH
@@ -288,44 +293,44 @@ public final class TushareBatchPolicies {
 
     private static Map<ApiName, Policy> createPolicies() {
         var result = new LinkedHashMap<ApiName, Policy>();
-        add(result,TushareConstants.DAILY,ParameterShape.STOCK,DateAxis.TRADE_DATE,6000L,27,"");
-        add(result,TushareConstants.WEEKLY,ParameterShape.STOCK,DateAxis.TRADE_DATE,6000L,144,"实际每周最后交易日");
-        add(result,TushareConstants.MONTHLY,ParameterShape.STOCK,DateAxis.TRADE_DATE,4500L,145,"实际每月最后交易日");
-        add(result,TushareConstants.ADJ_FACTOR,ParameterShape.STOCK,DateAxis.TRADE_DATE,null,28,"");
-        add(result,"daily_basic",ParameterShape.STOCK,DateAxis.TRADE_DATE,6000L,32,"",
+        add(result,TushareConstants.DAILY,ParameterShape.STOCK,DateAxis.TRADE_DATE,TushareConstants.DAILY_ROW_LIMIT,27,StringConstants.EMPTY);
+        add(result,TushareConstants.WEEKLY,ParameterShape.STOCK,DateAxis.TRADE_DATE,TushareConstants.WEEKLY_ROW_LIMIT,144,"实际每周最后交易日");
+        add(result,TushareConstants.MONTHLY,ParameterShape.STOCK,DateAxis.TRADE_DATE,TushareConstants.MONTHLY_ROW_LIMIT,145,"实际每月最后交易日");
+        add(result,TushareConstants.ADJ_FACTOR,ParameterShape.STOCK,DateAxis.TRADE_DATE,null,28,StringConstants.EMPTY);
+        add(result,"daily_basic",ParameterShape.STOCK,DateAxis.TRADE_DATE,TushareConstants.DAILY_BASIC_ROW_LIMIT,32,StringConstants.EMPTY,
                 SINGLE_000001_CASE, SINGLE_600000_CASE, RANGE_CASE, LOWER_BOUND_CASE, UPPER_BOUND_CASE, RANGE_600000_CASE, LOWER_BOUND_600000_CASE, UPPER_BOUND_600000_CASE, "cross-year");
-        add(result,"stk_limit",ParameterShape.STOCK,DateAxis.TRADE_DATE,5800L,183,"",
+        add(result,"stk_limit",ParameterShape.STOCK,DateAxis.TRADE_DATE,TushareConstants.STK_LIMIT_ROW_LIMIT,183,StringConstants.EMPTY,
                 SINGLE_000001_CASE, SINGLE_600000_CASE, RANGE_CASE, LOWER_BOUND_CASE, UPPER_BOUND_CASE, RANGE_600000_CASE, LOWER_BOUND_600000_CASE, UPPER_BOUND_600000_CASE);
-        add(result,TushareConstants.SUSPEND_D,ParameterShape.STOCK,DateAxis.TRADE_DATE,null,214,"");
-        add(result,"moneyflow",ParameterShape.STOCK,DateAxis.TRADE_DATE,6000L,170,"",
+        add(result,TushareConstants.SUSPEND_D,ParameterShape.STOCK,DateAxis.TRADE_DATE,null,214,StringConstants.EMPTY);
+        add(result,"moneyflow",ParameterShape.STOCK,DateAxis.TRADE_DATE,TushareConstants.MONEYFLOW_ROW_LIMIT,170,StringConstants.EMPTY,
                 SINGLE_000001_CASE, SINGLE_600000_CASE, RANGE_CASE, LOWER_BOUND_CASE, UPPER_BOUND_CASE, RANGE_600000_CASE, LOWER_BOUND_600000_CASE, UPPER_BOUND_600000_CASE);
-        add(result,TushareConstants.MARGIN,ParameterShape.EXCHANGE_ID,DateAxis.TRADE_DATE,4000L,58,"保留 exchange_id");
-        add(result,"margin_detail",ParameterShape.STOCK,DateAxis.TRADE_DATE,6000L,59,"",
+        add(result,TushareConstants.MARGIN,ParameterShape.EXCHANGE_ID,DateAxis.TRADE_DATE,TushareConstants.MARGIN_ROW_LIMIT,58,"保留 exchange_id");
+        add(result,"margin_detail",ParameterShape.STOCK,DateAxis.TRADE_DATE,TushareConstants.MARGIN_DETAIL_ROW_LIMIT,59,StringConstants.EMPTY,
                 SINGLE_000001_CASE, SINGLE_600000_CASE, RANGE_CASE, LOWER_BOUND_CASE, UPPER_BOUND_CASE, RANGE_600000_CASE, LOWER_BOUND_600000_CASE, UPPER_BOUND_600000_CASE);
-        add(result,TushareConstants.BLOCK_TRADE,ParameterShape.STOCK,DateAxis.TRADE_DATE,1000L,161,"");
-        add(result,TushareConstants.SLB_LEN,ParameterShape.DATES,DateAxis.TRADE_DATE,5000L,331,"");
-        add(result,TushareConstants.SLB_SEC,ParameterShape.STOCK,DateAxis.TRADE_DATE,5000L,332,SUSPENDED_SUPPORT_NOTE);
-        add(result,TushareConstants.SLB_SEC_DETAIL,ParameterShape.STOCK,DateAxis.TRADE_DATE,5000L,333,SUSPENDED_SUPPORT_NOTE);
+        add(result,TushareConstants.BLOCK_TRADE,ParameterShape.STOCK,DateAxis.TRADE_DATE,TushareConstants.BLOCK_TRADE_ROW_LIMIT,161,StringConstants.EMPTY);
+        add(result,TushareConstants.SLB_LEN,ParameterShape.DATES,DateAxis.TRADE_DATE,TushareConstants.SLB_LEN_ROW_LIMIT,331,StringConstants.EMPTY);
+        add(result,TushareConstants.SLB_SEC,ParameterShape.STOCK,DateAxis.TRADE_DATE,TushareConstants.SLB_SEC_ROW_LIMIT,332,SUSPENDED_SUPPORT_NOTE);
+        add(result,TushareConstants.SLB_SEC_DETAIL,ParameterShape.STOCK,DateAxis.TRADE_DATE,TushareConstants.SLB_SEC_DETAIL_ROW_LIMIT,333,SUSPENDED_SUPPORT_NOTE);
         add(result,TushareConstants.TRADE_CAL,ParameterShape.EXCHANGE,DateAxis.CALENDAR_DATE,null,26,"完整自然日覆盖；无猜测行数上限");
-        add(result,TushareConstants.NEW_SHARE,ParameterShape.DATES,DateAxis.ISSUE_DATE,2000L,123,"不是 issue_date 上市日期");
-        add(result,TushareConstants.INCOME,ParameterShape.STOCK,DateAxis.ANNOUNCEMENT_DATE,null,33,"");
-        add(result,TushareConstants.BALANCESHEET,ParameterShape.STOCK,DateAxis.ANNOUNCEMENT_DATE,null,36,"");
+        add(result,TushareConstants.NEW_SHARE,ParameterShape.DATES,DateAxis.ISSUE_DATE,TushareConstants.NEW_SHARE_ROW_LIMIT,123,"不是 issue_date 上市日期");
+        add(result,TushareConstants.INCOME,ParameterShape.STOCK,DateAxis.ANNOUNCEMENT_DATE,null,33,StringConstants.EMPTY);
+        add(result,TushareConstants.BALANCESHEET,ParameterShape.STOCK,DateAxis.ANNOUNCEMENT_DATE,null,36,StringConstants.EMPTY);
         add(result,TushareConstants.CASHFLOW,ParameterShape.STOCK,DateAxis.ANNOUNCEMENT_DATE,null,44,"不是 f_ann_date");
-        add(result,TushareConstants.FINA_AUDIT,ParameterShape.STOCK,DateAxis.ANNOUNCEMENT_DATE,null,80,"");
-        add(result,TushareConstants.FORECAST,ParameterShape.STOCK,DateAxis.ANNOUNCEMENT_DATE,3500L,45,"");
-        add(result,TushareConstants.EXPRESS,ParameterShape.STOCK,DateAxis.ANNOUNCEMENT_DATE,null,46,"");
+        add(result,TushareConstants.FINA_AUDIT,ParameterShape.STOCK,DateAxis.ANNOUNCEMENT_DATE,null,80,StringConstants.EMPTY);
+        add(result,TushareConstants.FORECAST,ParameterShape.STOCK,DateAxis.ANNOUNCEMENT_DATE,TushareConstants.FORECAST_ROW_LIMIT,45,StringConstants.EMPTY);
+        add(result,TushareConstants.EXPRESS,ParameterShape.STOCK,DateAxis.ANNOUNCEMENT_DATE,null,46,StringConstants.EMPTY);
         add(result,TushareConstants.REPURCHASE,ParameterShape.DATES,DateAxis.ANNOUNCEMENT_DATE,null,124,"默认 2000 不是区间硬上限");
-        add(result,TushareConstants.STK_MANAGERS,ParameterShape.STOCK,DateAxis.ANNOUNCEMENT_DATE,null,193,"");
-        add(result,TushareConstants.STK_HOLDERNUMBER,ParameterShape.STOCK,DateAxis.ANNOUNCEMENT_DATE,3000L,166,"不是 enddate/end_date");
-        add(result,TushareConstants.STK_HOLDERTRADE,ParameterShape.STOCK,DateAxis.ANNOUNCEMENT_DATE,3000L,175,"不是持股变动起止日");
-        add(result,TushareConstants.PLEDGE_DETAIL,ParameterShape.STOCK,DateAxis.ANNOUNCEMENT_DATE,1000L,111,"不是质押 start_date/end_date");
-        add(result,TushareConstants.FINA_INDICATOR,ParameterShape.STOCK,DateAxis.REPORT_PERIOD,100L,79,"");
-        add(result,TushareConstants.FINA_MAINBZ,ParameterShape.STOCK,DateAxis.REPORT_PERIOD,100L,81,"不传 type/period/ann_date");
-        add(result,TushareConstants.TOP10_HOLDERS,ParameterShape.STOCK,DateAxis.REPORT_PERIOD,null,61,"");
-        add(result,TushareConstants.TOP10_FLOATHOLDERS,ParameterShape.STOCK,DateAxis.REPORT_PERIOD,null,62,"");
-        add(result,TushareConstants.TOP_LIST,ParameterShape.STOCK,DateAxis.TRADE_DATE,10000L,106,"逐交易日 trade_date");
-        add(result,TushareConstants.DIVIDEND,ParameterShape.STOCK,DateAxis.ANNOUNCEMENT_DATE,2000L,103,"逐自然日 ann_date");
-        add(result,TushareConstants.DISCLOSURE_DATE,ParameterShape.STOCK,DateAxis.ANNOUNCEMENT_DATE,6000L,162,"逐自然日 ann_date，最新披露公告日");
+        add(result,TushareConstants.STK_MANAGERS,ParameterShape.STOCK,DateAxis.ANNOUNCEMENT_DATE,null,193,StringConstants.EMPTY);
+        add(result,TushareConstants.STK_HOLDERNUMBER,ParameterShape.STOCK,DateAxis.ANNOUNCEMENT_DATE,TushareConstants.STK_HOLDERNUMBER_ROW_LIMIT,166,"不是 enddate/end_date");
+        add(result,TushareConstants.STK_HOLDERTRADE,ParameterShape.STOCK,DateAxis.ANNOUNCEMENT_DATE,TushareConstants.STK_HOLDERTRADE_ROW_LIMIT,175,"不是持股变动起止日");
+        add(result,TushareConstants.PLEDGE_DETAIL,ParameterShape.STOCK,DateAxis.ANNOUNCEMENT_DATE,TushareConstants.PLEDGE_DETAIL_ROW_LIMIT,111,"不是质押 start_date/end_date");
+        add(result,TushareConstants.FINA_INDICATOR,ParameterShape.STOCK,DateAxis.REPORT_PERIOD,TushareConstants.FINA_INDICATOR_ROW_LIMIT,79,StringConstants.EMPTY);
+        add(result,TushareConstants.FINA_MAINBZ,ParameterShape.STOCK,DateAxis.REPORT_PERIOD,TushareConstants.FINA_MAINBZ_ROW_LIMIT,81,"不传 type/period/ann_date");
+        add(result,TushareConstants.TOP10_HOLDERS,ParameterShape.STOCK,DateAxis.REPORT_PERIOD,null,61,StringConstants.EMPTY);
+        add(result,TushareConstants.TOP10_FLOATHOLDERS,ParameterShape.STOCK,DateAxis.REPORT_PERIOD,null,62,StringConstants.EMPTY);
+        add(result,TushareConstants.TOP_LIST,ParameterShape.STOCK,DateAxis.TRADE_DATE,TushareConstants.TOP_LIST_ROW_LIMIT,106,"逐交易日 trade_date");
+        add(result,TushareConstants.DIVIDEND,ParameterShape.STOCK,DateAxis.ANNOUNCEMENT_DATE,TushareConstants.DIVIDEND_ROW_LIMIT,103,"逐自然日 ann_date");
+        add(result,TushareConstants.DISCLOSURE_DATE,ParameterShape.STOCK,DateAxis.ANNOUNCEMENT_DATE,TushareConstants.DISCLOSURE_DATE_ROW_LIMIT,162,"逐自然日 ann_date，最新披露公告日");
         return Map.copyOf(result);
     }
     private static void add(Map<ApiName,Policy> result, String name, ParameterShape shape, DateAxis axis,
@@ -339,19 +344,19 @@ public final class TushareBatchPolicies {
         boolean withdrawn = Set.of(TushareConstants.FINA_INDICATOR, TushareConstants.BALANCESHEET, TushareConstants.CASHFLOW, TushareConstants.REPURCHASE).contains(name); // ISSUE-031: actual RANGE TASKs failed adaptation.
         boolean verified = !withdrawn && (sourceCases.length > 0 || candidate != null);
         String sourceRun = "issue018-t14-priority-source-20260913T092938Z";
-        String evidence = sourceCases.length > 0 ? "docs/verification/ISSUE-018-range-acceptance.md#" + name + "；SOURCE " + sourceRun + "；"
-                + String.join(",", Arrays.stream(sourceCases).map(suffix -> sourceRun + "-" + name + "-" + suffix).toList())
+        String evidence = sourceCases.length > 0 ? "docs/verification/ISSUE-018-range-acceptance.md#" + name + "；SOURCE " + sourceRun + EVIDENCE_SEPARATOR
+                + String.join(StringConstants.COMMA, Arrays.stream(sourceCases).map(suffix -> sourceRun + SOURCE_ID_SEPARATOR + name + SOURCE_ID_SEPARATOR + suffix).toList())
                 : candidate == null ? null : candidate.reference(name);
         ApiName api = new ApiName(name);
         var p = new Policy(api,shape,axis,label,mode,column,mode == PlanningMode.NATIVE_RANGE ? null : column,
                 mode == PlanningMode.NATIVE_RANGE && rule == RuleKind.ROW_LIMIT,rule,limit,
-                (sourceCases.length > 0 ? "官网候选行数上限 " + limit + "；"
+                (sourceCases.length > 0 ? "官网候选行数上限 " + limit + EVIDENCE_SEPARATOR
                         : rule == RuleKind.RESPONSE_ONLY ? "允许不完整的响应采集；上游完整性未确认；"
                         : rule == RuleKind.CALENDAR_COVERAGE ? "完整自然日覆盖；"
-                        : name.startsWith("slb_") ? "已采用历史查询及工程阈值 " + limit + "；"
-                        : "已采用工程阈值 " + limit + "；") + note,
+                        : name.startsWith("slb_") ? "已采用历史查询及工程阈值 " + limit + EVIDENCE_SEPARATOR
+                        : "已采用工程阈值 " + limit + EVIDENCE_SEPARATOR) + note,
                 "https://tushare.pro/document/2?doc_id=" + document,
-                LocalDate.of(2026,9,sourceCases.length > 0 ? 13 : 14),
+                LocalDate.of(2026,java.time.Month.SEPTEMBER.getValue(),sourceCases.length > 0 ? 13 : 14),
                 withdrawn ? "tushare-range-v3" : "tushare-range-v2",verified,verified ? evidence : null);
         if (result.put(api,p) != null) throw invalidPolicies();
     }
@@ -406,6 +411,6 @@ public final class TushareBatchPolicies {
 
     private static Map.Entry<String, CandidateEvidence> evidence(String apiName, String decision, String caseId) {
         String runId = caseId.substring(0, caseId.indexOf('Z') + 1);
-        return Map.entry(apiName, new CandidateEvidence(decision, runId + "/" + caseId));
+        return Map.entry(apiName, new CandidateEvidence(decision, runId + StringConstants.SLASH + caseId));
     }
 }

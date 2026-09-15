@@ -1,10 +1,8 @@
 package com.akkc.tensor.web;
 
-import org.springframework.http.MediaType;
-
 import com.akkc.tensor.core.download.task.*;
-import com.akkc.tensor.observability.DownloadTaskOperationLogger;
 import com.akkc.tensor.observability.DownloadTaskOperationLogger.AcceptanceKind;
+import com.akkc.tensor.observability.DownloadTaskOperationLogger;
 import com.akkc.tensor.plugin.api.model.RequestId;
 import com.akkc.tensor.web.download.DownloadParameterResolver;
 import com.akkc.tensor.web.dto.*;
@@ -15,6 +13,8 @@ import java.util.UUID;
 import org.slf4j.MDC;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.context.annotation.DependsOn;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -45,7 +45,7 @@ public final class DownloadTaskController {
         };
         var result = service.submit(submission);
         return receipt(result.task(), result.created() ? AcceptanceKind.CREATED : AcceptanceKind.REPLAYED,
-                result.created() ? 202 : 200, started);
+                result.created() ? HttpStatus.ACCEPTED.value() : HttpStatus.OK.value(), started);
     }
 
     @GetMapping
@@ -73,18 +73,18 @@ public final class DownloadTaskController {
     public ResponseEntity<DownloadTaskReceipt> retry(DownloadTaskQuery.TaskId taskId,
             @RequestBody DownloadTaskControlRequest request) {
         long started = System.nanoTime();
-        return receipt(service.retry(taskId.value(), request.expectedVersion()), AcceptanceKind.RETRY, 202, started);
+        return receipt(service.retry(taskId.value(), request.expectedVersion()), AcceptanceKind.RETRY, HttpStatus.ACCEPTED.value(), started);
     }
 
     @PostMapping("/{taskId}/resume")
     public ResponseEntity<DownloadTaskReceipt> resume(DownloadTaskQuery.TaskId taskId,
             @RequestBody DownloadTaskControlRequest request) {
         long started = System.nanoTime();
-        return receipt(service.resume(taskId.value(), request.expectedVersion()), AcceptanceKind.RESUME, 202, started);
+        return receipt(service.resume(taskId.value(), request.expectedVersion()), AcceptanceKind.RESUME, HttpStatus.ACCEPTED.value(), started);
     }
 
     private ResponseEntity<DownloadTaskReceipt> receipt(DownloadTask task, AcceptanceKind kind, int status, long started) {
-        var requestId = new RequestId(UUID.fromString(Objects.requireNonNull(MDC.get(RequestIdFilter.MDC_KEY), WebConstants.REQUEST_ID_UNAVAILABLE)));
+        var requestId = new RequestId(UUID.fromString(Objects.requireNonNull(MDC.get(RequestIdFilter.MDC_KEY), "Request ID is unavailable")));
         logger.recordAccepted(requestId, task, kind, Duration.ofNanos(System.nanoTime() - started));
         return ResponseEntity.status(status).location(URI.create("/api/v1/download-tasks/" + task.taskId()))
                 .body(DownloadTaskReceipt.from(requestId, task));

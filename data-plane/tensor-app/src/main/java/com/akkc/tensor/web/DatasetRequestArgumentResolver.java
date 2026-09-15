@@ -1,6 +1,7 @@
 package com.akkc.tensor.web;
 
 import com.akkc.tensor.plugin.api.constant.RequestFields;
+import com.akkc.tensor.plugin.api.constant.StringConstants;
 import com.akkc.tensor.web.dto.DatasetPath;
 import com.akkc.tensor.web.dto.DatasetRecordsRequest;
 import jakarta.servlet.http.HttpServletRequest;
@@ -43,7 +44,7 @@ public final class DatasetRequestArgumentResolver implements HandlerMethodArgume
                 request.getParameterMap().keySet());
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings(StringConstants.UNCHECKED_WARNING)
     private static DatasetPath path(HttpServletRequest request) {
         Map<String, String> variables = (Map<String, String>) request.getAttribute(
                 HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE);
@@ -51,7 +52,7 @@ public final class DatasetRequestArgumentResolver implements HandlerMethodArgume
     }
 
     private static String joined(String[] values) {
-        return values == null ? null : String.join(",", values);
+        return values == null ? null : String.join(StringConstants.COMMA, values);
     }
 
     private static String tsCode(HttpServletRequest request) {

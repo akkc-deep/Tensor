@@ -1,11 +1,11 @@
 package com.akkc.tensor.web.download;
 
-import com.akkc.tensor.plugin.api.constant.DatasetFields;
-import com.akkc.tensor.plugin.tushare.TushareConstants;
 import static com.akkc.tensor.plugin.api.descriptor.ParameterType.*;
 import static com.akkc.tensor.web.download.ParameterShape.of;
 
+import com.akkc.tensor.plugin.api.constant.DatasetFields;
 import com.akkc.tensor.plugin.api.descriptor.ParameterType;
+import com.akkc.tensor.plugin.tushare.TushareConstants;
 import com.akkc.tensor.web.download.DownloadParameters.*;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -15,6 +15,8 @@ import java.util.function.Function;
 
 record ParameterCodec<T extends DownloadParameters>(ParameterShape shape, Class<T> parameterType,
         Function<ParameterJsonReader, T> reader, Function<T, Map<String, Object>> writer) {
+    private static final int ENTRY_SIZE = 2;
+
     private static final String SCENARIO = "scenario";
     private static final String SUCCESS_SCENARIO = "SUCCESS";
 
@@ -100,7 +102,7 @@ record ParameterCodec<T extends DownloadParameters>(ParameterShape shape, Class<
 
     private static Map<String, Object> values(Object... entries) {
         Map<String, Object> values = new LinkedHashMap<>();
-        for (int index = 0; index < entries.length; index += 2) {
+        for (int index = 0; index < entries.length; index += ENTRY_SIZE) {
             values.put((String) entries[index], entries[index + 1]);
         }
         return values;

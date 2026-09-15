@@ -1,6 +1,5 @@
 package com.akkc.tensor.plugin.api.download.batch;
 
-import com.akkc.tensor.plugin.api.constant.ValidationMessages;
 import com.akkc.tensor.plugin.api.descriptor.ParameterDescriptor;
 import com.akkc.tensor.plugin.api.descriptor.ParameterType;
 import java.util.List;
@@ -19,6 +18,8 @@ public record BatchDownloadDescriptor(
         String unavailableReason,
         String policyVersion,
         CompletenessRule completenessRule) {
+    private static final int RANGE_ENDPOINT_COUNT = 2;
+
 
     public BatchDownloadDescriptor {
         parameters = List.copyOf(parameters);
@@ -26,7 +27,7 @@ public record BatchDownloadDescriptor(
         Objects.requireNonNull(completenessRule, "completenessRule");
         requireText(policyVersion, "policyVersion");
         if (parameters.stream().map(ParameterDescriptor::name).distinct().count() != parameters.size()) {
-            throw new IllegalArgumentException(ValidationMessages.DUPLICATE_PARAMETERS);
+            throw new IllegalArgumentException("parameters must not contain duplicate names");
         }
         if (availability == Availability.AVAILABLE) {
             if (unavailableReason != null || completenessRule.kind() == CompletenessRule.Kind.UNKNOWN) {
@@ -47,7 +48,7 @@ public record BatchDownloadDescriptor(
             requireText(dateLabel, "dateLabel");
             var endpoints = parameters.stream()
                     .filter(parameter -> parameter.type() == ParameterType.DATE_RANGE_MEMBER).toList();
-            if (endpoints.size() != 2
+            if (endpoints.size() != RANGE_ENDPOINT_COUNT
                     || !endpoints.getFirst().name().equals(startParameter)
                     || !endpoints.getLast().name().equals(endParameter)
                     || !endpoints.getFirst().required() || !endpoints.getLast().required()
@@ -102,7 +103,7 @@ public record BatchDownloadDescriptor(
 
     private static void requireText(String value, String name) {
         if (value == null || value.isBlank()) {
-            throw new IllegalArgumentException(name + ValidationMessages.MUST_NOT_BE_BLANK);
+            throw new IllegalArgumentException(name + " must not be blank");
         }
     }
 }

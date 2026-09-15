@@ -30,10 +30,10 @@ public record QueryCriteria(
             throw new IllegalArgumentException("annDateFrom must not be after annDateTo");
         }
         if (page < PaginationConstants.FIRST_PAGE) {
-            throw new IllegalArgumentException(PaginationConstants.INVALID_PAGE);
+            throw new IllegalArgumentException("page must be at least 1");
         }
         if (!PaginationConstants.PAGE_SIZES.contains(pageSize)) {
-            throw new IllegalArgumentException(PaginationConstants.INVALID_PAGE_SIZE);
+            throw new IllegalArgumentException("pageSize must be one of 20, 50, 100");
         }
     }
 }

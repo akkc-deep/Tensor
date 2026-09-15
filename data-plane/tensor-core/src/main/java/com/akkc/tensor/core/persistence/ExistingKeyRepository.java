@@ -1,6 +1,5 @@
 package com.akkc.tensor.core.persistence;
 
-import com.akkc.tensor.plugin.api.constant.ValidationMessages;
 import com.akkc.tensor.plugin.api.constant.DatasetFields;
 import com.akkc.tensor.plugin.api.dataset.BusinessKeyMode;
 import com.akkc.tensor.plugin.api.dataset.ColumnDefinition;
@@ -32,7 +31,7 @@ public final class ExistingKeyRepository {
         Objects.requireNonNull(definition, "definition");
         Objects.requireNonNull(keys, "keys");
         if (keys.stream().anyMatch(Objects::isNull)) {
-            throw new IllegalArgumentException(ValidationMessages.NULL_BUSINESS_KEY);
+            throw new IllegalArgumentException("business keys must not contain null");
         }
         List<BusinessKey> copiedKeys = List.copyOf(keys);
 
@@ -84,14 +83,14 @@ public final class ExistingKeyRepository {
             int keyCount) {
         SqlIdentifierPolicy policy = new SqlIdentifierPolicy();
         String table = policy.quote(definition.tableName().value());
-        String columns = columnNames.stream().map(policy::quote).collect(Collectors.joining(", "));
+        String columns = columnNames.stream().map(policy::quote).collect(Collectors.joining(SqlConstants.COLUMN_SEPARATOR));
         if (columnNames.size() == 1) {
-            String placeholders = String.join(", ", Collections.nCopies(keyCount, "?"));
-            return "SELECT " + columns + " FROM " + table + " WHERE " + columns + " IN (" + placeholders + ")";
+            String placeholders = String.join(SqlConstants.COLUMN_SEPARATOR, Collections.nCopies(keyCount, SqlConstants.PARAMETER));
+            return SqlConstants.SELECT + columns + SqlConstants.FROM + table + SqlConstants.WHERE + columns + " IN (" + placeholders + SqlConstants.CLOSE_PARENTHESIS;
         }
-        String tuple = "(" + String.join(", ", Collections.nCopies(columnNames.size(), "?")) + ")";
-        String tuples = String.join(", ", Collections.nCopies(keyCount, tuple));
-        return "SELECT " + columns + " FROM " + table + " WHERE (" + columns + ") IN (" + tuples + ")";
+        String tuple = "(" + String.join(SqlConstants.COLUMN_SEPARATOR, Collections.nCopies(columnNames.size(), SqlConstants.PARAMETER)) + SqlConstants.CLOSE_PARENTHESIS;
+        String tuples = String.join(SqlConstants.COLUMN_SEPARATOR, Collections.nCopies(keyCount, tuple));
+        return SqlConstants.SELECT + columns + SqlConstants.FROM + table + " WHERE (" + columns + ") IN (" + tuples + SqlConstants.CLOSE_PARENTHESIS;
     }
 
     private static BusinessKey readKey(ResultSet resultSet, List<Integer> jdbcTypes) throws SQLException {

@@ -2,6 +2,7 @@ package com.akkc.tensor.core.download.task;
 
 import com.akkc.tensor.core.adapter.FingerprintKeyCodec;
 import com.akkc.tensor.plugin.api.constant.RequestFields;
+import com.akkc.tensor.plugin.api.constant.StringConstants;
 import com.akkc.tensor.plugin.api.constant.ValidationConstants;
 import com.akkc.tensor.plugin.api.dataset.ColumnDefinition;
 import com.akkc.tensor.plugin.api.dataset.DatasetDefinition;
@@ -34,6 +35,9 @@ import java.util.regex.Pattern;
 
 /** Bounded canonical JSON used by persisted download tasks. */
 public final class DownloadTaskJson {
+    private static final int SINGLE_POLICY_FIELD_COUNT = 2;
+    private static final int MAX_NESTING_DEPTH = 16;
+
     private static final String SCHEMA_VERSION = "schemaVersion";
     private static final String PARAMETERS = "parameters";
     static final String START_PARAMETER = "startParameter";
@@ -59,12 +63,12 @@ public final class DownloadTaskJson {
     private static final String ROW_LIMIT = "rowLimit";
     private static final String EVIDENCE = "evidence";
 
-    private static final int TASK_BYTES = 8 * 1024;
-    private static final int SNAPSHOT_BYTES = 16 * 1024;
-    private static final int INPUT_BYTES = 128 * 1024;
+    private static final int TASK_BYTES = 8_192;
+    private static final int SNAPSHOT_BYTES = 16_384;
+    private static final int INPUT_BYTES = 131_072;
     private static final Pattern PARAMETER_NAME = Pattern.compile(ValidationConstants.IDENTIFIER_REGEX);
     private static final Set<String> SECRET_KEYS = Set.of(
-            "token", "access_token", "refresh_token", "authorization", "password", "secret", "api_key");
+            RequestFields.TOKEN, "access_token", "refresh_token", "authorization", "password", "secret", "api_key");
     private static final Set<String> POLICY_FIELDS = Set.of(
             SCHEMA_VERSION, RequestFields.MODE, PARAMETERS, START_PARAMETER, END_PARAMETER, DATE_AXIS,
             DATE_LABEL, PLANNING_MODE, SPLITTABLE, AVAILABILITY, UNAVAILABLE_REASON,
@@ -79,7 +83,7 @@ public final class DownloadTaskJson {
     public DownloadTaskJson() {
         JsonFactory factory = JsonFactory.builder()
                 .enable(StreamReadFeature.STRICT_DUPLICATE_DETECTION)
-                .streamReadConstraints(StreamReadConstraints.builder().maxNestingDepth(16).build())
+                .streamReadConstraints(StreamReadConstraints.builder().maxNestingDepth(MAX_NESTING_DEPTH).build())
                 .build();
         mapper = new ObjectMapper(factory);
     }
@@ -156,7 +160,7 @@ public final class DownloadTaskJson {
         requireInt(root, SCHEMA_VERSION, 1);
         DownloadMode mode = enumValue(root, RequestFields.MODE, DownloadMode.class);
         if (mode == DownloadMode.SINGLE) {
-            if (root.size() != 2) {
+            if (root.size() != SINGLE_POLICY_FIELD_COUNT) {
                 throw invalid();
             }
         } else {
@@ -218,7 +222,7 @@ public final class DownloadTaskJson {
         value.put("rangePolicy", range == null ? Map.of(KIND, DownloadMode.SINGLE.name()) : rangePolicy(range));
         value.put("columns", dataset.columns().stream().map(this::column).toList());
         value.put("businessKey", Map.of(RequestFields.MODE, dataset.businessKey().mode().name(),
-                "fields", dataset.businessKey().fields()));
+                RequestFields.FIELDS, dataset.businessKey().fields()));
         return sha256(canonical(value));
     }
 
@@ -232,7 +236,7 @@ public final class DownloadTaskJson {
         root.properties().forEach(field -> values.put(field.getKey(), scalarText(field.getKey(), field.getValue())));
         String canonical = bounded(canonical(values), limit);
         try {
-            @SuppressWarnings("unchecked")
+            @SuppressWarnings(StringConstants.UNCHECKED_WARNING)
             Map<String, Object> result = mapper.readValue(canonical, LinkedHashMap.class);
             return Map.copyOf(result);
         } catch (IOException exception) {

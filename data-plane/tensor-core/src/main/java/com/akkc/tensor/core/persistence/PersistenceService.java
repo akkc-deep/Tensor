@@ -32,7 +32,7 @@ public final class PersistenceService {
         this.transactionTemplate = new TransactionTemplate(
                 Objects.requireNonNull(transactionManager, "transactionManager"));
         transactionTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
-        transactionTemplate.setTimeout(60);
+        transactionTemplate.setTimeout(SqlConstants.TRANSACTION_TIMEOUT_SECONDS);
     }
 
     public WriteCounts persist(AdaptedBatch batch) {

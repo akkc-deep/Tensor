@@ -1,13 +1,12 @@
 package com.akkc.tensor.web;
 
-import com.akkc.tensor.plugin.api.constant.RequestFields;
-import com.akkc.tensor.plugin.api.constant.ValidationMessages;
 import com.akkc.tensor.core.validation.ParameterValidator.ParameterValidationException;
+import com.akkc.tensor.plugin.api.constant.RequestFields;
 import com.akkc.tensor.plugin.api.error.ErrorCode;
 import com.akkc.tensor.plugin.api.error.TensorException;
+import com.akkc.tensor.web.download.DownloadBindingException;
 import com.akkc.tensor.web.dto.ApiErrorResponse;
 import com.akkc.tensor.web.dto.FieldErrorResponse;
-import com.akkc.tensor.web.download.DownloadBindingException;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -55,7 +54,7 @@ public final class GlobalExceptionHandler {
         List<FieldErrorResponse> fields = invalidByField.entrySet().stream()
                 .map(entry -> new FieldErrorResponse(
                         entry.getKey(),
-                        entry.getValue() ? ValidationMessages.INVALID_VALUE : ValidationMessages.REQUIRED))
+                        entry.getValue() ? "has invalid value" : "is required"))
                 .toList();
         return response(code, fields, exception);
     }
@@ -65,7 +64,7 @@ public final class GlobalExceptionHandler {
             MissingServletRequestParameterException exception) {
         return response(
                 ErrorCode.PARAM_REQUIRED,
-                List.of(new FieldErrorResponse(exception.getParameterName(), ValidationMessages.REQUIRED)),
+                List.of(new FieldErrorResponse(exception.getParameterName(), "is required")),
                 exception);
     }
 
@@ -74,7 +73,7 @@ public final class GlobalExceptionHandler {
             MethodArgumentTypeMismatchException exception) {
         return response(
                 ErrorCode.PARAM_INVALID,
-                List.of(new FieldErrorResponse(exception.getName(), ValidationMessages.INVALID_VALUE)),
+                List.of(new FieldErrorResponse(exception.getName(), "has invalid value")),
                 exception);
     }
 
@@ -88,7 +87,7 @@ public final class GlobalExceptionHandler {
         }
         return response(
                 ErrorCode.PARAM_INVALID,
-                List.of(new FieldErrorResponse(RequestFields.REQUEST, ValidationMessages.INVALID_VALUE)),
+                List.of(new FieldErrorResponse(RequestFields.REQUEST, "has invalid value")),
                 exception);
     }
 
@@ -121,7 +120,7 @@ public final class GlobalExceptionHandler {
             Exception exception) {
         String requestId = MDC.get(RequestIdFilter.MDC_KEY);
         if (requestId == null || requestId.isBlank()) {
-            throw new IllegalStateException(WebConstants.REQUEST_ID_UNAVAILABLE);
+            throw new IllegalStateException("Request ID is unavailable");
         }
         HttpStatus status = status(code);
         log(status, requestId, code, exception);

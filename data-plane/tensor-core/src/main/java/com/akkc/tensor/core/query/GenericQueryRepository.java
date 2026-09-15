@@ -1,7 +1,5 @@
 package com.akkc.tensor.core.query;
 
-import java.time.ZoneOffset;
-
 import com.akkc.tensor.plugin.api.constant.DatasetFields;
 import com.akkc.tensor.plugin.api.dataset.ColumnDefinition;
 import com.akkc.tensor.plugin.api.dataset.DatasetDefinition;
@@ -11,6 +9,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.LocalDate;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
@@ -22,8 +21,6 @@ import java.util.TimeZone;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 public final class GenericQueryRepository {
-    private static final String UNSUPPORTED_VALUE_TYPE = "Unsupported query value type";
-
     private final JdbcTemplate jdbcTemplate;
 
     public GenericQueryRepository(JdbcTemplate jdbcTemplate) {
@@ -73,7 +70,7 @@ public final class GenericQueryRepository {
                     || value instanceof LocalDate
                     || value instanceof Integer
                     || value instanceof Long)) {
-                throw new IllegalArgumentException(UNSUPPORTED_VALUE_TYPE);
+                throw new IllegalArgumentException("Unsupported query value type");
             }
         }
     }
@@ -91,7 +88,7 @@ public final class GenericQueryRepository {
             } else if (value instanceof Long longValue) {
                 statement.setLong(parameter, longValue);
             } else {
-                throw new IllegalArgumentException(UNSUPPORTED_VALUE_TYPE);
+                throw new IllegalArgumentException("Unsupported query value type");
             }
         }
     }

@@ -2,6 +2,8 @@ package com.akkc.tensor.plugin.api.constant;
 
 /** Field names shared by request binding, task snapshots and diagnostics. */
 public final class RequestFields {
+    public static final String FIELDS = "fields";
+    public static final String TOKEN = "token";
     public static final String REQUEST = "request";
     public static final String PLUGIN_ID = "pluginId";
     public static final String API_NAME = "apiName";

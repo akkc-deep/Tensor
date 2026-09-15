@@ -1,6 +1,5 @@
 package com.akkc.tensor.web.dto;
 
-import com.akkc.tensor.plugin.api.constant.ValidationMessages;
 import java.util.Objects;
 
 public record FieldErrorResponse(String field, String message) {
@@ -11,7 +10,7 @@ public record FieldErrorResponse(String field, String message) {
             throw new IllegalArgumentException("field must not be blank");
         }
         if (message.isBlank()) {
-            throw new IllegalArgumentException(ValidationMessages.MESSAGE_BLANK);
+            throw new IllegalArgumentException("message must not be blank");
         }
     }
 }

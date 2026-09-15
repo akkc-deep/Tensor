@@ -13,7 +13,8 @@ import java.util.function.LongSupplier;
 import java.util.function.Supplier;
 
 final class TushareRequestGate {
-    static final Duration MAX_WAIT = Duration.ofMillis(100);
+    private static final int MAX_WAIT_MILLIS = 100;
+    static final Duration MAX_WAIT = Duration.ofMillis(MAX_WAIT_MILLIS);
     private static final long MAX_WAIT_NANOS = MAX_WAIT.toNanos();
 
     private final long minIntervalNanos;
@@ -85,8 +86,8 @@ final class TushareRequestGate {
     static TensorException failure(ErrorCode code) {
         return switch (Objects.requireNonNull(code, "code")) {
             case EXECUTION_INTERRUPTED ->
-                    new ControlException(code, ErrorCode.EXECUTION_INTERRUPTED.message());
-            case TASK_LIMIT_EXCEEDED -> new ControlException(code, ErrorCode.TASK_LIMIT_EXCEEDED.message());
+                    new ControlException(code, "Download task execution was interrupted");
+            case TASK_LIMIT_EXCEEDED -> new ControlException(code, "Download task limit exceeded");
             default -> throw new IllegalArgumentException("code must identify a request control failure");
         };
     }

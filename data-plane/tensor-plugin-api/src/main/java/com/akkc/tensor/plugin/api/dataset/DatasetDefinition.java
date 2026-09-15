@@ -1,7 +1,6 @@
 package com.akkc.tensor.plugin.api.dataset;
 
 import com.akkc.tensor.plugin.api.constant.ValidationConstants;
-import com.akkc.tensor.plugin.api.constant.ValidationMessages;
 import com.akkc.tensor.plugin.api.descriptor.ParameterDescriptor;
 import com.akkc.tensor.plugin.api.descriptor.QueryMode;
 import com.akkc.tensor.plugin.api.model.DatasetKey;
@@ -32,12 +31,12 @@ public record DatasetDefinition(
     public DatasetDefinition {
         Objects.requireNonNull(datasetKey, "datasetKey");
         requireNonBlank(displayName, "displayName");
-        if (displayName.codePointCount(0, displayName.length()) > 128) {
+        if (displayName.codePointCount(0, displayName.length()) > ValidationConstants.MAX_DISPLAY_NAME_LENGTH) {
             throw new IllegalArgumentException("displayName must be at most 128 characters");
         }
         requireNonBlank(category, "category");
         if (category.codePointCount(0, category.length()) > ValidationConstants.MAX_CATEGORY_LENGTH) {
-            throw new IllegalArgumentException(ValidationMessages.CATEGORY_TOO_LONG);
+            throw new IllegalArgumentException("category must be at most 64 characters");
         }
         Objects.requireNonNull(queryMode, "queryMode");
         parameters = List.copyOf(Objects.requireNonNull(parameters, "parameters"));
@@ -47,13 +46,13 @@ public record DatasetDefinition(
         filters = List.copyOf(Objects.requireNonNull(filters, "filters"));
 
         if (columns.isEmpty()) {
-            throw new IllegalArgumentException(ValidationMessages.COLUMNS_EMPTY);
+            throw new IllegalArgumentException("columns must not be empty");
         }
         rejectDuplicates(parameters, ParameterDescriptor::name, "parameters");
         rejectDuplicates(columns, ColumnDefinition::name, "columns");
         rejectDuplicates(filters, FilterDefinition::field, "filters");
         if (!tableName.equals(TableName.from(datasetKey))) {
-            throw new IllegalArgumentException(ValidationMessages.TABLE_NAME_MISMATCH);
+            throw new IllegalArgumentException("tableName must match datasetKey");
         }
 
         Set<String> columnNames = columns.stream()
@@ -104,7 +103,7 @@ public record DatasetDefinition(
     private static void requireNonBlank(String value, String component) {
         Objects.requireNonNull(value, component);
         if (value.isBlank()) {
-            throw new IllegalArgumentException(component + ValidationMessages.MUST_NOT_BE_BLANK);
+            throw new IllegalArgumentException(component + " must not be blank");
         }
     }
 }

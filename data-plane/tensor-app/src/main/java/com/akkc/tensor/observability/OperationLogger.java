@@ -1,9 +1,9 @@
 package com.akkc.tensor.observability;
 
-import com.akkc.tensor.plugin.api.constant.DatasetFields;
 import com.akkc.tensor.core.query.DatasetPage;
 import com.akkc.tensor.core.query.QueryCriteria;
 import com.akkc.tensor.core.registry.PluginRegistry;
+import com.akkc.tensor.plugin.api.constant.DatasetFields;
 import com.akkc.tensor.plugin.api.descriptor.ParameterDescriptor;
 import com.akkc.tensor.plugin.api.download.DownloadOutcome;
 import com.akkc.tensor.plugin.api.download.DownloadResult;
@@ -21,8 +21,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public final class OperationLogger {
-    private static final String DOWNLOAD_OPERATION = "download";
-    private static final String QUERY_OPERATION = "query";
     private static final Logger LOGGER = LoggerFactory.getLogger(OperationLogger.class);
     private static final Pattern SENSITIVE_NAME = Pattern.compile(
             "token|authorization|cookie|password|credential",
@@ -64,7 +62,7 @@ public final class OperationLogger {
                     result.page(), result.pageSize(), result.items().size(),
                     result.totalElements(), duration.toMillis());
         } catch (RuntimeException ignored) {
-            observationFailed(QUERY_OPERATION);
+            observationFailed("query");
         }
     }
 
@@ -92,7 +90,7 @@ public final class OperationLogger {
                     result.sourceRowCount(), result.insertedRows(), result.updatedRows(),
                     duration.toMillis(), outcome.value());
         } catch (RuntimeException ignored) {
-            observationFailed(DOWNLOAD_OPERATION);
+            observationFailed("download");
         }
     }
 
@@ -105,7 +103,7 @@ public final class OperationLogger {
             metrics.recordDownload(key, outcome, duration,
                     result.sourceRowCount(), result.insertedRows(), result.updatedRows());
         } catch (RuntimeException ignored) {
-            observationFailed(DOWNLOAD_OPERATION);
+            observationFailed("download");
         }
     }
 
@@ -113,12 +111,12 @@ public final class OperationLogger {
         try {
             metrics.recordQuery(key, TensorMetrics.Outcome.SUCCESS, duration);
         } catch (RuntimeException ignored) {
-            observationFailed(QUERY_OPERATION);
+            observationFailed("query");
         }
     }
 
     private static List<String> filterNames(QueryCriteria criteria) {
-        ArrayList<String> names = new ArrayList<>(3);
+        ArrayList<String> names = new ArrayList<>();
         if (criteria.tsCode() != null) {
             names.add(DatasetFields.TS_CODE);
         }

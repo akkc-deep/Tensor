@@ -1,9 +1,8 @@
 package com.akkc.tensor.web.download;
 
+import com.akkc.tensor.core.download.task.DownloadTaskService;
 import com.akkc.tensor.plugin.api.constant.RequestFields;
 import com.akkc.tensor.plugin.api.constant.ValidationConstants;
-import com.akkc.tensor.plugin.api.constant.ValidationMessages;
-import com.akkc.tensor.core.download.task.DownloadTaskService;
 import com.akkc.tensor.plugin.api.download.batch.DownloadMode;
 import com.akkc.tensor.plugin.api.error.ErrorCode;
 import com.akkc.tensor.plugin.api.error.TensorException;
@@ -74,12 +73,12 @@ public final class DownloadTaskRequestDeserializer extends JsonDeserializer<Down
         if (!errors.isEmpty()) throw new DownloadBindingException(
                 errors.containsValue(true) ? ErrorCode.PARAM_INVALID : ErrorCode.PARAM_REQUIRED,
                 errors.entrySet().stream().map(e -> new FieldErrorResponse(e.getKey(),
-                        e.getValue() ? ValidationMessages.INVALID_VALUE : ValidationMessages.REQUIRED)).toList());
+                        e.getValue() ? "has invalid value" : "is required")).toList());
     }
 
     static DownloadBindingException invalid(String field) {
         return new DownloadBindingException(ErrorCode.PARAM_INVALID,
-                List.of(new FieldErrorResponse(field, ValidationMessages.INVALID_VALUE)));
+                List.of(new FieldErrorResponse(field, "has invalid value")));
     }
 
     private static boolean valid(String name, String value) {

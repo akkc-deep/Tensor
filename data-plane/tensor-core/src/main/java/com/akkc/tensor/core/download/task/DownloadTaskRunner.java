@@ -1,10 +1,10 @@
 package com.akkc.tensor.core.download.task;
 
-import com.akkc.tensor.plugin.api.constant.PaginationConstants;
-import com.akkc.tensor.plugin.api.constant.ValidationConstants;
 import com.akkc.tensor.core.download.task.DownloadTaskRepository.*;
 import com.akkc.tensor.core.download.task.DownloadTaskService.ExecutionDefinition;
 import com.akkc.tensor.plugin.api.BatchDownloadSupport;
+import com.akkc.tensor.plugin.api.constant.PaginationConstants;
+import com.akkc.tensor.plugin.api.constant.ValidationConstants;
 import com.akkc.tensor.plugin.api.download.*;
 import com.akkc.tensor.plugin.api.download.batch.*;
 import com.akkc.tensor.plugin.api.download.batch.BatchDownloadDescriptor.PlanningMode;
@@ -272,7 +272,7 @@ public final class DownloadTaskRunner {
                 if (assessment == BatchAssessment.SPLIT_REQUIRED) {
                     require(policy.splittable() && policy.planningMode() == PlanningMode.NATIVE_RANGE
                             && current.range().start().isBefore(current.range().end()), ErrorCode.BATCH_COMPLETENESS_UNCONFIRMED);
-                    budget(read(() -> repository.counts(taskId)), 2, 0);
+                    budget(read(() -> repository.counts(taskId)), DownloadTaskConstants.SPLIT_CHILD_COUNT, 0);
                     List<DateRange> halves = DateRangePlanner.split(current.range());
                     NewBatch left = newBatch(source, current.batchKey() + DownloadTaskConstants.LEFT_BATCH_SUFFIX, halves.get(0));
                     NewBatch right = newBatch(source, current.batchKey() + DownloadTaskConstants.RIGHT_BATCH_SUFFIX, halves.get(1));

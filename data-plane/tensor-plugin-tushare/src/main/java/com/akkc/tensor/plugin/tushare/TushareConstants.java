@@ -2,6 +2,31 @@ package com.akkc.tensor.plugin.tushare;
 
 /** Tushare plugin identity, API names and exchange codes. */
 public final class TushareConstants {
+    public static final long DAILY_ROW_LIMIT = 6000L;
+    public static final long WEEKLY_ROW_LIMIT = 6000L;
+    public static final long MONTHLY_ROW_LIMIT = 4500L;
+    public static final long DAILY_BASIC_ROW_LIMIT = 6000L;
+    public static final long STK_LIMIT_ROW_LIMIT = 5800L;
+    public static final long MONEYFLOW_ROW_LIMIT = 6000L;
+    public static final long MARGIN_ROW_LIMIT = 4000L;
+    public static final long MARGIN_DETAIL_ROW_LIMIT = 6000L;
+    public static final long BLOCK_TRADE_ROW_LIMIT = 1000L;
+    public static final long SLB_LEN_ROW_LIMIT = 5000L;
+    public static final long SLB_SEC_ROW_LIMIT = 5000L;
+    public static final long SLB_SEC_DETAIL_ROW_LIMIT = 5000L;
+    public static final long NEW_SHARE_ROW_LIMIT = 2000L;
+    public static final long FORECAST_ROW_LIMIT = 3500L;
+    public static final long STK_HOLDERNUMBER_ROW_LIMIT = 3000L;
+    public static final long STK_HOLDERTRADE_ROW_LIMIT = 3000L;
+    public static final long PLEDGE_DETAIL_ROW_LIMIT = 1000L;
+    public static final long FINA_INDICATOR_ROW_LIMIT = 100L;
+    public static final long FINA_MAINBZ_ROW_LIMIT = 100L;
+    public static final long TOP_LIST_ROW_LIMIT = 10000L;
+    public static final long DIVIDEND_ROW_LIMIT = 2000L;
+    public static final long DISCLOSURE_DATE_ROW_LIMIT = 6000L;
+
+    public static final int API_COUNT = 40;
+
     public static final int MAX_READ_TIMEOUT_SECONDS = 120;
     public static final int MAX_RESPONSE_BYTES = 67_108_864;
     public static final int DEFAULT_MIN_REQUEST_INTERVAL_MILLIS = 1_500;

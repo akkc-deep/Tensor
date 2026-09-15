@@ -1,7 +1,6 @@
 package com.akkc.tensor.plugin.api.download;
 
 import com.akkc.tensor.plugin.api.constant.ValidationConstants;
-import com.akkc.tensor.plugin.api.constant.ValidationMessages;
 import com.akkc.tensor.plugin.api.dataset.BusinessKeyDefinition;
 import com.akkc.tensor.plugin.api.model.DatasetKey;
 import com.akkc.tensor.plugin.api.model.TableName;
@@ -33,15 +32,15 @@ public record AdaptedBatch(
         Objects.requireNonNull(ingestedAt, "ingestedAt");
 
         if (!tableName.equals(TableName.from(datasetKey))) {
-            throw new IllegalArgumentException(ValidationMessages.TABLE_NAME_MISMATCH);
+            throw new IllegalArgumentException("tableName must match datasetKey");
         }
 
         columns = List.copyOf(columns);
         if (columns.isEmpty()) {
-            throw new IllegalArgumentException(ValidationMessages.COLUMNS_EMPTY);
+            throw new IllegalArgumentException("columns must not be empty");
         }
         if (columns.size() != new HashSet<>(columns).size()) {
-            throw new IllegalArgumentException(ValidationMessages.DUPLICATE_COLUMNS);
+            throw new IllegalArgumentException("columns must not contain duplicates");
         }
         for (String column : columns) {
             if (!IDENTIFIER_PATTERN.matcher(column).matches()) {
