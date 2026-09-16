@@ -261,12 +261,39 @@ describe('download task transport', () => {
     expect(criteria).toEqual({ page: 7, pageSize: 50 })
   })
 
+  it.each(['PENDING', 'RUNNING', 'SUCCEEDED', 'FAILED', 'SPLIT'])('queries %s batches including split parents', async (status) => {
+    const requests = []
+    http.defaults.adapter = async (config) => {
+      requests.push(config)
+      return rawResponse(config, { page: 2, pageSize: 100, total: 101, items: [validBatch({ status })] })
+    }
+    const criteria = Object.freeze({ page: 2, pageSize: 100, status, includeSplit: true })
+
+    const result = await listDownloadTaskBatches(TASK_ID, criteria)
+
+    expect(Object.fromEntries(requests[0].params)).toEqual({ page: '2', pageSize: '100', status, includeSplit: 'true' })
+    expect(result.items[0].status).toBe(status)
+  })
+
+  it('preserves the valid empty query for SPLIT with includeSplit=false', async () => {
+    http.defaults.adapter = async (config) => {
+      expect(Object.fromEntries(config.params)).toEqual({ page: '1', pageSize: '20', status: 'SPLIT', includeSplit: 'false' })
+      return rawResponse(config, { page: 1, pageSize: 20, total: 0, items: [] })
+    }
+    expect((await listDownloadTaskBatches(TASK_ID, { status: 'SPLIT', includeSplit: false })).total).toBe(0n)
+  })
+
   it.each([
     ['invalid detail task ID', () => getDownloadTask('task')],
     ['null batch task ID', () => listDownloadTaskBatches(null)],
     ['null batch criteria', () => listDownloadTaskBatches(TASK_ID, null)],
     ['array batch criteria', () => listDownloadTaskBatches(TASK_ID, [])],
-    ['unknown batch criterion', () => listDownloadTaskBatches(TASK_ID, { status: 'FAILED' })],
+    ['unknown batch criterion', () => listDownloadTaskBatches(TASK_ID, { unknown: 'FAILED' })],
+    ['invalid batch status', () => listDownloadTaskBatches(TASK_ID, { status: 'QUEUED' })],
+    ['task-only interrupted status', () => listDownloadTaskBatches(TASK_ID, { status: 'INTERRUPTED' })],
+    ['empty batch status', () => listDownloadTaskBatches(TASK_ID, { status: '' })],
+    ['string includeSplit', () => listDownloadTaskBatches(TASK_ID, { includeSplit: 'true' })],
+    ['null includeSplit', () => listDownloadTaskBatches(TASK_ID, { includeSplit: null })],
     ['batch page zero', () => listDownloadTaskBatches(TASK_ID, { page: 0 })],
     ['batch page overflow', () => listDownloadTaskBatches(TASK_ID, { page: 2147483648 })],
     ['fractional batch page', () => listDownloadTaskBatches(TASK_ID, { page: 1.5 })],

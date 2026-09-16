@@ -7,7 +7,7 @@ export default defineConfig({
   plugins: [vue()],
   build: {
     rollupOptions: {
-      input: { app: 'index.html', demos: 'ui-demos.html' },
+      input: { app: 'index.html', demos: 'ui-demos.html', studioLive: 'studio-live.html' },
     },
   },
   server: {

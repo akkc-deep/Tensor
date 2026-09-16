@@ -17,7 +17,8 @@ const STATUSES = new Set([
 const CRITERIA_KEYS = new Set([
   'page', 'pageSize', 'pluginId', 'apiName', 'status', 'submissionId',
 ])
-const BATCH_CRITERIA_KEYS = new Set(['page', 'pageSize'])
+const BATCH_CRITERIA_KEYS = new Set(['page', 'pageSize', 'status', 'includeSplit'])
+const BATCH_STATUSES = new Set(['PENDING', 'RUNNING', 'SUCCEEDED', 'FAILED', 'SPLIT'])
 const MAX_INT64 = 9223372036854775807n
 
 function header(headers, name) {
@@ -128,10 +129,17 @@ function batchCriteria(criteria) {
   if (![20, 50, 100].includes(pageSize)) {
     throw new TypeError('Download batch pageSize is invalid')
   }
-  return { page, pageSize }
+  if (criteria.status !== undefined && !BATCH_STATUSES.has(criteria.status)) {
+    throw new TypeError('Download batch status is invalid')
+  }
+  const includeSplit = criteria.includeSplit === undefined ? false : criteria.includeSplit
+  if (typeof includeSplit !== 'boolean') {
+    throw new TypeError('Download batch includeSplit is invalid')
+  }
+  return { page, pageSize, includeSplit, ...(criteria.status === undefined ? {} : { status: criteria.status }) }
 }
 
-/** Query one immutable server page of leaf batches. */
+/** Query one immutable server page; split parents are excluded by default. */
 export async function listDownloadTaskBatches(
   taskId,
   criteria = {},
@@ -139,11 +147,7 @@ export async function listDownloadTaskBatches(
 ) {
   const path = taskPath(taskId)
   const values = batchCriteria(criteria)
-  const params = new URLSearchParams([
-    ['page', String(values.page)],
-    ['pageSize', String(values.pageSize)],
-    ['includeSplit', 'false'],
-  ])
+  const params = new URLSearchParams(Object.entries(values).map(([key, value]) => [key, String(value)]))
   const response = await http.get(`${path}/batches`, {
     ...taskOptions(signal),
     params,
@@ -155,7 +159,7 @@ export async function listDownloadTaskBatches(
   if (
     page.page !== values.page ||
     page.pageSize !== values.pageSize ||
-    page.items.some(({ status }) => status === 'SPLIT')
+    (!values.includeSplit && page.items.some(({ status }) => status === 'SPLIT'))
   ) {
     invalid(response)
   }

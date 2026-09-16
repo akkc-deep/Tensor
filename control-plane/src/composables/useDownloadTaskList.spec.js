@@ -33,6 +33,7 @@ describe('useDownloadTaskList', () => {
   let list
 
   beforeEach(() => {
+    vi.resetAllMocks()
     vi.useFakeTimers()
     visibility = 'visible'
     vi.spyOn(document, 'visibilityState', 'get').mockImplementation(
@@ -45,6 +46,76 @@ describe('useDownloadTaskList', () => {
     list = null
     vi.clearAllTimers()
     vi.useRealTimers()
+  })
+
+  it('filters on the server, resets the page and keeps the filter during polling', async () => {
+    listDownloadTasks.mockResolvedValue(pageResult())
+    list = useDownloadTaskList()
+    await list.start()
+    await list.changePage(3)
+    await list.changeStatus('FAILED')
+    expect(listDownloadTasks).toHaveBeenLastCalledWith({ page: 1, pageSize: 20, status: 'FAILED' })
+    await vi.advanceTimersByTimeAsync(5_000)
+    expect(listDownloadTasks).toHaveBeenLastCalledWith({ page: 1, pageSize: 20, status: 'FAILED' })
+    await list.changeStatus('')
+    expect(listDownloadTasks).toHaveBeenLastCalledWith({ page: 1, pageSize: 20 })
+  })
+
+  it('combines historical source, API, submission and status filters across paging and polling', async () => {
+    listDownloadTasks.mockResolvedValue(pageResult())
+    list = useDownloadTaskList()
+    await list.start()
+    await list.changeStatus('FAILED')
+    await list.changePage(3)
+    const submissionId = '33333333-3333-4333-8333-333333333333'
+    await list.changeFilters({ pluginId: ' retired_source ', apiName: ' daily ', submissionId })
+    const filters = { pluginId: 'retired_source', apiName: 'daily', submissionId, status: 'FAILED' }
+    expect(listDownloadTasks).toHaveBeenLastCalledWith({ page: 1, pageSize: 20, ...filters })
+    await list.changePageSize(100)
+    await list.changePage(2)
+    await vi.advanceTimersByTimeAsync(5_000)
+    expect(listDownloadTasks).toHaveBeenLastCalledWith({ page: 2, pageSize: 100, ...filters })
+    await list.changeFilters({ apiName: 'weekly' })
+    expect(listDownloadTasks).toHaveBeenLastCalledWith({ page: 1, pageSize: 100, apiName: 'weekly', status: 'FAILED' })
+    await list.changeFilters({ pluginId: '', apiName: ' ', submissionId: '' })
+    expect(listDownloadTasks).toHaveBeenLastCalledWith({ page: 1, pageSize: 100, status: 'FAILED' })
+  })
+
+  it('keeps the last valid filter when input is invalid and discards a previous unfiltered response', async () => {
+    const old = deferred(), latest = deferred()
+    listDownloadTasks.mockReturnValueOnce(old.promise).mockReturnValueOnce(latest.promise)
+    list = useDownloadTaskList()
+    const started = list.start()
+    list.changeFilters({ pluginId: 'retired_source' })
+    expect(await list.changeFilters({ pluginId: 'bad source', submissionId: 'invalid' })).toBe(false)
+    expect(list.filterErrors.value).toHaveProperty('pluginId')
+    expect(list.filterErrors.value).toHaveProperty('submissionId')
+    old.resolve(pageResult({ total: 999n }))
+    await started
+    expect(list.result.value).toBeNull()
+    expect(listDownloadTasks).toHaveBeenLastCalledWith({ page: 1, pageSize: 20, pluginId: 'retired_source' })
+    latest.resolve(pageResult())
+    await flushPromises()
+    listDownloadTasks.mockResolvedValue(pageResult())
+    await list.changeFilters({})
+    expect(list.filterErrors.value).toEqual({})
+  })
+
+  it('discards an old page when the status filter changes during a request', async () => {
+    const old = deferred()
+    const next = deferred()
+    listDownloadTasks.mockReturnValueOnce(old.promise).mockReturnValueOnce(next.promise)
+    list = useDownloadTaskList()
+    const started = list.start()
+    list.changeStatus('INTERRUPTED')
+    old.resolve(pageResult({ items: [{ status: 'SUCCEEDED' }] }))
+    await started
+    expect(list.result.value).toBeNull()
+    expect(listDownloadTasks).toHaveBeenLastCalledWith({ page: 1, pageSize: 20, status: 'INTERRUPTED' })
+    next.resolve(pageResult())
+    await flushPromises()
+    expect(list.result.value.items).toEqual([])
+    expect(await list.changeStatus('INVALID')).toBe(false)
   })
 
   it('starts with the first server page and polls once five seconds after success', async () => {

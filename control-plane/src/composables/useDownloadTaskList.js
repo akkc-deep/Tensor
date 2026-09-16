@@ -5,10 +5,16 @@ import { listDownloadTasks } from '../api/downloadTasks.js'
 const POLL_DELAY = 5_000
 const FAILURE_DELAYS = [5_000, 10_000, 30_000]
 const PAGE_SIZES = new Set([20, 50, 100])
+const STATUSES = new Set(['', 'QUEUED', 'RUNNING', 'SUCCEEDED', 'PARTIAL_FAILED', 'FAILED', 'INTERRUPTED'])
+const IDENTIFIER = /^[a-z][a-z0-9_]{1,63}$/
+const UUID = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/
 
 export function useDownloadTaskList() {
   const page = ref(1)
   const pageSize = ref(20)
+  const status = ref('')
+  const filters = ref({})
+  const filterErrors = ref({})
   const result = ref(null)
   const loading = ref(false)
   const error = ref(null)
@@ -51,7 +57,8 @@ export function useDownloadTaskList() {
 
     queued = false
     const requestGeneration = generation
-    const criteria = { page: page.value, pageSize: pageSize.value }
+    const criteria = { page: page.value, pageSize: pageSize.value, ...filters.value }
+    if (status.value) criteria.status = status.value
     loading.value = true
     const operation = listDownloadTasks(criteria)
 
@@ -141,6 +148,32 @@ export function useDownloadTaskList() {
     return request()
   }
 
+  function changeStatus(value) {
+    if (disposed || !started || !STATUSES.has(value)) return Promise.resolve(false)
+    if (status.value === value) return request()
+    return changeFilters(filters.value, value)
+  }
+
+  function changeFilters(next, nextStatus = status.value) {
+    if (disposed || !started || !STATUSES.has(nextStatus)) return Promise.resolve(false)
+    const values = {}, errors = {}
+    for (const key of ['pluginId', 'apiName', 'submissionId']) {
+      const value = next[key]?.trim() ?? ''
+      if (!value) continue
+      if (!(key === 'submissionId' ? UUID : IDENTIFIER).test(value)) {
+        errors[key] = key === 'submissionId' ? '请输入完整的提交标识（UUID）。' : '请输入 2–64 位标识，以小写字母开头，仅含小写字母、数字或下划线。'
+      } else values[key] = value
+    }
+    filterErrors.value = errors
+    if (Object.keys(errors).length) return Promise.resolve(false)
+    generation += 1
+    status.value = nextStatus
+    filters.value = values
+    page.value = 1
+    result.value = error.value = lastUpdatedAt.value = null
+    return request()
+  }
+
   function handleVisibilityChange() {
     if (disposed || !started || !active) return
     if (!visible()) {
@@ -176,6 +209,10 @@ export function useDownloadTaskList() {
   }
 
   return {
+    filterErrors,
+    changeFilters,
+    status,
+    changeStatus,
     page,
     pageSize,
     result,

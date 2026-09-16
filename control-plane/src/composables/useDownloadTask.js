@@ -17,6 +17,7 @@ const UNCERTAIN_CODES = new Set([
 export function useDownloadTask() {
   const taskId = ref(null), task = ref(null), batches = ref(null)
   const page = ref(1), pageSize = ref(20), loading = ref(false)
+  const batchStatus = ref(''), includeSplit = ref(false)
   const taskError = ref(null), batchesError = ref(null)
   const taskUpdatedAt = ref(null), batchesUpdatedAt = ref(null)
   const operation = ref(null), operationError = ref(null), operationMessage = ref('')
@@ -65,6 +66,8 @@ export function useDownloadTask() {
     queued = false
     const epoch = generation, id = taskId.value
     const criteria = { page: page.value, pageSize: pageSize.value }
+    if (batchStatus.value) criteria.status = batchStatus.value
+    if (includeSplit.value) criteria.includeSplit = true
     loading.value = true
     let delay = null
     const job = Promise.allSettled([
@@ -120,16 +123,20 @@ export function useDownloadTask() {
     loading.value = false
     page.value = 1
     pageSize.value = 20
+    batchStatus.value = ''
+    includeSplit.value = false
     failures = 0
     return refresh()
   }
 
-  function changeIntent(nextPage, nextSize) {
+  function changeIntent(nextPage, nextSize, nextStatus = batchStatus.value, nextIncludeSplit = includeSplit.value) {
     if (disposed.value || invalidTaskId.value || taskId.value === null) return Promise.resolve(false)
-    if (page.value !== nextPage || pageSize.value !== nextSize) {
+    if (page.value !== nextPage || pageSize.value !== nextSize || batchStatus.value !== nextStatus || includeSplit.value !== nextIncludeSplit) {
       generation += 1
       page.value = nextPage
       pageSize.value = nextSize
+      batchStatus.value = nextStatus
+      includeSplit.value = nextIncludeSplit
       batches.value = batchesError.value = batchesUpdatedAt.value = null
     }
     return refresh()
@@ -141,6 +148,13 @@ export function useDownloadTask() {
   function changePageSize(value) {
     if (![20, 50, 100].includes(value)) return Promise.resolve(false)
     return changeIntent(1, value)
+  }
+
+  function changeBatchFilters({ status = batchStatus.value, includeSplit: split = includeSplit.value }) {
+    if (!['', 'PENDING', 'RUNNING', 'SUCCEEDED', 'FAILED', 'SPLIT'].includes(status) || typeof split !== 'boolean') {
+      return Promise.resolve(false)
+    }
+    return changeIntent(1, pageSize.value, status, split)
   }
 
   function control(type) {
@@ -210,6 +224,7 @@ export function useDownloadTask() {
 
   return {
     taskId, task, batches, page, pageSize, loading, taskError, batchesError,
+    batchStatus, includeSplit, changeBatchFilters,
     taskUpdatedAt, batchesUpdatedAt, operation, operationError, operationMessage,
     notFound, invalidTaskId, canRetry, canResume,
     load, refresh, changePage, changePageSize,
