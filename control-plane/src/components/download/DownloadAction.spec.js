@@ -7,11 +7,20 @@ describe('DownloadAction', () => {
     const wrapper = mount(DownloadAction)
     const button = wrapper.get('button')
 
-    expect(button.text()).toBe('提交任务')
+    expect(button.text()).toBe('开始下载')
     expect(button.attributes('type')).toBe('button')
     expect(button.attributes('aria-busy')).toBe('false')
     await button.trigger('click')
     expect(wrapper.emitted('submit')).toEqual([[]])
+  })
+
+  it.each([
+    [{ mode: 'RANGE' }, '开始批量下载'],
+    [{ submitting: true }, '正在创建…'],
+    [{ submitting: true, recovering: true }, '正在查找…'],
+  ])('names the current operation %#', (props, label) => {
+    const wrapper = mount(DownloadAction, { props })
+    expect(wrapper.get('button').text()).toBe(label)
   })
 
   it.each([

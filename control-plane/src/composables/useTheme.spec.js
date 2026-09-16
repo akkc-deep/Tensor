@@ -70,7 +70,7 @@ describe('createThemeState', () => {
       expect(state.requested.value).toBe(DEFAULT_ACCENT)
       expect(state.applied.value).toBe(DEFAULT_ACCENT)
       expect(state.storageStatus.value).toBe('saved')
-      expect(rootVariables().bg).toBe('#edf2f6')
+      expect(rootVariables().bg).toBe('#f7f9fb')
       expect(rootVariables().accent).toBe(DEFAULT_ACCENT)
       expect(setItem).not.toHaveBeenCalled()
     },
@@ -86,7 +86,7 @@ describe('createThemeState', () => {
     expect(state.requested.value).toBe(DEFAULT_ACCENT)
     expect(state.applied.value).toBe(DEFAULT_ACCENT)
     expect(state.storageStatus.value).toBe('preview-only')
-    expect(rootVariables().bg).toBe('#edf2f6')
+    expect(rootVariables().bg).toBe('#f7f9fb')
   })
 
   it('persists only the normalized requested HEX after a successful apply', () => {
@@ -96,14 +96,14 @@ describe('createThemeState', () => {
     expect(state.apply('#B52C63')).toBe(true)
 
     expect(state.requested.value).toBe('#b52c63')
-    expect(state.applied.value).toBe('#a5285a')
+    expect(state.applied.value).toBe('#b52c63')
     expect(state.storageStatus.value).toBe('saved')
     expect(setItem).toHaveBeenCalledTimes(1)
     expect(setItem).toHaveBeenCalledWith(STORAGE_KEY, '#b52c63')
-    expect(rootVariables().accent).toBe('#a5285a')
+    expect(rootVariables().accent).toBe('#b52c63')
     expect(
       document.documentElement.style.getPropertyValue('--tensor-interactive-color'),
-    ).toBe('#a5285a')
+    ).toBe('#b52c63')
   })
 
   it('applies a valid preview even when storage cannot be written', () => {
@@ -152,7 +152,7 @@ describe('createThemeState', () => {
     expect(state.requested.value).toBe(DEFAULT_ACCENT)
     expect(state.applied.value).toBe(DEFAULT_ACCENT)
     expect(state.storageStatus.value).toBe('saved')
-    expect(rootVariables().bg).toBe('#edf2f6')
+    expect(rootVariables().bg).toBe('#f7f9fb')
     expect(rootVariables().accent).toBe(DEFAULT_ACCENT)
     expect(setItem).toHaveBeenCalledOnce()
     expect(setItem).toHaveBeenCalledWith(STORAGE_KEY, DEFAULT_ACCENT)

@@ -1,3 +1,4 @@
+import { selectDownloadApi } from './catalog-helpers.js'
 import { configurePackagedEnvironment } from './packaged-test-environment.js'
 import { expect, test } from '@playwright/test'
 import { spawn } from 'node:child_process'
@@ -254,7 +255,9 @@ async function openAndRefresh(page, route, heading) {
 }
 
 async function selectOption(page, label, optionName) {
+  if (label === '数据接口') return selectDownloadApi(page, optionName)
   const combobox = page.getByRole('combobox', { name: label, exact: true })
+  if (await combobox.evaluate(el => el.tagName === 'SELECT')) return combobox.selectOption(optionName)
   await combobox.focus()
   await combobox.press('Enter')
   const option = page.getByRole('option', { name: optionName, exact: typeof optionName === 'string' })
@@ -293,7 +296,7 @@ function taskGetResponse(response, taskId, suffix = '') {
 
 async function submitFixtureTask(page, scenario, expected) {
   const submitPromise = page.waitForResponse(taskSubmitResponse)
-  await page.getByRole('button', { name: '提交任务', exact: true }).click()
+  await page.getByRole('button', { name: /^(开始(?:批量)?下载|正在创建…|正在查找…)$/, exact: true }).click()
   const response = await submitPromise
   expect(response.status()).toBe(202)
   const request = await response.request().postDataJSON()
@@ -314,7 +317,7 @@ async function submitFixtureTask(page, scenario, expected) {
   })
   expect(response.headers()['x-request-id']).toBe(receipt.requestId)
   expect(response.headers().location).toBe(`/api/v1/download-tasks/${receipt.taskId}`)
-  const accepted = page.locator('.download-result-panel')
+  const accepted = page.locator('.download-feedback')
   await expect(accepted.getByRole('heading', { name: '任务已接收' })).toBeVisible()
 
   const initialDetail = page.waitForResponse((candidate) => taskGetResponse(candidate, receipt.taskId))
@@ -323,7 +326,7 @@ async function submitFixtureTask(page, scenario, expected) {
   expect((await initialDetail).status()).toBe(200)
   expect((await initialBatches).status()).toBe(200)
   await expect(page).toHaveURL(`/downloads/tasks/${receipt.taskId}`)
-  await expect(page.locator('[data-task-status]')).toHaveText(expected.statusLabel, { timeout: 15_000 })
+  await expect(page.locator('.task-detail [data-task-status]')).toHaveText(expected.statusLabel, { timeout: 15_000 })
 
   const detailPromise = page.waitForResponse((candidate) => taskGetResponse(candidate, receipt.taskId))
   const batchesPromise = page.waitForResponse((candidate) => taskGetResponse(candidate, receipt.taskId, '/batches'))
@@ -362,7 +365,7 @@ async function submitFixtureTask(page, scenario, expected) {
 }
 
 async function queryByCode(page) {
-  await page.getByLabel('证券代码 (ts_code)').fill('000001.SZ')
+  await page.getByLabel('证券代码').fill('000001.SZ')
   const responsePromise = page.waitForResponse(recordsResponse)
   await page.getByRole('button', { name: '查询', exact: true }).click()
   const response = await responsePromise
@@ -523,7 +526,7 @@ test.describe('fixture page flow', () => {
         updatedRows: 0,
       },
     })
-    await page.locator('.task-detail__counts').screenshot({ path: testInfo.outputPath('success-counts.png') })
+    await page.locator('.task-detail').screenshot({ path: testInfo.outputPath('success-counts.png') })
 
     await page.getByRole('link', { name: '返回下载页', exact: true }).click()
     await page.getByRole('link', { name: /^数据查看\s*02$/ }).click()
@@ -559,10 +562,11 @@ test.describe('fixture page flow', () => {
         updatedRows: 0,
       },
     })
-    const counts = page.locator('.task-detail__counts')
-    await expect(counts.getByText('来源行数 0', { exact: true })).toBeVisible()
+    const counts = page.locator('.task-detail')
+    await expect(counts.locator(':scope > .confirmation dd').last()).toHaveText('0')
+    await counts.locator('.task-detail__record summary').click()
     await expect(counts.getByText('新增记录次数 0', { exact: true })).toBeVisible()
-    await page.locator('.task-detail__counts').screenshot({ path: testInfo.outputPath('empty-result.png') })
+    await page.locator('.task-detail').screenshot({ path: testInfo.outputPath('empty-result.png') })
 
     await page.getByRole('link', { name: '返回下载页', exact: true }).click()
     await page.getByRole('link', { name: /^数据查看\s*02$/ }).click()

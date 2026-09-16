@@ -13,7 +13,7 @@ defineProps({
 
 <style scoped>
 .field-error {
-  margin: 4px 0 0;
+  margin: 0.4rem 0 0;
   color: var(--el-color-danger, #f56c6c);
   line-height: 1.5;
 }

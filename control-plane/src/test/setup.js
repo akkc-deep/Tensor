@@ -4,6 +4,10 @@ import { afterEach, vi } from 'vitest'
 
 config.global.plugins = [ElementPlus]
 
+// jsdom does not implement the native dialog top layer; Chromium tests cover it.
+HTMLDialogElement.prototype.showModal = function () { this.open = true }
+HTMLDialogElement.prototype.close = function () { this.open = false }
+
 afterEach(() => {
   document.body.innerHTML = ''
   vi.restoreAllMocks()

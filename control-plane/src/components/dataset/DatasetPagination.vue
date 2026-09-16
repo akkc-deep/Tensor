@@ -47,26 +47,32 @@ function updatePageSize(pageSize) {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 12px;
+  justify-content: space-between;
+  gap: 2rem;
   min-width: 0;
-  padding: 24px;
-  border-top: 1px solid var(--tensor-line);
+  padding: 1.7rem 0;
+  color: var(--tensor-muted);
+  font-size: 1.2rem;
+  font-variant-numeric: tabular-nums;
 }
 
 .dataset-pagination :deep(.el-pagination) {
   display: flex;
   flex-wrap: wrap;
   min-width: 0;
+  gap: 0.8rem;
+  --el-pagination-font-size: 1.2rem;
+  --el-pagination-bg-color: transparent;
+  --el-pagination-button-disabled-bg-color: transparent;
+  --el-pagination-hover-color: var(--tensor-accent);
 }
 
-@media (max-width: 680px) {
-  .dataset-pagination {
-    padding: 18px;
-  }
-
-  .dataset-pagination :deep(.el-pagination__sizes) {
-    flex: 1 0 100%;
-    margin-right: 0;
-  }
-}
+.dataset-pagination :deep(.el-select__wrapper) { min-height: 3.2rem; font-size: 1.2rem; border-radius: 0.6rem; }
+.dataset-pagination :deep(.el-pagination__sizes) { margin: 0; }
+.dataset-pagination :deep(.el-pager) { gap: 0.4rem; }
+.dataset-pagination :deep(.el-pager li) { min-width: 3.2rem; width: auto; padding: 0 0.6rem; border-radius: 0.6rem; }
+.dataset-pagination :deep(.el-pager li.is-active) { color: var(--tensor-accent); background: var(--tensor-accent-bg); }
+.dataset-pagination :deep(button) { border-radius: 0.6rem; }
+.dataset-pagination :deep(button:not(:disabled):hover),
+.dataset-pagination :deep(.el-pager li:not(.is-disabled):hover) { background: var(--tensor-subtle); }
 </style>

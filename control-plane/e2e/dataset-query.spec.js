@@ -1,3 +1,4 @@
+import { selectDownloadApi } from './catalog-helpers.js'
 import { configurePackagedEnvironment } from './packaged-test-environment.js'
 import { expect, test } from '@playwright/test'
 import { spawn } from 'node:child_process'
@@ -65,11 +66,11 @@ const DATASETS = {
   disclosure_date: { option: /^财报披露计划disclosure_date$/, fields: 5 },
 }
 const FILTER_LABELS = {
-  tsCode: '证券代码 (ts_code)',
-  tradeDateFrom: '交易日期开始 (trade_date)',
-  tradeDateTo: '交易日期结束 (trade_date)',
-  annDateFrom: '公告日期开始 (ann_date)',
-  annDateTo: '公告日期结束 (ann_date)',
+  tsCode: '证券代码',
+  tradeDateFrom: '交易开始日期',
+  tradeDateTo: '交易结束日期',
+  annDateFrom: '公告开始日期',
+  annDateTo: '公告结束日期',
 }
 
 let application
@@ -1216,6 +1217,7 @@ async function openRoute(page, route, heading) {
 }
 
 async function selectFrom(combobox, optionName) {
+  if (await combobox.evaluate(el => el.tagName === 'SELECT')) return combobox.selectOption(optionName)
   await combobox.focus()
   await combobox.press('Enter')
   const option = combobox.page().getByRole('option', { name: optionName, exact: typeof optionName === 'string' })
@@ -1224,6 +1226,7 @@ async function selectFrom(combobox, optionName) {
 }
 
 async function selectOption(page, label, optionName) {
+  if (label === '数据接口') return selectDownloadApi(page, optionName)
   await selectFrom(page.getByRole('combobox', { name: label, exact: true }), optionName)
 }
 
@@ -1248,8 +1251,8 @@ async function assertNoSelectedOption(combobox) {
 async function chooseTushareDownload(page, api) {
   await selectOption(page, '数据源', 'Tushare Pro')
   await selectOption(page, '数据接口', DATASETS[api].option)
-  await page.getByRole('radiogroup', { name: '下载模式', exact: true }).getByText('单次请求', { exact: true }).click()
-  await expect(page.getByRole('radio', { name: '单次请求', exact: true })).toBeChecked()
+  await page.getByRole('button', { name: '单次下载', exact: true }).click()
+  await expect(page.getByRole('button', { name: '单次下载', exact: true })).toHaveAttribute('aria-pressed', 'true')
 }
 
 function definitionResponse(response, api) {
@@ -1671,7 +1674,7 @@ async function performDownload(page, monitor, mode, expectedCounts, tsCode, reus
   await fillDownloadParameters(page, definition.api, definition.params)
   const received = upstream.setMode(mode, tsCode)
   const responsePromise = page.waitForResponse(downloadRequest)
-  await page.getByRole('button', { name: '提交任务', exact: true }).click()
+  await page.getByRole('button', { name: /^(开始(?:批量)?下载|正在创建…|正在查找…)$/, exact: true }).click()
   const response = await responsePromise
   await received
   expect(response.status()).toBe(202)
@@ -1693,7 +1696,7 @@ async function performDownload(page, monitor, mode, expectedCounts, tsCode, reus
     version: 1,
   })
   expect(response.headers().location).toBe(`/api/v1/download-tasks/${receipt.taskId}`)
-  await expect(page.locator('.download-result-panel').getByRole('heading', { name: '任务已接收' })).toBeVisible()
+  await expect(page.locator('.download-feedback').getByRole('heading', { name: '任务已接收' })).toBeVisible()
   const { task, batch } = await waitForTask(page, receipt.taskId)
   expect(task).toMatchObject({
     taskId: receipt.taskId,
@@ -2627,7 +2630,7 @@ test.describe('dataset query UX', () => {
       await expect(page.getByRole('columnheader')).toHaveCount(0)
       await expect(pagination(page)).toHaveCount(0)
       await expect(page.getByLabel(FILTER_LABELS.tsCode, { exact: true })).toBeDisabled()
-      await expect(page.getByRole('button', { name: '查询', exact: true })).toBeDisabled()
+      await expect(page.getByRole('button', { name: '查询中…', exact: true })).toBeDisabled()
       await expect(page.getByRole('button', { name: '重置', exact: true })).toBeEnabled()
 
       const indexDefinition = await chooseDataset(page, 'index_classify', { source: false })
@@ -2937,10 +2940,15 @@ test.describe('dataset query UX', () => {
     await page.keyboard.type('000001.SZ')
     await page.keyboard.press('Tab')
     await expect(from).toBeFocused()
-    await page.keyboard.type('2026-08-07')
-    await page.keyboard.press('Tab')
-    await expect(to).toBeFocused()
-    await page.keyboard.type('2026-08-07')
+    await page.keyboard.press('ArrowLeft')
+    await page.keyboard.press('ArrowLeft')
+    await page.keyboard.type('08072026')
+    await expect(from).toHaveValue('2026-08-07')
+    await focusByTab(page, to)
+    await page.keyboard.press('ArrowLeft')
+    await page.keyboard.press('ArrowLeft')
+    await page.keyboard.type('08072026')
+    await expect(to).toHaveValue('2026-08-07')
     await focusByTab(page, query)
     let responsePromise = page.waitForResponse((response) => isRecordsResponse(response, 'daily'))
     await page.keyboard.press('Enter')

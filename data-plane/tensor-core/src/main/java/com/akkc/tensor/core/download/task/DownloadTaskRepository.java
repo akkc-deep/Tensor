@@ -30,6 +30,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.function.Function;
 import java.util.function.Supplier;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DuplicateKeyException;
@@ -221,8 +222,30 @@ public final class DownloadTaskRepository {
         }
     }
 
-    public record TaskFilter(
-            String pluginId, String apiName, DownloadTask.Status status, UUID submissionId) {}
+    public enum TaskStatusGroup {
+        ACTIVE(List.of(DownloadTask.Status.QUEUED, DownloadTask.Status.RUNNING)),
+        DONE(List.of(DownloadTask.Status.SUCCEEDED)),
+        ERROR(List.of(DownloadTask.Status.PARTIAL_FAILED, DownloadTask.Status.FAILED,
+                DownloadTask.Status.INTERRUPTED));
+
+        private final List<DownloadTask.Status> statuses;
+
+        TaskStatusGroup(List<DownloadTask.Status> statuses) {
+            this.statuses = statuses;
+        }
+    }
+
+    public record TaskFilter(String pluginId, String apiName, DownloadTask.Status status,
+            UUID submissionId, TaskStatusGroup statusGroup) {
+        public TaskFilter(String pluginId, String apiName, DownloadTask.Status status,
+                UUID submissionId) {
+            this(pluginId, apiName, status, submissionId, null);
+        }
+
+        public TaskFilter {
+            require(status == null || statusGroup == null);
+        }
+    }
 
     public record BatchFilter(DownloadBatch.Status status, boolean includeSplit) {}
 
@@ -264,38 +287,13 @@ public final class DownloadTaskRepository {
     }
 
     public Page<DownloadTask> tasks(TaskFilter filter, int page, int pageSize) {
-        return tx(
-                true,
-                () -> {
-                    page(page, pageSize);
-                    var args = new ArrayList<Object>();
-                    var where = new StringBuilder(FILTER_WHERE);
-                    if (filter != null) {
-                        if (filter.pluginId() != null) {
-                            new PluginId(filter.pluginId());
-                            clause(where, args, PLUGIN_ID, filter.pluginId());
-                        }
-                        if (filter.apiName() != null) {
-                            new ApiName(filter.apiName());
-                            clause(where, args, API_NAME, filter.apiName());
-                        }
-                        if (filter.status() != null)
-                            clause(where, args, RequestFields.STATUS, filter.status().name());
-                        if (filter.submissionId() != null)
-                            clause(where, args, SUBMISSION_ID, filter.submissionId());
-                    }
-                    long total =
-                            number(
-                                    COUNT_TASKS_PREFIX + where,
-                                    args.toArray());
-                    args.add(pageSize);
-                    args.add((long) (page - 1) * pageSize);
-                    return new Page<>(
-                            total,
-                            tasksQuery(
-                                    SELECT_TASKS_PREFIX + where + TASK_PAGE_ORDER,
-                                    args.toArray()));
-                });
+        return tx(true, () -> taskPage(filter, page, pageSize, Function.identity()));
+    }
+
+    public Page<TaskSnapshot> taskSnapshots(TaskFilter filter, int page, int pageSize) {
+        return tx(true, () -> taskPage(filter, page, pageSize, tasks -> tasks.stream()
+                .map(task -> new TaskSnapshot(Optional.of(task), countRows(task.taskId())))
+                .toList()));
     }
 
     public Page<DownloadBatch> batches(UUID id, BatchFilter filter, int page, int pageSize) {
@@ -860,6 +858,39 @@ public final class DownloadTaskRepository {
 
     private List<DownloadTask> tasksQuery(String sql, Object... args) {
         return queryOperation(() -> jdbc.query(sql, (r, n) -> mapTask(r), bind(args)));
+    }
+
+    private <T> Page<T> taskPage(TaskFilter filter, int page, int pageSize,
+            Function<List<DownloadTask>, List<T>> mapper) {
+        page(page, pageSize);
+        var args = new ArrayList<Object>();
+        var where = new StringBuilder(FILTER_WHERE);
+        if (filter != null) {
+            if (filter.pluginId() != null) {
+                new PluginId(filter.pluginId());
+                clause(where, args, PLUGIN_ID, filter.pluginId());
+            }
+            if (filter.apiName() != null) {
+                new ApiName(filter.apiName());
+                clause(where, args, API_NAME, filter.apiName());
+            }
+            if (filter.status() != null)
+                clause(where, args, RequestFields.STATUS, filter.status().name());
+            if (filter.statusGroup() != null) {
+                where.append(SqlConstants.AND).append(RequestFields.STATUS).append(" IN (")
+                        .append("?,".repeat(filter.statusGroup().statuses.size()));
+                where.setLength(where.length() - 1);
+                where.append(')');
+                filter.statusGroup().statuses.forEach(status -> args.add(status.name()));
+            }
+            if (filter.submissionId() != null)
+                clause(where, args, SUBMISSION_ID, filter.submissionId());
+        }
+        long total = number(COUNT_TASKS_PREFIX + where, args.toArray());
+        args.add(pageSize);
+        args.add((long) (page - 1) * pageSize);
+        return new Page<>(total, mapper.apply(tasksQuery(
+                SELECT_TASKS_PREFIX + where + TASK_PAGE_ORDER, args.toArray())));
     }
 
     private List<DownloadBatch> batchQuery(String sql, Object... args) {

@@ -1,5 +1,4 @@
 import { flushPromises, mount } from '@vue/test-utils'
-import { ElButton, ElInput } from 'element-plus'
 import { nextTick } from 'vue'
 
 const api = vi.hoisted(() => ({
@@ -21,7 +20,6 @@ vi.mock('../api/datasets.js', () => ({
 
 import { ClientError } from '../api/errors.js'
 import AsyncStatePanel from '../components/common/AsyncStatePanel.vue'
-import WorkbenchPanel from '../components/common/WorkbenchPanel.vue'
 import DataSourceSelect from '../components/download/DataSourceSelect.vue'
 import DatasetPagination from '../components/dataset/DatasetPagination.vue'
 import DatasetSelect from '../components/dataset/DatasetSelect.vue'
@@ -134,10 +132,10 @@ function pageResponse(overrides = {}) {
 
 function button(wrapper, text) {
   const result = wrapper
-    .findAllComponents(ElButton)
+    .findAll('button')
     .find((candidate) => candidate.text() === text)
   if (!result) throw new Error(`Missing button: ${text}`)
-  return result.get('button')
+  return result
 }
 
 function nativeButton(wrapper, text) {
@@ -167,11 +165,7 @@ async function selectDataset(wrapper, apiName) {
 }
 
 async function setCode(wrapper, value) {
-  wrapper
-    .getComponent(DynamicFilterForm)
-    .getComponent(ElInput)
-    .vm.$emit('update:modelValue', value)
-  await nextTick()
+  await wrapper.get('[data-filter="tsCode"] input').setValue(value)
 }
 
 async function mountWithDefinition({
@@ -206,7 +200,7 @@ describe('DatasetView', () => {
 
     expect(wrapper.findAll('h1')).toHaveLength(1)
     expect(wrapper.get('h1').text()).toBe('数据查看')
-    expect(wrapper.text()).toContain('筛选、浏览与核验，找到你需要的市场数据。')
+    expect(wrapper.text()).toContain('找到需要的数据，让研究继续。')
     expect(api.listDataSources).toHaveBeenCalledTimes(1)
     expect(wrapper.getComponent(AsyncStatePanel).props()).toMatchObject({
       state: 'LOADING',
@@ -230,9 +224,9 @@ describe('DatasetView', () => {
     await flushPromises()
     expect(api.listDataSources).toHaveBeenCalledTimes(2)
     expect(wrapper.getComponent(AsyncStatePanel).props()).toMatchObject({
-      state: 'INITIAL',
-      title: '请选择数据源',
-      message: '选择数据源后加载可查询的数据集。',
+      state: 'EMPTY',
+      title: '暂无数据源',
+      message: '当前没有可查询的数据源。',
     })
   })
 
@@ -430,7 +424,7 @@ describe('DatasetView', () => {
       )
 
       await setCode(wrapper, 'bad')
-      await button(wrapper, '查询').trigger('click')
+      await wrapper.get('form').trigger('submit')
       await flushPromises()
       expect(api.queryDataset).not.toHaveBeenCalled()
       expect(wrapper.get('.field-error').text()).toBe(
@@ -443,7 +437,7 @@ describe('DatasetView', () => {
       const completed = pageResponse()
       api.queryDataset.mockResolvedValueOnce(completed)
       await setCode(wrapper, ' 000001.sz ')
-      await button(wrapper, '查询').trigger('click')
+      await wrapper.get('form').trigger('submit')
       await flushPromises()
       expect(api.queryDataset).toHaveBeenCalledWith('fixture', 'daily', {
         tsCode: '000001.SZ',
@@ -462,27 +456,31 @@ describe('DatasetView', () => {
     }
   })
 
-  it('organizes configuration and results in two labelled workbench panels', async () => {
-    const currentDefinition = definition({ displayName: '日线行情详情' })
-    const wrapper = await mountWithDefinition({ currentDefinition })
+  it('submits from the horizontal query form only once while the query is pending', async () => {
+    const wrapper = await mountWithDefinition()
+    await setCode(wrapper, ' 000001.sz ')
+    const pending = deferred()
+    api.queryDataset.mockReturnValueOnce(pending.promise)
+    const form = wrapper.get('form[aria-label="数据查询"]')
+    await Promise.all([form.trigger('submit'), form.trigger('submit')])
+    await flushPromises()
+    expect(api.queryDataset).toHaveBeenCalledTimes(1)
+    expect(api.queryDataset).toHaveBeenCalledWith('fixture', 'daily', { tsCode: '000001.SZ', page: 1, pageSize: 50 })
+    expect(wrapper.get('.data-caption').text()).toContain('日线行情')
+    expect(wrapper.get('.data-caption').text()).not.toContain('条记录')
+    pending.resolve(pageResponse())
+    await flushPromises()
+    expect(wrapper.get('.data-caption').text()).toContain('只读 · 1 条记录')
+  })
 
-    const panels = wrapper.findAllComponents(WorkbenchPanel)
-    expect(panels).toHaveLength(2)
-    expect(panels.map((panel) => panel.props())).toMatchObject([
-      {
-        headingId: 'dataset-config-title',
-        title: '查询配置',
-        meta: 'fixture',
-      },
-      {
-        headingId: 'dataset-result-title',
-        title: '日线行情详情',
-        meta: 'daily',
-      },
-    ])
-    expect(wrapper.get('.dataset-workbench').classes()).toContain(
-      'dataset-workbench',
-    )
+  it('distinguishes an empty dataset list from a selection prompt', async () => {
+    api.listDataSources.mockResolvedValueOnce([source()])
+    api.listDatasets.mockResolvedValueOnce([])
+    const wrapper = mount(DatasetView)
+    await flushPromises()
+    expect(wrapper.getComponent(AsyncStatePanel).props()).toMatchObject({ state: 'EMPTY', title: '暂无可查询的数据集' })
+    expect(wrapper.getComponent(DatasetSelect).props('disabled')).toBe(true)
+    expect(api.queryDataset).not.toHaveBeenCalled()
   })
 
   it('keeps a real empty filter form and submits datasets without filter definitions', async () => {
@@ -497,7 +495,7 @@ describe('DatasetView', () => {
 
     expect(wrapper.getComponent(DynamicFilterForm).props('filters')).toEqual([])
     expect(wrapper.text()).toContain('此数据集无需填写筛选条件。')
-    await button(wrapper, '查询').trigger('click')
+    await wrapper.get('form').trigger('submit')
     await flushPromises()
 
     expect(api.queryDataset).toHaveBeenCalledOnce()
@@ -514,7 +512,7 @@ describe('DatasetView', () => {
     const wrapper = await mountWithDefinition()
     api.queryDataset.mockResolvedValueOnce(pageResponse())
     await setCode(wrapper, '000001.SZ')
-    await button(wrapper, '查询').trigger('click')
+    await wrapper.get('form').trigger('submit')
     await flushPromises()
     expect(wrapper.findComponent(DatasetTable).exists()).toBe(true)
     expect(wrapper.findComponent(DatasetPagination).exists()).toBe(true)
@@ -522,7 +520,7 @@ describe('DatasetView', () => {
     const pending = deferred()
     api.queryDataset.mockReturnValueOnce(pending.promise)
     await setCode(wrapper, '000002.SZ')
-    await button(wrapper, '查询').trigger('click')
+    await wrapper.get('form').trigger('submit')
     await nextTick()
 
     expect(wrapper.findComponent(DatasetTable).exists()).toBe(false)
@@ -530,7 +528,7 @@ describe('DatasetView', () => {
     expect(wrapper.getComponent(DynamicFilterForm).props('disabled')).toBe(
       true,
     )
-    expect(button(wrapper, '查询').attributes('disabled')).toBeDefined()
+    expect(button(wrapper, '查询中…').attributes('disabled')).toBeDefined()
     expect(button(wrapper, '重置').attributes('disabled')).toBeUndefined()
     expect(wrapper.getComponent(AsyncStatePanel).props('title')).toBe(
       '正在查询数据',
@@ -544,7 +542,7 @@ describe('DatasetView', () => {
     expect(wrapper.getComponent(DatasetSelect).props('modelValue')).toBe(
       'daily',
     )
-    expect(wrapper.getComponent(ElInput).props('modelValue')).toBe('')
+    expect(wrapper.get('[data-filter="tsCode"] input').element.value).toBe('')
     expect(wrapper.getComponent(AsyncStatePanel).props('title')).toBe(
       '设置筛选条件后查询',
     )
@@ -568,7 +566,7 @@ describe('DatasetView', () => {
       const first = pageResponse({ totalElements: 80, totalPages: 3 })
       api.queryDataset.mockResolvedValueOnce(first)
       await setCode(wrapper, '000001.SZ')
-      await button(wrapper, '查询').trigger('click')
+      await wrapper.get('form').trigger('submit')
       await flushPromises()
 
       expect(wrapper.getComponent(DatasetTable).props()).toMatchObject({
@@ -665,7 +663,7 @@ describe('DatasetView', () => {
       items: [],
     })
     api.queryDataset.mockResolvedValueOnce(empty)
-    await button(wrapper, '查询').trigger('click')
+    await wrapper.get('form').trigger('submit')
     await flushPromises()
 
     expect(wrapper.getComponent(AsyncStatePanel).props()).toMatchObject({
@@ -714,14 +712,14 @@ describe('DatasetView', () => {
     api.queryDataset.mockRejectedValueOnce(
       new ClientError('UNEXPECTED', 'final-request'),
     )
-    await button(wrapper, '查询').trigger('click')
+    await wrapper.get('form').trigger('submit')
     await flushPromises()
     expect(wrapper.getComponent(AsyncStatePanel).props('state')).toBe(
       'FAILURE',
     )
     expect(
       wrapper
-        .findAllComponents(ElButton)
+        .findAll('button')
         .some((candidate) => candidate.text() === '重新查询'),
     ).toBe(false)
   })
@@ -776,7 +774,7 @@ describe('DatasetView', () => {
       await flushPromises()
       await setCode(wrapper, '000001.SZ')
       api.queryDataset.mockResolvedValueOnce(pageResponse({ pluginId: 'first' }))
-      await button(wrapper, '查询').trigger('click')
+      await wrapper.get('form').trigger('submit')
       await flushPromises()
       expect(wrapper.findComponent(DatasetTable).exists()).toBe(true)
 
@@ -801,7 +799,7 @@ describe('DatasetView', () => {
 
       const staleSourceQuery = deferred()
       api.queryDataset.mockReturnValueOnce(staleSourceQuery.promise)
-      await button(wrapper, '查询').trigger('click')
+      await wrapper.get('form').trigger('submit')
       await nextTick()
       expect(wrapper.getComponent(AsyncStatePanel).props('title')).toBe(
         '正在查询数据',
@@ -854,7 +852,7 @@ describe('DatasetView', () => {
       expectBefore(datasetInput.element, filterInput.element)
       expectBefore(filterInput.element, queryButton.element)
       expectBefore(queryButton.element, resetButton.element)
-      expect(queryButton.attributes('type')).toBe('button')
+      expect(queryButton.attributes('type')).toBe('submit')
       expect(resetButton.attributes('type')).toBe('button')
       const buttonTexts = wrapper.findAll('button').map((item) => item.text())
       for (const forbidden of ['排序', '新增', '编辑', '删除', '导出']) {

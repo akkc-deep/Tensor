@@ -337,13 +337,13 @@ it('captures the original bigint version, waits for GETs, and prevents double or
 })
 
 it.each([
-  ['TASK_STATE_CONFLICT', '任务状态已变化，已重新查询'],
+  ['TASK_STATE_CONFLICT', '任务状态已变化，请核对最新任务状态'],
   ['TASK_DEFINITION_CHANGED', 'TASK_DEFINITION_CHANGED'],
-  ['QUERY_FAILED', '操作结果尚未确认，正在重新查询任务'],
+  ['QUERY_FAILED', '操作结果尚未确认，请核对最新任务状态'],
   ['TASK_QUEUE_FULL', 'TASK_QUEUE_FULL'],
   ['TASK_NOT_FOUND', 'TASK_NOT_FOUND'],
-  ['NETWORK', '操作结果尚未确认，正在重新查询任务'],
-  ['INVALID_RESPONSE', '操作结果尚未确认，正在重新查询任务'],
+  ['NETWORK', '操作结果尚未确认，请核对最新任务状态'],
+  ['INVALID_RESPONSE', '操作结果尚未确认，请核对最新任务状态'],
 ])('requeries after %s without replaying or mutating old facts; confirmation failure backs off', async (code, message) => {
   api.getDownloadTask.mockResolvedValue(task('interruptedTask'))
   flow = useDownloadTask()
@@ -409,4 +409,62 @@ it.each(['hide', 'switch', 'dispose'])('keeps a sent POST in its slot and isolat
   }
   expect(api.getDownloadTask).toHaveBeenCalledTimes(action === 'dispose' ? 1 : 2)
   if (action === 'switch') expect(flow.task.value.taskId).toBe(OTHER)
+})
+
+it('shares the task lock across entries and refreshes the survivor after the sender closes', async () => {
+  const { createDownloadTaskChannel } = await import('./useDownloadTask.js')
+  const channel = createDownloadTaskChannel()
+  api.getDownloadTask.mockResolvedValue(task('partialFailedTask'))
+  flow = useDownloadTask({ channel })
+  const other = useDownloadTask({ channel })
+  try {
+    await flow.load(ID)
+    await other.load(ID)
+    const post = deferred()
+    api.retryDownloadTask.mockReturnValueOnce(post.promise)
+    flow.retry()
+    expect(other.canRetry.value).toBe(false)
+    await other.retry()
+    expect(api.retryDownloadTask).toHaveBeenCalledTimes(1)
+    flow.dispose()
+    api.getDownloadTask.mockResolvedValue(task('succeededTask'))
+    post.resolve({ taskId: ID })
+    await flushPromises()
+    expect(other.task.value.status).toBe('SUCCEEDED')
+    expect(other.canRetry.value).toBe(false)
+    expect(channel.pending.size).toBe(0)
+  } finally { other.dispose() }
+})
+
+it('does not restore old permissions when the page becomes visible before a fresh GET finishes', async () => {
+  api.getDownloadTask.mockResolvedValue(task('partialFailedTask'))
+  flow = useDownloadTask()
+  await flow.load(ID)
+  visible('hidden')
+  const fresh = deferred()
+  api.getDownloadTask.mockReturnValueOnce(fresh.promise)
+  visible('visible')
+  expect(flow.canRetry.value).toBe(false)
+  await flow.retry()
+  expect(api.retryDownloadTask).not.toHaveBeenCalled()
+  fresh.resolve(task('succeededTask'))
+  await flushPromises()
+})
+
+it('queries only details for quick actions and pauses its work when deactivated', async () => {
+  api.getDownloadTask.mockResolvedValue(task('partialFailedTask'))
+  flow = useDownloadTask({ loadBatches: false, poll: false })
+  await flow.load(ID)
+  expect(api.listDownloadTaskBatches).not.toHaveBeenCalled()
+  api.getDownloadTask.mockResolvedValue(task())
+  await flow.retry()
+  await flushPromises()
+  expect(flow.task.value.status).toBe('RUNNING')
+  await vi.advanceTimersByTimeAsync(60000)
+  expect(api.getDownloadTask).toHaveBeenCalledTimes(2)
+  flow.setActive(false)
+  await flow.refresh()
+  expect(api.getDownloadTask).toHaveBeenCalledTimes(2)
+  await flow.setActive(true)
+  expect(api.getDownloadTask).toHaveBeenCalledTimes(3)
 })

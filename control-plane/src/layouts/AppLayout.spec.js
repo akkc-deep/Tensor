@@ -1,7 +1,6 @@
 import { readFileSync } from 'node:fs'
 
 import { flushPromises, mount } from '@vue/test-utils'
-import { ElButton, ElDatePicker, ElInput } from 'element-plus'
 import { nextTick } from 'vue'
 import { createMemoryHistory } from 'vue-router'
 
@@ -50,7 +49,6 @@ vi.mock('../api/datasets.js', () => ({
 import { ClientError } from '../api/errors.js'
 import DownloadAction from '../components/download/DownloadAction.vue'
 import ApiSelect from '../components/download/ApiSelect.vue'
-import DownloadResult from '../components/download/DownloadResult.vue'
 import DownloadTaskList from '../components/download/DownloadTaskList.vue'
 import DynamicParameterForm from '../components/download/DynamicParameterForm.vue'
 import DatasetPagination from '../components/dataset/DatasetPagination.vue'
@@ -230,19 +228,15 @@ async function setFilter(wrapper, key, value) {
   const field = wrapper
     .getComponent(DynamicFilterForm)
     .get(`[data-filter="${key}"]`)
-  const control = key === 'tsCode'
-    ? field.getComponent(ElInput)
-    : field.getComponent(ElDatePicker)
-  control.vm.$emit('update:modelValue', value)
-  await nextTick()
+  await field.get('input').setValue(value)
 }
 
 function action(wrapper, label) {
   const component = wrapper
-    .findAllComponents(ElButton)
+    .findAll('button')
     .find((candidate) => candidate.text() === label)
   if (!component) throw new Error(`Missing button: ${label}`)
-  return component.get('button')
+  return component
 }
 
 function declaration(selector, property) {
@@ -310,9 +304,9 @@ describe('AppLayout', () => {
       const nav = wrapper.get('nav[aria-label="工作区导航"]')
       const links = nav.findAll('a')
       expect(links.map((link) => link.text())).toEqual([
-        '数据下载01',
-        '数据查看02',
-        '设置03',
+        '数据下载',
+        '数据查看',
+        '外观设置',
       ])
       expect(links.map((link) => link.attributes('href'))).toEqual([
         '/downloads',
@@ -334,10 +328,10 @@ describe('AppLayout', () => {
       const skip = wrapper.get('a[href="#workspace"]')
       expect(skip.text()).toBe('跳转到工作区')
       expect(wrapper.get('main#workspace').attributes('tabindex')).toBe('-1')
-      expect(wrapper.get('main h1').text()).toBe('数据下载')
+      expect(wrapper.get('main h1').text()).toBe('下载工作台')
       expect(
         wrapper.findAll('main h2').map((heading) => heading.text()),
-      ).toEqual(['下载配置', '任务接收', '等待提交任务', '近期任务'])
+      ).toEqual(['接口目录', '最近任务 0'])
       expect(wrapper.find('input[type="color"]').exists()).toBe(false)
       expect(wrapper.getComponent(DownloadAction).props('disabled')).toBe(
         true,
@@ -364,9 +358,9 @@ describe('AppLayout', () => {
       expect(links[1].attributes('aria-current')).toBe('page')
       expect(wrapper.get('main h1').text()).toBe('数据查看')
       expect(wrapper.get('main .async-state-panel h2').text()).toBe(
-        '请选择数据源',
+        '暂无数据源',
       )
-      expect(wrapper.text()).toContain('选择数据源后加载可查询的数据集。')
+      expect(wrapper.text()).toContain('当前没有可查询的数据源。')
       expect(wrapper.text()).not.toContain('数据查看模块尚未完成')
     } finally {
       wrapper.unmount()
@@ -377,8 +371,8 @@ describe('AppLayout', () => {
     const { wrapper } = await mountAt('/settings')
 
     try {
-      expect(wrapper.get('main h1').text()).toBe('设置')
-      expect(wrapper.get('input[type="color"]').element.value).toBe('#2857b4')
+      expect(wrapper.get('main h1').text()).toBe('外观设置')
+      expect(wrapper.get('input[type="color"]').element.value).toBe('#3565b6')
       expect(metadataApi.listDataSources).not.toHaveBeenCalled()
       expect(metadataApi.listApis).not.toHaveBeenCalled()
       expect(downloadApi.downloadDataset).not.toHaveBeenCalled()
@@ -403,22 +397,19 @@ describe('AppLayout', () => {
       await flushPromises()
       wrapper
         .getComponent(DynamicParameterForm)
-        .getComponent(ElDatePicker)
-        .vm.$emit('update:modelValue', '2026-09-04')
+        .get('input[type=\"date\"]').setValue('2026-09-04')
       await nextTick()
 
       await router.push('/settings')
       await flushPromises()
-      expect(wrapper.get('main h1').text()).toBe('设置')
+      expect(wrapper.get('main h1').text()).toBe('外观设置')
 
       await router.push('/downloads')
       await flushPromises()
 
       expect(
         wrapper
-          .getComponent(DynamicParameterForm)
-          .getComponent(ElDatePicker)
-          .props('modelValue'),
+          .getComponent(DynamicParameterForm).get('input[type="date"]').element.value,
       ).toBe('2026-09-04')
       expect(metadataApi.listDataSources).toHaveBeenCalledTimes(1)
       expect(metadataApi.listApis).toHaveBeenCalledTimes(1)
@@ -446,8 +437,7 @@ describe('AppLayout', () => {
       await flushPromises()
       wrapper
         .getComponent(DynamicParameterForm)
-        .getComponent(ElDatePicker)
-        .vm.$emit('update:modelValue', '2026-09-04')
+        .get('input[type=\"date\"]').setValue('2026-09-04')
       await nextTick()
       await wrapper.getComponent(DownloadAction).get('button').trigger('click')
       await nextTick()
@@ -476,13 +466,10 @@ describe('AppLayout', () => {
 
       expect(
         wrapper
-          .getComponent(DynamicParameterForm)
-          .getComponent(ElDatePicker)
-          .props('modelValue'),
+          .getComponent(DynamicParameterForm).get('input[type="date"]').element.value,
       ).toBe('2026-09-04')
       expect(wrapper.text()).toContain('任务已接收')
       expect(wrapper.text()).not.toContain('下载成功')
-      expect(wrapper.findComponent(DownloadResult).exists()).toBe(false)
       expect(wrapper.getComponent(DownloadTaskList).props('result').total).toBe(2n)
       expect(downloadTaskApi.submitDownloadTask).toHaveBeenCalledOnce()
       expect(metadataApi.listDataSources).toHaveBeenCalledOnce()
@@ -531,8 +518,7 @@ describe('AppLayout', () => {
         wrapper
           .getComponent(DynamicFilterForm)
           .get('[data-filter="tsCode"]')
-          .getComponent(ElInput)
-          .props('modelValue'),
+          .get('input').element.value,
       ).toBe('000003.SZ')
       expect(wrapper.getComponent(DatasetPagination).props()).toMatchObject({
         page: 2,
@@ -646,8 +632,7 @@ describe('AppLayout', () => {
         wrapper
           .getComponent(DynamicFilterForm)
           .get('[data-filter="tsCode"]')
-          .getComponent(ElInput)
-          .props('modelValue'),
+          .get('input').element.value,
       ).toBe('000099.SZ')
       expect(wrapper.getComponent(DatasetTable).exists()).toBe(true)
     } finally {
@@ -676,7 +661,7 @@ function detailTask(overrides = {}) {
   return parseDownloadTask({ ...examples.examples.find((e) => e.name === 'partialFailedTask').value, ...overrides }, '11111111-1111-4111-8111-111111111111')
 }
 
-it('opens details through the list RouterLink, pauses the cached list, and returns to the same form', async () => {
+it('opens a routed dialog over the same form and cleans up when it closes', async () => {
   vi.useFakeTimers()
   metadataApi.listDataSources.mockResolvedValueOnce([source()])
   metadataApi.listApis.mockResolvedValueOnce([descriptor()])
@@ -688,22 +673,23 @@ it('opens details through the list RouterLink, pauses the cached list, and retur
     wrapper.getComponent(ApiSelect).vm.$emit('update:modelValue', 'daily')
     await flushPromises()
     const originalForm = wrapper.getComponent(DynamicParameterForm).element
-    wrapper.getComponent(DynamicParameterForm).getComponent(ElDatePicker).vm.$emit('update:modelValue', '2026-09-04')
+    wrapper.getComponent(DynamicParameterForm).get('input[type=\"date\"]').setValue('2026-09-04')
     await nextTick()
     await wrapper.get('.download-task-list a').trigger('click')
     await flushPromises()
     expect(router.currentRoute.value.name).toBe('download-task')
-    expect(wrapper.get('h1').text()).toBe('任务详情')
-    expect(wrapper.get('.workspace-bar b').text()).toBe('任务详情')
+    expect(wrapper.get('dialog').attributes('open')).toBeDefined()
+    expect(wrapper.getComponent(DynamicParameterForm).element).toBe(originalForm)
+    expect(wrapper.get('.workspace-bar b').text()).toBe('数据下载')
     expect(wrapper.get('nav[aria-label="工作区导航"] a').classes()).toContain('router-link-active')
     expect(downloadTaskApi.getDownloadTask).toHaveBeenCalledExactlyOnceWith(detailTask().taskId)
     await vi.advanceTimersByTimeAsync(6000)
-    expect(downloadTaskApi.listDownloadTasks).toHaveBeenCalledTimes(1)
+    expect(downloadTaskApi.listDownloadTasks).toHaveBeenCalledTimes(2)
     await wrapper.get('.task-detail__toolbar a').trigger('click')
     await flushPromises()
     expect(router.currentRoute.value.name).toBe('downloads')
     expect(wrapper.getComponent(DynamicParameterForm).element).toBe(originalForm)
-    expect(wrapper.getComponent(DynamicParameterForm).getComponent(ElDatePicker).props('modelValue')).toBe('2026-09-04')
+    expect(wrapper.getComponent(DynamicParameterForm).get('input[type="date"]').element.value).toBe('2026-09-04')
     expect(downloadTaskApi.listDownloadTasks).toHaveBeenCalledTimes(2)
   } finally { wrapper.unmount(); vi.clearAllTimers(); vi.useRealTimers() }
 })
@@ -724,6 +710,6 @@ it('reuses a same-name detail route while discarding the old task response', asy
     expect(wrapper.text()).toContain(other)
     expect(wrapper.text()).not.toContain(detailTask().taskId)
     expect(downloadTaskApi.getDownloadTask).toHaveBeenCalledTimes(2)
-    expect(metadataApi.listDataSources).not.toHaveBeenCalled()
+    expect(metadataApi.listDataSources).toHaveBeenCalledOnce()
   } finally { wrapper.unmount() }
 })

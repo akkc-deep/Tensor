@@ -32,9 +32,11 @@ export function useDatasetFilters(filters) {
   const values = reactive({})
   const errors = reactive(Object.create(null))
   const firstError = ref(null)
+  const invalidInputs = new Set()
   let snapshot = null
 
   function reset() {
+    invalidInputs.clear()
     clear(values)
     clear(errors)
     firstError.value = null
@@ -42,9 +44,13 @@ export function useDatasetFilters(filters) {
     for (const field of fields(filters.value)) values[field.name] = ''
   }
 
-  function setValue(name, value) {
+  function setValue(name, value, badInput = false) {
+    if (badInput) invalidInputs.add(name)
+    else invalidInputs.delete(name)
     values[name] = value
     delete errors[name]
+    const start = fields(filters.value).find(field => field.pair === name)
+    if (start && errors[start.name] === '开始日期不得晚于结束日期') delete errors[start.name]
     firstError.value = fields(filters.value).find(({ name: field }) => errors[field])?.name ?? null
     snapshot = null
   }
@@ -58,6 +64,10 @@ export function useDatasetFilters(filters) {
 
     for (const field of declared) {
       const value = values[field.name]
+      if (invalidInputs.has(field.name)) {
+        errors[field.name] = '请选择有效日期'
+        continue
+      }
       if (!hasValue(value)) continue
 
       if (field.type === 'code') {

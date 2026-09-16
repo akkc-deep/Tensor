@@ -52,3 +52,4 @@
 | ISSUE-031 | 完成本次251项真实区间任务与SQL验收 | 已完成 | 按用户决定排除四接口27项，251/251通过；历史问题与失败保留 | [详情](problems/ISSUE-031-range-live-task-verification.md) · [设计](../task-designs/ISSUE-031-design.md) · [交接](../task-handoffs/ISSUE-031-handoff.md) · [子看板](../task-handoffs/ISSUE-026/ISSUE-026-task-board.md) |
 | ISSUE-032 | 完成最终回归与母任务收尾 | 已完成 | 六门禁1401/524/1134/1137/15/138、111证据测试及独立终审通过；母任务本次范围已收尾 | [详情](problems/ISSUE-032-range-final-closure.md) · [设计](../task-designs/ISSUE-032-design.md) · [子看板](../task-handoffs/ISSUE-026/ISSUE-026-task-board.md) · [最终验收](../verification/ISSUE-032-range-final-closure.md) |
 | ISSUE-033 | 修复财务指标RANGE适配失败 | 未开始 | 本次范围明确排除fina_indicator；后续问题保留，未修复，保持v3撤回 | [详情](problems/ISSUE-033-fina-indicator-adaptation.md) · [子看板](../task-handoffs/ISSUE-026/ISSUE-026-task-board.md) |
+| ISSUE-034 | 工作台视觉对齐、信息比例与组件细节调整 | 已解决 | 五项视觉微调已完成；截图对照、80 项单测、浏览器回归及构建通过 | [详情](problems/ISSUE-034-studio-visual-refinements.md) |

@@ -793,6 +793,56 @@ class DownloadTaskRepositoryIT {
     }
 
     @Test
+    void taskStatusGroupsFilterBeforeCountingAndPagination() {
+        var active = new ArrayList<DownloadTask>();
+        var errorStatuses = List.of(DownloadTask.Status.PARTIAL_FAILED,
+                DownloadTask.Status.FAILED, DownloadTask.Status.INTERRUPTED);
+        for (int i = 0; i < 21; i++) {
+            var activeTask = repository.insert(input());
+            var doneTask = repository.insert(input());
+            var errorTask = repository.insert(input());
+            jdbc.update("UPDATE tensor_download_task SET status=? WHERE task_id=?",
+                    i % 2 == 0 ? "QUEUED" : "RUNNING", activeTask.taskId().toString());
+            jdbc.update("UPDATE tensor_download_task SET status='SUCCEEDED' WHERE task_id=?",
+                    doneTask.taskId().toString());
+            jdbc.update("UPDATE tensor_download_task SET status=? WHERE task_id=?",
+                    errorStatuses.get(i % errorStatuses.size()).name(), errorTask.taskId().toString());
+            active.add(activeTask);
+        }
+        var target = active.getFirst();
+        jdbc.update("UPDATE tensor_download_task SET plugin_id='other_source' WHERE task_id=?",
+                target.taskId().toString());
+
+        for (var group : DownloadTaskRepository.TaskStatusGroup.values()) {
+            var filter = new TaskFilter(null, null, null, null, group);
+            var first = repository.taskSnapshots(filter, 1, 20);
+            var second = repository.taskSnapshots(filter, 2, 20);
+            assertThat(first.total()).isEqualTo(21);
+            assertThat(first.items()).hasSize(20);
+            assertThat(second.items()).hasSize(1);
+            assertThat(repository.taskSnapshots(filter, 3, 20).items()).isEmpty();
+            var expectedStatuses = switch (group) {
+                case ACTIVE -> List.of(DownloadTask.Status.QUEUED, DownloadTask.Status.RUNNING);
+                case DONE -> List.of(DownloadTask.Status.SUCCEEDED);
+                case ERROR -> errorStatuses;
+            };
+            assertThat(first.items()).allSatisfy(snapshot -> assertThat(
+                    snapshot.task().orElseThrow().status()).isIn(expectedStatuses));
+            assertThat(first.items()).extracting(snapshot -> snapshot.task().orElseThrow().taskId())
+                    .isSortedAccordingTo(Comparator.comparing(UUID::toString).reversed());
+        }
+        var intersection = new TaskFilter("other_source", "daily", null,
+                target.submissionId(), DownloadTaskRepository.TaskStatusGroup.ACTIVE);
+        assertThat(repository.taskSnapshots(intersection, 1, 20).items())
+                .extracting(snapshot -> snapshot.task().orElseThrow().taskId())
+                .containsExactly(target.taskId());
+        assertThatThrownBy(() -> repository.taskSnapshots(
+                new TaskFilter(null, null, DownloadTask.Status.RUNNING, null,
+                        DownloadTaskRepository.TaskStatusGroup.ACTIVE), 1, 20))
+                .isInstanceOf(IllegalArgumentException.class);
+    }
+
+    @Test
     void snapshotAndPageKeepIndependentRepeatableReadViewsDuringConcurrentWrites()
             throws Exception {
         var t = rangeRunning();
@@ -842,6 +892,43 @@ class DownloadTaskRepositoryIT {
             assertThat(result.total()).isEqualTo(1);
             assertThat(result.items()).hasSize(1);
             assertThat(repository.tasks(null, 1, 20).total()).isEqualTo(2);
+        }
+        var snapshotPageTask = rangeRunning();
+        var snapshotPagePermit = permit(snapshotPageTask);
+        repository.savePlan(snapshotPagePermit,
+                List.of(batch("000001", "2023-12-31", "2024-03-01")), 1, NOW);
+        var snapshotPageGate = new GatedDataSource(jdbc.getDataSource(),
+                "SELECT * FROM tensor_download_task WHERE 1=1");
+        var snapshotPageRepository = new DownloadTaskRepository(new JdbcTemplate(snapshotPageGate),
+                new DataSourceTransactionManager(snapshotPageGate), json);
+        try (var executor = java.util.concurrent.Executors.newSingleThreadExecutor()) {
+            var page = executor.submit(() -> snapshotPageRepository.taskSnapshots(
+                    new TaskFilter(null, null, DownloadTask.Status.RUNNING,
+                            snapshotPageTask.submissionId()), 1, 20));
+            assertThat(snapshotPageGate.entered.await(5, java.util.concurrent.TimeUnit.SECONDS)).isTrue();
+            try {
+                jdbc.update("UPDATE tensor_download_task SET status='SUCCEEDED' WHERE task_id=?",
+                        snapshotPageTask.taskId().toString());
+                jdbc.update("UPDATE tensor_download_batch SET status='SUCCEEDED' WHERE task_id=?",
+                        snapshotPageTask.taskId().toString());
+            } finally {
+                snapshotPageGate.release.countDown();
+            }
+            var result = page.get(10, java.util.concurrent.TimeUnit.SECONDS);
+            assertThat(result.total()).isEqualTo(1);
+            assertThat(result.items()).singleElement().satisfies(snapshot -> {
+                assertThat(snapshot.task().orElseThrow().status()).isEqualTo(DownloadTask.Status.RUNNING);
+                assertThat(snapshot.counts().pending()).isEqualTo(1);
+                assertThat(snapshot.counts().succeeded()).isZero();
+            });
+            assertThat(repository.taskSnapshots(null, 1, 100).items())
+                    .filteredOn(snapshot -> snapshot.task().orElseThrow().taskId().equals(snapshotPageTask.taskId()))
+                    .singleElement().satisfies(snapshot -> {
+                        assertThat(snapshot.task().orElseThrow().status()).isEqualTo(DownloadTask.Status.SUCCEEDED);
+                        assertThat(snapshot.counts().succeeded()).isEqualTo(1);
+                    });
+            assertThat(snapshotPageGate.repeatableRead).isTrue();
+            assertThat(snapshotPageGate.readOnly).isTrue();
         }
         var batchGate =
                 new GatedDataSource(
@@ -1033,6 +1120,7 @@ class DownloadTaskRepositoryIT {
                         () -> repository.queuedTasks(t.activeRunId(), 1),
                         () -> repository.unfinishedTasks(),
                         () -> repository.tasks(null, 1, 20),
+                        () -> repository.taskSnapshots(null, 1, 20),
                         () -> repository.batches(t.taskId(), null, 1, 20),
                         () -> repository.pendingBatches(t.taskId()),
                         () -> repository.counts(t.taskId()),

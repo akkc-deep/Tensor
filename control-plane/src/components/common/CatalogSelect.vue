@@ -86,7 +86,7 @@ function updateValue(value) {
 .catalog-select {
   display: grid;
   min-width: 0;
-  gap: 8px;
+  gap: 0.8rem;
 }
 
 .catalog-select__label {
@@ -94,7 +94,7 @@ function updateValue(value) {
 }
 
 .catalog-select__api-name {
-  margin-left: 8px;
+  margin-left: 0.8rem;
   color: var(--tensor-muted);
 }
 

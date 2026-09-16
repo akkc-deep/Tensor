@@ -1,16 +1,16 @@
 import { DEFAULT_ACCENT, contrastRatio, createTheme } from './theme.js'
 
 const DEFAULT_COLORS = {
-  bg: '#edf2f6',
+  bg: '#f7f9fb',
   surface: '#ffffff',
-  raised: '#f3f6fa',
-  nav: '#f9fbfd',
-  line: '#c8d3e0',
-  text: '#142a42',
-  muted: '#52677d',
-  accentBg: '#e8efff',
-  accent: '#2857b4',
-  success: '#14785e',
+  raised: '#f1f4f8',
+  nav: '#ffffff',
+  line: '#e0e6ee',
+  text: '#1f2d43',
+  muted: '#52627a',
+  accentBg: '#eaf0fa',
+  accent: '#3565b6',
+  success: '#28745a',
   error: '#b72d47',
 }
 
@@ -18,33 +18,26 @@ const SURFACES = ['bg', 'surface', 'raised', 'nav', 'accentBg']
 
 describe('createTheme', () => {
   it('returns the complete confirmed palette for the default accent', () => {
-    expect(DEFAULT_ACCENT).toBe('#2857b4')
-    expect(createTheme('#2857b4')).toEqual({
-      requested: '#2857b4',
-      applied: '#2857b4',
+    expect(DEFAULT_ACCENT).toBe('#3565b6')
+    expect(createTheme('#3565b6')).toEqual({
+      requested: '#3565b6',
+      applied: '#3565b6',
       colors: DEFAULT_COLORS,
     })
   })
 
-  it('normalizes valid uppercase input and reproduces the confirmed mix ratios', () => {
+  it('normalizes existing custom colors without tinting Studio surfaces', () => {
     expect(createTheme('#B52C63')).toEqual({
-      requested: '#b52c63',
-      applied: '#a5285a',
-      colors: {
-        bg: '#f6e6ec',
-        surface: '#fefbfc',
-        raised: '#f9eef3',
-        nav: '#faf0f4',
-        line: '#e9c0d0',
-        text: '#242a45',
-        muted: '#5e607a',
-        accentBg: '#f5e1e9',
-        accent: '#a5285a',
-        success: '#14785e',
-        error: '#b72d47',
-      },
+      requested: '#b52c63', applied: '#b52c63',
+      colors: { ...DEFAULT_COLORS, accent: '#b52c63' },
     })
   })
+
+  it.each(['#28745a', '#3565b6', '#745942', '#383d43'])(
+    'preserves the Demo preset %s exactly', (color) => {
+      expect(createTheme(color).applied).toBe(color)
+    },
+  )
 
   it.each([
     null,
@@ -64,9 +57,9 @@ describe('createTheme', () => {
       const theme = createTheme(value)
 
       for (const role of SURFACES) {
-        expect(contrastRatio(theme.applied, theme.colors[role])).toBeGreaterThanOrEqual(5.5)
+        expect(contrastRatio(theme.applied, theme.colors[role])).toBeGreaterThanOrEqual(4.5)
       }
-      expect(contrastRatio(theme.applied, '#ffffff')).toBeGreaterThanOrEqual(5.5)
+      expect(contrastRatio(theme.applied, '#ffffff')).toBeGreaterThanOrEqual(4.5)
       expect(theme.colors.accent).toBe(theme.applied)
     },
   )

@@ -468,6 +468,17 @@ describe('download task transport', () => {
     expect(criteria).toEqual(snapshot)
   })
 
+  it.each(['ACTIVE', 'DONE', 'ERROR'])('queries the full %s group on the server', async (statusGroup) => {
+    let request
+    http.defaults.adapter = async (config) => {
+      request = config
+      return rawResponse(config, { page: 2, pageSize: 20, total: 21, items: [validTask()] })
+    }
+    const result = await listDownloadTasks({ page: 2, statusGroup })
+    expect(Object.fromEntries(request.params)).toEqual({ page: '2', pageSize: '20', statusGroup })
+    expect(result.total).toBe(21n)
+  })
+
   it('uses page 1 and pageSize 20 when list criteria are omitted', async () => {
     let request
     http.defaults.adapter = async (config) => {
@@ -489,6 +500,10 @@ describe('download task transport', () => {
     ['array filter', { status: ['QUEUED'] }],
     ['invalid identifier', { apiName: 'Daily' }],
     ['invalid status', { status: 'queued' }],
+    ['empty group', { statusGroup: '' }],
+    ['invalid group', { statusGroup: 'active' }],
+    ['null group', { statusGroup: null }],
+    ['ambiguous status and group', { status: 'RUNNING', statusGroup: 'ACTIVE' }],
     ['page zero', { page: 0 }],
     ['page overflow', { page: 2147483648 }],
     ['fractional page', { page: 1.5 }],

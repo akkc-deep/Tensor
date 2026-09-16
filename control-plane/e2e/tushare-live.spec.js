@@ -1,3 +1,4 @@
+import { selectDownloadApi } from './catalog-helpers.js'
 import { expect, test } from '@playwright/test'
 import { execFile, spawn } from 'node:child_process'
 import { createHash, randomUUID } from 'node:crypto'
@@ -59,9 +60,9 @@ const SUPPORTED_API_NAMES = [
 ]
 
 const FILTER_LABELS = {
-  ts_code: ['证券代码 (ts_code)'],
-  trade_date: ['交易日期开始 (trade_date)', '交易日期结束 (trade_date)'],
-  ann_date: ['公告日期开始 (ann_date)', '公告日期结束 (ann_date)'],
+  ts_code: ['证券代码'],
+  trade_date: ['交易开始日期', '交易结束日期'],
+  ann_date: ['公告开始日期', '公告结束日期'],
 }
 
 function buildFilters() {
@@ -1012,7 +1013,9 @@ async function openRoute(page, route, heading) {
 }
 
 async function selectOption(page, label, name) {
+  if (label === '数据接口') return selectDownloadApi(page, name)
   const combobox = page.getByRole('combobox', { name: label, exact: true })
+  if (await combobox.evaluate(el => el.tagName === 'SELECT')) return combobox.selectOption(name)
   await combobox.focus()
   await combobox.press('Enter')
   const option = page.getByRole('option', { name, exact: typeof name === 'string' })
@@ -1068,12 +1071,12 @@ async function chooseDownload(page, pluginId, contract) {
       && (expectedRule !== 'RESPONSE_ONLY' || !capability.range.splittable),
     'runtime RANGE matches candidate')
   } else safeCheck(capability.single.available, 'runtime SINGLE available')
-  const modeLabel = mode === 'RANGE' ? '日期区间' : '单次请求'
-  await page.getByRole('radiogroup', { name: '下载模式', exact: true }).getByText(modeLabel, { exact: true }).click()
-  await expect(page.getByRole('radio', { name: modeLabel, exact: true })).toBeChecked()
+  const modeLabel = mode === 'RANGE' ? '批量下载' : '单次下载'
+  await page.getByRole('button', { name: modeLabel, exact: true }).click()
+  await expect(page.getByRole('button', { name: modeLabel, exact: true })).toHaveAttribute('aria-pressed', 'true')
   downloadParameters.set(page, capability[mode.toLowerCase()].parameters)
   await assertPageSafe(page, 'download selection')
-  const region = page.getByRole('region', { name: '接口说明', exact: true })
+  const region = page.locator('.selected-api-heading')
   await expect(region.getByText(contract.apiName, { exact: true })).toBeVisible()
 }
 
@@ -1208,7 +1211,7 @@ async function queryDataset(page, monitor, pluginId, contract, definition, { cod
   const pathname = `/api/v1/data-sources/${pluginId}/datasets/${contract.apiName}/records`
   const priorRecords = monitor.records()
   safeCheck(priorRecords >= 0, 'records counter')
-  if (code) await page.getByLabel('证券代码 (ts_code)', { exact: true }).fill(code)
+  if (code) await page.getByLabel('证券代码', { exact: true }).fill(code)
   ledger.expectQuery(pathname)
   const responsePromise = page.waitForResponse((response) => isGet(response, pathname), { timeout: 30_000 })
   await page.getByRole('button', { name: '查询', exact: true }).click()
@@ -1342,7 +1345,7 @@ async function submitDownload(page, monitor, pluginId, contract, params, fixture
   const beforePosts = monitor.downloads()
   const responsePromise = page.waitForResponse((response) => response.request().method() === 'POST' && responsePath(response) === '/api/v1/download-tasks', { timeout: 30_000 })
   const startedAt = Date.now()
-  await page.getByRole('button', { name: '提交任务', exact: true }).click()
+  await page.getByRole('button', { name: /^(开始(?:批量)?下载|正在创建…|正在查找…)$/, exact: true }).click()
   const response = await responsePromise
   const receipt = validateTaskAcceptance(response.request().postDataJSON(), expectedBody, {
     status: response.status(), location: response.headers().location,
@@ -1358,10 +1361,10 @@ async function submitDownload(page, monitor, pluginId, contract, params, fixture
   const queryContext = { pluginId, apiName: contract.apiName, taskId: receipt.taskId, caseId: evidenceCase?.caseId ?? null }
   const observed = { ...expectedBody, submissionId, requestId: receipt.requestId, taskId: receipt.taskId, task: null, batches: [] }
   observedTasks.push(observed)
-  const panel = page.locator('.download-result-panel')
+  const panel = page.locator('.download-feedback')
   await expect(panel.getByRole('heading', { name: '任务已接收' })).toBeVisible()
   await expect(page.getByRole('combobox', { name: '数据源', exact: true })).toBeEnabled()
-  await expect(page.getByRole('combobox', { name: '数据接口', exact: true })).toBeEnabled()
+  await expect(page.getByRole('searchbox', { name: '搜索接口' })).toBeEnabled()
   await monitor.drain()
   await panel.getByRole('link', { name: '查看任务', exact: true }).click()
   await expect(page).toHaveURL(`/downloads/tasks/${receipt.taskId}`)
@@ -1418,10 +1421,11 @@ async function submitDownload(page, monitor, pluginId, contract, params, fixture
     const statusLabel = candidate?.completeness.kind === 'RESPONSE_ONLY'
       ? task.counts.sourceRows > 0n ? '返回记录已采集' : '本次请求未返回记录'
       : '已成功'
-    await expect(page.locator('[data-task-status]')).toHaveText(statusLabel)
+    await expect(page.locator('.task-detail [data-task-status]')).toHaveText(statusLabel)
     safeCheck(!task.canRetry && !task.canResume, 'successful task cannot be replayed')
-    const progress = page.locator('.task-detail__counts')
-    await expect(progress.getByText(`来源行数 ${task.counts.sourceRows}`, { exact: true })).toBeVisible()
+    const progress = page.locator('.task-detail')
+    await expect(progress.locator(':scope > .confirmation dd').last()).toHaveText(task.counts.sourceRows.toString())
+    await progress.locator('.task-detail__record summary').click()
     await expect(progress.getByText(`新增记录次数 ${task.counts.insertedRows}`, { exact: true })).toBeVisible()
     await expect(progress.getByText(`更新记录次数 ${task.counts.updatedRows}`, { exact: true })).toBeVisible()
     if (candidate?.completeness.kind === 'RESPONSE_ONLY') {

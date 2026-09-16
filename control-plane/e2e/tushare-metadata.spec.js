@@ -1,3 +1,4 @@
+import { selectDownloadApi } from './catalog-helpers.js'
 import { configurePackagedEnvironment } from './packaged-test-environment.js'
 import { rangeCapability } from './ui-redesign.fixtures.js'
 import { expect, test } from '@playwright/test'
@@ -55,9 +56,9 @@ const DATASET_SCREENSHOTS = new Set([
   'index_classify', 'stock_company', 'margin', 'daily', 'balancesheet',
 ])
 const FILTER_LABELS = {
-  ts_code: ['证券代码 (ts_code)'],
-  trade_date: ['交易日期开始 (trade_date)', '交易日期结束 (trade_date)'],
-  ann_date: ['公告日期开始 (ann_date)', '公告日期结束 (ann_date)'],
+  ts_code: ['证券代码'],
+  trade_date: ['交易开始日期', '交易结束日期'],
+  ann_date: ['公告开始日期', '公告结束日期'],
 }
 
 const PARAMETER = {
@@ -410,6 +411,7 @@ function optionName(contract) {
 }
 
 async function selectFrom(combobox, name) {
+  if (await combobox.evaluate(el => el.tagName === 'SELECT')) return combobox.selectOption(name)
   await combobox.focus()
   await combobox.press('Enter')
   const option = combobox.page().getByRole('option', { name, exact: typeof name === 'string' })
@@ -421,6 +423,7 @@ async function selectFrom(combobox, name) {
 }
 
 async function selectOption(page, label, name) {
+  if (label === '数据接口') return selectDownloadApi(page, name)
   await selectFrom(page.getByRole('combobox', { name: label, exact: true }), name)
 }
 
@@ -637,21 +640,18 @@ async function openDownloads(page, contract) {
   await selectOption(page, '数据源', 'Tushare Pro')
   await validateApis(await apisPromise)
 
-  const combobox = page.getByRole('combobox', { name: '数据接口', exact: true })
-  await combobox.focus()
-  await combobox.press('Enter')
-  await expect(page.getByRole('option')).toHaveCount(40)
+  const buttons = page.locator('.catalog-list button')
+  await expect(buttons).toHaveCount(40)
   for (const expected of CONTRACTS) {
-    await expect(page.getByRole('option', { name: optionName(expected) })).toHaveCount(1)
+    await expect(buttons.filter({ has: page.getByText(expected.apiName, { exact: true }) })).toHaveCount(1)
   }
   if (contract.apiName === CONTRACTS[0].apiName) {
-    for (const category of Object.keys(CATEGORY_COUNTS)) {
-      await expect(page.getByText(category, { exact: true }).last()).toBeVisible()
-    }
+    const categories = await page.getByRole('combobox', { name: '接口分类' }).locator('option').allTextContents()
+    expect(categories.slice(1).sort()).toEqual(Object.keys(CATEGORY_COUNTS).sort())
   }
   const capabilitiesPromise = page.waitForResponse((response) =>
     isResponse(response, `/api/v1/data-sources/tushare_pro/apis/${contract.apiName}/download-capabilities`))
-  await page.getByRole('option', { name: optionName(contract) }).click()
+  await selectDownloadApi(page, contract.apiName)
   const capabilitiesResponse = await capabilitiesPromise
   expect(capabilitiesResponse.status()).toBe(200)
   const capabilities = await readPublicJson(capabilitiesResponse, 'download capabilities')
@@ -660,7 +660,7 @@ async function openDownloads(page, contract) {
     range: rangeCapability(contract.apiName),
   })
   const expectedRange = rangeCapability(contract.apiName)
-  const rangeMode = page.getByRole('radio', { name: '日期区间', exact: true })
+  const rangeMode = page.getByRole('button', { name: /^批量下载/ })
   if (expectedRange.availability === 'AVAILABLE') {
     expect(capabilities.range).toMatchObject({ availability: 'AVAILABLE', policyVersion: 'tushare-range-v2',
       completenessRule: { kind: expectedRange.completenessRule.kind,
@@ -675,46 +675,30 @@ async function openDownloads(page, contract) {
       expect(capabilities.range.completenessRule.kind).toBe('RESPONSE_ONLY')
       expect(capabilities.range.completenessRule.rowLimit).toBeNull()
       expect(capabilities.range.splittable).toBe(false)
-      const warning = page.locator('.form-footer__help').filter({ hasText: '数据完整性未确认，可能存在上游截断' })
+      const warning = page.locator('.completeness-note')
       await expect(warning).toBeVisible()
       await expect(warning).toContainText('数据完整性未确认，可能存在上游截断')
     }
     await expect(rangeMode).toBeEnabled()
-    await expect(rangeMode).toBeChecked()
+    await expect(rangeMode).toHaveAttribute('aria-pressed', 'true')
   } else {
     await expect(rangeMode).toBeDisabled()
-    await expect(page.getByRole('radio', { name: '单次请求', exact: true })).toBeChecked()
+    await expect(page.getByRole('button', { name: '单次下载', exact: true })).toHaveAttribute('aria-pressed', 'true')
   }
-  await page.getByRole('radiogroup', { name: '下载模式', exact: true }).getByText('单次请求', { exact: true }).click()
-  await expect(page.getByRole('radio', { name: '单次请求', exact: true })).toBeChecked()
-  await expect(combobox).toHaveAttribute('aria-expanded', 'false')
-  await expect(page.getByRole('option')).toHaveCount(0)
+  await page.getByRole('button', { name: '单次下载', exact: true }).click()
+  await expect(page.getByRole('button', { name: '单次下载', exact: true })).toHaveAttribute('aria-pressed', 'true')
   await doubleAnimationFrame(page)
 
-  const description = page.getByRole('region', { name: '接口说明', exact: true })
-  await expect(description).toBeVisible()
-  for (const text of [contract.displayName, contract.apiName, contract.category, QUERY_MODE_LABELS[contract.queryMode]]) {
-    await expect(description.getByText(text, { exact: true })).toBeVisible()
-  }
+  await expect(page.locator('.selected-api-heading')).toContainText(contract.displayName)
+  await expect(page.locator('.selected-api-heading code')).toHaveText(contract.apiName)
+  await expect(page.locator('.selected-api-meta')).toContainText(contract.category)
+  await expect(page.locator('.selected-api-meta')).toContainText(QUERY_MODE_LABELS[contract.queryMode])
 }
 
 function parameterControl(page, parameter) {
   return parameter.type === 'ENUM'
     ? page.getByRole('combobox', { name: parameter.label, exact: true })
     : page.getByLabel(new RegExp(`^${escapeRegex(parameter.label)}\\s*\\*?$`))
-}
-
-async function openAndClosePicker(page, control) {
-  await expect(control).toHaveAttribute('aria-haspopup', 'dialog')
-  await control.click()
-  await expect(control).toHaveAttribute('aria-expanded', 'true')
-  const popupId = await control.getAttribute('aria-controls')
-  safeCheck(/^[A-Za-z][A-Za-z0-9_-]*$/.test(popupId ?? ''), 'picker aria controls')
-  const popup = page.locator(`#${popupId}`)
-  await expect(popup).toBeVisible()
-  await control.press('Escape')
-  await expect(control).toHaveAttribute('aria-expanded', 'false')
-  await expect(popup).toBeHidden()
 }
 
 async function screenshot(page, testInfo, name) {
@@ -730,7 +714,7 @@ async function validateParameters(page, contract, testInfo) {
   for (let index = 0; index < contract.parameters.length; index += 1) {
     const parameter = contract.parameters[index]
     const control = controls[index]
-    await expect(page.getByText(new RegExp(`^${escapeRegex(parameter.label)}\\s*\\*$`))).toBeVisible()
+    await expect(page.locator(`[data-parameter="${parameter.name}"] label`)).toContainText(parameter.label)
     await expect(control).toBeVisible()
     await expect(control).toHaveAttribute('aria-required', 'true')
     if (index) {
@@ -740,19 +724,16 @@ async function validateParameters(page, contract, testInfo) {
       expect(ordered).toBe(true)
     }
     if (parameter.type === 'ENUM') {
-      await control.focus()
-      await control.press('Enter')
-      await expect(page.getByRole('option')).toHaveText(parameter.allowedValues)
-      await control.press('Escape')
+      await expect(control.locator('option')).toHaveText(['请选择', ...parameter.allowedValues])
     }
   }
 
-  const button = page.getByRole('button', { name: '提交任务', exact: true })
+  const button = page.getByRole('button', { name: /^(开始(?:批量)?下载|正在创建…|正在查找…)$/, exact: true })
   await expect(button).toBeEnabled()
   if (!contract.parameters.length) {
     await expect(page.getByText('此项为必填项', { exact: true })).toHaveCount(0)
-    const configuration = page.getByRole('region', { name: '下载配置', exact: true })
-    await expect(configuration.getByRole('combobox')).toHaveCount(2)
+    const configuration = page.locator('.download-config-panel')
+    await expect(configuration.getByRole('combobox')).toHaveCount(0)
     await expect(configuration.getByRole('textbox')).toHaveCount(0)
     if (DOWNLOAD_SCREENSHOTS.has(contract.apiName)) await screenshot(page, testInfo, `download-${contract.apiName}.png`)
     return { requiredBlocked: false, parameterless: true }
@@ -784,7 +765,7 @@ async function validateParameters(page, contract, testInfo) {
         end_date: '2026-08-07', ts_code: '000001.SZ',
       }
       if (['DATE', 'DATE_RANGE_MEMBER'].includes(parameter.type)) {
-        await openAndClosePicker(page, control)
+        await expect(control).toHaveAttribute('type', 'date')
       }
       await control.fill(values[parameter.name])
       await control.press('Tab')

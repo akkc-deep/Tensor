@@ -51,14 +51,18 @@ public final class DownloadTaskController {
 
     @GetMapping
     public DownloadTaskPage<DownloadTaskResponse> tasks(DownloadTaskQuery.Tasks query) {
-        var page = queries.tasks(query.filter(), query.page(), query.pageSize());
+        var page = queries.taskSnapshots(query.filter(), query.page(), query.pageSize());
         return new DownloadTaskPage<>(query.page(), query.pageSize(), page.total(),
-                page.items().stream().map(task -> detail(new DownloadTaskQuery.TaskId(task.taskId()))).toList());
+                page.items().stream().map(this::response).toList());
     }
 
     @GetMapping("/{taskId}")
     public DownloadTaskResponse detail(DownloadTaskQuery.TaskId taskId) {
         var snapshot = queries.detail(taskId.value());
+        return response(snapshot);
+    }
+
+    private DownloadTaskResponse response(DownloadTaskRepository.TaskSnapshot snapshot) {
         var task = snapshot.task().orElseThrow();
         return DownloadTaskResponse.from(snapshot, service.controls(task), service.policySummary(task));
     }

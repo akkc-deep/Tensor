@@ -1,3 +1,4 @@
+import { selectDownloadApi } from './catalog-helpers.js'
 import { expect, test } from '@playwright/test'
 
 const LIVE = process.env.TENSOR_TASK_LIVE_E2E
@@ -51,15 +52,8 @@ async function chooseLifecycleRange(page, start, end) {
   await page.goto('/downloads')
   await page.locator('.data-source-select .el-select').click()
   await page.getByRole('option', { name: 'HTTP lifecycle test' }).click()
-  const api = page.locator('#download-api')
-  await page.locator('.api-select .el-select').click()
-  await api.fill('prices')
-  const listboxId = await api.getAttribute('aria-controls')
-  const option = page.locator(`#${listboxId}`).getByRole('option')
-    .filter({ has: page.getByText('prices', { exact: true }) })
-  await expect(option).toHaveCount(1)
-  await option.click()
-  await page.getByLabel('下载模式').getByText('日期区间', { exact: true }).click()
+  await selectDownloadApi(page, 'prices')
+  await page.getByRole('button', { name: '批量下载', exact: true }).click()
   for (const [name, value] of [['start_date', start], ['end_date', end]]) {
     const input = page.locator(`[data-parameter="${name}"] input`)
     await input.fill(value)
@@ -76,7 +70,7 @@ async function submit(page) {
   })
   const response = page.waitForResponse(response =>
     response.request().method() === 'POST' && new URL(response.url()).pathname === '/api/v1/download-tasks')
-  await page.getByRole('button', { name: '提交任务', exact: true }).click()
+  await page.getByRole('button', { name: /^(开始(?:批量)?下载|正在创建…|正在查找…)$/, exact: true }).click()
   const accepted = await response
   expect(accepted.status()).toBe(202)
   const receipt = await accepted.json()
@@ -120,14 +114,14 @@ if (SCENARIO === 'flow') {
     await reopened.goto('/downloads')
     const recentLink = reopened.locator(`.download-task-list a[href="/downloads/tasks/${submitted.taskId}"]`)
     await expect(recentLink).toBeVisible()
-    const row = recentLink.locator('xpath=ancestor::tr')
+    const row = recentLink.locator('xpath=ancestor::article')
     await expect(row).toContainText('已成功')
     await recentLink.click()
     await expect(reopened).toHaveURL(`/downloads/tasks/${submitted.taskId}`)
-    await expect(reopened.locator('[data-task-status]')).toHaveText('已成功')
+    await expect(reopened.locator('.task-detail [data-task-status]')).toHaveText('已成功')
     await reopened.reload()
-    await expect(reopened.locator('[data-task-status]')).toHaveText('已成功')
-    const finalRows = reopened.locator('.download-batch-table tbody tr')
+    await expect(reopened.locator('.task-detail [data-task-status]')).toHaveText('已成功')
+    const finalRows = reopened.locator('.download-batch-table ol > li')
     await expect(finalRows).toHaveCount(3)
     for (const date of ['2026-09-01', '2026-09-02', '2026-09-03']) {
       const batchRow = finalRows.filter({
@@ -158,8 +152,8 @@ if (SCENARIO === 'flow') {
     const submitted = await submit(page)
     await page.getByLabel('任务接收').getByRole('link', { name: '查看任务', exact: true }).click()
     await expect(page).toHaveURL(`/downloads/tasks/${submitted.taskId}`)
-    await expect(page.locator('[data-task-status]')).toHaveText('部分失败', { timeout: 15_000 })
-    const failedRow = page.locator('.download-batch-table tbody tr').filter({
+    await expect(page.locator('.task-detail [data-task-status]')).toHaveText('部分失败', { timeout: 15_000 })
+    const failedRow = page.locator('.download-batch-table ol > li').filter({
       has: page.getByText('2026-09-11 至 2026-09-11', { exact: true }),
     })
     await expect(failedRow).toHaveCount(1)
@@ -183,7 +177,7 @@ if (SCENARIO === 'flow') {
       if (request.method() === 'POST' && new URL(request.url()).pathname.endsWith('/retry')) retryPosts.push(request.postDataJSON())
     })
     await page.locator('[data-retry]').click({ clickCount: 2 })
-    await expect(page.locator('[data-task-status]')).toHaveText('已成功', { timeout: 15_000 })
+    await expect(page.locator('.task-detail [data-task-status]')).toHaveText('已成功', { timeout: 15_000 })
     expect(retryPosts).toEqual([{ expectedVersion: version }])
     const done = await taskDetail(request, submitted.taskId)
     expect(done).toMatchObject({ status: 'SUCCEEDED', requestCount: 4, counts: {
@@ -210,7 +204,7 @@ if (SCENARIO === 'resume') {
     const pageErrors = []
     observePageErrors(page, pageErrors)
     await page.goto(`/downloads/tasks/${RESUME_TASK_ID}`)
-    await expect(page.locator('[data-task-status]')).toHaveText('已中断')
+    await expect(page.locator('.task-detail [data-task-status]')).toHaveText('已中断')
     const before = await taskDetail(request, RESUME_TASK_ID)
     const oldLeaves = await batches(request, RESUME_TASK_ID)
     expect(oldLeaves.map(batch => [batch.status, batch.attemptCount])).toEqual([
@@ -228,7 +222,7 @@ if (SCENARIO === 'resume') {
     await expect.poll(async () => (await snapshot(request)).calls['2026-09-22']).toBe(1)
     expect(await snapshot(request)).toMatchObject({ committedKeys: ['20260920'], rowCount: 1, inFlight: true })
     await release(request, '2026-09-22')
-    await expect(page.locator('[data-task-status]')).toHaveText('部分失败', { timeout: 15_000 })
+    await expect(page.locator('.task-detail [data-task-status]')).toHaveText('部分失败', { timeout: 15_000 })
     expect(resumePosts).toEqual([{ expectedVersion: before.version }])
     const done = await taskDetail(request, RESUME_TASK_ID)
     expect(done.status).toBe('PARTIAL_FAILED')

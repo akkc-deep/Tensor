@@ -1,19 +1,16 @@
 import { flushPromises, mount as mountComponent } from '@vue/test-utils'
 import { createMemoryHistory, createRouter } from 'vue-router'
-import { ElButton, ElRadioGroup } from 'element-plus'
+import { ElButton } from 'element-plus'
 import { nextTick } from 'vue'
 
 import { ApiError, ClientError } from '../api/errors.js'
 import { PENDING_SUBMISSION_KEY } from '../utils/downloadTaskSubmission.js'
 import AsyncStatePanel from '../components/common/AsyncStatePanel.vue'
-import WorkbenchPanel from '../components/common/WorkbenchPanel.vue'
 import ApiSelect from '../components/download/ApiSelect.vue'
 import DataSourceSelect from '../components/download/DataSourceSelect.vue'
 import DownloadAction from '../components/download/DownloadAction.vue'
-import DownloadResult from '../components/download/DownloadResult.vue'
 import DownloadTaskList from '../components/download/DownloadTaskList.vue'
 import DynamicParameterForm from '../components/download/DynamicParameterForm.vue'
-import MetadataField from '../components/common/MetadataField.vue'
 import DownloadView from './DownloadView.vue'
 
 const api = vi.hoisted(() => ({
@@ -22,6 +19,9 @@ const api = vi.hoisted(() => ({
   getDownloadCapabilities: vi.fn(),
   submitDownloadTask: vi.fn(),
   listDownloadTasks: vi.fn(),
+  getDownloadTask: vi.fn(),
+  retryDownloadTask: vi.fn(),
+  resumeDownloadTask: vi.fn(),
 }))
 
 vi.mock('../api/dataSources.js', () => ({
@@ -32,6 +32,9 @@ vi.mock('../api/downloadTasks.js', () => ({
   getDownloadCapabilities: api.getDownloadCapabilities,
   submitDownloadTask: api.submitDownloadTask,
   listDownloadTasks: api.listDownloadTasks,
+  getDownloadTask: api.getDownloadTask,
+  retryDownloadTask: api.retryDownloadTask,
+  resumeDownloadTask: api.resumeDownloadTask,
 }))
 
 const SUBMISSION_ID = '33333333-3333-4333-8333-333333333333'
@@ -191,7 +194,7 @@ let visibility = 'visible'
 
 async function mountView({ sources = [source()], apis = [descriptor()], attachTo } = {}) {
   api.listDataSources.mockResolvedValueOnce(sources)
-  api.listApis.mockResolvedValueOnce(apis)
+  if (sources.length) api.listApis.mockResolvedValueOnce(apis)
   const wrapper = mount(DownloadView, { attachTo })
   wrappers.push(wrapper)
   await flushPromises()
@@ -205,10 +208,7 @@ async function selectApi(wrapper, apiName = 'daily') {
 }
 
 async function setParameter(wrapper, name, value) {
-  const field = wrapper.getComponent(DynamicParameterForm).findAllComponents(MetadataField)
-    .find((candidate) => candidate.attributes('data-parameter') === name)
-  field.vm.$emit('update:modelValue', value)
-  await nextTick()
+  await wrapper.getComponent(DynamicParameterForm).get(`[data-parameter="${name}"] input, [data-parameter="${name}"] select`).setValue(value)
 }
 
 async function submit(wrapper) {
@@ -221,6 +221,7 @@ function expectBefore(first, second) {
 }
 
 beforeEach(() => {
+  vi.resetAllMocks()
   vi.useFakeTimers()
   visibility = 'visible'
   vi.spyOn(document, 'visibilityState', 'get').mockImplementation(() => visibility)
@@ -238,6 +239,16 @@ afterEach(() => {
 })
 
 describe('DownloadView', () => {
+  it('preserves input when the selected Studio mode is clicked again', async () => {
+    const wrapper = await mountView()
+    await selectApi(wrapper)
+    const button = wrapper.get('[data-mode="RANGE"]')
+    expect(button.attributes('aria-pressed')).toBe('true')
+    await setParameter(wrapper, 'ts_code', '000001.SZ')
+    await button.trigger('click')
+    expect(wrapper.get('[data-parameter="ts_code"] input').element.value).toBe('000001.SZ')
+  })
+
   it('recovers first, then starts metadata and recent-list requests independently', async () => {
     const recovery = deferred()
     const metadata = deferred()
@@ -263,6 +274,9 @@ describe('DownloadView', () => {
     expect(api.listDownloadTasks).toHaveBeenCalledWith({ submissionId: SUBMISSION_ID })
     expect(api.listDataSources).not.toHaveBeenCalled()
     expect(wrapper.text()).toContain('正在找回原任务')
+    expect(wrapper.get('.pending-submission').text()).toContain('trade_date=20260912')
+    expect(wrapper.getComponent(DownloadAction).text()).toBe('正在查找…')
+    expect(wrapper.get('.catalog-panel').text()).not.toContain('暂无数据源')
 
     recovery.resolve(emptyPage())
     await flushPromises()
@@ -283,40 +297,125 @@ describe('DownloadView', () => {
     expect(wrapper.getComponent(DataSourceSelect).props('sources')).toEqual([source()])
     expect(wrapper.getComponent(ApiSelect).props('apis')).toEqual(apis)
     expect(wrapper.getComponent(DownloadAction).props('disabled')).toBe(true)
-    expect(wrapper.findAllComponents(WorkbenchPanel).map((panel) => panel.props('title'))).toEqual([
-      '下载配置', '任务接收', '近期任务',
-    ])
+    expect(wrapper.getComponent(DownloadTaskList).get('h2').text()).toContain('最近任务')
+    expect(wrapper.find('.download-feedback').exists()).toBe(false)
 
     const failure = new ClientError('NETWORK', 'capability-request')
     api.getDownloadCapabilities.mockRejectedValueOnce(failure)
     await selectApi(wrapper)
-    expect(wrapper.text()).toContain('下载配置加载失败')
+    expect(wrapper.get('.studio-form').text()).toContain('接口能力加载失败')
     expect(wrapper.text()).toContain('请求 ID：capability-request')
 
     api.getDownloadCapabilities.mockResolvedValueOnce(capabilities())
     await wrapper.findAllComponents(ElButton)
-      .find((button) => button.text() === '重新加载配置').get('button').trigger('click')
+      .find((button) => button.text() === '重新加载能力').get('button').trigger('click')
     await flushPromises()
     expect(wrapper.getComponent(DynamicParameterForm).exists()).toBe(true)
+  })
+
+  it('updates the heading immediately, shows capability loading, and ignores a late failure', async () => {
+    const pending = deferred()
+    api.getDownloadCapabilities.mockReturnValueOnce(pending.promise)
+    const wrapper = await mountView({ apis: [descriptor(), descriptor({ apiName: 'weekly', displayName: '周线行情' })] })
+    await wrapper.get('.catalog-list button').trigger('click')
+    expect(wrapper.get('.selected-api-heading').text()).toContain('日线行情')
+    expect(wrapper.get('.studio-form').text()).toContain('正在加载接口能力')
+    expect(wrapper.findComponent(DynamicParameterForm).exists()).toBe(false)
+    await wrapper.findAll('.catalog-list button')[1].trigger('click')
+    await flushPromises()
+    pending.reject(new ClientError('NETWORK', 'old-capability'))
+    await flushPromises()
+    expect(wrapper.get('.selected-api-heading').text()).toContain('周线行情')
+    expect(wrapper.findComponent(DynamicParameterForm).exists()).toBe(true)
+    expect(wrapper.text()).not.toContain('old-capability')
+    expect(wrapper.getComponent(DownloadAction).props('disabled')).toBe(false)
+  })
+
+  it('keeps parameters when filtering or reselecting and resets filters on source changes', async () => {
+    const wrapper = await mountView({ sources: [source(), source({ pluginId: 'other', displayName: 'Other' })] })
+    expect(wrapper.text()).toContain('请选择数据源')
+    wrapper.getComponent(DataSourceSelect).vm.$emit('update:modelValue', 'contract_fixture')
+    await flushPromises()
+    await wrapper.get('.catalog-list button').trigger('click')
+    await flushPromises()
+    await setParameter(wrapper, 'ts_code', '000001.SZ')
+    await wrapper.get('.catalog-list button').trigger('click')
+    await wrapper.get('[aria-label="搜索接口"]').setValue('missing')
+    expect(wrapper.getComponent(DynamicParameterForm).get('input').element.value).toBe('000001.SZ')
+    const loading = deferred()
+    api.listApis.mockReturnValueOnce(loading.promise)
+    wrapper.getComponent(DataSourceSelect).vm.$emit('update:modelValue', 'other')
+    await nextTick()
+    expect(wrapper.get('.catalog-panel').text()).toContain('正在加载接口目录')
+    expect(wrapper.find('.selected-api-heading').exists()).toBe(false)
+    expect(wrapper.findComponent(DynamicParameterForm).exists()).toBe(false)
+    loading.resolve([descriptor({ apiName: 'other_api', displayName: '其他接口', category: '其他' })])
+    await flushPromises()
+    expect(wrapper.get('[aria-label="搜索接口"]').element.value).toBe('')
+    expect(wrapper.get('[aria-label="接口分类"]').element.value).toBe('')
+    expect(wrapper.get('.catalog-list').text()).toContain('其他接口')
+  })
+
+  it('separates empty sources, unavailable sources and empty catalogs', async () => {
+    const empty = await mountView({ sources: [] })
+    expect(empty.get('.catalog-panel').text()).toContain('暂无数据源')
+    const unavailable = await mountView({ sources: [source({ downloadAvailable: false, unavailableReason: '尚未配置凭证' })] })
+    expect(unavailable.get('.catalog-panel').text()).toContain('尚未配置凭证')
+    expect(unavailable.get('.catalog-list button').element.disabled).toBe(true)
+    expect(unavailable.getComponent(DownloadAction).props('disabled')).toBe(true)
+    const noApis = await mountView({ apis: [] })
+    expect(noApis.get('.catalog-panel').text()).toContain('此数据源暂无接口')
+  })
+
+  it('retries a failed catalog without presenting it as empty or losing its source', async () => {
+    api.listDataSources.mockResolvedValueOnce([source()])
+    api.listApis.mockRejectedValueOnce(new ClientError('NETWORK', 'catalog-request'))
+    const wrapper = mount(DownloadView)
+    wrappers.push(wrapper)
+    await flushPromises()
+    expect(wrapper.get('.catalog-panel').text()).toContain('接口目录加载失败')
+    expect(wrapper.get('.catalog-panel').text()).toContain('catalog-request')
+    expect(wrapper.text()).not.toContain('此数据源暂无接口')
+    api.listApis.mockResolvedValueOnce([descriptor()])
+    await wrapper.findAllComponents(ElButton).find(button => button.text() === '重新加载目录').trigger('click')
+    await flushPromises()
+    expect(wrapper.get('.catalog-list').text()).toContain('日线行情')
   })
 
   it('uses capability modes and remounts a clean parameter form on every switch', async () => {
     const wrapper = await mountView()
     await selectApi(wrapper)
-    const radios = wrapper.getComponent(ElRadioGroup)
-    expect(radios.props('modelValue')).toBe('RANGE')
+    const rangeButton = wrapper.get('[data-mode="RANGE"]')
+    expect(rangeButton.attributes('aria-pressed')).toBe('true')
     expect(wrapper.text()).toContain('交易日期')
     expect(wrapper.getComponent(DynamicParameterForm).props('parameters').map(({ name }) => name)).toEqual([
       'ts_code', 'start_date', 'end_date',
     ])
     await setParameter(wrapper, 'ts_code', '000001.SZ')
-    radios.vm.$emit('update:modelValue', 'SINGLE')
+    await wrapper.get('[data-mode="SINGLE"]').trigger('click')
     await nextTick()
     expect(wrapper.getComponent(DynamicParameterForm).props('parameters').map(({ name }) => name)).toEqual([
       'ts_code', 'trade_date',
     ])
     expect(wrapper.getComponent(DynamicParameterForm).get('input').element.value).toBe('')
     expect(wrapper.text()).toContain('单次请求，结果不代表完整历史')
+  })
+
+  it.each([
+    ['VERIFIED_RULE', null, false, '采用已验证的完整性规则'],
+    ['CONFIRMED_ROW_LIMIT', 9223372036854775807n, true, '单次返回上限为 9223372036854775807 行。达到上限时按规则拆分日期区间。'],
+    ['CONFIRMED_ROW_LIMIT', 6000n, false, '单次返回上限为 6000 行。完整性以任务执行结果为准。'],
+  ])('explains %s capability without promising completion or previewing batches', async (kind, rowLimit, splittable, text) => {
+    api.getDownloadCapabilities.mockResolvedValueOnce(capabilities({ range: {
+      ...capabilities().range, planningMode: 'NATIVE_RANGE', splittable,
+      completenessRule: { kind, rowLimit, evidence: '服务端规则' },
+    } }))
+    const wrapper = await mountView()
+    await selectApi(wrapper)
+    expect(wrapper.get('.completeness-note').text()).toContain(text)
+    expect(wrapper.get('.form-parameters').text()).not.toContain('批次预览')
+    await wrapper.get('[data-mode="SINGLE"]').trigger('click')
+    expect(wrapper.get('.completeness-note').text()).toBe('单次请求，结果不代表完整历史。')
   })
 
   it('explains response-only before submission and removes the caveat for SINGLE', async () => {
@@ -326,10 +425,10 @@ describe('DownloadView', () => {
     } }))
     const wrapper = await mountView()
     await selectApi(wrapper)
-    expect(wrapper.get('.form-footer').text()).toContain('按所选日期区间采集本次接口返回的记录。数据完整性未确认，可能存在上游截断。')
+    expect(wrapper.get('.completeness-note').text()).toContain('按所选日期区间采集本次接口返回的记录。数据完整性未确认，可能存在上游截断。')
     expect(wrapper.find('[role="dialog"]').exists()).toBe(false)
     expect(wrapper.find('input[type="checkbox"]').exists()).toBe(false)
-    wrapper.getComponent(ElRadioGroup).vm.$emit('update:modelValue', 'SINGLE')
+    await wrapper.get('[data-mode="SINGLE"]').trigger('click')
     await nextTick()
     expect(wrapper.text()).not.toContain('可能存在上游截断')
     expect(wrapper.text()).toContain('单次请求，结果不代表完整历史')
@@ -354,7 +453,8 @@ describe('DownloadView', () => {
     }))
     const wrapper = await mountView()
     await selectApi(wrapper)
-    expect(wrapper.getComponent(ElRadioGroup).props('modelValue')).toBe('SINGLE')
+    expect(wrapper.get('[data-mode="SINGLE"]').attributes('aria-pressed')).toBe('true')
+    expect(wrapper.get('[data-mode="RANGE"]').element.disabled).toBe(true)
     expect(wrapper.text()).toContain('范围完整性尚待验证')
     expect(wrapper.getComponent(DownloadAction).props('disabled')).toBe(true)
   })
@@ -364,7 +464,7 @@ describe('DownloadView', () => {
     try {
       await selectApi(wrapper)
       const sourceInput = wrapper.getComponent(DataSourceSelect).get('input[role="combobox"]')
-      const apiInput = wrapper.getComponent(ApiSelect).get('input[role="combobox"]')
+      const apiInput = wrapper.getComponent(ApiSelect).get('[aria-label="搜索接口"]')
       const firstParameter = wrapper.getComponent(DynamicParameterForm)
         .get('[data-parameter="ts_code"] input')
       const button = wrapper.getComponent(DownloadAction).get('button')
@@ -408,9 +508,39 @@ describe('DownloadView', () => {
     expect(wrapper.get('.download-feedback a').attributes('href')).toBe(`/downloads/tasks/${TASK_ID}`)
     expect(wrapper.text()).toContain('接收后可继续提交其他任务')
     expect(wrapper.text()).not.toMatch(/下载成功|插入数|更新数|EMPTY/)
-    expect(wrapper.findComponent(DownloadResult).exists()).toBe(false)
     expect(wrapper.getComponent(DownloadAction).props('submitting')).toBe(false)
     expect(api.listDownloadTasks.mock.calls.filter(([criteria]) => criteria.page === 1)).toHaveLength(2)
+  })
+
+  it('locks every request input during a slow POST and displays the frozen request only once', async () => {
+    const pending = deferred()
+    api.submitDownloadTask.mockReturnValueOnce(pending.promise)
+    const wrapper = await mountView()
+    await selectApi(wrapper)
+    await setParameter(wrapper, 'ts_code', ' 000001.sz ')
+    await setParameter(wrapper, 'start_date', '2026-09-01')
+    await setParameter(wrapper, 'end_date', '2026-09-02')
+    const button = wrapper.getComponent(DownloadAction).get('button')
+    await Promise.all([button.trigger('click'), button.trigger('click')])
+    await flushPromises()
+
+    expect(api.submitDownloadTask).toHaveBeenCalledOnce()
+    expect(wrapper.get('.pending-submission').text()).toContain('ts_code=000001.SZ')
+    expect(wrapper.get('.pending-submission').text()).toContain(SUBMISSION_ID)
+    expect(wrapper.get('.download-feedback').attributes('aria-busy')).toBe('true')
+    expect(button.text()).toBe('正在创建…')
+    expect(wrapper.getComponent(DataSourceSelect).props('disabled')).toBe(true)
+    expect(wrapper.getComponent(ApiSelect).props('disabled')).toBe(true)
+    expect(wrapper.getComponent(DynamicParameterForm).props('disabled')).toBe(true)
+    expect(wrapper.findAll('[data-mode]').every(mode => mode.element.disabled)).toBe(true)
+    await button.trigger('click')
+    expect(api.submitDownloadTask).toHaveBeenCalledOnce()
+
+    pending.resolve(receipt())
+    await flushPromises()
+    expect(wrapper.get('.download-feedback [role="status"]').text()).toContain('任务已接收')
+    expect(wrapper.find('.pending-submission').exists()).toBe(false)
+    expect(button.element.disabled).toBe(false)
   })
 
   it('keeps range validation and submits a parameterless SINGLE task as an empty object', async () => {
@@ -453,14 +583,12 @@ describe('DownloadView', () => {
     expect(wrapper.text()).not.toContain('start_date=20260909')
 
     api.listDownloadTasks.mockResolvedValueOnce(emptyPage())
-    await wrapper.findAllComponents(ElButton)
-      .find((button) => button.text() === '重新查找').get('button').trigger('click')
+    await wrapper.findAll('button').find(button => button.text() === '重新查找').trigger('click')
     await flushPromises()
     expect(api.listDownloadTasks).toHaveBeenCalledWith({ submissionId: SUBMISSION_ID })
 
     api.submitDownloadTask.mockResolvedValueOnce(receipt())
-    await wrapper.findAllComponents(ElButton)
-      .find((button) => button.text() === '使用原参数重新确认').get('button').trigger('click')
+    await wrapper.findAll('button').find(button => button.text() === '使用原参数重新确认').trigger('click')
     await flushPromises()
     expect(api.submitDownloadTask.mock.calls[1][0]).toEqual(api.submitDownloadTask.mock.calls[0][0])
   })
@@ -575,4 +703,47 @@ describe('DownloadView', () => {
     await vi.advanceTimersByTimeAsync(30_000)
     expect(api.listDownloadTasks).toHaveBeenCalledOnce()
   })
+})
+
+
+it('preflights a quick action, uses the fresh bigint and suppresses rapid repeats', async () => {
+  const row = { ...recoveredTask(), status: 'FAILED', canRetry: true }
+  api.listDownloadTasks.mockResolvedValue(emptyPage({ total: 1n, items: [row] }))
+  const fresh = deferred(), post = deferred()
+  api.getDownloadTask.mockReturnValueOnce(fresh.promise).mockResolvedValue({ ...row, status: 'RUNNING', canRetry: false })
+  api.retryDownloadTask.mockReturnValueOnce(post.promise)
+  const wrapper = await mountView()
+  const list = wrapper.getComponent(DownloadTaskList)
+  list.vm.$emit('control', row, 'retry')
+  list.vm.$emit('control', row, 'retry')
+  await nextTick()
+  expect(list.get('[data-quick-retry]').element.disabled).toBe(true)
+  expect(api.retryDownloadTask).not.toHaveBeenCalled()
+  fresh.resolve({ ...row, version: 9007199254740993n })
+  await flushPromises()
+  expect(api.retryDownloadTask).toHaveBeenCalledExactlyOnceWith(TASK_ID, 9007199254740993n)
+  expect(list.find('.task-action-feedback').text()).toContain('正在提交重试')
+  post.resolve({ taskId: TASK_ID })
+  await flushPromises()
+  expect(list.text()).toContain('重试请求已接收')
+  expect(api.listDownloadTasks).toHaveBeenCalledTimes(2)
+  expect(api.getDownloadTask).toHaveBeenCalledTimes(2)
+})
+
+it('does not use list permissions when a fresh task forbids the operation or the lookup fails', async () => {
+  const row = { ...recoveredTask(), status: 'FAILED', canRetry: true }
+  api.listDownloadTasks.mockResolvedValue(emptyPage({ total: 1n, items: [row] }))
+  api.getDownloadTask.mockResolvedValueOnce({ ...row, canRetry: false })
+  const wrapper = await mountView()
+  const list = wrapper.getComponent(DownloadTaskList)
+  list.vm.$emit('control', row, 'retry')
+  await flushPromises()
+  expect(list.text()).toContain('当前操作不可用')
+  expect(api.retryDownloadTask).not.toHaveBeenCalled()
+  api.getDownloadTask.mockRejectedValueOnce(new ClientError('NETWORK'))
+  list.vm.$emit('control', row, 'retry')
+  await flushPromises()
+  expect(list.find('.task-action-feedback').text()).not.toContain('当前操作不可用')
+  expect(list.find('.task-action-feedback').text()).toContain('重新查询')
+  expect(api.retryDownloadTask).not.toHaveBeenCalled()
 })

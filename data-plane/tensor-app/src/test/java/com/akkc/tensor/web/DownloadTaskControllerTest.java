@@ -36,27 +36,27 @@ class DownloadTaskControllerTest {
         verify(service).policySummary(task);
     }
 
-    @Test void keepsPageMembershipButMapsEveryRowFromItsOwnCompleteSnapshot() {
+    @Test void mapsTheRepositorySnapshotPageWithoutRequeryingDetails() {
         var service = mock(DownloadTaskService.class);
         var queries = mock(DownloadTaskQueryService.class);
         var controller = new DownloadTaskController(service, queries, mock(DownloadParameterResolver.class), new DownloadTaskOperationLogger());
         var first = task(UUID.randomUUID(), DownloadTask.Status.RUNNING);
         var second = task(UUID.randomUUID(), DownloadTask.Status.RUNNING);
         var query = new DownloadTaskQuery.Tasks(3, 20, new DownloadTaskRepository.TaskFilter(null, null, DownloadTask.Status.RUNNING, null));
-        when(queries.tasks(query.filter(), 3, 20)).thenReturn(new DownloadTaskRepository.Page<>(57, List.of(first, second)));
-        when(queries.detail(first.taskId())).thenReturn(new DownloadTaskRepository.TaskSnapshot(Optional.of(task(first.taskId(), DownloadTask.Status.SUCCEEDED)),
-                new DownloadTaskRepository.Counts(2, 0, 0, 2, 0, 1, 7, 6, 1)));
-        when(queries.detail(second.taskId())).thenReturn(new DownloadTaskRepository.TaskSnapshot(Optional.of(second),
-                new DownloadTaskRepository.Counts(3, 1, 1, 1, 0, 2, 2, 2, 0)));
+        var firstSnapshot = new DownloadTaskRepository.TaskSnapshot(Optional.of(first),
+                new DownloadTaskRepository.Counts(2, 0, 1, 1, 0, 0, 7, 6, 1));
+        var secondSnapshot = new DownloadTaskRepository.TaskSnapshot(Optional.of(second),
+                new DownloadTaskRepository.Counts(3, 1, 1, 1, 0, 2, 2, 2, 0));
+        when(queries.taskSnapshots(query.filter(), 3, 20))
+                .thenReturn(new DownloadTaskRepository.Page<>(57, List.of(firstSnapshot, secondSnapshot)));
         when(service.controls(any())).thenReturn(new DownloadTaskService.ControlAvailability(false, false));
         var result = controller.tasks(query);
         assertThat(result.page()).isEqualTo(3); assertThat(result.total()).isEqualTo(57);
         assertThat(result.items()).extracting(item -> item.taskId()).containsExactly(first.taskId(), second.taskId());
-        assertThat(result.items().get(0).status()).isEqualTo(DownloadTask.Status.SUCCEEDED);
-        assertThat(result.items().get(0).counts().succeededBatches()).isEqualTo(2);
+        assertThat(result.items().get(0).status()).isEqualTo(DownloadTask.Status.RUNNING);
+        assertThat(result.items().get(0).counts().runningBatches()).isEqualTo(1);
         assertThat(result.items().get(1).counts().runningBatches()).isEqualTo(1);
-        when(queries.detail(second.taskId())).thenThrow(new com.akkc.tensor.plugin.api.error.TensorException(ErrorCode.QUERY_FAILED, "Query failed") {});
-        assertThatThrownBy(() -> controller.tasks(query)).isInstanceOf(com.akkc.tensor.plugin.api.error.TensorException.class);
+        verify(queries, never()).detail(any());
     }
 
     static DownloadTask task(UUID id, DownloadTask.Status status) {

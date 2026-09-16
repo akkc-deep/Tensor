@@ -1908,7 +1908,7 @@ function harnessFunction(name, dependencies = {}, source = harnessText) {
   return new Function(...Object.keys(dependencies), `return (${body})`)(...Object.values(dependencies))
 }
 const check = (condition, message) => assert.ok(condition, message)
-const uiExpect = (actual) => ({ toEqual: (wanted) => assert.deepEqual(actual, wanted), toBeVisible: async () => {}, toBeChecked: async () => assert.equal(actual.isChecked(), true) })
+const uiExpect = (actual) => ({ toEqual: (wanted) => assert.deepEqual(actual, wanted), toBeVisible: async () => {}, toBeChecked: async () => assert.equal(actual.isChecked(), true), toHaveAttribute: async (name, value) => assert.equal(actual.getAttribute(name), value) })
 
 // Evaluate real registration only; callbacks cannot launch a browser, JVM, SQL or source request.
 function singleHarnessBootstrap(env = {}) {
@@ -2255,15 +2255,16 @@ test('imperative RANGE selection fills the chosen capability labels for every da
     const values = {}
     const page = {
       waitForResponse: async () => responses.shift(), keyboard: { press: async () => {} },
+      locator: () => ({ getByText: () => ({}) }),
       getByRole: (role, options) => ({
-        isChecked: () => selectedMode === options.name,
-        getByText: (label, textOptions) => ({ click: async () => {
-          assert.deepEqual([role, options, textOptions], ['radiogroup', { name: '下载模式', exact: true }, { exact: true }])
-          selectedMode = label
-        } }),
+        getAttribute: (name) => name === 'aria-pressed' ? String(selectedMode === options.name) : undefined,
+        click: async () => {
+          assert.deepEqual([role, options], ['button', { name: '批量下载', exact: true }])
+          selectedMode = options.name
+        },
       }),
       getByLabel: (pattern) => {
-        assert.equal(selectedMode, '日期区间')
+        assert.equal(selectedMode, '批量下载')
         const descriptor = descriptors.find((d) => pattern.test(`${d.label} *`))
         assert.ok(descriptor, `actual capability label must match ${pattern}`)
         return { fill: async (value) => { values[descriptor.name] = value }, press: async () => {}, inputValue: async () => values[descriptor.name] }
@@ -2431,18 +2432,19 @@ test('imperative submission preserves failed evidence and accepts exact success 
     let posts = 0, reads = 0, statusChecks = 0
     const visible = []
     const control = { click: async () => {}, getByRole: () => control,
+      locator: (selector) => selector === ':scope > .confirmation dd' ? { last: () => ({ text: sourceRows.toString() }) } : control,
       getByText: (text) => ({ text }) }
     const response = { status: () => 202,
       headers: () => ({ location: taskQueryRoute, 'x-request-id': TASK_QUERY_ID }),
       request: () => ({ postDataJSON: () => request, headers: () => ({ 'x-request-id': TASK_QUERY_ID }) }) }
     const page = { waitForResponse: async () => response,
-      getByRole: (role, options) => options.name === '提交任务'
+      getByRole: (role, options) => options.name?.test?.('开始下载')
         ? { click: async () => { posts += 1 } } : control,
-      locator: (selector) => selector === '[data-task-status]' ? { text: label } : control }
+      locator: (selector) => selector === '.task-detail [data-task-status]' ? { text: label } : control }
     const pageExpect = (actual) => ({
       toBeVisible: async () => { if (actual.text) visible.push(actual.text) },
       toBeEnabled: async () => {}, toHaveURL: async () => {},
-      toHaveText: async (expected) => { statusChecks += 1; assert.equal(actual.text, expected) },
+      toHaveText: async (expected) => { if (actual.text === label) statusChecks += 1; else visible.push(`来源行数 ${actual.text}`); assert.equal(actual.text, expected) },
     })
     const evidence = { downloads: [] }, observedTasks = []
     const submit = harnessFunction('submitDownload', {
@@ -2691,15 +2693,17 @@ import { createRequire } from 'node:module'
 const requireForVue = createRequire(import.meta.url)
 async function renderedNavigation() {
   const { parse, compileScript } = requireForVue('@vue/compiler-sfc')
-  const vue = requireForVue('vue'), routerApi = requireForVue('vue-router')
+  const vue = requireForVue('vue'), routerApi = requireForVue('vue-router'), icons = requireForVue('@element-plus/icons-vue')
   const { renderToString } = requireForVue('@vue/server-renderer')
   const { JSDOM } = requireForVue('jsdom')
   const source = readFileSync(new URL('../src/layouts/AppLayout.vue', import.meta.url), 'utf8')
   let compiled = compileScript(parse(source).descriptor, { id: 'offline-navigation', inlineTemplate: true }).content
+  const downloadTask = { createDownloadTaskChannel: () => ({}), downloadTaskChannelKey: Symbol('downloadTaskChannel') }
+  const modules = { vue, 'vue-router': routerApi, '@element-plus/icons-vue': icons, '../composables/useDownloadTask.js': downloadTask }
   const dependencies = {}
   compiled = compiled.replace(/import\s*\{([^}]+)\}\s*from\s*['"]([^'"]+)['"]/g, (_, names, module) => {
-    assert.ok(['vue', 'vue-router'].includes(module))
-    const exports = module === 'vue' ? vue : routerApi
+    assert.ok(module in modules)
+    const exports = modules[module]
     for (const entry of names.split(',')) {
       const [exported, local = exported] = entry.trim().split(/\s+as\s+/)
       dependencies[local] = exports[exported]
@@ -2715,11 +2719,11 @@ async function renderedNavigation() {
   } finally { dom.window.close() }
 }
 
-test('actual layout navigation includes visible indices in unlabelled link names', async () => {
+test('actual Studio layout navigation uses plain accessible link names', async () => {
   const links = await renderedNavigation()
   assert.deepEqual(links.slice(0, 2), [
-    { href: '/downloads', name: '数据下载01', ariaLabel: null },
-    { href: '/datasets', name: '数据查看02', ariaLabel: null },
+    { href: '/downloads', name: '数据下载', ariaLabel: null },
+    { href: '/datasets', name: '数据查看', ariaLabel: null },
   ])
 })
 
@@ -2790,7 +2794,7 @@ function navigationFixture(links, cached = false) {
   }
 }
 
-test('imperative download entrance opens a fresh checked route despite numbered navigation links', async () => {
+test('imperative download entrance opens a fresh checked route with Studio navigation links', async () => {
   const fixture = navigationFixture(await renderedNavigation())
   await fixture.download(fixture.page, 'fixture', { apiName: 'fixture_daily' })
   assert.deepEqual(fixture.paths, ['/downloads'])

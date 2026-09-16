@@ -1,6 +1,6 @@
 <script setup>
 import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue'
-import { Download, Grid, Setting, ArrowLeft, ArrowRight, Check, Search, RefreshRight } from '@element-plus/icons-vue'
+import { Download, Grid, Setting, ArrowDown, ArrowLeft, ArrowRight, Check, Search, RefreshRight } from '@element-plus/icons-vue'
 import { useDownloadFlow } from '../../composables/useDownloadFlow.js'
 import { useDownloadTaskList } from '../../composables/useDownloadTaskList.js'
 import { taskStatusLabel, taskExtractionNotice } from '../../utils/downloadTaskText.js'
@@ -92,7 +92,7 @@ onBeforeUnmount(() => { disposed = true; flow.dispose(); list.dispose() })
               <header><h2>接口目录 <span class="count">{{ flow.apis.length }}</span></h2></header>
               <label class="live-source field"><span>数据源</span><select :value="flow.selectedPluginId" :disabled="flow.locked || !flow.sources.length" @change="selectSource($event.target.value)"><option v-if="!flow.sources.length" value="">等待连接</option><option v-for="source in flow.sources" :key="source.pluginId" :value="source.pluginId">{{ source.displayName }}</option></select></label>
               <label class="catalog-search"><Search /><input v-model="search" aria-label="搜索接口" placeholder="搜索名称或接口…" /></label>
-              <select v-model="category" class="category-select" aria-label="接口分类"><option value="">全部分类</option><option v-for="item in categories" :key="item">{{ item }}</option></select>
+              <div class="category-filter"><select v-model="category" class="category-select" aria-label="接口分类"><option value="">全部分类</option><option v-for="item in categories" :key="item">{{ item }}</option></select><ArrowDown aria-hidden="true" /></div>
               <div class="catalog-list"><button v-for="item in visibleCatalog" :key="item.apiName" :disabled="flow.locked" :class="{ selected: flow.selectedApiName === item.apiName }" :aria-pressed="flow.selectedApiName === item.apiName" @click="flow.selectedApiName !== item.apiName && flow.selectApi(item.apiName)"><span>{{ item.displayName }}<code>{{ item.apiName }}</code></span><ArrowRight v-if="flow.selectedApiName === item.apiName" /></button><p v-if="!visibleCatalog.length" class="catalog-empty">{{ flow.metadataState === 'LOADING' ? '正在加载接口…' : '暂无匹配接口' }}</p></div>
               <footer>{{ visibleCatalog.length }} 个接口</footer>
             </section>

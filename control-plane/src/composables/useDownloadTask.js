@@ -1,4 +1,4 @@
-import { computed, ref } from 'vue'
+import { computed, reactive, ref } from 'vue'
 
 import { ApiError } from '../api/errors.js'
 import {
@@ -14,7 +14,25 @@ const UNCERTAIN_CODES = new Set([
   'SOURCE_PAYLOAD_INVALID', 'SOURCE_RANGE_MISMATCH',
 ])
 
-export function useDownloadTask() {
+export const downloadTaskChannelKey = Symbol('downloadTaskChannel')
+
+export function createDownloadTaskChannel() {
+  const pending = reactive(new Map()), listeners = new Set()
+  return {
+    pending,
+    subscribe(listener) {
+      listeners.add(listener)
+      return () => listeners.delete(listener)
+    },
+    notify(id, owner, type) {
+      if (type) pending.set(id, type)
+      else pending.delete(id)
+      for (const listener of listeners) listener({ id, owner, type })
+    },
+  }
+}
+
+export function useDownloadTask({ channel = createDownloadTaskChannel(), loadBatches = true, poll = true } = {}) {
   const taskId = ref(null), task = ref(null), batches = ref(null)
   const page = ref(1), pageSize = ref(20), loading = ref(false)
   const batchStatus = ref(''), includeSplit = ref(false)
@@ -24,9 +42,11 @@ export function useDownloadTask() {
   const invalidTaskId = ref(false), controlsFresh = ref(false)
   const isVisible = ref(document.visibilityState !== 'hidden')
   const disposed = ref(false)
+  const active = ref(true)
   const notFound = computed(() => taskError.value?.code === 'TASK_NOT_FOUND')
   const controlsEnabled = computed(() => task.value !== null && taskError.value === null &&
-    controlsFresh.value && operation.value === null && isVisible.value && !disposed.value)
+    controlsFresh.value && operation.value === null && !channel.pending.has(taskId.value) &&
+    isVisible.value && active.value && !disposed.value)
   const canRetry = computed(() => controlsEnabled.value && task.value.canRetry)
   const canResume = computed(() => controlsEnabled.value && task.value.canResume)
 
@@ -38,7 +58,7 @@ export function useDownloadTask() {
     timer = null
   }
   function available() {
-    return !disposed.value && isVisible.value && taskId.value !== null && !invalidTaskId.value
+    return !disposed.value && active.value && isVisible.value && taskId.value !== null && !invalidTaskId.value
   }
   function current(epoch) {
     return available() && epoch === generation
@@ -71,7 +91,7 @@ export function useDownloadTask() {
     loading.value = true
     let delay = null
     const job = Promise.allSettled([
-      getDownloadTask(id), listDownloadTaskBatches(id, criteria),
+      getDownloadTask(id), loadBatches ? listDownloadTaskBatches(id, criteria) : Promise.resolve(null),
     ]).then(([detail, batchResult]) => {
       if (!current(epoch)) return false
       if (detail.status === 'rejected' && detail.reason?.code === 'TASK_NOT_FOUND') {
@@ -97,7 +117,7 @@ export function useDownloadTask() {
         return false
       }
       failures = 0
-      if (['QUEUED', 'RUNNING'].includes(task.value.status)) delay = 2000
+      if (poll && ['QUEUED', 'RUNNING'].includes(task.value.status)) delay = 2000
       return true
     }).finally(() => finish(job, epoch, delay))
     inFlight = job
@@ -168,6 +188,7 @@ export function useDownloadTask() {
     generation += 1
     clearTimer()
     queued = true
+    channel.notify(id, control, type)
     const valid = () => available() && controlContext === context
     // Reserving the slot before waiting prevents the old GET finally from dispatching a query.
     const job = (async () => {
@@ -182,9 +203,9 @@ export function useDownloadTask() {
         if (!valid()) return false
         operationError.value = error
         operationMessage.value = error.code === 'TASK_STATE_CONFLICT'
-          ? '任务状态已变化，已重新查询'
+          ? '任务状态已变化，请核对最新任务状态'
           : !(error instanceof ApiError) || UNCERTAIN_CODES.has(error.code)
-            ? '操作结果尚未确认，正在重新查询任务'
+            ? '操作结果尚未确认，请核对最新任务状态'
             : error.message
         return false
       }
@@ -192,6 +213,7 @@ export function useDownloadTask() {
       if (!disposed.value) operation.value = null
       // Every result invalidates the old permit until a fresh detail GET succeeds.
       finish(job, generation, null)
+      channel.notify(id, control, null)
     })
     inFlight = job
     return job
@@ -206,9 +228,31 @@ export function useDownloadTask() {
       context += 1
       queued = false
       loading.value = false
+      controlsFresh.value = false
     } else refresh()
   }
   document.addEventListener('visibilitychange', handleVisibilityChange)
+
+  function setActive(value) {
+    if (disposed.value || active.value === value) return Promise.resolve(false)
+    active.value = value
+    generation += 1
+    context += 1
+    clearTimer()
+    queued = false
+    loading.value = false
+    controlsFresh.value = false
+    return value ? refresh() : Promise.resolve(true)
+  }
+
+  const unsubscribe = channel.subscribe(({ id, owner, type }) => {
+    if (owner === control || id !== taskId.value) return
+    controlsFresh.value = false
+    generation += 1
+    clearTimer()
+    queued = false
+    if (!type) refresh()
+  })
 
   function dispose() {
     if (disposed.value) return
@@ -219,6 +263,7 @@ export function useDownloadTask() {
     queued = false
     loading.value = false
     operation.value = null
+    unsubscribe()
     document.removeEventListener('visibilitychange', handleVisibilityChange)
   }
 
@@ -228,6 +273,6 @@ export function useDownloadTask() {
     taskUpdatedAt, batchesUpdatedAt, operation, operationError, operationMessage,
     notFound, invalidTaskId, canRetry, canResume,
     load, refresh, changePage, changePageSize,
-    retry: () => control('retry'), resume: () => control('resume'), dispose,
+    retry: () => control('retry'), resume: () => control('resume'), setActive, dispose,
   }
 }

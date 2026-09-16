@@ -1,180 +1,54 @@
-import { flushPromises, mount } from '@vue/test-utils'
-import { ElOption, ElOptionGroup, ElSelect } from 'element-plus'
-import { nextTick } from 'vue'
-
+import { mount } from '@vue/test-utils'
 import ApiSelect from './ApiSelect.vue'
 
-const CATEGORY_COUNTS = [
-  ['basic_organization', 7],
-  ['行情与估值', 7],
-  ['交易与资金', 5],
-  ['互联互通与转融通', 3],
-  ['财务与披露', 9],
-  ['公司行动', 2],
-  ['股东与治理', 7],
+const apis = [
+  { apiName: 'daily', displayName: '日线行情', category: '行情', queryMode: 'trade_date', parameters: [] },
+  { apiName: 'weekly', displayName: '周线行情', category: '行情', queryMode: 'trade_date', parameters: [] },
+  { apiName: 'stock_basic', displayName: '股票列表', category: '基础', queryMode: 'snapshot', parameters: [] },
 ]
+const mountCatalog = (props = {}) => mount(ApiSelect, { props: { apis, sourceName: '测试来源', ...props } })
+const codes = wrapper => wrapper.findAll('.catalog-list code').map(item => item.text())
 
-function descriptor(apiName, displayName, category = '行情与估值') {
-  return {
-    apiName,
-    displayName,
-    category,
-    queryMode: 'trade_date',
-    parameters: [],
-  }
-}
+it('combines name/code search with category and counts the visible results', async () => {
+  const wrapper = mountCatalog()
+  expect(codes(wrapper)).toEqual(['daily', 'weekly', 'stock_basic'])
+  expect(wrapper.get('footer').text()).toBe('3 个接口 · 测试来源')
+  expect(wrapper.findAll('option').map(option => option.text())).toEqual(['全部', '行情', '基础'])
+  await wrapper.get('[aria-label="搜索接口"]').setValue('  DAI  ')
+  expect(codes(wrapper)).toEqual(['daily'])
+  expect(wrapper.get('footer').text()).toBe('1 个接口 · 测试来源')
+  await wrapper.get('[aria-label="接口分类"]').setValue('基础')
+  expect(codes(wrapper)).toEqual([])
+  expect(wrapper.text()).toContain('没有匹配的接口')
+  expect(wrapper.get('footer').text()).toBe('0 个接口 · 测试来源')
+  await wrapper.get('[aria-label="接口分类"]').setValue('')
+  await wrapper.get('[aria-label="搜索接口"]').setValue('周线')
+  expect(codes(wrapper)).toEqual(['weekly'])
+  await wrapper.get('[aria-label="搜索接口"]').setValue('')
+  expect(codes(wrapper)).toEqual(['daily', 'weekly', 'stock_basic'])
+  wrapper.unmount()
+})
 
-function currentApis() {
-  let index = 0
-  return CATEGORY_COUNTS.flatMap(([category, count]) =>
-    Array.from({ length: count }, () => {
-      index += 1
-      if (index === 1) return descriptor('daily', '日线行情', category)
-      if (index === 2) return descriptor('weekly', '周线行情', category)
-      return descriptor(`api_${index}`, `接口 ${index}`, category)
-    }),
-  )
-}
+it('preserves selection through filtering and avoids resetting the selected API', async () => {
+  const wrapper = mountCatalog({ modelValue: 'daily' })
+  await wrapper.get('.catalog-list button[aria-pressed="true"]').trigger('click')
+  expect(wrapper.emitted('update:modelValue')).toBeUndefined()
+  await wrapper.get('[aria-label="搜索接口"]').setValue('weekly')
+  expect(wrapper.find('[aria-pressed="true"]').exists()).toBe(false)
+  await wrapper.get('.catalog-list button').trigger('click')
+  expect(wrapper.emitted('update:modelValue')).toEqual([['weekly']])
+  await wrapper.get('[aria-label="搜索接口"]').setValue('')
+  expect(wrapper.get('[aria-pressed="true"] code').text()).toBe('daily')
+  wrapper.unmount()
+})
 
-function filter(wrapper, query) {
-  wrapper.getComponent(ElSelect).props('filterMethod')(query)
-  return nextTick()
-}
-
-describe('ApiSelect', () => {
-  it('groups all 40 options by the current seven metadata categories', () => {
-    const apis = currentApis()
-    const wrapper = mount(ApiSelect, {
-      props: { modelValue: '', apis },
-    })
-
-    expect(
-      wrapper.findAllComponents(ElOptionGroup).map((group) =>
-        group.props('label'),
-      ),
-    ).toEqual(CATEGORY_COUNTS.map(([category]) => category))
-    const options = wrapper.findAllComponents(ElOption)
-    expect(options).toHaveLength(40)
-    expect(options.map((option) => option.props('value'))).toEqual(
-      apis.map(({ apiName }) => apiName),
-    )
-    expect(new Set(options.map((option) => option.props('value'))).size).toBe(
-      40,
-    )
-  })
-
-  it('searches API names case-insensitively', async () => {
-    const wrapper = mount(ApiSelect, {
-      props: { modelValue: '', apis: currentApis() },
-    })
-
-    await filter(wrapper, '  DAI  ')
-
-    expect(
-      wrapper.findAllComponents(ElOption).map((option) => option.props('value')),
-    ).toEqual(['daily'])
-  })
-
-  it('searches display names and exposes the fixed no-match text', async () => {
-    const wrapper = mount(ApiSelect, {
-      props: { modelValue: '', apis: currentApis() },
-    })
-
-    await filter(wrapper, '周线')
-    expect(wrapper.findAllComponents(ElOption)).toHaveLength(1)
-    expect(wrapper.getComponent(ElOption).props('value')).toBe('weekly')
-
-    await filter(wrapper, '不存在')
-    expect(wrapper.findAllComponents(ElOption)).toHaveLength(0)
-    expect(wrapper.getComponent(ElSelect).props('noMatchText')).toBe(
-      '无匹配接口',
-    )
-  })
-
-  it('restores original options without changing selection or descriptors', async () => {
-    const apis = currentApis()
-    const snapshot = structuredClone(apis)
-    const wrapper = mount(ApiSelect, {
-      props: { modelValue: 'daily', apis },
-    })
-
-    await filter(wrapper, 'weekly')
-    await filter(wrapper, '')
-
-    expect(wrapper.findAllComponents(ElOption)).toHaveLength(40)
-    expect(wrapper.getComponent(ElSelect).props('modelValue')).toBe('daily')
-    expect(wrapper.emitted('update:modelValue')).toBeUndefined()
-    expect(apis).toEqual(snapshot)
-  })
-
-  it('restores native combobox search results after Escape clears its input', async () => {
-    const wrapper = mount(ApiSelect, {
-      attachTo: document.body,
-      props: {
-        modelValue: '',
-        apis: [
-          descriptor('daily', '日线行情'),
-          descriptor('weekly', '周线行情'),
-        ],
-      },
-    })
-
-    try {
-      const combobox = wrapper.get('input[role="combobox"]')
-      await combobox.trigger('click')
-      await combobox.setValue('周线')
-      await flushPromises()
-      expect(wrapper.findAllComponents(ElOption).map((option) => option.props('value'))).toEqual([
-        'weekly',
-      ])
-
-      await combobox.trigger('keydown', { key: 'Escape' })
-      await flushPromises()
-      expect(combobox.element.value).toBe('')
-      expect(wrapper.findAllComponents(ElOption).map((option) => option.props('value'))).toEqual([
-        'daily', 'weekly',
-      ])
-    } finally {
-      wrapper.unmount()
-    }
-  })
-
-  it('supports keyboard selection and locks interaction when disabled', async () => {
-    const wrapper = mount(ApiSelect, {
-      attachTo: document.body,
-      props: {
-        modelValue: '',
-        apis: [
-          descriptor('daily', '日线行情'),
-          descriptor('weekly', '周线行情'),
-        ],
-      },
-    })
-
-    try {
-      const combobox = wrapper.get('input[role="combobox"]')
-      combobox.element.focus()
-      expect(document.activeElement).toBe(combobox.element)
-
-      await combobox.trigger('keydown', { key: 'ArrowDown' })
-      await flushPromises()
-      expect(wrapper.emitted('update:modelValue')).toBeUndefined()
-
-      await combobox.trigger('keydown', { key: 'Enter' })
-      await flushPromises()
-      expect(wrapper.emitted('update:modelValue')).toEqual([['daily']])
-
-      await wrapper.setProps({ disabled: true })
-      expect(wrapper.getComponent(ElSelect).props('disabled')).toBe(true)
-      expect(wrapper.get('input[role="combobox"]').attributes('disabled')).toBe(
-        '',
-      )
-      await combobox.trigger('keydown', { key: 'ArrowDown' })
-      await combobox.trigger('keydown', { key: 'Enter' })
-      await flushPromises()
-      expect(wrapper.emitted('update:modelValue')).toEqual([['daily']])
-    } finally {
-      wrapper.unmount()
-    }
-  })
+it('disables all catalog controls and distinguishes an empty catalog from no matches', async () => {
+  const wrapper = mountCatalog({ disabled: true })
+  for (const control of wrapper.findAll('input, select, button')) expect(control.element.disabled).toBe(true)
+  await wrapper.get('.catalog-list button').trigger('click')
+  expect(wrapper.emitted('update:modelValue')).toBeUndefined()
+  await wrapper.setProps({ disabled: false, apis: [] })
+  expect(wrapper.text()).toContain('此数据源暂无接口')
+  expect(wrapper.get('footer').text()).toBe('0 个接口 · 测试来源')
+  wrapper.unmount()
 })

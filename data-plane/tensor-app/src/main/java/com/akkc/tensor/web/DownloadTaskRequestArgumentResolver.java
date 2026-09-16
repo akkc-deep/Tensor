@@ -20,6 +20,7 @@ import org.springframework.web.servlet.HandlerMapping;
 /** Strict task-only query/path binding; does not change legacy dataset query rules. */
 public final class DownloadTaskRequestArgumentResolver implements HandlerMethodArgumentResolver {
     private static final String NON_NEGATIVE_INTEGER_REGEX = "[0-9]+";
+    private static final String STATUS_GROUP = "statusGroup";
     private static final Set<Class<?>> TYPES = Set.of(Tasks.class, Batches.class, TaskId.class, Dataset.class, NoQuery.class);
 
     @Override
@@ -30,7 +31,7 @@ public final class DownloadTaskRequestArgumentResolver implements HandlerMethodA
             NativeWebRequest webRequest, WebDataBinderFactory binderFactory) {
         var request = Objects.requireNonNull(webRequest.getNativeRequest(HttpServletRequest.class));
         var type = parameter.getParameterType();
-        Set<String> allowed = type == Tasks.class ? Set.of(RequestFields.PAGE, RequestFields.PAGE_SIZE, RequestFields.PLUGIN_ID, RequestFields.API_NAME, RequestFields.STATUS, RequestFields.SUBMISSION_ID)
+        Set<String> allowed = type == Tasks.class ? Set.of(RequestFields.PAGE, RequestFields.PAGE_SIZE, RequestFields.PLUGIN_ID, RequestFields.API_NAME, RequestFields.STATUS, STATUS_GROUP, RequestFields.SUBMISSION_ID)
                 : type == Batches.class ? Set.of(RequestFields.PAGE, RequestFields.PAGE_SIZE, RequestFields.STATUS, RequestFields.INCLUDE_SPLIT) : Set.of();
         for (var entry : request.getParameterMap().entrySet()) {
             if (!allowed.contains(entry.getKey())) throw invalid("query");
@@ -48,15 +49,20 @@ public final class DownloadTaskRequestArgumentResolver implements HandlerMethodA
         if (type == Tasks.class) {
             String plugin = request.getParameter(RequestFields.PLUGIN_ID), api = request.getParameter(RequestFields.API_NAME);
             String submission = request.getParameter(RequestFields.SUBMISSION_ID);
+            String status = request.getParameter(RequestFields.STATUS);
+            String statusGroup = request.getParameter(STATUS_GROUP);
+            if (status != null && statusGroup != null) throw invalid(STATUS_GROUP);
             return new Tasks(page, pageSize, new DownloadTaskRepository.TaskFilter(
                     plugin == null ? null : identifier(RequestFields.PLUGIN_ID, plugin), api == null ? null : identifier(RequestFields.API_NAME, api),
-                    status(DownloadTask.Status.class, request.getParameter(RequestFields.STATUS)),
-                    submission == null ? null : uuid(RequestFields.SUBMISSION_ID, submission)));
+                    status(DownloadTask.Status.class, RequestFields.STATUS, status),
+                    submission == null ? null : uuid(RequestFields.SUBMISSION_ID, submission),
+                    status(DownloadTaskRepository.TaskStatusGroup.class, STATUS_GROUP, statusGroup)));
         }
         String split = value(request, RequestFields.INCLUDE_SPLIT, Boolean.FALSE.toString());
         if (!split.equals(Boolean.TRUE.toString()) && !split.equals(Boolean.FALSE.toString())) throw invalid(RequestFields.INCLUDE_SPLIT);
         return new Batches(uuid(RequestFields.TASK_ID, path(request, RequestFields.TASK_ID)), page, pageSize,
-                new DownloadTaskRepository.BatchFilter(status(DownloadBatch.Status.class, request.getParameter(RequestFields.STATUS)),
+                new DownloadTaskRepository.BatchFilter(status(DownloadBatch.Status.class, RequestFields.STATUS,
+                                request.getParameter(RequestFields.STATUS)),
                         Boolean.parseBoolean(split)));
     }
 
@@ -85,9 +91,9 @@ public final class DownloadTaskRequestArgumentResolver implements HandlerMethodA
             throw invalid(field);
         return UUID.fromString(value);
     }
-    private static <E extends Enum<E>> E status(Class<E> type, String value) {
+    private static <E extends Enum<E>> E status(Class<E> type, String field, String value) {
         if (value == null) return null;
-        try { return Enum.valueOf(type, value); } catch (IllegalArgumentException invalid) { throw invalid(RequestFields.STATUS); }
+        try { return Enum.valueOf(type, value); } catch (IllegalArgumentException invalid) { throw invalid(field); }
     }
     private static DownloadBindingException invalid(String field) {
         return new DownloadBindingException(ErrorCode.PARAM_INVALID, List.of(new FieldErrorResponse(field, "has invalid value")));

@@ -13,6 +13,7 @@ export function useDownloadTaskList() {
   const page = ref(1)
   const pageSize = ref(20)
   const status = ref('')
+  const statusGroup = ref('')
   const filters = ref({})
   const filterErrors = ref({})
   const result = ref(null)
@@ -59,6 +60,7 @@ export function useDownloadTaskList() {
     const requestGeneration = generation
     const criteria = { page: page.value, pageSize: pageSize.value, ...filters.value }
     if (status.value) criteria.status = status.value
+    if (statusGroup.value) criteria.statusGroup = statusGroup.value
     loading.value = true
     const operation = listDownloadTasks(criteria)
 
@@ -150,11 +152,17 @@ export function useDownloadTaskList() {
 
   function changeStatus(value) {
     if (disposed || !started || !STATUSES.has(value)) return Promise.resolve(false)
-    if (status.value === value) return request()
-    return changeFilters(filters.value, value)
+    if (status.value === value && !statusGroup.value) return request()
+    return changeFilters(filters.value, value, '')
   }
 
-  function changeFilters(next, nextStatus = status.value) {
+  function changeStatusGroup(value) {
+    if (disposed || !started || !['', 'ACTIVE', 'DONE', 'ERROR'].includes(value)) return Promise.resolve(false)
+    if (statusGroup.value === value && !status.value) return request()
+    return changeFilters(filters.value, '', value)
+  }
+
+  function changeFilters(next, nextStatus = status.value, nextGroup = nextStatus ? '' : statusGroup.value) {
     if (disposed || !started || !STATUSES.has(nextStatus)) return Promise.resolve(false)
     const values = {}, errors = {}
     for (const key of ['pluginId', 'apiName', 'submissionId']) {
@@ -168,6 +176,7 @@ export function useDownloadTaskList() {
     if (Object.keys(errors).length) return Promise.resolve(false)
     generation += 1
     status.value = nextStatus
+    statusGroup.value = nextGroup
     filters.value = values
     page.value = 1
     result.value = error.value = lastUpdatedAt.value = null
@@ -213,6 +222,8 @@ export function useDownloadTaskList() {
     changeFilters,
     status,
     changeStatus,
+    statusGroup,
+    changeStatusGroup,
     page,
     pageSize,
     result,

@@ -1,14 +1,16 @@
 # Tensor 控制面 UI Demo
 
-新增[后端接入版 Demo](live/README.md)：启动开发服务后打开 `/studio-live.html`，使用真实目录、任务与数据查询。下文描述原版 `/ui-demos.html`。
+正式 Studio 已完成迁移并继续通过真实 API 工作；使用说明和验证记录见[控制面 README](../../README.md)与 [STUDIO-T10 验证记录](../../../docs/verification/STUDIO-T10.md)。两个 Demo 仍作为独立、可追溯的设计基准和调试工具，不接入正式导航。
 
-已选定「工作台 Studio」设计：可搜索接口目录、下载配置、任务列表三栏联动。后续仅适配和验收 PC 桌面浏览器。其他四套设计和方案切换入口已移除。
+[后端接入版 Demo](live/README.md)：启动开发服务后打开 `/studio-live.html`，使用真实目录、任务与数据查询。下文描述本地模拟入口 `/ui-demos.html`。
+
+已选定「工作台 Studio」设计：可搜索接口目录、下载配置、任务列表三栏联动。正式 Studio 和 Demo 均仅适配和验收 PC 桌面浏览器。其他四套设计和方案切换入口已移除。
 
 在 `control-plane` 使用 Node 24.15+（24.x）运行 `npm run dev`，打开 `/ui-demos.html`。旧链接附带的 `?v=` 参数不再切换设计，均展示工作台。
 
 提供单次下载、按日期范围批量下载、数据查看、外观设置；支持模拟任务创建、排队、逐批完成、重试、恢复、详情、条件查询与分页。状态保存在当前页面内存中，刷新后重置。主题颜色仅影响本次 Demo。
 
-这是独立的多页面入口，不使用原应用路由、样式、请求层或后端服务。现有控制面仍由 `index.html` 加载；仅在 Vite 构建配置中增加 Demo 入口，`npm run build` 会同时输出两者。
+`/ui-demos.html` 是独立的多页面入口，不使用正式应用路由、样式、请求层或后端服务；`/studio-live.html` 同样独立，但复用正式 `/api/v1` 请求层连接真实后端。正式控制面由 `index.html` 加载，Vite 构建保留全部三个入口。
 
 `catalog.json` 是 2026-09-13 的本地快照：40 个接口的名称、参数、筛选字段来自 `data-plane/tensor-plugin-tushare/src/main/resources/datasets/tushare_pro/*.yaml`；记录来自 `docs/data-template/*.json`，每个接口最多 24 条、8 个字段，不代表数据库全量数据。样例为空的接口显示空状态。
 

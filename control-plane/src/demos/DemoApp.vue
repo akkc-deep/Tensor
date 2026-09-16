@@ -1,6 +1,6 @@
 <script setup>
 import { computed, nextTick, onBeforeUnmount, provide, ref, watch } from 'vue'
-import { Download, Grid, Setting, ArrowRight, Close, Check, Search, RefreshRight, Link } from '@element-plus/icons-vue'
+import { Download, Grid, Setting, ArrowDown, ArrowRight, Close, Check, Search, RefreshRight, Link } from '@element-plus/icons-vue'
 import DownloadForm from './DownloadForm.vue'
 import TaskList from './TaskList.vue'
 import DatasetBrowser from './DatasetBrowser.vue'
@@ -51,7 +51,7 @@ onBeforeUnmount(demo.dispose)
               <section class="catalog-panel" aria-label="接口目录">
                 <header><h2>接口目录 <span class="count">{{ demo.catalog.length }}</span></h2></header>
                 <label class="catalog-search"><Search /><input v-model="search" aria-label="搜索接口" placeholder="搜索名称或接口…" /></label>
-                <select v-model="category" class="category-select" aria-label="接口分类"><option>全部</option><option v-for="c in [...new Set(demo.catalog.map(item => item.category))]" :key="c">{{ c }}</option></select>
+                <div class="category-filter"><select v-model="category" class="category-select" aria-label="接口分类"><option>全部</option><option v-for="c in [...new Set(demo.catalog.map(item => item.category))]" :key="c">{{ c }}</option></select><ArrowDown aria-hidden="true" /></div>
                 <div class="catalog-list"><button v-for="item in visibleCatalog" :key="item.id" :class="{ selected: demo.selectedId === item.id }" :aria-pressed="demo.selectedId === item.id" @click="demo.select(item.id)"><span>{{ item.name }}<code>{{ item.id }}</code></span><ArrowRight v-if="demo.selectedId === item.id" /></button><p v-if="!visibleCatalog.length" class="catalog-empty">没有匹配的接口，请换个关键词。</p></div>
                 <footer>{{ visibleCatalog.length }} 个接口 · Tushare Pro</footer>
               </section>

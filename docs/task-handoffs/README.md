@@ -6,6 +6,7 @@
 | --- | --- | --- |
 | [tensor-v1/](tensor-v1/) | Tensor v1 正式任务：1 份看板、78 份任务交接 | [Tensor v1 看板](tensor-v1/tensor-v1-task-board.md) |
 | 当前目录 | Studio 前端迁移：10 个中等偏小任务 | [Studio 前端看板](studio-frontend-task-board.md) |
+| 当前目录 | 数据完整性检验：13 项任务，按本地检查设计实施 | [数据完整性看板](data-integrity-task-board.md) |
 | [ISSUE-004/](ISSUE-004/) | UI 改版任务；当前已有看板，后续交接放在同一目录 | [ISSUE-004 看板](ISSUE-004/ISSUE-004-task-board.md) |
 | [ISSUE-018/](ISSUE-018/) | 日期区间批量下载：T01–T14均已完成；本次30个RANGE/251项通过，四接口27项明确排除，SINGLE74项保留；032六门禁及终审通过，母任务已收尾 | [ISSUE-018 看板](ISSUE-018/ISSUE-018-task-board.md) · [T14交接](ISSUE-018/ISSUE-018-T14-handoff.md) |
 | [ISSUE-026/](ISSUE-026/) | 原六项ISSUE-027～032均COMPLETED；251项通过、四接口27项明确排除且问题保留；033本次跳过，保持NOT_STARTED | [子issue看板](ISSUE-026/ISSUE-026-task-board.md) · [历史交接](ISSUE-031-handoff.md) · [最终验收](../verification/ISSUE-032-range-final-closure.md) · [总任务原交接](ISSUE-026-handoff.md) |
@@ -16,6 +17,7 @@ ISSUE-018 的后续缺口按用户要求另由 [ISSUE-019～026 看板](ISSUE-01
 task-handoffs/
 ├── README.md
 ├── studio-frontend-task-board.md
+├── data-integrity-task-board.md
 ├── tensor-v1/
 │   ├── tensor-v1-task-board.md
 │   └── Mxx-Txx-handoff.md

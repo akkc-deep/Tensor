@@ -1,14 +1,14 @@
-export const DEFAULT_ACCENT = '#2857b4'
+export const DEFAULT_ACCENT = '#3565b6'
 
 const DEFAULT_PALETTE = {
-  bg: '#edf2f6',
+  bg: '#f7f9fb',
   surface: '#ffffff',
-  raised: '#f3f6fa',
-  nav: '#f9fbfd',
-  line: '#c8d3e0',
-  text: '#142a42',
-  muted: '#52677d',
-  accentBg: '#e8efff',
+  raised: '#f1f4f8',
+  nav: '#ffffff',
+  line: '#e0e6ee',
+  text: '#1f2d43',
+  muted: '#52627a',
+  accentBg: '#eaf0fa',
 }
 
 const SURFACE_ROLES = ['bg', 'surface', 'raised', 'nav', 'accentBg']
@@ -52,24 +52,13 @@ export function createTheme(value) {
   if (typeof value !== 'string' || !/^#[0-9a-f]{6}$/i.test(value)) return null
 
   const requested = value.toLowerCase()
-  const palette = requested === DEFAULT_ACCENT
-    ? { ...DEFAULT_PALETTE }
-    : {
-        bg: mix(requested, '#ffffff', 0.88),
-        surface: mix(requested, '#ffffff', 0.98),
-        raised: mix(requested, '#ffffff', 0.92),
-        nav: mix(requested, '#ffffff', 0.93),
-        line: mix(requested, '#ffffff', 0.7),
-        text: mix(requested, '#142a42', 0.9),
-        muted: mix(requested, '#52677d', 0.88),
-        accentBg: mix(requested, '#ffffff', 0.86),
-      }
+  const palette = { ...DEFAULT_PALETTE }
 
   let applied = requested
   const surfaces = SURFACE_ROLES.map((role) => palette[role])
   for (let amount = 0; amount <= 100; amount += 1) {
     applied = mix(requested, '#000000', amount / 100)
-    if ([...surfaces, '#ffffff'].every((surface) => contrastRatio(applied, surface) >= 5.5)) {
+    if ([...surfaces, '#ffffff'].every((surface) => contrastRatio(applied, surface) >= 4.5)) {
       break
     }
   }
@@ -80,7 +69,7 @@ export function createTheme(value) {
     colors: {
       ...palette,
       accent: applied,
-      success: '#14785e',
+      success: '#28745a',
       error: '#b72d47',
     },
   }

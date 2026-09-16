@@ -15,7 +15,7 @@ const STATUSES = new Set([
   'QUEUED', 'RUNNING', 'SUCCEEDED', 'PARTIAL_FAILED', 'FAILED', 'INTERRUPTED',
 ])
 const CRITERIA_KEYS = new Set([
-  'page', 'pageSize', 'pluginId', 'apiName', 'status', 'submissionId',
+  'page', 'pageSize', 'pluginId', 'apiName', 'status', 'statusGroup', 'submissionId',
 ])
 const BATCH_CRITERIA_KEYS = new Set(['page', 'pageSize', 'status', 'includeSplit'])
 const BATCH_STATUSES = new Set(['PENDING', 'RUNNING', 'SUCCEEDED', 'FAILED', 'SPLIT'])
@@ -227,6 +227,10 @@ function listCriteria(criteria) {
       throw new TypeError(`Download task ${key} is invalid`)
     }
   }
+  if (criteria.statusGroup !== undefined &&
+      (!['ACTIVE', 'DONE', 'ERROR'].includes(criteria.statusGroup) || criteria.status !== undefined)) {
+    throw new TypeError('Download task statusGroup is invalid')
+  }
   if (criteria.status !== undefined && !STATUSES.has(criteria.status)) {
     throw new TypeError('Download task status is invalid')
   }
@@ -237,7 +241,7 @@ function listCriteria(criteria) {
     throw new TypeError('Download task submissionId is invalid')
   }
   const values = { page, pageSize }
-  for (const key of ['pluginId', 'apiName', 'status', 'submissionId']) {
+  for (const key of ['pluginId', 'apiName', 'status', 'statusGroup', 'submissionId']) {
     if (criteria[key] !== undefined) values[key] = criteria[key]
   }
   return values
