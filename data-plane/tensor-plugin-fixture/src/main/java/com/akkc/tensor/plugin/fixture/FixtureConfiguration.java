@@ -5,7 +5,6 @@ import com.akkc.tensor.core.adapter.GenericDatasetAdapter;
 import com.akkc.tensor.core.adapter.ValueConverter;
 import com.akkc.tensor.plugin.api.DatasetAdapter;
 import com.akkc.tensor.plugin.api.constant.DatasetFields;
-import com.akkc.tensor.plugin.api.constant.StringConstants;
 import com.akkc.tensor.plugin.api.dataset.BusinessKeyDefinition;
 import com.akkc.tensor.plugin.api.dataset.BusinessKeyMode;
 import com.akkc.tensor.plugin.api.dataset.ColumnDefinition;
@@ -30,7 +29,7 @@ import org.springframework.context.annotation.Profile;
 @ConditionalOnProperty(
         prefix = "tensor.plugins.fixture",
         name = "enabled",
-        havingValue = StringConstants.TRUE)
+        havingValue = "true")
 public final class FixtureConfiguration {
     private static final DatasetDefinition DEFINITION = definition();
 

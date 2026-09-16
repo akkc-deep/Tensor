@@ -3,7 +3,6 @@ package com.akkc.tensor.web;
 import com.akkc.tensor.core.download.task.*;
 import com.akkc.tensor.plugin.api.constant.PaginationConstants;
 import com.akkc.tensor.plugin.api.constant.RequestFields;
-import com.akkc.tensor.plugin.api.constant.StringConstants;
 import com.akkc.tensor.plugin.api.constant.ValidationConstants;
 import com.akkc.tensor.plugin.api.error.ErrorCode;
 import com.akkc.tensor.plugin.api.model.*;
@@ -63,7 +62,7 @@ public final class DownloadTaskRequestArgumentResolver implements HandlerMethodA
     private static String value(HttpServletRequest request, String field, String fallback) {
         String value = request.getParameter(field); return value == null ? fallback : value;
     }
-    @SuppressWarnings(StringConstants.UNCHECKED_WARNING)
+    @SuppressWarnings("unchecked")
     private static String path(HttpServletRequest request, String name) {
         var variables = (Map<String, String>) request.getAttribute(HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE);
         return variables == null ? null : variables.get(name);

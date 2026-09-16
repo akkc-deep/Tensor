@@ -2,7 +2,6 @@ package com.akkc.tensor.core.download.task;
 
 import com.akkc.tensor.core.adapter.FingerprintKeyCodec;
 import com.akkc.tensor.plugin.api.constant.RequestFields;
-import com.akkc.tensor.plugin.api.constant.StringConstants;
 import com.akkc.tensor.plugin.api.constant.ValidationConstants;
 import com.akkc.tensor.plugin.api.dataset.ColumnDefinition;
 import com.akkc.tensor.plugin.api.dataset.DatasetDefinition;
@@ -236,7 +235,7 @@ public final class DownloadTaskJson {
         root.properties().forEach(field -> values.put(field.getKey(), scalarText(field.getKey(), field.getValue())));
         String canonical = bounded(canonical(values), limit);
         try {
-            @SuppressWarnings(StringConstants.UNCHECKED_WARNING)
+            @SuppressWarnings("unchecked")
             Map<String, Object> result = mapper.readValue(canonical, LinkedHashMap.class);
             return Map.copyOf(result);
         } catch (IOException exception) {

@@ -13,8 +13,7 @@ import org.springframework.context.annotation.Bean;
 
 /** Explicitly imported task lifecycle; production collaborator assembly belongs to its importer. */
 public final class DownloadTaskConfiguration {
-    public static final String RUN_ID_BEAN = "downloadTaskRunId";
-    @Bean(RUN_ID_BEAN)
+    @Bean("downloadTaskRunId")
     public UUID downloadTaskRunId(DatasetCatalog catalog) {
         return UUID.randomUUID();
     }
@@ -22,7 +21,7 @@ public final class DownloadTaskConfiguration {
     @Bean(destroyMethod = "close")
     public DownloadTaskCoordinator downloadTaskCoordinator(DownloadTaskService tasks,
             DownloadTaskRepository repository, DownloadTaskRunner runner, Clock clock,
-            @Qualifier(RUN_ID_BEAN) UUID runId) {
+            @Qualifier("downloadTaskRunId") UUID runId) {
         return new DownloadTaskCoordinator(tasks, repository, runner, clock, runId);
     }
 

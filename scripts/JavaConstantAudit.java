@@ -73,6 +73,7 @@ public final class JavaConstantAudit {
                 || number.doubleValue() == 0 || number.doubleValue() == 1)) return "basic";
         for (TreePath current = path.getParentPath(); current != null; current = current.getParentPath()) {
             Tree tree = current.getLeaf();
+            if (tree instanceof AnnotationTree) return "annotation";
             if (tree instanceof VariableTree variable && isScalar(variable.getType())
                     && isLiteralValue(variable.getInitializer())
                     && argument(List.of(variable.getInitializer()), literal, unit, positions) == 0

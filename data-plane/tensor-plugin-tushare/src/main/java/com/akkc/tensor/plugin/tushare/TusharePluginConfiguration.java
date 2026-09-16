@@ -15,7 +15,7 @@ import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 @Configuration(proxyBeanMethods = false)
 @EnableConfigurationProperties(TushareProperties.class)
 public final class TusharePluginConfiguration {
-    @Bean(TushareConstants.DATASET_DEFINITIONS_BEAN)
+    @Bean("tushareDatasetDefinitions")
     public List<DatasetDefinition> tushareDatasetDefinitions() {
         return new DatasetDefinitionLoader().loadAll(
                 new PathMatchingResourcePatternResolver(),
@@ -25,7 +25,7 @@ public final class TusharePluginConfiguration {
     @Bean
     public TushareProPlugin tushareProPlugin(
             TushareProperties properties,
-            @Qualifier(TushareConstants.DATASET_DEFINITIONS_BEAN)
+            @Qualifier("tushareDatasetDefinitions")
                     List<DatasetDefinition> definitions) {
         TushareProClient client = new TushareProClient(
                 new TushareRestClientFactory().create(properties), properties);

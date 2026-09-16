@@ -50,9 +50,9 @@ public final class SpaWebConfiguration implements WebMvcConfigurer {
     @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
     static final class SpaForwardController {
         @GetMapping({
-            StringConstants.SLASH,
-            StringConstants.SLASH + UI_FIRST_SEGMENT,
-            StringConstants.SLASH + UI_FIRST_SEGMENT + "/{*rest}"
+            "/",
+            "/" + UI_FIRST_SEGMENT,
+            "/" + UI_FIRST_SEGMENT + "/{*rest}"
         })
         String forward(
                 @PathVariable(name = "rest", required = false) String rest,

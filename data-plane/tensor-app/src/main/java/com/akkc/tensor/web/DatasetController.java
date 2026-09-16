@@ -30,7 +30,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 @RestController
-@RequestMapping(WebConstants.DATA_SOURCES_PATH)
+@RequestMapping("/api/v1/data-sources")
 @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
 public final class DatasetController {
     private static final Set<String> SUPPORTED_PARAMETERS = Set.of(

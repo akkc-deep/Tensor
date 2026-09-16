@@ -30,9 +30,7 @@ public final class TushareConstants {
     public static final int MAX_READ_TIMEOUT_SECONDS = 120;
     public static final int MAX_RESPONSE_BYTES = 67_108_864;
     public static final int DEFAULT_MIN_REQUEST_INTERVAL_MILLIS = 1_500;
-    public static final String API_NAME_FIELD = "api_name";
     public static final String PLUGIN_ID = "tushare_pro";
-    public static final String DATASET_DEFINITIONS_BEAN = "tushareDatasetDefinitions";
     public static final String DAILY = "daily";
     public static final String WEEKLY = "weekly";
     public static final String MONTHLY = "monthly";

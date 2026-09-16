@@ -14,12 +14,11 @@ import org.slf4j.MDC;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnWebApplication;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping(value = "/api/v1/download-tasks", produces = MediaType.APPLICATION_JSON_VALUE)
+@RequestMapping(value = "/api/v1/download-tasks", produces = "application/json")
 @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
 @DependsOn("downloadTaskCoordinator")
 public final class DownloadTaskController {

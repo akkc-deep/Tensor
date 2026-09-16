@@ -1,8 +1,5 @@
 package com.akkc.tensor.web;
 
-import org.springframework.http.MediaType;
-
-import com.akkc.tensor.plugin.api.constant.RequestFields;
 import com.akkc.tensor.core.metadata.MetadataQueryService;
 import com.akkc.tensor.core.download.task.DownloadTaskService;
 import com.akkc.tensor.web.dto.DownloadCapabilitiesResponse;
@@ -23,7 +20,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping(WebConstants.DATA_SOURCES_PATH)
+@RequestMapping("/api/v1/data-sources")
 @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
 public final class DataSourceController {
     private final MetadataQueryService metadataQueryService;
@@ -34,7 +31,7 @@ public final class DataSourceController {
         this.tasks = Objects.requireNonNull(tasks, "tasks");
     }
 
-    @GetMapping(value = "/{pluginId}/apis/{apiName}/download-capabilities", produces = MediaType.APPLICATION_JSON_VALUE)
+    @GetMapping(value = "/{pluginId}/apis/{apiName}/download-capabilities", produces = "application/json")
     public DownloadCapabilitiesResponse downloadCapabilities(DownloadTaskQuery.Dataset dataset) {
         return DownloadCapabilitiesResponse.from(tasks.capabilities(dataset.key()));
     }
@@ -45,14 +42,14 @@ public final class DataSourceController {
     }
 
     @GetMapping("/{pluginId}/apis")
-    public List<ApiDescriptorResponse> listPluginApis(@PathVariable(RequestFields.PLUGIN_ID) String pluginId) {
+    public List<ApiDescriptorResponse> listPluginApis(@PathVariable("pluginId") String pluginId) {
         return metadataQueryService.listApis(PluginId.of(pluginId)).stream()
                 .map(ApiDescriptorResponse::from).toList();
     }
 
     @GetMapping("/{pluginId}/datasets")
     public List<DatasetDefinitionResponse.DatasetSummary> listPluginDatasets(
-            @PathVariable(RequestFields.PLUGIN_ID) String pluginId) {
+            @PathVariable("pluginId") String pluginId) {
         return metadataQueryService.listDatasets(PluginId.of(pluginId)).stream()
                 .map(DatasetDefinitionResponse.DatasetSummary::from).toList();
     }

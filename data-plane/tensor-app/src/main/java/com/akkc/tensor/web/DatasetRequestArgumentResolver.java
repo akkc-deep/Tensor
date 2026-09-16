@@ -44,7 +44,7 @@ public final class DatasetRequestArgumentResolver implements HandlerMethodArgume
                 request.getParameterMap().keySet());
     }
 
-    @SuppressWarnings(StringConstants.UNCHECKED_WARNING)
+    @SuppressWarnings("unchecked")
     private static DatasetPath path(HttpServletRequest request) {
         Map<String, String> variables = (Map<String, String>) request.getAttribute(
                 HandlerMapping.URI_TEMPLATE_VARIABLES_ATTRIBUTE);

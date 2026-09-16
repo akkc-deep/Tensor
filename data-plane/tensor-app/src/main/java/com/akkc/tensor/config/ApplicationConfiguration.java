@@ -1,6 +1,5 @@
 package com.akkc.tensor.config;
 
-import com.akkc.tensor.plugin.tushare.TushareConstants;
 import com.akkc.tensor.core.adapter.FingerprintKeyCodec;
 import com.akkc.tensor.core.adapter.GenericDatasetAdapter;
 import com.akkc.tensor.core.adapter.ValueConverter;
@@ -52,15 +51,14 @@ import org.springframework.transaction.PlatformTransactionManager;
 @EnableConfigurationProperties(DownloadTaskProperties.class)
 @Import(DownloadTaskConfiguration.class)
 public final class ApplicationConfiguration {
-    private static final String DATASET_ADAPTERS_BEAN = "tensorDatasetAdapters";
     @Bean
     public PluginRegistry pluginRegistry(List<DataSourcePlugin> plugins) {
         return new PluginRegistry(plugins);
     }
 
-    @Bean(DATASET_ADAPTERS_BEAN)
+    @Bean("tensorDatasetAdapters")
     public List<DatasetAdapter> tensorDatasetAdapters(
-            @Qualifier(TushareConstants.DATASET_DEFINITIONS_BEAN)
+            @Qualifier("tushareDatasetDefinitions")
                     List<DatasetDefinition> tushareDefinitions,
             ObjectProvider<DatasetAdapter> extensions) {
         ValueConverter converter = new ValueConverter();
@@ -75,7 +73,7 @@ public final class ApplicationConfiguration {
     @Bean
     @DependsOnDatabaseInitialization
     public DatasetCatalog datasetCatalog(
-            @Qualifier(DATASET_ADAPTERS_BEAN) List<DatasetAdapter> adapters,
+            @Qualifier("tensorDatasetAdapters") List<DatasetAdapter> adapters,
             DataSource dataSource) {
         return new DatasetStartupValidator(
                 adapters.stream().map(DatasetAdapter::definition).toList(),
@@ -84,7 +82,7 @@ public final class ApplicationConfiguration {
 
     @Bean
     public AdapterRegistry adapterRegistry(
-            @Qualifier(DATASET_ADAPTERS_BEAN) List<DatasetAdapter> adapters,
+            @Qualifier("tensorDatasetAdapters") List<DatasetAdapter> adapters,
             DatasetCatalog catalog) {
         return new AdapterRegistry(adapters.stream()
                 .filter(adapter -> catalog.find(adapter.datasetKey()).isPresent())
@@ -162,7 +160,7 @@ public final class ApplicationConfiguration {
     @Bean
     public DownloadTaskService downloadTaskService(PluginRegistry plugins, DatasetCatalog catalog, AdapterRegistry adapters,
             ParameterValidator validator, DownloadTaskRepository repository, DownloadTaskJson json, Clock clock,
-            @Qualifier(DownloadTaskConfiguration.RUN_ID_BEAN) UUID runId, DownloadTaskProperties properties) {
+            @Qualifier("downloadTaskRunId") UUID runId, DownloadTaskProperties properties) {
         return new DownloadTaskService(plugins, catalog, adapters, validator, repository, json, clock,
                 runId, properties.toServiceSettings());
     }
@@ -175,7 +173,7 @@ public final class ApplicationConfiguration {
     @Bean
     public DownloadTaskRunner downloadTaskRunner(DownloadTaskService tasks, DownloadTaskRepository repository,
             BatchCommitService commits, DownloadTaskJson json, Clock clock,
-            @Qualifier(DownloadTaskConfiguration.RUN_ID_BEAN) UUID runId, DownloadTaskProperties properties) {
+            @Qualifier("downloadTaskRunId") UUID runId, DownloadTaskProperties properties) {
         return new DownloadTaskRunner(tasks, repository, commits, json, clock, runId, properties.toRunnerSettings());
     }
 

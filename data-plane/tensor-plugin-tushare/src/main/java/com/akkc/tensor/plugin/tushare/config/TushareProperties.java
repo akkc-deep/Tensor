@@ -11,13 +11,13 @@ import org.springframework.boot.context.properties.bind.DefaultValue;
 
 @ConfigurationProperties("tensor.plugins.tushare-pro")
 public record TushareProperties(
-        @DefaultValue(StringConstants.TRUE) boolean enabled,
+        @DefaultValue("true") boolean enabled,
         @DefaultValue("https://api.tushare.pro") URI baseUrl,
-        @DefaultValue(StringConstants.EMPTY) Credential token,
+        @DefaultValue("") Credential token,
         @DefaultValue("5s") Duration connectTimeout,
-        @DefaultValue(TushareConstants.MAX_READ_TIMEOUT_SECONDS + "s") Duration readTimeout,
-        @DefaultValue(StringConstants.EMPTY + TushareConstants.MAX_RESPONSE_BYTES) int maxResponseBytes,
-        @DefaultValue(TushareConstants.DEFAULT_MIN_REQUEST_INTERVAL_MILLIS + "ms") Duration minRequestInterval) {
+        @DefaultValue("120s") Duration readTimeout,
+        @DefaultValue("67108864") int maxResponseBytes,
+        @DefaultValue("1500ms") Duration minRequestInterval) {
 
     @ConstructorBinding
     public TushareProperties {
