@@ -38,3 +38,30 @@ git diff --check
 最终构建于 2026-09-16 03:53:20（Asia/Shanghai）成功：**1,132** 项 Java 测试及 **4** 项打包 JAR 测试全部通过，无失败、错误或跳过。最后一次验证复用完整构建的前端产物。
 
 独立审查通过：SQL 文本、数值边界、时间单位、字节限制及指纹编码保持行为；此前新增的消息提取已撤销，无待解决问题。
+
+## 后续：单次内联字符串及乘法表达式
+
+- 按本轮请求继续覆盖所有 Java 生产源码，将单次出现的非消息字符串也纳入提取范围。
+- 注解、日志（含 MDC 上下文）和异常消息保留；已有命名枚举常量保留原设计。
+- `DownloadTaskJson` 的任务、快照及输入上限恢复为 `8 * 1024`、`16 * 1024`、`128 * 1024`，数值保持不变。
+- 审计新增单次字符串检查，支持命名枚举常量、异常构造器及字面量乘法常量；集合和运行时初始化中的字符串仍需提取。
+- 临时边界样例验证：20 项通过，覆盖单次字符串、文本块、注解、record 注解、日志、异常、普通构造器、枚举、乘法、集合、运行时初始化、重复数字及解析错误。原脚本有 7 项不符合新规则，修改后全部通过。
+- 最终审计扫描 153 个生产 Java 文件：284 处待提取字符串归零，重复非字符串值为 0。AST 快照比较确认 696 处注解及消息字面量没有新增、删除或改写。
+- 保留 `UpsertSqlFactory` 无字段、`GlobalExceptionHandler` 仅日志字段、`TushareProClient` 仅 JSON 静态字段的既有反射契约；需要时将常量放入现有外部常量类。校验注解名通过对应类型获取，保留原来的空值判断行为。
+
+最终验证命令：
+
+```sh
+java scripts/JavaConstantAudit.java
+DOCKER_HOST=unix:///Users/qiangzhiwei/.colima/default/docker.sock \
+TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE=/var/run/docker.sock \
+mvn -o -f data-plane/pom.xml -pl tensor-core -am \
+  -Dtest=DownloadTaskRepositoryIT,ExistingKeyRepositoryIT,PersistenceServiceIT,DatasetQueryServiceIT \
+  -Dsurefire.failIfNoSpecifiedTests=false test
+mvn -o -f data-plane/pom.xml verify -Dskip.installnodenpm -Dskip.npm
+git diff --check
+```
+
+49 项 MySQL 集成测试通过；最终 Maven 验证于 2026-09-16 11:41:05（Asia/Shanghai）成功，1,132 项 Java 测试及 4 项打包契约测试通过，失败、错误和跳过均为 0。前端复用已有构建产物。
+
+独立任务审查及最终兼容性审查均通过，无待处理问题。

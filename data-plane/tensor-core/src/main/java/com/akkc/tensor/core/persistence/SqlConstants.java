@@ -14,6 +14,11 @@ public final class SqlConstants {
     public static final String ASCENDING = " ASC";
     public static final String CLOSE_PARENTHESIS = ")";
     public static final String IDENTIFIER_QUOTE = "`";
+    public static final String VALUES_ASSIGNMENT = " = VALUES(";
+    public static final String INSERT_INTO = "INSERT INTO ";
+    public static final String COLUMN_LIST_START = " (";
+    public static final String VALUES_START = ") VALUES (";
+    public static final String DUPLICATE_KEY_UPDATE = ") ON DUPLICATE KEY UPDATE ";
 
     private SqlConstants() {
     }

@@ -34,10 +34,12 @@ public final class UpsertSqlFactory {
         String placeholders = insertColumns.stream().map(column -> SqlConstants.PARAMETER).collect(Collectors.joining(SqlConstants.COLUMN_SEPARATOR));
         String updates = updateColumns.stream()
                 .map(policy::quote)
-                .map(column -> column + " = VALUES(" + column + SqlConstants.CLOSE_PARENTHESIS)
+                .map(column -> column + SqlConstants.VALUES_ASSIGNMENT
+                        + column + SqlConstants.CLOSE_PARENTHESIS)
                 .collect(Collectors.joining(SqlConstants.COLUMN_SEPARATOR));
 
-        return "INSERT INTO " + policy.quote(definition.tableName().value()) + " (" + quotedColumns + ") VALUES ("
-                + placeholders + ") ON DUPLICATE KEY UPDATE " + updates;
+        return SqlConstants.INSERT_INTO + policy.quote(definition.tableName().value())
+                + SqlConstants.COLUMN_LIST_START + quotedColumns + SqlConstants.VALUES_START
+                + placeholders + SqlConstants.DUPLICATE_KEY_UPDATE + updates;
     }
 }

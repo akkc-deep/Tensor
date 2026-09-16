@@ -61,13 +61,31 @@ public final class DownloadTaskJson {
     private static final String KIND = "kind";
     private static final String ROW_LIMIT = "rowLimit";
     private static final String EVIDENCE = "evidence";
+    private static final String DATASET_KEY = "datasetKey";
+    private static final String TABLE_NAME = "tableName";
+    private static final String QUERY_MODE = "queryMode";
+    private static final String RANGE_POLICY = "rangePolicy";
+    private static final String COLUMNS = "columns";
+    private static final String BUSINESS_KEY = "businessKey";
+    private static final String LOGICAL_TYPE = "logicalType";
+    private static final String NULLABLE = "nullable";
+    private static final String DISPLAY_ORDER = "displayOrder";
+    private static final String LENGTH = "length";
+    private static final String PRECISION = "precision";
+    private static final String SCALE = "scale";
+    private static final String ACCESS_TOKEN = "access_token";
+    private static final String REFRESH_TOKEN = "refresh_token";
+    private static final String AUTHORIZATION = "authorization";
+    private static final String PASSWORD = "password";
+    private static final String SECRET = "secret";
+    private static final String API_KEY = "api_key";
 
-    private static final int TASK_BYTES = 8_192;
-    private static final int SNAPSHOT_BYTES = 16_384;
-    private static final int INPUT_BYTES = 131_072;
+    private static final int TASK_BYTES = 8 * 1024;
+    private static final int SNAPSHOT_BYTES = 16 * 1024;
+    private static final int INPUT_BYTES = 128 * 1024;
     private static final Pattern PARAMETER_NAME = Pattern.compile(ValidationConstants.IDENTIFIER_REGEX);
     private static final Set<String> SECRET_KEYS = Set.of(
-            RequestFields.TOKEN, "access_token", "refresh_token", "authorization", "password", "secret", "api_key");
+            RequestFields.TOKEN, ACCESS_TOKEN, REFRESH_TOKEN, AUTHORIZATION, PASSWORD, SECRET, API_KEY);
     private static final Set<String> POLICY_FIELDS = Set.of(
             SCHEMA_VERSION, RequestFields.MODE, PARAMETERS, START_PARAMETER, END_PARAMETER, DATE_AXIS,
             DATE_LABEL, PLANNING_MODE, SPLITTABLE, AVAILABILITY, UNAVAILABLE_REASON,
@@ -212,15 +230,15 @@ public final class DownloadTaskJson {
         }
         Map<String, Object> value = new LinkedHashMap<>();
         value.put(SCHEMA_VERSION, 1);
-        value.put("datasetKey", Map.of(RequestFields.PLUGIN_ID, dataset.datasetKey().pluginId().value(),
+        value.put(DATASET_KEY, Map.of(RequestFields.PLUGIN_ID, dataset.datasetKey().pluginId().value(),
                 RequestFields.API_NAME, dataset.datasetKey().apiName().value()));
-        value.put("tableName", dataset.tableName().value());
+        value.put(TABLE_NAME, dataset.tableName().value());
         value.put(RequestFields.MODE, mode.name());
-        value.put("queryMode", selectedApi.queryMode().name());
+        value.put(QUERY_MODE, selectedApi.queryMode().name());
         value.put(PARAMETERS, selectedApi.parameters().stream().map(this::contractParameter).toList());
-        value.put("rangePolicy", range == null ? Map.of(KIND, DownloadMode.SINGLE.name()) : rangePolicy(range));
-        value.put("columns", dataset.columns().stream().map(this::column).toList());
-        value.put("businessKey", Map.of(RequestFields.MODE, dataset.businessKey().mode().name(),
+        value.put(RANGE_POLICY, range == null ? Map.of(KIND, DownloadMode.SINGLE.name()) : rangePolicy(range));
+        value.put(COLUMNS, dataset.columns().stream().map(this::column).toList());
+        value.put(BUSINESS_KEY, Map.of(RequestFields.MODE, dataset.businessKey().mode().name(),
                 RequestFields.FIELDS, dataset.businessKey().fields()));
         return sha256(canonical(value));
     }
@@ -352,12 +370,12 @@ public final class DownloadTaskJson {
     private Map<String, Object> column(ColumnDefinition column) {
         Map<String, Object> value = new LinkedHashMap<>();
         value.put(NAME, column.name());
-        value.put("logicalType", column.logicalType().name());
-        value.put("nullable", column.nullable());
-        value.put("displayOrder", column.displayOrder());
-        value.put("length", column.length());
-        value.put("precision", column.precision());
-        value.put("scale", column.scale());
+        value.put(LOGICAL_TYPE, column.logicalType().name());
+        value.put(NULLABLE, column.nullable());
+        value.put(DISPLAY_ORDER, column.displayOrder());
+        value.put(LENGTH, column.length());
+        value.put(PRECISION, column.precision());
+        value.put(SCALE, column.scale());
         value.put(ALLOWED_VALUES, column.allowedValues());
         return value;
     }

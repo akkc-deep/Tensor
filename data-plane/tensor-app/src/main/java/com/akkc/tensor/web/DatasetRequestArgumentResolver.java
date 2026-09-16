@@ -15,6 +15,8 @@ import org.springframework.web.method.support.ModelAndViewContainer;
 import org.springframework.web.servlet.HandlerMapping;
 
 public final class DatasetRequestArgumentResolver implements HandlerMethodArgumentResolver {
+    private static final String ARRAY_TS_CODE = "tsCode[]";
+
     @Override
     public boolean supportsParameter(MethodParameter parameter) {
         Class<?> type = parameter.getParameterType();
@@ -57,7 +59,7 @@ public final class DatasetRequestArgumentResolver implements HandlerMethodArgume
 
     private static String tsCode(HttpServletRequest request) {
         String[] values = request.getParameterValues(RequestFields.TS_CODE);
-        return joined(values == null ? request.getParameterValues("tsCode[]") : values);
+        return joined(values == null ? request.getParameterValues(ARRAY_TS_CODE) : values);
     }
 
     private static String first(HttpServletRequest request, String name) {

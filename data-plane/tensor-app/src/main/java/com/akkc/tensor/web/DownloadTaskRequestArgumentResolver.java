@@ -19,6 +19,7 @@ import org.springframework.web.servlet.HandlerMapping;
 
 /** Strict task-only query/path binding; does not change legacy dataset query rules. */
 public final class DownloadTaskRequestArgumentResolver implements HandlerMethodArgumentResolver {
+    private static final String NON_NEGATIVE_INTEGER_REGEX = "[0-9]+";
     private static final Set<Class<?>> TYPES = Set.of(Tasks.class, Batches.class, TaskId.class, Dataset.class, NoQuery.class);
 
     @Override
@@ -68,7 +69,7 @@ public final class DownloadTaskRequestArgumentResolver implements HandlerMethodA
         return variables == null ? null : variables.get(name);
     }
     private static int integer(String field, String value) {
-        if (!value.matches("[0-9]+")) throw invalid(field);
+        if (!value.matches(NON_NEGATIVE_INTEGER_REGEX)) throw invalid(field);
         try {
             int number = Integer.parseInt(value);
             if (number < PaginationConstants.FIRST_PAGE) throw invalid(field);

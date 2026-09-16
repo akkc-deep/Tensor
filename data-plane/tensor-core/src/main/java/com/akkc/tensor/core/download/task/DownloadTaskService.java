@@ -36,6 +36,9 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 
 /** Local admission and replay validation for durable download tasks. */
 public final class DownloadTaskService {
+    private static final String HISTORICAL_CATEGORY = "historical";
+    private static final String UNSUPPORTED_POLICY_VERSION = "unsupported-v1";
+
     private static final Pattern PARAMETER_NAME = Pattern.compile(ValidationConstants.IDENTIFIER_REGEX);
     private static final String RANGE_UNSUPPORTED = "Range download is not supported";
     private static final String INPUT_UNAVAILABLE = "Plugin or dataset is unavailable";
@@ -404,7 +407,7 @@ public final class DownloadTaskService {
         try {
             return descriptor(key);
         } catch (TaskException missing) {
-            return new ApiDescriptor(key.apiName(), key.apiName().value(), "historical", QueryMode.date_range,
+            return new ApiDescriptor(key.apiName(), key.apiName().value(), HISTORICAL_CATEGORY, QueryMode.date_range,
                     List.of());
         }
     }
@@ -442,7 +445,7 @@ public final class DownloadTaskService {
 
     private static BatchDownloadDescriptor unsupported(String reason) {
         return new BatchDownloadDescriptor(List.of(), null, null, null, null, null, false,
-                BatchDownloadDescriptor.Availability.UNSUPPORTED, reason, "unsupported-v1",
+                BatchDownloadDescriptor.Availability.UNSUPPORTED, reason, UNSUPPORTED_POLICY_VERSION,
                 new BatchDownloadDescriptor.CompletenessRule(
                         BatchDownloadDescriptor.CompletenessRule.Kind.UNKNOWN, null, null));
     }

@@ -20,6 +20,10 @@ public record DatasetDefinitionResponse(
         List<FilterResponse> filters,
         String fixedColumn,
         List<ColumnResponse> columns) {
+    private static final String EQUALS_OPERATOR = "EQ";
+    private static final String TEXT_CONTROL = "TEXT";
+    private static final String BETWEEN_OPERATOR = "BETWEEN";
+    private static final String DATE_RANGE_CONTROL = "DATE_RANGE";
 
     public DatasetDefinitionResponse {
         Objects.requireNonNull(pluginId, "pluginId");
@@ -104,9 +108,10 @@ public record DatasetDefinitionResponse(
         public static FilterResponse from(FilterDefinition definition) {
             Objects.requireNonNull(definition, "definition");
             return switch (definition.field()) {
-                case DatasetFields.TS_CODE -> new FilterResponse(DatasetFields.TS_CODE, "EQ", "TEXT");
+                case DatasetFields.TS_CODE -> new FilterResponse(
+                        DatasetFields.TS_CODE, EQUALS_OPERATOR, TEXT_CONTROL);
                 case DatasetFields.TRADE_DATE, DatasetFields.ANN_DATE ->
-                    new FilterResponse(definition.field(), "BETWEEN", "DATE_RANGE");
+                    new FilterResponse(definition.field(), BETWEEN_OPERATOR, DATE_RANGE_CONTROL);
                 default -> throw new IllegalArgumentException("Unsupported dataset filter");
             };
         }

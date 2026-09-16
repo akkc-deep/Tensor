@@ -22,8 +22,10 @@ public final class RequestIdFilter extends OncePerRequestFilter {
     public static final String HEADER_NAME = "X-Request-Id";
     public static final String MDC_KEY = RequestFields.REQUEST_ID;
 
+    private static final String UUID_REGEX =
+            "[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}";
     private static final Pattern CLIENT_REQUEST_ID = Pattern.compile(
-            "[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}");
+            UUID_REGEX);
 
     @Override
     protected void doFilterInternal(

@@ -34,6 +34,7 @@ import org.springframework.web.client.RestClient;
 
 public final class TushareRestClientFactory {
     static final String CONTROL_ATTRIBUTE = "tensor.tushare.requestControl";
+    private static final String USER_AGENT_VALUE = "Tensor/1.0";
 
     private final HttpClient httpClient;
 
@@ -52,7 +53,7 @@ public final class TushareRestClientFactory {
                 new ControlledRequest(sharedHttpClient, uri, method, properties.readTimeout());
         return RestClient.builder()
                 .baseUrl(properties.baseUrl())
-                .defaultHeader("User-Agent", "Tensor/1.0")
+                .defaultHeader(HttpHeaders.USER_AGENT, USER_AGENT_VALUE)
                 .requestFactory(requestFactory)
                 .build();
     }

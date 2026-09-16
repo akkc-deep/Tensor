@@ -18,6 +18,11 @@ public record TushareProperties(
         @DefaultValue("120s") Duration readTimeout,
         @DefaultValue("67108864") int maxResponseBytes,
         @DefaultValue("1500ms") Duration minRequestInterval) {
+    private static final String DISABLED_REASON = "Disabled";
+    private static final String MISSING_CREDENTIALS_REASON = "Credentials missing";
+    private static final String HTTP_SCHEME = "http";
+    private static final String HTTPS_SCHEME = "https";
+    private static final String REDACTED_TEXT = "[REDACTED]";
 
     @ConstructorBinding
     public TushareProperties {
@@ -54,10 +59,10 @@ public record TushareProperties(
     public PluginReadiness readiness() {
         boolean configured = token.configured();
         if (!enabled) {
-            return new PluginReadiness(false, configured, false, "Disabled");
+            return new PluginReadiness(false, configured, false, DISABLED_REASON);
         }
         if (!configured) {
-            return new PluginReadiness(true, false, false, "Credentials missing");
+            return new PluginReadiness(true, false, false, MISSING_CREDENTIALS_REASON);
         }
         return new PluginReadiness(true, true, true, null);
     }
@@ -67,7 +72,8 @@ public record TushareProperties(
                 || value.getUserInfo() != null || value.getQuery() != null || value.getFragment() != null) {
             return false;
         }
-        return "http".equalsIgnoreCase(value.getScheme()) || "https".equalsIgnoreCase(value.getScheme());
+        return HTTP_SCHEME.equalsIgnoreCase(value.getScheme())
+                || HTTPS_SCHEME.equalsIgnoreCase(value.getScheme());
     }
 
     public record Credential(String value) {
@@ -81,7 +87,7 @@ public record TushareProperties(
 
         @Override
         public String toString() {
-            return "[REDACTED]";
+            return REDACTED_TEXT;
         }
     }
 }

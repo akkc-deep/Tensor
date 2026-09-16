@@ -16,11 +16,16 @@ import java.util.*;
 /** Validates complete natural-day coverage before treating open dates as planning evidence. */
 final class TushareTradeCalendar {
     private static final int IS_OPEN_COLUMN_INDEX = 2;
+    private static final String PREVIOUS_TRADE_DATE = "pretrade_date";
+    private static final String CLOSED_FLAG = "0";
+    private static final String OPEN_FLAG = "1";
 
     private TushareTradeCalendar() {}
 
     static List<LocalDate> openDays(DateRange range, String exchange, DownloadEnvelope envelope) {
-        validateEnvelope(new ApiName(TushareConstants.TRADE_CAL), List.of(DatasetFields.EXCHANGE, DatasetFields.CAL_DATE, DatasetFields.IS_OPEN, "pretrade_date"), envelope);
+        validateEnvelope(new ApiName(TushareConstants.TRADE_CAL), List.of(
+                DatasetFields.EXCHANGE, DatasetFields.CAL_DATE, DatasetFields.IS_OPEN,
+                PREVIOUS_TRADE_DATE), envelope);
         if (range == null || exchange == null || !envelope.params().equals(Map.of(DatasetFields.EXCHANGE, exchange,
                 DatasetFields.START_DATE, format(range.start()), DatasetFields.END_DATE, format(range.end())))) throw failure(SOURCE_RANGE_MISMATCH);
         var days = new TreeMap<LocalDate, Boolean>();
@@ -41,8 +46,8 @@ final class TushareTradeCalendar {
     }
 
     static boolean isOpen(Object value) {
-        if ("0".equals(value)) return false;
-        if ("1".equals(value)) return true;
+        if (CLOSED_FLAG.equals(value)) return false;
+        if (OPEN_FLAG.equals(value)) return true;
         if (value instanceof Byte || value instanceof Short || value instanceof Integer || value instanceof Long
                 || value instanceof BigInteger || value instanceof BigDecimal) {
             try {

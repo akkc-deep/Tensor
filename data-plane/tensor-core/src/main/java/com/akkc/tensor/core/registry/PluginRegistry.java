@@ -14,6 +14,8 @@ import java.util.Optional;
 
 public final class PluginRegistry {
     private static final System.Logger LOGGER = System.getLogger(PluginRegistry.class.getName());
+    private static final String DUPLICATE_PLUGIN_REASON = "duplicate plugin id";
+    private static final String READINESS_UNAVAILABLE_REASON = "plugin readiness unavailable";
 
     private final Map<PluginId, DataSourcePlugin> plugins;
     private final List<PluginDescriptor> descriptors;
@@ -43,7 +45,7 @@ public final class PluginRegistry {
                 LOGGER.log(System.Logger.Level.WARNING, "Duplicate plugin id disabled");
                 for (Candidate candidate : candidates) {
                     snapshot.add(withReadiness(candidate.descriptor(), candidate.descriptor().enabled(),
-                            candidate.descriptor().credentialConfigured(), false, "duplicate plugin id"));
+                            candidate.descriptor().credentialConfigured(), false, DUPLICATE_PLUGIN_REASON));
                 }
             }
         }
@@ -79,7 +81,8 @@ public final class PluginRegistry {
                     readiness.downloadAvailable(), readiness.unavailableReason()));
         } catch (RuntimeException exception) {
             LOGGER.log(System.Logger.Level.WARNING, "Plugin readiness unavailable");
-            return new Candidate(plugin, withReadiness(descriptor, false, false, false, "plugin readiness unavailable"));
+            return new Candidate(plugin, withReadiness(
+                    descriptor, false, false, false, READINESS_UNAVAILABLE_REASON));
         }
     }
 

@@ -7,6 +7,9 @@ import com.akkc.tensor.plugin.api.error.TensorException;
 import com.akkc.tensor.web.download.DownloadBindingException;
 import com.akkc.tensor.web.dto.ApiErrorResponse;
 import com.akkc.tensor.web.dto.FieldErrorResponse;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -111,7 +114,9 @@ public final class GlobalExceptionHandler {
     }
 
     private static boolean isRequiredConstraint(String code) {
-        return "NotNull".equals(code) || "NotBlank".equals(code) || "NotEmpty".equals(code);
+        return NotNull.class.getSimpleName().equals(code)
+                || NotBlank.class.getSimpleName().equals(code)
+                || NotEmpty.class.getSimpleName().equals(code);
     }
 
     private static ResponseEntity<ApiErrorResponse> response(

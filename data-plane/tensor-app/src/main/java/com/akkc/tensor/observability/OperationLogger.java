@@ -22,8 +22,10 @@ import org.slf4j.LoggerFactory;
 
 public final class OperationLogger {
     private static final Logger LOGGER = LoggerFactory.getLogger(OperationLogger.class);
+    private static final String SENSITIVE_NAME_REGEX =
+            "token|authorization|cookie|password|credential";
     private static final Pattern SENSITIVE_NAME = Pattern.compile(
-            "token|authorization|cookie|password|credential",
+            SENSITIVE_NAME_REGEX,
             Pattern.CASE_INSENSITIVE);
 
     private final Map<DatasetKey, List<String>> parameterNames;

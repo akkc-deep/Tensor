@@ -17,7 +17,8 @@ import java.util.Set;
 
 public final class FingerprintKeyCodec {
     public static final String HASH_ALGORITHM = "SHA-256";
-    private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("uuuu-MM-dd");
+    private static final String DATE_FORMAT = "uuuu-MM-dd";
+    private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern(DATE_FORMAT);
 
     public String sha256(List<String> fields, Map<String, Object> row) {
         Objects.requireNonNull(fields, "fields");

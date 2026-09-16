@@ -32,6 +32,10 @@ public final class TushareConstants {
     public static final int DEFAULT_MIN_REQUEST_INTERVAL_MILLIS = 1_500;
     public static final String PLUGIN_ID = "tushare_pro";
     public static final String DAILY = "daily";
+    public static final String DAILY_BASIC = "daily_basic";
+    public static final String STK_LIMIT = "stk_limit";
+    public static final String MONEYFLOW = "moneyflow";
+    public static final String MARGIN_DETAIL = "margin_detail";
     public static final String WEEKLY = "weekly";
     public static final String MONTHLY = "monthly";
     public static final String ADJ_FACTOR = "adj_factor";
@@ -64,6 +68,7 @@ public final class TushareConstants {
     public static final String SSE = "SSE";
     public static final String SZSE = "SZSE";
     public static final String BSE = "BSE";
+    public static final String REQUEST_THREAD_NAME = "tushare-request";
 
     private TushareConstants() {
     }

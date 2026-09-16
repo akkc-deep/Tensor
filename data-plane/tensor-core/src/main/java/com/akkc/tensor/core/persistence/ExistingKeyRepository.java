@@ -20,6 +20,10 @@ import org.springframework.jdbc.core.JdbcTemplate;
 
 public final class ExistingKeyRepository {
     private static final int MAX_BIND_PARAMETERS = 1000;
+    private static final String IN_CLAUSE = " IN (";
+    private static final String OPEN_PARENTHESIS = "(";
+    private static final String TUPLE_WHERE = " WHERE (";
+    private static final String TUPLE_IN = ") IN (";
 
     private final JdbcTemplate jdbcTemplate;
 
@@ -86,11 +90,14 @@ public final class ExistingKeyRepository {
         String columns = columnNames.stream().map(policy::quote).collect(Collectors.joining(SqlConstants.COLUMN_SEPARATOR));
         if (columnNames.size() == 1) {
             String placeholders = String.join(SqlConstants.COLUMN_SEPARATOR, Collections.nCopies(keyCount, SqlConstants.PARAMETER));
-            return SqlConstants.SELECT + columns + SqlConstants.FROM + table + SqlConstants.WHERE + columns + " IN (" + placeholders + SqlConstants.CLOSE_PARENTHESIS;
+            return SqlConstants.SELECT + columns + SqlConstants.FROM + table + SqlConstants.WHERE
+                    + columns + IN_CLAUSE + placeholders + SqlConstants.CLOSE_PARENTHESIS;
         }
-        String tuple = "(" + String.join(SqlConstants.COLUMN_SEPARATOR, Collections.nCopies(columnNames.size(), SqlConstants.PARAMETER)) + SqlConstants.CLOSE_PARENTHESIS;
+        String tuple = OPEN_PARENTHESIS + String.join(SqlConstants.COLUMN_SEPARATOR,
+                Collections.nCopies(columnNames.size(), SqlConstants.PARAMETER)) + SqlConstants.CLOSE_PARENTHESIS;
         String tuples = String.join(SqlConstants.COLUMN_SEPARATOR, Collections.nCopies(keyCount, tuple));
-        return SqlConstants.SELECT + columns + SqlConstants.FROM + table + " WHERE (" + columns + ") IN (" + tuples + SqlConstants.CLOSE_PARENTHESIS;
+        return SqlConstants.SELECT + columns + SqlConstants.FROM + table + TUPLE_WHERE
+                + columns + TUPLE_IN + tuples + SqlConstants.CLOSE_PARENTHESIS;
     }
 
     private static BusinessKey readKey(ResultSet resultSet, List<Integer> jdbcTypes) throws SQLException {

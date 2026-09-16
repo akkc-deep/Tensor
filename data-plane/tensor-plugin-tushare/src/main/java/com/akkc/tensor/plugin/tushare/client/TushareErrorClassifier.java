@@ -14,6 +14,14 @@ import java.util.Locale;
 
 final class TushareErrorClassifier {
     private static final int MAX_CAUSE_DEPTH = 16;
+    private static final String AUTHENTICATION = "认证";
+    private static final String USER_NOT_FOUND = "用户不存在";
+    private static final String PER_MINUTE = "每分钟";
+    private static final String PER_HOUR = "每小时";
+    private static final String FREQUENCY = "频率";
+    private static final String RATE_LIMIT = "限流";
+    private static final String PERMISSION = "权限";
+    private static final String POINTS = "积分";
 
     private TushareErrorClassifier() {}
 
@@ -30,17 +38,17 @@ final class TushareErrorClassifier {
     static SourceException classifyBusiness(String message) {
         String normalized = message == null ? StringConstants.EMPTY : message.toLowerCase(Locale.ROOT);
         if (normalized.contains(RequestFields.TOKEN)
-                || normalized.contains("认证")
-                || normalized.contains("用户不存在")) {
+                || normalized.contains(AUTHENTICATION)
+                || normalized.contains(USER_NOT_FOUND)) {
             return failure(ErrorCode.SOURCE_AUTH_FAILED);
         }
-        if (normalized.contains("每分钟")
-                || normalized.contains("每小时")
-                || normalized.contains("频率")
-                || normalized.contains("限流")) {
+        if (normalized.contains(PER_MINUTE)
+                || normalized.contains(PER_HOUR)
+                || normalized.contains(FREQUENCY)
+                || normalized.contains(RATE_LIMIT)) {
             return failure(ErrorCode.SOURCE_RATE_LIMITED);
         }
-        if (normalized.contains("权限") || normalized.contains("积分")) {
+        if (normalized.contains(PERMISSION) || normalized.contains(POINTS)) {
             return failure(ErrorCode.SOURCE_PERMISSION_DENIED);
         }
         return invalidPayload();

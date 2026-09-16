@@ -25,6 +25,9 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public final class TushareProPlugin implements BatchDownloadSupport {
+    private static final String DISPLAY_NAME = "Tushare Pro";
+    private static final String DESCRIPTION = "Tushare Pro 证券数据源";
+
     private final TushareProperties properties;
     private final TushareProClient client;
     private final PluginDescriptor descriptor;
@@ -47,8 +50,8 @@ public final class TushareProPlugin implements BatchDownloadSupport {
         PluginReadiness readiness = properties.readiness();
         descriptor = new PluginDescriptor(
                 PluginId.of(TushareConstants.PLUGIN_ID),
-                "Tushare Pro",
-                "Tushare Pro 证券数据源",
+                DISPLAY_NAME,
+                DESCRIPTION,
                 readiness.enabled(),
                 readiness.credentialConfigured(),
                 readiness.downloadAvailable(),

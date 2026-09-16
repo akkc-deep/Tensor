@@ -5,6 +5,7 @@ public final class DatasetFields {
     public static final String TS_CODE = "ts_code";
     public static final String TRADE_DATE = "trade_date";
     public static final String ANN_DATE = "ann_date";
+    public static final String IPO_DATE = "ipo_date";
     public static final String START_DATE = "start_date";
     public static final String END_DATE = "end_date";
     public static final String EXCHANGE = "exchange";

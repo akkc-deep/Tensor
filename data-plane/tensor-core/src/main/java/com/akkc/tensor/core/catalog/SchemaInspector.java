@@ -15,8 +15,15 @@ import java.util.TreeMap;
 import javax.sql.DataSource;
 
 public final class SchemaInspector {
+    private static final String TABLE_NAME = "TABLE_NAME";
     private static final String COLUMN_NAME = "COLUMN_NAME";
     private static final String ORDINAL_POSITION = "ORDINAL_POSITION";
+    private static final String NULLABLE = "NULLABLE";
+    private static final String DATA_TYPE = "DATA_TYPE";
+    private static final String KEY_SEQUENCE = "KEY_SEQ";
+    private static final String INDEX_NAME = "INDEX_NAME";
+    private static final String INDEX_TYPE = "TYPE";
+    private static final String PRIMARY_INDEX = "PRIMARY";
 
     private final DataSource dataSource;
 
@@ -50,10 +57,10 @@ public final class SchemaInspector {
         List<ColumnRow> columns = new ArrayList<>();
         try (ResultSet result = metadata.getColumns(catalog, null, table, null)) {
             while (result.next()) {
-                if (!table.equals(result.getString("TABLE_NAME"))) {
+                if (!table.equals(result.getString(TABLE_NAME))) {
                     continue;
                 }
-                int nullableValue = result.getInt("NULLABLE");
+                int nullableValue = result.getInt(NULLABLE);
                 boolean nullable;
                 if (nullableValue == DatabaseMetaData.columnNullable) {
                     nullable = true;
@@ -64,7 +71,7 @@ public final class SchemaInspector {
                 }
                 columns.add(new ColumnRow(
                         result.getInt(ORDINAL_POSITION),
-                        new ColumnMetadata(result.getString(COLUMN_NAME), result.getInt("DATA_TYPE"), nullable)));
+                        new ColumnMetadata(result.getString(COLUMN_NAME), result.getInt(DATA_TYPE), nullable)));
             }
         }
         return columns;
@@ -75,7 +82,7 @@ public final class SchemaInspector {
         List<KeyRow> keys = new ArrayList<>();
         try (ResultSet result = metadata.getPrimaryKeys(catalog, null, table)) {
             while (result.next()) {
-                keys.add(new KeyRow(result.getInt("KEY_SEQ"), result.getString(COLUMN_NAME)));
+                keys.add(new KeyRow(result.getInt(KEY_SEQUENCE), result.getString(COLUMN_NAME)));
             }
         }
         return keys.stream().sorted(Comparator.comparingInt(KeyRow::sequence)).map(KeyRow::column).toList();
@@ -86,10 +93,10 @@ public final class SchemaInspector {
         Map<String, List<IndexRow>> indexes = new TreeMap<>();
         try (ResultSet result = metadata.getIndexInfo(catalog, null, table, true, false)) {
             while (result.next()) {
-                String indexName = result.getString("INDEX_NAME");
+                String indexName = result.getString(INDEX_NAME);
                 String columnName = result.getString(COLUMN_NAME);
-                int type = result.getInt("TYPE");
-                if (type == DatabaseMetaData.tableIndexStatistic || indexName == null || "PRIMARY".equals(indexName)) {
+                int type = result.getInt(INDEX_TYPE);
+                if (type == DatabaseMetaData.tableIndexStatistic || indexName == null || PRIMARY_INDEX.equals(indexName)) {
                     continue;
                 }
                 List<IndexRow> rows = indexes.computeIfAbsent(indexName, ignored -> new ArrayList<>());

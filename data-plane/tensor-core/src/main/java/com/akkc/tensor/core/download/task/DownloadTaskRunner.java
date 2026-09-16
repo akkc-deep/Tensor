@@ -21,6 +21,8 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 
 /** Synchronous, single-owner execution. Scheduling and recovery belong to the coordinator. */
 public final class DownloadTaskRunner {
+    private static final String SINGLE_BATCH_KEY = "000001";
+
     private final DownloadTaskService tasks;
     private final DownloadTaskRepository repository;
     private final BatchCommitService commits;
@@ -187,7 +189,7 @@ public final class DownloadTaskRunner {
         private void plan(ExecutionDefinition definition) {
             List<NewBatch> roots = new ArrayList<>();
             if (task.mode() == DownloadMode.SINGLE) {
-                roots.add(new NewBatch(UUID.randomUUID(), "000001", null, task.params()));
+                roots.add(new NewBatch(UUID.randomUUID(), SINGLE_BATCH_KEY, null, task.params()));
             } else {
                 var source = (BatchDownloadSupport) definition.plugin();
                 List<DateRange> planned = call(() -> source.plan(task.datasetKey().apiName(), task.params(), this), ErrorCode.INTERNAL_ERROR);

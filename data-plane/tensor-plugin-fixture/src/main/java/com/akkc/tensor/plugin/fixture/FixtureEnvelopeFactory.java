@@ -13,6 +13,7 @@ import java.util.Map;
 import java.util.Objects;
 
 public final class FixtureEnvelopeFactory {
+    private static final String INVALID_DECIMAL = "not-a-decimal";
     private static final PluginId PLUGIN_ID = PluginId.of(FixtureConstants.PLUGIN_ID);
     private static final ApiName API_NAME = ApiName.of(FixtureConstants.API_NAME);
     private static final List<String> FIELDS = List.of(DatasetFields.TS_CODE, DatasetFields.TRADE_DATE, FixtureConstants.AMOUNT, FixtureConstants.NOTE);
@@ -32,7 +33,9 @@ public final class FixtureEnvelopeFactory {
                     ErrorCode.SOURCE_UNAVAILABLE, "Fixture source unavailable");
             case TYPE_FAILURE -> new DownloadEnvelope(
                     PLUGIN_ID, API_NAME, params, FIELDS, 1,
-                    List.of(Arrays.asList(FixtureConstants.SAMPLE_TS_CODE, FixtureConstants.SAMPLE_TRADE_DATE, "not-a-decimal", null)), DownloadStatus.SUCCESS, null);
+                    List.of(Arrays.asList(FixtureConstants.SAMPLE_TS_CODE,
+                            FixtureConstants.SAMPLE_TRADE_DATE, INVALID_DECIMAL, null)),
+                    DownloadStatus.SUCCESS, null);
             case PERSISTENCE_FAILURE -> new DownloadEnvelope(
                     PLUGIN_ID, API_NAME, params, FIELDS, 1,
                     List.of(Arrays.asList(FixtureConstants.SAMPLE_TS_CODE, FixtureConstants.SAMPLE_TRADE_DATE, FixtureConstants.SAMPLE_AMOUNT, FixtureScenario.PERSISTENCE_FAILURE.name())),

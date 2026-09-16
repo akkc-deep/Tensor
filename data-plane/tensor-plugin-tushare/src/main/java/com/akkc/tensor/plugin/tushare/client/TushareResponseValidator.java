@@ -21,11 +21,14 @@ import java.util.Objects;
 import java.util.regex.Pattern;
 
 final class TushareResponseValidator {
+    private static final String ANNOUNCEMENT_DATE_TIME_REGEX =
+            "[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}";
+    private static final String ANNOUNCEMENT_DATE_TIME_FORMAT = "uuuu-MM-dd HH:mm:ss";
     private static final Pattern ANNOUNCEMENT_DATE_TIME =
-            Pattern.compile("[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}");
+            Pattern.compile(ANNOUNCEMENT_DATE_TIME_REGEX);
     private static final Pattern TS_CODE = Pattern.compile(ValidationConstants.TS_CODE_REGEX);
     private static final DateTimeFormatter ANNOUNCEMENT_FORMATTER =
-            DateTimeFormatter.ofPattern("uuuu-MM-dd HH:mm:ss", Locale.ROOT)
+            DateTimeFormatter.ofPattern(ANNOUNCEMENT_DATE_TIME_FORMAT, Locale.ROOT)
                     .withResolverStyle(ResolverStyle.STRICT);
 
     private TushareResponseValidator() {}

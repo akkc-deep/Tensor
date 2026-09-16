@@ -22,6 +22,8 @@ import org.springframework.web.bind.annotation.*;
 @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
 @DependsOn("downloadTaskCoordinator")
 public final class DownloadTaskController {
+    private static final String TASK_LOCATION_PREFIX = "/api/v1/download-tasks/";
+
     private final DownloadTaskService service;
     private final DownloadTaskQueryService queries;
     private final DownloadParameterResolver parameters;
@@ -85,7 +87,7 @@ public final class DownloadTaskController {
     private ResponseEntity<DownloadTaskReceipt> receipt(DownloadTask task, AcceptanceKind kind, int status, long started) {
         var requestId = new RequestId(UUID.fromString(Objects.requireNonNull(MDC.get(RequestIdFilter.MDC_KEY), "Request ID is unavailable")));
         logger.recordAccepted(requestId, task, kind, Duration.ofNanos(System.nanoTime() - started));
-        return ResponseEntity.status(status).location(URI.create("/api/v1/download-tasks/" + task.taskId()))
+        return ResponseEntity.status(status).location(URI.create(TASK_LOCATION_PREFIX + task.taskId()))
                 .body(DownloadTaskReceipt.from(requestId, task));
     }
 }

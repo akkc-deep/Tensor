@@ -31,6 +31,10 @@ import org.springframework.context.annotation.Profile;
         name = "enabled",
         havingValue = "true")
 public final class FixtureConfiguration {
+    private static final String DISPLAY_NAME = "Fixture 日线";
+    private static final String CATEGORY = "验收";
+    private static final String SCENARIO_LABEL = "场景";
+    private static final String SCENARIO_DESCRIPTION = "确定性验收场景";
     private static final DatasetDefinition DEFINITION = definition();
 
     @Bean
@@ -47,13 +51,13 @@ public final class FixtureConfiguration {
         DatasetKey key = DatasetKey.of(PluginId.of(FixtureConstants.PLUGIN_ID), ApiName.of(FixtureConstants.API_NAME));
         return new DatasetDefinition(
                 key,
-                "Fixture 日线",
-                "验收",
+                DISPLAY_NAME,
+                CATEGORY,
                 QueryMode.trade_date,
                 List.of(new ParameterDescriptor(
                         FixtureConstants.SCENARIO,
-                        "场景",
-                        "确定性验收场景",
+                        SCENARIO_LABEL,
+                        SCENARIO_DESCRIPTION,
                         ParameterType.ENUM,
                         true,
                         FixtureScenario.SUCCESS.name(),

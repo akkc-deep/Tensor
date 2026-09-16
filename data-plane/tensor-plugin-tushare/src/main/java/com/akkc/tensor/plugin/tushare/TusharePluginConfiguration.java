@@ -15,11 +15,14 @@ import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 @Configuration(proxyBeanMethods = false)
 @EnableConfigurationProperties(TushareProperties.class)
 public final class TusharePluginConfiguration {
+    private static final String DATASET_RESOURCE_PATTERN =
+            "classpath*:datasets/tushare_pro/*.yaml";
+
     @Bean("tushareDatasetDefinitions")
     public List<DatasetDefinition> tushareDatasetDefinitions() {
         return new DatasetDefinitionLoader().loadAll(
                 new PathMatchingResourcePatternResolver(),
-                "classpath*:datasets/tushare_pro/*.yaml");
+                DATASET_RESOURCE_PATTERN);
     }
 
     @Bean

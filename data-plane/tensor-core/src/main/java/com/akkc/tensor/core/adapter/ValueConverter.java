@@ -17,7 +17,8 @@ import java.util.Objects;
 import java.util.regex.Pattern;
 
 public final class ValueConverter {
-    private static final Pattern INTEGER_PATTERN = Pattern.compile("[+-]?[0-9]+");
+    private static final String INTEGER_REGEX = "[+-]?[0-9]+";
+    private static final Pattern INTEGER_PATTERN = Pattern.compile(INTEGER_REGEX);
     private static final Pattern DATE_PATTERN = Pattern.compile(ValidationConstants.DATE_REGEX);
     private static final Pattern MONTH_PATTERN = Pattern.compile(ValidationConstants.MONTH_REGEX);
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern(ValidationConstants.DATE_FORMAT, Locale.ROOT)

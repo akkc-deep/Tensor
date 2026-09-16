@@ -19,6 +19,13 @@ record ParameterCodec<T extends DownloadParameters>(ParameterShape shape, Class<
 
     private static final String SCENARIO = "scenario";
     private static final String SUCCESS_SCENARIO = "SUCCESS";
+    private static final String EMPTY_SCENARIO = "EMPTY";
+    private static final String SOURCE_FAILURE_SCENARIO = "SOURCE_FAILURE";
+    private static final String TYPE_FAILURE_SCENARIO = "TYPE_FAILURE";
+    private static final String PERSISTENCE_FAILURE_SCENARIO = "PERSISTENCE_FAILURE";
+    private static final String LISTED_STATUS = "L";
+    private static final String PAUSED_STATUS = "P";
+    private static final String DELISTED_STATUS = "D";
 
     T read(ParameterJsonReader json) {
         return reader.apply(json);
@@ -67,7 +74,8 @@ record ParameterCodec<T extends DownloadParameters>(ParameterShape shape, Class<
                                 json.nullableText(DatasetFields.START_DATE), json.nullableText(DatasetFields.END_DATE)),
                         value -> values(DatasetFields.TS_CODE, value.tsCode(), DatasetFields.START_DATE, value.startDate(),
                                 DatasetFields.END_DATE, value.endDate())),
-                new ParameterCodec<>(of(tsCode, enumeration(DatasetFields.LIST_STATUS, "L", "P", "D")), ListStatusParameters.class,
+                new ParameterCodec<>(of(tsCode, enumeration(DatasetFields.LIST_STATUS,
+                        LISTED_STATUS, PAUSED_STATUS, DELISTED_STATUS)), ListStatusParameters.class,
                         json -> new ListStatusParameters(json.nullableText(DatasetFields.TS_CODE), json.nullableText(DatasetFields.LIST_STATUS)),
                         value -> values(DatasetFields.TS_CODE, value.tsCode(), DatasetFields.LIST_STATUS, value.listStatus())),
                 new ParameterCodec<>(of(start, end), DateRangeParameters.class,
@@ -86,7 +94,8 @@ record ParameterCodec<T extends DownloadParameters>(ParameterShape shape, Class<
                         json -> new TsCodeAnnDateParameters(json.nullableText(DatasetFields.TS_CODE), json.nullableText(DatasetFields.ANN_DATE)),
                         value -> values(DatasetFields.TS_CODE, value.tsCode(), DatasetFields.ANN_DATE, value.annDate())),
                 new ParameterCodec<>(of(new ParameterShape.Field(SCENARIO, ENUM, true, SUCCESS_SCENARIO,
-                        Set.of(SUCCESS_SCENARIO, "EMPTY", "SOURCE_FAILURE", "TYPE_FAILURE", "PERSISTENCE_FAILURE"),
+                        Set.of(SUCCESS_SCENARIO, EMPTY_SCENARIO, SOURCE_FAILURE_SCENARIO,
+                                TYPE_FAILURE_SCENARIO, PERSISTENCE_FAILURE_SCENARIO),
                         null, null)), ScenarioParameters.class,
                         json -> new ScenarioParameters(json.nullableText(SCENARIO)),
                         value -> values(SCENARIO, value.scenario())));

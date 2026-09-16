@@ -13,6 +13,14 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 public final class QuerySqlFactory {
+    private static final String COUNT_PREFIX = "SELECT COUNT(*) FROM ";
+    private static final String ORDER_BY = " ORDER BY ";
+    private static final String PAGE_LIMIT = " LIMIT ? OFFSET ?";
+    private static final String EQUALS_CONDITION = " = ?";
+    private static final String BETWEEN_CONDITION = " BETWEEN ? AND ?";
+    private static final String GREATER_OR_EQUAL_CONDITION = " >= ?";
+    private static final String LESS_OR_EQUAL_CONDITION = " <= ?";
+
     private final SqlIdentifierPolicy identifiers = new SqlIdentifierPolicy();
 
     public QuerySql create(DatasetDefinition definition, QueryCriteria criteria) {
@@ -32,9 +40,9 @@ public final class QuerySqlFactory {
 
         String where = conditions.isEmpty() ? StringConstants.EMPTY : SqlConstants.WHERE + String.join(SqlConstants.AND, conditions);
         String table = identifiers.quote(definition.tableName().value());
-        String countSql = "SELECT COUNT(*) FROM " + table + where;
-        String pageSql = SqlConstants.SELECT + selectColumns(definition) + SqlConstants.FROM + table + where + " ORDER BY "
-                + orderColumns(definition) + " LIMIT ? OFFSET ?";
+        String countSql = COUNT_PREFIX + table + where;
+        String pageSql = SqlConstants.SELECT + selectColumns(definition) + SqlConstants.FROM + table
+                + where + ORDER_BY + orderColumns(definition) + PAGE_LIMIT;
         List<Object> pageValues = new ArrayList<>(values);
         pageValues.add(criteria.pageSize());
         pageValues.add((long) (criteria.page() - 1) * criteria.pageSize());
@@ -44,7 +52,7 @@ public final class QuerySqlFactory {
     private void addTsCodeCondition(QueryCriteria criteria, Set<String> filters, List<String> conditions, List<Object> values) {
         if (criteria.tsCode() != null) {
             requireDeclaredFilter(DatasetFields.TS_CODE, filters);
-            conditions.add(identifiers.quote(DatasetFields.TS_CODE) + " = ?");
+            conditions.add(identifiers.quote(DatasetFields.TS_CODE) + EQUALS_CONDITION);
             values.add(criteria.tsCode());
         }
     }
@@ -57,14 +65,14 @@ public final class QuerySqlFactory {
         requireDeclaredFilter(field, filters);
         String column = identifiers.quote(field);
         if (from != null && to != null) {
-            conditions.add(column + " BETWEEN ? AND ?");
+            conditions.add(column + BETWEEN_CONDITION);
             values.add(from);
             values.add(to);
         } else if (from != null) {
-            conditions.add(column + " >= ?");
+            conditions.add(column + GREATER_OR_EQUAL_CONDITION);
             values.add(from);
         } else {
-            conditions.add(column + " <= ?");
+            conditions.add(column + LESS_OR_EQUAL_CONDITION);
             values.add(to);
         }
     }

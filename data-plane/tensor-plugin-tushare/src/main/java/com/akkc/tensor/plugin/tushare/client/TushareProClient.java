@@ -7,6 +7,7 @@ import com.akkc.tensor.plugin.api.download.DownloadEnvelope;
 import com.akkc.tensor.plugin.api.download.batch.BatchCallContext;
 import com.akkc.tensor.plugin.api.error.ErrorCode;
 import com.akkc.tensor.plugin.api.error.TensorException;
+import com.akkc.tensor.plugin.tushare.TushareConstants;
 import com.akkc.tensor.plugin.tushare.config.TushareProperties;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.StreamReadFeature;
@@ -86,7 +87,7 @@ public final class TushareProClient {
             TushareRequestGate.check(context, gate.clock());
             return exchange(definition, params, requestBody, context);
         });
-        Thread io = Thread.ofVirtual().name("tushare-request").start(future);
+        Thread io = Thread.ofVirtual().name(TushareConstants.REQUEST_THREAD_NAME).start(future);
         DownloadEnvelope result = null;
         Throwable failure = null;
         TensorException controlFailure = null;

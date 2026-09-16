@@ -14,6 +14,8 @@ import java.util.Map;
 import java.util.Objects;
 
 public final class FixturePlugin implements DataSourcePlugin {
+    private static final String DISPLAY_NAME = "Fixture";
+    private static final String DESCRIPTION = "Fixture 验收数据源";
     private static final DatasetKey DATASET_KEY =
             DatasetKey.of(PluginId.of(FixtureConstants.PLUGIN_ID), ApiName.of(FixtureConstants.API_NAME));
     private final FixtureEnvelopeFactory envelopeFactory;
@@ -35,8 +37,8 @@ public final class FixturePlugin implements DataSourcePlugin {
                 definition.parameters());
         descriptor = new PluginDescriptor(
                 DATASET_KEY.pluginId(),
-                "Fixture",
-                "Fixture 验收数据源",
+                DISPLAY_NAME,
+                DESCRIPTION,
                 readiness.enabled(),
                 readiness.credentialConfigured(),
                 readiness.downloadAvailable(),

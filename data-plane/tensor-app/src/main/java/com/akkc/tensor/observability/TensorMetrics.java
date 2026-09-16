@@ -15,6 +15,9 @@ public final class TensorMetrics {
     private static final String API_TAG = "api";
     private static final String OUTCOME_TAG = "outcome";
     private static final String KIND_TAG = "kind";
+    private static final String SOURCE_KIND = "source";
+    private static final String INSERTED_KIND = "inserted";
+    private static final String UPDATED_KIND = "updated";
 
     private static final String DOWNLOAD_TOTAL = "tensor_download_total";
     private static final String DOWNLOAD_DURATION =
@@ -54,9 +57,9 @@ public final class TensorMetrics {
         counter(DOWNLOAD_TOTAL, key, OUTCOME_TAG, outcome.value()).increment();
         timer(DOWNLOAD_DURATION, key, outcome).record(duration);
         if (outcome != Outcome.FAILURE) {
-            counter(DOWNLOAD_ROWS, key, KIND_TAG, "source").increment(sourceRows);
-            counter(DOWNLOAD_ROWS, key, KIND_TAG, "inserted").increment(insertedRows);
-            counter(DOWNLOAD_ROWS, key, KIND_TAG, "updated").increment(updatedRows);
+            counter(DOWNLOAD_ROWS, key, KIND_TAG, SOURCE_KIND).increment(sourceRows);
+            counter(DOWNLOAD_ROWS, key, KIND_TAG, INSERTED_KIND).increment(insertedRows);
+            counter(DOWNLOAD_ROWS, key, KIND_TAG, UPDATED_KIND).increment(updatedRows);
         }
     }
 
