@@ -20,6 +20,11 @@ public final class DownloadTaskQueryService {
         return query(() -> repository.tasks(filter, page, pageSize));
     }
 
+    public DownloadTaskRepository.Page<DownloadTaskRepository.TaskSnapshot> taskSnapshots(
+            DownloadTaskRepository.TaskFilter filter, int page, int pageSize) {
+        return query(() -> repository.taskSnapshots(filter, page, pageSize));
+    }
+
     public Optional<DownloadTask> findSubmission(UUID submissionId) {
         return query(() -> repository.findSubmission(identity(submissionId)));
     }

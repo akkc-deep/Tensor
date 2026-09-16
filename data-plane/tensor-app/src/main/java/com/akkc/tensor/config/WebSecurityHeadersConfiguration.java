@@ -1,5 +1,6 @@
 package com.akkc.tensor.config;
 
+import com.akkc.tensor.plugin.api.constant.StringConstants;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -21,6 +22,27 @@ import org.springframework.web.servlet.resource.NoResourceFoundException;
 @Configuration(proxyBeanMethods = false)
 @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
 public final class WebSecurityHeadersConfiguration {
+    private static final String CONTENT_SECURITY_POLICY = "Content-Security-Policy";
+    private static final String CONTENT_TYPE_OPTIONS = "X-Content-Type-Options";
+    private static final String CONTENT_TYPE_OPTIONS_VALUE = "nosniff";
+    private static final String FRAME_OPTIONS = "X-Frame-Options";
+    private static final String FRAME_OPTIONS_VALUE = "DENY";
+    private static final String REFERRER_POLICY = "Referrer-Policy";
+    private static final String REFERRER_POLICY_VALUE = "no-referrer";
+    private static final String PERMISSIONS_POLICY = "Permissions-Policy";
+    private static final String PERMISSIONS_POLICY_VALUE = "camera=(), microphone=(), geolocation=()";
+    private static final String OPENER_POLICY = "Cross-Origin-Opener-Policy";
+    private static final String OPENER_POLICY_VALUE = "same-origin";
+    private static final String CACHE_CONTROL = "Cache-Control";
+    private static final String FILTER_NAME = "tensorSecurityHeadersFilter";
+    private static final String ASSET_PATH = "/assets/";
+    private static final String ASSET_CACHE_CONTROL = "public, max-age=31536000, immutable";
+    private static final String INDEX_PATH = "/index.html";
+    private static final String API_PATH = "/api/";
+    private static final String ACTUATOR_PATH = "/actuator";
+    private static final String ACTUATOR_PREFIX = "/actuator/";
+    private static final String NO_STORE = "no-store";
+    private static final String NO_CACHE = "no-cache";
     private static final String CSP =
             "default-src 'self'; base-uri 'none'; object-src 'none'; "
                     + "frame-ancestors 'none'; form-action 'self'; "
@@ -35,21 +57,21 @@ public final class WebSecurityHeadersConfiguration {
                     HttpServletRequest request,
                     HttpServletResponse response,
                     FilterChain chain) throws ServletException, IOException {
-                response.setHeader("Content-Security-Policy", CSP);
-                response.setHeader("X-Content-Type-Options", "nosniff");
-                response.setHeader("X-Frame-Options", "DENY");
-                response.setHeader("Referrer-Policy", "no-referrer");
+                response.setHeader(CONTENT_SECURITY_POLICY, CSP);
+                response.setHeader(CONTENT_TYPE_OPTIONS, CONTENT_TYPE_OPTIONS_VALUE);
+                response.setHeader(FRAME_OPTIONS, FRAME_OPTIONS_VALUE);
+                response.setHeader(REFERRER_POLICY, REFERRER_POLICY_VALUE);
                 response.setHeader(
-                        "Permissions-Policy",
-                        "camera=(), microphone=(), geolocation=()");
-                response.setHeader("Cross-Origin-Opener-Policy", "same-origin");
-                response.setHeader("Cache-Control", cacheControl(path(request)));
+                        PERMISSIONS_POLICY,
+                        PERMISSIONS_POLICY_VALUE);
+                response.setHeader(OPENER_POLICY, OPENER_POLICY_VALUE);
+                response.setHeader(CACHE_CONTROL, cacheControl(path(request)));
                 chain.doFilter(request, response);
             }
         };
         FilterRegistrationBean<OncePerRequestFilter> registration =
                 new FilterRegistrationBean<>(filter);
-        registration.setName("tensorSecurityHeadersFilter");
+        registration.setName(FILTER_NAME);
         registration.setOrder(Ordered.HIGHEST_PRECEDENCE + 1);
         return registration;
     }
@@ -61,17 +83,17 @@ public final class WebSecurityHeadersConfiguration {
     }
 
     private static String cacheControl(String path) {
-        if (path.startsWith("/assets/")) {
-            return "public, max-age=31536000, immutable";
+        if (path.startsWith(ASSET_PATH)) {
+            return ASSET_CACHE_CONTROL;
         }
-        if ("/".equals(path)
-                || "/index.html".equals(path)
-                || path.startsWith("/api/")
-                || "/actuator".equals(path)
-                || path.startsWith("/actuator/")) {
-            return "no-store";
+        if (StringConstants.SLASH.equals(path)
+                || INDEX_PATH.equals(path)
+                || path.startsWith(API_PATH)
+                || ACTUATOR_PATH.equals(path)
+                || path.startsWith(ACTUATOR_PREFIX)) {
+            return NO_STORE;
         }
-        return "no-cache";
+        return NO_CACHE;
     }
 
     @RestControllerAdvice

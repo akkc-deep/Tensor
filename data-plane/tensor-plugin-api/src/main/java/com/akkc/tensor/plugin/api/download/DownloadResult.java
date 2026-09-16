@@ -12,19 +12,13 @@ public record DownloadResult(
         ApiName apiName,
         long sourceRowCount,
         long insertedRows,
-        long updatedRows,
-        String message) {
+        long updatedRows) {
 
     public DownloadResult {
         Objects.requireNonNull(requestId, "requestId");
         Objects.requireNonNull(outcome, "outcome");
         Objects.requireNonNull(pluginId, "pluginId");
         Objects.requireNonNull(apiName, "apiName");
-        Objects.requireNonNull(message, "message");
-
-        if (message.isBlank()) {
-            throw new IllegalArgumentException("message must not be blank");
-        }
         if (sourceRowCount < 0 || insertedRows < 0 || updatedRows < 0) {
             throw new IllegalArgumentException("row counts must be non-negative");
         }
@@ -35,5 +29,9 @@ public record DownloadResult(
         if (outcome == DownloadOutcome.SUCCESS && sourceRowCount == 0) {
             throw new IllegalArgumentException("successful result must contain source rows");
         }
+    }
+
+    public String message() {
+        return outcome.message();
     }
 }

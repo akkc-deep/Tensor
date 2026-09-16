@@ -21,6 +21,9 @@ import org.springframework.context.annotation.Configuration;
 @Configuration(proxyBeanMethods = false)
 @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
 public final class DownloadBindingConfiguration {
+    private static final String DOWNLOAD_REQUEST_MODULE = "tensor-download-request";
+    private static final String DOWNLOAD_TASK_REQUEST_MODULE = "tensor-download-task-request";
+
     @Bean
     public DownloadDescriptorResolver downloadDescriptorResolver(PluginRegistry plugins, AdapterRegistry adapters) {
         return new DownloadDescriptorResolver(plugins, adapters);
@@ -39,7 +42,7 @@ public final class DownloadBindingConfiguration {
 
     @Bean
     public Module downloadRequestJacksonModule(DownloadRequestDeserializer deserializer) {
-        return new SimpleModule("tensor-download-request").addDeserializer(DownloadRequest.class, deserializer);
+        return new SimpleModule(DOWNLOAD_REQUEST_MODULE).addDeserializer(DownloadRequest.class, deserializer);
     }
 
     @Bean
@@ -56,7 +59,7 @@ public final class DownloadBindingConfiguration {
     @Bean
     public Module downloadTaskRequestJacksonModule(DownloadTaskRequestDeserializer submission,
             DownloadTaskControlRequestDeserializer control) {
-        return new SimpleModule("tensor-download-task-request")
+        return new SimpleModule(DOWNLOAD_TASK_REQUEST_MODULE)
                 .addDeserializer(DownloadTaskRequest.class, submission)
                 .addDeserializer(DownloadTaskControlRequest.class, control);
     }

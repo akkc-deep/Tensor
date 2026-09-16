@@ -1,5 +1,8 @@
 package com.akkc.tensor.plugin.tushare.client;
 
+import com.akkc.tensor.plugin.api.constant.DatasetFields;
+import com.akkc.tensor.plugin.api.constant.ValidationConstants;
+import com.akkc.tensor.plugin.tushare.TushareConstants;
 import com.akkc.tensor.plugin.api.dataset.ColumnDefinition;
 import com.akkc.tensor.plugin.api.dataset.DatasetDefinition;
 import com.akkc.tensor.plugin.api.descriptor.ParameterType;
@@ -18,11 +21,14 @@ import java.util.Objects;
 import java.util.regex.Pattern;
 
 final class TushareResponseValidator {
+    private static final String ANNOUNCEMENT_DATE_TIME_REGEX =
+            "[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}";
+    private static final String ANNOUNCEMENT_DATE_TIME_FORMAT = "uuuu-MM-dd HH:mm:ss";
     private static final Pattern ANNOUNCEMENT_DATE_TIME =
-            Pattern.compile("[0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}:[0-9]{2}");
-    private static final Pattern TS_CODE = Pattern.compile("[A-Z0-9]+\\.[A-Z0-9]+");
+            Pattern.compile(ANNOUNCEMENT_DATE_TIME_REGEX);
+    private static final Pattern TS_CODE = Pattern.compile(ValidationConstants.TS_CODE_REGEX);
     private static final DateTimeFormatter ANNOUNCEMENT_FORMATTER =
-            DateTimeFormatter.ofPattern("uuuu-MM-dd HH:mm:ss", Locale.ROOT)
+            DateTimeFormatter.ofPattern(ANNOUNCEMENT_DATE_TIME_FORMAT, Locale.ROOT)
                     .withResolverStyle(ResolverStyle.STRICT);
 
     private TushareResponseValidator() {}
@@ -70,8 +76,8 @@ final class TushareResponseValidator {
         }
         validateStockScope(definition, params, fields, items);
 
-        if (definition.datasetKey().apiName().value().equals("stk_holdernumber")) {
-            items = normalizeAnnouncementDates(items, fields.indexOf("ann_date"));
+        if (definition.datasetKey().apiName().value().equals(TushareConstants.STK_HOLDERNUMBER)) {
+            items = normalizeAnnouncementDates(items, fields.indexOf(DatasetFields.ANN_DATE));
         }
 
         return new DownloadEnvelope(
@@ -91,20 +97,20 @@ final class TushareResponseValidator {
             List<String> fields,
             List<List<Object>> items) {
         boolean stockScoped = definition.parameters().stream().anyMatch(parameter ->
-                parameter.name().equals("ts_code")
+                parameter.name().equals(DatasetFields.TS_CODE)
                         && parameter.type() == ParameterType.TS_CODE
                         && parameter.required());
         if (!stockScoped) {
             return;
         }
 
-        Object value = params.get("ts_code");
+        Object value = params.get(DatasetFields.TS_CODE);
         if (!(value instanceof String requested)
                 || !requested.equals(requested.strip().toUpperCase(Locale.ROOT))
                 || !TS_CODE.matcher(requested).matches()) {
             throw TushareErrorClassifier.invalidPayload();
         }
-        int columnIndex = fields.indexOf("ts_code");
+        int columnIndex = fields.indexOf(DatasetFields.TS_CODE);
         if (columnIndex < 0
                 || items.stream().anyMatch(row -> !requested.equals(row.get(columnIndex)))) {
             throw TushareErrorClassifier.invalidPayload();

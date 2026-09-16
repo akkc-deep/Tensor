@@ -1,5 +1,6 @@
 package com.akkc.tensor.core.catalog;
 
+import com.akkc.tensor.plugin.api.constant.DatasetFields;
 import com.akkc.tensor.core.catalog.SchemaInspector.ColumnMetadata;
 import com.akkc.tensor.core.catalog.SchemaInspector.TableSchema;
 import com.akkc.tensor.plugin.api.dataset.BusinessKeyMode;
@@ -106,17 +107,17 @@ public final class DatasetStartupValidator {
         List<ColumnMetadata> expectedColumns = new ArrayList<>();
         definition.columns().stream().map(DatasetStartupValidator::expectedColumn).forEach(expectedColumns::add);
         if (definition.businessKey().mode() == BusinessKeyMode.FINGERPRINT) {
-            expectedColumns.add(new ColumnMetadata("business_key", Types.CHAR, false));
+            expectedColumns.add(new ColumnMetadata(DatasetFields.BUSINESS_KEY, Types.CHAR, false));
         }
-        expectedColumns.add(new ColumnMetadata("source_plugin", Types.VARCHAR, false));
-        expectedColumns.add(new ColumnMetadata("source_api", Types.VARCHAR, false));
-        expectedColumns.add(new ColumnMetadata("ingested_at", Types.TIMESTAMP, false));
+        expectedColumns.add(new ColumnMetadata(DatasetFields.SOURCE_PLUGIN, Types.VARCHAR, false));
+        expectedColumns.add(new ColumnMetadata(DatasetFields.SOURCE_API, Types.VARCHAR, false));
+        expectedColumns.add(new ColumnMetadata(DatasetFields.INGESTED_AT, Types.TIMESTAMP, false));
         if (!actual.columns().equals(expectedColumns)) {
             return false;
         }
 
         List<String> expectedPrimary = definition.businessKey().mode() == BusinessKeyMode.FINGERPRINT
-                ? List.of("business_key") : definition.businessKey().fields();
+                ? List.of(DatasetFields.BUSINESS_KEY) : definition.businessKey().fields();
         return actual.primaryKey().equals(expectedPrimary) && actual.uniqueKeys().isEmpty();
     }
 

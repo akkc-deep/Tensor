@@ -12,10 +12,6 @@ defineProps({
       <h1 :id="id">{{ title }}</h1>
       <p>{{ description }}</p>
     </div>
-    <div class="page-heading__glyph" aria-hidden="true">
-      <i />
-      <i />
-      <i />
-    </div>
+    <slot />
   </header>
 </template>

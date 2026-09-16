@@ -1,5 +1,4 @@
 import { flushPromises, mount } from '@vue/test-utils'
-import { ElDatePicker, ElInput } from 'element-plus'
 import { nextTick } from 'vue'
 
 import DynamicFilterForm from './DynamicFilterForm.vue'
@@ -13,17 +12,11 @@ function field(wrapper, key) {
 }
 
 function control(wrapper, key) {
-  const current = field(wrapper, key)
-  const component = current.findComponent(ElDatePicker).exists()
-    ? current.findComponent(ElDatePicker)
-    : current.findComponent(ElInput)
-  if (!component.exists()) throw new Error(`Missing control ${key}`)
-  return component
+  return field(wrapper, key).get('input')
 }
 
 async function setValue(wrapper, key, value) {
-  control(wrapper, key).vm.$emit('update:modelValue', value)
-  await nextTick()
+  await control(wrapper, key).setValue(value)
 }
 
 describe('DynamicFilterForm', () => {
@@ -47,13 +40,11 @@ describe('DynamicFilterForm', () => {
     expect(wrapper.findAll('[data-filter]').map((item) => item.attributes('data-filter'))).toEqual([
       'tsCode', 'tradeDateFrom', 'tradeDateTo', 'annDateFrom', 'annDateTo',
     ])
-    expect(wrapper.findAll('.metadata-field__label').map((label) => label.text())).toEqual([
-      '证券代码 (ts_code)', '交易日期开始 (trade_date)', '交易日期结束 (trade_date)',
-      '公告日期开始 (ann_date)', '公告日期结束 (ann_date)',
+    expect(wrapper.findAll('.field label').map((label) => label.text())).toEqual([
+      '证券代码', '交易开始日期', '交易结束日期',
+      '公告开始日期', '公告结束日期',
     ])
-    expect(wrapper.findAllComponents(ElDatePicker).map((picker) => ({
-      type: picker.props('type'), valueFormat: picker.props('valueFormat'),
-    }))).toEqual(Array(4).fill({ type: 'date', valueFormat: 'YYYY-MM-DD' }))
+    expect(wrapper.findAll('input[type="date"]')).toHaveLength(4)
     for (const key of ['tsCode', 'tradeDateFrom', 'tradeDateTo', 'annDateFrom', 'annDateTo']) {
       expect(field(wrapper, key).get('input').attributes('id')).toBe(`dataset-filter-${key}`)
     }
@@ -89,7 +80,7 @@ describe('DynamicFilterForm', () => {
 
     try {
       await setValue(wrapper, 'tsCode', '<b>broken</b>')
-      await setValue(wrapper, 'tradeDateFrom', '2026-02-30')
+      Object.defineProperty(control(wrapper, 'tradeDateFrom').element, 'validity', { configurable: true, value: { badInput: true } })
       await setValue(wrapper, 'annDateFrom', '2026-09-02')
       await setValue(wrapper, 'annDateTo', '2026-09-01')
       expect(await wrapper.vm.validate()).toBe(false)
@@ -115,7 +106,7 @@ describe('DynamicFilterForm', () => {
     wrapper.vm.reset()
     await nextTick()
     expect(wrapper.vm.criteria()).toEqual({})
-    expect(control(wrapper, 'tsCode').props('modelValue')).toBe('')
+    expect(control(wrapper, 'tsCode').element.value).toBe('')
 
     await wrapper.setProps({ filters: [annFilter] })
     expect(wrapper.findAll('[data-filter]').map((item) => item.attributes('data-filter'))).toEqual([
@@ -123,9 +114,26 @@ describe('DynamicFilterForm', () => {
     ])
     expect(wrapper.vm.criteria()).toEqual({})
     await wrapper.setProps({ disabled: true })
-    expect(control(wrapper, 'annDateFrom').props('disabled')).toBe(true)
+    expect(control(wrapper, 'annDateFrom').element.disabled).toBe(true)
     expect(field(wrapper, 'annDateFrom').get('input').attributes('disabled')).toBe('')
     await setValue(wrapper, 'annDateFrom', '2026-09-01')
-    expect(control(wrapper, 'annDateFrom').props('modelValue')).toBe('')
+    expect(await wrapper.vm.validate()).toBe(true)
+    expect(wrapper.vm.criteria()).toEqual({})
   })
+  it('clears the start-date error after correcting the end date and resets partial native input', async () => {
+    const wrapper = mount(DynamicFilterForm, { props: { filters: [tradeFilter] } })
+    await setValue(wrapper, 'tradeDateFrom', '2026-09-04')
+    await setValue(wrapper, 'tradeDateTo', '2026-09-01')
+    expect(await wrapper.vm.validate()).toBe(false)
+    await setValue(wrapper, 'tradeDateTo', '2026-09-05')
+    expect(wrapper.find('.field-error').exists()).toBe(false)
+    expect(await wrapper.vm.validate()).toBe(true)
+    expect(wrapper.vm.criteria()).toEqual({ tradeDateFrom: '2026-09-04', tradeDateTo: '2026-09-05' })
+    wrapper.vm.reset()
+    await nextTick()
+    expect(wrapper.findAll('input').every(input => input.element.value === '')).toBe(true)
+    expect(await wrapper.vm.validate()).toBe(true)
+    expect(wrapper.vm.criteria()).toEqual({})
+  })
+
 })

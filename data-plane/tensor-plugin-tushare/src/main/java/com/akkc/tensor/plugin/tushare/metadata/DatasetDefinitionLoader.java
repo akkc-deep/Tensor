@@ -15,6 +15,7 @@ import com.akkc.tensor.plugin.api.model.ApiName;
 import com.akkc.tensor.plugin.api.model.DatasetKey;
 import com.akkc.tensor.plugin.api.model.PluginId;
 import com.akkc.tensor.plugin.api.model.TableName;
+import com.akkc.tensor.plugin.tushare.TushareConstants;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.StreamReadFeature;
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -41,10 +42,13 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.ResourcePatternResolver;
 
 public final class DatasetDefinitionLoader {
+    private static final String WHITESPACE_REGEX = "\\s+";
+    private static final String UNNAMED_RESOURCE = "<unnamed-resource>";
+    private static final String SINGLE_SPACE = " ";
     private static final String SCHEMA_RESOURCE = "contracts/dataset-definition.schema.json";
     private static final String SCHEMA_NAME = "dataset-definition.schema.json";
-    private static final String TUSHARE_PRO = "tushare_pro";
-    private static final Pattern WHITESPACE = Pattern.compile("\\s+");
+    private static final String TUSHARE_PRO = TushareConstants.PLUGIN_ID;
+    private static final Pattern WHITESPACE = Pattern.compile(WHITESPACE_REGEX);
     private static final ObjectMapper JSON = new ObjectMapper();
     private static final ObjectMapper YAML = new ObjectMapper(YAMLFactory.builder()
             .enable(StreamReadFeature.STRICT_DUPLICATE_DETECTION)
@@ -102,7 +106,7 @@ public final class DatasetDefinitionLoader {
     }
 
     private void loadResource(Resource resource, JsonSchema schema, List<Diagnostic> diagnostics, List<LoadedDefinition> loaded) {
-        String resourceName = resource.getFilename() == null ? "<unnamed-resource>" : resource.getFilename();
+        String resourceName = resource.getFilename() == null ? UNNAMED_RESOURCE : resource.getFilename();
         JsonNode node;
         try (InputStream input = resource.getInputStream()) {
             node = YAML.readTree(input);
@@ -242,7 +246,7 @@ public final class DatasetDefinitionLoader {
     }
 
     private static String normalize(String value) {
-        return WHITESPACE.matcher(value).replaceAll(" ").trim();
+        return WHITESPACE.matcher(value).replaceAll(SINGLE_SPACE).trim();
     }
 
     private record LoadedDefinition(String resourceName, DatasetDefinition definition) {

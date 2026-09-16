@@ -1,5 +1,6 @@
 package com.akkc.tensor.web.dto;
 
+import com.akkc.tensor.plugin.api.constant.DatasetFields;
 import com.akkc.tensor.plugin.api.dataset.ColumnDefinition;
 import com.akkc.tensor.plugin.api.dataset.DatasetDefinition;
 import com.akkc.tensor.plugin.api.dataset.FilterDefinition;
@@ -19,6 +20,10 @@ public record DatasetDefinitionResponse(
         List<FilterResponse> filters,
         String fixedColumn,
         List<ColumnResponse> columns) {
+    private static final String EQUALS_OPERATOR = "EQ";
+    private static final String TEXT_CONTROL = "TEXT";
+    private static final String BETWEEN_OPERATOR = "BETWEEN";
+    private static final String DATE_RANGE_CONTROL = "DATE_RANGE";
 
     public DatasetDefinitionResponse {
         Objects.requireNonNull(pluginId, "pluginId");
@@ -103,9 +108,10 @@ public record DatasetDefinitionResponse(
         public static FilterResponse from(FilterDefinition definition) {
             Objects.requireNonNull(definition, "definition");
             return switch (definition.field()) {
-                case "ts_code" -> new FilterResponse("ts_code", "EQ", "TEXT");
-                case "trade_date", "ann_date" ->
-                    new FilterResponse(definition.field(), "BETWEEN", "DATE_RANGE");
+                case DatasetFields.TS_CODE -> new FilterResponse(
+                        DatasetFields.TS_CODE, EQUALS_OPERATOR, TEXT_CONTROL);
+                case DatasetFields.TRADE_DATE, DatasetFields.ANN_DATE ->
+                    new FilterResponse(definition.field(), BETWEEN_OPERATOR, DATE_RANGE_CONTROL);
                 default -> throw new IllegalArgumentException("Unsupported dataset filter");
             };
         }

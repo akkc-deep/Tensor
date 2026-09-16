@@ -1,5 +1,7 @@
 package com.akkc.tensor.core.query;
 
+import com.akkc.tensor.plugin.api.constant.PaginationConstants;
+import com.akkc.tensor.plugin.api.constant.ValidationConstants;
 import java.time.LocalDate;
 import java.util.Locale;
 import java.util.regex.Pattern;
@@ -12,7 +14,7 @@ public record QueryCriteria(
         LocalDate annDateTo,
         int page,
         int pageSize) {
-    private static final Pattern TS_CODE = Pattern.compile("[A-Z0-9]+\\.[A-Z0-9]+");
+    private static final Pattern TS_CODE = Pattern.compile(ValidationConstants.TS_CODE_REGEX);
 
     public QueryCriteria {
         if (tsCode != null) {
@@ -27,10 +29,10 @@ public record QueryCriteria(
         if (annDateFrom != null && annDateTo != null && annDateFrom.isAfter(annDateTo)) {
             throw new IllegalArgumentException("annDateFrom must not be after annDateTo");
         }
-        if (page < 1) {
+        if (page < PaginationConstants.FIRST_PAGE) {
             throw new IllegalArgumentException("page must be at least 1");
         }
-        if (pageSize != 20 && pageSize != 50 && pageSize != 100) {
+        if (!PaginationConstants.PAGE_SIZES.contains(pageSize)) {
             throw new IllegalArgumentException("pageSize must be one of 20, 50, 100");
         }
     }

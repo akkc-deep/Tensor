@@ -33,6 +33,7 @@ describe('useDownloadTaskList', () => {
   let list
 
   beforeEach(() => {
+    vi.resetAllMocks()
     vi.useFakeTimers()
     visibility = 'visible'
     vi.spyOn(document, 'visibilityState', 'get').mockImplementation(
@@ -45,6 +46,130 @@ describe('useDownloadTaskList', () => {
     list = null
     vi.clearAllTimers()
     vi.useRealTimers()
+  })
+
+  it('keeps the selected server group through paging, polling, acceptance and return', async () => {
+    listDownloadTasks.mockResolvedValue(pageResult())
+    list = useDownloadTaskList()
+    await list.start()
+    await list.changePage(3)
+    await list.changeStatusGroup('ACTIVE')
+    expect(list.page.value).toBe(1)
+    expect(listDownloadTasks).toHaveBeenLastCalledWith({ page: 1, pageSize: 20, statusGroup: 'ACTIVE' })
+    await list.changePage(2)
+    await vi.advanceTimersByTimeAsync(5_000)
+    expect(listDownloadTasks).toHaveBeenLastCalledWith({ page: 2, pageSize: 20, statusGroup: 'ACTIVE' })
+    await list.onAccepted()
+    expect(listDownloadTasks).toHaveBeenLastCalledWith({ page: 1, pageSize: 20, statusGroup: 'ACTIVE' })
+    list.setActive(false)
+    await vi.advanceTimersByTimeAsync(30_000)
+    await list.setActive(true)
+    expect(listDownloadTasks).toHaveBeenLastCalledWith({ page: 1, pageSize: 20, statusGroup: 'ACTIVE' })
+    await list.changeStatusGroup('')
+    expect(listDownloadTasks).toHaveBeenLastCalledWith({ page: 1, pageSize: 20 })
+  })
+
+  it('discards an in-flight group and preserves only the latest group query', async () => {
+    const old = deferred(), latest = deferred()
+    listDownloadTasks.mockReturnValueOnce(old.promise).mockReturnValueOnce(latest.promise)
+    list = useDownloadTaskList()
+    const started = list.start()
+    list.changeStatusGroup('ACTIVE')
+    list.changeStatusGroup('ERROR')
+    old.resolve(pageResult({ total: 99n }))
+    await started
+    expect(list.result.value).toBeNull()
+    expect(listDownloadTasks).toHaveBeenLastCalledWith({ page: 1, pageSize: 20, statusGroup: 'ERROR' })
+    latest.resolve(pageResult({ total: 23n }))
+    await flushPromises()
+    expect(list.result.value.total).toBe(23n)
+    expect(await list.changeStatusGroup('invalid')).toBe(false)
+    expect(list.statusGroup.value).toBe('ERROR')
+  })
+
+  it('makes group and legacy status exclusive without losing historical filters', async () => {
+    listDownloadTasks.mockResolvedValue(pageResult())
+    list = useDownloadTaskList()
+    await list.start()
+    await list.changeFilters({ pluginId: 'retired_source' }, 'FAILED')
+    await list.changeStatusGroup('DONE')
+    expect(list.status.value).toBe('')
+    expect(listDownloadTasks).toHaveBeenLastCalledWith({ page: 1, pageSize: 20, pluginId: 'retired_source', statusGroup: 'DONE' })
+    await list.changeFilters({ apiName: 'daily' })
+    expect(listDownloadTasks).toHaveBeenLastCalledWith({ page: 1, pageSize: 20, apiName: 'daily', statusGroup: 'DONE' })
+    await list.changeStatus('RUNNING')
+    expect(list.statusGroup.value).toBe('')
+    expect(listDownloadTasks).toHaveBeenLastCalledWith({ page: 1, pageSize: 20, apiName: 'daily', status: 'RUNNING' })
+  })
+
+  it('filters on the server, resets the page and keeps the filter during polling', async () => {
+    listDownloadTasks.mockResolvedValue(pageResult())
+    list = useDownloadTaskList()
+    await list.start()
+    await list.changePage(3)
+    await list.changeStatus('FAILED')
+    expect(listDownloadTasks).toHaveBeenLastCalledWith({ page: 1, pageSize: 20, status: 'FAILED' })
+    await vi.advanceTimersByTimeAsync(5_000)
+    expect(listDownloadTasks).toHaveBeenLastCalledWith({ page: 1, pageSize: 20, status: 'FAILED' })
+    await list.changeStatus('')
+    expect(listDownloadTasks).toHaveBeenLastCalledWith({ page: 1, pageSize: 20 })
+  })
+
+  it('combines historical source, API, submission and status filters across paging and polling', async () => {
+    listDownloadTasks.mockResolvedValue(pageResult())
+    list = useDownloadTaskList()
+    await list.start()
+    await list.changeStatus('FAILED')
+    await list.changePage(3)
+    const submissionId = '33333333-3333-4333-8333-333333333333'
+    await list.changeFilters({ pluginId: ' retired_source ', apiName: ' daily ', submissionId })
+    const filters = { pluginId: 'retired_source', apiName: 'daily', submissionId, status: 'FAILED' }
+    expect(listDownloadTasks).toHaveBeenLastCalledWith({ page: 1, pageSize: 20, ...filters })
+    await list.changePageSize(100)
+    await list.changePage(2)
+    await vi.advanceTimersByTimeAsync(5_000)
+    expect(listDownloadTasks).toHaveBeenLastCalledWith({ page: 2, pageSize: 100, ...filters })
+    await list.changeFilters({ apiName: 'weekly' })
+    expect(listDownloadTasks).toHaveBeenLastCalledWith({ page: 1, pageSize: 100, apiName: 'weekly', status: 'FAILED' })
+    await list.changeFilters({ pluginId: '', apiName: ' ', submissionId: '' })
+    expect(listDownloadTasks).toHaveBeenLastCalledWith({ page: 1, pageSize: 100, status: 'FAILED' })
+  })
+
+  it('keeps the last valid filter when input is invalid and discards a previous unfiltered response', async () => {
+    const old = deferred(), latest = deferred()
+    listDownloadTasks.mockReturnValueOnce(old.promise).mockReturnValueOnce(latest.promise)
+    list = useDownloadTaskList()
+    const started = list.start()
+    list.changeFilters({ pluginId: 'retired_source' })
+    expect(await list.changeFilters({ pluginId: 'bad source', submissionId: 'invalid' })).toBe(false)
+    expect(list.filterErrors.value).toHaveProperty('pluginId')
+    expect(list.filterErrors.value).toHaveProperty('submissionId')
+    old.resolve(pageResult({ total: 999n }))
+    await started
+    expect(list.result.value).toBeNull()
+    expect(listDownloadTasks).toHaveBeenLastCalledWith({ page: 1, pageSize: 20, pluginId: 'retired_source' })
+    latest.resolve(pageResult())
+    await flushPromises()
+    listDownloadTasks.mockResolvedValue(pageResult())
+    await list.changeFilters({})
+    expect(list.filterErrors.value).toEqual({})
+  })
+
+  it('discards an old page when the status filter changes during a request', async () => {
+    const old = deferred()
+    const next = deferred()
+    listDownloadTasks.mockReturnValueOnce(old.promise).mockReturnValueOnce(next.promise)
+    list = useDownloadTaskList()
+    const started = list.start()
+    list.changeStatus('INTERRUPTED')
+    old.resolve(pageResult({ items: [{ status: 'SUCCEEDED' }] }))
+    await started
+    expect(list.result.value).toBeNull()
+    expect(listDownloadTasks).toHaveBeenLastCalledWith({ page: 1, pageSize: 20, status: 'INTERRUPTED' })
+    next.resolve(pageResult())
+    await flushPromises()
+    expect(list.result.value.items).toEqual([])
+    expect(await list.changeStatus('INVALID')).toBe(false)
   })
 
   it('starts with the first server page and polls once five seconds after success', async () => {

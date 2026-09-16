@@ -10,7 +10,10 @@ const routes = [
   {
     path: '/downloads/tasks/:taskId',
     name: 'download-task',
-    component: () => import('../views/DownloadTaskView.vue'),
+    components: {
+      default: DownloadView,
+      task: () => import('../views/DownloadTaskView.vue'),
+    },
   },
   { path: '/datasets', name: 'datasets', component: DatasetView },
   {

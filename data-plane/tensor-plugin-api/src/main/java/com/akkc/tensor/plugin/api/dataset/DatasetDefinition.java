@@ -1,5 +1,6 @@
 package com.akkc.tensor.plugin.api.dataset;
 
+import com.akkc.tensor.plugin.api.constant.ValidationConstants;
 import com.akkc.tensor.plugin.api.descriptor.ParameterDescriptor;
 import com.akkc.tensor.plugin.api.descriptor.QueryMode;
 import com.akkc.tensor.plugin.api.model.DatasetKey;
@@ -23,17 +24,18 @@ public record DatasetDefinition(
         String fixedColumn,
         int batchSize
 ) {
-    private static final int DEFAULT_BATCH_SIZE = 500;
-    private static final Pattern IDENTIFIER_PATTERN = Pattern.compile("^[a-z][a-z0-9_]{1,63}$");
+    private static final int MAX_BATCH_SIZE = 500;
+    private static final int DEFAULT_BATCH_SIZE = MAX_BATCH_SIZE;
+    private static final Pattern IDENTIFIER_PATTERN = Pattern.compile(ValidationConstants.IDENTIFIER_REGEX);
 
     public DatasetDefinition {
         Objects.requireNonNull(datasetKey, "datasetKey");
         requireNonBlank(displayName, "displayName");
-        if (displayName.codePointCount(0, displayName.length()) > 128) {
+        if (displayName.codePointCount(0, displayName.length()) > ValidationConstants.MAX_DISPLAY_NAME_LENGTH) {
             throw new IllegalArgumentException("displayName must be at most 128 characters");
         }
         requireNonBlank(category, "category");
-        if (category.codePointCount(0, category.length()) > 64) {
+        if (category.codePointCount(0, category.length()) > ValidationConstants.MAX_CATEGORY_LENGTH) {
             throw new IllegalArgumentException("category must be at most 64 characters");
         }
         Objects.requireNonNull(queryMode, "queryMode");
@@ -66,7 +68,7 @@ public record DatasetDefinition(
                 throw new IllegalArgumentException("fixedColumn must reference a column");
             }
         }
-        if (batchSize < 1 || batchSize > 500) {
+        if (batchSize < 1 || batchSize > MAX_BATCH_SIZE) {
             throw new IllegalArgumentException("batchSize must be between 1 and 500");
         }
     }

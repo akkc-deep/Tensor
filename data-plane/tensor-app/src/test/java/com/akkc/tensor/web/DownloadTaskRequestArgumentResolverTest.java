@@ -57,6 +57,36 @@ class DownloadTaskRequestArgumentResolverTest {
         invalid(() -> resolve("tasks", DownloadTaskQuery.Tasks.class, request));
     }
 
+    @ParameterizedTest
+    @ValueSource(strings = {"ACTIVE", "DONE", "ERROR"})
+    void acceptsTaskStatusGroups(String value) throws Exception {
+        var request = new MockHttpServletRequest(); request.addParameter("statusGroup", value);
+
+        var query = (DownloadTaskQuery.Tasks) resolve("tasks", DownloadTaskQuery.Tasks.class, request);
+
+        assertThat(query.filter().status()).isNull();
+        assertThat(query.filter().statusGroup().name()).isEqualTo(value);
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"", " ", "active", "UNKNOWN"})
+    void rejectsInvalidTaskStatusGroups(String value) {
+        var request = new MockHttpServletRequest(); request.addParameter("statusGroup", value);
+        invalid(() -> resolve("tasks", DownloadTaskQuery.Tasks.class, request));
+    }
+
+    @Test
+    void rejectsDuplicateOrStatusCombinedTaskStatusGroup() {
+        var duplicate = new MockHttpServletRequest();
+        duplicate.addParameter("statusGroup", "ACTIVE", "ACTIVE");
+        invalid(() -> resolve("tasks", DownloadTaskQuery.Tasks.class, duplicate));
+
+        var combined = new MockHttpServletRequest();
+        combined.addParameter("status", "RUNNING");
+        combined.addParameter("statusGroup", "ACTIVE");
+        invalid(() -> resolve("tasks", DownloadTaskQuery.Tasks.class, combined));
+    }
+
     @Test
     void splitFilterIsIndependentAndUuidIsStrict() throws Exception {
         var request = path("ABCDEF00-1234-1234-1234-123456789ABC");

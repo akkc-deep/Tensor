@@ -1,7 +1,8 @@
 <script setup>
-import { computed, ref } from 'vue'
+import { computed, onBeforeUnmount, onMounted, ref } from 'vue'
 
 import { decimalSign, formatCell } from '../../utils/format.js'
+import { useDisplay } from '../../composables/useDisplay.js'
 
 const props = defineProps({
   columns: { type: Array, required: true },
@@ -11,6 +12,9 @@ const props = defineProps({
   apiName: { type: String, default: '' },
 })
 const tableRegion = ref(null)
+const valueTooltips = ref([])
+const display = useDisplay()
+const displayScale = computed(() => display?.scale.value ?? 1)
 
 const sourceColumns = [
   { name: 'source_plugin', label: 'source_plugin', logicalType: 'STRING' },
@@ -24,8 +28,7 @@ const fixedColumn = computed(() => (
 ))
 
 function minWidth(column) {
-  if (column.name === 'ingested_at') return 180
-  return column.longText === true ? 240 : 140
+  return (column.name === 'ingested_at' ? 180 : column.longText === true ? 240 : 140) * displayScale.value
 }
 
 const MARKET_LABELS = {
@@ -78,8 +81,25 @@ function displayValue(value, column) {
 }
 
 function hasTooltip(value, column) {
-  return column.longText === true && String(value ?? '').length > 30
+  return column.longText === true && String(value ?? '').length > 0
 }
+
+function closeTooltips(event) {
+  if (event.key === 'Escape') valueTooltips.value.forEach(tooltip => tooltip.onClose())
+}
+
+function scrollTooltip(event) {
+  const tooltip = document.getElementById(event.currentTarget.getAttribute('aria-describedby'))
+  if (tooltip?.getAttribute('aria-hidden') !== 'false') return
+  const offsets = { ArrowUp: -40, ArrowDown: 40, PageUp: -tooltip.clientHeight, PageDown: tooltip.clientHeight, Home: -tooltip.scrollHeight, End: tooltip.scrollHeight }
+  if (!(event.key in offsets)) return
+  event.preventDefault()
+  event.stopPropagation()
+  tooltip.scrollTop += offsets[event.key]
+}
+
+onMounted(() => document.addEventListener('keydown', closeTooltips))
+onBeforeUnmount(() => document.removeEventListener('keydown', closeTooltips))
 
 function valueClasses(value, column) {
   const direction = marketDirection(value, column)
@@ -105,7 +125,7 @@ function cellStyle({ column }) {
 }
 
 function headerCellStyle({ column }) {
-  return stickyStyle(column, 'var(--tensor-raised)')
+  return stickyStyle(column, 'var(--tensor-subtle)')
 }
 
 function scrollHorizontally(offset) {
@@ -129,6 +149,8 @@ function scrollHorizontally(offset) {
   >
     <el-table
       :data="items"
+      :max-height="488 * displayScale"
+      :scrollbar-tabindex="0"
       :cell-style="cellStyle"
       :header-cell-style="headerCellStyle"
     >
@@ -151,13 +173,19 @@ function scrollHorizontally(offset) {
         <template #default="{ row }">
           <el-tooltip
             v-if="hasTooltip(row[column.name], column)"
+            ref="valueTooltips"
             :content="String(row[column.name])"
             placement="top"
+            :trigger="['hover', 'focus']"
             :show-after="0"
+            :popper-style="{ maxWidth: 'min(56rem, calc(100vw - 4.8rem))', maxHeight: '50vh', overflow: 'auto', overflowWrap: 'anywhere' }"
           >
             <span
-              class="dataset-table__value"
+              class="dataset-table__value dataset-table__long-text"
               :class="valueClasses(row[column.name], column)"
+              tabindex="0"
+              aria-description="使用上下键或 Page Up、Page Down 滚动全文，Home、End 跳至首尾，Esc 关闭。"
+              @keydown="scrollTooltip"
             >{{ displayValue(row[column.name], column) }}</span>
           </el-tooltip>
           <span
@@ -176,19 +204,20 @@ function scrollHorizontally(offset) {
   min-width: 0;
   max-width: 100%;
   overflow-x: auto;
-  border-radius: 0 0 14px 14px;
+  border: 0.1rem solid var(--tensor-line);
+  border-radius: 0.7rem;
 }
 
 .dataset-table:focus-visible {
-  outline: 3px solid var(--tensor-interactive-color);
-  outline-offset: -3px;
+  outline: 0.3rem solid var(--tensor-interactive-color);
+  outline-offset: -0.3rem;
 }
 
 .dataset-table__field-code {
   display: block;
-  margin-top: 3px;
+  margin-top: 0.3rem;
   color: var(--tensor-muted);
-  font-size: 11px;
+  font-size: 1.1rem;
   font-weight: 400;
   line-height: 1.4;
 }
@@ -205,7 +234,23 @@ function scrollHorizontally(offset) {
   color: var(--tensor-success);
 }
 
+.dataset-table :deep(.el-table) {
+  --el-table-text-color: var(--tensor-text);
+  --el-table-header-text-color: var(--tensor-muted);
+  --el-table-header-bg-color: var(--tensor-subtle);
+  --el-table-row-hover-bg-color: var(--tensor-subtle);
+  font-variant-numeric: tabular-nums;
+}
+
+.dataset-table :deep(.el-table__inner-wrapper::before) { display: none; }
+.dataset-table :deep(.el-table__cell) { padding: 1.4rem 0; }
+.dataset-table :deep(.cell) { padding: 0 1.5rem; line-height: 1.6; white-space: nowrap; }
+.dataset-table :deep(th.el-table__cell) { font-family: 'SFMono-Regular', Consolas, monospace; font-size: 1.2rem; font-weight: 400; }
+.dataset-table :deep(td.el-table__cell) { font-size: 1.4rem; }
+.dataset-table__long-text { display: block; overflow: hidden; text-overflow: ellipsis; }
+.dataset-table__long-text:focus-visible { outline: 0.2rem solid var(--tensor-accent); outline-offset: -0.2rem; }
+
 .dataset-table :deep(.el-table__body tr:hover > td.el-table__cell) {
-  background: var(--tensor-raised) !important;
+  background: var(--tensor-subtle) !important;
 }
 </style>

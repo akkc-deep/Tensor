@@ -1,5 +1,6 @@
 package com.akkc.tensor.core.persistence;
 
+import com.akkc.tensor.plugin.api.constant.DatasetFields;
 import com.akkc.tensor.plugin.api.dataset.BusinessKeyMode;
 import com.akkc.tensor.plugin.api.dataset.ColumnDefinition;
 import com.akkc.tensor.plugin.api.dataset.DatasetDefinition;
@@ -19,7 +20,10 @@ import org.springframework.jdbc.core.JdbcTemplate;
 
 public final class ExistingKeyRepository {
     private static final int MAX_BIND_PARAMETERS = 1000;
-    private static final String FINGERPRINT_COLUMN = "business_key";
+    private static final String IN_CLAUSE = " IN (";
+    private static final String OPEN_PARENTHESIS = "(";
+    private static final String TUPLE_WHERE = " WHERE (";
+    private static final String TUPLE_IN = ") IN (";
 
     private final JdbcTemplate jdbcTemplate;
 
@@ -83,14 +87,17 @@ public final class ExistingKeyRepository {
             int keyCount) {
         SqlIdentifierPolicy policy = new SqlIdentifierPolicy();
         String table = policy.quote(definition.tableName().value());
-        String columns = columnNames.stream().map(policy::quote).collect(Collectors.joining(", "));
+        String columns = columnNames.stream().map(policy::quote).collect(Collectors.joining(SqlConstants.COLUMN_SEPARATOR));
         if (columnNames.size() == 1) {
-            String placeholders = String.join(", ", Collections.nCopies(keyCount, "?"));
-            return "SELECT " + columns + " FROM " + table + " WHERE " + columns + " IN (" + placeholders + ")";
+            String placeholders = String.join(SqlConstants.COLUMN_SEPARATOR, Collections.nCopies(keyCount, SqlConstants.PARAMETER));
+            return SqlConstants.SELECT + columns + SqlConstants.FROM + table + SqlConstants.WHERE
+                    + columns + IN_CLAUSE + placeholders + SqlConstants.CLOSE_PARENTHESIS;
         }
-        String tuple = "(" + String.join(", ", Collections.nCopies(columnNames.size(), "?")) + ")";
-        String tuples = String.join(", ", Collections.nCopies(keyCount, tuple));
-        return "SELECT " + columns + " FROM " + table + " WHERE (" + columns + ") IN (" + tuples + ")";
+        String tuple = OPEN_PARENTHESIS + String.join(SqlConstants.COLUMN_SEPARATOR,
+                Collections.nCopies(columnNames.size(), SqlConstants.PARAMETER)) + SqlConstants.CLOSE_PARENTHESIS;
+        String tuples = String.join(SqlConstants.COLUMN_SEPARATOR, Collections.nCopies(keyCount, tuple));
+        return SqlConstants.SELECT + columns + SqlConstants.FROM + table + TUPLE_WHERE
+                + columns + TUPLE_IN + tuples + SqlConstants.CLOSE_PARENTHESIS;
     }
 
     private static BusinessKey readKey(ResultSet resultSet, List<Integer> jdbcTypes) throws SQLException {
@@ -123,7 +130,7 @@ public final class ExistingKeyRepository {
 
     private static List<String> physicalColumnNames(DatasetDefinition definition) {
         if (definition.businessKey().mode() == BusinessKeyMode.FINGERPRINT) {
-            return List.of(FINGERPRINT_COLUMN);
+            return List.of(DatasetFields.BUSINESS_KEY);
         }
         return definition.businessKey().fields();
     }

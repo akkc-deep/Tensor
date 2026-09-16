@@ -64,9 +64,11 @@ export function useParameterForm(parameters) {
   const errors = reactive(Object.create(null))
   const firstError = ref(null)
   let snapshot = null
+  const invalidInputs = new Set()
 
   function reset() {
     clear(values)
+    invalidInputs.clear()
     clear(errors)
     firstError.value = null
     snapshot = null
@@ -75,9 +77,13 @@ export function useParameterForm(parameters) {
     }
   }
 
-  function setValue(name, value) {
+  function setValue(name, value, badInput = false) {
     values[name] = value
+    if (badInput) invalidInputs.add(name)
+    else invalidInputs.delete(name)
     delete errors[name]
+    const related = parameters.value.find((parameter) => parameter.name === name)?.relatedParameter
+    if (related && errors[related] === '开始日期不得晚于结束日期') delete errors[related]
     firstError.value =
       parameters.value.find(({ name: field }) => errors[field])?.name ?? null
     snapshot = null
@@ -91,6 +97,10 @@ export function useParameterForm(parameters) {
 
     for (const parameter of parameters.value) {
       const value = values[parameter.name]
+      if (invalidInputs.has(parameter.name)) {
+        errors[parameter.name] = typeError(parameter, null) || '输入格式不正确'
+        continue
+      }
       if (!hasValue(value)) {
         if (parameter.required) errors[parameter.name] = '此项为必填项'
         continue

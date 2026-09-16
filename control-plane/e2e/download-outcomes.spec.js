@@ -1,3 +1,4 @@
+import { selectDownloadApi } from './catalog-helpers.js'
 import { configurePackagedEnvironment } from './packaged-test-environment.js'
 import { expect, test } from '@playwright/test'
 import { spawn } from 'node:child_process'
@@ -758,7 +759,9 @@ async function openRoute(page, route, heading) {
 }
 
 async function selectOption(page, label, optionName) {
+  if (label === '数据接口') return selectDownloadApi(page, optionName)
   const combobox = page.getByRole('combobox', { name: label, exact: true })
+  if (await combobox.evaluate(el => el.tagName === 'SELECT')) return combobox.selectOption(optionName)
   await combobox.focus()
   await combobox.press('Enter')
   const option = page.getByRole('option', { name: optionName, exact: typeof optionName === 'string' })
@@ -774,8 +777,8 @@ async function chooseFixtureDownload(page) {
 async function chooseTushareDownload(page, api = DAILY_OPTION) {
   await selectOption(page, '数据源', 'Tushare Pro')
   await selectOption(page, '数据接口', api)
-  await page.getByRole('radiogroup', { name: '下载模式', exact: true }).getByText('单次请求', { exact: true }).click()
-  await expect(page.getByRole('radio', { name: '单次请求', exact: true })).toBeChecked()
+  await page.getByRole('button', { name: '单次下载', exact: true }).click()
+  await expect(page.getByRole('button', { name: '单次下载', exact: true })).toHaveAttribute('aria-pressed', 'true')
 }
 
 async function chooseDataset(page, plugin, api) {
@@ -853,7 +856,7 @@ async function submitDownload(
   await assertNoExtraFeatures(page)
   const startedAt = Date.now()
   const responsePromise = page.waitForResponse(downloadResponse, { timeout })
-  await page.getByRole('button', { name: '提交任务', exact: true }).click()
+  await page.getByRole('button', { name: /^(开始(?:批量)?下载|正在创建…|正在查找…)$/, exact: true }).click()
   const response = await responsePromise
   const receipt = await readPublicJson(response, 'download task receipt')
   assertExactKeys(receipt, ['requestId', 'taskId', 'status', 'version', 'createdAt'], 'download task receipt')
@@ -872,7 +875,7 @@ async function submitDownload(
     version: 1,
   })
   expect(response.headers().location).toBe(`/api/v1/download-tasks/${receipt.taskId}`)
-  const accepted = page.locator('.download-result-panel')
+  const accepted = page.locator('.download-feedback')
   await expect(accepted.getByRole('heading', { name: '任务已接收' })).toBeVisible()
   if (onAccepted) await onAccepted({ receipt, durationMs: Date.now() - startedAt })
   const terminalStatus = success ? 'SUCCEEDED' : 'FAILED'
@@ -892,7 +895,7 @@ async function submitDownload(
   expect((await detailPromise).status()).toBe(200)
   expect((await batchesPromise).status()).toBe(200)
   await expect(page).toHaveURL(`/downloads/tasks/${receipt.taskId}`)
-  await expect(page.locator('[data-task-status]')).toHaveText(success ? '已成功' : '失败')
+  await expect(page.locator('.task-detail [data-task-status]')).toHaveText(success ? '已成功' : '失败')
   await assertPageSafety(page, 'download task result')
 
   const zeroCounts = {
@@ -931,8 +934,9 @@ async function submitDownload(
     error: error ? { code: error.code, message: error.message } : null,
   })
   if (success) {
-    const counts = page.locator('.task-detail__counts')
-    await expect(counts.getByText(`来源行数 ${success.sourceRowCount}`, { exact: true })).toBeVisible()
+    const counts = page.locator('.task-detail')
+    await expect(counts.locator(':scope > .confirmation dd').last()).toHaveText(String(success.sourceRowCount))
+    await counts.locator('.task-detail__record summary').click()
     await expect(counts.getByText(`新增记录次数 ${success.insertedRows}`, { exact: true })).toBeVisible()
     await expect(counts.getByText(`更新记录次数 ${success.updatedRows}`, { exact: true })).toBeVisible()
   } else {
@@ -975,7 +979,7 @@ async function queryDataset(page, { plugin, api, option, code, navigate = false 
     await openRoute(page, '/datasets', '数据查看')
   }
   await chooseDataset(page, plugin, option)
-  if (code) await page.getByLabel('证券代码 (ts_code)', { exact: true }).fill(code)
+  if (code) await page.getByLabel('证券代码', { exact: true }).fill(code)
   const responsePromise = page.waitForResponse((response) =>
     recordsResponse(response, plugin, api),
   )
@@ -1456,8 +1460,8 @@ test.describe('download outcome matrix', () => {
     await chooseTushareDownload(page)
     await page.getByLabel('股票代码', { exact: false }).fill('000001.SZ')
     const date = page.getByLabel('交易日期', { exact: false })
-    await expect(page.getByRole('button', { name: '提交任务', exact: true })).toBeEnabled()
-    await page.getByRole('button', { name: '提交任务', exact: true }).click()
+    await expect(page.getByRole('button', { name: /^(开始(?:批量)?下载|正在创建…|正在查找…)$/, exact: true })).toBeEnabled()
+    await page.getByRole('button', { name: /^(开始(?:批量)?下载|正在创建…|正在查找…)$/, exact: true }).click()
     await expect(date).toHaveAttribute('aria-invalid', 'true')
     await expect(date).toBeFocused()
     const ids = (await date.getAttribute('aria-describedby')).split(' ')
@@ -1465,9 +1469,9 @@ test.describe('download outcome matrix', () => {
     const fieldError = page.locator(`#${ids.at(-1)}`)
     await expect(fieldError).toHaveAttribute('role', 'alert')
     await expect(fieldError).toHaveText('此项为必填项')
-    await expect(page.getByRole('button', { name: '提交任务', exact: true })).toBeEnabled()
+    await expect(page.getByRole('button', { name: /^(开始(?:批量)?下载|正在创建…|正在查找…)$/, exact: true })).toBeEnabled()
     await expect(page.getByRole('heading', { name: '任务已接收' })).toHaveCount(0)
-    await expect(page.locator('[data-task-status]')).toHaveCount(0)
+    await expect(page.locator('.task-detail [data-task-status]')).toHaveCount(0)
     await assertNoExtraFeatures(page)
     expect(downloadPostCount).toBe(posts)
     expect([...stub.counts.values()].reduce((sum, value) => sum + value, 0)).toBe(calls)
@@ -1488,7 +1492,7 @@ test.describe('download outcome matrix', () => {
     await end.press('Tab')
     await expect(start).toHaveValue('2026-08-08')
     await expect(end).toHaveValue('2026-08-07')
-    await page.getByRole('button', { name: '提交任务', exact: true }).click()
+    await page.getByRole('button', { name: /^(开始(?:批量)?下载|正在创建…|正在查找…)$/, exact: true }).click()
     await expect(start).toHaveAttribute('aria-invalid', 'true')
     await expect(start).toBeFocused()
     await expect(end).not.toHaveAttribute('aria-invalid', 'true')
@@ -1825,11 +1829,11 @@ test.describe('download outcome matrix', () => {
           expect(durationMs).toBeLessThan(5_000)
           if (scenario.mode !== 'timeout') return
           await received
-          const button = page.getByRole('button', { name: '提交任务', exact: true })
+          const button = page.getByRole('button', { name: /^(开始(?:批量)?下载|正在创建…|正在查找…)$/, exact: true })
           await expect(button).toBeEnabled()
           await expect(button).not.toHaveAttribute('aria-busy', 'true')
           await expect(page.getByRole('combobox', { name: '数据源', exact: true })).toBeEnabled()
-          await expect(page.getByRole('combobox', { name: '数据接口', exact: true })).toBeEnabled()
+          await expect(page.getByRole('searchbox', { name: '搜索接口' })).toBeEnabled()
           await expect(stockCode).toBeEnabled()
           await expect(tradeDate).toBeEnabled()
         },

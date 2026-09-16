@@ -1,5 +1,6 @@
 package com.akkc.tensor.plugin.api.descriptor;
 
+import com.akkc.tensor.plugin.api.constant.ValidationConstants;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
@@ -16,7 +17,7 @@ public record ParameterDescriptor(
         String pattern,
         String relatedParameter
 ) {
-    private static final Pattern IDENTIFIER_PATTERN = Pattern.compile("^[a-z][a-z0-9_]{1,63}$");
+    private static final Pattern IDENTIFIER_PATTERN = Pattern.compile(ValidationConstants.IDENTIFIER_REGEX);
 
     public ParameterDescriptor {
         requireIdentifier(name, "name");

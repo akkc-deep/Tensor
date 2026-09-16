@@ -19,6 +19,9 @@ import java.util.concurrent.locks.ReentrantLock;
 
 /** Single-instance ownership of dispatch, manual controls and stopped-worker recovery. */
 public final class DownloadTaskCoordinator implements AutoCloseable {
+    private static final String POLLER_THREAD_NAME = "tensor-download-poller";
+    private static final String WORKER_THREAD_NAME = "tensor-download-worker";
+
     private enum State { STARTING, RUNNING, RECOVERING, FAULTED, CLOSING, CLOSED }
 
     private final DownloadTaskService tasks;
@@ -39,8 +42,8 @@ public final class DownloadTaskCoordinator implements AutoCloseable {
     public DownloadTaskCoordinator(DownloadTaskService tasks, DownloadTaskRepository repository,
             DownloadTaskRunner runner, Clock clock, UUID activeRunId) {
         this(tasks, repository, runner, clock, activeRunId,
-                Executors.newSingleThreadScheduledExecutor(r -> new Thread(r, "tensor-download-poller")),
-                Executors.newSingleThreadExecutor(r -> new Thread(r, "tensor-download-worker")));
+                Executors.newSingleThreadScheduledExecutor(r -> new Thread(r, POLLER_THREAD_NAME)),
+                Executors.newSingleThreadExecutor(r -> new Thread(r, WORKER_THREAD_NAME)));
     }
 
     DownloadTaskCoordinator(DownloadTaskService tasks, DownloadTaskRepository repository,

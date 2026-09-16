@@ -1,5 +1,5 @@
-import { flushPromises, mount } from '@vue/test-utils'
-import { ElButton, ElPagination } from 'element-plus'
+import { mount } from '@vue/test-utils'
+import { ElButton } from 'element-plus'
 import { nextTick } from 'vue'
 import examples from '../../../../docs/contracts/download-task-examples.json'
 import { ClientError } from '../../api/errors.js'
@@ -25,7 +25,7 @@ it('shows failed and unexecuted intervals, immutable source params, attempts, fu
     batch({ insertedRows: 9007199254740993n, updatedRows: 9223372036854775807n }),
     batch({ batchId: 'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa', batchKey: '000003', status: 'PENDING', attemptCount: 0, error: null }),
   ]) })
-  const rows = wrapper.findAll('tbody tr')
+  const rows = wrapper.findAll('ol > li')
   expect(rows[0].text()).toContain('失败')
   expect(rows[0].text()).toContain('2026-08-04')
   expect(rows[0].text()).toContain('SOURCE_TIMEOUT')
@@ -35,7 +35,7 @@ it('shows failed and unexecuted intervals, immutable source params, attempts, fu
   expect(rows[1].text()).toContain('0（尚未尝试）')
   expect(wrapper.text()).toContain('批次按服务端计划排序，拆分可能改变总批数')
   expect(wrapper.get('time').attributes('datetime')).toBeTruthy()
-  expect(wrapper.get('[aria-label="批次表格"]').attributes('tabindex')).toBe('0')
+  expect(wrapper.get('ol').attributes('aria-label')).toBe('批次列表')
   expect(wrapper.find('table[aria-live]').exists()).toBe(false)
 })
 
@@ -50,7 +50,7 @@ it('keeps a pending batch with past attempts pending, and identifies single requ
 
 it('keeps same-page rows when querying fails, with an independent safe error and refresh', async () => {
   const wrapper = render({ result: result(), error: new ClientError('NETWORK', 'batch-request'), lastUpdatedAt: new Date() })
-  expect(wrapper.findAll('tbody tr')).toHaveLength(1)
+  expect(wrapper.findAll('ol > li')).toHaveLength(1)
   expect(wrapper.text()).toContain('状态暂时无法更新')
   expect(wrapper.text()).toContain('上次更新')
   expect(wrapper.text()).toContain('batch-request')
@@ -67,35 +67,31 @@ it('shows initial loading and failure separately, with a working reload', async 
   expect(wrapper.emitted('refresh')).toEqual([[]])
 })
 
-it.each([3n, 0n])('keeps page 7 when the real pager clamps a shrinking total %s', async (total) => {
+it.each([3n, 0n])('keeps an out-of-range page explicit when the total shrinks to %s', async (total) => {
   const wrapper = render({ page: 7, result: result([batch()], { page: 7, total: 140n }) })
   await wrapper.setProps({ result: result([], { page: 7, total }) })
   await nextTick()
   expect(wrapper.text()).toContain('本页暂无批次')
   expect(wrapper.emitted('update:page')).toBeUndefined()
   if (total === 0n) {
-    expect(wrapper.getComponent(ElPagination).props('pageCount')).toBe(0)
+    expect(wrapper.text()).not.toContain('/ 0 页')
     expect(wrapper.get('.btn-next').attributes('disabled')).toBeDefined()
     expect(wrapper.get('.btn-prev').attributes('disabled')).toBeDefined()
   }
-  await wrapper.findAllComponents(ElButton).find((b) => b.text() === '返回第一页').trigger('click')
+  await wrapper.get('[data-first-page]').trigger('click')
   expect(wrapper.emitted('update:page')).toEqual([[1]])
 })
 
 it('keeps bigint total and caps accessible pages without losing the count', () => {
   const wrapper = render({ result: result([], { total: 9223372036854775807n }) })
   expect(wrapper.text()).toContain('9223372036854775807')
-  expect(wrapper.getComponent(ElPagination).props('pageCount')).toBe(2147483647)
+  expect(wrapper.get('[data-total]').text()).toContain('/ 2147483647 页')
 })
 
 it('forwards actual next-page and page-size interactions', async () => {
   const wrapper = render({ page: 2, result: result([batch()], { page: 2, total: 60n }) })
   await wrapper.get('.btn-next').trigger('click')
   expect(wrapper.emitted('update:page')).toEqual([[3]])
-  await wrapper.get('input[role="combobox"]').trigger('click')
-  await flushPromises()
-  const option = [...document.body.querySelectorAll('.el-select-dropdown__item')].find((o) => o.textContent.trim() === '50/page')
-  option.click()
-  await flushPromises()
+  await wrapper.get('select').setValue('50')
   expect(wrapper.emitted('update:pageSize')).toEqual([[50]])
 })

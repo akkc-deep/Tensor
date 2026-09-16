@@ -1,7 +1,6 @@
 package com.akkc.tensor.web.dto;
 
 import com.akkc.tensor.plugin.api.error.ErrorCode;
-
 import java.util.List;
 import java.util.Objects;
 

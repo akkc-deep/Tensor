@@ -1,6 +1,8 @@
 package com.akkc.tensor.web.download;
 
 import com.akkc.tensor.core.download.task.DownloadTaskService;
+import com.akkc.tensor.plugin.api.constant.RequestFields;
+import com.akkc.tensor.plugin.api.constant.ValidationConstants;
 import com.akkc.tensor.plugin.api.download.batch.DownloadMode;
 import com.akkc.tensor.plugin.api.error.ErrorCode;
 import com.akkc.tensor.plugin.api.error.TensorException;
@@ -13,7 +15,7 @@ import java.io.IOException;
 import java.util.*;
 
 public final class DownloadTaskRequestDeserializer extends JsonDeserializer<DownloadTaskRequest> {
-    private static final Set<String> FIELDS = Set.of("submissionId", "pluginId", "apiName", "mode", "params");
+    private static final Set<String> FIELDS = Set.of(RequestFields.SUBMISSION_ID, RequestFields.PLUGIN_ID, RequestFields.API_NAME, RequestFields.MODE, RequestFields.PARAMS);
     private final DownloadTaskService tasks;
     private final DownloadParameterResolver resolver;
 
@@ -29,22 +31,22 @@ public final class DownloadTaskRequestDeserializer extends JsonDeserializer<Down
         for (String name : FIELDS) {
             JsonNode value = input.get(name);
             if (value == null || value.isNull()) errors.put(name, false);
-            else if (!name.equals("params") && (!value.isTextual() || !valid(name, value.textValue())))
+            else if (!name.equals(RequestFields.PARAMS) && (!value.isTextual() || !valid(name, value.textValue())))
                 errors.put(name, true);
         }
-        JsonNode params = input.get("params");
-        if (params != null && !params.isNull() && !params.isObject()) throw invalid("request");
+        JsonNode params = input.get(RequestFields.PARAMS);
+        if (params != null && !params.isNull() && !params.isObject()) throw invalid(RequestFields.REQUEST);
         reject(errors);
         Map<String, Object> raw = new LinkedHashMap<>();
         params.fields().forEachRemaining(entry -> {
-            if (!identifier(entry.getKey())) throw invalid("params");
+            if (!identifier(entry.getKey())) throw invalid(RequestFields.PARAMS);
             if (!entry.getValue().isTextual()) throw invalid(entry.getKey());
             raw.put(entry.getKey(), entry.getValue().textValue());
         });
         try {
-            var submission = new DownloadTaskService.Submission(UUID.fromString(input.get("submissionId").textValue()),
-                    DatasetKey.of(PluginId.of(input.get("pluginId").textValue()), ApiName.of(input.get("apiName").textValue())),
-                    DownloadMode.valueOf(input.get("mode").textValue()), raw);
+            var submission = new DownloadTaskService.Submission(UUID.fromString(input.get(RequestFields.SUBMISSION_ID).textValue()),
+                    DatasetKey.of(PluginId.of(input.get(RequestFields.PLUGIN_ID).textValue()), ApiName.of(input.get(RequestFields.API_NAME).textValue())),
+                    DownloadMode.valueOf(input.get(RequestFields.MODE).textValue()), raw);
             var binding = tasks.prepareSubmission(submission);
             if (binding.replay()) return new DownloadTaskRequest.Replay(binding.submission());
             var normalized = binding.submission();
@@ -56,14 +58,14 @@ public final class DownloadTaskRequestDeserializer extends JsonDeserializer<Down
     }
 
     @Override
-    public DownloadTaskRequest getNullValue(DeserializationContext context) { throw invalid("request"); }
+    public DownloadTaskRequest getNullValue(DeserializationContext context) { throw invalid(RequestFields.REQUEST); }
 
     static JsonNode object(JsonParser parser, DeserializationContext context, Set<String> fields) throws IOException {
         parser.enable(JsonParser.Feature.STRICT_DUPLICATE_DETECTION);
         JsonNode input = context.readTree(parser);
-        if (!input.isObject() || parser.nextToken() != null) throw invalid("request");
+        if (!input.isObject() || parser.nextToken() != null) throw invalid(RequestFields.REQUEST);
         var names = input.fieldNames();
-        while (names.hasNext()) if (!fields.contains(names.next())) throw invalid("request");
+        while (names.hasNext()) if (!fields.contains(names.next())) throw invalid(RequestFields.REQUEST);
         return input;
     }
 
@@ -81,11 +83,11 @@ public final class DownloadTaskRequestDeserializer extends JsonDeserializer<Down
 
     private static boolean valid(String name, String value) {
         return switch (name) {
-            case "submissionId" -> value.matches("[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}");
-            case "mode" -> value.equals("SINGLE") || value.equals("RANGE");
+            case RequestFields.SUBMISSION_ID -> value.matches(ValidationConstants.UUID_REGEX);
+            case RequestFields.MODE -> value.equals(DownloadMode.SINGLE.name()) || value.equals(DownloadMode.RANGE.name());
             default -> identifier(value);
         };
     }
 
-    private static boolean identifier(String value) { return value.matches("^[a-z][a-z0-9_]{1,63}$"); }
+    private static boolean identifier(String value) { return value.matches(ValidationConstants.IDENTIFIER_REGEX); }
 }

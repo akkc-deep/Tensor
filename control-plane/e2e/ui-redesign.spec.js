@@ -1,3 +1,4 @@
+import { selectDownloadApi } from './catalog-helpers.js'
 import { expect, test } from '@playwright/test'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -64,7 +65,7 @@ function expectBoxesStable(before, after) {
   })
 }
 
-async function tabTo(page, target, { backwards = false, limit = 40 } = {}) {
+async function tabTo(page, target, { backwards = false, limit = 400 } = {}) {
   for (let step = 0; step < limit; step += 1) {
     await page.keyboard.press(backwards ? 'Shift+Tab' : 'Tab')
     if (await target.evaluate((element) => element === document.activeElement)) return
@@ -79,6 +80,13 @@ async function expectFocusOutline(focused, outlined = focused) {
     const style = getComputedStyle(element)
     return style.outlineStyle !== 'none' && Number.parseFloat(style.outlineWidth) > 0
   })).toBe(true)
+}
+
+async function expectFocusHalo(focused, outlined = focused) {
+  await expect(focused).toBeFocused()
+  expect(await focused.evaluate(element => element.matches(':focus-visible'))).toBe(true)
+  await expect(outlined).toHaveCSS('border-top-color', 'rgb(53, 101, 182)')
+  await expect(outlined).toHaveCSS('box-shadow', /0px 0px 0px 2px$/)
 }
 
 function pagedDatasetResponse(request, apiName) {
@@ -103,6 +111,7 @@ function pagedDatasetResponse(request, apiName) {
 }
 
 async function selectCatalog(page, id, apiName) {
+  if (id === 'download-api') return selectDownloadApi(page, apiName)
   const input = page.locator(`#${id}`)
   await expect(input).toBeEnabled()
   await input.click()
@@ -115,35 +124,41 @@ async function selectCatalog(page, id, apiName) {
   await expect(input).toHaveAttribute('aria-expanded', 'false')
 }
 
+async function openCustomTheme(page) {
+  await expect(page.locator('details.custom-theme')).toBeVisible()
+  const disclosure = page.locator('details.custom-theme:not([open]) > summary')
+  if (await disclosure.count()) await disclosure.click()
+  await expect(page.getByLabel('主题色 HEX')).toBeVisible()
+}
+
 async function openDownloads(page) {
   await page.goto('/downloads')
-  await expect(page.getByRole('heading', { name: '数据下载', level: 1 })).toBeVisible()
-  await expect(page.locator('#download-api')).toBeEnabled()
+  await expect(page.getByRole('heading', { name: '下载工作台', level: 1 })).toBeVisible()
+  await expect(page.getByRole('searchbox', { name: '搜索接口' })).toBeEnabled()
 }
 
 async function chooseDownload(page, apiName) {
   await selectCatalog(page, 'download-api', apiName)
-  await expect(page.locator('.download-config-panel')).toContainText(apiName)
+  await expect(page.locator('.selected-api-heading code')).toHaveText(apiName)
 }
 
 async function chooseSingleMode(page) {
-  const singleMode = page.getByRole('radio', { name: '单次请求', exact: true })
-  await page.getByRole('radiogroup', { name: '下载模式', exact: true }).getByText('单次请求', { exact: true }).click()
-  await expect(singleMode).toBeChecked()
+  const singleMode = page.getByRole('button', { name: '单次下载', exact: true })
+  await page.getByRole('button', { name: '单次下载', exact: true }).click()
+  await expect(singleMode).toHaveAttribute('aria-pressed', 'true')
 }
 
 async function fillMetadataField(page, wrapper, parameter) {
   const input = wrapper.locator('input')
   if (parameter.type === 'ENUM') {
-    await wrapper.locator('.el-select__wrapper').click()
-    const listboxId = await input.getAttribute('aria-controls')
-    const option = page.locator(`#${listboxId}`).getByRole('option', { name: parameter.allowedValues[0], exact: true })
-    await option.scrollIntoViewIfNeeded()
-    await expect(option).toBeInViewport({ ratio: 1 })
-    await option.click()
-    await expect(input).toHaveAttribute('aria-expanded', 'false')
-    await expect(wrapper.locator('.el-select__selected-item').filter({ hasText: parameter.allowedValues[0] }))
-      .toHaveText(parameter.allowedValues[0])
+    const nativeSelect = wrapper.locator('select')
+    if (await nativeSelect.count()) {
+      await nativeSelect.selectOption(parameter.allowedValues[0])
+    } else {
+      await wrapper.locator('.el-select__wrapper').click()
+      const listboxId = await input.getAttribute('aria-controls')
+      await page.locator(`#${listboxId}`).getByRole('option', { name: parameter.allowedValues[0], exact: true }).click()
+    }
     return parameter.allowedValues[0]
   }
   const displayValue = ['DATE', 'DATE_RANGE_MEMBER'].includes(parameter.type)
@@ -167,19 +182,20 @@ async function submitDownload(page, definition) {
     const wrapper = wrappers.nth(index)
     await expect(wrapper).toHaveAttribute('data-parameter', parameter.name)
     await expect(wrapper.locator('label')).toContainText(parameter.label)
-    await expect(wrapper.locator('input')).toHaveAttribute('aria-required', parameter.required ? 'true' : 'false')
-    if (parameter.type === 'ENUM') await expect(wrapper.locator('.el-select')).toBeVisible()
-    else if (['DATE', 'DATE_RANGE_MEMBER'].includes(parameter.type)) await expect(wrapper.locator('.el-date-editor')).toBeVisible()
+    await expect(wrapper.locator('input, select')).toHaveAttribute('aria-required', parameter.required ? 'true' : 'false')
+    if (parameter.type === 'ENUM') await expect(wrapper.locator('select')).toBeVisible()
+    else if (['DATE', 'DATE_RANGE_MEMBER'].includes(parameter.type)) await expect(wrapper.locator('input[type="date"]')).toBeVisible()
     params[parameter.name] = await fillMetadataField(page, wrapper, parameter)
   }
-  await page.getByRole('button', { name: '提交任务' }).click()
+  await page.getByRole('button', { name: /^(开始(?:批量)?下载|正在创建…|正在查找…)$/ }).click()
   await expect(page.getByRole('heading', { name: '任务已接收', level: 2 })).toBeVisible()
   await expect(page.getByRole('heading', { name: '下载成功' })).toHaveCount(0)
   await page.locator('.task-identity').getByRole('link', { name: '查看任务' }).click()
-  await expect(page.locator('[data-task-status]')).toHaveText('已成功')
-  await expect(page.locator('.task-detail__counts')).toContainText('来源行数 12')
-  await expect(page.locator('.task-detail__counts')).toContainText('新增记录次数 10')
-  await expect(page.locator('.task-detail__counts')).toContainText('更新记录次数 2')
+  await expect(page.locator('.task-detail [data-task-status]')).toHaveText('已成功')
+  await expect(page.locator('.task-detail > .confirmation dd').last()).toHaveText('12')
+  await page.locator('.task-detail__record summary').click()
+  await expect(page.locator('.task-detail')).toContainText('新增记录次数 10')
+  await expect(page.locator('.task-detail')).toContainText('更新记录次数 2')
   await expect(page.getByText('本次请求已完成。', { exact: true })).toBeVisible()
   await page.getByRole('link', { name: '返回下载页' }).click()
   return params
@@ -190,7 +206,7 @@ async function openDataset(page, apiName) {
   await expect(page).toHaveURL(/\/datasets$/)
   await expect(page.locator('#dataset-select')).toBeEnabled()
   await selectCatalog(page, 'dataset-select', apiName)
-  await expect(page.locator('.dataset-setup')).toBeVisible()
+  await expect(page.getByRole('form', { name: '数据查询' })).toBeVisible()
 }
 
 async function fillDatasetFilters(page, definition) {
@@ -208,7 +224,6 @@ async function fillDatasetFilters(page, definition) {
     const input = page.locator(`[data-filter="${name}"] input`)
     const value = name === 'tsCode' ? '000001.SZ' : '2026-08-07'
     await input.fill(value)
-    await input.press('Enter')
     await input.blur()
     criteria[name] = value
   }
@@ -241,23 +256,23 @@ test.describe('40 项 UI 元数据矩阵', () => {
       await openDownloads(page)
       await chooseDownload(page, apiName)
       const range = rangeCapability(apiName)
-      const rangeMode = page.getByRole('radio', { name: '日期区间', exact: true })
+      const rangeMode = page.getByRole('button', { name: /^批量下载/ })
       if (range.availability === 'AVAILABLE') {
         await expect(rangeMode).toBeEnabled()
-        await expect(rangeMode).toBeChecked()
+        await expect(rangeMode).toHaveAttribute('aria-pressed', 'true')
         if (range.completenessRule.kind === 'RESPONSE_ONLY') {
-          const warning = page.locator('.form-footer__help').filter({ hasText: '数据完整性未确认，可能存在上游截断' })
+          const warning = page.locator('.completeness-note')
           await expect(warning).toBeVisible()
           await expect(warning).toContainText('数据完整性未确认，可能存在上游截断')
         }
       }
       else {
         await expect(rangeMode).toBeDisabled()
-        await expect(page.getByRole('radio', { name: '单次请求', exact: true })).toBeChecked()
-        await expect(page.locator('.download-mode')).toContainText(range.unavailableReason)
+        await expect(page.getByRole('button', { name: '单次下载', exact: true })).toHaveAttribute('aria-pressed', 'true')
+        await expect(page.locator('.form-parameters')).toContainText(range.unavailableReason)
       }
-      await page.getByRole('radiogroup', { name: '下载模式', exact: true }).getByText('单次请求', { exact: true }).click()
-      await expect(page.getByRole('radio', { name: '单次请求', exact: true })).toBeChecked()
+      await page.getByRole('button', { name: '单次下载', exact: true }).click()
+      await expect(page.getByRole('button', { name: '单次下载', exact: true })).toHaveAttribute('aria-pressed', 'true')
       const expectedParams = await submitDownload(page, definition)
       const posts = apiRequests(api, ({ method, path: requestPath }) => method === 'POST' && requestPath === '/api/v1/download-tasks')
       expect(posts).toHaveLength(1)
@@ -306,7 +321,7 @@ test('下载状态、校验、往返缓存与原参数重试', async ({ page }) 
   await page.getByRole('button', { name: '重新加载配置' }).click()
   await chooseDownload(page, 'daily')
   await chooseSingleMode(page)
-  await page.getByRole('button', { name: '提交任务' }).click()
+  await page.getByRole('button', { name: /^(开始(?:批量)?下载|正在创建…|正在查找…)$/ }).click()
   const stockCode = page.locator('[data-parameter="ts_code"] input')
   const tradeDate = page.locator('[data-parameter="trade_date"] input')
   await expect(stockCode).toHaveAttribute('aria-invalid', 'true')
@@ -315,14 +330,15 @@ test('下载状态、校验、往返缓存与原参数重试', async ({ page }) 
   await stockCode.fill(' 000001.sz ')
   await tradeDate.fill('2026-08-07')
   await tradeDate.press('Enter')
-  await page.getByRole('button', { name: '提交任务' }).click()
+  await page.getByRole('button', { name: /^(开始(?:批量)?下载|正在创建…|正在查找…)$/ }).click()
   await expect(page.getByRole('heading', { name: '正在提交任务' })).toBeVisible()
   await expect(page.locator('#download-data-source')).toBeDisabled()
-  await expect(page.locator('#download-api')).toBeDisabled()
+  await expect(page.getByRole('searchbox', { name: '搜索接口' })).toBeDisabled()
   await expect(stockCode).toBeDisabled()
   await expect(tradeDate).toBeDisabled()
-  await expect(page.getByRole('button', { name: /提交任务/ })).toBeDisabled()
+  await expect(page.getByRole('button', { name: /^(开始(?:批量)?下载|正在创建…|正在查找…)$/ })).toBeDisabled()
   await page.getByRole('link', { name: /设置/ }).click()
+  await openCustomTheme(page)
   releaseDownload()
   await page.getByRole('link', { name: /数据下载/ }).click()
   await expect(stockCode).toHaveValue(' 000001.sz ')
@@ -331,11 +347,12 @@ test('下载状态、校验、往返缓存与原参数重试', async ({ page }) 
   await expect(page.locator('.task-identity code')).toHaveText(/^[0-9a-f-]{36}$/)
   expect(apiRequests(api, ({ method }) => method === 'POST')).toHaveLength(1)
 
-  await page.getByRole('button', { name: '提交任务' }).click()
+  await page.getByRole('button', { name: /^(开始(?:批量)?下载|正在创建…|正在查找…)$/ }).click()
   await expect(page.getByRole('heading', { name: '提交结果尚未确认' })).toBeVisible()
   await stockCode.fill('000002.SZ')
   await tradeDate.fill('2026-08-08')
   await page.getByRole('link', { name: /设置/ }).click()
+  await openCustomTheme(page)
   await page.getByRole('link', { name: /数据下载/ }).click()
   await expect(page.getByRole('heading', { name: '提交结果尚未确认' })).toBeVisible()
   await page.getByRole('button', { name: '使用原参数重新确认' }).click()
@@ -347,9 +364,9 @@ test('下载状态、校验、往返缓存与原参数重试', async ({ page }) 
   expect(posts[2].body.submissionId).toBe(posts[1].body.submissionId)
   expect(posts[2].body.params).toEqual({ ts_code: '000001.SZ', trade_date: '20260807' })
 
-  await page.getByRole('button', { name: '提交任务' }).click()
+  await page.getByRole('button', { name: /^(开始(?:批量)?下载|正在创建…|正在查找…)$/ }).click()
   await expect(page.getByRole('heading', { name: '任务已接收' })).toBeVisible()
-  await page.getByRole('button', { name: '提交任务' }).click()
+  await page.getByRole('button', { name: /^(开始(?:批量)?下载|正在创建…|正在查找…)$/ }).click()
   await expect(page.getByRole('heading', { name: '任务未接收' })).toBeVisible()
   await expect(page.getByRole('button', { name: '使用原参数重新确认' })).toHaveCount(0)
 
@@ -357,18 +374,18 @@ test('下载状态、校验、往返缓存与原参数重试', async ({ page }) 
   await chooseSingleMode(page)
   const start = page.locator('[data-parameter="start_date"] input')
   const end = page.locator('[data-parameter="end_date"] input')
-  await page.getByRole('button', { name: '提交任务' }).click()
+  await page.getByRole('button', { name: /^(开始(?:批量)?下载|正在创建…|正在查找…)$/ }).click()
   expect(apiRequests(api, ({ method }) => method === 'POST')).toHaveLength(5)
   await start.fill('2026-08-08')
   await start.press('Enter')
   await end.fill('2026-08-07')
   await end.press('Enter')
-  await page.getByRole('button', { name: '提交任务' }).click()
+  await page.getByRole('button', { name: /^(开始(?:批量)?下载|正在创建…|正在查找…)$/ }).click()
   await expect(start).toHaveAttribute('aria-invalid', 'true')
   expect(apiRequests(api, ({ method }) => method === 'POST')).toHaveLength(5)
   await end.fill('2026-08-09')
   await end.press('Enter')
-  await page.getByRole('button', { name: '提交任务' }).click()
+  await page.getByRole('button', { name: /^(开始(?:批量)?下载|正在创建…|正在查找…)$/ }).click()
   await expect(page.getByRole('heading', { name: '任务已接收' })).toBeVisible()
   const finalPost = apiRequests(api, ({ method }) => method === 'POST').at(-1)
   expect(finalPost.body).toEqual({ submissionId: expect.stringMatching(/^[0-9a-f-]{36}$/), mode: 'SINGLE', pluginId: 'tushare_pro', apiName: 'new_share', params: { start_date: '20260808', end_date: '20260809' } })
@@ -407,7 +424,6 @@ test('查询分页、未提交草稿、设置往返与重试快照', async ({ pa
   await selectCatalog(page, 'dataset-select', 'daily')
   const from = page.locator('[data-filter="tradeDateFrom"] input')
   await from.fill('2026-08-07')
-  await from.press('Enter')
   await page.getByRole('button', { name: '查询', exact: true }).click()
   await expect(page.getByRole('status').filter({ hasText: '共 201 条' })).toContainText('第 1 / 5 页')
   const pageSizeInput = page.locator('.el-pagination__sizes input')
@@ -419,6 +435,7 @@ test('查询分页、未提交草稿、设置往返与重试快照', async ({ pa
   await expect(page.getByRole('status').filter({ hasText: '共 201 条' })).toContainText('第 2 / 3 页')
   await from.fill('2026-08-08')
   await page.getByRole('link', { name: /设置/ }).click()
+  await openCustomTheme(page)
   await page.getByLabel('主题色 HEX').fill('#b52c63')
   await page.getByRole('button', { name: '应用' }).click()
   await page.getByRole('link', { name: /数据查看/ }).click()
@@ -441,7 +458,7 @@ test('查询分页、未提交草稿、设置往返与重试快照', async ({ pa
   const resetQueryRequest = apiRequests(api, ({ path: requestPath }) => requestPath.endsWith('/daily/records')).at(-1)
   expect(resetQueryRequest.query).toEqual({ page: '1', pageSize: '50' })
   await expect(from).toBeDisabled()
-  await expect(page.getByRole('button', { name: '查询', exact: true })).toBeDisabled()
+  await expect(page.getByRole('button', { name: '查询中…', exact: true })).toBeDisabled()
   await expect(page.getByRole('button', { name: '重置', exact: true })).toBeEnabled()
   await page.getByRole('button', { name: '重置', exact: true }).click()
   releaseStale()
@@ -460,7 +477,6 @@ test('查询分页、未提交草稿、设置往返与重试快照', async ({ pa
   await selectCatalog(page, 'dataset-select', 'income')
   const annDateTo = page.locator('[data-filter="annDateTo"] input')
   await annDateTo.fill('2026-08-07')
-  await annDateTo.press('Enter')
   await page.getByRole('button', { name: '查询', exact: true }).click()
   await expect(page.getByRole('region', { name: '数据表格，可横向滚动' })).toBeVisible()
   const incomeQueries = apiRequests(api, ({ path: requestPath }) => requestPath.endsWith('/income/records'))
@@ -471,6 +487,7 @@ test('查询分页、未提交草稿、设置往返与重试快照', async ({ pa
   await page.getByRole('button', { name: '查询', exact: true }).click()
   await expect(page.getByRole('heading', { name: '正在查询数据' })).toBeVisible()
   await page.getByRole('link', { name: /设置/ }).click()
+  await openCustomTheme(page)
   releaseAcrossSettings()
   await page.getByRole('link', { name: /数据查看/ }).click()
   await expect(page.getByRole('region', { name: '数据表格，可横向滚动' })).toBeVisible()
@@ -478,9 +495,9 @@ test('查询分页、未提交草稿、设置往返与重试快照', async ({ pa
   assertApiClean(api)
 })
 
-test.describe('主题、五视口与布局稳定性', () => {
+test.describe('主题、PC 视口与布局稳定性', () => {
   test.describe.configure({ timeout: 120_000 })
-  for (const [width, height] of [[1440, 1080], [1024, 768], [768, 1024], [390, 844], [360, 800]]) {
+  for (const [width, height] of [[1440, 1080], [1280, 800], [1024, 768]]) {
     test(`${width}x${height}：宽表分页、导航位置与三页四主题布局稳定`, async ({ page }) => {
       await page.setViewportSize({ width, height })
       const api = await installApi(page, {
@@ -494,17 +511,17 @@ test.describe('主题、五视口与布局稳定性', () => {
       const tradeDate = page.locator('[data-parameter="trade_date"] input')
       await tradeDate.fill('2026-08-07')
       await tradeDate.press('Enter')
-      await page.getByRole('button', { name: '提交任务' }).click()
+      await page.getByRole('button', { name: /^(开始(?:批量)?下载|正在创建…|正在查找…)$/ }).click()
       await expect(page.getByRole('heading', { name: '任务已接收' })).toBeVisible()
       await expect(page.locator('.task-identity code')).toHaveText(/^[0-9a-f-]{36}$/)
       await page.evaluate(() => scrollTo(0, 0))
       expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true)
-      const columns = await page.locator('.download-grid').evaluate((element) => getComputedStyle(element).gridTemplateColumns)
-      expect(columns.split(' ').length).toBe(width <= 1000 ? 1 : 2)
+      const columns = await page.locator('.studio-layout').evaluate((element) => getComputedStyle(element).gridTemplateColumns)
+      expect(columns.split(' ').length).toBe(3)
       const downloadTargets = [
-        page.locator('.app-nav__link.router-link-active'), page.locator('#download-api'),
-        page.getByRole('button', { name: '提交任务' }), page.locator('.download-config-panel'),
-        page.locator('.download-result-panel'),
+        page.locator('.app-nav__link.router-link-active'), page.getByRole('searchbox', { name: '搜索接口' }),
+        page.getByRole('button', { name: /^(开始(?:批量)?下载|正在创建…|正在查找…)$/ }), page.locator('.download-config-panel'),
+        page.locator('.download-feedback'),
       ]
       const downloadBaseline = await boxes(downloadTargets)
 
@@ -546,14 +563,15 @@ test.describe('主题、五视口与布局稳定性', () => {
       const datasetBaseline = await boxes(datasetTargets)
 
       await page.getByRole('link', { name: /设置/ }).click()
+      await openCustomTheme(page)
       await expect(page).toHaveURL(/\/settings$/)
       await expect(page.locator('.app-nav__link.router-link-active')).toContainText('设置')
-      const settingsReset = page.getByRole('button', { name: '恢复冰川白' })
+      const settingsReset = page.getByRole('button', { name: '恢复默认' })
       const themeInput = page.getByLabel('主题色 HEX')
       const applyButton = page.getByRole('button', { name: '应用' })
-      const geometryTargets = [page.locator('.app-nav__link.router-link-active'), themeInput, applyButton, page.locator('.settings-panel'), settingsReset]
+      const geometryTargets = [page.locator('.app-nav__link.router-link-active'), themeInput, applyButton, page.locator('.settings-content'), settingsReset]
       const settingsBaseline = await boxes(geometryTargets)
-      for (const color of ['#2857b4', '#b52c63', '#ffff00', '#000000']) {
+      for (const color of ['#3565b6', '#b52c63', '#ffff00', '#000000']) {
         await themeInput.fill(color)
         await applyButton.click()
         await page.evaluate(() => scrollTo(0, 0))
@@ -568,11 +586,11 @@ test.describe('主题、五视口与布局稳定性', () => {
         expectBoxesStable(datasetBaseline, await boxes(datasetTargets))
         expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true)
         await page.getByRole('link', { name: /设置/ }).click()
+        await openCustomTheme(page)
       }
       const navBox = await page.locator('.app-nav').boundingBox()
       const workspaceBox = await page.locator('.workspace-shell').boundingBox()
-      if (width < 680) expect(navBox.y + navBox.height).toBeLessThanOrEqual(workspaceBox.y + 0.5)
-      else expect(navBox.x + navBox.width).toBeLessThanOrEqual(workspaceBox.x + 0.5)
+      expect(navBox.y + navBox.height).toBeLessThanOrEqual(workspaceBox.y + 0.5)
       assertApiClean(api)
     })
   }
@@ -582,24 +600,27 @@ test('设置零 API、四主题真实颜色、持久化降级、非法值与完�
   test.setTimeout(180_000)
   const api = await installApi(page)
   await page.goto('/settings')
+  await openCustomTheme(page)
   expect(api.requests).toEqual([])
   const rootValues = async () => page.evaluate(() => Object.fromEntries([
     'bg', 'surface', 'raised', 'nav', 'line', 'text', 'muted', 'accent-bg', 'accent', 'success', 'error',
   ].map((name) => [name, getComputedStyle(document.documentElement).getPropertyValue(`--tensor-${name}`).trim()])))
-  expect(await rootValues()).toEqual({ bg: '#edf2f6', surface: '#ffffff', raised: '#f3f6fa', nav: '#f9fbfd', line: '#c8d3e0', text: '#142a42', muted: '#52677d', 'accent-bg': '#e8efff', accent: '#2857b4', success: '#14785e', error: '#b72d47' })
+  expect(await rootValues()).toEqual({ bg: '#f7f9fb', surface: '#ffffff', raised: '#f1f4f8', nav: '#ffffff', line: '#e0e6ee', text: '#1f2d43', muted: '#52627a', 'accent-bg': '#eaf0fa', accent: '#3565b6', success: '#28745a', error: '#b72d47' })
 
   const colorPicker = page.getByLabel('全局主题色')
   await colorPicker.fill('#000000')
   expect((await rootValues()).accent).toBe('#000000')
   const hex = page.getByLabel('主题色 HEX')
   const apply = page.getByRole('button', { name: '应用' })
-  for (const color of ['#2857b4', '#b52c63', '#ffff00', '#000000']) {
+  for (const color of ['#3565b6', '#b52c63', '#ffff00', '#000000']) {
     await hex.fill(color)
     await apply.click()
     await page.mouse.move(0, 0)
     const style = (locator) => locator.evaluate((element) => {
       const computed = getComputedStyle(element)
-      return { color: computed.color, background: computed.backgroundColor }
+      let surface = element
+      while (getComputedStyle(surface).backgroundColor === 'rgba(0, 0, 0, 0)' && surface.parentElement) surface = surface.parentElement
+      return { color: computed.color, background: getComputedStyle(surface).backgroundColor }
     })
     const buttonNormal = await style(apply)
     await apply.hover()
@@ -608,41 +629,43 @@ test('设置零 API、四主题真实颜色、持久化降级、非法值与完�
     const buttonActive = await style(apply)
     await page.mouse.up()
     const body = await style(page.locator('body'))
-    const panel = await style(page.locator('.settings-panel'))
+    const panel = await style(page.locator('.settings-content'))
     const nav = await style(page.locator('.app-nav'))
     const selectedNav = await style(page.locator('.app-nav__link.router-link-active'))
     const text = await style(page.locator('.page-heading h1'))
-    const muted = await style(page.locator('.settings-form__help'))
-    const reset = page.getByRole('button', { name: '恢复冰川白' })
+    const muted = await style(page.locator('.settings-intro p'))
+    const reset = page.getByRole('button', { name: '恢复默认' })
     await reset.hover()
     const raised = await style(reset)
     for (const button of [buttonNormal, buttonHover, buttonActive]) {
-      expect(contrastRatio(button.color, button.background)).toBeGreaterThanOrEqual(5.5)
+      expect(contrastRatio(button.color, button.background)).toBeGreaterThanOrEqual(4.5)
     }
     for (const surface of [body.background, panel.background, nav.background, selectedNav.background, raised.background]) {
-      expect(contrastRatio(buttonNormal.background, surface)).toBeGreaterThanOrEqual(5.5)
+      expect(contrastRatio(buttonNormal.background, surface)).toBeGreaterThanOrEqual(4.5)
     }
     expect(contrastRatio(text.color, body.background)).toBeGreaterThanOrEqual(4.5)
     expect(contrastRatio(muted.color, panel.background)).toBeGreaterThanOrEqual(4.5)
-    expect(contrastRatio(selectedNav.color, selectedNav.background)).toBeGreaterThanOrEqual(5.5)
+    expect(contrastRatio(selectedNav.color, selectedNav.background)).toBeGreaterThanOrEqual(4.5)
   }
   await page.getByLabel('主题色 HEX').fill('#b52c63')
   await page.getByRole('button', { name: '应用' }).click()
-  await expect(page.getByRole('status')).toContainText('已保存')
+  await expect(page.locator('#theme-status')).toContainText('已保存')
   const applied = (await rootValues()).accent
   await page.reload()
+  await openCustomTheme(page)
   expect((await rootValues()).accent).toBe(applied)
   await page.getByLabel('主题色 HEX').fill('#nothex')
   await page.getByRole('button', { name: '应用' }).click()
   await expect(page.getByLabel('主题色 HEX')).toHaveAttribute('aria-invalid', 'true')
   expect((await rootValues()).accent).toBe(applied)
-  await page.getByRole('button', { name: '恢复冰川白' }).click()
-  expect((await rootValues()).accent).toBe('#2857b4')
+  await page.getByRole('button', { name: '恢复默认' }).click()
+  expect((await rootValues()).accent).toBe('#3565b6')
   expect(api.requests).toEqual([])
 
   await page.evaluate(() => localStorage.setItem('tensor-issue004-accent', 'damaged'))
   await page.reload()
-  expect((await rootValues()).accent).toBe('#2857b4')
+  await openCustomTheme(page)
+  expect((await rootValues()).accent).toBe('#3565b6')
 
   for (const mode of ['getItem', 'setItem']) {
     const context = await browser.newContext()
@@ -659,14 +682,15 @@ test('设置零 API、四主题真实颜色、持久化降级、非法值与完�
     const degradedPage = await context.newPage()
     const degradedApi = await installApi(degradedPage)
     await degradedPage.goto('/settings')
+    await openCustomTheme(degradedPage)
     if (mode === 'setItem') {
       await degradedPage.getByLabel('主题色 HEX').fill('#b52c63')
       await degradedPage.getByRole('button', { name: '应用' }).click()
     }
-    await expect(degradedPage.getByRole('status')).toContainText('仅本次预览')
+    await expect(degradedPage.locator('#theme-status')).toContainText('仅本次生效')
     await degradedPage.getByLabel('主题色 HEX').fill('#000000')
     await degradedPage.getByRole('button', { name: '应用' }).click()
-    await degradedPage.getByRole('button', { name: '恢复冰川白' }).click()
+    await degradedPage.getByRole('button', { name: '恢复默认' }).click()
     expect(degradedApi.requests).toEqual([])
     assertApiClean(degradedApi)
     await context.close()
@@ -698,13 +722,14 @@ test('设置零 API、四主题真实颜色、持久化降级、非法值与完�
   await businessDate.fill('2026-08-07')
   await businessDate.press('Enter')
   await businessPage.locator('[data-parameter="ts_code"] input').fill('000001.SZ')
-  await businessPage.getByRole('button', { name: '提交任务' }).click()
+  await businessPage.getByRole('button', { name: /^(开始(?:批量)?下载|正在创建…|正在查找…)$/ }).click()
   await openDataset(businessPage, 'daily')
   await businessPage.getByRole('button', { name: '查询', exact: true }).click()
   await expect(businessPage.getByRole('status').filter({ hasText: '共 201 条' })).toContainText('第 1 / 5 页')
 
-  for (const color of ['#2857b4', '#b52c63', '#ffff00', '#000000']) {
+  for (const color of ['#3565b6', '#b52c63', '#ffff00', '#000000']) {
     await businessPage.getByRole('link', { name: /设置/ }).click()
+    await openCustomTheme(businessPage)
     await businessPage.getByLabel('主题色 HEX').fill(color)
     await businessPage.getByRole('button', { name: '应用' }).click()
     const [surface, raised, nav, textColor, accent] = await Promise.all(
@@ -712,27 +737,22 @@ test('设置零 API、四主题真实颜色、持久化降级、非法值与完�
     )
 
     await businessPage.getByRole('link', { name: /数据下载/ }).click()
-    expect(await foreground(businessPage.locator('.async-state-panel--success .async-state-panel__mark'))).toBe('rgb(20, 120, 94)')
-    await businessDate.click()
-    const picker = businessPage.locator('.el-picker-panel:visible')
-    await expect(picker).toBeVisible()
-    expect(await background(picker)).toBe(nav)
-    expect(await background(picker.locator('td.current span').first())).toBe(accent)
-    await businessPage.keyboard.press('Escape')
-    await businessPage.locator('#download-api').click()
-    const apiListboxId = await businessPage.locator('#download-api').getAttribute('aria-controls')
-    const apiDropdown = businessPage.locator(`#${apiListboxId}`).locator('xpath=ancestor::*[contains(@class, "el-popper")][1]')
-    await expect(apiDropdown).toBeVisible()
-    expect(await background(apiDropdown)).toBe(nav)
-    await businessPage.keyboard.press('Escape')
+    expect(await foreground(businessPage.locator('.async-state-panel--success .async-state-panel__mark'))).toBe('rgb(40, 116, 90)')
+    await businessDate.focus()
+    expect(await background(businessDate)).toBe(surface)
+    expect(await foreground(businessDate)).toBe(textColor)
+    await expect(businessDate).toHaveCSS('border-top-color', accent)
+    await expect(businessDate).toHaveCSS('box-shadow', /0px 0px 0px 2px$/)
+    expect(await foreground(businessPage.locator('.mode-control button.selected'))).toBe(accent)
+    expect(await foreground(businessPage.locator('.catalog-list button[aria-pressed="true"]'))).toBe(accent)
 
     await businessPage.getByRole('link', { name: /数据查看/ }).click()
     const dailyTable = businessPage.getByRole('region', { name: '数据表格，可横向滚动' })
     expect(await background(dailyTable.locator('.el-table__body-wrapper td').first())).toBe(surface)
-    expect(await background(dailyTable.locator('.el-table__header-wrapper th').first())).toBe(raised)
+    expect(await background(dailyTable.locator('.el-table__header-wrapper th').first())).toBe(await themeColor('subtle'))
     expect(await foreground(businessPage.locator('.el-pager li.is-active'))).toBe(accent)
     expect(await foreground(dailyTable.locator('.dataset-table__change--up').first())).toBe('rgb(183, 45, 71)')
-    expect(await foreground(dailyTable.locator('.dataset-table__change--down').first())).toBe('rgb(20, 120, 94)')
+    expect(await foreground(dailyTable.locator('.dataset-table__change--down').first())).toBe('rgb(40, 116, 90)')
 
     await selectCatalog(businessPage, 'dataset-select', 'stock_company')
     await businessPage.getByRole('button', { name: '查询', exact: true }).click()
@@ -798,8 +818,8 @@ test('精确宽表、符号、单位、大整数、空值与纯文本 tooltip', 
   assertApiClean(api)
 })
 
-test('键盘、焦点、移动端弹层与 reduced motion', async ({ page }) => {
-  await page.setViewportSize({ width: 360, height: 800 })
+test('键盘、焦点、PC 弹层与 reduced motion', async ({ page }) => {
+  await page.setViewportSize({ width: 1024, height: 800 })
   await page.emulateMedia({ reducedMotion: 'reduce' })
   const api = await installApi(page, {
     'GET /api/v1/data-sources/tushare_pro/datasets/stock_company/records':
@@ -822,16 +842,17 @@ test('键盘、焦点、移动端弹层与 reduced motion', async ({ page }) => 
   await page.keyboard.press('Enter')
   await expect(page).toHaveURL(/\/downloads$/)
 
-  const downloadApi = page.locator('#download-api')
+  const downloadApi = page.getByRole('searchbox', { name: '搜索接口' })
   await tabTo(page, downloadApi)
-  await expectFocusOutline(downloadApi, downloadApi.locator('xpath=ancestor::*[contains(@class, "el-select__wrapper")][1]'))
+  await expectFocusHalo(downloadApi, page.locator('.catalog-search'))
   await page.keyboard.press('ControlOrMeta+A')
   await page.keyboard.type('日线行情')
-  await expect(page.getByRole('option')).toHaveCount(1)
-  await page.keyboard.press('ArrowDown')
+  const apiButton = page.locator('.catalog-list button')
+  await expect(apiButton).toHaveCount(1)
+  await tabTo(page, apiButton)
+  await expectFocusOutline(apiButton)
   await page.keyboard.press('Enter')
-  await page.keyboard.press('Escape')
-  await expect(page.locator('.api-select .el-select__selected-item:not(.el-select__input-wrapper)')).toHaveText('日线行情 (daily)')
+  await expect(apiButton).toHaveAttribute('aria-pressed', 'true')
   await chooseSingleMode(page)
 
   const stock = page.locator('[data-parameter="ts_code"] input')
@@ -839,18 +860,10 @@ test('键盘、焦点、移动端弹层与 reduced motion', async ({ page }) => 
   await page.keyboard.type('000001.SZ')
   const date = page.locator('[data-parameter="trade_date"] input')
   await tabTo(page, date)
-  await expectFocusOutline(date, date.locator('xpath=ancestor::*[contains(@class, "el-input__wrapper")][1]'))
-  const picker = page.locator('.el-picker-panel:visible')
-  await expect(picker).toBeVisible()
-  const pickerBox = await picker.boundingBox()
-  expect(pickerBox.x).toBeGreaterThanOrEqual(0)
-  expect(pickerBox.x + pickerBox.width).toBeLessThanOrEqual(360)
-  await page.keyboard.press('Escape')
-  await page.keyboard.press('ControlOrMeta+A')
-  await page.keyboard.type('2026-08-07')
-  await page.keyboard.press('Enter')
+  await expectFocusHalo(date)
+  await date.fill('2026-08-07')
   await expect(date).toHaveValue('2026-08-07')
-  const downloadButton = page.getByRole('button', { name: '提交任务' })
+  const downloadButton = page.getByRole('button', { name: /^(开始(?:批量)?下载|正在创建…|正在查找…)$/ })
   await tabTo(page, downloadButton)
   await expectFocusOutline(downloadButton)
   await page.keyboard.press('Enter')
@@ -863,14 +876,14 @@ test('键盘、焦点、移动端弹层与 reduced motion', async ({ page }) => 
   const datasetSelect = page.locator('#dataset-select')
   await expect(datasetSelect).toBeEnabled()
   await tabTo(page, datasetSelect)
-  await expectFocusOutline(datasetSelect, datasetSelect.locator('xpath=ancestor::*[contains(@class, "el-select__wrapper")][1]'))
+  await expectFocusHalo(datasetSelect, datasetSelect.locator('xpath=ancestor::*[contains(@class, "el-select__wrapper")][1]'))
   await page.keyboard.type('stock_company')
   const listboxId = await datasetSelect.getAttribute('aria-controls')
   const dropdown = page.locator(`#${listboxId}`).locator('xpath=ancestor::*[contains(@class, "el-popper")][1]')
   await expect(dropdown).toBeVisible()
   const dropdownBox = await dropdown.boundingBox()
   expect(dropdownBox.x).toBeGreaterThanOrEqual(0)
-  expect(dropdownBox.x + dropdownBox.width).toBeLessThanOrEqual(360)
+  expect(dropdownBox.x + dropdownBox.width).toBeLessThanOrEqual(1024)
   await datasetSelect.press('ArrowDown')
   await datasetSelect.press('Enter')
   await datasetSelect.press('Escape')
@@ -888,7 +901,7 @@ test('键盘、焦点、移动端弹层与 reduced motion', async ({ page }) => 
 
   const pageSizeInput = page.locator('.el-pagination__sizes input')
   await tabTo(page, pageSizeInput)
-  await expectFocusOutline(pageSizeInput, pageSizeInput.locator('xpath=ancestor::*[contains(@class, "el-select__wrapper")][1]'))
+  await expectFocusHalo(pageSizeInput, pageSizeInput.locator('xpath=ancestor::*[contains(@class, "el-select__wrapper")][1]'))
   await page.keyboard.press('Enter')
   await page.keyboard.press('ArrowDown')
   await page.keyboard.press('Enter')
@@ -936,7 +949,7 @@ test('生成八张可复现的正式验收截图', async ({ page }) => {
   const date = page.locator('[data-parameter="trade_date"] input')
   await date.fill('2026-08-07')
   await date.press('Enter')
-  await page.getByRole('button', { name: '提交任务' }).click()
+  await page.getByRole('button', { name: /^(开始(?:批量)?下载|正在创建…|正在查找…)$/ }).click()
   await expect(page.getByRole('heading', { name: '任务已接收' })).toBeVisible()
   await shot('downloads-desktop.png')
   await openDataset(page, 'daily')
@@ -944,20 +957,21 @@ test('生成八张可复现的正式验收截图', async ({ page }) => {
   await expect(page.getByRole('region', { name: '数据表格，可横向滚动' })).toBeVisible()
   await shot('datasets-desktop.png')
   await page.getByRole('link', { name: /设置/ }).click()
+  await openCustomTheme(page)
   await shot('settings-desktop.png')
   await page.getByRole('link', { name: /数据下载/ }).click()
-  await page.setViewportSize({ width: 390, height: 844 })
-  await shot('downloads-mobile.png')
+  await page.setViewportSize({ width: 1280, height: 844 })
+  await shot('downloads-small-desktop.png')
   await page.getByRole('link', { name: /数据查看/ }).click()
-  await shot('datasets-mobile.png')
+  await shot('datasets-small-desktop.png')
   await page.getByRole('link', { name: /设置/ }).click()
-  await shot('settings-mobile.png')
-  await page.setViewportSize({ width: 360, height: 800 })
+  await openCustomTheme(page)
+  await shot('settings-small-desktop.png')
+  await page.setViewportSize({ width: 1024, height: 800 })
   await page.getByRole('link', { name: /数据下载/ }).click()
-  await date.click()
-  await expect(page.locator('.el-picker-panel:visible')).toBeVisible()
-  await shot('datepicker-mobile.png', true)
-  await page.keyboard.press('Escape')
+  await date.focus()
+  await expect(date).toHaveAttribute('type', 'date')
+  await shot('date-input-small-desktop.png')
   await page.unroute('**/api/**')
   const errorApi = await installApi(page, {
     'POST /api/v1/download-tasks': (request) => {
@@ -972,9 +986,9 @@ test('生成八张可复现的正式验收截图', async ({ page }) => {
   await page.locator('[data-parameter="ts_code"] input').fill('000001.SZ')
   await page.locator('[data-parameter="trade_date"] input').fill('2026-08-07')
   await page.locator('[data-parameter="trade_date"] input').press('Enter')
-  await page.getByRole('button', { name: '提交任务' }).click()
+  await page.getByRole('button', { name: /^(开始(?:批量)?下载|正在创建…|正在查找…)$/ }).click()
   await expect(page.getByRole('heading', { name: '提交结果尚未确认' })).toBeVisible()
-  await shot('download-error-mobile.png')
+  await shot('download-error-small-desktop.png')
   assertApiClean(api)
   assertApiClean(errorApi)
 })

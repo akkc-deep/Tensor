@@ -1,3 +1,4 @@
+import { selectDownloadApi } from './catalog-helpers.js'
 import { expect, test } from '@playwright/test'
 
 import {
@@ -20,16 +21,9 @@ function downloadPosts(api) {
 }
 
 async function selectApi(page, apiName) {
-  const input = page.locator('#download-api')
-  await input.click()
-  await input.fill(apiName)
-  const listboxId = await input.getAttribute('aria-controls')
-  const option = page.locator(`#${listboxId}`).getByRole('option')
-    .filter({ has: page.getByText(apiName, { exact: true }) })
-  await expect(option).toHaveCount(1)
-  await option.click()
-  await page.getByRole('radiogroup', { name: '下载模式', exact: true }).getByText('单次请求', { exact: true }).click()
-  await expect(page.getByRole('radio', { name: '单次请求', exact: true })).toBeChecked()
+  await selectDownloadApi(page, apiName)
+  await page.getByRole('button', { name: '单次下载', exact: true }).click()
+  await expect(page.getByRole('button', { name: '单次下载', exact: true })).toHaveAttribute('aria-pressed', 'true')
 }
 
 async function fillParameter(page, parameter, rawStockCode = ' 000001.sz ') {
@@ -37,14 +31,8 @@ async function fillParameter(page, parameter, rawStockCode = ' 000001.sz ') {
   const input = wrapper.locator('input')
   if (parameter.type === 'ENUM') {
     const value = parameter.name === 'exchange' ? 'SZSE' : parameter.allowedValues[0]
-    await wrapper.locator('.el-select__wrapper').click()
-    const listboxId = await input.getAttribute('aria-controls')
-    const option = page.locator(`#${listboxId}`).getByRole('option', { name: value, exact: true })
-    await option.scrollIntoViewIfNeeded()
-    await expect(option).toBeInViewport({ ratio: 1 })
-    await option.click()
-    await expect(input).toHaveAttribute('aria-expanded', 'false')
-    await expect(wrapper.locator('.el-select__selected-item').filter({ hasText: value })).toHaveText(value)
+    await wrapper.locator('select').selectOption(value)
+    await expect(wrapper.locator('select')).toHaveValue(value)
     return value
   }
   if (parameter.type === 'TS_CODE') {
@@ -66,7 +54,7 @@ async function fillForm(page, definition, rawStockCode) {
 
 async function openDownloads(page) {
   await page.goto('/downloads')
-  await expect(page.locator('#download-api')).toBeEnabled()
+  await expect(page.getByRole('searchbox', { name: '搜索接口' })).toBeEnabled()
 }
 
 test('34 stock forms block a blank stock and submit one normalized stock', async ({ page }) => {
@@ -80,13 +68,13 @@ test('34 stock forms block a blank stock and submit one normalized stock', async
     await expect(page.locator('[data-parameter]').first()).toHaveAttribute('data-parameter', 'ts_code')
     await expect(stock.locator('input')).toHaveAttribute('aria-required', 'true')
     const before = downloadPosts(api).length
-    await page.getByRole('button', { name: '提交任务' }).click()
+    await page.getByRole('button', { name: /^(开始(?:批量)?下载|正在创建…|正在查找…)$/ }).click()
     await expect(stock.locator('input')).toHaveAttribute('aria-invalid', 'true')
     await expect(stock.locator('input')).toBeFocused()
     expect(downloadPosts(api)).toHaveLength(before)
 
     const params = await fillForm(page, definition)
-    await page.getByRole('button', { name: '提交任务' }).click()
+    await page.getByRole('button', { name: /^(开始(?:批量)?下载|正在创建…|正在查找…)$/ }).click()
     await expect(page.getByRole('heading', { name: '任务已接收', level: 2 })).toBeVisible()
     expect(downloadPosts(api).at(-1).body).toEqual({ submissionId: expect.stringMatching(/^[0-9a-f-]{36}$/), mode: 'SINGLE', pluginId: 'tushare_pro', apiName, params })
   }
@@ -107,7 +95,7 @@ test('six unchanged forms submit their original parameters without a stock', asy
     await selectApi(page, apiName)
     await expect(page.locator('[data-parameter="ts_code"]')).toHaveCount(0)
     const params = await fillForm(page, definition)
-    await page.getByRole('button', { name: '提交任务' }).click()
+    await page.getByRole('button', { name: /^(开始(?:批量)?下载|正在创建…|正在查找…)$/ }).click()
     await expect(page.getByRole('heading', { name: '任务已接收', level: 2 })).toBeVisible()
     expect(downloadPosts(api).at(-1).body).toEqual({ submissionId: expect.stringMatching(/^[0-9a-f-]{36}$/), mode: 'SINGLE', pluginId: 'tushare_pro', apiName, params })
   }
@@ -133,7 +121,7 @@ test('manual submission confirmation preserves submissionId and normalized stock
   await openDownloads(page)
   await selectApi(page, 'daily')
   await fillForm(page, EXPECTED.get('daily'))
-  await page.getByRole('button', { name: '提交任务' }).click()
+  await page.getByRole('button', { name: /^(开始(?:批量)?下载|正在创建…|正在查找…)$/ }).click()
   await expect(page.getByRole('heading', { name: '提交结果尚未确认', level: 2 })).toBeVisible()
 
   await page.locator('[data-parameter="ts_code"] input').fill('000002.SZ')

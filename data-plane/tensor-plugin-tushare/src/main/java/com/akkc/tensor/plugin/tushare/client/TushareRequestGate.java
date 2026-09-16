@@ -13,7 +13,8 @@ import java.util.function.LongSupplier;
 import java.util.function.Supplier;
 
 final class TushareRequestGate {
-    private static final Duration MAX_WAIT = Duration.ofMillis(100);
+    private static final int MAX_WAIT_MILLIS = 100;
+    static final Duration MAX_WAIT = Duration.ofMillis(MAX_WAIT_MILLIS);
     private static final long MAX_WAIT_NANOS = MAX_WAIT.toNanos();
 
     private final long minIntervalNanos;

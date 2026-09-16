@@ -113,7 +113,7 @@ describe('DatasetTable', () => {
     ])
     expect(withTsHeaders[1].element.style.left).toBe('0px')
     expect(withTsHeaders[1].element.style.zIndex).toBe('calc(var(--el-table-index) + 1)')
-    expect(withTsHeaders[1].element.style.background).toBe('var(--tensor-raised)')
+    expect(withTsHeaders[1].element.style.background).toBe('var(--tensor-subtle)')
 
     const withTsCells = withTsCode.findAll('.el-table__body tbody tr')[0].findAll('td')
     expect(withTsCells.map((cell) => cell.get('.cell').text())).toEqual([
@@ -310,7 +310,10 @@ describe('DatasetTable', () => {
       expect(allColumns.map((current) => current.props('minWidth'))).toEqual([140, 240, 140, 140, 180])
 
       const longTextCell = wrapper.findAll('.el-table__body tbody tr')[0].findAll('td')[1]
-      await longTextCell.get('.dataset-table__value').trigger('mouseenter')
+      const value = longTextCell.get('.dataset-table__value')
+      expect(value.attributes('tabindex')).toBe('0')
+      value.element.focus()
+      expect(document.activeElement).toBe(value.element)
       await flushPromises()
 
       await vi.waitFor(() => {

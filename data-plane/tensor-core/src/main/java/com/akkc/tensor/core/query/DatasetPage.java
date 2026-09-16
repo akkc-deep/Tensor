@@ -1,5 +1,6 @@
 package com.akkc.tensor.core.query;
 
+import com.akkc.tensor.plugin.api.constant.PaginationConstants;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -41,10 +42,10 @@ public record DatasetPage(
         }
         items = List.copyOf(copiedItems);
 
-        if (page < 1) {
+        if (page < PaginationConstants.FIRST_PAGE) {
             throw new IllegalArgumentException("page must be at least 1");
         }
-        if (pageSize != 20 && pageSize != 50 && pageSize != 100) {
+        if (!PaginationConstants.PAGE_SIZES.contains(pageSize)) {
             throw new IllegalArgumentException("pageSize must be one of 20, 50, 100");
         }
         if (totalElements < 0 || totalPages < 0) {
@@ -54,7 +55,7 @@ public record DatasetPage(
         if (totalPages != expectedPages) {
             throw new IllegalArgumentException("totalPages must match totalElements and pageSize");
         }
-        if (totalElements == 0 && (page != 1 || !items.isEmpty())) {
+        if (totalElements == 0 && (page != PaginationConstants.FIRST_PAGE || !items.isEmpty())) {
             throw new IllegalArgumentException("empty pages must use page 1 and no items");
         }
         if (totalElements > 0 && page > totalPages) {

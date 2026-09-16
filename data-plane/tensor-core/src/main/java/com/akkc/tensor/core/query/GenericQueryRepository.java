@@ -1,5 +1,6 @@
 package com.akkc.tensor.core.query;
 
+import com.akkc.tensor.plugin.api.constant.DatasetFields;
 import com.akkc.tensor.plugin.api.dataset.ColumnDefinition;
 import com.akkc.tensor.plugin.api.dataset.DatasetDefinition;
 import java.sql.Date;
@@ -8,6 +9,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.LocalDate;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
@@ -56,9 +58,9 @@ public final class GenericQueryRepository {
         List<String> columns = definition.columns().stream()
                 .map(ColumnDefinition::name)
                 .collect(java.util.stream.Collectors.toCollection(ArrayList::new));
-        columns.add("source_plugin");
-        columns.add("source_api");
-        columns.add("ingested_at");
+        columns.add(DatasetFields.SOURCE_PLUGIN);
+        columns.add(DatasetFields.SOURCE_API);
+        columns.add(DatasetFields.INGESTED_AT);
         return List.copyOf(columns);
     }
 
@@ -98,11 +100,11 @@ public final class GenericQueryRepository {
         for (ColumnDefinition column : definition.columns()) {
             row.put(column.name(), readValue(resultSet, index++, column));
         }
-        row.put("source_plugin", resultSet.getString(index++));
-        row.put("source_api", resultSet.getString(index++));
-        Calendar utc = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+        row.put(DatasetFields.SOURCE_PLUGIN, resultSet.getString(index++));
+        row.put(DatasetFields.SOURCE_API, resultSet.getString(index++));
+        Calendar utc = Calendar.getInstance(TimeZone.getTimeZone(ZoneOffset.UTC));
         Timestamp ingestedAt = resultSet.getTimestamp(index, utc);
-        row.put("ingested_at", ingestedAt == null ? null : ingestedAt.toInstant());
+        row.put(DatasetFields.INGESTED_AT, ingestedAt == null ? null : ingestedAt.toInstant());
         return Collections.unmodifiableMap(row);
     }
 

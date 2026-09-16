@@ -1,5 +1,6 @@
 package com.akkc.tensor.plugin.api.download;
 
+import com.akkc.tensor.plugin.api.constant.ValidationConstants;
 import com.akkc.tensor.plugin.api.dataset.BusinessKeyDefinition;
 import com.akkc.tensor.plugin.api.model.DatasetKey;
 import com.akkc.tensor.plugin.api.model.TableName;
@@ -20,7 +21,7 @@ public record AdaptedBatch(
         List<Map<String, Object>> rows,
         BusinessKeyDefinition businessKeyDefinition,
         Instant ingestedAt) {
-    private static final Pattern IDENTIFIER_PATTERN = Pattern.compile("^[a-z][a-z0-9_]{1,63}$");
+    private static final Pattern IDENTIFIER_PATTERN = Pattern.compile(ValidationConstants.IDENTIFIER_REGEX);
 
     public AdaptedBatch {
         Objects.requireNonNull(datasetKey, "datasetKey");

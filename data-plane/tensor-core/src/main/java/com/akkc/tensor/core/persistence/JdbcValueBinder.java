@@ -1,5 +1,7 @@
 package com.akkc.tensor.core.persistence;
 
+import java.time.ZoneOffset;
+
 import java.math.BigDecimal;
 import java.sql.Date;
 import java.sql.PreparedStatement;
@@ -28,7 +30,7 @@ public final class JdbcValueBinder {
         } else if (value instanceof BigDecimal decimal) {
             statement.setBigDecimal(index, decimal);
         } else if (value instanceof Instant instant) {
-            Calendar utc = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+            Calendar utc = Calendar.getInstance(TimeZone.getTimeZone(ZoneOffset.UTC));
             statement.setTimestamp(index, Timestamp.from(instant), utc);
         } else {
             throw new IllegalArgumentException("Unsupported JDBC value type");

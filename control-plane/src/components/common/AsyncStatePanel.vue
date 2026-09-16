@@ -74,25 +74,25 @@ const live = computed(() =>
   min-width: 0;
   flex-direction: column;
   align-items: flex-start;
-  padding: 30px 26px;
+  padding: 3rem 2.6rem;
   color: var(--tensor-text);
 }
 
 .async-state-panel__mark {
   display: grid;
-  width: 46px;
-  height: 46px;
+  width: 4.6rem;
+  height: 4.6rem;
   place-items: center;
-  margin-bottom: 23px;
+  margin-bottom: 2.3rem;
   color: var(--tensor-muted);
-  border: 1px solid var(--tensor-line);
+  border: 0.1rem solid var(--tensor-line);
   border-radius: 50%;
   background: var(--tensor-raised);
 }
 
 .async-state-panel__mark svg {
-  width: 23px;
-  height: 23px;
+  width: 2.3rem;
+  height: 2.3rem;
   stroke: currentColor;
   stroke-width: 1.7;
   stroke-linecap: round;
@@ -113,7 +113,7 @@ const live = computed(() =>
 
 .async-state-panel__title {
   margin: 0;
-  font-size: 22px;
+  font-size: 2.2rem;
   font-weight: 550;
   letter-spacing: -0.02em;
   line-height: 1.35;
@@ -124,9 +124,9 @@ const live = computed(() =>
 .async-state-panel__message,
 .async-state-panel__request-id {
   max-width: 70ch;
-  margin: 10px 0 0;
+  margin: 1rem 0 0;
   color: var(--tensor-muted);
-  font-size: 12px;
+  font-size: 1.2rem;
   line-height: 1.8;
   overflow-wrap: anywhere;
 }
@@ -140,18 +140,18 @@ const live = computed(() =>
 .async-state-panel__actions {
   display: flex;
   flex-wrap: wrap;
-  gap: 12px;
-  margin-top: 16px;
+  gap: 1.2rem;
+  margin-top: 1.6rem;
 }
 
 .async-state-panel__actions :deep(.el-button:focus-visible) {
-  outline: 3px solid var(--tensor-interactive-color);
-  outline-offset: 3px;
+  outline: 0.3rem solid var(--tensor-interactive-color);
+  outline-offset: 0.3rem;
 }
 
 @media (max-width: 680px) {
   .async-state-panel {
-    padding: 27px 18px;
+    padding: 2.7rem 1.8rem;
   }
 }
 </style>

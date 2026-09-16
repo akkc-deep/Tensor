@@ -1,0 +1,56 @@
+.live-root .live-source { margin: 0 14px 16px; }
+.live-root .live-source select { min-width: 0; width: 100%; font-size: 13px; }
+.live-root .live-task-filter { margin: 12px 0 8px; }
+.live-root .live-task-filter select { width: 100%; }
+.live-root .live-task-search { margin: 12px 0; font-size: 13px; }
+.live-root .live-task-search summary, .live-root .live-batch-lineage summary { cursor: pointer; color: var(--accent); }
+.live-root .live-task-filters { display: grid; gap: 12px; margin-top: 12px; }
+.live-root .live-task-filters input { width: 100%; min-width: 0; }
+.live-root .live-batch-filters { display: flex; align-items: end; flex-wrap: wrap; gap: 12px; margin: 16px 0; }
+.live-root .live-batch-filters .field { flex: 1; min-width: 140px; }
+.live-root .live-checkbox { display: flex; align-items: center; gap: 8px; font-size: 13px; min-height: 40px; }
+.live-root .live-checkbox input { accent-color: var(--accent); }
+.live-root .live-batch-lineage { font-size: 12px; overflow-wrap: anywhere; margin-top: 8px; }
+.live-root .live-task-pagination, .live-root .live-batch-pagination { flex-wrap: wrap; gap: 8px; }
+.live-root .live-inset { margin: 24px 28px; }
+.live-root .live-notice { padding: 14px 16px; margin: 16px 0; background: var(--accent-soft); border-radius: 7px; font-size: 13px; overflow-wrap: anywhere; }
+.live-root .live-notice p { margin: 5px 0; }
+.live-root .live-notice small { display: block; margin-top: 8px; color: var(--muted); }
+.live-root .live-notice .text-button { margin-top: 7px; }
+.live-root .error-notice { background: var(--warning-bg); }
+.live-root .error-notice strong { color: var(--warning); }
+.live-root .error-notice ul { padding-left: 18px; }
+.live-root .live-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 12px; }
+.live-root .connection-dot.offline { background: var(--warning); }
+.live-root .task-row { flex-wrap: wrap; gap: 8px; }
+.live-root .task-name { min-width: 0; overflow-wrap: anywhere; flex: 1 1 85px; }
+.live-root .task-trailing { max-width: 55%; }
+.live-root .task-trailing .status { white-space: normal; text-align: right; justify-content: flex-end; }
+.live-root .live-task-footnote { flex-basis: 100%; font-size: 12px; color: var(--muted); }
+.live-root .live-task-pagination { border-top: 1px solid var(--line); }
+.live-root .studio-tasks .task-items { max-height: 480px; overflow: auto; }
+.live-root .live-detail { width: 480px; }
+.live-root .live-task-id { overflow-wrap: anywhere; margin-top: 8px; }
+.live-root .live-detail header > div { min-width: 0; }
+.live-root .live-detail .confirmation dt { overflow-wrap: anywhere; min-width: 100px; }
+.live-root .detail-progress p { margin-top: 10px; line-height: 1.8; }
+.live-root .batch-preview code { overflow-wrap: anywhere; min-width: 0; }
+.live-root .query-form { align-items: flex-start; }
+.live-root .query-form > .button, .live-root .query-form > .text-button { margin-top: 29px; }
+.live-root .records-table th { font-family: inherit; min-width: 140px; }
+.live-root .records-table th code { display: block; font-weight: 400; color: var(--muted); margin-top: 4px; }
+.live-root .records-table th, .live-root .records-table td { background: var(--surface); }
+.live-root .records-table th { background: var(--subtle); }
+.live-root .records-table th:first-child, .live-root .records-table td:first-child { position: sticky; left: 0; }
+.live-root .data-scroll thead { z-index: 1; }
+.live-root .records-table .numeric { text-align: right; }
+.live-root .pagination select { background: var(--surface); border: 1px solid var(--line); border-radius: 4px; min-height: 32px; padding: 0 8px; }
+.live-root .form-error { margin-top: 4px; }
+.live-root .range-configuration:empty { display: none; }
+@media (max-width: 680px) {
+  .live-root .demo-environment { flex-wrap: wrap; font-size: 11px; }
+  .live-root .live-detail { width: 100%; }
+  .live-root .live-inset { margin: 20px; }
+  .live-root .query-form > .button, .live-root .query-form > .text-button { margin-top: 0; }
+  .live-root .live-data-pagination { flex-wrap: wrap; }
+}

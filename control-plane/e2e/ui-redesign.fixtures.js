@@ -425,7 +425,7 @@ export async function installApi(page, overrides = {}) {
     if (request.postData()) {
       try { body = request.postDataJSON() } catch { body = request.postData() }
     }
-    const recorded = { method, path, query: Object.fromEntries(url.searchParams), body, requestId }
+    const recorded = { method, path, query: Object.fromEntries(url.searchParams), body, requestId, rawBody: request.postData() }
     requests.push(recorded)
 
     const reject = (reason) => {

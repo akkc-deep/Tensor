@@ -5,7 +5,6 @@ import { nextTick } from 'vue'
 
 import { ClientError } from '../../api/errors.js'
 import AsyncStatePanel from '../common/AsyncStatePanel.vue'
-import WorkbenchPanel from '../common/WorkbenchPanel.vue'
 import DownloadTaskList from './DownloadTaskList.vue'
 
 function mount(component, options = {}) {
@@ -70,9 +69,11 @@ describe('DownloadTaskList', () => {
       props: { page: 1, pageSize: 20, result: result([row]) },
     })
 
-    expect(wrapper.getComponent(WorkbenchPanel).props('title')).toBe('近期任务')
-    expect(wrapper.get('.download-task-list__scroll').attributes('tabindex')).toBe('0')
-    expect(wrapper.get('table').text()).toContain('tushare_pro / daily')
+    expect(wrapper.get('h2').text()).toContain('最近任务')
+    expect(wrapper.find('table').exists()).toBe(false)
+    expect(wrapper.find('details').exists()).toBe(true)
+    expect(wrapper.get('.task-name').text()).toContain('daily')
+    expect(wrapper.get('.task-name > span').text()).toBe('tushare_pro')
     expect(wrapper.text()).toContain('trade_date=20260912')
     expect(wrapper.text()).toContain('ts_code=000001.SZ')
     expect(wrapper.text()).toContain('单次请求')
@@ -91,7 +92,29 @@ describe('DownloadTaskList', () => {
     expect(wrapper.get('a').attributes('href')).toBe(
       '/downloads/tasks/11111111-1111-4111-8111-111111111111',
     )
-    expect(wrapper.get('a').text()).toBe('查看任务')
+    expect(wrapper.get('a').attributes('aria-label')).toBe('查看任务 daily')
+  })
+
+  it('shows controlled group tabs and the server count without filtering current rows', async () => {
+    const wrapper = mount(DownloadTaskList, { props: { statusGroup: 'ACTIVE', result: result([task()], { total: 42n }) } })
+    const buttons = wrapper.findAll('.task-filters button')
+    expect(buttons.map(button => button.text())).toEqual(['全部', '进行中', '已完成', '需处理'])
+    expect(buttons[1].attributes('aria-pressed')).toBe('true')
+    expect(wrapper.get('[data-total]').text()).toContain('进行中 · 共 42 个任务')
+    expect(wrapper.findAll('article')).toHaveLength(1)
+    await buttons[3].trigger('click')
+    expect(wrapper.emitted('update:statusGroup')).toEqual([['ERROR']])
+    expect(buttons[1].attributes('aria-pressed')).toBe('true')
+  })
+
+  it('keeps errors and completeness readable without opening technical details', () => {
+    const wrapper = mount(DownloadTaskList, { props: { result: result([task({ status: 'FAILED',
+      lastError: { code: 'SOURCE_TIMEOUT', message: '数据源请求超时' },
+      extraction: { ruleKind: 'RESPONSE_ONLY', policyVersion: 'v1' },
+    })]) } })
+    expect(wrapper.get('.task-error').text()).toContain('数据源请求超时')
+    expect(wrapper.get('.task-notice').text()).toContain('数据完整性未确认')
+    expect(wrapper.get('.task-error').element.closest('details')).toBeNull()
   })
 
   it.each([
@@ -109,6 +132,12 @@ describe('DownloadTaskList', () => {
     })
 
     expect(wrapper.get('[data-task-status]').text()).toBe(label)
+  })
+
+  it.each([['FAILED', '查看失败原因'], ['PARTIAL_FAILED', '查看失败原因'], ['INTERRUPTED', '执行已中断']])('does not imply execution continues for unplanned %s tasks', (status, hint) => {
+    const wrapper = mount(DownloadTaskList, { props: { result: result([task({ status, planReady: false })]) } })
+    expect(wrapper.get('.task-trailing').text()).toContain(hint)
+    expect(wrapper.get('.task-trailing').text()).not.toContain('进度自动更新')
   })
 
   it('reports an unplanned zero-batch task without inferring completion', () => {
@@ -200,7 +229,7 @@ describe('DownloadTaskList', () => {
       },
     })
 
-    expect(wrapper.find('table').exists()).toBe(true)
+    expect(wrapper.find('article').exists()).toBe(true)
     expect(wrapper.text()).toContain('状态暂时无法更新')
     expect(wrapper.text()).toContain('上次更新')
     expect(wrapper.text()).toContain('失败')
@@ -249,6 +278,7 @@ describe('DownloadTaskList', () => {
       props: { page: 1, pageSize: 20, result: result([]) },
     })
     expect(empty.text()).toContain('暂无近期任务')
+    expect(empty.get('[data-total]').text()).toBe('全部 · 共 0 个任务')
     expect(empty.getComponent(ElPagination).props('pageCount')).toBe(0)
     empty.unmount()
 
@@ -260,11 +290,7 @@ describe('DownloadTaskList', () => {
       },
     })
     expect(overTail.text()).toContain('本页暂无任务')
-    await overTail
-      .findAllComponents(ElButton)
-      .find((button) => button.text() === '返回第一页')
-      .get('button')
-      .trigger('click')
+    await overTail.get('[data-first-page]').trigger('click')
     expect(overTail.emitted('update:page')).toEqual([[1]])
   })
 
@@ -287,11 +313,7 @@ describe('DownloadTaskList', () => {
     expect(wrapper.text()).toContain('本页暂无任务')
     expect(wrapper.emitted('update:page')).toBeUndefined()
 
-    await wrapper
-      .findAllComponents(ElButton)
-      .find((button) => button.text() === '返回第一页')
-      .get('button')
-      .trigger('click')
+    await wrapper.get('[data-first-page]').trigger('click')
     expect(wrapper.emitted('update:page')).toEqual([[1]])
     },
   )
@@ -353,5 +375,22 @@ it('updates the list explanation from the next saved task snapshot', async () =>
     extraction: { policyVersion: 'old-v2', ruleKind: 'CONFIRMED_ROW_LIMIT' } })]) })
   expect(wrapper.text()).toContain('old-v2')
   expect(wrapper.text()).not.toContain('数据完整性未确认')
+  wrapper.unmount()
+})
+
+it('offers independent server permissions, emits the task and blocks stale or busy shortcuts', async () => {
+  const row = task({ status: 'PARTIAL_FAILED', canRetry: true, canResume: true })
+  const wrapper = mount(DownloadTaskList, { props: { result: result([row]) } })
+  const retry = wrapper.get('[data-quick-retry]')
+  const resume = wrapper.get('[data-quick-resume]')
+  await retry.trigger('click')
+  expect(wrapper.emitted('control')).toEqual([[row, 'retry']])
+  await wrapper.setProps({ error: new ClientError('NETWORK') })
+  expect(retry.element.disabled).toBe(true)
+  expect(resume.element.disabled).toBe(true)
+  await wrapper.setProps({ error: null, actionBusy: true })
+  expect(retry.element.disabled).toBe(true)
+  await wrapper.setProps({ actionBusy: false, result: result([task({ status: 'FAILED' })]) })
+  expect(wrapper.find('[data-quick-retry]').exists()).toBe(false)
   wrapper.unmount()
 })

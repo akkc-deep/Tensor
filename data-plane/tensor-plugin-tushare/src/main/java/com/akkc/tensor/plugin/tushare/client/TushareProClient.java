@@ -1,11 +1,13 @@
 package com.akkc.tensor.plugin.tushare.client;
 
+import com.akkc.tensor.plugin.api.constant.StringConstants;
 import com.akkc.tensor.plugin.api.dataset.ColumnDefinition;
 import com.akkc.tensor.plugin.api.dataset.DatasetDefinition;
 import com.akkc.tensor.plugin.api.download.DownloadEnvelope;
 import com.akkc.tensor.plugin.api.download.batch.BatchCallContext;
 import com.akkc.tensor.plugin.api.error.ErrorCode;
 import com.akkc.tensor.plugin.api.error.TensorException;
+import com.akkc.tensor.plugin.tushare.TushareConstants;
 import com.akkc.tensor.plugin.tushare.config.TushareProperties;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.StreamReadFeature;
@@ -69,7 +71,7 @@ public final class TushareProClient {
 
         String fields = definition.columns().stream()
                 .map(ColumnDefinition::name)
-                .collect(Collectors.joining(","));
+                .collect(Collectors.joining(StringConstants.COMMA));
         TushareRequest request = new TushareRequest(
                 definition.datasetKey().apiName().value(),
                 properties.token().value(),
@@ -85,7 +87,7 @@ public final class TushareProClient {
             TushareRequestGate.check(context, gate.clock());
             return exchange(definition, params, requestBody, context);
         });
-        Thread io = Thread.ofVirtual().name("tushare-request").start(future);
+        Thread io = Thread.ofVirtual().name(TushareConstants.REQUEST_THREAD_NAME).start(future);
         DownloadEnvelope result = null;
         Throwable failure = null;
         TensorException controlFailure = null;
@@ -94,8 +96,8 @@ public final class TushareProClient {
             while (true) {
                 TushareRequestGate.check(context, gate.clock());
                 Duration remaining = Duration.between(gate.clock().instant(), context.deadline());
-                long waitNanos = remaining.compareTo(Duration.ofMillis(100)) < 0
-                        ? Math.max(1, remaining.toNanos()) : TimeUnit.MILLISECONDS.toNanos(100);
+                long waitNanos = remaining.compareTo(TushareRequestGate.MAX_WAIT) < 0
+                        ? Math.max(1, remaining.toNanos()) : TushareRequestGate.MAX_WAIT.toNanos();
                 try {
                     result = future.get(waitNanos, TimeUnit.NANOSECONDS);
                     break;
@@ -138,7 +140,7 @@ public final class TushareProClient {
                                       byte[] requestBody, BatchCallContext context) {
         try {
             return restClient.post()
-                    .uri("")
+                    .uri(StringConstants.EMPTY)
                     .contentType(MediaType.APPLICATION_JSON)
                     .accept(MediaType.APPLICATION_JSON)
                     .attribute(TushareRestClientFactory.CONTROL_ATTRIBUTE,

@@ -1,5 +1,6 @@
 package com.akkc.tensor.plugin.api.download;
 
+import com.akkc.tensor.plugin.api.constant.ValidationConstants;
 import com.akkc.tensor.plugin.api.model.ApiName;
 import com.akkc.tensor.plugin.api.model.PluginId;
 import java.util.ArrayList;
@@ -18,7 +19,7 @@ public record DownloadEnvelope(
         List<List<Object>> data,
         DownloadStatus status,
         String error) {
-    private static final Pattern IDENTIFIER_PATTERN = Pattern.compile("^[a-z][a-z0-9_]{1,63}$");
+    private static final Pattern IDENTIFIER_PATTERN = Pattern.compile(ValidationConstants.IDENTIFIER_REGEX);
 
     public DownloadEnvelope {
         Objects.requireNonNull(pluginId, "pluginId");

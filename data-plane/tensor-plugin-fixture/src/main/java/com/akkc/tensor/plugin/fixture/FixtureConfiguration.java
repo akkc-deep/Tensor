@@ -4,6 +4,7 @@ import com.akkc.tensor.core.adapter.FingerprintKeyCodec;
 import com.akkc.tensor.core.adapter.GenericDatasetAdapter;
 import com.akkc.tensor.core.adapter.ValueConverter;
 import com.akkc.tensor.plugin.api.DatasetAdapter;
+import com.akkc.tensor.plugin.api.constant.DatasetFields;
 import com.akkc.tensor.plugin.api.dataset.BusinessKeyDefinition;
 import com.akkc.tensor.plugin.api.dataset.BusinessKeyMode;
 import com.akkc.tensor.plugin.api.dataset.ColumnDefinition;
@@ -30,6 +31,10 @@ import org.springframework.context.annotation.Profile;
         name = "enabled",
         havingValue = "true")
 public final class FixtureConfiguration {
+    private static final String DISPLAY_NAME = "Fixture 日线";
+    private static final String CATEGORY = "验收";
+    private static final String SCENARIO_LABEL = "场景";
+    private static final String SCENARIO_DESCRIPTION = "确定性验收场景";
     private static final DatasetDefinition DEFINITION = definition();
 
     @Bean
@@ -43,31 +48,31 @@ public final class FixtureConfiguration {
     }
 
     private static DatasetDefinition definition() {
-        DatasetKey key = DatasetKey.of(PluginId.of("fixture"), ApiName.of("fixture_daily"));
+        DatasetKey key = DatasetKey.of(PluginId.of(FixtureConstants.PLUGIN_ID), ApiName.of(FixtureConstants.API_NAME));
         return new DatasetDefinition(
                 key,
-                "Fixture 日线",
-                "验收",
+                DISPLAY_NAME,
+                CATEGORY,
                 QueryMode.trade_date,
                 List.of(new ParameterDescriptor(
-                        "scenario",
-                        "场景",
-                        "确定性验收场景",
+                        FixtureConstants.SCENARIO,
+                        SCENARIO_LABEL,
+                        SCENARIO_DESCRIPTION,
                         ParameterType.ENUM,
                         true,
-                        "SUCCESS",
-                        List.of("SUCCESS", "EMPTY", "SOURCE_FAILURE", "TYPE_FAILURE", "PERSISTENCE_FAILURE"),
+                        FixtureScenario.SUCCESS.name(),
+                        java.util.Arrays.stream(FixtureScenario.values()).map(Enum::name).toList(),
                         null,
                         null)),
                 TableName.from(key),
                 List.of(
-                        column("ts_code", LogicalType.STRING, false, 0, 64, null, null),
-                        column("trade_date", LogicalType.DATE, false, 1, null, null, null),
-                        column("amount", LogicalType.DECIMAL, false, 2, null, 38, 18),
-                        column("note", LogicalType.STRING, true, 3, 255, null, null)),
-                new BusinessKeyDefinition(BusinessKeyMode.COMPOSITE, List.of("ts_code", "trade_date")),
-                List.of(new FilterDefinition("ts_code")),
-                "ts_code");
+                        column(DatasetFields.TS_CODE, LogicalType.STRING, false, 0, FixtureConstants.TS_CODE_MAX_LENGTH, null, null),
+                        column(DatasetFields.TRADE_DATE, LogicalType.DATE, false, 1, null, null, null),
+                        column(FixtureConstants.AMOUNT, LogicalType.DECIMAL, false, FixtureConstants.AMOUNT_DISPLAY_ORDER, null, 38, 18),
+                        column(FixtureConstants.NOTE, LogicalType.STRING, true, FixtureConstants.NOTE_DISPLAY_ORDER, FixtureConstants.NOTE_MAX_LENGTH, null, null)),
+                new BusinessKeyDefinition(BusinessKeyMode.COMPOSITE, List.of(DatasetFields.TS_CODE, DatasetFields.TRADE_DATE)),
+                List.of(new FilterDefinition(DatasetFields.TS_CODE)),
+                DatasetFields.TS_CODE);
     }
 
     private static ColumnDefinition column(

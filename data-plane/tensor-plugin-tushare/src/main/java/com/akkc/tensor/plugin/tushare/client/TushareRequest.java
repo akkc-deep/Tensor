@@ -11,6 +11,8 @@ record TushareRequest(
         String token,
         Map<String, Object> params,
         String fields) {
+    private static final String REDACTED_TEXT = "TushareRequest[REDACTED]";
+
     TushareRequest {
         Objects.requireNonNull(apiName, "apiName");
         Objects.requireNonNull(token, "token");
@@ -20,6 +22,6 @@ record TushareRequest(
 
     @Override
     public String toString() {
-        return "TushareRequest[REDACTED]";
+        return REDACTED_TEXT;
     }
 }

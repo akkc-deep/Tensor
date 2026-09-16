@@ -168,7 +168,8 @@ export function useDownloadFlow({ onAccepted } = {}) {
     if (
       disposed ||
       locked.value ||
-      (apiName !== '' && !apis.value.some((api) => api.apiName === apiName))
+      (apiName !== '' && (selectedSource.value?.downloadAvailable !== true ||
+        !apis.value.some((api) => api.apiName === apiName)))
     ) return false
     const generation = beginMetadata()
     selectedApiName.value = apiName
@@ -202,6 +203,7 @@ export function useDownloadFlow({ onAccepted } = {}) {
         ? capabilities.value.single.available === true
         : nextMode === 'RANGE' && capabilities.value.range.availability === 'AVAILABLE'
     if (!available) return false
+    if (nextMode === mode.value) return true
     mode.value = nextMode
     formKey.value += 1
     return true

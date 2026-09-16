@@ -11,6 +11,14 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 public final class TensorMetrics {
+    private static final String PLUGIN_TAG = "plugin";
+    private static final String API_TAG = "api";
+    private static final String OUTCOME_TAG = "outcome";
+    private static final String KIND_TAG = "kind";
+    private static final String SOURCE_KIND = "source";
+    private static final String INSERTED_KIND = "inserted";
+    private static final String UPDATED_KIND = "updated";
+
     private static final String DOWNLOAD_TOTAL = "tensor_download_total";
     private static final String DOWNLOAD_DURATION =
             "tensor_download_duration_seconds";
@@ -46,12 +54,12 @@ public final class TensorMetrics {
         if (!supports(key)) {
             return;
         }
-        counter(DOWNLOAD_TOTAL, key, "outcome", outcome.value()).increment();
+        counter(DOWNLOAD_TOTAL, key, OUTCOME_TAG, outcome.value()).increment();
         timer(DOWNLOAD_DURATION, key, outcome).record(duration);
         if (outcome != Outcome.FAILURE) {
-            counter(DOWNLOAD_ROWS, key, "kind", "source").increment(sourceRows);
-            counter(DOWNLOAD_ROWS, key, "kind", "inserted").increment(insertedRows);
-            counter(DOWNLOAD_ROWS, key, "kind", "updated").increment(updatedRows);
+            counter(DOWNLOAD_ROWS, key, KIND_TAG, SOURCE_KIND).increment(sourceRows);
+            counter(DOWNLOAD_ROWS, key, KIND_TAG, INSERTED_KIND).increment(insertedRows);
+            counter(DOWNLOAD_ROWS, key, KIND_TAG, UPDATED_KIND).increment(updatedRows);
         }
     }
 
@@ -64,23 +72,23 @@ public final class TensorMetrics {
         if (!supports(key)) {
             return;
         }
-        counter(QUERY_TOTAL, key, "outcome", outcome.value()).increment();
+        counter(QUERY_TOTAL, key, OUTCOME_TAG, outcome.value()).increment();
         timer(QUERY_DURATION, key, outcome).record(duration);
     }
 
     private Counter counter(
             String name, DatasetKey key, String extraName, String extraValue) {
         return Counter.builder(name)
-                .tags("plugin", key.pluginId().value(),
-                        "api", key.apiName().value(), extraName, extraValue)
+                .tags(PLUGIN_TAG, key.pluginId().value(),
+                        API_TAG, key.apiName().value(), extraName, extraValue)
                 .register(registry);
     }
 
     private Timer timer(String name, DatasetKey key, Outcome outcome) {
         return Timer.builder(name)
-                .tags("plugin", key.pluginId().value(),
-                        "api", key.apiName().value(),
-                        "outcome", outcome.value())
+                .tags(PLUGIN_TAG, key.pluginId().value(),
+                        API_TAG, key.apiName().value(),
+                        OUTCOME_TAG, outcome.value())
                 .register(registry);
     }
 

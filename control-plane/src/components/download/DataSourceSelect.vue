@@ -63,7 +63,7 @@ watch(
 <style scoped>
 .data-source-select {
   display: grid;
-  gap: 8px;
+  gap: 0.8rem;
 }
 
 .data-source-select__label {

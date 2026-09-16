@@ -18,6 +18,8 @@ public record BatchDownloadDescriptor(
         String unavailableReason,
         String policyVersion,
         CompletenessRule completenessRule) {
+    private static final int RANGE_ENDPOINT_COUNT = 2;
+
 
     public BatchDownloadDescriptor {
         parameters = List.copyOf(parameters);
@@ -46,7 +48,7 @@ public record BatchDownloadDescriptor(
             requireText(dateLabel, "dateLabel");
             var endpoints = parameters.stream()
                     .filter(parameter -> parameter.type() == ParameterType.DATE_RANGE_MEMBER).toList();
-            if (endpoints.size() != 2
+            if (endpoints.size() != RANGE_ENDPOINT_COUNT
                     || !endpoints.getFirst().name().equals(startParameter)
                     || !endpoints.getLast().name().equals(endParameter)
                     || !endpoints.getFirst().required() || !endpoints.getLast().required()

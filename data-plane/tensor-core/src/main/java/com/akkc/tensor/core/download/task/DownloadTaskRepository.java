@@ -1,5 +1,10 @@
 package com.akkc.tensor.core.download.task;
 
+import com.akkc.tensor.core.persistence.SqlConstants;
+import com.akkc.tensor.plugin.api.constant.PaginationConstants;
+import com.akkc.tensor.plugin.api.constant.RequestFields;
+import com.akkc.tensor.plugin.api.constant.StringConstants;
+import com.akkc.tensor.plugin.api.constant.ValidationConstants;
 import com.akkc.tensor.plugin.api.download.batch.DateRange;
 import com.akkc.tensor.plugin.api.download.batch.DownloadMode;
 import com.akkc.tensor.plugin.api.error.ErrorCode;
@@ -8,16 +13,6 @@ import com.akkc.tensor.plugin.api.model.ApiName;
 import com.akkc.tensor.plugin.api.model.DatasetKey;
 import com.akkc.tensor.plugin.api.model.PluginId;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
-import org.springframework.dao.DataAccessException;
-import org.springframework.dao.DuplicateKeyException;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.TransactionDefinition;
-import org.springframework.transaction.support.TransactionSynchronization;
-import org.springframework.transaction.support.TransactionSynchronizationManager;
-import org.springframework.transaction.support.TransactionTemplate;
-
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.Instant;
@@ -35,10 +30,119 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.function.Function;
 import java.util.function.Supplier;
+import org.springframework.dao.DataAccessException;
+import org.springframework.dao.DuplicateKeyException;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionDefinition;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
+import org.springframework.transaction.support.TransactionTemplate;
 
 /** Fixed task operations; task rows are always locked before batch rows. */
 public final class DownloadTaskRepository {
+    private static final int TOTAL_BATCHES_INDEX = 1;
+    private static final int PENDING_INDEX = 2;
+    private static final int RUNNING_INDEX = 3;
+    private static final int SUCCEEDED_INDEX = 4;
+    private static final int FAILED_INDEX = 5;
+    private static final int SPLIT_BATCHES_INDEX = 6;
+    private static final int SOURCE_ROWS_INDEX = 7;
+    private static final int INSERTED_ROWS_INDEX = 8;
+    private static final int UPDATED_ROWS_INDEX = 9;
+
+    private static final String UPDATE_BATCH = "UPDATE tensor_download_batch SET";
+    private static final String UPDATE_TASK = "UPDATE tensor_download_task SET";
+    private static final String BATCH_WHERE = " WHERE batch_id=?";
+    private static final String TASK_WHERE = " WHERE task_id=?";
+    private static final String TASK_ID = "task_id";
+    private static final String API_NAME = "api_name";
+    private static final String PLUGIN_ID = "plugin_id";
+    private static final String SUBMISSION_ID = "submission_id";
+    private static final String DEFINITION_HASH = "definition_hash";
+    private static final String REQUEST_HASH = "request_hash";
+    private static final String RUN_GENERATION = "run_generation";
+    private static final String CREATED_AT = "created_at";
+    private static final String UPDATED_AT = "updated_at";
+    private static final String STARTED_AT = "started_at";
+    private static final String FINISHED_AT = "finished_at";
+    private static final String POLICY_SNAPSHOT = "policy_snapshot";
+    private static final String PLAN_READY = "plan_ready";
+    private static final String ACTIVE_RUN_ID = "active_run_id";
+    private static final String VERSION = "version";
+    private static final String REQUEST_COUNT = "request_count";
+    private static final String RUN_REQUEST_COUNT = "run_request_count";
+    private static final String LAST_ERROR_CODE = "last_error_code";
+    private static final String LAST_ERROR_MESSAGE = "last_error_message";
+    private static final String QUEUED_AT = "queued_at";
+    private static final String DEADLINE_AT = "deadline_at";
+    private static final String RANGE_START = "range_start";
+    private static final String RANGE_END = "range_end";
+    private static final String BATCH_ID = "batch_id";
+    private static final String PARENT_BATCH_ID = "parent_batch_id";
+    private static final String BATCH_KEY = "batch_key";
+    private static final String SOURCE_PARAMS = "source_params";
+    private static final String ATTEMPT_COUNT = "attempt_count";
+    private static final String SOURCE_ROWS = "source_rows";
+    private static final String INSERTED_ROWS = "inserted_rows";
+    private static final String UPDATED_ROWS = "updated_rows";
+    private static final String ERROR_CODE = "error_code";
+    private static final String ERROR_MESSAGE = "error_message";
+
+    private static final String COUNT_QUEUED_TASKS_SQL =
+            "SELECT COUNT(*) FROM tensor_download_task WHERE status='QUEUED'";
+    private static final String QUEUED_TASKS_SQL =
+            "SELECT * FROM tensor_download_task WHERE status='QUEUED' AND active_run_id=? ORDER BY queued_at,task_id LIMIT ?";
+    private static final String UNFINISHED_TASKS_SQL =
+            "SELECT * FROM tensor_download_task WHERE status IN ('QUEUED','RUNNING') ORDER BY queued_at,task_id";
+    private static final String FILTER_WHERE = " WHERE 1=1";
+    private static final String COUNT_TASKS_PREFIX = "SELECT COUNT(*) FROM tensor_download_task";
+    private static final String SELECT_TASKS_PREFIX = "SELECT * FROM tensor_download_task";
+    private static final String TASK_PAGE_ORDER =
+            " ORDER BY created_at DESC,task_id DESC LIMIT ? OFFSET ?";
+    private static final String EXCLUDE_SPLIT_CLAUSE = " AND status<>'SPLIT'";
+    private static final String COUNT_BATCHES_PREFIX = "SELECT COUNT(*) FROM tensor_download_batch";
+    private static final String SELECT_BATCHES_PREFIX = "SELECT * FROM tensor_download_batch";
+    private static final String BATCH_PAGE_ORDER = " ORDER BY batch_key LIMIT ? OFFSET ?";
+    private static final String PENDING_BATCHES_SQL =
+            "SELECT * FROM tensor_download_batch WHERE task_id=? AND status='PENDING' ORDER BY batch_key";
+    private static final String INSERT_TASK_SQL =
+            "INSERT INTO tensor_download_task (task_id,submission_id,request_hash,plugin_id,api_name,mode,params,definition_hash,policy_snapshot,status,plan_ready,active_run_id,run_generation,version,request_count,run_request_count,created_at,updated_at,queued_at) VALUES (?,?,?,?,?,?,?,?,?,'QUEUED',false,?,0,1,0,0,?,?,?)";
+    private static final String CLAIM_TASK_SET =
+            " status='RUNNING',run_generation=run_generation+1,version=version+1,started_at=?,deadline_at=?,finished_at=NULL,run_request_count=0,updated_at=?";
+    private static final String CLAIM_BATCH_SET =
+            " status='RUNNING',attempt_count=attempt_count+1,run_generation=?,started_at=?,finished_at=NULL,error_code=NULL,error_message=NULL,updated_at=?";
+    private static final String RESERVE_REQUEST_SET =
+            " request_count=request_count+1,run_request_count=run_request_count+1,updated_at=?";
+    private static final String MARK_PLAN_READY_SQL =
+            "UPDATE tensor_download_task SET plan_ready=true,updated_at=? WHERE task_id=?";
+    private static final String SPLIT_BATCH_SET =
+            " status='SPLIT',finished_at=?,updated_at=?,source_rows=0,inserted_rows=0,updated_rows=0";
+    private static final String RESET_FAILED_BATCHES_SET =
+            " status='PENDING',error_code=NULL,error_message=NULL,started_at=NULL,finished_at=NULL,updated_at=? WHERE task_id=? AND status='FAILED'";
+    private static final String RESUME_INTERRUPTED_CLAUSE =
+            " AND error_code='EXECUTION_INTERRUPTED'";
+    private static final String REQUEUE_TASK_SET =
+            " status='QUEUED',active_run_id=?,version=version+1,queued_at=?,updated_at=?,last_error_code=NULL,last_error_message=NULL,started_at=NULL,finished_at=NULL,deadline_at=NULL";
+    private static final String LOCKED_BATCHES_SQL =
+            "SELECT * FROM tensor_download_batch WHERE task_id=? ORDER BY batch_key FOR UPDATE";
+    private static final String END_TASK_SET =
+            " status=?,version=version+1,last_error_code=?,last_error_message=?,finished_at=?,updated_at=?";
+    private static final String BATCH_RESULT_SET =
+            " status=?,source_rows=?,inserted_rows=?,updated_rows=?,error_code=?,error_message=?,finished_at=?,updated_at=?";
+    private static final String BATCH_KEY_REGEX = "[0-9]{6}(?:/[01])*";
+    private static final String INSERT_BATCH_SQL =
+            "INSERT INTO tensor_download_batch (batch_id,task_id,parent_batch_id,batch_key,range_start,range_end,source_params,status,attempt_count,source_rows,inserted_rows,updated_rows,created_at,updated_at) VALUES (?,?,?,?,?,?,?,'PENDING',0,0,0,0,?,?)";
+    private static final String COUNT_BATCH_NODES_SQL =
+            "SELECT COUNT(*) FROM tensor_download_batch WHERE task_id=?";
+    private static final String COUNT_ROWS_SQL =
+            "SELECT COUNT(CASE WHEN status<>'SPLIT' THEN 1 END),COUNT(CASE WHEN status='PENDING' THEN 1 END),COUNT(CASE WHEN status='RUNNING' THEN 1 END),COUNT(CASE WHEN status='SUCCEEDED' THEN 1 END),COUNT(CASE WHEN status='FAILED' THEN 1 END),COUNT(CASE WHEN status='SPLIT' THEN 1 END),COALESCE(SUM(CASE WHEN status='SUCCEEDED' THEN source_rows ELSE 0 END),0),COALESCE(SUM(CASE WHEN status='SUCCEEDED' THEN inserted_rows ELSE 0 END),0),COALESCE(SUM(CASE WHEN status='SUCCEEDED' THEN updated_rows ELSE 0 END),0) FROM tensor_download_batch";
+    private static final String TASK_BY_COLUMN_PREFIX = "SELECT * FROM tensor_download_task WHERE ";
+    private static final String BATCH_BY_ID_SQL =
+            "SELECT * FROM tensor_download_batch WHERE batch_id=? AND task_id=?";
+
     private final JdbcTemplate jdbc;
     private final DownloadTaskJson json;
     private final TransactionTemplate write;
@@ -56,9 +160,9 @@ public final class DownloadTaskRepository {
         this.json = Objects.requireNonNull(json);
         this.observer = Objects.requireNonNull(observer);
         write = new TransactionTemplate(transactions);
-        write.setTimeout(60);
+        write.setTimeout(SqlConstants.TRANSACTION_TIMEOUT_SECONDS);
         read = new TransactionTemplate(transactions);
-        read.setTimeout(60);
+        read.setTimeout(SqlConstants.TRANSACTION_TIMEOUT_SECONDS);
         read.setReadOnly(true);
         read.setIsolationLevel(TransactionDefinition.ISOLATION_REPEATABLE_READ);
     }
@@ -97,7 +201,7 @@ public final class DownloadTaskRepository {
         }
 
         public String message() {
-            return messageFor(code);
+            return code.message();
         }
     }
 
@@ -118,8 +222,30 @@ public final class DownloadTaskRepository {
         }
     }
 
-    public record TaskFilter(
-            String pluginId, String apiName, DownloadTask.Status status, UUID submissionId) {}
+    public enum TaskStatusGroup {
+        ACTIVE(List.of(DownloadTask.Status.QUEUED, DownloadTask.Status.RUNNING)),
+        DONE(List.of(DownloadTask.Status.SUCCEEDED)),
+        ERROR(List.of(DownloadTask.Status.PARTIAL_FAILED, DownloadTask.Status.FAILED,
+                DownloadTask.Status.INTERRUPTED));
+
+        private final List<DownloadTask.Status> statuses;
+
+        TaskStatusGroup(List<DownloadTask.Status> statuses) {
+            this.statuses = statuses;
+        }
+    }
+
+    public record TaskFilter(String pluginId, String apiName, DownloadTask.Status status,
+            UUID submissionId, TaskStatusGroup statusGroup) {
+        public TaskFilter(String pluginId, String apiName, DownloadTask.Status status,
+                UUID submissionId) {
+            this(pluginId, apiName, status, submissionId, null);
+        }
+
+        public TaskFilter {
+            require(status == null || statusGroup == null);
+        }
+    }
 
     public record BatchFilter(DownloadBatch.Status status, boolean includeSplit) {}
 
@@ -131,17 +257,17 @@ public final class DownloadTaskRepository {
     }
 
     public Optional<DownloadTask> findTask(UUID id) {
-        return tx(true, () -> task("task_id", id, false));
+        return tx(true, () -> task(TASK_ID, id, false));
     }
 
     public Optional<DownloadTask> findSubmission(UUID id) {
-        return tx(true, () -> task("submission_id", id, false));
+        return tx(true, () -> task(SUBMISSION_ID, id, false));
     }
 
     public long queuedCount() {
         return tx(
                 true,
-                () -> number("SELECT COUNT(*) FROM tensor_download_task WHERE status='QUEUED'"));
+                () -> number(COUNT_QUEUED_TASKS_SQL));
     }
 
     public List<DownloadTask> queuedTasks(UUID run, int limit) {
@@ -149,11 +275,7 @@ public final class DownloadTaskRepository {
                 true,
                 () -> {
                     require(run != null && limit > 0);
-                    return tasksQuery(
-                            "SELECT * FROM tensor_download_task WHERE status='QUEUED' AND"
-                                    + " active_run_id=? ORDER BY queued_at,task_id LIMIT ?",
-                            run,
-                            limit);
+                    return tasksQuery(QUEUED_TASKS_SQL, run, limit);
                 });
     }
 
@@ -161,47 +283,17 @@ public final class DownloadTaskRepository {
         return tx(
                 true,
                 () ->
-                        tasksQuery(
-                                "SELECT * FROM tensor_download_task WHERE status IN"
-                                        + " ('QUEUED','RUNNING') ORDER BY queued_at,task_id"));
+                        tasksQuery(UNFINISHED_TASKS_SQL));
     }
 
     public Page<DownloadTask> tasks(TaskFilter filter, int page, int pageSize) {
-        return tx(
-                true,
-                () -> {
-                    page(page, pageSize);
-                    var args = new ArrayList<Object>();
-                    var where = new StringBuilder(" WHERE 1=1");
-                    if (filter != null) {
-                        if (filter.pluginId() != null) {
-                            new PluginId(filter.pluginId());
-                            clause(where, args, "plugin_id", filter.pluginId());
-                        }
-                        if (filter.apiName() != null) {
-                            new ApiName(filter.apiName());
-                            clause(where, args, "api_name", filter.apiName());
-                        }
-                        if (filter.status() != null)
-                            clause(where, args, "status", filter.status().name());
-                        if (filter.submissionId() != null)
-                            clause(where, args, "submission_id", filter.submissionId());
-                    }
-                    long total =
-                            number(
-                                    "SELECT COUNT(*) FROM tensor_download_task" + where,
-                                    args.toArray());
-                    args.add(pageSize);
-                    args.add((long) (page - 1) * pageSize);
-                    return new Page<>(
-                            total,
-                            tasksQuery(
-                                    "SELECT * FROM tensor_download_task"
-                                            + where
-                                            + " ORDER BY created_at DESC,task_id DESC LIMIT ?"
-                                            + " OFFSET ?",
-                                    args.toArray()));
-                });
+        return tx(true, () -> taskPage(filter, page, pageSize, Function.identity()));
+    }
+
+    public Page<TaskSnapshot> taskSnapshots(TaskFilter filter, int page, int pageSize) {
+        return tx(true, () -> taskPage(filter, page, pageSize, tasks -> tasks.stream()
+                .map(task -> new TaskSnapshot(Optional.of(task), countRows(task.taskId())))
+                .toList()));
     }
 
     public Page<DownloadBatch> batches(UUID id, BatchFilter filter, int page, int pageSize) {
@@ -211,23 +303,21 @@ public final class DownloadTaskRepository {
                     page(page, pageSize);
                     var args = new ArrayList<Object>();
                     args.add(id);
-                    var where = new StringBuilder(" WHERE task_id=?");
+                    var where = new StringBuilder(TASK_WHERE);
                     if (filter == null || !filter.includeSplit())
-                        where.append(" AND status<>'SPLIT'");
+                        where.append(EXCLUDE_SPLIT_CLAUSE);
                     if (filter != null && filter.status() != null)
-                        clause(where, args, "status", filter.status().name());
+                        clause(where, args, RequestFields.STATUS, filter.status().name());
                     long total =
                             number(
-                                    "SELECT COUNT(*) FROM tensor_download_batch" + where,
+                                    COUNT_BATCHES_PREFIX + where,
                                     args.toArray());
                     args.add(pageSize);
                     args.add((long) (page - 1) * pageSize);
                     return new Page<>(
                             total,
                             batchQuery(
-                                    "SELECT * FROM tensor_download_batch"
-                                            + where
-                                            + " ORDER BY batch_key LIMIT ? OFFSET ?",
+                                    SELECT_BATCHES_PREFIX + where + BATCH_PAGE_ORDER,
                                     args.toArray()));
                 });
     }
@@ -236,10 +326,7 @@ public final class DownloadTaskRepository {
         return tx(
                 true,
                 () ->
-                        batchQuery(
-                                "SELECT * FROM tensor_download_batch WHERE task_id=? AND"
-                                        + " status='PENDING' ORDER BY batch_key",
-                                id));
+                        batchQuery(PENDING_BATCHES_SQL, id));
     }
 
     public Counts counts(UUID id) {
@@ -247,7 +334,7 @@ public final class DownloadTaskRepository {
     }
 
     public TaskSnapshot snapshot(UUID id) {
-        return tx(true, () -> new TaskSnapshot(task("task_id", id, false), countRows(id)));
+        return tx(true, () -> new TaskSnapshot(task(TASK_ID, id, false), countRows(id)));
     }
 
     public DownloadTask insert(NewTask in) {
@@ -266,9 +353,7 @@ public final class DownloadTaskRepository {
                     String policy = json.validatePolicySnapshot(in.policySnapshot());
                     require(policyMode(policy).equals(in.mode().name()));
                     update(
-                            "INSERT INTO tensor_download_task"
-                                + " (task_id,submission_id,request_hash,plugin_id,api_name,mode,params,definition_hash,policy_snapshot,status,plan_ready,active_run_id,run_generation,version,request_count,run_request_count,created_at,updated_at,queued_at)"
-                                + " VALUES (?,?,?,?,?,?,?,?,?,'QUEUED',false,?,0,1,0,0,?,?,?)",
+                            INSERT_TASK_SQL,
                             in.taskId(),
                             in.submissionId(),
                             json.requestHash(in.datasetKey(), in.mode(), in.normalizedParams()),
@@ -291,16 +376,16 @@ public final class DownloadTaskRepository {
                 false,
                 () -> {
                     require(run != null && time(deadline).isAfter(time(now)));
-                    var found = task("task_id", id, true);
+                    var found = task(TASK_ID, id, true);
                     if (found.isEmpty()) return Optional.empty();
                     var t = found.get();
                     if (t.status() != DownloadTask.Status.QUEUED || !t.activeRunId().equals(run))
                         return Optional.empty();
                     limit(t.runGeneration() < Integer.MAX_VALUE && t.version() < Long.MAX_VALUE);
                     update(
-                            "UPDATE tensor_download_task SET"
-                                + " status='RUNNING',run_generation=run_generation+1,version=version+1,started_at=?,deadline_at=?,finished_at=NULL,run_request_count=0,updated_at=?"
-                                + " WHERE task_id=?",
+                            UPDATE_TASK
+                                + CLAIM_TASK_SET
+                                + TASK_WHERE,
                             time(now),
                             time(deadline),
                             time(now),
@@ -322,9 +407,9 @@ public final class DownloadTaskRepository {
                         return Optional.empty();
                     limit(found.get().attemptCount() < Integer.MAX_VALUE);
                     update(
-                            "UPDATE tensor_download_batch SET"
-                                + " status='RUNNING',attempt_count=attempt_count+1,run_generation=?,started_at=?,finished_at=NULL,error_code=NULL,error_message=NULL,updated_at=?"
-                                + " WHERE batch_id=?",
+                            UPDATE_BATCH
+                                + CLAIM_BATCH_SET
+                                + BATCH_WHERE,
                             p.runGeneration(),
                             time(now),
                             time(now),
@@ -345,9 +430,9 @@ public final class DownloadTaskRepository {
                                     && t.requestCount() < Long.MAX_VALUE
                                     && t.runRequestCount() < Long.MAX_VALUE);
                     update(
-                            "UPDATE tensor_download_task SET"
-                                + " request_count=request_count+1,run_request_count=run_request_count+1,updated_at=?"
-                                + " WHERE task_id=?",
+                            UPDATE_TASK
+                                + RESERVE_REQUEST_SET
+                                + TASK_WHERE,
                             time(now),
                             p.taskId());
                     return null;
@@ -369,13 +454,12 @@ public final class DownloadTaskRepository {
                         var b = roots.get(i);
                         validateBatch(t, b);
                         require(
-                                b.batchKey().equals(String.format(Locale.ROOT, "%06d", i + 1))
+                                b.batchKey().equals(String.format(Locale.ROOT, DownloadTaskConstants.BATCH_KEY_FORMAT, i + 1))
                                         && ids.add(b.batchId()));
                     }
                     for (var b : roots) insertBatch(p.taskId(), null, b, now);
                     update(
-                            "UPDATE tensor_download_task SET plan_ready=true,updated_at=? WHERE"
-                                    + " task_id=?",
+                            MARK_PLAN_READY_SQL,
                             time(now),
                             p.taskId());
                     return null;
@@ -401,8 +485,8 @@ public final class DownloadTaskRepository {
                     var r = parent.range();
                     require(r != null && r.start().isBefore(r.end()));
                     require(
-                            left.batchKey().equals(parent.batchKey() + "/0")
-                                    && right.batchKey().equals(parent.batchKey() + "/1")
+                            left.batchKey().equals(parent.batchKey() + DownloadTaskConstants.LEFT_BATCH_SUFFIX)
+                                    && right.batchKey().equals(parent.batchKey() + DownloadTaskConstants.RIGHT_BATCH_SUFFIX)
                                     && !left.batchId().equals(right.batchId()));
                     require(
                             left.range().start().equals(r.start())
@@ -411,11 +495,11 @@ public final class DownloadTaskRepository {
                                     && right.range()
                                             .start()
                                             .equals(left.range().end().plusDays(1)));
-                    limit(maxNodes >= 0 && nodes(p.taskId()) <= (long) maxNodes - 2);
+                    limit(maxNodes >= 0 && nodes(p.taskId()) <= (long) maxNodes - DownloadTaskConstants.SPLIT_CHILD_COUNT);
                     update(
-                            "UPDATE tensor_download_batch SET"
-                                + " status='SPLIT',finished_at=?,updated_at=?,source_rows=0,inserted_rows=0,updated_rows=0"
-                                + " WHERE batch_id=?",
+                            UPDATE_BATCH
+                                + SPLIT_BATCH_SET
+                                + BATCH_WHERE,
                             time(now),
                             time(now),
                             parentId);
@@ -433,7 +517,7 @@ public final class DownloadTaskRepository {
                     var t = lockedTask(p);
                     var b = lockedBatch(p, id);
                     require(error != null);
-                    batchResult(id, "FAILED", error, 0, 0, 0, now);
+                    batchResult(id, DownloadBatch.Status.FAILED.name(), error, 0, 0, 0, now);
                     batchFinished(t, b, DownloadBatch.Status.FAILED, 0, 0, 0, error, now);
                     return null;
                 });
@@ -469,7 +553,7 @@ public final class DownloadTaskRepository {
                 false,
                 () -> {
                     require(run != null && mode != null);
-                    var t = task("task_id", id, true).orElseThrow(DownloadTaskRepository::conflict);
+                    var t = task(TASK_ID, id, true).orElseThrow(DownloadTaskRepository::conflict);
                     state(
                             t.version() == version
                                     && (mode == RequeueMode.RETRY
@@ -480,18 +564,17 @@ public final class DownloadTaskRepository {
                     limit(t.version() < Long.MAX_VALUE);
                     lockedBatches(id);
                     update(
-                            "UPDATE tensor_download_batch SET"
-                                + " status='PENDING',error_code=NULL,error_message=NULL,started_at=NULL,finished_at=NULL,updated_at=?"
-                                + " WHERE task_id=? AND status='FAILED'"
+                            UPDATE_BATCH
+                                + RESET_FAILED_BATCHES_SET
                                     + (mode == RequeueMode.RESUME
-                                            ? " AND error_code='EXECUTION_INTERRUPTED'"
-                                            : ""),
+                                            ? RESUME_INTERRUPTED_CLAUSE
+                                            : StringConstants.EMPTY),
                             time(now),
                             id);
                     update(
-                            "UPDATE tensor_download_task SET"
-                                + " status='QUEUED',active_run_id=?,version=version+1,queued_at=?,updated_at=?,last_error_code=NULL,last_error_message=NULL,started_at=NULL,finished_at=NULL,deadline_at=NULL"
-                                + " WHERE task_id=?",
+                            UPDATE_TASK
+                                + REQUEUE_TASK_SET
+                                + TASK_WHERE,
                             run,
                             time(now),
                             time(now),
@@ -505,7 +588,7 @@ public final class DownloadTaskRepository {
         return tx(
                 false,
                 () -> {
-                    var t = task("task_id", id, true).orElseThrow(DownloadTaskRepository::conflict);
+                    var t = task(TASK_ID, id, true).orElseThrow(DownloadTaskRepository::conflict);
                     state(
                             t.activeRunId().equals(run)
                                     && t.runGeneration() == generation
@@ -520,7 +603,7 @@ public final class DownloadTaskRepository {
                             if (b.status() == DownloadBatch.Status.RUNNING) {
                                 batchResult(
                                         b.batchId(),
-                                        "FAILED",
+                                        DownloadBatch.Status.FAILED.name(),
                                         ErrorCode.EXECUTION_INTERRUPTED,
                                         0,
                                         0,
@@ -581,7 +664,8 @@ public final class DownloadTaskRepository {
                         remainingInserted -= batch.insertedRows();
                         remainingUpdated -= batch.updatedRows();
                     }
-                    batchResult(id, "SUCCEEDED", null, sourceRows, insertedRows, updatedRows, now);
+                    batchResult(id, DownloadBatch.Status.SUCCEEDED.name(), null,
+                            sourceRows, insertedRows, updatedRows, now);
                     batchFinished(t, b, DownloadBatch.Status.SUCCEEDED,
                             sourceRows, insertedRows, updatedRows, null, now);
                     return null;
@@ -623,7 +707,7 @@ public final class DownloadTaskRepository {
 
     private DownloadTask lockedTask(ExecutionPermit p) {
         require(p != null);
-        var t = task("task_id", p.taskId(), true).orElseThrow(DownloadTaskRepository::conflict);
+        var t = task(TASK_ID, p.taskId(), true).orElseThrow(DownloadTaskRepository::conflict);
         state(
                 t.status() == DownloadTask.Status.RUNNING
                         && t.activeRunId().equals(p.activeRunId())
@@ -640,20 +724,18 @@ public final class DownloadTaskRepository {
     }
 
     private List<DownloadBatch> lockedBatches(UUID id) {
-        return batchQuery(
-                "SELECT * FROM tensor_download_batch WHERE task_id=? ORDER BY batch_key FOR UPDATE",
-                id);
+        return batchQuery(LOCKED_BATCHES_SQL, id);
     }
 
     private void endTask(DownloadTask t, DownloadTask.Status target, ErrorCode error, Instant now) {
         limit(t.version() < Long.MAX_VALUE);
         update(
-                "UPDATE tensor_download_task SET"
-                    + " status=?,version=version+1,last_error_code=?,last_error_message=?,finished_at=?,updated_at=?"
-                    + " WHERE task_id=?",
+                UPDATE_TASK
+                    + END_TASK_SET
+                    + TASK_WHERE,
                 target.name(),
                 error == null ? null : error.name(),
-                error == null ? null : messageFor(error),
+                error == null ? null : error.message(),
                 time(now),
                 time(now),
                 t.taskId());
@@ -668,15 +750,15 @@ public final class DownloadTaskRepository {
             long updated,
             Instant now) {
         update(
-                "UPDATE tensor_download_batch SET"
-                    + " status=?,source_rows=?,inserted_rows=?,updated_rows=?,error_code=?,error_message=?,finished_at=?,updated_at=?"
-                    + " WHERE batch_id=?",
+                UPDATE_BATCH
+                    + BATCH_RESULT_SET
+                    + BATCH_WHERE,
                 status,
                 source,
                 inserted,
                 updated,
                 error == null ? null : error.name(),
-                error == null ? null : messageFor(error),
+                error == null ? null : error.message(),
                 time(now),
                 time(now),
                 id);
@@ -687,8 +769,8 @@ public final class DownloadTaskRepository {
                 b != null
                         && b.batchId() != null
                         && b.batchKey() != null
-                        && b.batchKey().length() <= 128
-                        && b.batchKey().matches("[0-9]{6}(?:/[01])*"));
+                        && b.batchKey().length() <= DownloadTaskConstants.MAX_BATCH_KEY_LENGTH
+                        && b.batchKey().matches(BATCH_KEY_REGEX));
         json.writeBatchParams(b.sourceParams());
         if (t.mode() == DownloadMode.SINGLE)
             require(b.range() == null && b.sourceParams().equals(t.params()));
@@ -696,8 +778,8 @@ public final class DownloadTaskRepository {
             require(b.range() != null);
             try {
                 var policy = new ObjectMapper().readTree(t.policySnapshot());
-                var start = endpointDate(t.params().get(policy.get("startParameter").textValue()));
-                var end = endpointDate(t.params().get(policy.get("endParameter").textValue()));
+                var start = endpointDate(t.params().get(policy.get(DownloadTaskJson.START_PARAMETER).textValue()));
+                var end = endpointDate(t.params().get(policy.get(DownloadTaskJson.END_PARAMETER).textValue()));
                 require(!b.range().start().isBefore(start) && !b.range().end().isAfter(end));
             } catch (Exception failure) {
                 throw invalid();
@@ -706,15 +788,13 @@ public final class DownloadTaskRepository {
     }
 
     private static LocalDate endpointDate(Object value) {
-        require(value instanceof String text && text.matches("[0-9]{8}"));
+        require(value instanceof String text && text.matches(ValidationConstants.DATE_REGEX));
         return LocalDate.parse((String) value, DateTimeFormatter.BASIC_ISO_DATE);
     }
 
     private void insertBatch(UUID task, UUID parent, NewBatch b, Instant now) {
         update(
-                "INSERT INTO tensor_download_batch"
-                    + " (batch_id,task_id,parent_batch_id,batch_key,range_start,range_end,source_params,status,attempt_count,source_rows,inserted_rows,updated_rows,created_at,updated_at)"
-                    + " VALUES (?,?,?,?,?,?,?,'PENDING',0,0,0,0,?,?)",
+                INSERT_BATCH_SQL,
                 b.batchId(),
                 task,
                 parent,
@@ -727,7 +807,7 @@ public final class DownloadTaskRepository {
     }
 
     private long nodes(UUID id) {
-        return number("SELECT COUNT(*) FROM tensor_download_batch WHERE task_id=?", id);
+        return number(COUNT_BATCH_NODES_SQL, id);
     }
 
     private Counts countRows(UUID id) {
@@ -735,52 +815,41 @@ public final class DownloadTaskRepository {
         return queryOperation(
                 () ->
                         jdbc.queryForObject(
-                                "SELECT COUNT(CASE WHEN status<>'SPLIT' THEN 1 END),COUNT(CASE WHEN"
-                                    + " status='PENDING' THEN 1 END),COUNT(CASE WHEN"
-                                    + " status='RUNNING' THEN 1 END),COUNT(CASE WHEN"
-                                    + " status='SUCCEEDED' THEN 1 END),COUNT(CASE WHEN"
-                                    + " status='FAILED' THEN 1 END),COUNT(CASE WHEN status='SPLIT'"
-                                    + " THEN 1 END),COALESCE(SUM(CASE WHEN status='SUCCEEDED' THEN"
-                                    + " source_rows ELSE 0 END),0),COALESCE(SUM(CASE WHEN"
-                                    + " status='SUCCEEDED' THEN inserted_rows ELSE 0"
-                                    + " END),0),COALESCE(SUM(CASE WHEN status='SUCCEEDED' THEN"
-                                    + " updated_rows ELSE 0 END),0) FROM tensor_download_batch"
-                                    + " WHERE task_id=?",
+                                COUNT_ROWS_SQL + TASK_WHERE,
                                 (r, n) ->
                                         new Counts(
-                                                r.getLong(1),
-                                                r.getLong(2),
-                                                r.getLong(3),
-                                                r.getLong(4),
-                                                r.getLong(5),
-                                                r.getLong(6),
-                                                r.getBigDecimal(7).longValueExact(),
-                                                r.getBigDecimal(8).longValueExact(),
-                                                r.getBigDecimal(9).longValueExact()),
+                                                r.getLong(TOTAL_BATCHES_INDEX),
+                                                r.getLong(PENDING_INDEX),
+                                                r.getLong(RUNNING_INDEX),
+                                                r.getLong(SUCCEEDED_INDEX),
+                                                r.getLong(FAILED_INDEX),
+                                                r.getLong(SPLIT_BATCHES_INDEX),
+                                                r.getBigDecimal(SOURCE_ROWS_INDEX).longValueExact(),
+                                                r.getBigDecimal(INSERTED_ROWS_INDEX).longValueExact(),
+                                                r.getBigDecimal(UPDATED_ROWS_INDEX).longValueExact()),
                                 id.toString()));
     }
 
     private Optional<DownloadTask> task(String column, UUID id, boolean lock) {
         require(id != null);
         return tasksQuery(
-                        "SELECT * FROM tensor_download_task WHERE "
-                                + column
-                                + "=?"
-                                + (lock ? " FOR UPDATE" : ""),
+                        TASK_BY_COLUMN_PREFIX + column
+                                + SqlConstants.EQUALS_PARAMETER
+                                + (lock ? SqlConstants.FOR_UPDATE : StringConstants.EMPTY),
                         id)
                 .stream()
                 .findFirst();
     }
 
     private DownloadTask requiredTask(UUID id) {
-        return task("task_id", id, false).orElseThrow(DownloadTaskRepository::conflict);
+        return task(TASK_ID, id, false).orElseThrow(DownloadTaskRepository::conflict);
     }
 
     private Optional<DownloadBatch> batch(UUID id, UUID task, boolean lock) {
         require(id != null);
         return batchQuery(
-                        "SELECT * FROM tensor_download_batch WHERE batch_id=? AND task_id=?"
-                                + (lock ? " FOR UPDATE" : ""),
+                        BATCH_BY_ID_SQL
+                                + (lock ? SqlConstants.FOR_UPDATE : StringConstants.EMPTY),
                         id,
                         task)
                 .stream()
@@ -791,42 +860,75 @@ public final class DownloadTaskRepository {
         return queryOperation(() -> jdbc.query(sql, (r, n) -> mapTask(r), bind(args)));
     }
 
+    private <T> Page<T> taskPage(TaskFilter filter, int page, int pageSize,
+            Function<List<DownloadTask>, List<T>> mapper) {
+        page(page, pageSize);
+        var args = new ArrayList<Object>();
+        var where = new StringBuilder(FILTER_WHERE);
+        if (filter != null) {
+            if (filter.pluginId() != null) {
+                new PluginId(filter.pluginId());
+                clause(where, args, PLUGIN_ID, filter.pluginId());
+            }
+            if (filter.apiName() != null) {
+                new ApiName(filter.apiName());
+                clause(where, args, API_NAME, filter.apiName());
+            }
+            if (filter.status() != null)
+                clause(where, args, RequestFields.STATUS, filter.status().name());
+            if (filter.statusGroup() != null) {
+                where.append(SqlConstants.AND).append(RequestFields.STATUS).append(" IN (")
+                        .append("?,".repeat(filter.statusGroup().statuses.size()));
+                where.setLength(where.length() - 1);
+                where.append(')');
+                filter.statusGroup().statuses.forEach(status -> args.add(status.name()));
+            }
+            if (filter.submissionId() != null)
+                clause(where, args, SUBMISSION_ID, filter.submissionId());
+        }
+        long total = number(COUNT_TASKS_PREFIX + where, args.toArray());
+        args.add(pageSize);
+        args.add((long) (page - 1) * pageSize);
+        return new Page<>(total, mapper.apply(tasksQuery(
+                SELECT_TASKS_PREFIX + where + TASK_PAGE_ORDER, args.toArray())));
+    }
+
     private List<DownloadBatch> batchQuery(String sql, Object... args) {
         return queryOperation(() -> jdbc.query(sql, (r, n) -> mapBatch(r), bind(args)));
     }
 
     private DownloadTask mapTask(ResultSet r) throws SQLException {
         try {
-            var mode = DownloadMode.valueOf(r.getString("mode"));
-            var policy = json.validatePolicySnapshot(r.getString("policy_snapshot"));
+            var mode = DownloadMode.valueOf(r.getString(RequestFields.MODE));
+            var policy = json.validatePolicySnapshot(r.getString(POLICY_SNAPSHOT));
             require(policyMode(policy).equals(mode.name()));
-            hash(r.getString("request_hash"));
-            hash(r.getString("definition_hash"));
+            hash(r.getString(REQUEST_HASH));
+            hash(r.getString(DEFINITION_HASH));
             return new DownloadTask(
-                    uuid(r, "task_id"),
-                    uuid(r, "submission_id"),
-                    r.getString("request_hash"),
+                    uuid(r, TASK_ID),
+                    uuid(r, SUBMISSION_ID),
+                    r.getString(REQUEST_HASH),
                     new DatasetKey(
-                            new PluginId(r.getString("plugin_id")),
-                            new ApiName(r.getString("api_name"))),
+                            new PluginId(r.getString(PLUGIN_ID)),
+                            new ApiName(r.getString(API_NAME))),
                     mode,
-                    json.readTaskParams(r.getString("params")),
-                    r.getString("definition_hash"),
+                    json.readTaskParams(r.getString(RequestFields.PARAMS)),
+                    r.getString(DEFINITION_HASH),
                     policy,
-                    DownloadTask.Status.valueOf(r.getString("status")),
-                    r.getBoolean("plan_ready"),
-                    uuid(r, "active_run_id"),
-                    r.getInt("run_generation"),
-                    r.getLong("version"),
-                    r.getLong("request_count"),
-                    r.getLong("run_request_count"),
-                    error(r, "last_error_code", "last_error_message"),
-                    instant(r, "created_at"),
-                    instant(r, "updated_at"),
-                    instant(r, "queued_at"),
-                    instant(r, "started_at"),
-                    instant(r, "finished_at"),
-                    instant(r, "deadline_at"));
+                    DownloadTask.Status.valueOf(r.getString(RequestFields.STATUS)),
+                    r.getBoolean(PLAN_READY),
+                    uuid(r, ACTIVE_RUN_ID),
+                    r.getInt(RUN_GENERATION),
+                    r.getLong(VERSION),
+                    r.getLong(REQUEST_COUNT),
+                    r.getLong(RUN_REQUEST_COUNT),
+                    error(r, LAST_ERROR_CODE, LAST_ERROR_MESSAGE),
+                    instant(r, CREATED_AT),
+                    instant(r, UPDATED_AT),
+                    instant(r, QUEUED_AT),
+                    instant(r, STARTED_AT),
+                    instant(r, FINISHED_AT),
+                    instant(r, DEADLINE_AT));
         } catch (RuntimeException failure) {
             throw failure(ErrorCode.QUERY_FAILED);
         }
@@ -834,27 +936,27 @@ public final class DownloadTaskRepository {
 
     private DownloadBatch mapBatch(ResultSet r) throws SQLException {
         try {
-            var start = r.getObject("range_start", LocalDate.class);
-            var end = r.getObject("range_end", LocalDate.class);
+            var start = r.getObject(RANGE_START, LocalDate.class);
+            var end = r.getObject(RANGE_END, LocalDate.class);
             require((start == null) == (end == null));
             return new DownloadBatch(
-                    uuid(r, "batch_id"),
-                    uuid(r, "task_id"),
-                    uuid(r, "parent_batch_id"),
-                    r.getString("batch_key"),
+                    uuid(r, BATCH_ID),
+                    uuid(r, TASK_ID),
+                    uuid(r, PARENT_BATCH_ID),
+                    r.getString(BATCH_KEY),
                     start == null ? null : new DateRange(start, end),
-                    json.readBatchParams(r.getString("source_params")),
-                    DownloadBatch.Status.valueOf(r.getString("status")),
-                    r.getInt("attempt_count"),
-                    r.getObject("run_generation", Integer.class),
-                    r.getLong("source_rows"),
-                    r.getLong("inserted_rows"),
-                    r.getLong("updated_rows"),
-                    error(r, "error_code", "error_message"),
-                    instant(r, "created_at"),
-                    instant(r, "updated_at"),
-                    instant(r, "started_at"),
-                    instant(r, "finished_at"));
+                    json.readBatchParams(r.getString(SOURCE_PARAMS)),
+                    DownloadBatch.Status.valueOf(r.getString(RequestFields.STATUS)),
+                    r.getInt(ATTEMPT_COUNT),
+                    r.getObject(RUN_GENERATION, Integer.class),
+                    r.getLong(SOURCE_ROWS),
+                    r.getLong(INSERTED_ROWS),
+                    r.getLong(UPDATED_ROWS),
+                    error(r, ERROR_CODE, ERROR_MESSAGE),
+                    instant(r, CREATED_AT),
+                    instant(r, UPDATED_AT),
+                    instant(r, STARTED_AT),
+                    instant(r, FINISHED_AT));
         } catch (RuntimeException failure) {
             throw failure(ErrorCode.QUERY_FAILED);
         }
@@ -908,12 +1010,12 @@ public final class DownloadTaskRepository {
     }
 
     private static void clause(StringBuilder sql, List<Object> args, String column, Object value) {
-        sql.append(" AND ").append(column).append("=?");
+        sql.append(SqlConstants.AND).append(column).append(SqlConstants.EQUALS_PARAMETER);
         args.add(value);
     }
 
     private static void page(int page, int size) {
-        require(page >= 1 && (size == 20 || size == 50 || size == 100));
+        require(page >= PaginationConstants.FIRST_PAGE && PaginationConstants.PAGE_SIZES.contains(size));
     }
 
     private static boolean complete(DownloadTask t, Counts c) {
@@ -950,14 +1052,14 @@ public final class DownloadTaskRepository {
 
     private static String policyMode(String policy) {
         try {
-            return new ObjectMapper().readTree(policy).get("mode").textValue();
+            return new ObjectMapper().readTree(policy).get(RequestFields.MODE).textValue();
         } catch (Exception e) {
             throw invalid();
         }
     }
 
     private static void hash(String v) {
-        require(v != null && v.matches("[0-9a-f]{64}"));
+        require(v != null && v.matches(ValidationConstants.FINGERPRINT_REGEX));
     }
 
     private static Map<String, Object> immutableParams(Map<String, Object> values) {
@@ -995,38 +1097,7 @@ public final class DownloadTaskRepository {
 
     private static final class RepositoryException extends TensorException {
         RepositoryException(ErrorCode code) {
-            super(code, messageFor(code));
+            super(code, code.message());
         }
-    }
-
-    private static String messageFor(ErrorCode code) {
-        return switch (code) {
-            case PARAM_REQUIRED -> "Required parameters are missing";
-            case PARAM_INVALID -> "Parameters are invalid";
-            case PLUGIN_DISABLED -> "Plugin is unavailable";
-            case DATASET_MISCONFIGURED -> "Dataset metadata is unavailable";
-            case SOURCE_AUTH_FAILED -> "Source authentication failed";
-            case SOURCE_PERMISSION_DENIED -> "Source permission denied";
-            case SOURCE_RATE_LIMITED -> "Source rate limit exceeded";
-            case SOURCE_UNAVAILABLE -> "Source is unavailable";
-            case SOURCE_NETWORK_ERROR -> "Source network request failed";
-            case SOURCE_TIMEOUT -> "Source request timed out";
-            case SOURCE_PAYLOAD_INVALID -> "Source returned an invalid payload";
-            case ADAPTER_FIELD_MISSING -> "Source data is missing a required field";
-            case ADAPTER_TYPE_INVALID -> "Source data contains an invalid value";
-            case PERSISTENCE_FAILED -> "Persistence failed";
-            case QUERY_FAILED -> "Query failed";
-            case INTERNAL_ERROR -> "Internal server error";
-            case TASK_NOT_FOUND -> "Download task was not found";
-            case SUBMISSION_CONFLICT -> "Submission ID belongs to a different request";
-            case TASK_STATE_CONFLICT -> "Download task state has changed";
-            case TASK_DEFINITION_CHANGED -> "Download task definition has changed";
-            case BATCH_DOWNLOAD_UNAVAILABLE -> "Batch download is unavailable";
-            case TASK_QUEUE_FULL -> "Download task queue is full";
-            case BATCH_COMPLETENESS_UNCONFIRMED -> "Batch completeness is unconfirmed";
-            case SOURCE_RANGE_MISMATCH -> "Source data is outside the requested range";
-            case TASK_LIMIT_EXCEEDED -> "Download task limit exceeded";
-            case EXECUTION_INTERRUPTED -> "Download task execution was interrupted";
-        };
     }
 }

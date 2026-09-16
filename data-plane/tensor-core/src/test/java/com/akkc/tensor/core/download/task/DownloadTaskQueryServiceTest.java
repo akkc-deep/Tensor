@@ -65,6 +65,18 @@ class DownloadTaskQueryServiceTest {
     }
 
     @Test
+    void taskSnapshotPagesAreForwardedAsOneRepositoryQuery() {
+        var snapshot = new DownloadTaskRepository.TaskSnapshot(Optional.of(task()), zero);
+        var page = new DownloadTaskRepository.Page<>(1, List.of(snapshot));
+        when(repository.taskSnapshots(null, 1, 20)).thenReturn(page);
+
+        assertThat(service.taskSnapshots(null, 1, 20)).isSameAs(page);
+
+        verify(repository).taskSnapshots(null, 1, 20);
+        verifyNoMoreInteractions(repository);
+    }
+
+    @Test
     void nullIdentityIsInvalidAndAllPublicUsesRejectOuterTransactions() {
         code(ErrorCode.PARAM_INVALID, () -> service.detail(null));
         code(ErrorCode.PARAM_INVALID, () -> service.findSubmission(null));
@@ -74,6 +86,7 @@ class DownloadTaskQueryServiceTest {
             assertThatThrownBy(() -> service.detail(id)).isInstanceOf(IllegalStateException.class);
             assertThatThrownBy(() -> service.findSubmission(id)).isInstanceOf(IllegalStateException.class);
             assertThatThrownBy(() -> service.tasks(null, 1, 20)).isInstanceOf(IllegalStateException.class);
+            assertThatThrownBy(() -> service.taskSnapshots(null, 1, 20)).isInstanceOf(IllegalStateException.class);
             assertThatThrownBy(() -> service.batches(id, null, 1, 20)).isInstanceOf(IllegalStateException.class);
         } finally {
             TransactionSynchronizationManager.setActualTransactionActive(false);

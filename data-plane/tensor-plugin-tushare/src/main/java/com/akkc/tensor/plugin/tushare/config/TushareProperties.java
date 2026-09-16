@@ -1,6 +1,8 @@
 package com.akkc.tensor.plugin.tushare.config;
 
+import com.akkc.tensor.plugin.api.constant.StringConstants;
 import com.akkc.tensor.plugin.api.descriptor.PluginReadiness;
+import com.akkc.tensor.plugin.tushare.TushareConstants;
 import java.net.URI;
 import java.time.Duration;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -16,9 +18,15 @@ public record TushareProperties(
         @DefaultValue("120s") Duration readTimeout,
         @DefaultValue("67108864") int maxResponseBytes,
         @DefaultValue("1500ms") Duration minRequestInterval) {
+    private static final String DISABLED_REASON = "Disabled";
+    private static final String MISSING_CREDENTIALS_REASON = "Credentials missing";
+    private static final String HTTP_SCHEME = "http";
+    private static final String HTTPS_SCHEME = "https";
+    private static final String REDACTED_TEXT = "[REDACTED]";
+
     @ConstructorBinding
     public TushareProperties {
-        token = token == null ? new Credential("") : token;
+        token = token == null ? new Credential(StringConstants.EMPTY) : token;
         if (!validBaseUrl(baseUrl)) {
             throw new IllegalArgumentException("baseUrl must be an absolute HTTP(S) URI without credentials, query, or fragment");
         }
@@ -26,10 +34,10 @@ public record TushareProperties(
             throw new IllegalArgumentException("connectTimeout must be positive");
         }
         if (readTimeout == null || readTimeout.isZero() || readTimeout.isNegative()
-                || readTimeout.compareTo(Duration.ofSeconds(120)) > 0) {
+                || readTimeout.compareTo(Duration.ofSeconds(TushareConstants.MAX_READ_TIMEOUT_SECONDS)) > 0) {
             throw new IllegalArgumentException("readTimeout must be positive and at most 120 seconds");
         }
-        if (maxResponseBytes < 1 || maxResponseBytes > 67_108_864) {
+        if (maxResponseBytes < 1 || maxResponseBytes > TushareConstants.MAX_RESPONSE_BYTES) {
             throw new IllegalArgumentException("maxResponseBytes must be between 1 and 67108864");
         }
         if (minRequestInterval == null || minRequestInterval.isNegative()) {
@@ -44,16 +52,17 @@ public record TushareProperties(
 
     public TushareProperties(boolean enabled, URI baseUrl, Credential token, Duration connectTimeout,
                              Duration readTimeout, int maxResponseBytes) {
-        this(enabled, baseUrl, token, connectTimeout, readTimeout, maxResponseBytes, Duration.ofMillis(1_500));
+        this(enabled, baseUrl, token, connectTimeout, readTimeout, maxResponseBytes,
+                Duration.ofMillis(TushareConstants.DEFAULT_MIN_REQUEST_INTERVAL_MILLIS));
     }
 
     public PluginReadiness readiness() {
         boolean configured = token.configured();
         if (!enabled) {
-            return new PluginReadiness(false, configured, false, "Disabled");
+            return new PluginReadiness(false, configured, false, DISABLED_REASON);
         }
         if (!configured) {
-            return new PluginReadiness(true, false, false, "Credentials missing");
+            return new PluginReadiness(true, false, false, MISSING_CREDENTIALS_REASON);
         }
         return new PluginReadiness(true, true, true, null);
     }
@@ -63,12 +72,13 @@ public record TushareProperties(
                 || value.getUserInfo() != null || value.getQuery() != null || value.getFragment() != null) {
             return false;
         }
-        return "http".equalsIgnoreCase(value.getScheme()) || "https".equalsIgnoreCase(value.getScheme());
+        return HTTP_SCHEME.equalsIgnoreCase(value.getScheme())
+                || HTTPS_SCHEME.equalsIgnoreCase(value.getScheme());
     }
 
     public record Credential(String value) {
         public Credential {
-            value = value == null ? "" : value;
+            value = value == null ? StringConstants.EMPTY : value;
         }
 
         public boolean configured() {
@@ -77,7 +87,7 @@ public record TushareProperties(
 
         @Override
         public String toString() {
-            return "[REDACTED]";
+            return REDACTED_TEXT;
         }
     }
 }

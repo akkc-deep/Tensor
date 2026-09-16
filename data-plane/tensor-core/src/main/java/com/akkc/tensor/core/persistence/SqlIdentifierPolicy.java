@@ -1,13 +1,14 @@
 package com.akkc.tensor.core.persistence;
 
+import com.akkc.tensor.plugin.api.constant.ValidationConstants;
 import java.util.Objects;
 
 public final class SqlIdentifierPolicy {
     public String quote(String identifier) {
         Objects.requireNonNull(identifier, "identifier");
-        if (!identifier.matches("^[a-z][a-z0-9_]{1,63}$")) {
+        if (!identifier.matches(ValidationConstants.IDENTIFIER_REGEX)) {
             throw new IllegalArgumentException("Invalid SQL identifier");
         }
-        return "`" + identifier + "`";
+        return SqlConstants.IDENTIFIER_QUOTE + identifier + SqlConstants.IDENTIFIER_QUOTE;
     }
 }

@@ -1,5 +1,6 @@
 package com.akkc.tensor.core.validation;
 
+import com.akkc.tensor.plugin.api.constant.ValidationConstants;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -7,7 +8,7 @@ import java.util.Objects;
 import java.util.regex.Pattern;
 
 public record ValidatedParameters(Map<String, Object> values) {
-    private static final Pattern KEY_PATTERN = Pattern.compile("^[a-z][a-z0-9_]{1,63}$");
+    private static final Pattern KEY_PATTERN = Pattern.compile(ValidationConstants.IDENTIFIER_REGEX);
 
     public ValidatedParameters {
         Objects.requireNonNull(values, "values");

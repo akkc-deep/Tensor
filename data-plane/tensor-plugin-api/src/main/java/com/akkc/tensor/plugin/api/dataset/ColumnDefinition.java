@@ -1,5 +1,6 @@
 package com.akkc.tensor.plugin.api.dataset;
 
+import com.akkc.tensor.plugin.api.constant.ValidationConstants;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
@@ -17,7 +18,8 @@ public record ColumnDefinition(
         List<String> allowedValues,
         boolean longText
 ) {
-    private static final Pattern IDENTIFIER_PATTERN = Pattern.compile("^[a-z][a-z0-9_]{1,63}$");
+    private static final int MAX_DECIMAL_SCALE = 30;
+    private static final Pattern IDENTIFIER_PATTERN = Pattern.compile(ValidationConstants.IDENTIFIER_REGEX);
 
     public ColumnDefinition {
         Objects.requireNonNull(name, "name");
@@ -38,7 +40,7 @@ public record ColumnDefinition(
         if (precision != null && (precision < 1 || precision > 65)) {
             throw new IllegalArgumentException("precision must be between 1 and 65");
         }
-        if (scale != null && (scale < 0 || scale > 30)) {
+        if (scale != null && (scale < 0 || scale > MAX_DECIMAL_SCALE)) {
             throw new IllegalArgumentException("scale must be between 0 and 30");
         }
         if ((logicalType == LogicalType.STRING || logicalType == LogicalType.ENUM) && length == null) {

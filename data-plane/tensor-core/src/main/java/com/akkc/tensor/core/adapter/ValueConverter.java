@@ -1,5 +1,6 @@
 package com.akkc.tensor.core.adapter;
 
+import com.akkc.tensor.plugin.api.constant.ValidationConstants;
 import com.akkc.tensor.plugin.api.dataset.ColumnDefinition;
 import com.akkc.tensor.plugin.api.error.AdapterException;
 import com.akkc.tensor.plugin.api.error.ErrorCode;
@@ -16,12 +17,13 @@ import java.util.Objects;
 import java.util.regex.Pattern;
 
 public final class ValueConverter {
-    private static final Pattern INTEGER_PATTERN = Pattern.compile("[+-]?[0-9]+");
-    private static final Pattern DATE_PATTERN = Pattern.compile("[0-9]{8}");
-    private static final Pattern MONTH_PATTERN = Pattern.compile("[0-9]{6}");
-    private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("uuuuMMdd", Locale.ROOT)
+    private static final String INTEGER_REGEX = "[+-]?[0-9]+";
+    private static final Pattern INTEGER_PATTERN = Pattern.compile(INTEGER_REGEX);
+    private static final Pattern DATE_PATTERN = Pattern.compile(ValidationConstants.DATE_REGEX);
+    private static final Pattern MONTH_PATTERN = Pattern.compile(ValidationConstants.MONTH_REGEX);
+    private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern(ValidationConstants.DATE_FORMAT, Locale.ROOT)
             .withResolverStyle(ResolverStyle.STRICT);
-    private static final DateTimeFormatter MONTH_FORMATTER = DateTimeFormatter.ofPattern("uuuuMM", Locale.ROOT)
+    private static final DateTimeFormatter MONTH_FORMATTER = DateTimeFormatter.ofPattern(ValidationConstants.MONTH_FORMAT, Locale.ROOT)
             .withResolverStyle(ResolverStyle.STRICT);
 
     public Object convert(Object source, ColumnDefinition column, ConversionContext context) {

@@ -282,11 +282,12 @@ paths:
         Filters combine with AND; pluginId and apiName can be used independently and
         need not identify a currently installed plugin. Unknown submissionId is an empty
         page, not 404. Only the listed query parameters are accepted; unknown, duplicate,
-        empty or whitespace values are PARAM_INVALID. Status is case-sensitive.
-        The initial query fixes total, member IDs and ordering; each item then comes
-        from one task/counts snapshot. Rows may reflect different instants or changed
-        statuses; members are not re-filtered, re-sorted or filled in. Any detail read
-        failure fails the entire response. A page beyond the end stays unchanged.
+        empty or whitespace values are PARAM_INVALID. status and statusGroup are
+        case-sensitive and mutually exclusive. statusGroup ACTIVE means QUEUED or
+        RUNNING, DONE means SUCCEEDED, and ERROR means PARTIAL_FAILED, FAILED or
+        INTERRUPTED. The filtered total, ordered page members, task rows and batch
+        counts are read in one repeatable-read snapshot. A page beyond the end stays
+        unchanged.
         Stored task or batch failures, including SOURCE_TIMEOUT and PERSISTENCE_FAILED,
         remain HTTP 200; 500 means this query itself failed. Each item's extraction is
         read from that task's persisted policy snapshot; controls are current hints.
@@ -296,10 +297,11 @@ paths:
         - {name: pluginId, in: query, schema: {type: string, pattern: '^[a-z][a-z0-9_]{1,63}$'}}
         - {name: apiName, in: query, schema: {type: string, pattern: '^[a-z][a-z0-9_]{1,63}$'}}
         - {name: status, in: query, schema: {$ref: './download-task.schema.json#/$defs/TaskStatus'}}
+        - {name: statusGroup, in: query, schema: {type: string, enum: [ACTIVE, DONE, ERROR]}}
         - {name: submissionId, in: query, schema: {$ref: './download-task.schema.json#/$defs/UUID'}}
       responses:
         '200':
-          description: Task page with a fixed initial membership and per-row snapshot consistency.
+          description: Task page whose filtered total, members and item facts share one database snapshot.
           headers:
             X-Request-Id: {$ref: '#/components/headers/TaskRequestId'}
           content:

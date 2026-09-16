@@ -1,5 +1,6 @@
 package com.akkc.tensor.plugin.api.descriptor;
 
+import com.akkc.tensor.plugin.api.constant.ValidationConstants;
 import com.akkc.tensor.plugin.api.model.ApiName;
 import java.util.List;
 import java.util.Objects;
@@ -15,7 +16,7 @@ public record ApiDescriptor(
         Objects.requireNonNull(apiName, "apiName");
         requireNonBlank(displayName, "displayName");
         requireNonBlank(category, "category");
-        if (category.length() > 64) {
+        if (category.length() > ValidationConstants.MAX_CATEGORY_LENGTH) {
             throw new IllegalArgumentException("category must be at most 64 characters");
         }
         Objects.requireNonNull(queryMode, "queryMode");

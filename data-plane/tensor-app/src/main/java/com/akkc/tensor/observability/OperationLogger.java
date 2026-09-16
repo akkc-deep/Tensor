@@ -3,6 +3,7 @@ package com.akkc.tensor.observability;
 import com.akkc.tensor.core.query.DatasetPage;
 import com.akkc.tensor.core.query.QueryCriteria;
 import com.akkc.tensor.core.registry.PluginRegistry;
+import com.akkc.tensor.plugin.api.constant.DatasetFields;
 import com.akkc.tensor.plugin.api.descriptor.ParameterDescriptor;
 import com.akkc.tensor.plugin.api.download.DownloadOutcome;
 import com.akkc.tensor.plugin.api.download.DownloadResult;
@@ -21,8 +22,10 @@ import org.slf4j.LoggerFactory;
 
 public final class OperationLogger {
     private static final Logger LOGGER = LoggerFactory.getLogger(OperationLogger.class);
+    private static final String SENSITIVE_NAME_REGEX =
+            "token|authorization|cookie|password|credential";
     private static final Pattern SENSITIVE_NAME = Pattern.compile(
-            "token|authorization|cookie|password|credential",
+            SENSITIVE_NAME_REGEX,
             Pattern.CASE_INSENSITIVE);
 
     private final Map<DatasetKey, List<String>> parameterNames;
@@ -115,15 +118,15 @@ public final class OperationLogger {
     }
 
     private static List<String> filterNames(QueryCriteria criteria) {
-        ArrayList<String> names = new ArrayList<>(3);
+        ArrayList<String> names = new ArrayList<>();
         if (criteria.tsCode() != null) {
-            names.add("ts_code");
+            names.add(DatasetFields.TS_CODE);
         }
         if (criteria.tradeDateFrom() != null || criteria.tradeDateTo() != null) {
-            names.add("trade_date");
+            names.add(DatasetFields.TRADE_DATE);
         }
         if (criteria.annDateFrom() != null || criteria.annDateTo() != null) {
-            names.add("ann_date");
+            names.add(DatasetFields.ANN_DATE);
         }
         return List.copyOf(names);
     }

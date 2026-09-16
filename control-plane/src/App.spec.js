@@ -46,16 +46,16 @@ beforeEach(() => {
 
 describe('App', () => {
   it('maps the confirmed semantic palette across root and Element Plus states', () => {
-    expect(rootDeclaration('--tensor-bg')).toBe('#edf2f6')
+    expect(rootDeclaration('--tensor-bg')).toBe('#f7f9fb')
     expect(rootDeclaration('--tensor-surface')).toBe('#ffffff')
-    expect(rootDeclaration('--tensor-raised')).toBe('#f3f6fa')
-    expect(rootDeclaration('--tensor-nav')).toBe('#f9fbfd')
-    expect(rootDeclaration('--tensor-line')).toBe('#c8d3e0')
-    expect(rootDeclaration('--tensor-text')).toBe('#142a42')
-    expect(rootDeclaration('--tensor-muted')).toBe('#52677d')
-    expect(rootDeclaration('--tensor-accent-bg')).toBe('#e8efff')
-    expect(rootDeclaration('--tensor-accent')).toBe('#2857b4')
-    expect(rootDeclaration('--tensor-success')).toBe('#14785e')
+    expect(rootDeclaration('--tensor-raised')).toBe('#f1f4f8')
+    expect(rootDeclaration('--tensor-nav')).toBe('#ffffff')
+    expect(rootDeclaration('--tensor-line')).toBe('#e0e6ee')
+    expect(rootDeclaration('--tensor-text')).toBe('#1f2d43')
+    expect(rootDeclaration('--tensor-muted')).toBe('#52627a')
+    expect(rootDeclaration('--tensor-accent-bg')).toBe('#eaf0fa')
+    expect(rootDeclaration('--tensor-accent')).toBe('#3565b6')
+    expect(rootDeclaration('--tensor-success')).toBe('#28745a')
     expect(rootDeclaration('--tensor-error')).toBe('#b72d47')
 
     expect(rootDeclaration('--el-bg-color-page')).toBe('var(--tensor-bg)')
@@ -93,9 +93,9 @@ describe('App', () => {
 
     try {
       expect(injectedTheme.requested.value).toBe('#b52c63')
-      expect(injectedTheme.applied.value).toBe('#a5285a')
-      expect(accentAtSetup).toBe('#a5285a')
-      expect(document.documentElement.style.getPropertyValue('--tensor-bg')).toBe('#f6e6ec')
+      expect(injectedTheme.applied.value).toBe('#b52c63')
+      expect(accentAtSetup).toBe('#b52c63')
+      expect(document.documentElement.style.getPropertyValue('--tensor-bg')).toBe('#f7f9fb')
     } finally {
       wrapper.unmount()
     }
@@ -112,11 +112,11 @@ describe('App', () => {
 
     try {
       await flushPromises()
-      expect(wrapper.findAll('aside.app-nav')).toHaveLength(1)
+      expect(wrapper.findAll('header.app-nav')).toHaveLength(1)
       expect(wrapper.findAll('nav[aria-label="工作区导航"]')).toHaveLength(1)
       expect(wrapper.findAll('main#workspace')).toHaveLength(1)
       expect(wrapper.findAll('h1')).toHaveLength(1)
-      expect(wrapper.get('h1').text()).toBe('数据下载')
+      expect(wrapper.get('h1').text()).toBe('下载工作台')
       expect(wrapper.getComponent(DownloadAction).props('disabled')).toBe(true)
       expect(wrapper.text()).toContain('请选择数据接口')
       expect(wrapper.text()).not.toContain('数据下载模块尚未完成')

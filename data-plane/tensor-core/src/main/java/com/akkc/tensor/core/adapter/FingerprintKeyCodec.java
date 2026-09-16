@@ -9,13 +9,16 @@ import java.security.NoSuchAlgorithmException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.HashSet;
+import java.util.HexFormat;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
 public final class FingerprintKeyCodec {
-    private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("uuuu-MM-dd");
+    public static final String HASH_ALGORITHM = "SHA-256";
+    private static final String DATE_FORMAT = "uuuu-MM-dd";
+    private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern(DATE_FORMAT);
 
     public String sha256(List<String> fields, Map<String, Object> row) {
         Objects.requireNonNull(fields, "fields");
@@ -48,7 +51,7 @@ public final class FingerprintKeyCodec {
                 bytes.writeBytes(text);
             }
         }
-        return hex(digest(bytes.toByteArray()));
+        return HexFormat.of().formatHex(digest(bytes.toByteArray()));
     }
 
     private String canonicalText(Object value) {
@@ -69,20 +72,9 @@ public final class FingerprintKeyCodec {
 
     private byte[] digest(byte[] bytes) {
         try {
-            return MessageDigest.getInstance("SHA-256").digest(bytes);
+            return MessageDigest.getInstance(HASH_ALGORITHM).digest(bytes);
         } catch (NoSuchAlgorithmException exception) {
             throw new IllegalStateException("SHA-256 unavailable");
         }
-    }
-
-    private String hex(byte[] bytes) {
-        char[] result = new char[bytes.length * 2];
-        char[] digits = "0123456789abcdef".toCharArray();
-        for (int index = 0; index < bytes.length; index++) {
-            int value = bytes[index] & 0xff;
-            result[index * 2] = digits[value >>> 4];
-            result[index * 2 + 1] = digits[value & 0x0f];
-        }
-        return new String(result);
     }
 }

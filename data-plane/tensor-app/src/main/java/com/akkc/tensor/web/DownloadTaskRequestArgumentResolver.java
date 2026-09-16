@@ -1,6 +1,9 @@
 package com.akkc.tensor.web;
 
 import com.akkc.tensor.core.download.task.*;
+import com.akkc.tensor.plugin.api.constant.PaginationConstants;
+import com.akkc.tensor.plugin.api.constant.RequestFields;
+import com.akkc.tensor.plugin.api.constant.ValidationConstants;
 import com.akkc.tensor.plugin.api.error.ErrorCode;
 import com.akkc.tensor.plugin.api.model.*;
 import com.akkc.tensor.web.download.DownloadBindingException;
@@ -16,6 +19,8 @@ import org.springframework.web.servlet.HandlerMapping;
 
 /** Strict task-only query/path binding; does not change legacy dataset query rules. */
 public final class DownloadTaskRequestArgumentResolver implements HandlerMethodArgumentResolver {
+    private static final String NON_NEGATIVE_INTEGER_REGEX = "[0-9]+";
+    private static final String STATUS_GROUP = "statusGroup";
     private static final Set<Class<?>> TYPES = Set.of(Tasks.class, Batches.class, TaskId.class, Dataset.class, NoQuery.class);
 
     @Override
@@ -26,33 +31,38 @@ public final class DownloadTaskRequestArgumentResolver implements HandlerMethodA
             NativeWebRequest webRequest, WebDataBinderFactory binderFactory) {
         var request = Objects.requireNonNull(webRequest.getNativeRequest(HttpServletRequest.class));
         var type = parameter.getParameterType();
-        Set<String> allowed = type == Tasks.class ? Set.of("page", "pageSize", "pluginId", "apiName", "status", "submissionId")
-                : type == Batches.class ? Set.of("page", "pageSize", "status", "includeSplit") : Set.of();
+        Set<String> allowed = type == Tasks.class ? Set.of(RequestFields.PAGE, RequestFields.PAGE_SIZE, RequestFields.PLUGIN_ID, RequestFields.API_NAME, RequestFields.STATUS, STATUS_GROUP, RequestFields.SUBMISSION_ID)
+                : type == Batches.class ? Set.of(RequestFields.PAGE, RequestFields.PAGE_SIZE, RequestFields.STATUS, RequestFields.INCLUDE_SPLIT) : Set.of();
         for (var entry : request.getParameterMap().entrySet()) {
             if (!allowed.contains(entry.getKey())) throw invalid("query");
             if (entry.getValue().length != 1) throw invalid(entry.getKey());
         }
         if (type == NoQuery.class) return new NoQuery();
         if (type == Dataset.class) return new Dataset(DatasetKey.of(
-                PluginId.of(identifier("pluginId", path(request, "pluginId"))),
-                ApiName.of(identifier("apiName", path(request, "apiName")))));
-        if (type == TaskId.class) return new TaskId(uuid("taskId", path(request, "taskId")));
-        int page = integer("page", value(request, "page", "1"));
-        String size = value(request, "pageSize", "20");
-        if (!Set.of("20", "50", "100").contains(size)) throw invalid("pageSize");
+                PluginId.of(identifier(RequestFields.PLUGIN_ID, path(request, RequestFields.PLUGIN_ID))),
+                ApiName.of(identifier(RequestFields.API_NAME, path(request, RequestFields.API_NAME)))));
+        if (type == TaskId.class) return new TaskId(uuid(RequestFields.TASK_ID, path(request, RequestFields.TASK_ID)));
+        int page = integer(RequestFields.PAGE, value(request, RequestFields.PAGE, PaginationConstants.FIRST_PAGE_TEXT));
+        String size = value(request, RequestFields.PAGE_SIZE, PaginationConstants.DEFAULT_TASK_PAGE_SIZE_TEXT);
+        if (!PaginationConstants.PAGE_SIZE_VALUES.contains(size)) throw invalid(RequestFields.PAGE_SIZE);
         int pageSize = Integer.parseInt(size);
         if (type == Tasks.class) {
-            String plugin = request.getParameter("pluginId"), api = request.getParameter("apiName");
-            String submission = request.getParameter("submissionId");
+            String plugin = request.getParameter(RequestFields.PLUGIN_ID), api = request.getParameter(RequestFields.API_NAME);
+            String submission = request.getParameter(RequestFields.SUBMISSION_ID);
+            String status = request.getParameter(RequestFields.STATUS);
+            String statusGroup = request.getParameter(STATUS_GROUP);
+            if (status != null && statusGroup != null) throw invalid(STATUS_GROUP);
             return new Tasks(page, pageSize, new DownloadTaskRepository.TaskFilter(
-                    plugin == null ? null : identifier("pluginId", plugin), api == null ? null : identifier("apiName", api),
-                    status(DownloadTask.Status.class, request.getParameter("status")),
-                    submission == null ? null : uuid("submissionId", submission)));
+                    plugin == null ? null : identifier(RequestFields.PLUGIN_ID, plugin), api == null ? null : identifier(RequestFields.API_NAME, api),
+                    status(DownloadTask.Status.class, RequestFields.STATUS, status),
+                    submission == null ? null : uuid(RequestFields.SUBMISSION_ID, submission),
+                    status(DownloadTaskRepository.TaskStatusGroup.class, STATUS_GROUP, statusGroup)));
         }
-        String split = value(request, "includeSplit", "false");
-        if (!split.equals("true") && !split.equals("false")) throw invalid("includeSplit");
-        return new Batches(uuid("taskId", path(request, "taskId")), page, pageSize,
-                new DownloadTaskRepository.BatchFilter(status(DownloadBatch.Status.class, request.getParameter("status")),
+        String split = value(request, RequestFields.INCLUDE_SPLIT, Boolean.FALSE.toString());
+        if (!split.equals(Boolean.TRUE.toString()) && !split.equals(Boolean.FALSE.toString())) throw invalid(RequestFields.INCLUDE_SPLIT);
+        return new Batches(uuid(RequestFields.TASK_ID, path(request, RequestFields.TASK_ID)), page, pageSize,
+                new DownloadTaskRepository.BatchFilter(status(DownloadBatch.Status.class, RequestFields.STATUS,
+                                request.getParameter(RequestFields.STATUS)),
                         Boolean.parseBoolean(split)));
     }
 
@@ -65,25 +75,25 @@ public final class DownloadTaskRequestArgumentResolver implements HandlerMethodA
         return variables == null ? null : variables.get(name);
     }
     private static int integer(String field, String value) {
-        if (!value.matches("[0-9]+")) throw invalid(field);
+        if (!value.matches(NON_NEGATIVE_INTEGER_REGEX)) throw invalid(field);
         try {
             int number = Integer.parseInt(value);
-            if (number < 1) throw invalid(field);
+            if (number < PaginationConstants.FIRST_PAGE) throw invalid(field);
             return number;
         } catch (NumberFormatException invalid) { throw invalid(field); }
     }
     private static String identifier(String field, String value) {
-        if (value == null || !value.matches("[a-z][a-z0-9_]{1,63}")) throw invalid(field);
+        if (value == null || !value.matches(ValidationConstants.IDENTIFIER_REGEX)) throw invalid(field);
         return value;
     }
     private static UUID uuid(String field, String value) {
-        if (value == null || !value.matches("[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}"))
+        if (value == null || !value.matches(ValidationConstants.UUID_REGEX))
             throw invalid(field);
         return UUID.fromString(value);
     }
-    private static <E extends Enum<E>> E status(Class<E> type, String value) {
+    private static <E extends Enum<E>> E status(Class<E> type, String field, String value) {
         if (value == null) return null;
-        try { return Enum.valueOf(type, value); } catch (IllegalArgumentException invalid) { throw invalid("status"); }
+        try { return Enum.valueOf(type, value); } catch (IllegalArgumentException invalid) { throw invalid(field); }
     }
     private static DownloadBindingException invalid(String field) {
         return new DownloadBindingException(ErrorCode.PARAM_INVALID, List.of(new FieldErrorResponse(field, "has invalid value")));
