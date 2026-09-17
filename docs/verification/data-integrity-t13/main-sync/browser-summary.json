@@ -1,0 +1,119 @@
+{
+  "exitCode": 0,
+  "passed": 70,
+  "failed": 0,
+  "skipped": 0,
+  "logSha256": "49774a0e39d9eb67ac040ec4a0670753efe890a0a59fab921cacd29bde28fedc",
+  "suites": [
+    {
+      "name": "integrity-fixture",
+      "passed": 1,
+      "failed": 0,
+      "skipped": 0,
+      "tests": [
+        "[chromium] › e2e/integrity-fixture.spec.js:232:3 › real fixture integrity closure › proves exact sets, immutable history, version upgrade, and responsive report (20.6s)"
+      ]
+    },
+    {
+      "name": "download-outcomes",
+      "passed": 15,
+      "failed": 0,
+      "skipped": 0,
+      "tests": [
+        "[chromium] › e2e/download-outcomes.spec.js:1469:3 › download outcome matrix › blocksMissingRequiredDate (780ms)",
+        "[chromium] › e2e/download-outcomes.spec.js:1495:3 › download outcome matrix › blocksReversedDateRange (713ms)",
+        "[chromium] › e2e/download-outcomes.spec.js:1524:3 › download outcome matrix › upsertsDuplicateFixtureSuccess (5.4s)",
+        "[chromium] › e2e/download-outcomes.spec.js:1600:3 › download outcome matrix › keepsRowsOnFixtureEmpty (1.8s)",
+        "[chromium] › e2e/download-outcomes.spec.js:1625:3 › download outcome matrix › showsFixtureSourceFailure (2.0s)",
+        "[chromium] › e2e/download-outcomes.spec.js:1648:3 › download outcome matrix › rejectsFixtureTypeFailure (2.0s)",
+        "[chromium] › e2e/download-outcomes.spec.js:1675:3 › download outcome matrix › rollsBackFixturePersistenceFailure (3.0s)",
+        "[chromium] › e2e/download-outcomes.spec.js:1717:3 › download outcome matrix › downloadsDailyFromLocalUpstream (3.5s)",
+        "[chromium] › e2e/download-outcomes.spec.js:1815:5 › download outcome matrix › showsSourceAuthFailure (2.6s)",
+        "[chromium] › e2e/download-outcomes.spec.js:1815:5 › download outcome matrix › showsSourcePermissionFailure (1.8s)",
+        "[chromium] › e2e/download-outcomes.spec.js:1815:5 › download outcome matrix › showsSourceRateLimitFailure (2.1s)",
+        "[chromium] › e2e/download-outcomes.spec.js:1815:5 › download outcome matrix › showsSourceUnavailableFailure (2.1s)",
+        "[chromium] › e2e/download-outcomes.spec.js:1815:5 › download outcome matrix › showsSourceNetworkFailure (1.8s)",
+        "[chromium] › e2e/download-outcomes.spec.js:1815:5 › download outcome matrix › showsSourceTimeoutFailure (2.0m)",
+        "[chromium] › e2e/download-outcomes.spec.js:1815:5 › download outcome matrix › showsSourcePayloadFailure (2.2s)"
+      ]
+    },
+    {
+      "name": "dataset-query",
+      "passed": 11,
+      "failed": 0,
+      "skipped": 0,
+      "tests": [
+        "[chromium] › e2e/dataset-query.spec.js:2010:3 › dataset query UX › seedsQueryDatasetsThroughDownloadPages (4.2m)",
+        "[chromium] › e2e/dataset-query.spec.js:2036:3 › dataset query UX › showsOnlyDeclaredFiltersWithoutAutoQuery (5.6s)",
+        "[chromium] › e2e/dataset-query.spec.js:2083:3 › dataset query UX › paginatesAllRowsWithServerTotals (5.2s)",
+        "[chromium] › e2e/dataset-query.spec.js:2137:3 › dataset query UX › combinesTradeDateFiltersAndKeepsEmptyPaging (2.1s)",
+        "[chromium] › e2e/dataset-query.spec.js:2201:3 › dataset query UX › resetsSelectionStateAndRejectsInvalidRanges (3.6s)",
+        "[chromium] › e2e/dataset-query.spec.js:2282:3 › dataset query UX › normalizesLastPageAfterAnnDateCorrection (2.1m)",
+        "[chromium] › e2e/dataset-query.spec.js:2386:3 › dataset query UX › rendersWideColumnsAndExactTextValues (3.2s)",
+        "[chromium] › e2e/dataset-query.spec.js:2565:3 › dataset query UX › ignoresReleasedResponseFromPreviousDataset (2.0s)",
+        "[chromium] › e2e/dataset-query.spec.js:2687:3 › dataset query UX › keepsResetStateAfterPendingQueryCompletes (2.8s)",
+        "[chromium] › e2e/dataset-query.spec.js:2808:3 › dataset query UX › recoversFromQueryNetworkFailureWithoutOldRows (2.1s)",
+        "[chromium] › e2e/dataset-query.spec.js:2887:3 › dataset query UX › queriesAndPaginatesUsingKeyboard (1.9s)"
+      ]
+    },
+    {
+      "name": "tushare-metadata",
+      "passed": 40,
+      "failed": 0,
+      "skipped": 0,
+      "tests": [
+        "[chromium] › e2e/tushare-metadata.spec.js:938:5 › Tushare 40 metadata contracts › metadataContract:stock_basic (3.7s)",
+        "[chromium] › e2e/tushare-metadata.spec.js:938:5 › Tushare 40 metadata contracts › metadataContract:stock_company (4.1s)",
+        "[chromium] › e2e/tushare-metadata.spec.js:938:5 › Tushare 40 metadata contracts › metadataContract:income (3.2s)",
+        "[chromium] › e2e/tushare-metadata.spec.js:938:5 › Tushare 40 metadata contracts › metadataContract:balancesheet (4.1s)",
+        "[chromium] › e2e/tushare-metadata.spec.js:938:5 › Tushare 40 metadata contracts › metadataContract:cashflow (3.1s)",
+        "[chromium] › e2e/tushare-metadata.spec.js:938:5 › Tushare 40 metadata contracts › metadataContract:fina_indicator (3.6s)",
+        "[chromium] › e2e/tushare-metadata.spec.js:938:5 › Tushare 40 metadata contracts › metadataContract:fina_audit (3.6s)",
+        "[chromium] › e2e/tushare-metadata.spec.js:938:5 › Tushare 40 metadata contracts › metadataContract:fina_mainbz (3.1s)",
+        "[chromium] › e2e/tushare-metadata.spec.js:938:5 › Tushare 40 metadata contracts › metadataContract:stk_rewards (3.1s)",
+        "[chromium] › e2e/tushare-metadata.spec.js:938:5 › Tushare 40 metadata contracts › metadataContract:stk_holdernumber (3.6s)",
+        "[chromium] › e2e/tushare-metadata.spec.js:938:5 › Tushare 40 metadata contracts › metadataContract:trade_cal (3.2s)",
+        "[chromium] › e2e/tushare-metadata.spec.js:938:5 › Tushare 40 metadata contracts › metadataContract:margin (3.7s)",
+        "[chromium] › e2e/tushare-metadata.spec.js:938:5 › Tushare 40 metadata contracts › metadataContract:daily (3.7s)",
+        "[chromium] › e2e/tushare-metadata.spec.js:938:5 › Tushare 40 metadata contracts › metadataContract:weekly (3.1s)",
+        "[chromium] › e2e/tushare-metadata.spec.js:938:5 › Tushare 40 metadata contracts › metadataContract:monthly (4.1s)",
+        "[chromium] › e2e/tushare-metadata.spec.js:938:5 › Tushare 40 metadata contracts › metadataContract:adj_factor (3.1s)",
+        "[chromium] › e2e/tushare-metadata.spec.js:938:5 › Tushare 40 metadata contracts › metadataContract:suspend_d (3.6s)",
+        "[chromium] › e2e/tushare-metadata.spec.js:938:5 › Tushare 40 metadata contracts › metadataContract:daily_basic (3.1s)",
+        "[chromium] › e2e/tushare-metadata.spec.js:938:5 › Tushare 40 metadata contracts › metadataContract:moneyflow (3.6s)",
+        "[chromium] › e2e/tushare-metadata.spec.js:938:5 › Tushare 40 metadata contracts › metadataContract:stk_limit (3.6s)",
+        "[chromium] › e2e/tushare-metadata.spec.js:938:5 › Tushare 40 metadata contracts › metadataContract:top_list (3.6s)",
+        "[chromium] › e2e/tushare-metadata.spec.js:938:5 › Tushare 40 metadata contracts › metadataContract:margin_detail (3.1s)",
+        "[chromium] › e2e/tushare-metadata.spec.js:938:5 › Tushare 40 metadata contracts › metadataContract:block_trade (4.1s)",
+        "[chromium] › e2e/tushare-metadata.spec.js:938:5 › Tushare 40 metadata contracts › metadataContract:slb_len (3.1s)",
+        "[chromium] › e2e/tushare-metadata.spec.js:938:5 › Tushare 40 metadata contracts › metadataContract:slb_sec (3.6s)",
+        "[chromium] › e2e/tushare-metadata.spec.js:938:5 › Tushare 40 metadata contracts › metadataContract:slb_sec_detail (3.6s)",
+        "[chromium] › e2e/tushare-metadata.spec.js:938:5 › Tushare 40 metadata contracts › metadataContract:forecast (3.1s)",
+        "[chromium] › e2e/tushare-metadata.spec.js:938:5 › Tushare 40 metadata contracts › metadataContract:express (3.1s)",
+        "[chromium] › e2e/tushare-metadata.spec.js:938:5 › Tushare 40 metadata contracts › metadataContract:dividend (3.1s)",
+        "[chromium] › e2e/tushare-metadata.spec.js:938:5 › Tushare 40 metadata contracts › metadataContract:disclosure_date (3.6s)",
+        "[chromium] › e2e/tushare-metadata.spec.js:938:5 › Tushare 40 metadata contracts › metadataContract:repurchase (3.1s)",
+        "[chromium] › e2e/tushare-metadata.spec.js:938:5 › Tushare 40 metadata contracts › metadataContract:stk_holdertrade (3.1s)",
+        "[chromium] › e2e/tushare-metadata.spec.js:938:5 › Tushare 40 metadata contracts › metadataContract:top10_holders (3.1s)",
+        "[chromium] › e2e/tushare-metadata.spec.js:938:5 › Tushare 40 metadata contracts › metadataContract:top10_floatholders (3.1s)",
+        "[chromium] › e2e/tushare-metadata.spec.js:938:5 › Tushare 40 metadata contracts › metadataContract:new_share (3.6s)",
+        "[chromium] › e2e/tushare-metadata.spec.js:938:5 › Tushare 40 metadata contracts › metadataContract:stk_managers (3.2s)",
+        "[chromium] › e2e/tushare-metadata.spec.js:938:5 › Tushare 40 metadata contracts › metadataContract:pledge_stat (3.6s)",
+        "[chromium] › e2e/tushare-metadata.spec.js:938:5 › Tushare 40 metadata contracts › metadataContract:pledge_detail (3.6s)",
+        "[chromium] › e2e/tushare-metadata.spec.js:938:5 › Tushare 40 metadata contracts › metadataContract:index_classify (3.6s)",
+        "[chromium] › e2e/tushare-metadata.spec.js:938:5 › Tushare 40 metadata contracts › metadataContract:index_member_all (3.1s)"
+      ]
+    },
+    {
+      "name": "fixture-flow",
+      "passed": 3,
+      "failed": 0,
+      "skipped": 0,
+      "tests": [
+        "[chromium] › e2e/fixture-flow.spec.js:490:3 › fixture page flow › downloadsSuccessAndQueriesFixtureFromPages (5.3s)",
+        "[chromium] › e2e/fixture-flow.spec.js:545:3 › fixture page flow › showsEmptyDownloadWithoutAddingRows (4.3s)",
+        "[chromium] › e2e/fixture-flow.spec.js:583:3 › fixture page flow › hidesDisabledFixtureOnBothPagesAfterRestart (3.9s)"
+      ]
+    }
+  ]
+}

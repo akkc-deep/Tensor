@@ -4,7 +4,15 @@
 
 ## 当前状态
 
-T13 **BLOCKED**（仅剩设计第6节的main集成门禁）。真实fixture/HTTP、五套浏览器回归、acceptance/production完整构建及限定复审已通过，最终独立审查已通过，新增问题0；最终 `verify-contracts.sh` 需要代码一致的clean committed main，当前混合暂存隔离区不满足。未提交、合并或推送。
+T13 **BLOCKED**（仅剩设计第6节的main集成门禁）。已将远程 `main@5aaf6ad` 同步到隔离区，合并审查及全部隔离验证通过，代码提交为 `a7deb7dd2bcac252171d1fd9d4c62fff2e07039e`。将该311文件提交快进到本地main的操作被自动审批拒绝，要求用户对此具体默认分支变更明确授权；授权请求待答复。main仍为 `5aaf6ad`，未推送，正式门禁尚未通过。
+
+## 同步远程 main 后的最新验证
+
+用户要求“把远程main的代码拉到数据检验隔离工作区，然后继续完成T13”。本轮先保存恢复stash `ee0c3d3b52f576e5bb52459caff1fc3ae6ca1707`，再同步并解决25处冲突；保留远程Studio布局、中文字段与下载行为，以及本地完整性实现、V9与历史证据。独立合并审查通过；修复合并后的窄屏导航及两处过时/竞态浏览器断言，业务断言保留。
+
+最新结果：前端 **50文件/738项**、API stub **39项**、完整性Java专项 **441项（含125项真实IT）**、production **1466项**、acceptance **1469项**及构建均通过；真实五套浏览器 **70项通过，0失败/跳过**。浏览器于 `2026-09-17T14:44:53.680712Z` 至 `14:57:43.616850Z` 运行，acceptance JAR SHA256为 `a5ff0e16d960b164702fd08890da9696b41b7c9b8514637f7722683a62a03ddf`。SQL95%→100%、旧报告不变、六次证券快照不变、上游0和同库版本2→3均再次验证；自有环境清理完成。
+
+完整结果、失败重跑原因、三宽度截图及607文件源码一致性清单见[本轮验收索引](data-integrity-t13/main-sync/README.md)，实际集成阻塞见[integration.json](data-integrity-t13/main-sync/integration.json)。以下原始验收章节及740项前端结果属于同步前历史证据，保留原值；最终集成门禁仍需在获准的真实clean committed main执行，隔离测试不能替代。
 
 ## 基线与浏览器 stub
 
@@ -134,4 +142,4 @@ mvn -o -f data-plane/pom.xml \
 
 T13以实施前混合暂存树 `1728e704532dca83032c35aaf4cc576307e37ca5` 为比较基线，保留Studio/T01–T12既有改动；逐blob核对1183个非T13既有文件仍与原暂存树相同，见[基线保护核对](data-integrity-t13/baseline-preservation.json)。最终[扩展范围核对](data-integrity-t13/extension-boundary.json)确认core、HTTP/app、plugin-api、Tushare与control-plane/src均无本任务增量；产品代码只扩展fixture模块，其余为测试、启动器和文档。限定后端和浏览器审查已通过。最终独立审查亦为Spec/Quality APPROVED，Critical/Important/Minor均0，审查树为 `16949da7bacb7701082f2f562fc015416d66dd44`；审查后仅补最终证据链接/摘要与状态交接，未改产品或测试代码。完整记录见[最终审查](../../.superpowers/sdd/2026-09-17-data-integrity-t13/final-review.md)。
 
-按设计第6节，已写[pause交接](../task-handoffs/DATA-INTEGRITY-T13-handoff.md)并将看板T13从IN_PROGRESS转为BLOCKED；唯一剩余项为用户授权后建立代码一致的clean committed main、记录集成SHA并实际通过原合同脚本。隔离区实现、运行验证、文档和审查工作均已完成；本记录不宣称T13或项目COMPLETED。
+按设计第6节，已写[pause交接](../task-handoffs/DATA-INTEGRITY-T13-handoff.md)并将看板T13从IN_PROGRESS转为BLOCKED；同步后仍保持该状态。唯一剩余项为用户明确授权本地main集成后建立代码一致的clean committed main、记录集成SHA并实际通过原合同脚本。隔离区实现、运行验证、文档和审查工作均已完成；本记录不宣称T13或项目COMPLETED。

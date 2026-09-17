@@ -1,0 +1,10 @@
+{
+  "featureCommit": "a7deb7dd2bcac252171d1fd9d4c62fff2e07039e",
+  "targetBranch": "main",
+  "requestedAction": "git merge --ff-only feat/data-integrity",
+  "authorizationReview": "REJECTED_PENDING_EXPLICIT_USER_APPROVAL",
+  "reason": "311-file commit changes default branch history; automatic review requires explicit authorization for this concrete merge",
+  "mainUnchanged": true,
+  "pushRequested": false,
+  "sourceSha256": "1be64b65b9d47ccb0748c4436ed7f7411a047a4e0cfe35c5359ee5c28baa2bbe"
+}

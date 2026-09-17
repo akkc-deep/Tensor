@@ -1,0 +1,54 @@
+{
+  "version": 1,
+  "task": "DATA-INTEGRITY-T13",
+  "startedAt": "2026-09-17T14:44:53.680712Z",
+  "finishedAt": "2026-09-17T14:57:43.616850Z",
+  "jarSha256": "a5ff0e16d960b164702fd08890da9696b41b7c9b8514637f7722683a62a03ddf",
+  "mysqlImage": "mysql:8.4.6",
+  "mysqlServer": "8.4.6",
+  "tools": {
+    "node": "v24.15.0",
+    "mysqlClient": "mysql  Ver 8.4.11 for macos15 on arm64 (MySQL Community Server - GPL)",
+    "docker": "Docker version 29.7.1, build e9452d6e78",
+    "java": "21.0.11"
+  },
+  "schemaAliases": [
+    "t13",
+    "download-outcomes",
+    "dataset-query",
+    "tushare-metadata",
+    "fixture-flow"
+  ],
+  "suites": [
+    {
+      "name": "integrity-fixture",
+      "exitCode": 0,
+      "durationSeconds": 26.12
+    },
+    {
+      "name": "download-outcomes",
+      "exitCode": 0,
+      "durationSeconds": 159.53
+    },
+    {
+      "name": "dataset-query",
+      "exitCode": 0,
+      "durationSeconds": 415.571
+    },
+    {
+      "name": "tushare-metadata",
+      "exitCode": 0,
+      "durationSeconds": 143.13
+    },
+    {
+      "name": "fixture-flow",
+      "exitCode": 0,
+      "durationSeconds": 18.749
+    }
+  ],
+  "cleanup": {
+    "containerRemoved": true,
+    "temporaryCredentialsRemoved": true
+  },
+  "passed": true
+}
