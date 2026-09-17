@@ -105,6 +105,9 @@ class TushareMetadataContractTest {
         TemplateProjection template = readTemplate(contracts.repositoryRoot(), manifest);
         assertThat(template.apiName()).as("%s template api_name", apiName).isEqualTo(apiName);
         assertThat(columnNames).as("%s template field order", apiName).containsExactlyElementsOf(template.fields());
+        assertThat(definition.columns()).allSatisfy(column ->
+                assertThat(column.label()).as("%s.%s Chinese header", apiName, column.name())
+                        .containsPattern("[\\p{IsHan}]"));
 
         definition.parameters().forEach(parameter -> assertParameterDefaults(apiName, parameter));
         List<ExpectedParameter> actualParameters = definition.parameters().stream()

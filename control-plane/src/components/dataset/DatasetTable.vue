@@ -17,9 +17,9 @@ const display = useDisplay()
 const displayScale = computed(() => display?.scale.value ?? 1)
 
 const sourceColumns = [
-  { name: 'source_plugin', label: 'source_plugin', logicalType: 'STRING' },
-  { name: 'source_api', label: 'source_api', logicalType: 'STRING' },
-  { name: 'ingested_at', label: 'ingested_at', logicalType: 'STRING' },
+  { name: 'source_plugin', label: '来源插件', logicalType: 'STRING' },
+  { name: 'source_api', label: '来源接口', logicalType: 'STRING' },
+  { name: 'ingested_at', label: '入库时间', logicalType: 'STRING' },
 ]
 
 const displayColumns = computed(() => [...props.columns, ...sourceColumns])
@@ -29,39 +29,6 @@ const fixedColumn = computed(() => (
 
 function minWidth(column) {
   return (column.name === 'ingested_at' ? 180 : column.longText === true ? 240 : 140) * displayScale.value
-}
-
-const MARKET_LABELS = {
-  ts_code: '证券代码',
-  trade_date: '交易日',
-  open: '开盘价',
-  high: '最高价',
-  low: '最低价',
-  close: '收盘价',
-  pre_close: '前收盘价',
-  change: '涨跌额',
-  vol: '成交量',
-  amount: '成交额',
-  source_plugin: '来源插件',
-  source_api: '来源接口',
-  ingested_at: '入库时间',
-}
-
-function mappedLabel(column) {
-  if (props.pluginId !== 'tushare_pro' || !['daily', 'weekly'].includes(props.apiName)) {
-    return column.label
-  }
-  if (column.name === 'pct_chg') {
-    return props.apiName === 'daily' ? '涨跌幅（%）' : '涨跌幅（比率）'
-  }
-  return MARKET_LABELS[column.name] ?? column.label
-}
-
-function hasMappedLabel(column) {
-  if (props.pluginId !== 'tushare_pro' || !['daily', 'weekly'].includes(props.apiName)) {
-    return false
-  }
-  return MARKET_LABELS[column.name] !== undefined || column.name === 'pct_chg'
 }
 
 function isNumeric(column) {
@@ -158,15 +125,15 @@ function scrollHorizontally(offset) {
         v-for="column in displayColumns"
         :key="column.name"
         :prop="column.name"
-        :label="mappedLabel(column)"
-        :align="isNumeric(column) ? 'right' : undefined"
+        :label="column.label"
+        align="center"
         :min-width="minWidth(column)"
         :show-overflow-tooltip="column.longText !== true"
       >
         <template #header>
-          <span>{{ mappedLabel(column) }}</span>
+          <span>{{ column.label }}</span>
           <code
-            v-if="hasMappedLabel(column)"
+            v-if="column.label !== column.name"
             class="dataset-table__field-code"
           >{{ column.name }}</code>
         </template>
@@ -245,6 +212,8 @@ function scrollHorizontally(offset) {
 .dataset-table :deep(.el-table__inner-wrapper::before) { display: none; }
 .dataset-table :deep(.el-table__cell) { padding: 1.4rem 0; }
 .dataset-table :deep(.cell) { padding: 0 1.5rem; line-height: 1.6; white-space: nowrap; }
+/* Override Element Plus's narrower inline tooltip width to match the header. */
+.dataset-table :deep(.cell.el-tooltip) { width: 100% !important; }
 .dataset-table :deep(th.el-table__cell) { font-family: 'SFMono-Regular', Consolas, monospace; font-size: 1.2rem; font-weight: 400; }
 .dataset-table :deep(td.el-table__cell) { font-size: 1.4rem; }
 .dataset-table__long-text { display: block; overflow: hidden; text-overflow: ellipsis; }

@@ -27,11 +27,7 @@ const TOTAL_DOWNLOAD_COUNT = 375
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
 const LONG_TEXT = `M14_T03_TEXT_${'查询说明'.repeat(80)}`
 const SOURCE_COLUMNS = ['source_plugin', 'source_api', 'ingested_at']
-const DAILY_HEADERS = [
-  '证券代码ts_code', '交易日trade_date', '开盘价open', '最高价high', '最低价low',
-  '收盘价close', '前收盘价pre_close', '涨跌额change', '涨跌幅（%）pct_chg',
-  '成交量vol', '成交额amount', '来源插件source_plugin', '来源接口source_api', '入库时间ingested_at',
-]
+const SOURCE_HEADERS = ['来源插件source_plugin', '来源接口source_api', '入库时间ingested_at']
 const PAGE_KEYS = [
   'requestId',
   'pluginId',
@@ -1434,8 +1430,7 @@ function displayValue(name, value) {
 }
 
 async function assertTable(page, definition, body) {
-  const headers = body.apiName === 'daily' ? DAILY_HEADERS
-    : [...definition.columns.map(({ label }) => label), ...SOURCE_COLUMNS]
+  const headers = [...definition.columns.map(({ name, label }) => `${label}${name}`), ...SOURCE_HEADERS]
   await expect(page.getByRole('columnheader')).toHaveText(headers)
   await expect(page.getByRole('row')).toHaveCount(body.items.length + 1)
   const rows = page.getByRole('row').filter({ has: page.getByRole('cell') })
@@ -1458,7 +1453,7 @@ function pagination(page) {
 }
 
 async function selectPageSize(page, size) {
-  await selectFrom(pagination(page).getByRole('combobox'), `${size}/page`)
+  await selectFrom(pagination(page).getByRole('combobox'), `${size}条/页`)
 }
 
 async function doubleAnimationFrame(page) {
@@ -2410,8 +2405,8 @@ test.describe('dataset query UX', () => {
     await expect(page.getByRole('columnheader')).toHaveCount(155)
     await expect(page.getByRole('cell')).toHaveCount(155)
     await expect(page.getByText('business_key', { exact: true })).toHaveCount(0)
-    const tsLabel = definition.columns.find(({ name }) => name === 'ts_code').label
-    const annLabel = definition.columns.find(({ name }) => name === 'ann_date').label
+    const tsLabel = /^证券代码\s*ts_code$/
+    const annLabel = /^公告日期\s*ann_date$/
     const fixedHeader = page.getByRole('columnheader', { name: tsLabel, exact: true })
     const normalHeader = page.getByRole('columnheader', { name: annLabel, exact: true })
     const fixedCell = page.getByRole('cell', { name: '000001.SZ', exact: true })
@@ -2529,8 +2524,8 @@ test.describe('dataset query UX', () => {
     assertBusinessRows(body, [indexExpected])
     await assertTable(page, definition, body)
     await assertSummary(page, 1, 1, 1)
-    const indexLabel = definition.columns[0].label
-    const industryLabel = definition.columns[1].label
+    const indexLabel = /^指数代码\s*index_code$/
+    const industryLabel = /^行业名称\s*industry_name$/
     const indexHeader = page.getByRole('columnheader', { name: indexLabel, exact: true })
     const industryHeader = page.getByRole('columnheader', { name: industryLabel, exact: true })
     const indexCell = page.getByRole('cell', { name: '801001.SI', exact: true })
@@ -2650,7 +2645,7 @@ test.describe('dataset query UX', () => {
       expect(old).toMatchObject({ page: 1, pageSize: 50, totalElements: 126, totalPages: 3 })
       await doubleAnimationFrame(page)
       await expect(page.getByRole('columnheader')).toHaveText([
-        ...indexDefinition.columns.map(({ label }) => label), ...SOURCE_COLUMNS,
+        ...indexDefinition.columns.map(({ name, label }) => `${label}${name}`), ...SOURCE_HEADERS,
       ])
       await expect(page.getByRole('cell', { name: '801001.SI', exact: true })).toBeVisible()
       await expect(page.getByRole('cell', { name: '000001.SZ', exact: true })).toHaveCount(0)
@@ -2977,7 +2972,7 @@ test.describe('dataset query UX', () => {
     const size = pagination(page).getByRole('combobox')
     await focusByTab(page, size)
     responsePromise = page.waitForResponse((response) => isRecordsResponse(response, 'daily'))
-    await keyboardSelect(page, size, '20/page', { direction: 'ArrowUp' })
+    await keyboardSelect(page, size, '20条/页', { direction: 'ArrowUp' })
     body = await captureQueryResponse(await responsePromise, 'daily', {
       tradeDateFrom: '2026-08-07', tradeDateTo: '2026-08-07', page: '1', pageSize: '20',
     })

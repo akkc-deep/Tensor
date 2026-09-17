@@ -117,8 +117,8 @@ describe('App', () => {
       expect(wrapper.findAll('main#workspace')).toHaveLength(1)
       expect(wrapper.findAll('h1')).toHaveLength(1)
       expect(wrapper.get('h1').text()).toBe('下载工作台')
-      expect(wrapper.getComponent(DownloadAction).props('disabled')).toBe(true)
-      expect(wrapper.text()).toContain('请选择数据接口')
+      expect(wrapper.findComponent(DownloadAction).exists()).toBe(false)
+      expect(wrapper.text()).toContain('选择接口，开始下载')
       expect(wrapper.text()).not.toContain('数据下载模块尚未完成')
     } finally {
       wrapper.unmount()

@@ -635,7 +635,7 @@ describe('DatasetView', () => {
         .trigger('click')
       await flushPromises()
       const size20 = [...document.body.querySelectorAll('[role="option"]')]
-        .find((option) => option.textContent.trim() === '20/page')
+        .find((option) => option.textContent.trim() === '20条/页')
       expect(size20).toBeDefined()
       await size20.click()
       await flushPromises()

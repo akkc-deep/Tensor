@@ -66,10 +66,10 @@ public final class FixtureConfiguration {
                         null)),
                 TableName.from(key),
                 List.of(
-                        column(DatasetFields.TS_CODE, LogicalType.STRING, false, 0, FixtureConstants.TS_CODE_MAX_LENGTH, null, null),
-                        column(DatasetFields.TRADE_DATE, LogicalType.DATE, false, 1, null, null, null),
-                        column(FixtureConstants.AMOUNT, LogicalType.DECIMAL, false, FixtureConstants.AMOUNT_DISPLAY_ORDER, null, 38, 18),
-                        column(FixtureConstants.NOTE, LogicalType.STRING, true, FixtureConstants.NOTE_DISPLAY_ORDER, FixtureConstants.NOTE_MAX_LENGTH, null, null)),
+                        column(DatasetFields.TS_CODE, "证券代码", LogicalType.STRING, false, 0, FixtureConstants.TS_CODE_MAX_LENGTH, null, null),
+                        column(DatasetFields.TRADE_DATE, "交易日", LogicalType.DATE, false, 1, null, null, null),
+                        column(FixtureConstants.AMOUNT, "金额", LogicalType.DECIMAL, false, FixtureConstants.AMOUNT_DISPLAY_ORDER, null, 38, 18),
+                        column(FixtureConstants.NOTE, "备注", LogicalType.STRING, true, FixtureConstants.NOTE_DISPLAY_ORDER, FixtureConstants.NOTE_MAX_LENGTH, null, null)),
                 new BusinessKeyDefinition(BusinessKeyMode.COMPOSITE, List.of(DatasetFields.TS_CODE, DatasetFields.TRADE_DATE)),
                 List.of(new FilterDefinition(DatasetFields.TS_CODE)),
                 DatasetFields.TS_CODE);
@@ -77,6 +77,7 @@ public final class FixtureConfiguration {
 
     private static ColumnDefinition column(
             String name,
+            String label,
             LogicalType type,
             boolean nullable,
             int order,
@@ -84,6 +85,6 @@ public final class FixtureConfiguration {
             Integer precision,
             Integer scale) {
         return new ColumnDefinition(
-                name, name, type, nullable, order, length, precision, scale, List.of(), false);
+                name, label, type, nullable, order, length, precision, scale, List.of(), false);
     }
 }

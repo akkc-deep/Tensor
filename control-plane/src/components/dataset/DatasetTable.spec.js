@@ -44,10 +44,10 @@ describe('DatasetTable', () => {
       'trade_date', 'open', 'notes', 'source_plugin', 'source_api', 'ingested_at',
     ])
     expect(renderedColumns(wrapper).map((current) => current.props('label'))).toEqual([
-      '交易日期', '开盘价', '备注', 'source_plugin', 'source_api', 'ingested_at',
+      '交易日期', '开盘价', '备注', '来源插件', '来源接口', '入库时间',
     ])
     expect(wrapper.findAll('.el-table__header th .cell').map((header) => header.text())).toEqual([
-      '交易日期', '开盘价', '备注', 'source_plugin', 'source_api', 'ingested_at',
+      '交易日期trade_date', '开盘价open', '备注notes', '来源插件source_plugin', '来源接口source_api', '入库时间ingested_at',
     ])
     expect(columns).toEqual(originalColumns)
     expect(items).toEqual(originalItems)
@@ -106,7 +106,7 @@ describe('DatasetTable', () => {
 
     const withTsHeaders = withTsCode.findAll('.el-table__header th')
     expect(withTsHeaders.map((header) => header.get('.cell').text())).toEqual([
-      'trade_date', 'ts_code', '收盘价', 'source_plugin', 'source_api', 'ingested_at',
+      'trade_date', 'ts_code', '收盘价close', '来源插件source_plugin', '来源接口source_api', '入库时间ingested_at',
     ])
     expect(withTsHeaders.map((header) => header.element.style.position)).toEqual([
       '', 'sticky', '', '', '', '',
@@ -134,7 +134,7 @@ describe('DatasetTable', () => {
 
     const emptyHeaders = withoutBusinessColumns.findAll('.el-table__header th')
     expect(emptyHeaders.map((header) => header.get('.cell').text())).toEqual([
-      'source_plugin', 'source_api', 'ingested_at',
+      '来源插件source_plugin', '来源接口source_api', '入库时间ingested_at',
     ])
     expect(emptyHeaders.every((header) => header.element.style.position !== 'sticky')).toBe(true)
   })
@@ -178,7 +178,7 @@ describe('DatasetTable', () => {
     ])
   })
 
-  it('right-aligns numeric cells and signs only non-zero market changes', async () => {
+  it('centers all columns and signs only non-zero market changes', async () => {
     const columns = [
       column('change', '涨跌额', 'DECIMAL'),
       column('pct_chg', '涨跌幅', 'DECIMAL'),
@@ -223,7 +223,7 @@ describe('DatasetTable', () => {
     await flushPromises()
 
     expect(renderedColumns(wrapper).map((current) => current.props('align'))).toEqual([
-      'right', 'right', 'right', undefined, undefined, undefined, undefined,
+      'center', 'center', 'center', 'center', 'center', 'center', 'center',
     ])
     expect(firstRowTexts(wrapper)).toEqual([
       '+0.0100', '-0.0100', '-9223372036854775807', '样本一',
@@ -246,7 +246,7 @@ describe('DatasetTable', () => {
     )).toBe(true)
   })
 
-  it('scopes daily and weekly labels to the tushare_pro table context', async () => {
+  it('uses Chinese metadata labels for every data source without interface-specific overrides', async () => {
     const columns = [
       column('ts_code', '代码元数据'),
       column('close', '收盘元数据', 'DECIMAL'),
@@ -264,20 +264,26 @@ describe('DatasetTable', () => {
     const other = mount(DatasetTable, {
       props: { columns, items: [], pluginId: 'fixture', apiName: 'daily' },
     })
+    const adjusted = mount(DatasetTable, {
+      props: { columns: [column('ts_code', '证券代码'), column('trade_date', '交易日'), column('adj_factor', '复权因子')], items: [], pluginId: 'tushare_pro', apiName: 'adj_factor' },
+    })
 
     await flushPromises()
 
     expect(renderedColumns(daily).map((current) => current.props('label'))).toEqual([
-      '证券代码', '收盘价', '开盘价', '前收盘价', '涨跌幅（%）',
+      '代码元数据', '收盘元数据', '开盘元数据', '前收元数据', '涨跌幅元数据',
       '来源插件', '来源接口', '入库时间',
     ])
     expect(renderedColumns(weekly).map((current) => current.props('label'))).toEqual([
-      '证券代码', '收盘价', '开盘价', '前收盘价', '涨跌幅（比率）',
+      '代码元数据', '收盘元数据', '开盘元数据', '前收元数据', '涨跌幅元数据',
       '来源插件', '来源接口', '入库时间',
     ])
     expect(renderedColumns(other).map((current) => current.props('label'))).toEqual([
       '代码元数据', '收盘元数据', '开盘元数据', '前收元数据', '涨跌幅元数据',
-      'source_plugin', 'source_api', 'ingested_at',
+      '来源插件', '来源接口', '入库时间',
+    ])
+    expect(renderedColumns(adjusted).map((current) => current.props('label'))).toEqual([
+      '证券代码', '交易日', '复权因子', '来源插件', '来源接口', '入库时间',
     ])
     expect(daily.findAll('.dataset-table__field-code').map((code) => code.text())).toEqual([
       'ts_code', 'close', 'open', 'pre_close', 'pct_chg',

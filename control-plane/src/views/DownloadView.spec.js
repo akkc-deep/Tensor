@@ -296,7 +296,8 @@ describe('DownloadView', () => {
     expect(api.listApis).toHaveBeenCalledWith('contract_fixture')
     expect(wrapper.getComponent(DataSourceSelect).props('sources')).toEqual([source()])
     expect(wrapper.getComponent(ApiSelect).props('apis')).toEqual(apis)
-    expect(wrapper.getComponent(DownloadAction).props('disabled')).toBe(true)
+    expect(wrapper.findComponent(DownloadAction).exists()).toBe(false)
+    expect(wrapper.get('.download-empty').text()).toContain('选择接口，开始下载')
     expect(wrapper.getComponent(DownloadTaskList).get('h2').text()).toContain('最近任务')
     expect(wrapper.find('.download-feedback').exists()).toBe(false)
 
@@ -362,7 +363,7 @@ describe('DownloadView', () => {
     const unavailable = await mountView({ sources: [source({ downloadAvailable: false, unavailableReason: '尚未配置凭证' })] })
     expect(unavailable.get('.catalog-panel').text()).toContain('尚未配置凭证')
     expect(unavailable.get('.catalog-list button').element.disabled).toBe(true)
-    expect(unavailable.getComponent(DownloadAction).props('disabled')).toBe(true)
+    expect(unavailable.findComponent(DownloadAction).exists()).toBe(false)
     const noApis = await mountView({ apis: [] })
     expect(noApis.get('.catalog-panel').text()).toContain('此数据源暂无接口')
   })

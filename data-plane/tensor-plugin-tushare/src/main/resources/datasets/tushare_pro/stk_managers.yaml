@@ -7,17 +7,17 @@ queryMode: snapshot
 parameters:
   - { name: ts_code, label: 股票代码, type: TS_CODE, required: true }
 columns:
-  - { name: ts_code, label: ts_code, logicalType: STRING, nullable: true, displayOrder: 0, length: 64 }
-  - { name: ann_date, label: ann_date, logicalType: DATE, nullable: true, displayOrder: 1 }
-  - { name: name, label: name, logicalType: STRING, nullable: true, displayOrder: 2, length: 128 }
-  - { name: gender, label: gender, logicalType: STRING, nullable: true, displayOrder: 3, length: 64 }
-  - { name: lev, label: lev, logicalType: STRING, nullable: true, displayOrder: 4, length: 64 }
-  - { name: title, label: title, logicalType: STRING, nullable: true, displayOrder: 5, length: 128 }
-  - { name: edu, label: edu, logicalType: STRING, nullable: true, displayOrder: 6, length: 128 }
-  - { name: national, label: national, logicalType: STRING, nullable: true, displayOrder: 7, length: 128 }
-  - { name: birthday, label: birthday, logicalType: DATE, nullable: true, displayOrder: 8 }
-  - { name: begin_date, label: begin_date, logicalType: DATE, nullable: true, displayOrder: 9 }
-  - { name: end_date, label: end_date, logicalType: DATE, nullable: true, displayOrder: 10 }
+  - { name: ts_code, label: 证券代码, logicalType: STRING, nullable: true, displayOrder: 0, length: 64 }
+  - { name: ann_date, label: 公告日期, logicalType: DATE, nullable: true, displayOrder: 1 }
+  - { name: name, label: 姓名, logicalType: STRING, nullable: true, displayOrder: 2, length: 128 }
+  - { name: gender, label: 性别, logicalType: STRING, nullable: true, displayOrder: 3, length: 64 }
+  - { name: lev, label: 岗位类别, logicalType: STRING, nullable: true, displayOrder: 4, length: 64 }
+  - { name: title, label: 岗位, logicalType: STRING, nullable: true, displayOrder: 5, length: 128 }
+  - { name: edu, label: 学历, logicalType: STRING, nullable: true, displayOrder: 6, length: 128 }
+  - { name: national, label: 国籍, logicalType: STRING, nullable: true, displayOrder: 7, length: 128 }
+  - { name: birthday, label: 出生年月, logicalType: DATE, nullable: true, displayOrder: 8 }
+  - { name: begin_date, label: 上任日期, logicalType: DATE, nullable: true, displayOrder: 9 }
+  - { name: end_date, label: 离任日期, logicalType: DATE, nullable: true, displayOrder: 10 }
 businessKey: { mode: FINGERPRINT, fields: [ts_code, ann_date, name, gender, lev, title, birthday, begin_date] }
 filters: [ts_code, ann_date]
 fixedColumn: ts_code

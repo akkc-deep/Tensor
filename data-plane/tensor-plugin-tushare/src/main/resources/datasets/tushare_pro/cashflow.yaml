@@ -8,103 +8,103 @@ parameters:
   - { name: ts_code, label: 股票代码, type: TS_CODE, required: true }
   - { name: ann_date, label: 公告日期, type: DATE, required: true }
 columns:
-  - { name: ts_code, label: ts_code, logicalType: STRING, nullable: false, displayOrder: 0, length: 64 }
-  - { name: ann_date, label: ann_date, logicalType: DATE, nullable: false, displayOrder: 1 }
-  - { name: f_ann_date, label: f_ann_date, logicalType: DATE, nullable: true, displayOrder: 2 }
-  - { name: end_date, label: end_date, logicalType: DATE, nullable: false, displayOrder: 3 }
-  - { name: comp_type, label: comp_type, logicalType: STRING, nullable: true, displayOrder: 4, length: 64 }
-  - { name: report_type, label: report_type, logicalType: STRING, nullable: false, displayOrder: 5, length: 64 }
-  - { name: end_type, label: end_type, logicalType: STRING, nullable: true, displayOrder: 6, length: 64 }
-  - { name: net_profit, label: net_profit, logicalType: DECIMAL, nullable: true, displayOrder: 7, precision: 38, scale: 18 }
-  - { name: finan_exp, label: finan_exp, logicalType: DECIMAL, nullable: true, displayOrder: 8, precision: 38, scale: 18 }
-  - { name: c_fr_sale_sg, label: c_fr_sale_sg, logicalType: DECIMAL, nullable: true, displayOrder: 9, precision: 38, scale: 18 }
-  - { name: recp_tax_rends, label: recp_tax_rends, logicalType: DECIMAL, nullable: true, displayOrder: 10, precision: 38, scale: 18 }
-  - { name: n_depos_incr_fi, label: n_depos_incr_fi, logicalType: DECIMAL, nullable: true, displayOrder: 11, precision: 38, scale: 18 }
-  - { name: n_incr_loans_cb, label: n_incr_loans_cb, logicalType: DECIMAL, nullable: true, displayOrder: 12, precision: 38, scale: 18 }
-  - { name: n_inc_borr_oth_fi, label: n_inc_borr_oth_fi, logicalType: DECIMAL, nullable: true, displayOrder: 13, precision: 38, scale: 18 }
-  - { name: prem_fr_orig_contr, label: prem_fr_orig_contr, logicalType: DECIMAL, nullable: true, displayOrder: 14, precision: 38, scale: 18 }
-  - { name: n_incr_insured_dep, label: n_incr_insured_dep, logicalType: DECIMAL, nullable: true, displayOrder: 15, precision: 38, scale: 18 }
-  - { name: n_reinsur_prem, label: n_reinsur_prem, logicalType: DECIMAL, nullable: true, displayOrder: 16, precision: 38, scale: 18 }
-  - { name: n_incr_disp_tfa, label: n_incr_disp_tfa, logicalType: DECIMAL, nullable: true, displayOrder: 17, precision: 38, scale: 18 }
-  - { name: ifc_cash_incr, label: ifc_cash_incr, logicalType: DECIMAL, nullable: true, displayOrder: 18, precision: 38, scale: 18 }
-  - { name: n_incr_disp_faas, label: n_incr_disp_faas, logicalType: DECIMAL, nullable: true, displayOrder: 19, precision: 38, scale: 18 }
-  - { name: n_incr_loans_oth_bank, label: n_incr_loans_oth_bank, logicalType: DECIMAL, nullable: true, displayOrder: 20, precision: 38, scale: 18 }
-  - { name: n_cap_incr_repur, label: n_cap_incr_repur, logicalType: DECIMAL, nullable: true, displayOrder: 21, precision: 38, scale: 18 }
-  - { name: c_fr_oth_operate_a, label: c_fr_oth_operate_a, logicalType: DECIMAL, nullable: true, displayOrder: 22, precision: 38, scale: 18 }
-  - { name: c_inf_fr_operate_a, label: c_inf_fr_operate_a, logicalType: DECIMAL, nullable: true, displayOrder: 23, precision: 38, scale: 18 }
-  - { name: c_paid_goods_s, label: c_paid_goods_s, logicalType: DECIMAL, nullable: true, displayOrder: 24, precision: 38, scale: 18 }
-  - { name: c_paid_to_for_empl, label: c_paid_to_for_empl, logicalType: DECIMAL, nullable: true, displayOrder: 25, precision: 38, scale: 18 }
-  - { name: c_paid_for_taxes, label: c_paid_for_taxes, logicalType: DECIMAL, nullable: true, displayOrder: 26, precision: 38, scale: 18 }
-  - { name: n_incr_clt_loan_adv, label: n_incr_clt_loan_adv, logicalType: DECIMAL, nullable: true, displayOrder: 27, precision: 38, scale: 18 }
-  - { name: n_incr_dep_cbob, label: n_incr_dep_cbob, logicalType: DECIMAL, nullable: true, displayOrder: 28, precision: 38, scale: 18 }
-  - { name: c_pay_claims_orig_inco, label: c_pay_claims_orig_inco, logicalType: DECIMAL, nullable: true, displayOrder: 29, precision: 38, scale: 18 }
-  - { name: pay_handling_chrg, label: pay_handling_chrg, logicalType: DECIMAL, nullable: true, displayOrder: 30, precision: 38, scale: 18 }
-  - { name: pay_comm_insur_plcy, label: pay_comm_insur_plcy, logicalType: DECIMAL, nullable: true, displayOrder: 31, precision: 38, scale: 18 }
-  - { name: oth_cash_pay_oper_act, label: oth_cash_pay_oper_act, logicalType: DECIMAL, nullable: true, displayOrder: 32, precision: 38, scale: 18 }
-  - { name: st_cash_out_act, label: st_cash_out_act, logicalType: DECIMAL, nullable: true, displayOrder: 33, precision: 38, scale: 18 }
-  - { name: n_cashflow_act, label: n_cashflow_act, logicalType: DECIMAL, nullable: true, displayOrder: 34, precision: 38, scale: 18 }
-  - { name: oth_recp_ral_inv_act, label: oth_recp_ral_inv_act, logicalType: DECIMAL, nullable: true, displayOrder: 35, precision: 38, scale: 18 }
-  - { name: c_disp_withdrwl_invest, label: c_disp_withdrwl_invest, logicalType: DECIMAL, nullable: true, displayOrder: 36, precision: 38, scale: 18 }
-  - { name: c_recp_return_invest, label: c_recp_return_invest, logicalType: DECIMAL, nullable: true, displayOrder: 37, precision: 38, scale: 18 }
-  - { name: n_recp_disp_fiolta, label: n_recp_disp_fiolta, logicalType: DECIMAL, nullable: true, displayOrder: 38, precision: 38, scale: 18 }
-  - { name: n_recp_disp_sobu, label: n_recp_disp_sobu, logicalType: DECIMAL, nullable: true, displayOrder: 39, precision: 38, scale: 18 }
-  - { name: stot_inflows_inv_act, label: stot_inflows_inv_act, logicalType: DECIMAL, nullable: true, displayOrder: 40, precision: 38, scale: 18 }
-  - { name: c_pay_acq_const_fiolta, label: c_pay_acq_const_fiolta, logicalType: DECIMAL, nullable: true, displayOrder: 41, precision: 38, scale: 18 }
-  - { name: c_paid_invest, label: c_paid_invest, logicalType: DECIMAL, nullable: true, displayOrder: 42, precision: 38, scale: 18 }
-  - { name: n_disp_subs_oth_biz, label: n_disp_subs_oth_biz, logicalType: DECIMAL, nullable: true, displayOrder: 43, precision: 38, scale: 18 }
-  - { name: oth_pay_ral_inv_act, label: oth_pay_ral_inv_act, logicalType: DECIMAL, nullable: true, displayOrder: 44, precision: 38, scale: 18 }
-  - { name: n_incr_pledge_loan, label: n_incr_pledge_loan, logicalType: DECIMAL, nullable: true, displayOrder: 45, precision: 38, scale: 18 }
-  - { name: stot_out_inv_act, label: stot_out_inv_act, logicalType: DECIMAL, nullable: true, displayOrder: 46, precision: 38, scale: 18 }
-  - { name: n_cashflow_inv_act, label: n_cashflow_inv_act, logicalType: DECIMAL, nullable: true, displayOrder: 47, precision: 38, scale: 18 }
-  - { name: c_recp_borrow, label: c_recp_borrow, logicalType: DECIMAL, nullable: true, displayOrder: 48, precision: 38, scale: 18 }
-  - { name: proc_issue_bonds, label: proc_issue_bonds, logicalType: DECIMAL, nullable: true, displayOrder: 49, precision: 38, scale: 18 }
-  - { name: oth_cash_recp_ral_fnc_act, label: oth_cash_recp_ral_fnc_act, logicalType: DECIMAL, nullable: true, displayOrder: 50, precision: 38, scale: 18 }
-  - { name: stot_cash_in_fnc_act, label: stot_cash_in_fnc_act, logicalType: DECIMAL, nullable: true, displayOrder: 51, precision: 38, scale: 18 }
-  - { name: free_cashflow, label: free_cashflow, logicalType: DECIMAL, nullable: true, displayOrder: 52, precision: 38, scale: 18 }
-  - { name: c_prepay_amt_borr, label: c_prepay_amt_borr, logicalType: DECIMAL, nullable: true, displayOrder: 53, precision: 38, scale: 18 }
-  - { name: c_pay_dist_dpcp_int_exp, label: c_pay_dist_dpcp_int_exp, logicalType: DECIMAL, nullable: true, displayOrder: 54, precision: 38, scale: 18 }
-  - { name: incl_dvd_profit_paid_sc_ms, label: incl_dvd_profit_paid_sc_ms, logicalType: DECIMAL, nullable: true, displayOrder: 55, precision: 38, scale: 18 }
-  - { name: oth_cashpay_ral_fnc_act, label: oth_cashpay_ral_fnc_act, logicalType: DECIMAL, nullable: true, displayOrder: 56, precision: 38, scale: 18 }
-  - { name: stot_cashout_fnc_act, label: stot_cashout_fnc_act, logicalType: DECIMAL, nullable: true, displayOrder: 57, precision: 38, scale: 18 }
-  - { name: n_cash_flows_fnc_act, label: n_cash_flows_fnc_act, logicalType: DECIMAL, nullable: true, displayOrder: 58, precision: 38, scale: 18 }
-  - { name: eff_fx_flu_cash, label: eff_fx_flu_cash, logicalType: DECIMAL, nullable: true, displayOrder: 59, precision: 38, scale: 18 }
-  - { name: n_incr_cash_cash_equ, label: n_incr_cash_cash_equ, logicalType: DECIMAL, nullable: true, displayOrder: 60, precision: 38, scale: 18 }
-  - { name: c_cash_equ_beg_period, label: c_cash_equ_beg_period, logicalType: DECIMAL, nullable: true, displayOrder: 61, precision: 38, scale: 18 }
-  - { name: c_cash_equ_end_period, label: c_cash_equ_end_period, logicalType: DECIMAL, nullable: true, displayOrder: 62, precision: 38, scale: 18 }
-  - { name: c_recp_cap_contrib, label: c_recp_cap_contrib, logicalType: DECIMAL, nullable: true, displayOrder: 63, precision: 38, scale: 18 }
-  - { name: incl_cash_rec_saims, label: incl_cash_rec_saims, logicalType: DECIMAL, nullable: true, displayOrder: 64, precision: 38, scale: 18 }
-  - { name: uncon_invest_loss, label: uncon_invest_loss, logicalType: DECIMAL, nullable: true, displayOrder: 65, precision: 38, scale: 18 }
-  - { name: prov_depr_assets, label: prov_depr_assets, logicalType: DECIMAL, nullable: true, displayOrder: 66, precision: 38, scale: 18 }
-  - { name: depr_fa_coga_dpba, label: depr_fa_coga_dpba, logicalType: DECIMAL, nullable: true, displayOrder: 67, precision: 38, scale: 18 }
-  - { name: amort_intang_assets, label: amort_intang_assets, logicalType: DECIMAL, nullable: true, displayOrder: 68, precision: 38, scale: 18 }
-  - { name: lt_amort_deferred_exp, label: lt_amort_deferred_exp, logicalType: DECIMAL, nullable: true, displayOrder: 69, precision: 38, scale: 18 }
-  - { name: decr_deferred_exp, label: decr_deferred_exp, logicalType: DECIMAL, nullable: true, displayOrder: 70, precision: 38, scale: 18 }
-  - { name: incr_acc_exp, label: incr_acc_exp, logicalType: DECIMAL, nullable: true, displayOrder: 71, precision: 38, scale: 18 }
-  - { name: loss_disp_fiolta, label: loss_disp_fiolta, logicalType: DECIMAL, nullable: true, displayOrder: 72, precision: 38, scale: 18 }
-  - { name: loss_scr_fa, label: loss_scr_fa, logicalType: DECIMAL, nullable: true, displayOrder: 73, precision: 38, scale: 18 }
-  - { name: loss_fv_chg, label: loss_fv_chg, logicalType: DECIMAL, nullable: true, displayOrder: 74, precision: 38, scale: 18 }
-  - { name: invest_loss, label: invest_loss, logicalType: DECIMAL, nullable: true, displayOrder: 75, precision: 38, scale: 18 }
-  - { name: decr_def_inc_tax_assets, label: decr_def_inc_tax_assets, logicalType: DECIMAL, nullable: true, displayOrder: 76, precision: 38, scale: 18 }
-  - { name: incr_def_inc_tax_liab, label: incr_def_inc_tax_liab, logicalType: DECIMAL, nullable: true, displayOrder: 77, precision: 38, scale: 18 }
-  - { name: decr_inventories, label: decr_inventories, logicalType: DECIMAL, nullable: true, displayOrder: 78, precision: 38, scale: 18 }
-  - { name: decr_oper_payable, label: decr_oper_payable, logicalType: DECIMAL, nullable: true, displayOrder: 79, precision: 38, scale: 18 }
-  - { name: incr_oper_payable, label: incr_oper_payable, logicalType: DECIMAL, nullable: true, displayOrder: 80, precision: 38, scale: 18 }
-  - { name: others, label: others, logicalType: DECIMAL, nullable: true, displayOrder: 81, precision: 38, scale: 18 }
-  - { name: im_net_cashflow_oper_act, label: im_net_cashflow_oper_act, logicalType: DECIMAL, nullable: true, displayOrder: 82, precision: 38, scale: 18 }
-  - { name: conv_debt_into_cap, label: conv_debt_into_cap, logicalType: DECIMAL, nullable: true, displayOrder: 83, precision: 38, scale: 18 }
-  - { name: conv_copbonds_due_within_1y, label: conv_copbonds_due_within_1y, logicalType: DECIMAL, nullable: true, displayOrder: 84, precision: 38, scale: 18 }
-  - { name: fa_fnc_leases, label: fa_fnc_leases, logicalType: DECIMAL, nullable: true, displayOrder: 85, precision: 38, scale: 18 }
-  - { name: im_n_incr_cash_equ, label: im_n_incr_cash_equ, logicalType: DECIMAL, nullable: true, displayOrder: 86, precision: 38, scale: 18 }
-  - { name: net_dism_capital_add, label: net_dism_capital_add, logicalType: DECIMAL, nullable: true, displayOrder: 87, precision: 38, scale: 18 }
-  - { name: net_cash_rece_sec, label: net_cash_rece_sec, logicalType: DECIMAL, nullable: true, displayOrder: 88, precision: 38, scale: 18 }
-  - { name: credit_impa_loss, label: credit_impa_loss, logicalType: DECIMAL, nullable: true, displayOrder: 89, precision: 38, scale: 18 }
-  - { name: use_right_asset_dep, label: use_right_asset_dep, logicalType: DECIMAL, nullable: true, displayOrder: 90, precision: 38, scale: 18 }
-  - { name: oth_loss_asset, label: oth_loss_asset, logicalType: DECIMAL, nullable: true, displayOrder: 91, precision: 38, scale: 18 }
-  - { name: end_bal_cash, label: end_bal_cash, logicalType: DECIMAL, nullable: true, displayOrder: 92, precision: 38, scale: 18 }
-  - { name: beg_bal_cash, label: beg_bal_cash, logicalType: DECIMAL, nullable: true, displayOrder: 93, precision: 38, scale: 18 }
-  - { name: end_bal_cash_equ, label: end_bal_cash_equ, logicalType: DECIMAL, nullable: true, displayOrder: 94, precision: 38, scale: 18 }
-  - { name: beg_bal_cash_equ, label: beg_bal_cash_equ, logicalType: DECIMAL, nullable: true, displayOrder: 95, precision: 38, scale: 18 }
-  - { name: update_flag, label: update_flag, logicalType: STRING, nullable: true, displayOrder: 96, length: 64 }
+  - { name: ts_code, label: 证券代码, logicalType: STRING, nullable: false, displayOrder: 0, length: 64 }
+  - { name: ann_date, label: 公告日期, logicalType: DATE, nullable: false, displayOrder: 1 }
+  - { name: f_ann_date, label: 实际公告日期, logicalType: DATE, nullable: true, displayOrder: 2 }
+  - { name: end_date, label: 报告期, logicalType: DATE, nullable: false, displayOrder: 3 }
+  - { name: comp_type, label: 公司类型, logicalType: STRING, nullable: true, displayOrder: 4, length: 64 }
+  - { name: report_type, label: 报表类型, logicalType: STRING, nullable: false, displayOrder: 5, length: 64 }
+  - { name: end_type, label: 报告期类型, logicalType: STRING, nullable: true, displayOrder: 6, length: 64 }
+  - { name: net_profit, label: 净利润, logicalType: DECIMAL, nullable: true, displayOrder: 7, precision: 38, scale: 18 }
+  - { name: finan_exp, label: 财务费用, logicalType: DECIMAL, nullable: true, displayOrder: 8, precision: 38, scale: 18 }
+  - { name: c_fr_sale_sg, label: 销售商品、提供劳务收到的现金, logicalType: DECIMAL, nullable: true, displayOrder: 9, precision: 38, scale: 18 }
+  - { name: recp_tax_rends, label: 收到的税费返还, logicalType: DECIMAL, nullable: true, displayOrder: 10, precision: 38, scale: 18 }
+  - { name: n_depos_incr_fi, label: 客户存款和同业存放款项净增加额, logicalType: DECIMAL, nullable: true, displayOrder: 11, precision: 38, scale: 18 }
+  - { name: n_incr_loans_cb, label: 向中央银行借款净增加额, logicalType: DECIMAL, nullable: true, displayOrder: 12, precision: 38, scale: 18 }
+  - { name: n_inc_borr_oth_fi, label: 向其他金融机构拆入资金净增加额, logicalType: DECIMAL, nullable: true, displayOrder: 13, precision: 38, scale: 18 }
+  - { name: prem_fr_orig_contr, label: 收到原保险合同保费取得的现金, logicalType: DECIMAL, nullable: true, displayOrder: 14, precision: 38, scale: 18 }
+  - { name: n_incr_insured_dep, label: 保户储金净增加额, logicalType: DECIMAL, nullable: true, displayOrder: 15, precision: 38, scale: 18 }
+  - { name: n_reinsur_prem, label: 收到再保业务现金净额, logicalType: DECIMAL, nullable: true, displayOrder: 16, precision: 38, scale: 18 }
+  - { name: n_incr_disp_tfa, label: 处置交易性金融资产净增加额, logicalType: DECIMAL, nullable: true, displayOrder: 17, precision: 38, scale: 18 }
+  - { name: ifc_cash_incr, label: 收取利息和手续费净增加额, logicalType: DECIMAL, nullable: true, displayOrder: 18, precision: 38, scale: 18 }
+  - { name: n_incr_disp_faas, label: 处置可供出售金融资产净增加额, logicalType: DECIMAL, nullable: true, displayOrder: 19, precision: 38, scale: 18 }
+  - { name: n_incr_loans_oth_bank, label: 拆入资金净增加额, logicalType: DECIMAL, nullable: true, displayOrder: 20, precision: 38, scale: 18 }
+  - { name: n_cap_incr_repur, label: 回购业务资金净增加额, logicalType: DECIMAL, nullable: true, displayOrder: 21, precision: 38, scale: 18 }
+  - { name: c_fr_oth_operate_a, label: 收到其他与经营活动有关的现金, logicalType: DECIMAL, nullable: true, displayOrder: 22, precision: 38, scale: 18 }
+  - { name: c_inf_fr_operate_a, label: 经营活动现金流入小计, logicalType: DECIMAL, nullable: true, displayOrder: 23, precision: 38, scale: 18 }
+  - { name: c_paid_goods_s, label: 购买商品、接受劳务支付的现金, logicalType: DECIMAL, nullable: true, displayOrder: 24, precision: 38, scale: 18 }
+  - { name: c_paid_to_for_empl, label: 支付给职工以及为职工支付的现金, logicalType: DECIMAL, nullable: true, displayOrder: 25, precision: 38, scale: 18 }
+  - { name: c_paid_for_taxes, label: 支付的各项税费, logicalType: DECIMAL, nullable: true, displayOrder: 26, precision: 38, scale: 18 }
+  - { name: n_incr_clt_loan_adv, label: 客户贷款及垫款净增加额, logicalType: DECIMAL, nullable: true, displayOrder: 27, precision: 38, scale: 18 }
+  - { name: n_incr_dep_cbob, label: 存放央行和同业款项净增加额, logicalType: DECIMAL, nullable: true, displayOrder: 28, precision: 38, scale: 18 }
+  - { name: c_pay_claims_orig_inco, label: 支付原保险合同赔付款项的现金, logicalType: DECIMAL, nullable: true, displayOrder: 29, precision: 38, scale: 18 }
+  - { name: pay_handling_chrg, label: 支付手续费的现金, logicalType: DECIMAL, nullable: true, displayOrder: 30, precision: 38, scale: 18 }
+  - { name: pay_comm_insur_plcy, label: 支付保单红利的现金, logicalType: DECIMAL, nullable: true, displayOrder: 31, precision: 38, scale: 18 }
+  - { name: oth_cash_pay_oper_act, label: 支付其他与经营活动有关的现金, logicalType: DECIMAL, nullable: true, displayOrder: 32, precision: 38, scale: 18 }
+  - { name: st_cash_out_act, label: 经营活动现金流出小计, logicalType: DECIMAL, nullable: true, displayOrder: 33, precision: 38, scale: 18 }
+  - { name: n_cashflow_act, label: 经营活动产生的现金流量净额, logicalType: DECIMAL, nullable: true, displayOrder: 34, precision: 38, scale: 18 }
+  - { name: oth_recp_ral_inv_act, label: 收到其他与投资活动有关的现金, logicalType: DECIMAL, nullable: true, displayOrder: 35, precision: 38, scale: 18 }
+  - { name: c_disp_withdrwl_invest, label: 收回投资收到的现金, logicalType: DECIMAL, nullable: true, displayOrder: 36, precision: 38, scale: 18 }
+  - { name: c_recp_return_invest, label: 取得投资收益收到的现金, logicalType: DECIMAL, nullable: true, displayOrder: 37, precision: 38, scale: 18 }
+  - { name: n_recp_disp_fiolta, label: 处置固定资产、无形资产和其他长期资产收回的现金净额, logicalType: DECIMAL, nullable: true, displayOrder: 38, precision: 38, scale: 18 }
+  - { name: n_recp_disp_sobu, label: 处置子公司及其他营业单位收到的现金净额, logicalType: DECIMAL, nullable: true, displayOrder: 39, precision: 38, scale: 18 }
+  - { name: stot_inflows_inv_act, label: 投资活动现金流入小计, logicalType: DECIMAL, nullable: true, displayOrder: 40, precision: 38, scale: 18 }
+  - { name: c_pay_acq_const_fiolta, label: 购建固定资产、无形资产和其他长期资产支付的现金, logicalType: DECIMAL, nullable: true, displayOrder: 41, precision: 38, scale: 18 }
+  - { name: c_paid_invest, label: 投资支付的现金, logicalType: DECIMAL, nullable: true, displayOrder: 42, precision: 38, scale: 18 }
+  - { name: n_disp_subs_oth_biz, label: 取得子公司及其他营业单位支付的现金净额, logicalType: DECIMAL, nullable: true, displayOrder: 43, precision: 38, scale: 18 }
+  - { name: oth_pay_ral_inv_act, label: 支付其他与投资活动有关的现金, logicalType: DECIMAL, nullable: true, displayOrder: 44, precision: 38, scale: 18 }
+  - { name: n_incr_pledge_loan, label: 质押贷款净增加额, logicalType: DECIMAL, nullable: true, displayOrder: 45, precision: 38, scale: 18 }
+  - { name: stot_out_inv_act, label: 投资活动现金流出小计, logicalType: DECIMAL, nullable: true, displayOrder: 46, precision: 38, scale: 18 }
+  - { name: n_cashflow_inv_act, label: 投资活动产生的现金流量净额, logicalType: DECIMAL, nullable: true, displayOrder: 47, precision: 38, scale: 18 }
+  - { name: c_recp_borrow, label: 取得借款收到的现金, logicalType: DECIMAL, nullable: true, displayOrder: 48, precision: 38, scale: 18 }
+  - { name: proc_issue_bonds, label: 发行债券收到的现金, logicalType: DECIMAL, nullable: true, displayOrder: 49, precision: 38, scale: 18 }
+  - { name: oth_cash_recp_ral_fnc_act, label: 收到其他与筹资活动有关的现金, logicalType: DECIMAL, nullable: true, displayOrder: 50, precision: 38, scale: 18 }
+  - { name: stot_cash_in_fnc_act, label: 筹资活动现金流入小计, logicalType: DECIMAL, nullable: true, displayOrder: 51, precision: 38, scale: 18 }
+  - { name: free_cashflow, label: 企业自由现金流量, logicalType: DECIMAL, nullable: true, displayOrder: 52, precision: 38, scale: 18 }
+  - { name: c_prepay_amt_borr, label: 偿还债务支付的现金, logicalType: DECIMAL, nullable: true, displayOrder: 53, precision: 38, scale: 18 }
+  - { name: c_pay_dist_dpcp_int_exp, label: 分配股利、利润或偿付利息支付的现金, logicalType: DECIMAL, nullable: true, displayOrder: 54, precision: 38, scale: 18 }
+  - { name: incl_dvd_profit_paid_sc_ms, label: 其中：子公司支付给少数股东的股利、利润, logicalType: DECIMAL, nullable: true, displayOrder: 55, precision: 38, scale: 18 }
+  - { name: oth_cashpay_ral_fnc_act, label: 支付其他与筹资活动有关的现金, logicalType: DECIMAL, nullable: true, displayOrder: 56, precision: 38, scale: 18 }
+  - { name: stot_cashout_fnc_act, label: 筹资活动现金流出小计, logicalType: DECIMAL, nullable: true, displayOrder: 57, precision: 38, scale: 18 }
+  - { name: n_cash_flows_fnc_act, label: 筹资活动产生的现金流量净额, logicalType: DECIMAL, nullable: true, displayOrder: 58, precision: 38, scale: 18 }
+  - { name: eff_fx_flu_cash, label: 汇率变动对现金的影响, logicalType: DECIMAL, nullable: true, displayOrder: 59, precision: 38, scale: 18 }
+  - { name: n_incr_cash_cash_equ, label: 现金及现金等价物净增加额, logicalType: DECIMAL, nullable: true, displayOrder: 60, precision: 38, scale: 18 }
+  - { name: c_cash_equ_beg_period, label: 期初现金及现金等价物余额, logicalType: DECIMAL, nullable: true, displayOrder: 61, precision: 38, scale: 18 }
+  - { name: c_cash_equ_end_period, label: 期末现金及现金等价物余额, logicalType: DECIMAL, nullable: true, displayOrder: 62, precision: 38, scale: 18 }
+  - { name: c_recp_cap_contrib, label: 吸收投资收到的现金, logicalType: DECIMAL, nullable: true, displayOrder: 63, precision: 38, scale: 18 }
+  - { name: incl_cash_rec_saims, label: 其中：子公司吸收少数股东投资收到的现金, logicalType: DECIMAL, nullable: true, displayOrder: 64, precision: 38, scale: 18 }
+  - { name: uncon_invest_loss, label: 未确认投资损失, logicalType: DECIMAL, nullable: true, displayOrder: 65, precision: 38, scale: 18 }
+  - { name: prov_depr_assets, label: 加：资产减值准备, logicalType: DECIMAL, nullable: true, displayOrder: 66, precision: 38, scale: 18 }
+  - { name: depr_fa_coga_dpba, label: 固定资产折旧、油气资产折耗、生产性生物资产折旧, logicalType: DECIMAL, nullable: true, displayOrder: 67, precision: 38, scale: 18 }
+  - { name: amort_intang_assets, label: 无形资产摊销, logicalType: DECIMAL, nullable: true, displayOrder: 68, precision: 38, scale: 18 }
+  - { name: lt_amort_deferred_exp, label: 长期待摊费用摊销, logicalType: DECIMAL, nullable: true, displayOrder: 69, precision: 38, scale: 18 }
+  - { name: decr_deferred_exp, label: 待摊费用减少, logicalType: DECIMAL, nullable: true, displayOrder: 70, precision: 38, scale: 18 }
+  - { name: incr_acc_exp, label: 预提费用增加, logicalType: DECIMAL, nullable: true, displayOrder: 71, precision: 38, scale: 18 }
+  - { name: loss_disp_fiolta, label: 处置固定、无形资产和其他长期资产的损失, logicalType: DECIMAL, nullable: true, displayOrder: 72, precision: 38, scale: 18 }
+  - { name: loss_scr_fa, label: 固定资产报废损失, logicalType: DECIMAL, nullable: true, displayOrder: 73, precision: 38, scale: 18 }
+  - { name: loss_fv_chg, label: 公允价值变动损失, logicalType: DECIMAL, nullable: true, displayOrder: 74, precision: 38, scale: 18 }
+  - { name: invest_loss, label: 投资损失, logicalType: DECIMAL, nullable: true, displayOrder: 75, precision: 38, scale: 18 }
+  - { name: decr_def_inc_tax_assets, label: 递延所得税资产减少, logicalType: DECIMAL, nullable: true, displayOrder: 76, precision: 38, scale: 18 }
+  - { name: incr_def_inc_tax_liab, label: 递延所得税负债增加, logicalType: DECIMAL, nullable: true, displayOrder: 77, precision: 38, scale: 18 }
+  - { name: decr_inventories, label: 存货的减少, logicalType: DECIMAL, nullable: true, displayOrder: 78, precision: 38, scale: 18 }
+  - { name: decr_oper_payable, label: 经营性应收项目的减少, logicalType: DECIMAL, nullable: true, displayOrder: 79, precision: 38, scale: 18 }
+  - { name: incr_oper_payable, label: 经营性应付项目的增加, logicalType: DECIMAL, nullable: true, displayOrder: 80, precision: 38, scale: 18 }
+  - { name: others, label: 其他, logicalType: DECIMAL, nullable: true, displayOrder: 81, precision: 38, scale: 18 }
+  - { name: im_net_cashflow_oper_act, label: 经营活动产生的现金流量净额（间接法）, logicalType: DECIMAL, nullable: true, displayOrder: 82, precision: 38, scale: 18 }
+  - { name: conv_debt_into_cap, label: 债务转为资本, logicalType: DECIMAL, nullable: true, displayOrder: 83, precision: 38, scale: 18 }
+  - { name: conv_copbonds_due_within_1y, label: 一年内到期的可转换公司债券, logicalType: DECIMAL, nullable: true, displayOrder: 84, precision: 38, scale: 18 }
+  - { name: fa_fnc_leases, label: 融资租入固定资产, logicalType: DECIMAL, nullable: true, displayOrder: 85, precision: 38, scale: 18 }
+  - { name: im_n_incr_cash_equ, label: 现金及现金等价物净增加额（间接法）, logicalType: DECIMAL, nullable: true, displayOrder: 86, precision: 38, scale: 18 }
+  - { name: net_dism_capital_add, label: 拆出资金净增加额, logicalType: DECIMAL, nullable: true, displayOrder: 87, precision: 38, scale: 18 }
+  - { name: net_cash_rece_sec, label: 代理买卖证券收到的现金净额（元）, logicalType: DECIMAL, nullable: true, displayOrder: 88, precision: 38, scale: 18 }
+  - { name: credit_impa_loss, label: 信用减值损失, logicalType: DECIMAL, nullable: true, displayOrder: 89, precision: 38, scale: 18 }
+  - { name: use_right_asset_dep, label: 使用权资产折旧, logicalType: DECIMAL, nullable: true, displayOrder: 90, precision: 38, scale: 18 }
+  - { name: oth_loss_asset, label: 其他资产减值损失, logicalType: DECIMAL, nullable: true, displayOrder: 91, precision: 38, scale: 18 }
+  - { name: end_bal_cash, label: 现金的期末余额, logicalType: DECIMAL, nullable: true, displayOrder: 92, precision: 38, scale: 18 }
+  - { name: beg_bal_cash, label: 减：现金的期初余额, logicalType: DECIMAL, nullable: true, displayOrder: 93, precision: 38, scale: 18 }
+  - { name: end_bal_cash_equ, label: 加：现金等价物的期末余额, logicalType: DECIMAL, nullable: true, displayOrder: 94, precision: 38, scale: 18 }
+  - { name: beg_bal_cash_equ, label: 减：现金等价物的期初余额, logicalType: DECIMAL, nullable: true, displayOrder: 95, precision: 38, scale: 18 }
+  - { name: update_flag, label: 更新标识, logicalType: STRING, nullable: true, displayOrder: 96, length: 64 }
 businessKey: { mode: COMPOSITE, fields: [ts_code, end_date, report_type, ann_date] }
 filters: [ts_code, ann_date]
 fixedColumn: ts_code

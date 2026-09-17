@@ -51,10 +51,10 @@ class FixturePluginTest {
                 defaultValue: SUCCESS
                 allowedValues: [SUCCESS, EMPTY, SOURCE_FAILURE, TYPE_FAILURE, PERSISTENCE_FAILURE]
             columns:
-              - { name: ts_code, label: ts_code, logicalType: STRING, nullable: false, displayOrder: 0, length: 64 }
-              - { name: trade_date, label: trade_date, logicalType: DATE, nullable: false, displayOrder: 1 }
-              - { name: amount, label: amount, logicalType: DECIMAL, nullable: false, displayOrder: 2, precision: 38, scale: 18 }
-              - { name: note, label: note, logicalType: STRING, nullable: true, displayOrder: 3, length: 255 }
+              - { name: ts_code, label: 证券代码, logicalType: STRING, nullable: false, displayOrder: 0, length: 64 }
+              - { name: trade_date, label: 交易日, logicalType: DATE, nullable: false, displayOrder: 1 }
+              - { name: amount, label: 金额, logicalType: DECIMAL, nullable: false, displayOrder: 2, precision: 38, scale: 18 }
+              - { name: note, label: 备注, logicalType: STRING, nullable: true, displayOrder: 3, length: 255 }
             businessKey: { mode: COMPOSITE, fields: [ts_code, trade_date] }
             filters: [ts_code]
             fixedColumn: ts_code
@@ -191,19 +191,19 @@ class FixturePluginTest {
         return new DatasetDefinition(
                 key, "Fixture 日线", "验收", QueryMode.trade_date, List.of(expectedParameter()), TableName.from(key),
                 List.of(
-                        column("ts_code", LogicalType.STRING, false, 0, 64, null, null),
-                        column("trade_date", LogicalType.DATE, false, 1, null, null, null),
-                        column("amount", LogicalType.DECIMAL, false, 2, null, 38, 18),
-                        column("note", LogicalType.STRING, true, 3, 255, null, null)),
+                        column("ts_code", "证券代码", LogicalType.STRING, false, 0, 64, null, null),
+                        column("trade_date", "交易日", LogicalType.DATE, false, 1, null, null, null),
+                        column("amount", "金额", LogicalType.DECIMAL, false, 2, null, 38, 18),
+                        column("note", "备注", LogicalType.STRING, true, 3, 255, null, null)),
                 new BusinessKeyDefinition(BusinessKeyMode.COMPOSITE, List.of("ts_code", "trade_date")),
                 List.of(new FilterDefinition("ts_code")), "ts_code");
     }
 
     private static ColumnDefinition column(
-            String name, LogicalType type, boolean nullable, int order,
+            String name, String label, LogicalType type, boolean nullable, int order,
             Integer length, Integer precision, Integer scale) {
         return new ColumnDefinition(
-                name, name, type, nullable, order, length, precision, scale, List.of(), false);
+                name, label, type, nullable, order, length, precision, scale, List.of(), false);
     }
 
     private static AnnotationConfigApplicationContext context(String profile, String enabled) {

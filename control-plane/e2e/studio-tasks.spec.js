@@ -87,7 +87,7 @@ test('多页混合状态：四组查询、服务端总数、翻页和每页数�
   await expect(list(page).locator('[data-total]')).toContainText('第 2 / 2 页')
   await expect(list(page).locator('article')).toHaveCount(13)
   await list(page).locator('.el-select__wrapper').click()
-  await page.getByRole('option', { name: '50/page', exact: true }).click()
+  await page.getByRole('option', { name: '50条/页', exact: true }).click()
   await expect(list(page).locator('[data-total]')).toContainText('需处理 · 共 33 个任务，第 1 / 1 页')
   await expect(list(page).locator('article')).toHaveCount(33)
   expect(api.requests.at(-1).query).toEqual({ page: '1', pageSize: '50', statusGroup: 'ERROR' })

@@ -427,7 +427,10 @@ async function assertFixtureRow(page, body) {
   })
   const displayedTimestamp = shanghaiTimestamp(rowData.ingested_at)
 
-  await expect(page.getByRole('columnheader')).toHaveText(body.columns)
+  await expect(page.getByRole('columnheader')).toHaveText([
+    '证券代码ts_code', '交易日trade_date', '金额amount', '备注note',
+    '来源插件source_plugin', '来源接口source_api', '入库时间ingested_at',
+  ])
   const row = page
     .getByRole('row')
     .filter({ has: page.getByRole('cell', { name: '000001.SZ', exact: true }) })

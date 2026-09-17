@@ -331,11 +331,9 @@ describe('AppLayout', () => {
       expect(wrapper.get('main h1').text()).toBe('下载工作台')
       expect(
         wrapper.findAll('main h2').map((heading) => heading.text()),
-      ).toEqual(['接口目录', '最近任务 0'])
+      ).toEqual(['接口目录', '选择接口，开始下载', '最近任务 0'])
       expect(wrapper.find('input[type="color"]').exists()).toBe(false)
-      expect(wrapper.getComponent(DownloadAction).props('disabled')).toBe(
-        true,
-      )
+      expect(wrapper.findComponent(DownloadAction).exists()).toBe(false)
       expect(wrapper.text()).not.toContain('数据下载模块尚未完成')
     } finally {
       wrapper.unmount()

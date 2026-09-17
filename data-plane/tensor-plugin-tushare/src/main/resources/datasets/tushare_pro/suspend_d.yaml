@@ -8,10 +8,10 @@ parameters:
   - { name: ts_code, label: 股票代码, type: TS_CODE, required: true }
   - { name: trade_date, label: 交易日期, type: DATE, required: true }
 columns:
-  - { name: ts_code, label: ts_code, logicalType: STRING, nullable: false, displayOrder: 0, length: 64 }
-  - { name: trade_date, label: trade_date, logicalType: DATE, nullable: false, displayOrder: 1 }
-  - { name: suspend_timing, label: suspend_timing, logicalType: STRING, nullable: true, displayOrder: 2, length: 255 }
-  - { name: suspend_type, label: suspend_type, logicalType: STRING, nullable: true, displayOrder: 3, length: 64 }
+  - { name: ts_code, label: 证券代码, logicalType: STRING, nullable: false, displayOrder: 0, length: 64 }
+  - { name: trade_date, label: 停复牌日期, logicalType: DATE, nullable: false, displayOrder: 1 }
+  - { name: suspend_timing, label: 日内停牌时间段, logicalType: STRING, nullable: true, displayOrder: 2, length: 255 }
+  - { name: suspend_type, label: 停复牌类型, logicalType: STRING, nullable: true, displayOrder: 3, length: 64 }
 businessKey: { mode: COMPOSITE, fields: [ts_code, trade_date] }
 filters: [ts_code, trade_date]
 fixedColumn: ts_code

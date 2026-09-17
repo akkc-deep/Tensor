@@ -8,24 +8,24 @@ parameters:
   - { name: ts_code, label: 股票代码, type: TS_CODE, required: true }
   - { name: exchange, label: 交易所, type: ENUM, required: true, allowedValues: [SSE, SZSE, BSE] }
 columns:
-  - { name: ts_code, label: ts_code, logicalType: STRING, nullable: false, displayOrder: 0, length: 64 }
-  - { name: com_name, label: com_name, logicalType: STRING, nullable: true, displayOrder: 1, length: 128 }
-  - { name: com_id, label: com_id, logicalType: STRING, nullable: true, displayOrder: 2, length: 64 }
-  - { name: chairman, label: chairman, logicalType: STRING, nullable: true, displayOrder: 3, length: 128 }
-  - { name: manager, label: manager, logicalType: STRING, nullable: true, displayOrder: 4, length: 128 }
-  - { name: secretary, label: secretary, logicalType: STRING, nullable: true, displayOrder: 5, length: 128 }
-  - { name: reg_capital, label: reg_capital, logicalType: DECIMAL, nullable: true, displayOrder: 6, precision: 38, scale: 18 }
-  - { name: setup_date, label: setup_date, logicalType: DATE, nullable: true, displayOrder: 7 }
-  - { name: province, label: province, logicalType: STRING, nullable: true, displayOrder: 8, length: 128 }
-  - { name: city, label: city, logicalType: STRING, nullable: true, displayOrder: 9, length: 128 }
-  - { name: introduction, label: introduction, logicalType: TEXT, nullable: true, displayOrder: 10, longText: true }
-  - { name: website, label: website, logicalType: STRING, nullable: true, displayOrder: 11, length: 255 }
-  - { name: email, label: email, logicalType: STRING, nullable: true, displayOrder: 12, length: 255 }
-  - { name: office, label: office, logicalType: STRING, nullable: true, displayOrder: 13, length: 255 }
-  - { name: business_scope, label: business_scope, logicalType: TEXT, nullable: true, displayOrder: 14, longText: true }
-  - { name: employees, label: employees, logicalType: LONG, nullable: true, displayOrder: 15 }
-  - { name: main_business, label: main_business, logicalType: TEXT, nullable: true, displayOrder: 16, longText: true }
-  - { name: exchange, label: exchange, logicalType: STRING, nullable: true, displayOrder: 17, length: 64 }
+  - { name: ts_code, label: 证券代码, logicalType: STRING, nullable: false, displayOrder: 0, length: 64 }
+  - { name: com_name, label: 公司全称, logicalType: STRING, nullable: true, displayOrder: 1, length: 128 }
+  - { name: com_id, label: 统一社会信用代码, logicalType: STRING, nullable: true, displayOrder: 2, length: 64 }
+  - { name: chairman, label: 法人代表, logicalType: STRING, nullable: true, displayOrder: 3, length: 128 }
+  - { name: manager, label: 总经理, logicalType: STRING, nullable: true, displayOrder: 4, length: 128 }
+  - { name: secretary, label: 董秘, logicalType: STRING, nullable: true, displayOrder: 5, length: 128 }
+  - { name: reg_capital, label: 注册资本（万元）, logicalType: DECIMAL, nullable: true, displayOrder: 6, precision: 38, scale: 18 }
+  - { name: setup_date, label: 注册日期, logicalType: DATE, nullable: true, displayOrder: 7 }
+  - { name: province, label: 所在省份, logicalType: STRING, nullable: true, displayOrder: 8, length: 128 }
+  - { name: city, label: 所在城市, logicalType: STRING, nullable: true, displayOrder: 9, length: 128 }
+  - { name: introduction, label: 公司介绍, logicalType: TEXT, nullable: true, displayOrder: 10, longText: true }
+  - { name: website, label: 公司主页, logicalType: STRING, nullable: true, displayOrder: 11, length: 255 }
+  - { name: email, label: 电子邮件, logicalType: STRING, nullable: true, displayOrder: 12, length: 255 }
+  - { name: office, label: 办公室, logicalType: STRING, nullable: true, displayOrder: 13, length: 255 }
+  - { name: business_scope, label: 经营范围, logicalType: TEXT, nullable: true, displayOrder: 14, longText: true }
+  - { name: employees, label: 员工人数, logicalType: LONG, nullable: true, displayOrder: 15 }
+  - { name: main_business, label: 主要业务及产品, logicalType: TEXT, nullable: true, displayOrder: 16, longText: true }
+  - { name: exchange, label: 交易所代码, logicalType: STRING, nullable: true, displayOrder: 17, length: 64 }
 businessKey: { mode: COMPOSITE, fields: [ts_code] }
 filters: [ts_code]
 fixedColumn: ts_code

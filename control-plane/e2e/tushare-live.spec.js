@@ -1448,10 +1448,9 @@ function shanghaiTimestamp(value) {
 
 async function assertVisibleRow(page, definition, row) {
   await assertPageSafe(page, 'visible business row')
-  const marketLabels = { ts_code: '证券代码', trade_date: '交易日', open: '开盘价', high: '最高价', low: '最低价', close: '收盘价', pre_close: '前收盘价', change: '涨跌额', vol: '成交量', amount: '成交额', source_plugin: '来源插件', source_api: '来源接口', ingested_at: '入库时间', pct_chg: definition.apiName === 'daily' ? '涨跌幅（%）' : '涨跌幅（比率）' }
-  const market = definition.pluginId === 'tushare_pro' && ['daily', 'weekly'].includes(definition.apiName)
-  const headerTexts = [...definition.columns, ...SOURCE_COLUMNS.map((name) => ({ name, label: name }))]
-    .map(({ name, label }) => market && marketLabels[name] ? `${marketLabels[name]}${name}` : label)
+  const sourceLabels = { source_plugin: '来源插件', source_api: '来源接口', ingested_at: '入库时间' }
+  const headerTexts = [...definition.columns, ...SOURCE_COLUMNS.map((name) => ({ name, label: sourceLabels[name] }))]
+    .map(({ name, label }) => `${label}${name}`)
   safeCheck(
     JSON.stringify((await page.getByRole('columnheader').allTextContents()).map((v) => v.replace(/\s+/g, ''))) === JSON.stringify(headerTexts.map((v) => v.replace(/\s+/g, ''))),
     'visible column labels',

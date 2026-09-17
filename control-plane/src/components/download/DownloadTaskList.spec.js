@@ -336,7 +336,7 @@ describe('DownloadTaskList', () => {
       await input.trigger('click')
       await flushPromises()
       const options = [...document.body.querySelectorAll('.el-select-dropdown__item')]
-      await options.find((option) => option.textContent.trim() === '50/page').click()
+      await options.find((option) => option.textContent.trim() === '50条/页').click()
       await flushPromises()
 
       expect(wrapper.props('pageSize')).toBe(20)

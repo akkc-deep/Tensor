@@ -252,7 +252,7 @@ onUnmounted(() => {
           @update:model-value="selectApi"
         />
       </section>
-      <div class="studio-form">
+      <div class="studio-form" :class="{ 'studio-form--empty': !selectedApi && submissionState === 'IDLE' && !storageError }">
         <template v-if="selectedApi">
           <div class="selected-api-heading">
             <span class="api-glyph" aria-hidden="true"><Grid /></span>
@@ -260,7 +260,11 @@ onUnmounted(() => {
           </div>
           <p class="selected-api-meta">{{ selectedApi.category }} · {{ queryModeLabels[selectedApi.queryMode] ?? selectedApi.queryMode }}</p>
         </template>
-        <p v-else class="catalog-notice">请选择数据接口，从左侧目录开始。</p>
+        <div v-else-if="submissionState === 'IDLE' && !storageError" class="download-empty" role="status">
+          <Grid aria-hidden="true" />
+          <h2>选择接口，开始下载</h2>
+          <p>从左侧目录选择数据接口，设置参数后即可创建下载任务。</p>
+        </div>
         <AsyncStatePanel
           v-if="selectedApi && metadataState === 'LOADING'"
           state="LOADING"
@@ -276,7 +280,7 @@ onUnmounted(() => {
           retry-label="重新加载能力"
           @retry="retryMetadata"
         />
-        <div class="download-config-panel">
+        <div v-if="selectedApi || submissionState !== 'IDLE' || storageError" class="download-config-panel">
           <section v-if="selectedApi && capabilities" class="form-parameters" aria-labelledby="download-mode-label">
             <header class="mode-heading"><h3 id="download-mode-label">下载方式</h3><span>{{ mode === 'RANGE' ? '按日期范围' : '单次请求' }}</span></header>
             <div class="mode-control" role="group" aria-labelledby="download-mode-label">
@@ -288,7 +292,7 @@ onUnmounted(() => {
             <p v-else class="parameter-empty">此模式无需填写请求参数。</p>
             <p v-if="completenessNote" class="mode-note completeness-note">{{ completenessNote }}</p>
           </section>
-          <footer class="form-footer">
+          <footer v-if="selectedApi || locked" class="form-footer">
             <DownloadAction :mode="mode" :disabled="!canSubmit" :submitting="locked" :recovering="submissionState === 'RECOVERING'" @submit="handleSubmit" />
             <p class="form-footer__help">接收后可继续提交其他任务</p>
           </footer>
@@ -440,6 +444,14 @@ onUnmounted(() => {
 </template>
 
 <style scoped>
+.studio-form { padding: 2.8rem; }
+.studio-form > * { width: 100%; max-width: 68rem; margin-inline: auto; }
+.studio-form > .async-state-panel { padding-inline: 0; }
+.studio-form--empty { display: grid; place-items: center; }
+.download-empty { display: flex; flex-direction: column; align-items: center; padding: 4.5rem 0; color: var(--tensor-muted); text-align: center; }
+.download-empty > svg { width: 3.2rem; height: 3.2rem; }
+.download-empty h2 { margin: 1.5rem 0 0; color: var(--tensor-text); font-size: 1.8rem; font-weight: 600; }
+.download-empty p { max-width: 32rem; margin: 0.9rem 0 0; font-size: 1.3rem; line-height: 1.8; text-wrap: balance; }
 .catalog-panel { display: flex; flex-direction: column; }
 .catalog-panel h2 { display: flex; align-items: center; gap: 0.9rem; }
 .catalog-count { display: inline-grid; place-items: center; min-width: 2rem; height: 1.9rem; padding: 0 0.5rem; border-radius: 0.4rem; background: var(--tensor-raised); font-weight: 400; }
@@ -450,20 +462,17 @@ onUnmounted(() => {
 .catalog-panel .catalog-notice { padding: 2rem 1.8rem; }
 .catalog-panel :deep(.async-state-panel) { padding: 2rem 1.8rem; }
 .catalog-panel :deep(.async-state-panel__title) { font-size: 1.6rem; }
-.selected-api-heading { display: flex; align-items: center; gap: 1.3rem; padding: 2.8rem 2.8rem 0; }
+.selected-api-heading { display: flex; align-items: center; gap: 1.3rem; }
 .selected-api-heading > div { min-width: 0; overflow-wrap: anywhere; }
 .selected-api-heading h2 { margin: 0; font-size: 2.1rem; font-weight: 600; line-height: 1.5; }
 .selected-api-heading code { color: var(--tensor-muted); font: 1.2rem 'SFMono-Regular', Consolas, monospace; }
 .api-glyph { display: grid; place-items: center; flex-shrink: 0; width: 4rem; height: 4rem; border: 0.1rem solid var(--tensor-line); border-radius: 0.8rem; color: var(--tensor-accent); }
 .api-glyph svg { width: 1.8rem; height: 1.8rem; }
-.selected-api-meta { margin: 1.6rem 2.8rem 0; color: var(--tensor-muted); font-size: 1.2rem; overflow-wrap: anywhere; }
+.selected-api-meta { margin-block: 1.6rem 0; color: var(--tensor-muted); font-size: 1.2rem; overflow-wrap: anywhere; }
 @media (max-width: 1200px) {
-  .selected-api-heading { padding-left: 2.2rem; padding-right: 2.2rem; }
-  .selected-api-meta { margin-left: 2.2rem; margin-right: 2.2rem; }
+  .studio-form { padding: 2.8rem 2.2rem; }
 }
 
-.download-config-panel { padding: 0 2.8rem; }
-.form-parameters, .download-config-panel .form-footer { max-width: 68rem; }
 .form-parameters { margin-top: 2.6rem; padding-top: 2.4rem; border-top: 0.1rem solid var(--tensor-line); }
 .mode-heading { display: flex; align-items: center; justify-content: space-between; gap: 1.2rem; margin-bottom: 1.2rem; }
 .mode-heading h3 { margin: 0; font-size: 1.4rem; font-weight: 500; }
@@ -476,8 +485,7 @@ onUnmounted(() => {
 .mode-control svg { width: 1.3rem; height: 1.3rem; }
 .mode-control small { font-size: 1.2rem; padding: 0.1rem 0.4rem; background: var(--tensor-line); border-radius: 0.3rem; }
 .mode-note { margin: 1.2rem 0 2rem; font-size: 1.2rem; color: var(--tensor-muted); overflow-wrap: anywhere; }
-.download-config-panel .form-footer { flex-direction: column; align-items: flex-start; gap: 1.3rem; padding: 2.3rem 0 2.8rem; margin-top: 2.9rem; border-top: 0.1rem solid var(--tensor-line); }
-@media (max-width: 1200px) { .download-config-panel { padding: 0 2.2rem; } }
+.download-config-panel .form-footer { flex-direction: column; align-items: flex-start; gap: 1.3rem; padding: 2.3rem 0 0; margin-top: 2.9rem; border-top: 0.1rem solid var(--tensor-line); }
 
 .download-feedback { min-width: 0; margin-bottom: 2.8rem; border-top: 0.1rem solid var(--tensor-line); }
 .download-feedback :deep(.async-state-panel) { display: grid; grid-template-columns: 1.8rem minmax(0, 1fr); align-items: start; column-gap: 0.9rem; padding: 1.8rem 0 0; }

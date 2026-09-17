@@ -61,7 +61,7 @@ function parameters(params) {
 }
 
 function formatTime(value) {
-  return new Intl.DateTimeFormat(undefined, {
+  return new Intl.DateTimeFormat('zh-CN', {
     dateStyle: 'medium',
     timeStyle: 'medium',
   }).format(new Date(value))
@@ -227,7 +227,7 @@ summary { width: fit-content; cursor: pointer; }
 .task-facts__body > * { min-width: 0; }
 .task-footer { display: grid; gap: 1.2rem; padding-top: 1.2rem; border-top: 0.1rem solid var(--tensor-line); color: var(--tensor-muted); font-size: 1.2rem; overflow-wrap: anywhere; }
 .task-footer__help { display: grid; gap: 0.4rem; }
-.download-task-list__pagination :deep(.el-pagination) { display: flex; flex-wrap: wrap; min-width: 0; row-gap: 0.8rem; }
+.download-task-list__pagination :deep(.el-pagination) { display: flex; flex-wrap: wrap; min-width: 0; row-gap: 0.8rem; --el-pagination-bg-color: transparent; --el-pagination-button-disabled-bg-color: transparent; }
 .download-task-list__pagination :deep(.el-pagination__sizes) { margin: 0 auto 0 0; }
 .download-task-list__pagination :deep(.el-select__wrapper) { min-height: 3.4rem; }
 .download-task-list__pagination :deep(.el-pager) { flex-basis: 100%; justify-content: center; margin: 0; }

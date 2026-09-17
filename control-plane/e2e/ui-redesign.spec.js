@@ -16,12 +16,7 @@ import {
 
 const SOURCE_COLUMNS = ['source_plugin', 'source_api', 'ingested_at']
 const SCREENSHOT_DIR = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../control-plane/node_modules/.cache/issue018-t12-ui')
-const MARKET_LABELS = {
-  ts_code: '证券代码', trade_date: '交易日', open: '开盘价', high: '最高价',
-  low: '最低价', close: '收盘价', pre_close: '前收盘价', change: '涨跌额',
-  vol: '成交量', amount: '成交额', source_plugin: '来源插件', source_api: '来源接口',
-  ingested_at: '入库时间',
-}
+const SOURCE_HEADERS = ['来源插件source_plugin', '来源接口source_api', '入库时间ingested_at']
 
 test.use({ baseURL: process.env.TENSOR_UI_BASE_URL || 'http://127.0.0.1:4173' })
 
@@ -231,11 +226,7 @@ async function fillDatasetFilters(page, definition) {
 }
 
 function expectedHeaders(definition) {
-  return [...definition.columns.map(({ name, label }) => {
-    if (!['daily', 'weekly'].includes(definition.apiName)) return label
-    if (name === 'pct_chg') return definition.apiName === 'daily' ? '涨跌幅（%）pct_chg' : '涨跌幅（比率）pct_chg'
-    return MARKET_LABELS[name] ? `${MARKET_LABELS[name]}${name}` : label
-  }), ...SOURCE_COLUMNS.map((name) => ['daily', 'weekly'].includes(definition.apiName) ? `${MARKET_LABELS[name]}${name}` : name)]
+  return [...definition.columns.map(({ name, label }) => `${label}${name}`), ...SOURCE_HEADERS]
 }
 
 async function submitDataset(page, definition) {
@@ -797,7 +788,9 @@ test('精确宽表、符号、单位、大整数、空值与纯文本 tooltip', 
       await expect(table.locator('th').filter({ hasText: '涨跌幅（%）' })).toBeVisible()
       const number = table.locator('.dataset-table__number').first()
       expect(await number.evaluate((element) => getComputedStyle(element).fontVariantNumeric)).toContain('tabular-nums')
-      expect(await number.evaluate((element) => getComputedStyle(element.closest('td')).textAlign)).toBe('right')
+      expect(await table.locator('th, td').evaluateAll((cells) =>
+        [...new Set(cells.map((cell) => getComputedStyle(cell).textAlign))],
+      )).toEqual(['center'])
     }
     if (apiName === 'weekly') {
       await expect(table).toContainText('-0.0378')

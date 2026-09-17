@@ -6,13 +6,13 @@ displayName: 行业指数分类
 queryMode: snapshot
 parameters: []
 columns:
-  - { name: index_code, label: index_code, logicalType: STRING, nullable: false, displayOrder: 0, length: 64 }
-  - { name: industry_name, label: industry_name, logicalType: STRING, nullable: true, displayOrder: 1, length: 128 }
-  - { name: level, label: level, logicalType: STRING, nullable: true, displayOrder: 2, length: 64 }
-  - { name: industry_code, label: industry_code, logicalType: STRING, nullable: true, displayOrder: 3, length: 64 }
-  - { name: is_pub, label: is_pub, logicalType: STRING, nullable: true, displayOrder: 4, length: 64 }
-  - { name: parent_code, label: parent_code, logicalType: STRING, nullable: true, displayOrder: 5, length: 64 }
-  - { name: src, label: src, logicalType: STRING, nullable: true, displayOrder: 6, length: 64 }
+  - { name: index_code, label: 指数代码, logicalType: STRING, nullable: false, displayOrder: 0, length: 64 }
+  - { name: industry_name, label: 行业名称, logicalType: STRING, nullable: true, displayOrder: 1, length: 128 }
+  - { name: level, label: 行业层级, logicalType: STRING, nullable: true, displayOrder: 2, length: 64 }
+  - { name: industry_code, label: 行业代码, logicalType: STRING, nullable: true, displayOrder: 3, length: 64 }
+  - { name: is_pub, label: 是否发布了指数, logicalType: STRING, nullable: true, displayOrder: 4, length: 64 }
+  - { name: parent_code, label: 父级代码, logicalType: STRING, nullable: true, displayOrder: 5, length: 64 }
+  - { name: src, label: 行业分类来源, logicalType: STRING, nullable: true, displayOrder: 6, length: 64 }
 businessKey: { mode: COMPOSITE, fields: [index_code] }
 filters: []
 fixedColumn: index_code

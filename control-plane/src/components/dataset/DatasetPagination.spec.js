@@ -86,7 +86,7 @@ describe('DatasetPagination', () => {
       await input.trigger('click')
       await flushPromises()
       const options = [...document.body.querySelectorAll('.el-select-dropdown__item')]
-      expect(options.map((option) => option.textContent.trim())).toEqual(['20/page', '50/page', '100/page'])
+      expect(options.map((option) => option.textContent.trim())).toEqual(['20条/页', '50条/页', '100条/页'])
       await options[2].click()
       await flushPromises()
 
