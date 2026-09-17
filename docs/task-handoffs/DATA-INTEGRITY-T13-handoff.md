@@ -12,6 +12,10 @@ pause
 
 ## Current State
 
+**2026-09-18 阻塞已解除，T13已完成。** 用户明确“授权本地合并并继续完成 T13”；main已集成代码与证据，正式合同门禁在 `6c3c13f` 上exit0（metadata42/schema47/package4、前端738、11拒绝自检通过），归档输入一致，自有容器已清理。看板已依次记录 BLOCKED → READY → IN_PROGRESS → COMPLETED；本pause文件作为历史入口保留。按最新授权未推送远程。
+
+以下为原阻塞时的历史快照，当前状态以看板及 `docs/verification/data-integrity-t13/main-sync/contract-summary.json` 为准：
+
 2026-09-17，用户要求“把远程main的代码拉到数据检验隔离工作区，然后继续完成T13”后，已在 `.worktrees/data-integrity` / `feat/data-integrity` 同步 `origin/main@5aaf6ad`，解决冲突并完成独立审查与全套隔离复测。代码已提交为 `a7deb7dd2bcac252171d1fd9d4c62fff2e07039e`；实现/隔离验证已通过，T13整体验收尚未完成。
 
 可靠fixture证明E20/命中19/缺失1/额外1/95%，改数后新报告100%且旧报告仍95%；整只无行股票有20个独立SQL完整缺失键；可靠空与UNKNOWN保留null。六次检查的七字段证券行及SHA前后不变，上游调用0，同库版本2→3保留旧报告并通用显示新增规则。
@@ -70,13 +74,11 @@ pause
 
 ## Remaining Work
 
-1. 获得用户对将 `a7deb7d` 本地快进合并到main的明确授权；确认main仍干净且位于 `5aaf6ad`，集成后记录SHA与607项源码一致性证据。不得绕过自动审批或main守卫，不推送。
-2. 在上述main运行原 `scripts/verify-contracts.sh`，记录实际成功结果；若发现真实失败，按其结果处理，不能用隔离区通过替代。
-3. 门禁通过后依看板状态机记录阻塞解除/恢复及T13最终验收，届时才可标COMPLETED。当前无其他未关闭代码审查问题。
+无。用户已授权本地main集成，正式合同门禁通过，输入一致性与T13完成状态已记录。没有后继预定义任务。
 
 ## Resume Task
 
-继续 `DATA-INTEGRITY-T13`：用真实受控数据证明完整用户流程、只读边界、规则扩展及历史可追溯，并完成最终回归与运维验收。剩余范围仅上述已建立的main集成门禁。
+`DATA-INTEGRITY-T13` 已完成，无需恢复。实现、历史阻塞及最终解除结果保留供后续查证。
 
 ## Start Here
 
@@ -89,12 +91,11 @@ pause
 5. `.superpowers/sdd/2026-09-17-data-integrity-t13/final-review.md`、`progress.md`。
 6. `scripts/verify-contracts.sh`。
 
-第一步：取得对 `a7deb7d` 本地main合并的明确授权，核对607项被测输入与实际集成提交一致，再运行原合同门禁；此前保留隔离工作区、已提交实现、暂存的文档证据和恢复stash，不重做已通过的fixture/浏览器实现。
+查证入口：读取看板的T13完成记录和 `docs/verification/data-integrity-t13/main-sync/contract-summary.json`，无需重做已通过的实现或验收。
 
 ## Blocker
 
-- **Reason:** 专属设计第6节的正式合同门禁要求真实、代码一致的clean committed main。自动审批已拒绝把311文件提交 `a7deb7d` 快进到默认main，明确要求用户授权这一具体历史变更；授权未收到，main仍为 `5aaf6ad`。
-- **Resolution condition:** 用户明确授权的clean committed main已包含全部待验收输入，集成SHA和与T13被测代码的一致性证据已建立，随后正式合同门禁成功。只有这些可观察结果成立才记录 `BLOCKED -> READY`；恢复实施是后续独立状态变化。
+无。原main集成审批阻塞于2026-09-18经用户明确授权解除，正式main合同门禁已成功，恢复stash与隔离工作区保留。
 
 ## Risks
 

@@ -1,10 +1,28 @@
 # DATA-INTEGRITY-T13 验收记录
 
-日期：2026-09-17。工作区 `.worktrees/data-integrity`；分支 `feat/data-integrity`。依据：[任务设计](../task-designs/DATA-INTEGRITY-T13-design.md)。本记录区分本次实测、待执行与最终集成门禁。
+实施日期：2026-09-17；最终集成验收：2026-09-18。实现工作区 `.worktrees/data-integrity` / `feat/data-integrity`；正式门禁在根工作区本地 `main`。依据：[任务设计](../task-designs/DATA-INTEGRITY-T13-design.md)。本记录区分本次实测、待执行与最终集成门禁。
 
 ## 当前状态
 
-T13 **BLOCKED**（仅剩设计第6节的main集成门禁）。已将远程 `main@5aaf6ad` 同步到隔离区，合并审查及全部隔离验证通过，代码提交为 `a7deb7dd2bcac252171d1fd9d4c62fff2e07039e`。将该311文件提交快进到本地main的操作被自动审批拒绝，要求用户对此具体默认分支变更明确授权；授权请求待答复。main仍为 `5aaf6ad`，未推送，正式门禁尚未通过。
+T13 **COMPLETED**。2026-09-18 用户明确“授权本地合并并继续完成 T13”；已将数据检验提交 `a7deb7d` 及文档截图提交 `1e3b039` 快进合并到真实本地main。正式合同门禁在 `6c3c13f908ca37acddfcf46fe6a76246a4283630` 上通过，已解除原审批/main门禁阻塞。按最新授权未推送远程，隔离工作区及恢复stash保留。
+
+## 最终 main 合同门禁（2026-09-18）
+
+在干净、已提交的真实main执行：
+
+```sh
+PATH=/Users/qiangzhiwei/.nvm/versions/node/v24.15.0/bin:$PATH \
+DOCKER_HOST=unix:///Users/qiangzhiwei/.colima/default/docker.sock \
+TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE=/var/run/docker.sock \
+M14_MAVEN_REPO=/Users/qiangzhiwei/.m2/repository \
+sh scripts/verify-contracts.sh
+```
+
+最终 **exit0**：metadata **42**、真实MySQL schema **47**、package **4**，合计93项合同测试，0失败/错误/跳过；同轮前端50文件/738项及构建通过，11项拒绝自检通过。Maven用时46.605秒，执行窗口为 `2026-09-17T17:02:55.193505Z` 至 `17:03:42.891150Z`（北京时间9月18日）。40个YAML、生产54表/8迁移与验收55表/9迁移等合同验证通过；两个自有容器全部退出，既有容器保留。
+
+首次正式运行曾因远程main新增 `mainBusinessSingleIsOnlyAStockSnapshot` 而遇到旧门禁期待41项的 `report-case-count` 失败。仅同步精确测试方法、数量、自检及摘要为42；限定独立复审通过，全部main/干净输入/HEAD归档与报告检查保留。失败记录和最终成功记录分别保存，不混用结果。
+
+[最终摘要](data-integrity-t13/main-sync/contract-summary.json)、[脚本原始证据](data-integrity-t13/main-sync/contract-verification.json)、[首次失败](data-integrity-t13/main-sync/contract-first-attempt.json)、[集成授权与SHA](data-integrity-t13/main-sync/integration.json)。607项归档输入与集成提交及工作区逐项一致，其中606项与原被测清单相同，唯一变化是上述合同脚本；产品及测试输入未改变，因此既有SQL、浏览器、只读和版本历史证据继续适用。最终文档提交仅归档证据与状态，不改变被测代码。
 
 ## 同步远程 main 后的最新验证
 
@@ -12,7 +30,7 @@ T13 **BLOCKED**（仅剩设计第6节的main集成门禁）。已将远程 `main
 
 最新结果：前端 **50文件/738项**、API stub **39项**、完整性Java专项 **441项（含125项真实IT）**、production **1466项**、acceptance **1469项**及构建均通过；真实五套浏览器 **70项通过，0失败/跳过**。浏览器于 `2026-09-17T14:44:53.680712Z` 至 `14:57:43.616850Z` 运行，acceptance JAR SHA256为 `a5ff0e16d960b164702fd08890da9696b41b7c9b8514637f7722683a62a03ddf`。SQL95%→100%、旧报告不变、六次证券快照不变、上游0和同库版本2→3均再次验证；自有环境清理完成。
 
-完整结果、失败重跑原因、三宽度截图及607文件源码一致性清单见[本轮验收索引](data-integrity-t13/main-sync/README.md)，实际集成阻塞见[integration.json](data-integrity-t13/main-sync/integration.json)。以下原始验收章节及740项前端结果属于同步前历史证据，保留原值；最终集成门禁仍需在获准的真实clean committed main执行，隔离测试不能替代。
+完整结果、失败重跑原因、三宽度截图及607文件源码一致性清单见[本轮验收索引](data-integrity-t13/main-sync/README.md)，集成解除记录见[integration.json](data-integrity-t13/main-sync/integration.json)。以下原始验收章节及740项前端结果属于同步前历史证据，保留原值；正式main门禁结果单列于本页上节，隔离测试未被当作其替代。
 
 ## 基线与浏览器 stub
 
@@ -26,13 +44,13 @@ T13 **BLOCKED**（仅剩设计第6节的main集成门禁）。已将远程 `main
 
 真实HTTP/MySQL首个RED：`IntegrityFixtureFlowIT` 实际MySQL8.4.6及9次迁移，请求PROVEN_EXTRA的Jan1..21，完成报告返回UNKNOWN而预期FAIL；1失败、0错误、0跳过。未以编译或环境故障作为RED。
 
-## 合同脚本准备
+## 合同脚本准备（历史）
 
-脚本中的Flyway方法名及证据统计由V8最小同步到V9：生产54表、验收55表，生产/验收迁移8/9、验收1110列、55主索引、56非主索引。脚本main、干净受保护输入和HEAD归档约束保持不变。`sh -n`与提取的原内部helper预检通过：manifest40项、11项拒绝性自检。该预检**不是最终合同门禁通过**。直接在本隔离分支执行 `M14_MAVEN_REPO=/Users/qiangzhiwei/.m2/repository sh scripts/verify-contracts.sh`，exit1、`M14-T04 failed: branch`（[最终实测摘要](data-integrity-t13/contract-gate.json)）；脚本按预期阻止未集成分支进入最终门禁。真实Flyway报告校验已通过；仍需代码一致的clean committed main运行。
+脚本中的Flyway方法名及证据统计由V8最小同步到V9：生产54表、验收55表，生产/验收迁移8/9、验收1110列、55主索引、56非主索引。脚本main、干净受保护输入和HEAD归档约束保持不变。`sh -n`与提取的原内部helper预检通过：manifest40项、11项拒绝性自检。该预检**不是最终合同门禁通过**。直接在本隔离分支执行 `M14_MAVEN_REPO=/Users/qiangzhiwei/.m2/repository sh scripts/verify-contracts.sh`，exit1、`M14-T04 failed: branch`（[最终实测摘要](data-integrity-t13/contract-gate.json)）；脚本按预期阻止未集成分支进入最终门禁。真实Flyway报告校验当时已通过，缺少的main前提现已由上节最终运行满足。
 
-## 剩余验收前提
+## 验收前提闭环
 
-隔离区运行验证全部通过，十项结果与十五项边界的实际证据见下文。最终独立审查已通过，新增问题0；最终合同门禁仍缺代码一致的clean committed main，不将内部helper预检计为正式通过。
+隔离区运行验证、独立审查及真实clean committed main合同门禁全部通过，十项结果与十五项边界的证据见下文。原内部helper预检始终与正式门禁分别记录。
 
 ## 十项结果的本次证据索引
 
@@ -142,4 +160,4 @@ mvn -o -f data-plane/pom.xml \
 
 T13以实施前混合暂存树 `1728e704532dca83032c35aaf4cc576307e37ca5` 为比较基线，保留Studio/T01–T12既有改动；逐blob核对1183个非T13既有文件仍与原暂存树相同，见[基线保护核对](data-integrity-t13/baseline-preservation.json)。最终[扩展范围核对](data-integrity-t13/extension-boundary.json)确认core、HTTP/app、plugin-api、Tushare与control-plane/src均无本任务增量；产品代码只扩展fixture模块，其余为测试、启动器和文档。限定后端和浏览器审查已通过。最终独立审查亦为Spec/Quality APPROVED，Critical/Important/Minor均0，审查树为 `16949da7bacb7701082f2f562fc015416d66dd44`；审查后仅补最终证据链接/摘要与状态交接，未改产品或测试代码。完整记录见[最终审查](../../.superpowers/sdd/2026-09-17-data-integrity-t13/final-review.md)。
 
-按设计第6节，已写[pause交接](../task-handoffs/DATA-INTEGRITY-T13-handoff.md)并将看板T13从IN_PROGRESS转为BLOCKED；同步后仍保持该状态。唯一剩余项为用户明确授权本地main集成后建立代码一致的clean committed main、记录集成SHA并实际通过原合同脚本。隔离区实现、运行验证、文档和审查工作均已完成；本记录不宣称T13或项目COMPLETED。
+按设计第6节保留原[pause交接](../task-handoffs/DATA-INTEGRITY-T13-handoff.md)作为历史入口。用户明确授权、集成输入一致性及正式main门禁成功后，看板依次记录 BLOCKED → READY → IN_PROGRESS → COMPLETED。T13为最后一项预定义任务，原定项目范围完成，无后继交接。生产Tushare覆盖依据不足继续UNKNOWN属于既定实现边界；本次未实施对话中另行讨论的规则增强方案。

@@ -8,7 +8,7 @@
 - **Completion condition:** 13 项任务按各自验收条件完成；共享设计“如何验证”的 10 项结果都有证据；受控真实 MySQL、真实后端 fixture 浏览器闭环、既有功能回归及合同校验通过。任务拆分、API stub 页面或 fixture 的可靠全集不能代替生产 Tushare 覆盖证明。
 - **Design authority:** `docs/task-designs/DATA-INTEGRITY-design.md` 是共享功能设计。本板仅拆分责任、顺序、依赖及验收；各任务的详细设计在启动或后继交接时补齐，`Design document` 初始化为 `None`，不把共享设计冒充已完成的任务专属设计。
 - **Workspace:** `.worktrees/data-integrity`，分支 `feat/data-integrity`，起点提交 `211094822aa061c2f9217d367cc06f8ddcae3b4e`。2026-09-16 从 `feat/studio-frontend` 工作区复制当时全部 142 个已暂存改动，包含共享设计及 Studio 当前代码；复制后保持暂存，未为基线创建提交。后续原工作区修改不会自动同步。本次仅创建看板并补充目录入口，未开始功能实现。
-- **Integration:** 2026-09-16 用户要求将拆分内容合回当前分支 `feat/studio-frontend`；合入范围为本看板和任务交接目录入口，不回写独立工作区中复制的旧代码基线。合入后的任务状态以当前分支本板为准。2026-09-16 用户随后要求在隔离工作区完成 T01，T01 及后续任务状态与交接以 `.worktrees/data-integrity` 内本板为准，尚未回写原工作区。
+- **Integration:** 2026-09-16 用户要求将拆分内容合回当前分支 `feat/studio-frontend`；合入范围为本看板和任务交接目录入口，不回写独立工作区中复制的旧代码基线。合入后的任务状态以当前分支本板为准。2026-09-16 用户随后要求在隔离工作区完成 T01，T01 及后续任务状态与交接以 `.worktrees/data-integrity` 内本板为准，当时尚未回写原工作区。2026-09-18 已按用户明确授权集成本地main并完成T13正式合同门禁；根工作区main内本板与保留隔离分支同步后的副本保持一致，未推送远程。
 
 ## Workflow
 
@@ -35,7 +35,7 @@
 | 10 | DATA-INTEGRITY-T10 | 前端请求、精确 DTO 与检查状态 | COMPLETED | DATA-INTEGRITY-T09 | docs/task-designs/DATA-INTEGRITY-T10-design.md | docs/task-handoffs/DATA-INTEGRITY-T10-handoff.md |
 | 11 | DATA-INTEGRITY-T11 | 创建检查、口径预览与历史页面 | COMPLETED | DATA-INTEGRITY-T10 | docs/task-designs/DATA-INTEGRITY-T11-design.md | docs/task-handoffs/DATA-INTEGRITY-T11-handoff.md |
 | 12 | DATA-INTEGRITY-T12 | 报告详情、问题定位与再次检查 | COMPLETED | DATA-INTEGRITY-T10, DATA-INTEGRITY-T11 | docs/task-designs/DATA-INTEGRITY-T12-design.md | docs/task-handoffs/DATA-INTEGRITY-T12-handoff.md |
-| 13 | DATA-INTEGRITY-T13 | 真实 fixture 闭环、回归与文档验收 | BLOCKED | DATA-INTEGRITY-T07, DATA-INTEGRITY-T08, DATA-INTEGRITY-T09, DATA-INTEGRITY-T11, DATA-INTEGRITY-T12 | docs/task-designs/DATA-INTEGRITY-T13-design.md | docs/task-handoffs/DATA-INTEGRITY-T13-handoff.md |
+| 13 | DATA-INTEGRITY-T13 | 真实 fixture 闭环、回归与文档验收 | COMPLETED | DATA-INTEGRITY-T07, DATA-INTEGRITY-T08, DATA-INTEGRITY-T09, DATA-INTEGRITY-T11, DATA-INTEGRITY-T12 | docs/task-designs/DATA-INTEGRITY-T13-design.md | docs/task-handoffs/DATA-INTEGRITY-T13-handoff.md |
 
 ## Task Details
 
@@ -182,7 +182,15 @@
 - **First action:** 按完整专属设计在真实MySQL/HTTP的 `IntegrityFixtureFlowIT` 构造PROVEN_EXTRA Jan1..19+21，请求Jan1..21；先观察可靠20/19/1/95%断言在当前UNKNOWN规则下的行为RED，再实现acceptance fixture版本2与受控窗口。
 - **State evidence:** 2026-09-17 先记录T12 COMPLETED，再按Order=13选定本项并观察NOT_STARTED。完成并回填 `docs/task-designs/DATA-INTEGRITY-T13-design.md`：明确PROVEN_EXTRA合法可靠窗口、20/19/1 SQL复算、空/未知场景、acceptance规则版本2/3与扩展、真实HTTP/浏览器、自有MySQL/JVM、四套既有回归、十项证据与clean-main门禁前提；直接依赖约束无冲突。随后写入并链接 `docs/task-handoffs/DATA-INTEGRITY-T13-handoff.md`，按NOT_STARTED→READY准备。2026-09-17 用户明确要求“在隔离工作区中完成数据检验T13”；完整读取专属设计与交接，沿用 `.worktrees/data-integrity`，按 READY → IN_PROGRESS 启动。保留当前混合暂存基线，最终验收仍须记录已授权干净 main 门禁结果。 2026-09-17 隔离实施及验收完成：Java完整性专项441项（含125真实IT）及最终HTTP修复1项、前端740项、stub39项、真实五套浏览器70项、acceptance1469项和production1466项全部通过，0失败/错误/跳过；SQL95%→100%、证券前后不变、上游0及同库2→3历史已核对。最终独立审查Spec/Quality APPROVED，新增问题0。详情见 `docs/verification/DATA-INTEGRITY-T13.md`。正式合同命令仍exit1 `M14-T04 failed: branch`；按专属设计第6节先写入同路径pause交接，再记录 IN_PROGRESS → BLOCKED。唯一解除条件为已授权代码一致的clean committed main及正式合同门禁成功；当时未提交/合并/推送，T01–T12状态保留。
 
-- **Latest synchronization evidence:** 用户随后要求“把远程main的代码拉到数据检验隔离工作区，然后继续完成T13”。已同步 `origin/main@5aaf6ad`、解决25处冲突并通过独立合并审查；恢复stash `ee0c3d3b52f576e5bb52459caff1fc3ae6ca1707` 保留。代码提交 `a7deb7d` 与607项被测输入清单一致；本轮前端738项、stub39项、Java专项441项（125真实IT）、production1466项、acceptance1469项、真实浏览器70项全部通过。证据：`docs/verification/data-integrity-t13/main-sync/README.md`。本地main快进合并被自动审批拒绝，要求用户明确授权311文件默认分支变更，授权待答复；main仍为 `5aaf6ad`，未推送。已刷新同路径pause交接；T13保持BLOCKED，未记录解除或完成。
+- **Synchronization history:** 用户随后要求“把远程main的代码拉到数据检验隔离工作区，然后继续完成T13”。已同步 `origin/main@5aaf6ad`、解决25处冲突并通过独立合并审查；恢复stash `ee0c3d3b52f576e5bb52459caff1fc3ae6ca1707` 保留。代码提交 `a7deb7d` 与607项被测输入清单一致；本轮前端738项、stub39项、Java专项441项（125真实IT）、production1466项、acceptance1469项、真实浏览器70项全部通过。证据：`docs/verification/data-integrity-t13/main-sync/README.md`。本地main快进合并被自动审批拒绝，要求用户明确授权311文件默认分支变更，授权待答复；main仍为 `5aaf6ad`，未推送。已刷新同路径pause交接；T13保持BLOCKED，未记录解除或完成。
+
+- **BLOCKED → READY:** 2026-09-18 用户明确“授权本地合并并继续完成 T13”。真实main已快进集成到1e3b039，精确元数据门禁清单修复提交6c3c13f经限定复审通过；正式main合同门禁exit0，metadata42/schema47/package4、前端738及11拒绝自检通过。607项归档输入与集成提交一致，606项与既有被测清单相同，仅门禁脚本同步上游新增测试。解除证据：`docs/verification/data-integrity-t13/main-sync/contract-summary.json`。
+
+- **READY → IN_PROGRESS:** 依据同一明确继续完成T13的请求，读取原pause交接并保留历史，恢复最终结果归档、看板更新及本地工作区同步。
+
+- **IN_PROGRESS → COMPLETED:** 十项结果与十五条边界已有隔离区实测证据；正式clean committed main合同门禁现已通过，集成SHA6c3c13f和输入一致性已登记，门禁修复复审无Critical/Important/Minor，全部自有门禁容器已清理。既有Java441（125真实IT）、前端738、stub39、真实浏览器70、acceptance1469及production1466结果继续由未变产品/测试输入支持。完整验收：`docs/verification/DATA-INTEGRITY-T13.md`。按最新授权仅本地合并，未推送；保留隔离工作区和恢复stash。
+
+- **Project completion:** T13为最后一项预定义任务，原定T01–T13范围已完成；无后继任务，不创建新的handoff。Tushare可靠生产全集、在线对账等仍属于既定范围之外。
 
 T13 的目标命令沿用共享设计；Java 21、Node 24 与受控 Docker/MySQL 是执行前提，测试结果必须在实施时记录。`*IT` 是否实际执行以测试报告为准，不能只因命令退出成功就视为集成验收：
 
@@ -201,5 +209,5 @@ sh scripts/verify-contracts.sh
 - 原始请求、所选股票、日期和接口不能为避限或提高通过率被删除；空数据、未实现、不适用和未完成单元都必须有明确结果，不能只展示通过项。
 - 只读快照可能较长；单线程、累计扫描/问题限额和超时必须共同生效。部分统计或问题明细不是完整结果，截断须保留 incomplete/issuesComplete 和 null 覆盖率。
 - 报告长期保留会增长；首版只有运维观察，没有自动删除。证据不得包含 Token、任意原始响应或异常堆栈。
-- 当前工作区基线包含尚未提交的 Studio/下载改动；后续实现和合并应保留这些变更，避免用旧布局或旧 API 覆盖它们。源工作区继续演进时需要显式核对差异；V9 迁移编号在实施时再次确认。
+- 初始工作区含未提交的Studio/下载基线；已于2026-09-17同步远程main并保留最新布局/API，2026-09-18授权集成本地main。恢复stash和隔离工作区保留；后续改动仍须核对来源，避免覆盖既有功能。
 - 初始化阶段的历史证据仅验证工作区复制、看板结构、引用、依赖及 Git 跟踪；当时未运行 Java/前端测试或数据库验收。后续运行结果以各任务 State evidence 和专项验收记录为准。

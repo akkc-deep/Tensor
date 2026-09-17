@@ -1,0 +1,183 @@
+{
+  "contracts": {
+    "fixtureAdditionalTables": 1,
+    "fixtureTotals": {
+      "businessTables": 55,
+      "nonPrimaryIndexes": 56,
+      "primaryKeys": 55,
+      "totalColumns": 1110
+    },
+    "legacyTables": 9,
+    "packagedYaml": 40,
+    "productionMigrations": 8,
+    "productionSecuritiesTables": 49,
+    "productionTables": 54,
+    "registeredDatasets": 40,
+    "sourceYaml": 40,
+    "tableEvidence": "successful FlywaySchemaContractIT result-level assertions",
+    "testMigrations": 9
+  },
+  "head": "6c3c13f908ca37acddfcf46fe6a76246a4283630",
+  "manifest": {
+    "count": 40,
+    "path": "docs/data-template/manifest.json",
+    "sha256": "386f46a99b6605e203129836d7a744b96b65304307f52991dd8bba6fd1870984"
+  },
+  "maven": {
+    "exitCode": 0,
+    "finishedAt": "2026-09-17T17:03:42.891150+00:00",
+    "generatedReports": [
+      {
+        "errors": 0,
+        "exists": true,
+        "failures": 0,
+        "path": "tensor-plugin-tushare/target/surefire-reports/TEST-com.akkc.tensor.plugin.tushare.metadata.TushareMetadataContractTest.xml",
+        "skipped": 0,
+        "tests": 42,
+        "xmlReadable": true
+      },
+      {
+        "errors": 0,
+        "exists": true,
+        "failures": 0,
+        "path": "tensor-app/target/surefire-reports/TEST-com.akkc.tensor.db.FlywaySchemaContractIT.xml",
+        "skipped": 0,
+        "tests": 47,
+        "xmlReadable": true
+      },
+      {
+        "errors": 0,
+        "exists": true,
+        "failures": 0,
+        "path": "tensor-app/target/failsafe-reports/TEST-com.akkc.tensor.build.PackagedJarContractTest.xml",
+        "skipped": 0,
+        "tests": 4,
+        "xmlReadable": true
+      }
+    ],
+    "startedAt": "2026-09-17T17:02:55.193505+00:00"
+  },
+  "reports": {
+    "failsafeSummary": {
+      "completed": 4,
+      "errors": 0,
+      "failures": 0,
+      "path": "/var/folders/s5/h3vynqy544lc7vwtz0zjy39m0000gn/T/tensor-m14-t04.s3nYTQSW/snapshot/data-plane/tensor-app/target/failsafe-reports/failsafe-summary.xml",
+      "sha256": "b147141cd8c7e33d2920f5e57398d17dc840856cf8e18be8066e8362d20e4383",
+      "skipped": 0
+    },
+    "reports": [
+      {
+        "className": "com.akkc.tensor.plugin.tushare.metadata.TushareMetadataContractTest",
+        "errors": 0,
+        "failures": 0,
+        "methods": {
+          "hasExactManifestAndExpectationCoverage": 1,
+          "mainBusinessSingleIsOnlyAStockSnapshot": 1,
+          "matchesIndependentContract": 40
+        },
+        "path": "/var/folders/s5/h3vynqy544lc7vwtz0zjy39m0000gn/T/tensor-m14-t04.s3nYTQSW/snapshot/data-plane/tensor-plugin-tushare/target/surefire-reports/TEST-com.akkc.tensor.plugin.tushare.metadata.TushareMetadataContractTest.xml",
+        "sha256": "cecd2b380aadcd5acf401b381f993c8854eec29bfd93da60d79b451793b4987d",
+        "skipped": 0,
+        "tests": 42
+      },
+      {
+        "className": "com.akkc.tensor.db.FlywaySchemaContractIT",
+        "errors": 0,
+        "failures": 0,
+        "methods": {
+          "fixtureSchemaMatchesContract": 1,
+          "keepsV6InTestOutputOnly": 1,
+          "migratesAndValidatesRepeatablyOnMySql846": 1,
+          "mysqlRejectsTaskAndBatchConstraintViolations": 1,
+          "productionMigrationInventoryCreates54TablesWithoutFixture": 1,
+          "productionSchemasMatchDatasetDefinitions": 40,
+          "taskTablesHaveExactColumnsDefaultsIndexesAndConstraints": 1,
+          "upgradesV7WithoutChangingChecksumsOrExistingSecurities": 1
+        },
+        "path": "/var/folders/s5/h3vynqy544lc7vwtz0zjy39m0000gn/T/tensor-m14-t04.s3nYTQSW/snapshot/data-plane/tensor-app/target/surefire-reports/TEST-com.akkc.tensor.db.FlywaySchemaContractIT.xml",
+        "sha256": "c66802544106cc17acd64de592ab3f262bd72a533e6d79a1281379ff9ddf7101",
+        "skipped": 0,
+        "tests": 47
+      },
+      {
+        "className": "com.akkc.tensor.build.PackagedJarContractTest",
+        "errors": 0,
+        "failures": 0,
+        "methods": {
+          "packagesOnlyTheProductionExecutableJarAndItsContractedContents": 1,
+          "rejectsDuplicateArchiveEntries": 1,
+          "rejectsMalformedUtf8": 1,
+          "rejectsNestedTushareYamlPaths": 1
+        },
+        "path": "/var/folders/s5/h3vynqy544lc7vwtz0zjy39m0000gn/T/tensor-m14-t04.s3nYTQSW/snapshot/data-plane/tensor-app/target/failsafe-reports/TEST-com.akkc.tensor.build.PackagedJarContractTest.xml",
+        "sha256": "d38a844dfa88f140a5cbd03c953f89ad9d6075ec931d2c26007753106dc5df3f",
+        "skipped": 0,
+        "tests": 4
+      }
+    ]
+  },
+  "resources": {
+    "packagedYaml": {
+      "count": 40,
+      "location": "BOOT-INF/lib/tensor-plugin-tushare-1.0-SNAPSHOT.jar"
+    },
+    "productionJar": {
+      "path": "/var/folders/s5/h3vynqy544lc7vwtz0zjy39m0000gn/T/tensor-m14-t04.s3nYTQSW/snapshot/data-plane/tensor-app/target/tensor-app-1.0-SNAPSHOT.jar",
+      "sha256": "4b973411b18d2ed5bc6df784c4fc26c575541948d89937dd39fb8a6fb039c00c"
+    },
+    "sourceYaml": {
+      "count": 40,
+      "names": [
+        "adj_factor.yaml",
+        "balancesheet.yaml",
+        "block_trade.yaml",
+        "cashflow.yaml",
+        "daily.yaml",
+        "daily_basic.yaml",
+        "disclosure_date.yaml",
+        "dividend.yaml",
+        "express.yaml",
+        "fina_audit.yaml",
+        "fina_indicator.yaml",
+        "fina_mainbz.yaml",
+        "forecast.yaml",
+        "income.yaml",
+        "index_classify.yaml",
+        "index_member_all.yaml",
+        "margin.yaml",
+        "margin_detail.yaml",
+        "moneyflow.yaml",
+        "monthly.yaml",
+        "new_share.yaml",
+        "pledge_detail.yaml",
+        "pledge_stat.yaml",
+        "repurchase.yaml",
+        "slb_len.yaml",
+        "slb_sec.yaml",
+        "slb_sec_detail.yaml",
+        "stk_holdernumber.yaml",
+        "stk_holdertrade.yaml",
+        "stk_limit.yaml",
+        "stk_managers.yaml",
+        "stk_rewards.yaml",
+        "stock_basic.yaml",
+        "stock_company.yaml",
+        "suspend_d.yaml",
+        "top10_floatholders.yaml",
+        "top10_holders.yaml",
+        "top_list.yaml",
+        "trade_cal.yaml",
+        "weekly.yaml"
+      ]
+    }
+  },
+  "syntheticRejections": 11,
+  "task": "M14-T04",
+  "taskFiles": {
+    "control-plane/e2e/tushare-metadata.spec.js": "1e6208c381ce0622072e147a3f437603e47d7a938486fd00121ccd5bbce1a3ae",
+    "docs/verification/M14-T04-49-contracts.md": "ba8861e4fa534c98e307c7e527a840130c9f88fe6befe6b36d0505499e224f45",
+    "scripts/verify-contracts.sh": "0b77a9247bd9afd3e4b798ab5cbc1aad4c17a24aa1b96ff02223f4ae90a3f694"
+  },
+  "version": 1
+}

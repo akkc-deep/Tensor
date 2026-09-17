@@ -32,12 +32,14 @@
 
 本轮 acceptance JAR SHA256 为 `a5ff0e16d960b164702fd08890da9696b41b7c9b8514637f7722683a62a03ddf`。两次下载测试修复均只改浏览器测试，未改产品或此JAR；限定复审通过。最终清理完成：自有容器、JVM/浏览器及临时凭据已删除或退出，8080空闲，仅保留预先存在的 `tensor-issue018-t13-0bc7f37f27ff` 容器。
 
-[源代码清单](source-identity.json)覆盖607个源码、配置与合同文件；与已提交 `a7deb7d` 及最终工作区逐项SHA256一致。后续仅补文档和验收摘要，历史T12/T13证据已恢复原内容。
+[源代码清单](source-identity.json)覆盖607个源码、配置与合同文件；在浏览器验收完成时与已提交 `a7deb7d` 逐项SHA256一致。最终main集成保留其中606项原值，只同步合同门禁脚本的上游新增测试清单；差异与607项归档输入核对见[最终摘要](contract-summary.json)。历史T12/T13证据已恢复原内容。
 
 ## 最终门禁
 
-设计第6节及 `verify-contracts.sh` 的 main/干净受保护输入/归档 HEAD 要求保持。已将同步后经审查的数据检验差异提交为 `a7deb7dd2bcac252171d1fd9d4c62fff2e07039e`；隔离工作区与恢复 stash 保留。
+2026-09-18 用户明确“授权本地合并并继续完成 T13”，解除此前自动审批对311文件默认分支合并的拒绝。`a7deb7d`及仅文档截图提交`1e3b039`已快进合并到真实main；恢复stash、隔离工作区均保留，按最新授权未推送远程。[集成记录](integration.json)保留原拒绝原因、最新授权与SHA。
 
-尝试将该提交快进到真实本地 main 时，自动审批拒绝了该操作，理由为311文件提交会改变默认分支历史，需要用户对此具体合并明确授权。main仍为 `5aaf6ad`，没有绕过审批或更改门禁；已向用户请求授权，隔离区全部验证已完成。详见 [integration.json](integration.json)。
+第一次正式门禁在`1e3b039`上运行：Maven成功，但远程`5aaf6ad`新增`mainBusinessSingleIsOnlyAStockSnapshot`后metadata已为42项，门禁旧清单仍为41项，因此失败。仅同步精确方法、计数、自检和成功摘要，未改变任何门禁守卫；[限定复审](merge-review.md)通过，修复提交`6c3c13f`。[首次失败](contract-first-attempt.json)单独保留。
 
-当前任务状态仍为 BLOCKED；只有获准集成、实际门禁成功及输入一致性记录成立，才依次记录 BLOCKED → READY → IN_PROGRESS → COMPLETED。没有推送，隔离工作区与恢复副本继续保留。
+随后在干净main `6c3c13f908ca37acddfcf46fe6a76246a4283630` 实际执行完整`sh scripts/verify-contracts.sh`，**exit0，metadata42/schema47/package4全部通过，0失败/错误/跳过**；同轮前端50文件/738项及构建通过，11项拒绝自检通过，Maven46.605秒。40个YAML、生产54表/8迁移、验收55表/9迁移等合同通过；两个自有容器清理完成，既有容器保留。[最终摘要](contract-summary.json)及[原脚本证据](contract-verification.json)保存SHA、时间、报告方法和资源哈希。
+
+正式门禁归档的607项输入与集成提交/工作区一致，产品与测试代码仍与既有隔离验收相同。任务依次记录 BLOCKED → READY → IN_PROGRESS → COMPLETED；T13为最后一项预定义任务，无后继交接。本次完成既定本地检查范围，不包含对话中讨论的生产规则增强。

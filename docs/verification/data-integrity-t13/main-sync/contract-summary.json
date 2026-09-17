@@ -1,0 +1,81 @@
+{
+  "task": "DATA-INTEGRITY-T13",
+  "branch": "main",
+  "head": "6c3c13f908ca37acddfcf46fe6a76246a4283630",
+  "exitCode": 0,
+  "command": "PATH=/Users/qiangzhiwei/.nvm/versions/node/v24.15.0/bin:$PATH DOCKER_HOST=unix:///Users/qiangzhiwei/.colima/default/docker.sock TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE=/var/run/docker.sock M14_MAVEN_REPO=/Users/qiangzhiwei/.m2/repository sh scripts/verify-contracts.sh",
+  "maven": {
+    "exitCode": 0,
+    "finishedAt": "2026-09-17T17:03:42.891150+00:00",
+    "generatedReports": [
+      {
+        "errors": 0,
+        "exists": true,
+        "failures": 0,
+        "path": "tensor-plugin-tushare/target/surefire-reports/TEST-com.akkc.tensor.plugin.tushare.metadata.TushareMetadataContractTest.xml",
+        "skipped": 0,
+        "tests": 42,
+        "xmlReadable": true
+      },
+      {
+        "errors": 0,
+        "exists": true,
+        "failures": 0,
+        "path": "tensor-app/target/surefire-reports/TEST-com.akkc.tensor.db.FlywaySchemaContractIT.xml",
+        "skipped": 0,
+        "tests": 47,
+        "xmlReadable": true
+      },
+      {
+        "errors": 0,
+        "exists": true,
+        "failures": 0,
+        "path": "tensor-app/target/failsafe-reports/TEST-com.akkc.tensor.build.PackagedJarContractTest.xml",
+        "skipped": 0,
+        "tests": 4,
+        "xmlReadable": true
+      }
+    ],
+    "startedAt": "2026-09-17T17:02:55.193505+00:00"
+  },
+  "frontend": {
+    "files": 50,
+    "tests": 738,
+    "failures": 0
+  },
+  "mavenDurationSeconds": 46.605,
+  "contractTests": 93,
+  "contractCounts": {
+    "metadata": 42,
+    "schema": 47,
+    "package": 4
+  },
+  "syntheticRejections": 11,
+  "officialEvidence": "contract-verification.json",
+  "officialEvidenceSha256": "4f29a2e90bfdc106382242d12ad4c84cc5b5048e985b43c7c994af23e4db66af",
+  "mavenLogSha256": "c880c1284f7fb9db61370eb7e13d28d9ec83223a74bbdd2ce2fd867e8edffc21",
+  "gateLogSha256": "c25ece73f2a810c901998f8b73c92b7d8c21421db1d8b9d58d6635fc3582f63c",
+  "cleanCommittedMainBeforeRun": true,
+  "sourceIdentity": {
+    "task": "DATA-INTEGRITY-T13",
+    "integratedHead": "6c3c13f908ca37acddfcf46fe6a76246a4283630",
+    "baselineManifest": "docs/verification/data-integrity-t13/main-sync/source-identity.json",
+    "baselineSourceSha256": "1be64b65b9d47ccb0748c4436ed7f7411a047a4e0cfe35c5359ee5c28baa2bbe",
+    "sourceFilesChecked": 607,
+    "unchangedFiles": 606,
+    "changes": [
+      {
+        "path": "scripts/verify-contracts.sh",
+        "baselineSha256": "60f37d8b09d226a1dfb5edc500741fa812c69a1cf7d7eb609a7a52b2513c0128",
+        "integratedSha256": "0b77a9247bd9afd3e4b798ab5cbc1aad4c17a24aa1b96ff02223f4ae90a3f694"
+      }
+    ],
+    "reason": "Only the official gate test inventory is synchronized to the already-tested upstream metadata test; all product and test files remain byte-identical."
+  },
+  "all607ArchivedInputsMatchWorkingTree": true,
+  "cleanup": {
+    "ownedContainerCount": 2,
+    "ownedContainersRemaining": 0,
+    "preexistingContainersPreserved": true
+  }
+}

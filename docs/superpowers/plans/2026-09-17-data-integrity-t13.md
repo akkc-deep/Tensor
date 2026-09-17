@@ -45,7 +45,7 @@
 - [x] V9同步为1..9迁移/55表，保留旧业务断言；构建acceptance JAR后运行Python真实套件并保存安全证据。
 - [x] 精确暂存，不提交。
 
-### Task 3: 完整回归、文档与证据（BLOCKED：最终main门禁）
+### Task 3: 完整回归、文档与证据（COMPLETED）
 
 **Files:** docs/runbook/configuration.md、data-integrity-rules.md、docs/task-designs/DATA-INTEGRITY-design.md；新增 docs/verification/DATA-INTEGRITY-T13.md及data-integrity-t13证据；任务看板。
 
@@ -57,7 +57,7 @@
 - [x] 将共享设计10项验证与15项测试逐行映射到本次具体方法和证据。
 - [x] 独立审查本次差异、修复实质问题并做针对回归；精确Git跟踪。
 - [x] 所有隔离区工作已完成，最终审查APPROVED；记录明确pause交接并给用户具体可审查结果。
-- [ ] 在用户授权、代码一致的clean committed main实际通过最终合同门禁，记录集成SHA；当前BLOCKED，未写COMPLETED。
+- [x] 2026-09-18 用户明确授权后，真实clean committed main `6c3c13f` 正式合同门禁exit0；metadata42/schema47/package4、前端738及11拒绝自检通过，输入一致性已记录，T13按状态机完成。
 
 ## 2026-09-17 远程 main 同步后续
 
@@ -66,4 +66,8 @@
 - [x] 远程main同步、冲突审查、恢复副本保留；数据检验代码提交为 `a7deb7d`。
 - [x] 同步后738项前端、39项stub、441项Java专项（125真实IT）、production1466项、acceptance1469项及70项真实浏览器通过；607项源文件与提交一致，历史证据保留。
 - [x] 最新验收、pause交接与看板证据更新；自有环境清理完成。
-- [ ] 自动审批拒绝311文件提交到默认main，等待用户明确授权本地快进合并；main仍为 `5aaf6ad`，未推送。授权后实际运行正式合同门禁，成功后才记录T13完成。
+- [x] 原自动审批拒绝经用户2026-09-18明确授权解除；本地main已快进集成。最小同步上游新增元数据测试清单后，正式门禁及限定复审通过。未推送远程，隔离工作区和恢复副本保留。
+
+## 2026-09-18 完成记录
+
+正式门禁提交 `6c3c13f908ca37acddfcf46fe6a76246a4283630`；产品/测试输入与前次隔离验收相同，仅脚本严格清单由metadata41更新为42。证据：`docs/verification/data-integrity-t13/main-sync/contract-summary.json`。原定T01–T13范围全部完成，生产可靠全集/在线对账等另行讨论内容未纳入本次变更。
