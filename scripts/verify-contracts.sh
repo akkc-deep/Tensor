@@ -129,8 +129,9 @@ REPORTS = (
         "tensor-plugin-tushare/target/surefire-reports/"
         "TEST-com.akkc.tensor.plugin.tushare.metadata.TushareMetadataContractTest.xml",
         "com.akkc.tensor.plugin.tushare.metadata.TushareMetadataContractTest",
-        41,
-        {"hasExactManifestAndExpectationCoverage": 1, "matchesIndependentContract": 40},
+        42,
+        {"mainBusinessSingleIsOnlyAStockSnapshot": 1, "hasExactManifestAndExpectationCoverage": 1,
+         "matchesIndependentContract": 40},
     ),
     (
         "tensor-app/target/surefire-reports/"
@@ -451,7 +452,7 @@ def self_probe(root):
     maven_status.write_text('{"exitCode": 37}\n', encoding="utf-8")
     recorded = record_generated_report_counts(valid, maven_status)
     check(recorded["exitCode"] == 37, "probe-maven-exit-code")
-    check([item.get("tests") for item in recorded["generatedReports"]] == [41, 47, 4],
+    check([item.get("tests") for item in recorded["generatedReports"]] == [42, 47, 4],
           "probe-generated-report-counts")
     first_relative, class_name, _, methods = REPORTS[0]
     first = valid / first_relative
@@ -740,5 +741,5 @@ Path(output).write_text(json.dumps(result, indent=2, sort_keys=True) + "\n", enc
 os.chmod(output, 0o600)
 PY
 
-printf 'M14-T04 contracts passed: metadata=41 schema=47 package=4 yaml=40 tables=54 legacy=9 packaged=40\n'
+printf 'M14-T04 contracts passed: metadata=42 schema=47 package=4 yaml=40 tables=54 legacy=9 packaged=40\n'
 printf 'M14-T04 private evidence: %s\n' "$evidence"

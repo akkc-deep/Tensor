@@ -1,0 +1,43 @@
+{
+  "task": "DATA-INTEGRITY-T13",
+  "head": "1e3b039fbea4382fc8d4e75d7d6b4741333e859c",
+  "exitCode": 1,
+  "failure": "report-case-count",
+  "reason": "Upstream 5aaf6ad added mainBusinessSingleIsOnlyAStockSnapshot; all 42 metadata tests passed but the gate expected 41.",
+  "maven": {
+    "exitCode": 0,
+    "finishedAt": "2026-09-17T16:59:39.668803+00:00",
+    "generatedReports": [
+      {
+        "errors": 0,
+        "exists": true,
+        "failures": 0,
+        "path": "tensor-plugin-tushare/target/surefire-reports/TEST-com.akkc.tensor.plugin.tushare.metadata.TushareMetadataContractTest.xml",
+        "skipped": 0,
+        "tests": 42,
+        "xmlReadable": true
+      },
+      {
+        "errors": 0,
+        "exists": true,
+        "failures": 0,
+        "path": "tensor-app/target/surefire-reports/TEST-com.akkc.tensor.db.FlywaySchemaContractIT.xml",
+        "skipped": 0,
+        "tests": 47,
+        "xmlReadable": true
+      },
+      {
+        "errors": 0,
+        "exists": true,
+        "failures": 0,
+        "path": "tensor-app/target/failsafe-reports/TEST-com.akkc.tensor.build.PackagedJarContractTest.xml",
+        "skipped": 0,
+        "tests": 4,
+        "xmlReadable": true
+      }
+    ],
+    "startedAt": "2026-09-17T16:58:52.484480+00:00"
+  },
+  "logSha256": "4e4442b55823b78d76f4a818506da098c7adf15854a27a480db8c532392e0516",
+  "fix": "Require exactly 42 metadata tests and the additional named method; synchronize the self-probe and success summary; retain every validation guard."
+}

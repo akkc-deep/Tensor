@@ -67,3 +67,9 @@ The helper has one caller, which requests only SUCCEEDED or FAILED for these SIN
 The final task assertion still requires the original status, exact counts/error, `canRetry: Boolean(error)`, `canResume: false`, requestCount 1, and runRequestCount 1. Exact batch state/attemptCount remains unchanged. The change adds only read-only GET polling until the existing contract assertions can hold; it adds no POST, retry action, explicit sleep, timeout extension, production change, or weaker assertion.
 
 `git diff --check -- control-plane/e2e/download-outcomes.spec.js` is clean. No tests were run by this reviewer. Approval covers this bounded synchronization correction; the complete five-suite rerun and final genuine clean-committed-main contract gate remain required.
+
+## 2026-09-18 正式main门禁清单修复复审
+
+首次正式门禁在main `1e3b039` 上归档HEAD执行，Maven成功（metadata42/schema47/package4，均0失败/错误/跳过），但门禁旧清单期待metadata41，因此 `report-case-count` 失败。远程 `5aaf6ad` 已新增 `TushareMetadataContractTest#mainBusinessSingleIsOnlyAStockSnapshot`；本次仅将精确方法清单、总数、自检期望与成功摘要同步到42，未修改任何产品或Java测试代码。
+
+限定独立复审 `/root/t13_sync_review`：APPROVED，Critical/Important/Minor均0。确认main检查、受保护输入洁净检查、HEAD归档、方法身份/数量、零失败/错误/跳过要求和拒绝探针全部保留。控制器已用更新helper验证本次真实42+47+4报告及11项拒绝自检；正式通过以修复提交后完整脚本重跑为准。首次失败保留在 `contract-first-attempt.json`。

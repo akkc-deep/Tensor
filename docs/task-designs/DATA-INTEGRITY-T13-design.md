@@ -115,6 +115,8 @@ FROM expected e LEFT JOIN fixture__fixture_daily a
 
 公开OpenAPI/schema/examples/error-codes只在实际发现不一致时做最小同步；不扩API。最终合同脚本 `scripts/verify-contracts.sh` 须最小同步V9对应的Flyway测试方法名和证据统计（生产54表/8次迁移，验收55表/9次迁移/1110列/55主索引/56非主索引）；其main/已提交干净受保护输入要求保持原样：它归档HEAD，当前混合暂存隔离区不能通过。不得为本任务提交整个混合基线、伪造main分支或绕过检查。只有用户已授权的干净集成main包含全部待验收输入后，才在那里执行该门禁，并将提交SHA与T13被测代码一致性记入证据。
 
+正式main实测补充（2026-09-18）：远程 `5aaf6ad` 已新增元数据测试 `mainBusinessSingleIsOnlyAStockSnapshot`，实际metadata为42项。合同脚本须将精确方法清单补上该方法1次，并将总数、自检期望和成功摘要同步为42；保留原40项接口合同、其他测试数量及全部门禁守卫。首次失败及限定复审记录位于 `docs/verification/data-integrity-t13/main-sync/`。
+
 缺少该集成前提时，完成其他验证、记录具体缺口并按看板写pause/blocker；T13及项目不得标COMPLETED，亦不回滚T12已完成状态。此为已知最终验收前提，不妨碍在隔离区开始fixture实现。
 
 ## Files
