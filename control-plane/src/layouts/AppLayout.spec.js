@@ -306,11 +306,13 @@ describe('AppLayout', () => {
       expect(links.map((link) => link.text())).toEqual([
         '数据下载',
         '数据查看',
+        '数据完整性',
         '外观设置',
       ])
       expect(links.map((link) => link.attributes('href'))).toEqual([
         '/downloads',
         '/datasets',
+        '/integrity',
         '/settings',
       ])
       expect(links[0].attributes('aria-current')).toBe('page')

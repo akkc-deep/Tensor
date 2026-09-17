@@ -1,6 +1,6 @@
 <script setup>
 import { computed, provide } from 'vue'
-import { Download, Grid, Setting } from '@element-plus/icons-vue'
+import { CircleCheck, Download, Grid, Setting } from '@element-plus/icons-vue'
 import { RouterLink, RouterView, useRoute } from 'vue-router'
 import { createDownloadTaskChannel, downloadTaskChannelKey } from '../composables/useDownloadTask.js'
 
@@ -10,11 +10,12 @@ const route = useRoute()
 const navItems = [
   { name: 'downloads', label: '数据下载', icon: Download },
   { name: 'datasets', label: '数据查看', icon: Grid },
+  { name: 'integrity', label: '数据完整性', icon: CircleCheck },
   { name: 'settings', label: '外观设置', icon: Setting },
 ]
 const currentLabel = computed(() =>
   navItems.find(item => item.name === route.name)?.label
-    ?? (route.name === 'download-task' ? '数据下载' : '页面不存在'),
+    ?? (route.name === 'download-task' ? '数据下载' : route.name === 'integrity-check' ? '数据完整性' : '页面不存在'),
 )
 </script>
 
@@ -27,19 +28,19 @@ const currentLabel = computed(() =>
           <path d="m16 2 14 8v16l-14 8L2 26V10L16 2Z" />
           <path d="m2 10 14 8 14-8M16 18v16m-7-20V6m14 8v16M2 26l14-8" />
         </svg>
-        <span>Tensor</span>
+        <span class="app-brand__name">Tensor</span>
       </div>
       <nav class="app-nav__links" aria-label="工作区导航">
         <RouterLink
           v-for="item in navItems"
           :key="item.name"
           class="app-nav__link"
-          :class="{ 'router-link-active': item.name === 'downloads' && route.name === 'download-task' }"
-          :aria-current="item.name === route.name || (item.name === 'downloads' && route.name === 'download-task') ? 'page' : undefined"
+          :class="{ 'router-link-active': (item.name === 'downloads' && route.name === 'download-task') || (item.name === 'integrity' && route.name === 'integrity-check') }"
+          :aria-current="item.name === route.name || (item.name === 'downloads' && route.name === 'download-task') || (item.name === 'integrity' && route.name === 'integrity-check') ? 'page' : undefined"
           :to="{ name: item.name }"
         >
           <component :is="item.icon" aria-hidden="true" />
-          {{ item.label }}
+          <span>{{ item.label }}</span>
         </RouterLink>
       </nav>
       <div class="top-workspace">

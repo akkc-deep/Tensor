@@ -418,7 +418,7 @@ async function selectFrom(combobox, name) {
   await expect(option).toBeVisible()
   await option.click()
   await expect(combobox).toHaveAttribute('aria-expanded', 'false')
-  await expect(combobox.page().getByRole('option')).toHaveCount(0)
+  await expect(combobox.page().locator('[role="option"]:visible')).toHaveCount(0)
   await doubleAnimationFrame(combobox.page())
 }
 
@@ -629,7 +629,7 @@ async function openDownloads(page, contract) {
   const tasksPromise = page.waitForResponse((response) => isResponse(response, '/api/v1/download-tasks'))
   const navigation = await page.goto('/downloads')
   expect(navigation?.status()).toBe(200)
-  await expect(page.getByRole('heading', { level: 1, name: '数据下载' })).toBeVisible()
+  await expect(page.getByRole('heading', { level: 1, name: '下载工作台' })).toBeVisible()
   await validateSources(await sourcesPromise)
   const tasksResponse = await tasksPromise
   expect(tasksResponse.status()).toBe(200)
@@ -783,7 +783,7 @@ async function validateParameters(page, contract, testInfo) {
 
 async function openDataset(page, contract) {
   const sourcesPromise = page.waitForResponse((response) => isResponse(response, '/api/v1/data-sources'))
-  await page.getByRole('link', { name: /^数据查看\s*02$/ }).click()
+  await page.getByRole('link', { name: '数据查看', exact: true }).click()
   await expect(page).toHaveURL(`${BASE_URL}/datasets`)
   await expect(page.getByRole('heading', { level: 1, name: '数据查看' })).toBeVisible()
   await validateSources(await sourcesPromise)

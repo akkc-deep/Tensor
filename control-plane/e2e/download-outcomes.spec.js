@@ -373,12 +373,12 @@ async function verifyMigratedSchema() {
     `SELECT GROUP_CONCAT(CONCAT(version, ':', success) ORDER BY installed_rank SEPARATOR ',') FROM \`${mysqlConfig.schema}\`.flyway_schema_history;\n`,
     'read migration history',
   )
-  expect(migrations).toBe('1:1,2:1,3:1,4:1,5:1,6:1,7:1,8:1')
+  expect(migrations).toBe('1:1,2:1,3:1,4:1,5:1,6:1,7:1,8:1,9:1')
   const tables = await mysql(
     `SELECT COUNT(*) FROM information_schema.TABLES WHERE TABLE_SCHEMA = '${mysqlConfig.schema}' AND TABLE_NAME <> 'flyway_schema_history';\n`,
     'count business tables',
   )
-  expect(tables).toBe('52')
+  expect(tables).toBe('55')
   const rows = await mysql(
     `SELECT (SELECT COUNT(*) FROM \`${mysqlConfig.schema}\`.\`fixture__fixture_daily\`), (SELECT COUNT(*) FROM \`${mysqlConfig.schema}\`.\`tushare_pro__daily\`);\n`,
     'count initial business rows',
@@ -813,7 +813,12 @@ function rememberRequest(response, body) {
 }
 
 async function assertNoExtraFeatures(page) {
-  await expect(page.getByRole('progressbar')).toHaveCount(0)
+  const taskDetail = page.locator('.task-detail')
+  if (await taskDetail.count()) {
+    await expect(taskDetail.getByRole('progressbar', { name: '已结束批次进度', exact: true })).toBeVisible()
+  } else {
+    await expect(page.getByRole('progressbar')).toHaveCount(0)
+  }
   await expect(page.getByRole('button', { name: /取消/ })).toHaveCount(0)
   await expect(page.getByRole('link', { name: /取消/ })).toHaveCount(0)
 }
@@ -838,8 +843,8 @@ async function waitForTask(page, taskId, status, timeout) {
   let task
   await expect.poll(async () => {
     task = await readTaskApi(page, `/api/v1/download-tasks/${taskId}`)
-    return task.status
-  }, { timeout }).toBe(status)
+    return { status: task.status, canRetry: task.canRetry, canResume: task.canResume }
+  }, { timeout }).toEqual({ status, canRetry: status === 'FAILED', canResume: false })
   const batches = await readTaskApi(
     page,
     `/api/v1/download-tasks/${taskId}/batches?page=1&pageSize=20&includeSplit=false`,
@@ -936,9 +941,10 @@ async function submitDownload(
   if (success) {
     const counts = page.locator('.task-detail')
     await expect(counts.locator(':scope > .confirmation dd').last()).toHaveText(String(success.sourceRowCount))
-    await counts.locator('.task-detail__record summary').click()
-    await expect(counts.getByText(`新增记录次数 ${success.insertedRows}`, { exact: true })).toBeVisible()
-    await expect(counts.getByText(`更新记录次数 ${success.updatedRows}`, { exact: true })).toBeVisible()
+    const record = counts.locator('.task-detail__record')
+    await record.locator('summary').click()
+    await expect(record.getByText(`新增记录次数 ${success.insertedRows}`, { exact: true })).toBeVisible()
+    await expect(record.getByText(`更新记录次数 ${success.updatedRows}`, { exact: true })).toBeVisible()
   } else {
     const details = page.locator('.task-detail')
     await expect(details).toContainText(error.code)
@@ -973,7 +979,12 @@ async function submitDownload(
 
 async function queryDataset(page, { plugin, api, option, code, navigate = false }) {
   if (navigate) {
-    await page.getByRole('link', { name: /^数据查看\s*02$/ }).click()
+    const taskDialog = page.getByRole('dialog')
+    if (await taskDialog.count()) {
+      await taskDialog.getByRole('button', { name: '关闭任务详情', exact: true }).click()
+      await expect(taskDialog).toHaveCount(0)
+    }
+    await page.getByRole('link', { name: '数据查看', exact: true }).click()
     await expect(page.getByRole('heading', { level: 1, name: '数据查看' })).toBeVisible()
   } else {
     await openRoute(page, '/datasets', '数据查看')
@@ -1061,7 +1072,10 @@ async function assertSingleRow(page, body, expectedColumns, expectedRow) {
     ? ['证券代码ts_code', '交易日trade_date', '开盘价open', '最高价high', '最低价low',
       '收盘价close', '前收盘价pre_close', '涨跌额change', '涨跌幅（%）pct_chg',
       '成交量vol', '成交额amount', '来源插件source_plugin', '来源接口source_api', '入库时间ingested_at']
-    : expectedColumns
+    : body.pluginId === 'fixture' && body.apiName === 'fixture_daily'
+      ? ['证券代码ts_code', '交易日trade_date', '金额amount', '备注note',
+        '来源插件source_plugin', '来源接口source_api', '入库时间ingested_at']
+      : expectedColumns
   await expect(page.getByRole('columnheader')).toHaveText(headers)
   const row = page
     .getByRole('row')
@@ -1456,7 +1470,7 @@ test.describe('download outcome matrix', () => {
     const monitor = monitorPage(page)
     const posts = downloadPostCount
     const calls = [...stub.counts.values()].reduce((sum, value) => sum + value, 0)
-    await openRoute(page, '/downloads', '数据下载')
+    await openRoute(page, '/downloads', '下载工作台')
     await chooseTushareDownload(page)
     await page.getByLabel('股票代码', { exact: false }).fill('000001.SZ')
     const date = page.getByLabel('交易日期', { exact: false })
@@ -1482,7 +1496,7 @@ test.describe('download outcome matrix', () => {
     const monitor = monitorPage(page)
     const posts = downloadPostCount
     const calls = [...stub.counts.values()].reduce((sum, value) => sum + value, 0)
-    await openRoute(page, '/downloads', '数据下载')
+    await openRoute(page, '/downloads', '下载工作台')
     await chooseTushareDownload(page, NEW_SHARE_API)
     const start = page.getByLabel('开始日期', { exact: false })
     const end = page.getByLabel('结束日期', { exact: false })
@@ -1515,14 +1529,12 @@ test.describe('download outcome matrix', () => {
       option: FIXTURE_API,
     })
     expect(body).toMatchObject({ totalElements: 0, totalPages: 0, items: [] })
-    await openRoute(page, '/downloads', '数据下载')
+    await openRoute(page, '/downloads', '下载工作台')
     await chooseFixtureDownload(page)
     const scenario = page.getByRole('combobox', { name: /场景/ })
     await scenario.focus()
     await scenario.press('Enter')
-    await expect(
-      page.getByRole('option', { name: 'SUCCESS', exact: true, selected: true }),
-    ).toBeVisible()
+    await expect(scenario).toHaveValue('SUCCESS')
     await scenario.press('Escape')
     const successBase = {
       outcome: 'SUCCESS',
@@ -1552,7 +1564,7 @@ test.describe('download outcome matrix', () => {
       .poll(() => Date.now(), { timeout: 5_000 })
       .toBeGreaterThan(new Date(first.ingested_at).getTime() + 1_000)
 
-    await openRoute(page, '/downloads', '数据下载')
+    await openRoute(page, '/downloads', '下载工作台')
     await chooseFixtureDownload(page)
     await submitDownload(page, {
       title: 'upsertsDuplicateFixtureSuccess:second',
@@ -1587,7 +1599,7 @@ test.describe('download outcome matrix', () => {
 
   test('keepsRowsOnFixtureEmpty', async ({ page }) => {
     const monitor = monitorPage(page)
-    await openRoute(page, '/downloads', '数据下载')
+    await openRoute(page, '/downloads', '下载工作台')
     await chooseFixtureDownload(page)
     await selectOption(page, /场景/, 'EMPTY')
     await submitDownload(page, {
@@ -1612,7 +1624,7 @@ test.describe('download outcome matrix', () => {
 
   test('showsFixtureSourceFailure', async ({ page }) => {
     const monitor = monitorPage(page)
-    await openRoute(page, '/downloads', '数据下载')
+    await openRoute(page, '/downloads', '下载工作台')
     await chooseFixtureDownload(page)
     await selectOption(page, /场景/, 'SOURCE_FAILURE')
     await submitDownload(page, {
@@ -1635,7 +1647,7 @@ test.describe('download outcome matrix', () => {
 
   test('rejectsFixtureTypeFailure', async ({ page }) => {
     const monitor = monitorPage(page)
-    await openRoute(page, '/downloads', '数据下载')
+    await openRoute(page, '/downloads', '下载工作台')
     await chooseFixtureDownload(page)
     await selectOption(page, /场景/, 'TYPE_FAILURE')
     const { body } = await submitDownload(page, {
@@ -1666,7 +1678,7 @@ test.describe('download outcome matrix', () => {
     await runWithCleanup(
       async () => {
         await assertFixtureUnchanged(page)
-        await openRoute(page, '/downloads', '数据下载')
+        await openRoute(page, '/downloads', '下载工作台')
         await chooseFixtureDownload(page)
         await selectOption(page, /场景/, 'PERSISTENCE_FAILURE')
         const { body, batch } = await submitDownload(page, {
@@ -1710,7 +1722,7 @@ test.describe('download outcome matrix', () => {
       option: DAILY_OPTION,
     })
     expect(body).toMatchObject({ totalElements: 0, totalPages: 0, items: [] })
-    await openRoute(page, '/downloads', '数据下载')
+    await openRoute(page, '/downloads', '下载工作台')
     await chooseTushareDownload(page)
     const stockCode = page.getByLabel('股票代码', { exact: false })
     const tradeDate = page.getByLabel('交易日期', { exact: false })
@@ -1802,7 +1814,7 @@ test.describe('download outcome matrix', () => {
   ]) {
     test(scenario.title, async ({ page }, testInfo) => {
       const monitor = monitorPage(page)
-      await openRoute(page, '/downloads', '数据下载')
+      await openRoute(page, '/downloads', '下载工作台')
       await chooseTushareDownload(page)
       const stockCode = page.getByLabel('股票代码', { exact: false })
       const tradeDate = page.getByLabel('交易日期', { exact: false })

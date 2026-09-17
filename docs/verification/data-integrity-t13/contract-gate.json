@@ -1,0 +1,11 @@
+{
+  "command": "M14_MAVEN_REPO=/Users/qiangzhiwei/.m2/repository sh scripts/verify-contracts.sh",
+  "worktree": ".worktrees/data-integrity",
+  "branch": "feat/data-integrity",
+  "head": "211094822aa061c2f9217d367cc06f8ddcae3b4e",
+  "exitCode": 1,
+  "output": "M14-T04 failed: branch",
+  "passed": false,
+  "reason": "Design section6 requires code-consistent clean committed main; current inherited mixed staged feature worktree is deliberately not committed or renamed.",
+  "resolution": "Explicitly authorized clean-main integration with code consistency recorded, then actual contract gate success."
+}

@@ -84,7 +84,7 @@ class FixtureFlowIT {
                 .dataSource(rawDataSource)
                 .locations("classpath:db/migration")
                 .load();
-        assertThat(flyway.migrate().migrationsExecuted).isEqualTo(8);
+        assertThat(flyway.migrate().migrationsExecuted).isEqualTo(9);
         assertThat(flyway.validateWithResult().validationSuccessful).isTrue();
 
         acceptanceContext = fixtureContext("acceptance");

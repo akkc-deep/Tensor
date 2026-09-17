@@ -489,7 +489,7 @@ test.describe('fixture page flow', () => {
 
   test('downloadsSuccessAndQueriesFixtureFromPages', async ({ page }, testInfo) => {
     const monitor = monitorPage(page)
-    await openAndRefresh(page, '/downloads', '数据下载')
+    await openAndRefresh(page, '/downloads', '下载工作台')
     await openAndRefresh(page, '/datasets', '数据查看')
 
     await chooseFixtureDataset(page)
@@ -503,15 +503,13 @@ test.describe('fixture page flow', () => {
       page.getByRole('heading', { name: '未找到符合条件的数据' }),
     ).toBeVisible()
 
-    await page.getByRole('link', { name: /^数据下载\s*01$/ }).click()
-    await expect(page.getByRole('heading', { level: 1, name: '数据下载' })).toBeVisible()
+    await page.getByRole('link', { name: '数据下载', exact: true }).click()
+    await expect(page.getByRole('heading', { level: 1, name: '下载工作台' })).toBeVisible()
     await chooseFixtureDownload(page)
     const scenario = page.getByRole('combobox', { name: /场景/ })
     await scenario.focus()
     await scenario.press('Enter')
-    await expect(
-      page.getByRole('option', { name: 'SUCCESS', exact: true, selected: true }),
-    ).toBeVisible()
+    await expect(scenario).toHaveValue('SUCCESS')
     await scenario.press('Escape')
 
     const result = await submitFixtureTask(page, 'SUCCESS', {
@@ -532,7 +530,7 @@ test.describe('fixture page flow', () => {
     await page.locator('.task-detail').screenshot({ path: testInfo.outputPath('success-counts.png') })
 
     await page.getByRole('link', { name: '返回下载页', exact: true }).click()
-    await page.getByRole('link', { name: /^数据查看\s*02$/ }).click()
+    await page.getByRole('link', { name: '数据查看', exact: true }).click()
     await expect(page.getByRole('heading', { level: 1, name: '数据查看' })).toBeVisible()
     await chooseFixtureDataset(page)
     const pageBody = await queryByCode(page)
@@ -546,7 +544,7 @@ test.describe('fixture page flow', () => {
 
   test('showsEmptyDownloadWithoutAddingRows', async ({ page }, testInfo) => {
     const monitor = monitorPage(page)
-    await openAndRefresh(page, '/downloads', '数据下载')
+    await openAndRefresh(page, '/downloads', '下载工作台')
     await chooseFixtureDownload(page)
     await selectOption(page, /场景/, 'EMPTY')
 
@@ -567,12 +565,13 @@ test.describe('fixture page flow', () => {
     })
     const counts = page.locator('.task-detail')
     await expect(counts.locator(':scope > .confirmation dd').last()).toHaveText('0')
-    await counts.locator('.task-detail__record summary').click()
-    await expect(counts.getByText('新增记录次数 0', { exact: true })).toBeVisible()
+    const record = counts.locator('.task-detail__record')
+    await record.locator('summary').click()
+    await expect(record.getByText('新增记录次数 0', { exact: true })).toBeVisible()
     await page.locator('.task-detail').screenshot({ path: testInfo.outputPath('empty-result.png') })
 
     await page.getByRole('link', { name: '返回下载页', exact: true }).click()
-    await page.getByRole('link', { name: /^数据查看\s*02$/ }).click()
+    await page.getByRole('link', { name: '数据查看', exact: true }).click()
     await chooseFixtureDataset(page)
     const pageBody = await queryByCode(page)
     const { rowData } = await assertFixtureRow(page, pageBody)
@@ -602,7 +601,7 @@ test.describe('fixture page flow', () => {
     await assertDisabledPage(
       page,
       '/downloads',
-      '数据下载',
+      '下载工作台',
       testInfo.outputPath('disabled-downloads.png'),
     )
     await assertDisabledPage(

@@ -64,13 +64,17 @@ class FixturePluginTest {
     void exposesTheNewConstructorAndRejectsInvalidDependencies() {
         assertThat(FixturePlugin.class.getModifiers()).satisfies(modifiers ->
                 assertThat(java.lang.reflect.Modifier.isFinal(modifiers)).isTrue());
-        assertThat(FixturePlugin.class.getConstructors()).singleElement().satisfies(constructor ->
-                assertThat(constructor.getParameterTypes()).containsExactly(
-                        DatasetDefinition.class, FixtureEnvelopeFactory.class));
-        assertThat(FixturePlugin.class.getInterfaces()).containsExactly(DataSourcePlugin.class);
+        assertThat(FixturePlugin.class.getConstructors()).extracting(constructor -> List.of(constructor.getParameterTypes()))
+                .containsExactlyInAnyOrder(
+                        List.of(DatasetDefinition.class, FixtureEnvelopeFactory.class),
+                        List.of(DatasetDefinition.class, FixtureEnvelopeFactory.class, int.class));
+        assertThat(DataSourcePlugin.class.isAssignableFrom(FixturePlugin.class)).isTrue();
 
         assertThatNullPointerException().isThrownBy(() -> new FixturePlugin(null, new FixtureEnvelopeFactory()));
         assertThatNullPointerException().isThrownBy(() -> new FixturePlugin(expectedDefinition(), null));
+        assertThatThrownBy(() -> new FixturePlugin(expectedDefinition(), new FixtureEnvelopeFactory(), 1))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("Fixture integrity version must be 2 or 3");
         DatasetDefinition valid = expectedDefinition();
         DatasetKey wrongKey = DatasetKey.of(PLUGIN_ID, ApiName.of("fixture_other"));
         DatasetDefinition wrong = new DatasetDefinition(
@@ -147,6 +151,25 @@ class FixturePluginTest {
     }
 
     @Test
+    void bindsOnlySupportedIntegrityVersionsAndDefaultsToTwo() {
+        try (AnnotationConfigApplicationContext context = context("acceptance", "true")) {
+            FixturePlugin plugin = context.getBean(FixturePlugin.class);
+            assertThat(plugin.integrityDescriptor(API_NAME).orElseThrow().capabilityVersion()).isEqualTo("2");
+            assertThat(plugin.integrityRules(API_NAME)).extracting(rule -> rule.descriptor().version())
+                    .containsExactly("2");
+        }
+        try (AnnotationConfigApplicationContext context = context("acceptance", "true", "3")) {
+            FixturePlugin plugin = context.getBean(FixturePlugin.class);
+            assertThat(plugin.integrityDescriptor(API_NAME).orElseThrow().capabilityVersion()).isEqualTo("3");
+            assertThat(plugin.integrityRules(API_NAME)).extracting(rule -> rule.descriptor().ruleId())
+                    .containsExactly("fixture.coverage.fixture_daily", "fixture.acceptance.extension");
+        }
+        assertThatThrownBy(() -> context("acceptance", "true", "4"))
+                .hasRootCauseInstanceOf(IllegalArgumentException.class)
+                .hasRootCauseMessage("Fixture integrity version must be 2 or 3");
+    }
+
+    @Test
     void routesExactScenariosAndRejectsInvalidDirectInputsSafely() {
         FixturePlugin plugin = plugin();
         assertThat(plugin.download(API_NAME, Map.of("scenario", "SUCCESS")).data())
@@ -207,13 +230,20 @@ class FixturePluginTest {
     }
 
     private static AnnotationConfigApplicationContext context(String profile, String enabled) {
+        return context(profile, enabled, null);
+    }
+
+    private static AnnotationConfigApplicationContext context(String profile, String enabled, String integrityVersion) {
         AnnotationConfigApplicationContext context = new AnnotationConfigApplicationContext();
         if (profile != null) {
             context.getEnvironment().setActiveProfiles(profile);
         }
-        if (enabled != null) {
+        if (enabled != null || integrityVersion != null) {
+            var properties = new java.util.HashMap<String, Object>();
+            if (enabled != null) properties.put("tensor.plugins.fixture.enabled", enabled);
+            if (integrityVersion != null) properties.put("tensor.plugins.fixture.integrity-version", integrityVersion);
             context.getEnvironment().getPropertySources().addFirst(new MapPropertySource(
-                    "fixture-test", Map.of("tensor.plugins.fixture.enabled", enabled)));
+                    "fixture-test", properties));
         }
         context.register(FixtureConfiguration.class);
         context.refresh();

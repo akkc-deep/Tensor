@@ -1,0 +1,33 @@
+{
+  "command": "mvn -o -f data-plane/pom.xml -DargLine=<Mockito javaagent> clean verify",
+  "result": "BUILD SUCCESS",
+  "seconds": "54.109",
+  "artifact": "data-plane/tensor-app/target/tensor-app-1.0-SNAPSHOT.jar",
+  "sha256": "31e0b2cffd8b14b5c8983b23e40a74d1e28b684e6b923810c93b37553be832cb",
+  "bytes": 31751426,
+  "totals": {
+    "tests": 1466,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "reportCount": 83,
+  "itMethods": 0,
+  "productionMigrations": [
+    "BOOT-INF/classes/db/migration/V7__version_dividend_business_key.sql",
+    "BOOT-INF/classes/db/migration/V8__create_download_task_tables.sql",
+    "BOOT-INF/classes/db/migration/V3__create_connect_and_slb_tables.sql",
+    "BOOT-INF/classes/db/migration/V9__create_integrity_check_tables.sql",
+    "BOOT-INF/classes/db/migration/V1__create_basic_and_organization_tables.sql",
+    "BOOT-INF/classes/db/migration/V5__create_corporate_and_governance_tables.sql",
+    "BOOT-INF/classes/db/migration/V4__create_financial_tables.sql",
+    "BOOT-INF/classes/db/migration/V2__create_market_and_trading_tables.sql"
+  ],
+  "forbiddenFixtureOrAcceptanceEntries": [],
+  "frontend": {
+    "files": 52,
+    "tests": 740,
+    "build": "PASS"
+  },
+  "note": "Production unit/package verification; selected real MySQL IT results are separately recorded in integrity-tests.json and fixture-http-final.json. Production clean removed the acceptance target after the browser run; rebuild -Pacceptance before reproducing it."
+}

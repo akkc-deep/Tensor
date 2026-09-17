@@ -12,6 +12,7 @@ import static org.mockito.Mockito.when;
 
 import com.akkc.tensor.plugin.api.DataSourcePlugin;
 import com.akkc.tensor.plugin.api.BatchDownloadSupport;
+import com.akkc.tensor.plugin.api.IntegrityCheckSupport;
 import com.akkc.tensor.plugin.api.dataset.DatasetDefinition;
 import com.akkc.tensor.plugin.api.descriptor.ApiDescriptor;
 import com.akkc.tensor.plugin.api.descriptor.PluginDescriptor;
@@ -46,6 +47,22 @@ import org.springframework.core.env.MapPropertySource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 
 class TushareProPluginTest {
+    @Test
+    void integrityRangeUsesAcceptedShanghaiDateWithoutCallingUpstream() {
+        var client = mock(TushareProClient.class);
+        var plugin = plugin(properties(true, null), client, definitions());
+        var day = java.time.LocalDate.of(2026, 9, 16);
+        var today = new com.akkc.tensor.plugin.api.integrity.IntegrityDateRange(day, day);
+        var tomorrow = new com.akkc.tensor.plugin.api.integrity.IntegrityDateRange(day, day.plusDays(1));
+        var before = java.time.Instant.parse("2026-09-16T15:59:59.999999999Z");
+        var midnight = java.time.Instant.parse("2026-09-16T16:00:00Z");
+        plugin.validateIntegrityRange(today, before);
+        assertThatThrownBy(() -> plugin.validateIntegrityRange(tomorrow, before))
+                .isInstanceOf(IllegalArgumentException.class);
+        plugin.validateIntegrityRange(tomorrow, midnight);
+        verifyNoInteractions(client);
+    }
+
     private static final String SECRET = "m07-t04-secret-sentinel";
     private static final List<String> API_NAMES = List.of(
             "adj_factor", "balancesheet", "block_trade", "cashflow", "daily",
@@ -61,13 +78,14 @@ class TushareProPluginTest {
     void exposesOnlyTheApprovedPluginConfigurationAndUnavailableFailureSurface() {
         assertThat(Modifier.isPublic(TushareProPlugin.class.getModifiers())).isTrue();
         assertThat(Modifier.isFinal(TushareProPlugin.class.getModifiers())).isTrue();
-        assertThat(TushareProPlugin.class.getInterfaces()).containsExactly(BatchDownloadSupport.class);
+        assertThat(TushareProPlugin.class.getInterfaces()).containsExactly(BatchDownloadSupport.class, IntegrityCheckSupport.class);
         assertThat(TushareProPlugin.class.getConstructors()).singleElement()
                 .satisfies(constructor -> assertThat(constructor.getParameterTypes()).containsExactly(
                         TushareProperties.class, TushareProClient.class, List.class));
         assertThat(publicDeclaredMethods(TushareProPlugin.class)).extracting(Method::getName)
                 .containsExactlyInAnyOrder("descriptor", "readiness", "download", "batchDescriptor", "plan",
-                        "sourceParameters", "downloadBatch", "assess");
+                        "sourceParameters", "downloadBatch", "assess", "normalizeIntegritySymbol", "integrityDescriptor",
+                        "integrityRules", "integrityReferenceReads", "validateIntegrityRange");
 
         assertThat(Modifier.isPublic(TusharePluginConfiguration.class.getModifiers())).isTrue();
         assertThat(Modifier.isFinal(TusharePluginConfiguration.class.getModifiers())).isTrue();

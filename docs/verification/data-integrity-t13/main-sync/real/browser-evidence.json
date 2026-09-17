@@ -1,0 +1,484 @@
+{
+  "version": 1,
+  "task": "DATA-INTEGRITY-T13",
+  "startedAt": "2026-09-17T14:45:00.991Z",
+  "finishedAt": "2026-09-17T14:45:26.342Z",
+  "jarSha256": "a5ff0e16d960b164702fd08890da9696b41b7c9b8514637f7722683a62a03ddf",
+  "checks": [
+    {
+      "symbol": "PROVEN_EXTRA",
+      "startDate": "2026-01-01",
+      "endDate": "2026-01-21",
+      "checkId": "0263f3e3-6312-44cc-8063-58060f34f9a1",
+      "submissionId": "8bd51d6d-4267-4a1d-a7b8-dfd623cafbf9",
+      "capabilityHash": "7fa2ea12e89aee5b24350014c8f95b2d7552b5a5ae27f5cf20d7649b17108a95",
+      "conclusion": "有问题"
+    },
+    {
+      "symbol": "PROVEN_EXTRA",
+      "startDate": "2026-01-01",
+      "endDate": "2026-01-21",
+      "checkId": "9c136430-95fe-4a4a-a879-6443b66f660c",
+      "submissionId": "5b5a3c27-3094-4fe9-95ed-caebd8195f9d",
+      "capabilityHash": "7fa2ea12e89aee5b24350014c8f95b2d7552b5a5ae27f5cf20d7649b17108a95",
+      "conclusion": "通过"
+    },
+    {
+      "symbol": "PROVEN",
+      "startDate": "2026-01-01",
+      "endDate": "2026-01-20",
+      "checkId": "809aa74a-9fe5-4f5a-bad1-6154e1a50fef",
+      "submissionId": "6f8fd1d2-44db-4475-a214-a6acbc5e93c5",
+      "capabilityHash": "7fa2ea12e89aee5b24350014c8f95b2d7552b5a5ae27f5cf20d7649b17108a95",
+      "conclusion": "有问题"
+    },
+    {
+      "symbol": "PROVEN_EMPTY",
+      "startDate": "2026-01-01",
+      "endDate": "2026-01-21",
+      "checkId": "343f2b54-bbb7-4e36-8283-22e7ef51e449",
+      "submissionId": "25ba0b43-a21a-48f5-81e1-1d3703af79bc",
+      "capabilityHash": "7fa2ea12e89aee5b24350014c8f95b2d7552b5a5ae27f5cf20d7649b17108a95",
+      "conclusion": "通过"
+    },
+    {
+      "symbol": "UNCONFIRMED",
+      "startDate": "2026-01-01",
+      "endDate": "2026-01-20",
+      "checkId": "f29946ff-fcb2-4be8-8038-f790a0783585",
+      "submissionId": "53a50fc8-2552-4a9a-8895-0146d0ca16ec",
+      "capabilityHash": "7fa2ea12e89aee5b24350014c8f95b2d7552b5a5ae27f5cf20d7649b17108a95",
+      "conclusion": "无法判定"
+    },
+    {
+      "symbol": "PROVEN_EXTRA",
+      "startDate": "2026-01-01",
+      "endDate": "2026-01-21",
+      "checkId": "855864e9-b75b-4d6c-b642-653100e33259",
+      "submissionId": "7f5f3a9f-fe36-459a-bd9e-f162a58f3696",
+      "capabilityHash": "bb0e645da1a8cd45d9d14f6cb9a964d855071e760cbe176fcace7719046081e1",
+      "conclusion": "通过"
+    }
+  ],
+  "sql": {
+    "beforeUpdate": {
+      "expected": "20",
+      "actual": "20",
+      "matched": "19",
+      "missing": "1",
+      "extra": "1",
+      "rate": "0.950000",
+      "missingKeys": [
+        "PROVEN_EXTRA|2026-01-20"
+      ],
+      "extraKeys": [
+        "PROVEN_EXTRA|2026-01-21"
+      ]
+    },
+    "afterUpdate": {
+      "expected": "20",
+      "actual": "20",
+      "matched": "20",
+      "missing": "0",
+      "extra": "0",
+      "rate": "1.000000",
+      "missingKeys": [],
+      "extraKeys": []
+    },
+    "proven": {
+      "expected": "20",
+      "actual": "0",
+      "matched": "0",
+      "missing": "20",
+      "extra": "0",
+      "rate": "0.000000",
+      "missingKeys": [
+        "PROVEN|2026-01-01",
+        "PROVEN|2026-01-02",
+        "PROVEN|2026-01-03",
+        "PROVEN|2026-01-04",
+        "PROVEN|2026-01-05",
+        "PROVEN|2026-01-06",
+        "PROVEN|2026-01-07",
+        "PROVEN|2026-01-08",
+        "PROVEN|2026-01-09",
+        "PROVEN|2026-01-10",
+        "PROVEN|2026-01-11",
+        "PROVEN|2026-01-12",
+        "PROVEN|2026-01-13",
+        "PROVEN|2026-01-14",
+        "PROVEN|2026-01-15",
+        "PROVEN|2026-01-16",
+        "PROVEN|2026-01-17",
+        "PROVEN|2026-01-18",
+        "PROVEN|2026-01-19",
+        "PROVEN|2026-01-20"
+      ],
+      "extraKeys": []
+    }
+  },
+  "securities": [
+    {
+      "checkId": "0263f3e3-6312-44cc-8063-58060f34f9a1",
+      "before": {
+        "rows": [
+          "PROVEN_EXTRA\t2026-01-01\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-02\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-03\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-04\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-05\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-06\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-07\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-08\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-09\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-10\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-11\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-12\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-13\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-14\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-15\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-16\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-17\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-18\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-19\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-21\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000"
+        ],
+        "sha256": "b8f625006dbe77810ca5612fbbee85c5d24814583d5dec06dfb2d07dddc38340"
+      },
+      "after": {
+        "rows": [
+          "PROVEN_EXTRA\t2026-01-01\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-02\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-03\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-04\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-05\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-06\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-07\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-08\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-09\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-10\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-11\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-12\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-13\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-14\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-15\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-16\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-17\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-18\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-19\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-21\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000"
+        ],
+        "sha256": "b8f625006dbe77810ca5612fbbee85c5d24814583d5dec06dfb2d07dddc38340"
+      }
+    },
+    {
+      "checkId": "9c136430-95fe-4a4a-a879-6443b66f660c",
+      "before": {
+        "rows": [
+          "PROVEN_EXTRA\t2026-01-01\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-02\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-03\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-04\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-05\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-06\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-07\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-08\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-09\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-10\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-11\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-12\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-13\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-14\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-15\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-16\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-17\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-18\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-19\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-20\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000"
+        ],
+        "sha256": "27816012d8ed0c76f36ccc2e09e2cd299636e8c652c9e9b19beb7f999b7e6988"
+      },
+      "after": {
+        "rows": [
+          "PROVEN_EXTRA\t2026-01-01\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-02\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-03\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-04\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-05\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-06\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-07\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-08\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-09\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-10\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-11\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-12\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-13\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-14\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-15\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-16\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-17\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-18\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-19\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-20\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000"
+        ],
+        "sha256": "27816012d8ed0c76f36ccc2e09e2cd299636e8c652c9e9b19beb7f999b7e6988"
+      }
+    },
+    {
+      "checkId": "809aa74a-9fe5-4f5a-bad1-6154e1a50fef",
+      "before": {
+        "rows": [
+          "PROVEN_EXTRA\t2026-01-01\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-02\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-03\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-04\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-05\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-06\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-07\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-08\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-09\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-10\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-11\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-12\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-13\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-14\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-15\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-16\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-17\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-18\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-19\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-20\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000"
+        ],
+        "sha256": "27816012d8ed0c76f36ccc2e09e2cd299636e8c652c9e9b19beb7f999b7e6988"
+      },
+      "after": {
+        "rows": [
+          "PROVEN_EXTRA\t2026-01-01\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-02\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-03\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-04\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-05\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-06\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-07\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-08\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-09\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-10\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-11\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-12\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-13\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-14\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-15\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-16\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-17\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-18\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-19\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-20\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000"
+        ],
+        "sha256": "27816012d8ed0c76f36ccc2e09e2cd299636e8c652c9e9b19beb7f999b7e6988"
+      }
+    },
+    {
+      "checkId": "343f2b54-bbb7-4e36-8283-22e7ef51e449",
+      "before": {
+        "rows": [
+          "PROVEN_EXTRA\t2026-01-01\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-02\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-03\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-04\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-05\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-06\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-07\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-08\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-09\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-10\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-11\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-12\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-13\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-14\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-15\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-16\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-17\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-18\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-19\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-20\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000"
+        ],
+        "sha256": "27816012d8ed0c76f36ccc2e09e2cd299636e8c652c9e9b19beb7f999b7e6988"
+      },
+      "after": {
+        "rows": [
+          "PROVEN_EXTRA\t2026-01-01\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-02\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-03\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-04\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-05\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-06\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-07\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-08\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-09\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-10\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-11\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-12\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-13\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-14\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-15\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-16\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-17\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-18\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-19\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-20\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000"
+        ],
+        "sha256": "27816012d8ed0c76f36ccc2e09e2cd299636e8c652c9e9b19beb7f999b7e6988"
+      }
+    },
+    {
+      "checkId": "f29946ff-fcb2-4be8-8038-f790a0783585",
+      "before": {
+        "rows": [
+          "PROVEN_EXTRA\t2026-01-01\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-02\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-03\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-04\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-05\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-06\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-07\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-08\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-09\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-10\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-11\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-12\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-13\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-14\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-15\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-16\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-17\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-18\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-19\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-20\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000"
+        ],
+        "sha256": "27816012d8ed0c76f36ccc2e09e2cd299636e8c652c9e9b19beb7f999b7e6988"
+      },
+      "after": {
+        "rows": [
+          "PROVEN_EXTRA\t2026-01-01\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-02\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-03\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-04\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-05\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-06\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-07\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-08\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-09\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-10\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-11\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-12\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-13\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-14\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-15\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-16\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-17\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-18\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-19\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-20\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000"
+        ],
+        "sha256": "27816012d8ed0c76f36ccc2e09e2cd299636e8c652c9e9b19beb7f999b7e6988"
+      }
+    },
+    {
+      "checkId": "855864e9-b75b-4d6c-b642-653100e33259",
+      "before": {
+        "rows": [
+          "PROVEN_EXTRA\t2026-01-01\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-02\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-03\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-04\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-05\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-06\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-07\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-08\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-09\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-10\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-11\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-12\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-13\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-14\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-15\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-16\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-17\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-18\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-19\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-20\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000"
+        ],
+        "sha256": "27816012d8ed0c76f36ccc2e09e2cd299636e8c652c9e9b19beb7f999b7e6988"
+      },
+      "after": {
+        "rows": [
+          "PROVEN_EXTRA\t2026-01-01\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-02\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-03\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-04\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-05\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-06\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-07\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-08\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-09\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-10\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-11\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-12\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-13\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-14\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-15\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-16\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-17\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-18\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-19\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000",
+          "PROVEN_EXTRA\t2026-01-20\t1.230000000000000000\t<NULL>\tfixture\tfixture_daily\t2026-01-22T00:00:00.000000"
+        ],
+        "sha256": "27816012d8ed0c76f36ccc2e09e2cd299636e8c652c9e9b19beb7f999b7e6988"
+      }
+    }
+  ],
+  "screenshots": [
+    {
+      "width": 1440,
+      "path": "docs/verification/data-integrity-t13/main-sync/real/report-1440.png",
+      "sha256": "067a46856dbb52fbe992f5b81dac77e2114f4959daf63213f88d8e0d1e839c08"
+    },
+    {
+      "width": 1024,
+      "path": "docs/verification/data-integrity-t13/main-sync/real/report-1024.png",
+      "sha256": "17eceb6b0539453bf20d3257018048295161ab2f77d9fb3ed07eb248abdd5435"
+    },
+    {
+      "width": 390,
+      "path": "docs/verification/data-integrity-t13/main-sync/real/report-390.png",
+      "sha256": "4f121b503c4a720be36dc945d68938c311b303834fe59f065a1be3d5076e7574"
+    }
+  ],
+  "lifecycle": [
+    {
+      "version": 2,
+      "signal": null,
+      "exitCode": 143,
+      "logSafety": true
+    },
+    {
+      "version": 3,
+      "signal": null,
+      "exitCode": 143,
+      "logSafety": true
+    }
+  ],
+  "counters": {
+    "upstreamCalls": 0
+  },
+  "cleanup": {
+    "jvmStopped": true,
+    "receiverStopped": true,
+    "port8080Free": true
+  },
+  "scenarios": {
+    "proven": "809aa74a-9fe5-4f5a-bad1-6154e1a50fef",
+    "provenEmpty": "343f2b54-bbb7-4e36-8283-22e7ef51e449",
+    "unconfirmed": "f29946ff-fcb2-4be8-8038-f790a0783585"
+  }
+}

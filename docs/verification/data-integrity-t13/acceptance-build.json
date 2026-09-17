@@ -1,0 +1,17 @@
+{
+  "command": "mvn -o -f data-plane/pom.xml -Pacceptance -DargLine=<Mockito javaagent> clean verify",
+  "result": "BUILD SUCCESS",
+  "seconds": "56.090",
+  "artifact": "data-plane/tensor-app/target/acceptance/tensor-app-1.0-SNAPSHOT-acceptance.jar",
+  "sha256": "7b4963f4719c56a7e6e2bdbd28de3971969bd2ca3ab06aa537ed080c08e72f60",
+  "bytes": 33755158,
+  "totals": {
+    "tests": 1469,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "reportCount": 84,
+  "itMethods": 0,
+  "note": "Default Maven verify uses its configured unit/package patterns. Real MySQL IT results are separately recorded in integrity-tests.json and focused IntegrityFixtureFlowIT runs."
+}

@@ -26,7 +26,12 @@ public enum ErrorCode {
     BATCH_COMPLETENESS_UNCONFIRMED("Batch completeness is unconfirmed", false),
     SOURCE_RANGE_MISMATCH("Source data is outside the requested range", false),
     TASK_LIMIT_EXCEEDED("Download task limit exceeded", false),
-    EXECUTION_INTERRUPTED("Download task execution was interrupted", false);
+    EXECUTION_INTERRUPTED("Download task execution was interrupted", false),
+    INTEGRITY_UNAVAILABLE("Local integrity check is unavailable", false),
+    INTEGRITY_DEFINITION_CHANGED("Integrity check definition has changed", false),
+    INTEGRITY_QUEUE_FULL("Integrity check queue is full", true),
+    INTEGRITY_LIMIT_EXCEEDED("Integrity check limit exceeded", false),
+    INTEGRITY_CHECK_NOT_FOUND("Integrity check was not found", false);
 
     private final String message;
     private final boolean retryable;

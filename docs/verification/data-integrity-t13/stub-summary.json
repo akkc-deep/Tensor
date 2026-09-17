@@ -1,0 +1,66 @@
+{
+  "suite": "control-plane/e2e/integrity-checks.spec.js",
+  "mode": "API stub, not real SQL/HTTP integration",
+  "node": "24.15.0",
+  "tests": 39,
+  "failures": 0,
+  "skipped": 0,
+  "durationSeconds": 34.8,
+  "unitTests": 740,
+  "unitFiles": 52,
+  "build": "passed; existing >500kB chunk warning",
+  "screenshots": [
+    {
+      "path": "stub/empty-results.png",
+      "sha256": "aae399d7e4437ba7a8dc1658ac54b38b505eb0f23262c98ab5bbe3ccae318a2d"
+    },
+    {
+      "path": "stub/report-1024.png",
+      "sha256": "3896651b1229ccf8822581ea415b1495ed2b16ae171e910b77102fc1a834ae2e"
+    },
+    {
+      "path": "stub/report-1440.png",
+      "sha256": "b3e1e9799d24832f9121f54280ca3d000981087efc09260f576c7dec25daaf0d"
+    },
+    {
+      "path": "stub/report-390.png",
+      "sha256": "0f8721e888c9fa3fd73adcace26a129e61937376a8a402eacc50a779593ab8fd"
+    },
+    {
+      "path": "stub/中断与长值-1024.png",
+      "sha256": "904aeb25e9339789acc2b51db8ee1c1ba022729d0bb845c6bf8b441c5d399e30"
+    },
+    {
+      "path": "stub/中断与长值-1440.png",
+      "sha256": "e84317dc3896736b0530c2a5ce24b9fe3cdcb47070eef2279d80185acf269303"
+    },
+    {
+      "path": "stub/中断与长值-390.png",
+      "sha256": "918ea4d55c4e3ce810a9f77c4b0c8dd4ec9b1afd97d3ad51c0b312d3f249b4d9"
+    },
+    {
+      "path": "stub/全N-A-1024.png",
+      "sha256": "dd8c0515471d490c6e906ab817781bb59a13ed6c919919c1b4aa556e4088dbb0"
+    },
+    {
+      "path": "stub/全N-A-1440.png",
+      "sha256": "2cf335484e2f7b30f0d1b431f3964333df9ffe4dd6ef91a2c95b5dfd7a8edf7e"
+    },
+    {
+      "path": "stub/全N-A-390.png",
+      "sha256": "310a25d7902490826822e3642656350b179c02765dadf52e44ab69e181934699"
+    },
+    {
+      "path": "stub/全UNKNOWN-1024.png",
+      "sha256": "7e00986fb7eb980b91f47b6f4476ca8b643191c12c8827a335b64f9eb0fd1eaf"
+    },
+    {
+      "path": "stub/全UNKNOWN-1440.png",
+      "sha256": "097d1cbf963d4f3048d61d583ef834a698deab78bf2844650c15c98b2ae7ed45"
+    },
+    {
+      "path": "stub/全UNKNOWN-390.png",
+      "sha256": "23b51a28cc2e2267e05ece7aabaf718904355721cfe3d2be677668310f1ae979"
+    }
+  ]
+}

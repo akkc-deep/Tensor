@@ -1,0 +1,12 @@
+{
+  "baselineTree": "1728e704532dca83032c35aaf4cc576307e37ca5",
+  "checkedProductionPaths": [
+    "control-plane/src",
+    "data-plane/tensor-core/src/main",
+    "data-plane/tensor-app/src/main",
+    "data-plane/tensor-plugin-api/src/main",
+    "data-plane/tensor-plugin-tushare/src/main"
+  ],
+  "changedFiles": [],
+  "scope": "T13 delta from inherited staged baseline; only fixture production code changes. Final code-boundary check after all runtime fixes."
+}

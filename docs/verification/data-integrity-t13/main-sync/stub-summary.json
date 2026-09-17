@@ -1,0 +1,33 @@
+{
+  "tests": 39,
+  "passed": 39,
+  "failed": 0,
+  "skipped": 0,
+  "seconds": 36.9,
+  "red": {
+    "passed": 32,
+    "failed": 7,
+    "reason": "390px navigation overflow; scrollWidth 690 for viewport 390"
+  },
+  "screenshots": {
+    "create-1024.png": "4a278ded5a1973d9865bbcfac272b28d92e84186d8ee69a85c52d5c7a6b5fb4b",
+    "create-1440.png": "b1bf81ff0e6c2e75861015322d1c8cd91073b6b7ff348e4e1ff36400cb38193e",
+    "create-390.png": "98cb6144296752ac05c4b748434111f64fddd185e3552a95b2260b2432f5cd91",
+    "empty-results.png": "aae399d7e4437ba7a8dc1658ac54b38b505eb0f23262c98ab5bbe3ccae318a2d",
+    "empty.png": "0b11f5dd62901ffecf011ac2265b94ebb73b289c7496bd1ba75007e002b59e30",
+    "long-390.png": "c6765d8425e50b0942e88ca850ec04d945d64239de14f81782a7e801e4f76e06",
+    "report-1024.png": "3896651b1229ccf8822581ea415b1495ed2b16ae171e910b77102fc1a834ae2e",
+    "report-1440.png": "b3e1e9799d24832f9121f54280ca3d000981087efc09260f576c7dec25daaf0d",
+    "report-390.png": "0f8721e888c9fa3fd73adcace26a129e61937376a8a402eacc50a779593ab8fd",
+    "uncertain.png": "dfaf760774da3cafb83daa0dbe9e1f9589eb21d16d5e9ea3de57a78ce862c317",
+    "中断与长值-1024.png": "670a41fba0a75d0fcc796b5d8cfeae0650b8565a0cf68f2d2491193d4686a86d",
+    "中断与长值-1440.png": "d365879556c358ae1bc6ff49ad97d6b3de99e778e2ab0ff9a59660d6d8c17b91",
+    "中断与长值-390.png": "e4c750a7c8a160511d513a855b8e92633c65909bba1504410ef1fbb7b32113ec",
+    "全N-A-1024.png": "50c1914841f4de2600b3b49ebf575e04ada2a047a7b9fe3643e42a743e4a482b",
+    "全N-A-1440.png": "71d6f77592ba7dfdef983b9cfca0381a7ced44d2677ad85a9e3edc91e1116446",
+    "全N-A-390.png": "47754a9aa7afae91f0c18a48a536e36d39cc8093caa29aa1b268f80d4e6a160a",
+    "全UNKNOWN-1024.png": "85a2a43117ce1905ff4e6427c18479df01a550ddaa74a83a8a275972afba7b68",
+    "全UNKNOWN-1440.png": "6136d7e7ce672083360a68fc9698221e0498957dd5d094fb04afb31182663c65",
+    "全UNKNOWN-390.png": "6dbf0cb6ba78e0f26659b1f2d99dfe8902f0e00a179354410ac2aefdb3273d09"
+  }
+}

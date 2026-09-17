@@ -1,0 +1,27 @@
+{
+  "version": 1,
+  "task": "DATA-INTEGRITY-T13",
+  "fixture": "temporary fake npm parent-child-grandchild process tree",
+  "results": [
+    {
+      "signal": "SIGTERM",
+      "launcherExitNonZero": true,
+      "allOwnedProcessesExited": true,
+      "containerSentinelRemoved": true,
+      "credentialSentinelRemoved": true
+    },
+    {
+      "signal": "SIGINT",
+      "launcherExitNonZero": true,
+      "allOwnedProcessesExited": true,
+      "containerSentinelRemoved": true,
+      "credentialSentinelRemoved": true
+    }
+  ],
+  "commands": [
+    "python3 /tmp/t13-signal-probe/run-probe.py",
+    "PROBE_SIGNAL=SIGINT python3 /tmp/t13-signal-probe/run-probe.py"
+  ],
+  "containsCredentials": false,
+  "containsProcessIds": false
+}

@@ -4,12 +4,15 @@ info:
   version: v1
   description: >-
     Shared REST contract for Tensor v1 metadata, downloads, persistent download tasks,
-    and read-only dataset queries. Task versions, counts, totals and rowLimit are int64
+    local integrity checks and read-only dataset queries. Download task versions, counts, totals and rowLimit are int64
     JSON numbers up to 9223372036854775807. JavaScript Number is exact only through
     9007199254740991: use lossless JSON parsing and preserve exact decimal digits when
     displaying larger values or sending expectedVersion. Never round or truncate.
     Historical securities LONG and DECIMAL values retain their existing string format.
-    Task examples are in download-task-examples.json; error semantics are in error-codes.md.
+    Download examples are in download-task-examples.json; integrity examples are in integrity-check-examples.json.
+    Integrity counts, page totals, issueId and long limits are decimal strings; nullable statistics stay null.
+    Integrity coverageRate is a six-place string from 0.000000 to 1.000000, or null when unproven.
+    Error semantics are in error-codes.md.
 paths:
   /api/v1/data-sources:
     get:
@@ -448,8 +451,594 @@ paths:
         '400': {$ref: '#/components/responses/DownloadTaskBadRequest'}
         '409': {$ref: '#/components/responses/DownloadTaskConflict'}
         '500': {$ref: '#/components/responses/DownloadTaskFailure'}
+  /api/v1/data-sources/{pluginId}/integrity-capabilities:
+    parameters:
+    - name: pluginId
+      in: path
+      required: true
+      schema:
+        $ref: '#/components/schemas/IntegrityIdentifier'
+    get:
+      operationId: integrityCapabilities
+      description: Local metadata only; no source network requests. A missing token does not disable local checks.
+        Unknown, disabled or unsupported plugins return unavailable metadata with an explicit reason. No query parameters
+        accepted. API order/hash are the current service snapshot; download availability is independent.
+      responses:
+        '200':
+          description: Local capabilities and all API policies, including unknown and not applicable entries.
+          headers:
+            X-Request-Id:
+              required: true
+              schema:
+                type: string
+                format: uuid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IntegrityCapability'
+        '400':
+          description: 'PARAM_REQUIRED or PARAM_INVALID: missing body/fields or invalid JSON, identifiers, dates,
+            enums, pagination, unknown/repeated parameters.'
+          headers:
+            X-Request-Id:
+              required: true
+              schema:
+                type: string
+                format: uuid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '409':
+          description: 'DATASET_MISCONFIGURED: invalid registered capability metadata.'
+          headers:
+            X-Request-Id:
+              required: true
+              schema:
+                type: string
+                format: uuid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '500':
+          description: QUERY_FAILED, PERSISTENCE_FAILED or INTERNAL_ERROR. Safe fixed message only.
+          headers:
+            X-Request-Id:
+              required: true
+              schema:
+                type: string
+                format: uuid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+  /api/v1/integrity-checks:
+    post:
+      operationId: createIntegrityCheck
+      description: Accept the original JSON object; apiNames omitted fixes the current complete API list, an empty
+        array is rejected. Reject unknown/duplicate members and trailing content. No query parameters. Same submissionId
+        and original payload replays before current capability checks; arrays retain their order. Limits count the
+        full requested scope and inclusive date range. Tushare endDate cannot be later than the acceptance date in
+        Asia/Shanghai.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/IntegrityRequest'
+      responses:
+        '202':
+          description: New check committed and queued; not a data verdict.
+          headers:
+            X-Request-Id:
+              required: true
+              schema:
+                type: string
+                format: uuid
+            Location:
+              required: true
+              description: Original check detail URL; unchanged for replay.
+              schema:
+                type: string
+                pattern: ^/api/v1/integrity-checks/[0-9a-fA-F-]{36}$
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IntegrityReceipt'
+        '200':
+          description: Identical original request replay, preserving original checkId and current stored status.
+          headers:
+            X-Request-Id:
+              required: true
+              schema:
+                type: string
+                format: uuid
+            Location:
+              required: true
+              description: Original check detail URL; unchanged for replay.
+              schema:
+                type: string
+                pattern: ^/api/v1/integrity-checks/[0-9a-fA-F-]{36}$
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IntegrityReceipt'
+        '400':
+          description: PARAM_REQUIRED, PARAM_INVALID or INTEGRITY_LIMIT_EXCEEDED; correct the supplied request.
+          headers:
+            X-Request-Id:
+              required: true
+              schema:
+                type: string
+                format: uuid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '409':
+          description: SUBMISSION_CONFLICT, INTEGRITY_UNAVAILABLE, INTEGRITY_DEFINITION_CHANGED or DATASET_MISCONFIGURED.
+            On definition change refresh capabilities and confirm the new policy before creating a new request.
+          headers:
+            X-Request-Id:
+              required: true
+              schema:
+                type: string
+                format: uuid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '429':
+          description: INTEGRITY_QUEUE_FULL; this admission did not create a check.
+          headers:
+            X-Request-Id:
+              required: true
+              schema:
+                type: string
+                format: uuid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '500':
+          description: QUERY_FAILED, PERSISTENCE_FAILED or INTERNAL_ERROR. Safe fixed message only.
+          headers:
+            X-Request-Id:
+              required: true
+              schema:
+                type: string
+                format: uuid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+    get:
+      operationId: listIntegrityChecks
+      description: Persisted history only, ordered created_at DESC/check_id DESC. Unknown/repeated parameters are
+        rejected; out-of-range pages return empty items. submissionId can recover an uncertain admission without a
+        new POST. No current plugin or token is required.
+      parameters:
+      - name: page
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 2147483647
+          default: 1
+      - name: pageSize
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 100
+          default: 20
+      - name: pluginId
+        in: query
+        required: false
+        schema:
+          $ref: '#/components/schemas/IntegrityIdentifier'
+      - name: status
+        in: query
+        required: false
+        schema:
+          $ref: '#/components/schemas/IntegrityTaskStatus'
+      - name: submissionId
+        in: query
+        required: false
+        schema:
+          $ref: '#/components/schemas/IntegrityUuid'
+      responses:
+        '200':
+          description: History count and items from one read transaction.
+          headers:
+            X-Request-Id:
+              required: true
+              schema:
+                type: string
+                format: uuid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IntegrityTaskPage'
+        '400':
+          description: 'PARAM_REQUIRED or PARAM_INVALID: missing body/fields or invalid JSON, identifiers, dates,
+            enums, pagination, unknown/repeated parameters.'
+          headers:
+            X-Request-Id:
+              required: true
+              schema:
+                type: string
+                format: uuid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '500':
+          description: QUERY_FAILED, PERSISTENCE_FAILED or INTERNAL_ERROR. Safe fixed message only.
+          headers:
+            X-Request-Id:
+              required: true
+              schema:
+                type: string
+                format: uuid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+  /api/v1/integrity-checks/{checkId}:
+    parameters:
+    - name: checkId
+      in: path
+      required: true
+      schema:
+        $ref: '#/components/schemas/IntegrityUuid'
+    get:
+      operationId: getIntegrityCheck
+      description: One persisted progress snapshot. No query parameters. completedUnits includes the errorUnits subset;
+        never add them. Uncomputed units count as UNKNOWN; HTTP 200 and COMPLETED do not imply PASS. No cross-API
+        percentage is supplied.
+      responses:
+        '200':
+          description: Original scope, stored execution state and data conclusions; historical rules are not recomputed.
+          headers:
+            X-Request-Id:
+              required: true
+              schema:
+                type: string
+                format: uuid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IntegrityDetail'
+        '404':
+          description: INTEGRITY_CHECK_NOT_FOUND.
+          headers:
+            X-Request-Id:
+              required: true
+              schema:
+                type: string
+                format: uuid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '400':
+          description: 'PARAM_REQUIRED or PARAM_INVALID: missing body/fields or invalid JSON, identifiers, dates,
+            enums, pagination, unknown/repeated parameters.'
+          headers:
+            X-Request-Id:
+              required: true
+              schema:
+                type: string
+                format: uuid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '500':
+          description: QUERY_FAILED, PERSISTENCE_FAILED or INTERNAL_ERROR. Safe fixed message only.
+          headers:
+            X-Request-Id:
+              required: true
+              schema:
+                type: string
+                format: uuid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+  /api/v1/integrity-checks/{checkId}/results:
+    parameters:
+    - name: checkId
+      in: path
+      required: true
+      schema:
+        $ref: '#/components/schemas/IntegrityUuid'
+    get:
+      operationId: listIntegrityResults
+      description: Stored results ordered api_name/symbol/result_id; unknown/repeated parameters rejected. symbol
+        is an exact historical value, not normalized against current plugins. The parent check must exist. Out-of-range
+        pages return empty items.
+      parameters:
+      - name: page
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 2147483647
+          default: 1
+      - name: pageSize
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 100
+          default: 20
+      - name: symbol
+        in: query
+        required: false
+        schema:
+          type: string
+          minLength: 1
+          maxLength: 255
+          pattern: \S
+      - name: apiName
+        in: query
+        required: false
+        schema:
+          $ref: '#/components/schemas/IntegrityIdentifier'
+      - name: overallStatus
+        in: query
+        required: false
+        schema:
+          $ref: '#/components/schemas/IntegrityStatus'
+      responses:
+        '200':
+          description: Saved result reports and exact total from one read transaction.
+          headers:
+            X-Request-Id:
+              required: true
+              schema:
+                type: string
+                format: uuid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IntegrityResultPage'
+        '404':
+          description: INTEGRITY_CHECK_NOT_FOUND.
+          headers:
+            X-Request-Id:
+              required: true
+              schema:
+                type: string
+                format: uuid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '400':
+          description: 'PARAM_REQUIRED or PARAM_INVALID: missing body/fields or invalid JSON, identifiers, dates,
+            enums, pagination, unknown/repeated parameters.'
+          headers:
+            X-Request-Id:
+              required: true
+              schema:
+                type: string
+                format: uuid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '500':
+          description: QUERY_FAILED, PERSISTENCE_FAILED or INTERNAL_ERROR. Safe fixed message only.
+          headers:
+            X-Request-Id:
+              required: true
+              schema:
+                type: string
+                format: uuid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+  /api/v1/integrity-checks/{checkId}/issues:
+    parameters:
+    - name: checkId
+      in: path
+      required: true
+      schema:
+        $ref: '#/components/schemas/IntegrityUuid'
+    get:
+      operationId: listIntegrityIssues
+      description: Stored issues ordered issue_date ASC (null last)/issue_id ASC. dateFrom/dateTo filter the saved
+        issue date, inclusively; one-sided ranges are allowed and two-sided ranges must be ordered. Filtering by date
+        excludes undated issues; omit both to see them. resultId is only a filter, including a foreign/nonexistent
+        value returns an empty page. Unknown/repeated parameters rejected; no current plugin required.
+      parameters:
+      - name: page
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 2147483647
+          default: 1
+      - name: pageSize
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 100
+          default: 20
+      - name: resultId
+        in: query
+        required: false
+        schema:
+          $ref: '#/components/schemas/IntegrityUuid'
+      - name: symbol
+        in: query
+        required: false
+        schema:
+          type: string
+          minLength: 1
+          maxLength: 255
+          pattern: \S
+      - name: apiName
+        in: query
+        required: false
+        schema:
+          $ref: '#/components/schemas/IntegrityIdentifier'
+      - name: type
+        in: query
+        required: false
+        schema:
+          $ref: '#/components/schemas/IntegrityIssueType'
+      - name: status
+        in: query
+        required: false
+        schema:
+          $ref: '#/components/schemas/IntegrityStatus'
+      - name: dateFrom
+        in: query
+        required: false
+        schema:
+          $ref: '#/components/schemas/IntegrityDate'
+      - name: dateTo
+        in: query
+        required: false
+        schema:
+          $ref: '#/components/schemas/IntegrityDate'
+      responses:
+        '200':
+          description: Saved issue evidence, complete business keys and exact total from one read transaction.
+          headers:
+            X-Request-Id:
+              required: true
+              schema:
+                type: string
+                format: uuid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IntegrityIssuePage'
+        '404':
+          description: INTEGRITY_CHECK_NOT_FOUND.
+          headers:
+            X-Request-Id:
+              required: true
+              schema:
+                type: string
+                format: uuid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '400':
+          description: 'PARAM_REQUIRED or PARAM_INVALID: missing body/fields or invalid JSON, identifiers, dates,
+            enums, pagination, unknown/repeated parameters.'
+          headers:
+            X-Request-Id:
+              required: true
+              schema:
+                type: string
+                format: uuid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '500':
+          description: QUERY_FAILED, PERSISTENCE_FAILED or INTERNAL_ERROR. Safe fixed message only.
+          headers:
+            X-Request-Id:
+              required: true
+              schema:
+                type: string
+                format: uuid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
 components:
   schemas:
+    IntegrityIdentifier:
+      $ref: ./integrity-check.schema.json#/$defs/Identifier
+    IntegrityUuid:
+      $ref: ./integrity-check.schema.json#/$defs/Uuid
+    IntegrityHash:
+      $ref: ./integrity-check.schema.json#/$defs/Hash
+    IntegrityDate:
+      $ref: ./integrity-check.schema.json#/$defs/Date
+    IntegrityTimestamp:
+      $ref: ./integrity-check.schema.json#/$defs/Timestamp
+    IntegrityCount:
+      $ref: ./integrity-check.schema.json#/$defs/Count
+    IntegrityCoverageRate:
+      $ref: ./integrity-check.schema.json#/$defs/CoverageRate
+    IntegrityStatus:
+      $ref: ./integrity-check.schema.json#/$defs/Status
+    IntegrityTaskStatus:
+      $ref: ./integrity-check.schema.json#/$defs/TaskStatus
+    IntegrityUnitStatus:
+      $ref: ./integrity-check.schema.json#/$defs/UnitStatus
+    IntegrityIssueType:
+      $ref: ./integrity-check.schema.json#/$defs/IssueType
+    IntegrityDatasetKey:
+      $ref: ./integrity-check.schema.json#/$defs/DatasetKey
+    IntegrityDateRange:
+      $ref: ./integrity-check.schema.json#/$defs/DateRange
+    IntegrityScope:
+      $ref: ./integrity-check.schema.json#/$defs/Scope
+    IntegrityTaskScope:
+      $ref: ./integrity-check.schema.json#/$defs/TaskScope
+    IntegrityDependency:
+      $ref: ./integrity-check.schema.json#/$defs/Dependency
+    IntegrityRuleDescriptor:
+      $ref: ./integrity-check.schema.json#/$defs/RuleDescriptor
+    IntegrityDescriptor:
+      $ref: ./integrity-check.schema.json#/$defs/Descriptor
+    IntegrityStatistics:
+      $ref: ./integrity-check.schema.json#/$defs/Statistics
+    IntegrityEvidence:
+      $ref: ./integrity-check.schema.json#/$defs/Evidence
+    IntegrityRuleResult:
+      $ref: ./integrity-check.schema.json#/$defs/RuleResult
+    IntegrityUnitReport:
+      $ref: ./integrity-check.schema.json#/$defs/UnitReport
+    IntegrityIssueBody:
+      $ref: ./integrity-check.schema.json#/$defs/IssueBody
+    IntegrityLimits:
+      $ref: ./integrity-check.schema.json#/$defs/Limits
+    IntegrityApi:
+      $ref: ./integrity-check.schema.json#/$defs/Api
+    IntegrityCapability:
+      $ref: ./integrity-check.schema.json#/$defs/Capability
+    IntegrityRequest:
+      $ref: ./integrity-check.schema.json#/$defs/Request
+    IntegrityReceipt:
+      $ref: ./integrity-check.schema.json#/$defs/Receipt
+    IntegrityTaskSummary:
+      $ref: ./integrity-check.schema.json#/$defs/TaskSummary
+    IntegrityStatusCounts:
+      $ref: ./integrity-check.schema.json#/$defs/StatusCounts
+    IntegrityDetail:
+      $ref: ./integrity-check.schema.json#/$defs/Detail
+    IntegrityResult:
+      $ref: ./integrity-check.schema.json#/$defs/Result
+    IntegrityIssue:
+      $ref: ./integrity-check.schema.json#/$defs/Issue
+    IntegrityTaskPage:
+      $ref: ./integrity-check.schema.json#/$defs/TaskPage
+    IntegrityResultPage:
+      $ref: ./integrity-check.schema.json#/$defs/ResultPage
+    IntegrityIssuePage:
+      $ref: ./integrity-check.schema.json#/$defs/IssuePage
     DownloadTaskSubmissionRequest:
       $ref: './download-task.schema.json#/$defs/SubmissionRequest'
     DownloadTaskControlRequest:
@@ -665,7 +1254,7 @@ components:
       properties:
         requestId: {type: string, minLength: 1, description: Must equal the X-Request-Id response header.}
         code:
-          enum: [PARAM_REQUIRED, PARAM_INVALID, PLUGIN_DISABLED, DATASET_MISCONFIGURED, SOURCE_AUTH_FAILED, SOURCE_PERMISSION_DENIED, SOURCE_RATE_LIMITED, SOURCE_UNAVAILABLE, SOURCE_NETWORK_ERROR, SOURCE_TIMEOUT, SOURCE_PAYLOAD_INVALID, ADAPTER_FIELD_MISSING, ADAPTER_TYPE_INVALID, PERSISTENCE_FAILED, QUERY_FAILED, INTERNAL_ERROR, TASK_NOT_FOUND, SUBMISSION_CONFLICT, TASK_STATE_CONFLICT, TASK_DEFINITION_CHANGED, BATCH_DOWNLOAD_UNAVAILABLE, TASK_QUEUE_FULL, BATCH_COMPLETENESS_UNCONFIRMED, SOURCE_RANGE_MISMATCH, TASK_LIMIT_EXCEEDED, EXECUTION_INTERRUPTED]
+          enum: [PARAM_REQUIRED, PARAM_INVALID, PLUGIN_DISABLED, DATASET_MISCONFIGURED, SOURCE_AUTH_FAILED, SOURCE_PERMISSION_DENIED, SOURCE_RATE_LIMITED, SOURCE_UNAVAILABLE, SOURCE_NETWORK_ERROR, SOURCE_TIMEOUT, SOURCE_PAYLOAD_INVALID, ADAPTER_FIELD_MISSING, ADAPTER_TYPE_INVALID, PERSISTENCE_FAILED, QUERY_FAILED, INTERNAL_ERROR, TASK_NOT_FOUND, SUBMISSION_CONFLICT, TASK_STATE_CONFLICT, TASK_DEFINITION_CHANGED, BATCH_DOWNLOAD_UNAVAILABLE, TASK_QUEUE_FULL, BATCH_COMPLETENESS_UNCONFIRMED, SOURCE_RANGE_MISMATCH, TASK_LIMIT_EXCEEDED, EXECUTION_INTERRUPTED, INTEGRITY_CHECK_NOT_FOUND, INTEGRITY_UNAVAILABLE, INTEGRITY_DEFINITION_CHANGED, INTEGRITY_QUEUE_FULL, INTEGRITY_LIMIT_EXCEEDED]
         message: {type: string, minLength: 1}
         retryable: {type: boolean}
         fieldErrors:

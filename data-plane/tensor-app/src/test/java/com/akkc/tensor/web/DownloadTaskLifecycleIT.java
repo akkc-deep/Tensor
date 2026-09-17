@@ -128,7 +128,7 @@ class DownloadTaskLifecycleIT {
         adminDataSource = new DriverManagerDataSource(MYSQL.getJdbcUrl(), MYSQL.getUsername(), MYSQL.getPassword());
         Flyway flyway = Flyway.configure().dataSource(adminDataSource).locations(migrations).cleanDisabled(false).load();
         flyway.clean();
-        assertThat(flyway.migrate().migrationsExecuted).isEqualTo(7);
+        assertThat(flyway.migrate().migrationsExecuted).isEqualTo(8);
         jdbc = new JdbcTemplate(adminDataSource);
         createLifecycleTable(jdbc);
         source = new ControlledSource();
@@ -274,7 +274,7 @@ class DownloadTaskLifecycleIT {
     }
 
     @Test
-    void documentedSchemaPrivilegesSupportV8AndTaskWrites() throws Exception {
+    void documentedSchemaPrivilegesSupportCurrentMigrationsAndTaskWrites() throws Exception {
         String suffix = UUID.randomUUID().toString().replace("-", "").substring(0, 10);
         String schema = "tensor_lifecycle_priv_" + suffix;
         String user = "tensor_lifecycle_" + suffix;
@@ -286,7 +286,7 @@ class DownloadTaskLifecycleIT {
             rootJdbc.execute("GRANT CREATE,SELECT,INSERT,UPDATE,ALTER,INDEX,REFERENCES ON `" + schema + "`.* TO '" + user + "'@'%'");
             DriverManagerDataSource restricted = new DriverManagerDataSource(jdbcUrl(schema), user, password);
             Flyway flyway = Flyway.configure().dataSource(restricted).locations(migrations).load();
-            assertThat(flyway.migrate().migrationsExecuted).isEqualTo(7);
+            assertThat(flyway.migrate().migrationsExecuted).isEqualTo(8);
             JdbcTemplate restrictedJdbc = new JdbcTemplate(restricted);
             createLifecycleTable(restrictedJdbc);
             ControlledSource restrictedSource = new ControlledSource();

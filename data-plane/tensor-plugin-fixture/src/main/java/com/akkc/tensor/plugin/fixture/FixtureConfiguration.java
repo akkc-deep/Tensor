@@ -20,6 +20,7 @@ import com.akkc.tensor.plugin.api.model.PluginId;
 import com.akkc.tensor.plugin.api.model.TableName;
 import java.util.List;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
@@ -38,8 +39,13 @@ public final class FixtureConfiguration {
     private static final DatasetDefinition DEFINITION = definition();
 
     @Bean
+    public FixturePlugin fixturePlugin(
+            @Value("${tensor.plugins.fixture.integrity-version:2}") int integrityVersion) {
+        return new FixturePlugin(DEFINITION, new FixtureEnvelopeFactory(), integrityVersion);
+    }
+
     public FixturePlugin fixturePlugin() {
-        return new FixturePlugin(DEFINITION, new FixtureEnvelopeFactory());
+        return fixturePlugin(2);
     }
 
     @Bean

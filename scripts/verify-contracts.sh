@@ -144,7 +144,7 @@ REPORTS = (
             "keepsV6InTestOutputOnly": 1,
             "taskTablesHaveExactColumnsDefaultsIndexesAndConstraints": 1,
             "upgradesV7WithoutChangingChecksumsOrExistingSecurities": 1,
-            "productionMigrationInventoryCreates51TablesWithoutFixture": 1,
+            "productionMigrationInventoryCreates54TablesWithoutFixture": 1,
             "mysqlRejectsTaskAndBatchConstraintViolations": 1,
         },
     ),
@@ -718,20 +718,20 @@ result = {
     "resources": json.loads(Path(resources_path).read_text(encoding="utf-8")),
     "contracts": {
         "sourceYaml": 40,
-        "productionTables": 51,
+        "productionTables": 54,
         "productionSecuritiesTables": 49,
         "legacyTables": 9,
         "registeredDatasets": 40,
-        "productionMigrations": 7,
-        "testMigrations": 8,
+        "productionMigrations": 8,
+        "testMigrations": 9,
         "packagedYaml": 40,
         "fixtureAdditionalTables": 1,
         "tableEvidence": "successful FlywaySchemaContractIT result-level assertions",
         "fixtureTotals": {
-            "businessTables": 52,
-            "totalColumns": 1051,
-            "primaryKeys": 52,
-            "nonPrimaryIndexes": 48,
+            "businessTables": 55,
+            "totalColumns": 1110,
+            "primaryKeys": 55,
+            "nonPrimaryIndexes": 56,
         },
     },
     "syntheticRejections": 11,
@@ -740,5 +740,5 @@ Path(output).write_text(json.dumps(result, indent=2, sort_keys=True) + "\n", enc
 os.chmod(output, 0o600)
 PY
 
-printf 'M14-T04 contracts passed: metadata=41 schema=47 package=4 yaml=40 tables=51 legacy=9 packaged=40\n'
+printf 'M14-T04 contracts passed: metadata=41 schema=47 package=4 yaml=40 tables=54 legacy=9 packaged=40\n'
 printf 'M14-T04 private evidence: %s\n' "$evidence"

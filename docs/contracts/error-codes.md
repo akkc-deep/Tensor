@@ -47,3 +47,21 @@ If a submission or retry/resume response is lost or reports `PERSISTENCE_FAILED`
 Requests reject unknown/repeated query parameters and duplicate JSON members at runtime. Structural errors are 400; invalid present top-level fields take precedence over missing required ones. A syntactically valid request that changes a previously used submissionId is 409 `SUBMISSION_CONFLICT`. A well-formed unknown taskId is 404; an unknown submissionId filter is an empty 200 page.
 
 Task versions, request counts, batch counts, row counts, page totals and nullable completeness `rowLimit` are JSON integer numbers bounded by signed int64 (maximum `9223372036854775807`). JavaScript Number is exact only through `9007199254740991`; clients must parse larger values losslessly, display their exact decimal digits, and preserve the exact version when sending `expectedVersion` as an integer token. Do not round or truncate. This contract does not change historical securities LONG/DECIMAL string serialization.
+
+## Local integrity HTTP errors
+
+The six local integrity endpoints use the same safe `ApiError` and request ID contract. A successful query returns 200 even when data is UNKNOWN/FAIL or execution is FAILED/INTERRUPTED. GET errors describe failure to query, not a stored data conclusion.
+
+| Code | HTTP | Retryable | Meaning |
+|---|---:|---|---|
+| `INTEGRITY_CHECK_NOT_FOUND` | 404 | `false` | Integrity check was not found. Results and issues also validate their parent check; a nonmatching resultId filter returns an empty page. |
+| `INTEGRITY_UNAVAILABLE` | 409 | `false` | Local integrity checking is unavailable for the plugin. |
+| `INTEGRITY_DEFINITION_CHANGED` | 409 | `false` | Refresh the capability snapshot before creating a new check. |
+| `INTEGRITY_QUEUE_FULL` | 429 | `true` | No queue slot is available; this attempt did not create a check. |
+| `INTEGRITY_LIMIT_EXCEEDED` | 400 | `false` | The requested symbols, inclusive date span, or planned units exceed the configured limit. |
+
+First admission returns 202; an identical original submission returns 200 with the same checkId and Location. Replay occurs before checking the current capability hash; a changed payload with the same submissionId returns 409/SUBMISSION_CONFLICT. On an uncertain response, query history by submissionId or replay the unchanged request with the same ID. Never assume a persistence error proves no commit.
+
+All six endpoints reject unknown/repeated query parameters; submission JSON rejects duplicate members, trailing content and unknown fields. Invalid query values use PARAM_INVALID; missing required submission fields use PARAM_REQUIRED. Lists accept page >= 1 and any pageSize from 1 to 100 (defaults 1/20). Historical symbols are exact filters and do not require current plugin availability. Issue dates filter the saved issue date; filtering excludes undated issues.
+
+Integrity counts, page totals, issueId and long-valued limits are decimal strings. Unknown statistics stay null; a computed zero stays "0". coverageRate is null or a six-place decimal string from 0.000000 to 1.000000, rounded HALF_UP for display only. plannedUnits, page/pageSize and int-valued limits remain JSON integers. Download availability reuses the existing download contract (including integer rowLimit). See `integrity-check.schema.json` and `integrity-check-examples.json`; saved reports do not depend on current rules or credentials.

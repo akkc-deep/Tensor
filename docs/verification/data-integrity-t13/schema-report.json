@@ -1,0 +1,19 @@
+{
+  "path": "data-plane/tensor-app/target/surefire-reports/TEST-com.akkc.tensor.db.FlywaySchemaContractIT.xml",
+  "sha256": "5f8260388aa73d1aa03640ed1e22fcb96c1163567884172960b436d9e2325eb6",
+  "className": "com.akkc.tensor.db.FlywaySchemaContractIT",
+  "tests": 47,
+  "failures": 0,
+  "errors": 0,
+  "skipped": 0,
+  "methods": {
+    "productionSchemasMatchDatasetDefinitions": 40,
+    "migratesAndValidatesRepeatablyOnMySql846": 1,
+    "fixtureSchemaMatchesContract": 1,
+    "keepsV6InTestOutputOnly": 1,
+    "taskTablesHaveExactColumnsDefaultsIndexesAndConstraints": 1,
+    "upgradesV7WithoutChangingChecksumsOrExistingSecurities": 1,
+    "productionMigrationInventoryCreates54TablesWithoutFixture": 1,
+    "mysqlRejectsTaskAndBatchConstraintViolations": 1
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "firstAttempt": "terminated after Testcontainers JDBC greeting stalled",
+  "businessFailure": false,
+  "evidence": {
+    "mysql": "8.4.6 ready on3306",
+    "hostPort": 33331,
+    "hostGreeting": "3s timeout",
+    "thread": "JdbcDatabaseContainer.waitUntilContainerStarted beforeHandshake socket read"
+  },
+  "recovery": "terminate only owned Maven/test JVM; retry same suite with new owned containers",
+  "legacyDatabaseTouched": false,
+  "retryResult": {
+    "exitCode": 0,
+    "tests": 441,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0,
+    "itTests": 125
+  }
+}

@@ -1,0 +1,1379 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://tensor.local/contracts/integrity-check.schema.json",
+  "title": "Tensor local integrity checks",
+  "description": "Persisted historical reports. HTTP success and task COMPLETED do not imply data PASS. Closed DTOs; explicit nulls; exact string counters. Download availability retains the independent download contract.",
+  "$defs": {
+    "Identifier": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_]{1,63}$"
+    },
+    "Uuid": {
+      "type": "string",
+      "format": "uuid",
+      "pattern": "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
+    },
+    "Hash": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "Date": {
+      "type": "string",
+      "format": "date",
+      "pattern": "^[1-9][0-9]{3}-[0-9]{2}-[0-9]{2}$"
+    },
+    "Timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "pattern": "Z$"
+    },
+    "Count": {
+      "type": "string",
+      "pattern": "^(0|[1-9][0-9]*)$",
+      "description": "Exact nonnegative decimal integer. Never convert to JavaScript Number."
+    },
+    "CoverageRate": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "pattern": "^(0\\.[0-9]{6}|1\\.000000)$",
+      "description": "Display-only ratio, six places HALF_UP; null when unproven, incomplete or expected set is empty."
+    },
+    "Status": {
+      "type": "string",
+      "enum": [
+        "PASS",
+        "FAIL",
+        "WARN",
+        "UNKNOWN",
+        "NOT_APPLICABLE"
+      ]
+    },
+    "TaskStatus": {
+      "type": "string",
+      "enum": [
+        "QUEUED",
+        "RUNNING",
+        "COMPLETED",
+        "FAILED",
+        "INTERRUPTED"
+      ]
+    },
+    "UnitStatus": {
+      "type": "string",
+      "enum": [
+        "PENDING",
+        "RUNNING",
+        "COMPLETED",
+        "ERROR",
+        "NOT_RUN"
+      ]
+    },
+    "IssueType": {
+      "type": "string",
+      "enum": [
+        "MISSING",
+        "SUSPECTED_MISSING",
+        "EXTRA",
+        "REQUIRED_FIELD_MISSING",
+        "BUSINESS_KEY_INVALID",
+        "SOURCE_IDENTITY_MISMATCH",
+        "REFERENCE_INCOMPLETE",
+        "DATE_SCOPE_UNRESOLVED",
+        "RULE_EXECUTION_FAILED"
+      ]
+    },
+    "DatasetKey": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "pluginId",
+        "apiName"
+      ],
+      "properties": {
+        "pluginId": {
+          "$ref": "#/$defs/Identifier"
+        },
+        "apiName": {
+          "$ref": "#/$defs/Identifier"
+        }
+      }
+    },
+    "DateRange": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "startDate",
+        "endDate"
+      ],
+      "properties": {
+        "startDate": {
+          "$ref": "#/$defs/Date"
+        },
+        "endDate": {
+          "$ref": "#/$defs/Date"
+        }
+      }
+    },
+    "Scope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "datasetKey",
+        "symbol",
+        "startDate",
+        "endDate",
+        "acceptedAt",
+        "snapshotStartedAt"
+      ],
+      "properties": {
+        "datasetKey": {
+          "$ref": "#/$defs/DatasetKey"
+        },
+        "symbol": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "pattern": "\\S"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "startDate": {
+          "$ref": "#/$defs/Date"
+        },
+        "endDate": {
+          "$ref": "#/$defs/Date"
+        },
+        "acceptedAt": {
+          "$ref": "#/$defs/Timestamp"
+        },
+        "snapshotStartedAt": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Timestamp"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      }
+    },
+    "TaskScope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "pluginId",
+        "symbols",
+        "startDate",
+        "endDate",
+        "apiNames",
+        "acceptedAt"
+      ],
+      "properties": {
+        "pluginId": {
+          "$ref": "#/$defs/Identifier"
+        },
+        "symbols": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "\\S"
+          },
+          "minItems": 1
+        },
+        "startDate": {
+          "$ref": "#/$defs/Date"
+        },
+        "endDate": {
+          "$ref": "#/$defs/Date"
+        },
+        "apiNames": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Identifier"
+          },
+          "minItems": 1
+        },
+        "acceptedAt": {
+          "$ref": "#/$defs/Timestamp"
+        }
+      }
+    },
+    "Dependency": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "datasetKey",
+        "columns",
+        "purpose"
+      ],
+      "properties": {
+        "datasetKey": {
+          "$ref": "#/$defs/DatasetKey"
+        },
+        "columns": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Identifier"
+          },
+          "minItems": 1,
+          "uniqueItems": true
+        },
+        "purpose": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "\\S"
+        }
+      }
+    },
+    "RuleDescriptor": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "ruleId",
+        "version",
+        "displayName",
+        "dimension",
+        "requiredColumns",
+        "dependencies",
+        "description"
+      ],
+      "properties": {
+        "ruleId": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_.-]*$"
+        },
+        "version": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "\\S"
+        },
+        "displayName": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "\\S"
+        },
+        "dimension": {
+          "type": "string",
+          "enum": [
+            "COVERAGE",
+            "KEY",
+            "FIELD"
+          ]
+        },
+        "requiredColumns": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Identifier"
+          },
+          "uniqueItems": true
+        },
+        "dependencies": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Dependency"
+          }
+        },
+        "description": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "\\S"
+        }
+      }
+    },
+    "Descriptor": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "datasetKey",
+        "scopeKind",
+        "symbolField",
+        "dateField",
+        "dateLabel",
+        "marketZone",
+        "capabilityVersion",
+        "dependencies",
+        "rules",
+        "limitations"
+      ],
+      "properties": {
+        "datasetKey": {
+          "$ref": "#/$defs/DatasetKey"
+        },
+        "scopeKind": {
+          "type": "string",
+          "enum": [
+            "STOCK_DATE",
+            "STOCK_SNAPSHOT",
+            "NON_STOCK"
+          ]
+        },
+        "symbolField": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Identifier"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "dateField": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Identifier"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "dateLabel": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "\\S"
+        },
+        "marketZone": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "\\S"
+        },
+        "capabilityVersion": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "\\S"
+        },
+        "dependencies": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Dependency"
+          }
+        },
+        "rules": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/RuleDescriptor"
+          }
+        },
+        "limitations": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "\\S"
+          }
+        }
+      }
+    },
+    "Statistics": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "actualCount",
+        "expectedCount",
+        "matchedCount",
+        "missingCount",
+        "suspectedMissingCount",
+        "extraCount",
+        "requiredFieldIssueCount",
+        "coverageRate"
+      ],
+      "properties": {
+        "actualCount": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Count"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "expectedCount": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Count"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "matchedCount": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Count"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "missingCount": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Count"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "suspectedMissingCount": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Count"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "extraCount": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Count"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "requiredFieldIssueCount": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Count"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "coverageRate": {
+          "$ref": "#/$defs/CoverageRate"
+        }
+      }
+    },
+    "Evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "source",
+        "ruleVersion",
+        "range",
+        "readAt",
+        "summary"
+      ],
+      "properties": {
+        "source": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "\\S"
+        },
+        "ruleVersion": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "\\S"
+        },
+        "range": {
+          "$ref": "#/$defs/DateRange"
+        },
+        "readAt": {
+          "$ref": "#/$defs/Timestamp"
+        },
+        "summary": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "\\S"
+        }
+      }
+    },
+    "RuleResult": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "descriptor",
+        "status",
+        "reasonCode",
+        "message",
+        "statistics",
+        "evidence"
+      ],
+      "properties": {
+        "descriptor": {
+          "$ref": "#/$defs/RuleDescriptor"
+        },
+        "status": {
+          "$ref": "#/$defs/Status"
+        },
+        "reasonCode": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "\\S"
+        },
+        "message": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "\\S"
+        },
+        "statistics": {
+          "$ref": "#/$defs/Statistics"
+        },
+        "evidence": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Evidence"
+          }
+        }
+      }
+    },
+    "UnitReport": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "scope",
+        "descriptor",
+        "definitionHash",
+        "publishedRange",
+        "unitStatus",
+        "coverageStatus",
+        "keyStatus",
+        "fieldStatus",
+        "overallStatus",
+        "statistics",
+        "ruleResults",
+        "evidence",
+        "finishedAt",
+        "incomplete",
+        "issuesComplete",
+        "reasonCode",
+        "message"
+      ],
+      "properties": {
+        "scope": {
+          "$ref": "#/$defs/Scope"
+        },
+        "descriptor": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Descriptor"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "definitionHash": {
+          "$ref": "#/$defs/Hash"
+        },
+        "publishedRange": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/DateRange"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "unitStatus": {
+          "$ref": "#/$defs/UnitStatus"
+        },
+        "coverageStatus": {
+          "$ref": "#/$defs/Status"
+        },
+        "keyStatus": {
+          "$ref": "#/$defs/Status"
+        },
+        "fieldStatus": {
+          "$ref": "#/$defs/Status"
+        },
+        "overallStatus": {
+          "$ref": "#/$defs/Status"
+        },
+        "statistics": {
+          "$ref": "#/$defs/Statistics"
+        },
+        "ruleResults": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/RuleResult"
+          }
+        },
+        "evidence": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Evidence"
+          }
+        },
+        "finishedAt": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Timestamp"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "incomplete": {
+          "type": "boolean"
+        },
+        "issuesComplete": {
+          "type": "boolean"
+        },
+        "reasonCode": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "\\S"
+        },
+        "message": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "\\S"
+        }
+      }
+    },
+    "IssueBody": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "type",
+        "status",
+        "symbol",
+        "apiName",
+        "dateField",
+        "date",
+        "businessKey",
+        "field",
+        "relatedDates",
+        "reasonCode",
+        "message",
+        "evidence",
+        "incomplete"
+      ],
+      "properties": {
+        "type": {
+          "$ref": "#/$defs/IssueType"
+        },
+        "status": {
+          "$ref": "#/$defs/Status"
+        },
+        "symbol": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "pattern": "\\S"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "apiName": {
+          "$ref": "#/$defs/Identifier"
+        },
+        "dateField": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Identifier"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "date": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Date"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "businessKey": {
+          "type": "object",
+          "propertyNames": {
+            "$ref": "#/$defs/Identifier"
+          },
+          "additionalProperties": {
+            "type": [
+              "string",
+              "integer",
+              "boolean",
+              "null"
+            ]
+          }
+        },
+        "field": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Identifier"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "relatedDates": {
+          "type": "object",
+          "propertyNames": {
+            "$ref": "#/$defs/Identifier"
+          },
+          "additionalProperties": {
+            "$ref": "#/$defs/Date"
+          }
+        },
+        "reasonCode": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "\\S"
+        },
+        "message": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "\\S"
+        },
+        "evidence": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Evidence"
+          }
+        },
+        "incomplete": {
+          "type": "boolean"
+        }
+      }
+    },
+    "Limits": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "maxSymbols",
+        "maxRangeDays",
+        "maxUnits",
+        "queueCapacity",
+        "workers",
+        "scanBatchSize",
+        "maxIssuesPerUnit",
+        "maxScannedRowsPerUnit",
+        "unitTimeoutSeconds",
+        "taskTimeoutSeconds"
+      ],
+      "properties": {
+        "maxSymbols": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 2147483647
+        },
+        "maxRangeDays": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 2147483647
+        },
+        "maxUnits": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 2147483647
+        },
+        "queueCapacity": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 2147483647
+        },
+        "workers": {
+          "const": 1,
+          "type": "integer"
+        },
+        "scanBatchSize": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 2147483647
+        },
+        "maxIssuesPerUnit": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 2147483647
+        },
+        "maxScannedRowsPerUnit": {
+          "type": "string",
+          "pattern": "^[1-9][0-9]*$"
+        },
+        "unitTimeoutSeconds": {
+          "type": "string",
+          "pattern": "^[1-9][0-9]*$"
+        },
+        "taskTimeoutSeconds": {
+          "type": "string",
+          "pattern": "^[1-9][0-9]*$"
+        }
+      }
+    },
+    "Api": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "apiName",
+        "displayName",
+        "descriptor",
+        "downloadAvailability"
+      ],
+      "properties": {
+        "apiName": {
+          "$ref": "#/$defs/Identifier"
+        },
+        "displayName": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "\\S"
+        },
+        "descriptor": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Descriptor"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "downloadAvailability": {
+          "$ref": "./download-task.schema.json#/$defs/CapabilitiesResponse"
+        }
+      }
+    },
+    "Capability": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "pluginId",
+        "localCheckAvailable",
+        "unavailableReason",
+        "capabilityHash",
+        "limits",
+        "apis"
+      ],
+      "properties": {
+        "pluginId": {
+          "$ref": "#/$defs/Identifier"
+        },
+        "localCheckAvailable": {
+          "type": "boolean"
+        },
+        "unavailableReason": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "pattern": "\\S"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "capabilityHash": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Hash"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "limits": {
+          "$ref": "#/$defs/Limits"
+        },
+        "apis": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Api"
+          }
+        }
+      }
+    },
+    "Request": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "submissionId",
+        "pluginId",
+        "capabilityHash",
+        "symbols",
+        "startDate",
+        "endDate"
+      ],
+      "properties": {
+        "submissionId": {
+          "$ref": "#/$defs/Uuid"
+        },
+        "pluginId": {
+          "$ref": "#/$defs/Identifier"
+        },
+        "capabilityHash": {
+          "$ref": "#/$defs/Hash"
+        },
+        "symbols": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "\\S"
+          },
+          "minItems": 1
+        },
+        "startDate": {
+          "$ref": "#/$defs/Date"
+        },
+        "endDate": {
+          "$ref": "#/$defs/Date"
+        },
+        "apiNames": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Identifier"
+          },
+          "minItems": 1
+        }
+      }
+    },
+    "Receipt": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "requestId",
+        "checkId",
+        "submissionId",
+        "pluginId",
+        "status",
+        "plannedUnits",
+        "createdAt"
+      ],
+      "properties": {
+        "requestId": {
+          "$ref": "#/$defs/Uuid"
+        },
+        "checkId": {
+          "$ref": "#/$defs/Uuid"
+        },
+        "submissionId": {
+          "$ref": "#/$defs/Uuid"
+        },
+        "pluginId": {
+          "$ref": "#/$defs/Identifier"
+        },
+        "status": {
+          "$ref": "#/$defs/TaskStatus"
+        },
+        "plannedUnits": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 2147483647
+        },
+        "createdAt": {
+          "$ref": "#/$defs/Timestamp"
+        }
+      }
+    },
+    "TaskSummary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "checkId",
+        "submissionId",
+        "pluginId",
+        "originalRequest",
+        "scope",
+        "capabilityHash",
+        "status",
+        "plannedUnits",
+        "createdAt",
+        "updatedAt",
+        "startedAt",
+        "finishedAt",
+        "errorCode",
+        "errorMessage"
+      ],
+      "properties": {
+        "checkId": {
+          "$ref": "#/$defs/Uuid"
+        },
+        "submissionId": {
+          "$ref": "#/$defs/Uuid"
+        },
+        "pluginId": {
+          "$ref": "#/$defs/Identifier"
+        },
+        "originalRequest": {
+          "$ref": "#/$defs/Request"
+        },
+        "scope": {
+          "$ref": "#/$defs/TaskScope"
+        },
+        "capabilityHash": {
+          "$ref": "#/$defs/Hash"
+        },
+        "status": {
+          "$ref": "#/$defs/TaskStatus"
+        },
+        "plannedUnits": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 2147483647
+        },
+        "createdAt": {
+          "$ref": "#/$defs/Timestamp"
+        },
+        "updatedAt": {
+          "$ref": "#/$defs/Timestamp"
+        },
+        "startedAt": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Timestamp"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "finishedAt": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Timestamp"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "errorCode": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "pattern": "\\S"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "errorMessage": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "pattern": "\\S"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      }
+    },
+    "StatusCounts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "PASS",
+        "FAIL",
+        "WARN",
+        "UNKNOWN",
+        "NOT_APPLICABLE"
+      ],
+      "properties": {
+        "PASS": {
+          "$ref": "#/$defs/Count"
+        },
+        "FAIL": {
+          "$ref": "#/$defs/Count"
+        },
+        "WARN": {
+          "$ref": "#/$defs/Count"
+        },
+        "UNKNOWN": {
+          "$ref": "#/$defs/Count"
+        },
+        "NOT_APPLICABLE": {
+          "$ref": "#/$defs/Count"
+        }
+      }
+    },
+    "Detail": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "checkId",
+        "submissionId",
+        "pluginId",
+        "originalRequest",
+        "scope",
+        "capabilityHash",
+        "status",
+        "plannedUnits",
+        "createdAt",
+        "updatedAt",
+        "startedAt",
+        "finishedAt",
+        "errorCode",
+        "errorMessage",
+        "overallStatus",
+        "completedUnits",
+        "errorUnits",
+        "notRunUnits",
+        "statusCounts"
+      ],
+      "properties": {
+        "checkId": {
+          "$ref": "#/$defs/Uuid"
+        },
+        "submissionId": {
+          "$ref": "#/$defs/Uuid"
+        },
+        "pluginId": {
+          "$ref": "#/$defs/Identifier"
+        },
+        "originalRequest": {
+          "$ref": "#/$defs/Request"
+        },
+        "scope": {
+          "$ref": "#/$defs/TaskScope"
+        },
+        "capabilityHash": {
+          "$ref": "#/$defs/Hash"
+        },
+        "status": {
+          "$ref": "#/$defs/TaskStatus"
+        },
+        "plannedUnits": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 2147483647
+        },
+        "createdAt": {
+          "$ref": "#/$defs/Timestamp"
+        },
+        "updatedAt": {
+          "$ref": "#/$defs/Timestamp"
+        },
+        "startedAt": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Timestamp"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "finishedAt": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Timestamp"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "errorCode": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "pattern": "\\S"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "errorMessage": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "pattern": "\\S"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "overallStatus": {
+          "$ref": "#/$defs/Status"
+        },
+        "completedUnits": {
+          "$ref": "#/$defs/Count"
+        },
+        "errorUnits": {
+          "$ref": "#/$defs/Count"
+        },
+        "notRunUnits": {
+          "$ref": "#/$defs/Count"
+        },
+        "statusCounts": {
+          "$ref": "#/$defs/StatusCounts"
+        }
+      }
+    },
+    "Result": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "resultId",
+        "checkId",
+        "report"
+      ],
+      "properties": {
+        "resultId": {
+          "$ref": "#/$defs/Uuid"
+        },
+        "checkId": {
+          "$ref": "#/$defs/Uuid"
+        },
+        "report": {
+          "$ref": "#/$defs/UnitReport"
+        }
+      }
+    },
+    "Issue": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "issueId",
+        "resultId",
+        "ruleId",
+        "ruleVersion",
+        "issue"
+      ],
+      "properties": {
+        "issueId": {
+          "$ref": "#/$defs/Count"
+        },
+        "resultId": {
+          "$ref": "#/$defs/Uuid"
+        },
+        "ruleId": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "\\S"
+        },
+        "ruleVersion": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "\\S"
+        },
+        "issue": {
+          "$ref": "#/$defs/IssueBody"
+        }
+      }
+    },
+    "TaskPage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "page",
+        "pageSize",
+        "total",
+        "items"
+      ],
+      "properties": {
+        "page": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 2147483647
+        },
+        "pageSize": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100
+        },
+        "total": {
+          "$ref": "#/$defs/Count"
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/TaskSummary"
+          }
+        }
+      }
+    },
+    "ResultPage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "page",
+        "pageSize",
+        "total",
+        "items"
+      ],
+      "properties": {
+        "page": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 2147483647
+        },
+        "pageSize": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100
+        },
+        "total": {
+          "$ref": "#/$defs/Count"
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Result"
+          }
+        }
+      }
+    },
+    "IssuePage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "page",
+        "pageSize",
+        "total",
+        "items"
+      ],
+      "properties": {
+        "page": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 2147483647
+        },
+        "pageSize": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100
+        },
+        "total": {
+          "$ref": "#/$defs/Count"
+        },
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Issue"
+          }
+        }
+      }
+    }
+  }
+}

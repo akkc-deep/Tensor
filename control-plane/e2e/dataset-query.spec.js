@@ -665,11 +665,11 @@ async function verifyMigratedDatabase() {
     'migrated read-only evidence',
   )
   expect(output.split(/\r?\n/)).toEqual([
-    'migrations\t1:1,2:1,3:1,4:1,5:1,6:1,7:1,8:1',
-    'tables\t52',
+    'migrations\t1:1,2:1,3:1,4:1,5:1,6:1,7:1,8:1,9:1',
+    'tables\t55',
     'rows\t0\t0\t0\t0\t0',
   ])
-  evidence.database.migrated = { migrations: 8, businessTables: 52, targetRows: [0, 0, 0, 0, 0] }
+  evidence.database.migrated = { migrations: 9, businessTables: 55, targetRows: [0, 0, 0, 0, 0] }
 }
 
 async function verifyFinalDatabase() {
@@ -679,13 +679,13 @@ async function verifyFinalDatabase() {
     'final read-only evidence',
   )
   expect(output.split(/\r?\n/)).toEqual([
-    'migrations\t1:1,2:1,3:1,4:1,5:1,6:1,7:1,8:1',
-    'tables\t52',
+    'migrations\t1:1,2:1,3:1,4:1,5:1,6:1,7:1,8:1,9:1',
+    'tables\t55',
     'rows\t126\t1\t1\t1\t123\t1\t122',
   ])
   evidence.database.final = {
-    migrations: 8,
-    businessTables: 52,
+    migrations: 9,
+    businessTables: 55,
     daily: 126,
     company: 1,
     index: 1,
@@ -1662,7 +1662,7 @@ async function performDownload(page, monitor, mode, expectedCounts, tsCode, reus
   if (!reuseForm) {
     monitor.reportResponseScans(`${mode}:before-goto`)
     await monitor.drainResponseScans(`${mode}:before-goto:drained`)
-    await openRoute(page, '/downloads', '数据下载')
+    await openRoute(page, '/downloads', '下载工作台')
     monitor.reportResponseScans(`${mode}:after-goto`)
     await chooseTushareDownload(page, definition.api)
   }
@@ -2010,11 +2010,11 @@ test.describe('dataset query UX', () => {
   test('seedsQueryDatasetsThroughDownloadPages', async ({ page }) => {
     test.setTimeout(600_000)
     const monitor = monitorPage(page)
-    await openRoute(page, '/downloads', '数据下载')
-    await page.getByRole('link', { name: /^数据查看\s*02$/ }).click()
+    await openRoute(page, '/downloads', '下载工作台')
+    await page.getByRole('link', { name: '数据查看', exact: true }).click()
     await expect(page.getByRole('heading', { level: 1, name: '数据查看' })).toBeVisible()
-    await page.getByRole('link', { name: /^数据下载\s*01$/ }).click()
-    await expect(page.getByRole('heading', { level: 1, name: '数据下载' })).toBeVisible()
+    await page.getByRole('link', { name: '数据下载', exact: true }).click()
+    await expect(page.getByRole('heading', { level: 1, name: '下载工作台' })).toBeVisible()
 
     let seedDownloads = 0
     for (const [mode, counts] of [
@@ -2886,8 +2886,8 @@ test.describe('dataset query UX', () => {
 
   test('queriesAndPaginatesUsingKeyboard', async ({ page }, testInfo) => {
     const monitor = monitorPage(page)
-    await openRoute(page, '/downloads', '数据下载')
-    const datasetsLink = page.getByRole('link', { name: /^数据查看\s*02$/ })
+    await openRoute(page, '/downloads', '下载工作台')
+    const datasetsLink = page.getByRole('link', { name: '数据查看', exact: true })
     await focusByTab(page, datasetsLink)
     await expect(datasetsLink).toBeFocused()
     await page.keyboard.press('Enter')

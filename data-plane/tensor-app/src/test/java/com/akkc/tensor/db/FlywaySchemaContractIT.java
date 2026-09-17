@@ -78,7 +78,7 @@ class FlywaySchemaContractIT {
                 .load();
         MigrateResult firstMigration = flyway.migrate();
         firstMigrationsExecuted = firstMigration.migrationsExecuted;
-        assertThat(firstMigrationsExecuted).as("first Flyway migration count").isEqualTo(8);
+        assertThat(firstMigrationsExecuted).as("first Flyway migration count").isEqualTo(9);
         ValidateResult validation = flyway.validateWithResult();
         validationSuccessful = validation.validationSuccessful;
         assertThat(validationSuccessful).as(validation.getAllErrorMessages()).isTrue();
@@ -108,15 +108,15 @@ class FlywaySchemaContractIT {
     @Test
     void migratesAndValidatesRepeatablyOnMySql846() {
         assertThat(mysqlVersion).startsWith("8.4.6");
-        assertThat(firstMigrationsExecuted).isEqualTo(8);
+        assertThat(firstMigrationsExecuted).isEqualTo(9);
         assertThat(validationSuccessful).isTrue();
         assertThat(repeatMigrationsExecuted).isZero();
-        assertThat(snapshot.tables()).hasSize(52);
-        assertThat(snapshot.columns().values().stream().mapToInt(List::size).sum()).isEqualTo(1051);
+        assertThat(snapshot.tables()).hasSize(55);
+        assertThat(snapshot.columns().values().stream().mapToInt(List::size).sum()).isEqualTo(1110);
         assertThat(snapshot.indexes().values().stream().flatMap(value -> value.values().stream())
-                .filter(value -> value.name().equals("PRIMARY"))).hasSize(52);
+                .filter(value -> value.name().equals("PRIMARY"))).hasSize(55);
         assertThat(snapshot.indexes().values().stream().flatMap(value -> value.values().stream())
-                .filter(value -> !value.name().equals("PRIMARY"))).hasSize(48);
+                .filter(value -> !value.name().equals("PRIMARY"))).hasSize(56);
 
         Set<String> productionTables = definitions.stream().map(value -> value.tableName().value())
                 .collect(java.util.stream.Collectors.toSet());
@@ -147,7 +147,8 @@ class FlywaySchemaContractIT {
                 "V4__create_financial_tables.sql",
                 "V5__create_corporate_and_governance_tables.sql",
                 "V7__version_dividend_business_key.sql",
-                "V8__create_download_task_tables.sql");
+                "V8__create_download_task_tables.sql",
+                "V9__create_integrity_check_tables.sql");
     }
 
     @Test
@@ -242,10 +243,10 @@ class FlywaySchemaContractIT {
                 + "VALUES ('000001.SZ', '2024-02-29', 'tushare_pro', 'daily', '2024-02-29 12:00:00.123')");
         Flyway current = Flyway.configure().dataSource(url, "root", MYSQL.getPassword())
                 .locations("classpath:db/migration").load();
-        assertThat(current.migrate().migrationsExecuted).isEqualTo(1);
+        assertThat(current.migrate().migrationsExecuted).isEqualTo(2);
         assertThat(current.validateWithResult().validationSuccessful).isTrue();
         assertThat(upgraded.queryForList("SELECT version, checksum FROM flyway_schema_history "
-                + "WHERE version <> '8' ORDER BY installed_rank")).isEqualTo(before);
+                + "WHERE version NOT IN ('8','9') ORDER BY installed_rank")).isEqualTo(before);
         assertThat(upgraded.queryForObject("SELECT COUNT(*) FROM tushare_pro__daily "
                 + "WHERE ts_code = '000001.SZ' AND trade_date = '2024-02-29' AND source_api = 'daily'", Integer.class)).isEqualTo(1);
         assertThat(upgraded.queryForObject("SELECT COUNT(*) FROM tensor_download_task", Integer.class)).isZero();
@@ -254,25 +255,25 @@ class FlywaySchemaContractIT {
     }
 
     @Test
-    void productionMigrationInventoryCreates51TablesWithoutFixture() {
+    void productionMigrationInventoryCreates54TablesWithoutFixture() {
         jdbc(MYSQL.getJdbcUrl(), "root").execute("CREATE DATABASE tensor_production CHARACTER SET utf8mb4 COLLATE " + COLLATION);
         String url = MYSQL.getJdbcUrl().replace("/" + SCHEMA, "/tensor_production");
         Flyway production = Flyway.configure().dataSource(url, "root", MYSQL.getPassword())
                 .locations("filesystem:" + Path.of("src/main/resources/db/migration").toAbsolutePath()).load();
-        assertThat(production.migrate().migrationsExecuted).isEqualTo(7);
+        assertThat(production.migrate().migrationsExecuted).isEqualTo(8);
         JdbcTemplate jdbc = jdbc(url, "root");
         assertThat(jdbc.queryForObject("SELECT COUNT(*) FROM information_schema.tables "
-                + "WHERE table_schema = DATABASE() AND table_name <> 'flyway_schema_history'", Integer.class)).isEqualTo(51);
+                + "WHERE table_schema = DATABASE() AND table_name <> 'flyway_schema_history'", Integer.class)).isEqualTo(54);
         assertThat(jdbc.queryForObject("SELECT COUNT(*) FROM information_schema.columns "
-                + "WHERE table_schema = DATABASE() AND table_name <> 'flyway_schema_history'", Integer.class)).isEqualTo(1044);
+                + "WHERE table_schema = DATABASE() AND table_name <> 'flyway_schema_history'", Integer.class)).isEqualTo(1103);
         assertThat(jdbc.queryForObject("SELECT COUNT(DISTINCT table_name, index_name) FROM information_schema.statistics "
                 + "WHERE table_schema = DATABASE() AND table_name <> 'flyway_schema_history' "
-                + "AND index_name = 'PRIMARY'", Integer.class)).isEqualTo(51);
+                + "AND index_name = 'PRIMARY'", Integer.class)).isEqualTo(54);
         assertThat(jdbc.queryForObject("SELECT COUNT(DISTINCT table_name, index_name) FROM information_schema.statistics "
                 + "WHERE table_schema = DATABASE() AND table_name <> 'flyway_schema_history' "
-                + "AND index_name <> 'PRIMARY'", Integer.class)).isEqualTo(48);
+                + "AND index_name <> 'PRIMARY'", Integer.class)).isEqualTo(56);
         assertThat(jdbc.queryForList("SELECT version FROM flyway_schema_history ORDER BY installed_rank", String.class))
-                .containsExactly("1", "2", "3", "4", "5", "7", "8");
+                .containsExactly("1", "2", "3", "4", "5", "7", "8", "9");
         assertThat(jdbc.queryForList("SHOW TABLES", String.class)).contains("tensor_download_task", "tensor_download_batch")
                 .doesNotContain(FIXTURE_TABLE);
         assertThat(production.migrate().migrationsExecuted).isZero();
@@ -414,7 +415,8 @@ class FlywaySchemaContractIT {
     private static ExpectedColumn column(String name, String dataType, int jdbcType, boolean nullable,
                                          Integer characterLength, Integer numericPrecision, Integer numericScale,
                                          Integer datetimePrecision) {
-        return new ExpectedColumn(name, dataType, jdbcType, nullable, characterLength, numericPrecision,
+        return new ExpectedColumn(name, dataType, jdbcType, nullable,
+                characterLength == null ? null : characterLength.longValue(), numericPrecision,
                 numericScale, datetimePrecision);
     }
 
@@ -477,7 +479,7 @@ class FlywaySchemaContractIT {
                 columns.computeIfAbsent(result.getString("table_name"), ignored -> new ArrayList<>()).add(
                         new ColumnSnapshot(result.getString("column_name"), result.getInt("ordinal_position"),
                                 result.getString("data_type"), "YES".equals(result.getString("is_nullable")),
-                                nullableInt(result, "character_maximum_length"), nullableInt(result, "numeric_precision"),
+                                result.getObject("character_maximum_length", Long.class), nullableInt(result, "numeric_precision"),
                                 nullableInt(result, "numeric_scale"), nullableInt(result, "datetime_precision")));
             }
         }
@@ -522,7 +524,7 @@ class FlywaySchemaContractIT {
     private static int jdbcType(String dataType) {
         return switch (dataType) {
             case "varchar" -> Types.VARCHAR;
-            case "text" -> Types.LONGVARCHAR;
+            case "text", "longtext" -> Types.LONGVARCHAR;
             case "date" -> Types.DATE;
             case "char" -> Types.CHAR;
             case "bigint" -> Types.BIGINT;
@@ -549,12 +551,12 @@ class FlywaySchemaContractIT {
     }
 
     private record ExpectedColumn(String name, String dataType, int jdbcType, boolean nullable,
-                                  Integer characterLength, Integer numericPrecision, Integer numericScale,
+                                  Long characterLength, Integer numericPrecision, Integer numericScale,
                                   Integer datetimePrecision) {
     }
 
     private record ColumnSnapshot(String name, int ordinal, String dataType, boolean nullable,
-                                  Integer characterLength, Integer numericPrecision, Integer numericScale,
+                                  Long characterLength, Integer numericPrecision, Integer numericScale,
                                   Integer datetimePrecision) {
     }
 

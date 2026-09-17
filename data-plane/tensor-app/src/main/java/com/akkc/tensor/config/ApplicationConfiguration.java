@@ -49,7 +49,7 @@ import org.springframework.transaction.PlatformTransactionManager;
 @Configuration(proxyBeanMethods = false)
 @ConditionalOnWebApplication(type = ConditionalOnWebApplication.Type.SERVLET)
 @EnableConfigurationProperties(DownloadTaskProperties.class)
-@Import(DownloadTaskConfiguration.class)
+@Import({DownloadTaskConfiguration.class, IntegrityCheckConfiguration.class})
 public final class ApplicationConfiguration {
     @Bean
     public PluginRegistry pluginRegistry(List<DataSourcePlugin> plugins) {

@@ -1,0 +1,28 @@
+{
+  "baselineTree": "1728e704532dca83032c35aaf4cc576307e37ca5",
+  "head": "211094822aa061c2f9217d367cc06f8ddcae3b4e",
+  "branch": "feat/data-integrity",
+  "baselineTrackedFiles": 1200,
+  "allowedT13ExistingPaths": [
+    "control-plane/e2e/dataset-query.spec.js",
+    "control-plane/e2e/download-outcomes.spec.js",
+    "control-plane/e2e/fixture-flow.spec.js",
+    "control-plane/e2e/tushare-metadata.spec.js",
+    "data-plane/tensor-plugin-fixture/src/main/java/com/akkc/tensor/plugin/fixture/FixtureConfiguration.java",
+    "data-plane/tensor-plugin-fixture/src/main/java/com/akkc/tensor/plugin/fixture/FixturePlugin.java",
+    "data-plane/tensor-plugin-fixture/src/main/java/com/akkc/tensor/plugin/fixture/integrity/FixtureIntegrityRules.java",
+    "data-plane/tensor-plugin-fixture/src/test/java/com/akkc/tensor/plugin/fixture/FixturePluginTest.java",
+    "data-plane/tensor-plugin-fixture/src/test/java/com/akkc/tensor/plugin/fixture/integrity/FixtureIntegrityComparisonTest.java",
+    "data-plane/tensor-plugin-fixture/src/test/java/com/akkc/tensor/plugin/fixture/integrity/IntegrityPluginContractTest.java",
+    "docs/runbook/configuration.md",
+    "docs/runbook/data-integrity-rules.md",
+    "docs/task-designs/DATA-INTEGRITY-T13-design.md",
+    "docs/task-designs/DATA-INTEGRITY-design.md",
+    "docs/task-handoffs/DATA-INTEGRITY-T13-handoff.md",
+    "docs/task-handoffs/data-integrity-task-board.md",
+    "scripts/verify-contracts.sh"
+  ],
+  "unchangedOtherBaselineFiles": 1183,
+  "unexpectedModifiedOrMissingPaths": [],
+  "comparison": "Each other inherited baseline blob equals the current index blob; no commits, reset, merge or push."
+}

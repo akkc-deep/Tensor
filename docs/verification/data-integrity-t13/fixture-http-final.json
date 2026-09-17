@@ -1,0 +1,20 @@
+{
+  "phase": "Task1 review fix2 final",
+  "command": "mvn -o -f data-plane/pom.xml -Dskip.npm=true -Dtest=IntegrityFixtureFlowIT -DargLine=<Mockito javaagent> -Dsurefire.failIfNoSpecifiedTests=false test",
+  "report": "data-plane/tensor-app/target/surefire-reports/TEST-com.akkc.tensor.fixture.IntegrityFixtureFlowIT.xml",
+  "sha256": "7fe8d2b98afa7a23eb4057db910162099de43958f6a278a51c89a4abbf5f016f",
+  "suite": "com.akkc.tensor.fixture.IntegrityFixtureFlowIT",
+  "tests": 1,
+  "failures": 0,
+  "errors": 0,
+  "skipped": 0,
+  "seconds": "12.977",
+  "buildSeconds": "17.432",
+  "methods": [
+    "fixtureCompletesRealHttpSqlFlowAndPreservesVersionedHistory"
+  ],
+  "upstreamConfigurations": {
+    "v2": "empty token, enabled, controlled loopback receiver, 0 requests",
+    "v3": "synthetic token, enabled, same receiver, 0 cumulative requests"
+  }
+}

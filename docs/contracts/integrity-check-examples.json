@@ -1,0 +1,692 @@
+{
+  "examples": [
+    {
+      "name": "submission",
+      "schema": "Request",
+      "value": {
+        "submissionId": "22222222-2222-4222-8222-222222222222",
+        "pluginId": "fixture",
+        "capabilityHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "symbols": [
+          "000001.SZ"
+        ],
+        "startDate": "2024-02-01",
+        "endDate": "2024-02-29",
+        "apiNames": [
+          "fixture_daily"
+        ]
+      }
+    },
+    {
+      "name": "availableCapability",
+      "schema": "Capability",
+      "value": {
+        "pluginId": "fixture",
+        "localCheckAvailable": true,
+        "unavailableReason": null,
+        "capabilityHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "limits": {
+          "maxSymbols": 100,
+          "maxRangeDays": 36600,
+          "maxUnits": 4000,
+          "queueCapacity": 20,
+          "workers": 1,
+          "scanBatchSize": 500,
+          "maxScannedRowsPerUnit": "500000",
+          "maxIssuesPerUnit": 20000,
+          "unitTimeoutSeconds": "120",
+          "taskTimeoutSeconds": "1800"
+        },
+        "apis": [
+          {
+            "apiName": "fixture_daily",
+            "displayName": "Controlled daily fixture",
+            "descriptor": {
+              "datasetKey": {
+                "pluginId": "fixture",
+                "apiName": "fixture_daily"
+              },
+              "scopeKind": "STOCK_DATE",
+              "symbolField": "ts_code",
+              "dateField": "trade_date",
+              "dateLabel": "交易日期",
+              "marketZone": "Asia/Shanghai",
+              "capabilityVersion": "1",
+              "dependencies": [],
+              "rules": [
+                {
+                  "ruleId": "fixture.coverage.fixture_daily",
+                  "version": "1",
+                  "displayName": "Controlled fixture coverage",
+                  "dimension": "COVERAGE",
+                  "requiredColumns": [
+                    "ts_code",
+                    "trade_date"
+                  ],
+                  "dependencies": [],
+                  "description": "Reliable fixture expected keys only; not production Tushare proof."
+                }
+              ],
+              "limitations": [
+                "Fixture evidence applies only to controlled test data."
+              ]
+            },
+            "downloadAvailability": {
+              "single": {
+                "available": false,
+                "parameters": []
+              },
+              "range": {
+                "availability": "UNSUPPORTED",
+                "unavailableReason": "Range download is unsupported",
+                "dateAxis": null,
+                "dateLabel": null,
+                "startParameter": null,
+                "endParameter": null,
+                "parameters": [],
+                "planningMode": null,
+                "splittable": false,
+                "policyVersion": "unsupported-v1",
+                "completenessRule": {
+                  "kind": "UNKNOWN",
+                  "rowLimit": null,
+                  "evidence": null
+                }
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "unavailableCapability",
+      "schema": "Capability",
+      "value": {
+        "pluginId": "fixture",
+        "localCheckAvailable": false,
+        "unavailableReason": "Plugin does not provide local integrity checking",
+        "capabilityHash": null,
+        "limits": {
+          "maxSymbols": 100,
+          "maxRangeDays": 36600,
+          "maxUnits": 4000,
+          "queueCapacity": 20,
+          "workers": 1,
+          "scanBatchSize": 500,
+          "maxScannedRowsPerUnit": "500000",
+          "maxIssuesPerUnit": 20000,
+          "unitTimeoutSeconds": "120",
+          "taskTimeoutSeconds": "1800"
+        },
+        "apis": []
+      }
+    },
+    {
+      "name": "createdReceipt",
+      "schema": "Receipt",
+      "value": {
+        "requestId": "44444444-4444-4444-8444-444444444444",
+        "checkId": "11111111-1111-4111-8111-111111111111",
+        "submissionId": "22222222-2222-4222-8222-222222222222",
+        "pluginId": "fixture",
+        "status": "QUEUED",
+        "plannedUnits": 1,
+        "createdAt": "2026-09-17T00:00:00Z"
+      }
+    },
+    {
+      "name": "replayedReceipt",
+      "schema": "Receipt",
+      "value": {
+        "requestId": "44444444-4444-4444-8444-444444444444",
+        "checkId": "11111111-1111-4111-8111-111111111111",
+        "submissionId": "22222222-2222-4222-8222-222222222222",
+        "pluginId": "fixture",
+        "status": "COMPLETED",
+        "plannedUnits": 1,
+        "createdAt": "2026-09-17T00:00:00Z"
+      }
+    },
+    {
+      "name": "runningDetail",
+      "schema": "Detail",
+      "value": {
+        "checkId": "11111111-1111-4111-8111-111111111111",
+        "submissionId": "22222222-2222-4222-8222-222222222222",
+        "pluginId": "fixture",
+        "originalRequest": {
+          "submissionId": "22222222-2222-4222-8222-222222222222",
+          "pluginId": "fixture",
+          "capabilityHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "symbols": [
+            "000001.SZ"
+          ],
+          "startDate": "2024-02-01",
+          "endDate": "2024-02-29",
+          "apiNames": [
+            "fixture_daily"
+          ]
+        },
+        "scope": {
+          "pluginId": "fixture",
+          "symbols": [
+            "000001.SZ"
+          ],
+          "startDate": "2024-02-01",
+          "endDate": "2024-02-29",
+          "apiNames": [
+            "fixture_daily"
+          ],
+          "acceptedAt": "2026-09-17T00:00:00Z"
+        },
+        "capabilityHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+        "status": "RUNNING",
+        "plannedUnits": 1,
+        "createdAt": "2026-09-17T00:00:00Z",
+        "updatedAt": "2026-09-17T00:00:00Z",
+        "startedAt": "2026-09-17T00:00:00Z",
+        "finishedAt": null,
+        "errorCode": null,
+        "errorMessage": null,
+        "overallStatus": "UNKNOWN",
+        "completedUnits": "0",
+        "errorUnits": "0",
+        "notRunUnits": "0",
+        "statusCounts": {
+          "PASS": "0",
+          "FAIL": "0",
+          "WARN": "0",
+          "UNKNOWN": "1",
+          "NOT_APPLICABLE": "0"
+        }
+      }
+    },
+    {
+      "name": "failedDataResult",
+      "schema": "Result",
+      "value": {
+        "resultId": "33333333-3333-4333-8333-333333333333",
+        "checkId": "11111111-1111-4111-8111-111111111111",
+        "report": {
+          "scope": {
+            "datasetKey": {
+              "pluginId": "fixture",
+              "apiName": "fixture_daily"
+            },
+            "symbol": "000001.SZ",
+            "startDate": "2024-02-01",
+            "endDate": "2024-02-29",
+            "acceptedAt": "2026-09-17T00:00:00Z",
+            "snapshotStartedAt": "2026-09-17T00:00:00Z"
+          },
+          "descriptor": {
+            "datasetKey": {
+              "pluginId": "fixture",
+              "apiName": "fixture_daily"
+            },
+            "scopeKind": "STOCK_DATE",
+            "symbolField": "ts_code",
+            "dateField": "trade_date",
+            "dateLabel": "交易日期",
+            "marketZone": "Asia/Shanghai",
+            "capabilityVersion": "1",
+            "dependencies": [],
+            "rules": [
+              {
+                "ruleId": "fixture.coverage.fixture_daily",
+                "version": "1",
+                "displayName": "Controlled fixture coverage",
+                "dimension": "COVERAGE",
+                "requiredColumns": [
+                  "ts_code",
+                  "trade_date"
+                ],
+                "dependencies": [],
+                "description": "Reliable fixture expected keys only; not production Tushare proof."
+              }
+            ],
+            "limitations": [
+              "Fixture evidence applies only to controlled test data."
+            ]
+          },
+          "definitionHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "publishedRange": {
+            "startDate": "2024-02-01",
+            "endDate": "2024-02-29"
+          },
+          "unitStatus": "COMPLETED",
+          "coverageStatus": "FAIL",
+          "keyStatus": "PASS",
+          "fieldStatus": "PASS",
+          "overallStatus": "FAIL",
+          "statistics": {
+            "actualCount": "20",
+            "expectedCount": "20",
+            "matchedCount": "19",
+            "missingCount": "1",
+            "suspectedMissingCount": "0",
+            "extraCount": "1",
+            "requiredFieldIssueCount": "0",
+            "coverageRate": "0.950000"
+          },
+          "ruleResults": [
+            {
+              "descriptor": {
+                "ruleId": "fixture.coverage.fixture_daily",
+                "version": "1",
+                "displayName": "Controlled fixture coverage",
+                "dimension": "COVERAGE",
+                "requiredColumns": [
+                  "ts_code",
+                  "trade_date"
+                ],
+                "dependencies": [],
+                "description": "Reliable fixture expected keys only; not production Tushare proof."
+              },
+              "status": "FAIL",
+              "reasonCode": "MISSING_KEYS",
+              "message": "One confirmed missing key",
+              "statistics": {
+                "actualCount": "20",
+                "expectedCount": "20",
+                "matchedCount": "19",
+                "missingCount": "1",
+                "suspectedMissingCount": "0",
+                "extraCount": "1",
+                "requiredFieldIssueCount": "0",
+                "coverageRate": "0.950000"
+              },
+              "evidence": [
+                {
+                  "source": "fixture.expected-keys",
+                  "ruleVersion": "1",
+                  "range": {
+                    "startDate": "2024-02-01",
+                    "endDate": "2024-02-29"
+                  },
+                  "readAt": "2026-09-17T00:00:00Z",
+                  "summary": "20 controlled expected keys; 19 matched, one extra cannot offset one missing."
+                }
+              ]
+            }
+          ],
+          "evidence": [
+            {
+              "source": "fixture.expected-keys",
+              "ruleVersion": "1",
+              "range": {
+                "startDate": "2024-02-01",
+                "endDate": "2024-02-29"
+              },
+              "readAt": "2026-09-17T00:00:00Z",
+              "summary": "20 controlled expected keys; 19 matched, one extra cannot offset one missing."
+            }
+          ],
+          "finishedAt": "2026-09-17T00:00:00Z",
+          "incomplete": false,
+          "issuesComplete": true,
+          "reasonCode": "MISSING_KEYS",
+          "message": "One confirmed missing key"
+        }
+      }
+    },
+    {
+      "name": "unknownResult",
+      "schema": "Result",
+      "value": {
+        "resultId": "33333333-3333-4333-8333-333333333333",
+        "checkId": "11111111-1111-4111-8111-111111111111",
+        "report": {
+          "scope": {
+            "datasetKey": {
+              "pluginId": "fixture",
+              "apiName": "fixture_daily"
+            },
+            "symbol": "000001.SZ",
+            "startDate": "2024-02-01",
+            "endDate": "2024-02-29",
+            "acceptedAt": "2026-09-17T00:00:00Z",
+            "snapshotStartedAt": "2026-09-17T00:00:00Z"
+          },
+          "descriptor": {
+            "datasetKey": {
+              "pluginId": "fixture",
+              "apiName": "fixture_daily"
+            },
+            "scopeKind": "STOCK_DATE",
+            "symbolField": "ts_code",
+            "dateField": "trade_date",
+            "dateLabel": "交易日期",
+            "marketZone": "Asia/Shanghai",
+            "capabilityVersion": "1",
+            "dependencies": [],
+            "rules": [
+              {
+                "ruleId": "fixture.coverage.fixture_daily",
+                "version": "1",
+                "displayName": "Controlled fixture coverage",
+                "dimension": "COVERAGE",
+                "requiredColumns": [
+                  "ts_code",
+                  "trade_date"
+                ],
+                "dependencies": [],
+                "description": "Reliable fixture expected keys only; not production Tushare proof."
+              }
+            ],
+            "limitations": [
+              "Fixture evidence applies only to controlled test data."
+            ]
+          },
+          "definitionHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "publishedRange": null,
+          "unitStatus": "COMPLETED",
+          "coverageStatus": "UNKNOWN",
+          "keyStatus": "PASS",
+          "fieldStatus": "PASS",
+          "overallStatus": "UNKNOWN",
+          "statistics": {
+            "actualCount": "20",
+            "expectedCount": null,
+            "matchedCount": null,
+            "missingCount": null,
+            "suspectedMissingCount": "0",
+            "extraCount": null,
+            "requiredFieldIssueCount": "0",
+            "coverageRate": null
+          },
+          "ruleResults": [],
+          "evidence": [
+            {
+              "source": "fixture.local-snapshot",
+              "ruleVersion": "1",
+              "range": {
+                "startDate": "2024-02-01",
+                "endDate": "2024-02-29"
+              },
+              "readAt": "2026-09-17T00:00:00Z",
+              "summary": "Observed local rows do not prove the expected set for this interval."
+            }
+          ],
+          "finishedAt": "2026-09-17T00:00:00Z",
+          "incomplete": false,
+          "issuesComplete": true,
+          "reasonCode": "EXPECTED_SET_UNPROVEN",
+          "message": "No reliable expected set"
+        }
+      }
+    },
+    {
+      "name": "notApplicableResult",
+      "schema": "Result",
+      "value": {
+        "resultId": "33333333-3333-4333-8333-333333333333",
+        "checkId": "11111111-1111-4111-8111-111111111111",
+        "report": {
+          "scope": {
+            "datasetKey": {
+              "pluginId": "fixture",
+              "apiName": "fixture_daily"
+            },
+            "symbol": null,
+            "startDate": "2024-02-01",
+            "endDate": "2024-02-29",
+            "acceptedAt": "2026-09-17T00:00:00Z",
+            "snapshotStartedAt": "2026-09-17T00:00:00Z"
+          },
+          "descriptor": {
+            "datasetKey": {
+              "pluginId": "fixture",
+              "apiName": "fixture_daily"
+            },
+            "scopeKind": "NON_STOCK",
+            "symbolField": null,
+            "dateField": null,
+            "dateLabel": "交易日期",
+            "marketZone": "Asia/Shanghai",
+            "capabilityVersion": "1",
+            "dependencies": [],
+            "rules": [],
+            "limitations": [
+              "Fixture evidence applies only to controlled test data."
+            ]
+          },
+          "definitionHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "publishedRange": null,
+          "unitStatus": "COMPLETED",
+          "coverageStatus": "NOT_APPLICABLE",
+          "keyStatus": "NOT_APPLICABLE",
+          "fieldStatus": "NOT_APPLICABLE",
+          "overallStatus": "NOT_APPLICABLE",
+          "statistics": {
+            "actualCount": null,
+            "expectedCount": null,
+            "matchedCount": null,
+            "missingCount": null,
+            "suspectedMissingCount": null,
+            "extraCount": null,
+            "requiredFieldIssueCount": null,
+            "coverageRate": null
+          },
+          "ruleResults": [],
+          "evidence": [],
+          "finishedAt": "2026-09-17T00:00:00Z",
+          "incomplete": false,
+          "issuesComplete": true,
+          "reasonCode": "NON_STOCK",
+          "message": "Not a stock-scoped dataset"
+        }
+      }
+    },
+    {
+      "name": "incompleteResult",
+      "schema": "Result",
+      "value": {
+        "resultId": "33333333-3333-4333-8333-333333333333",
+        "checkId": "11111111-1111-4111-8111-111111111111",
+        "report": {
+          "scope": {
+            "datasetKey": {
+              "pluginId": "fixture",
+              "apiName": "fixture_daily"
+            },
+            "symbol": "000001.SZ",
+            "startDate": "2024-02-01",
+            "endDate": "2024-02-29",
+            "acceptedAt": "2026-09-17T00:00:00Z",
+            "snapshotStartedAt": "2026-09-17T00:00:00Z"
+          },
+          "descriptor": {
+            "datasetKey": {
+              "pluginId": "fixture",
+              "apiName": "fixture_daily"
+            },
+            "scopeKind": "STOCK_DATE",
+            "symbolField": "ts_code",
+            "dateField": "trade_date",
+            "dateLabel": "交易日期",
+            "marketZone": "Asia/Shanghai",
+            "capabilityVersion": "1",
+            "dependencies": [],
+            "rules": [
+              {
+                "ruleId": "fixture.coverage.fixture_daily",
+                "version": "1",
+                "displayName": "Controlled fixture coverage",
+                "dimension": "COVERAGE",
+                "requiredColumns": [
+                  "ts_code",
+                  "trade_date"
+                ],
+                "dependencies": [],
+                "description": "Reliable fixture expected keys only; not production Tushare proof."
+              }
+            ],
+            "limitations": [
+              "Fixture evidence applies only to controlled test data."
+            ]
+          },
+          "definitionHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "publishedRange": null,
+          "unitStatus": "ERROR",
+          "coverageStatus": "UNKNOWN",
+          "keyStatus": "PASS",
+          "fieldStatus": "PASS",
+          "overallStatus": "UNKNOWN",
+          "statistics": {
+            "actualCount": "20",
+            "expectedCount": null,
+            "matchedCount": null,
+            "missingCount": null,
+            "suspectedMissingCount": "0",
+            "extraCount": null,
+            "requiredFieldIssueCount": "0",
+            "coverageRate": null
+          },
+          "ruleResults": [],
+          "evidence": [
+            {
+              "source": "fixture.local-snapshot",
+              "ruleVersion": "1",
+              "range": {
+                "startDate": "2024-02-01",
+                "endDate": "2024-02-29"
+              },
+              "readAt": "2026-09-17T00:00:00Z",
+              "summary": "Observed local rows do not prove the expected set for this interval."
+            }
+          ],
+          "finishedAt": "2026-09-17T00:00:00Z",
+          "incomplete": true,
+          "issuesComplete": false,
+          "reasonCode": "ROW_BUDGET_EXHAUSTED",
+          "message": "Scan budget reached; counts are partial"
+        }
+      }
+    },
+    {
+      "name": "undatedIssue",
+      "schema": "Issue",
+      "value": {
+        "issueId": "9223372036854775807",
+        "resultId": "33333333-3333-4333-8333-333333333333",
+        "ruleId": "core.business-key",
+        "ruleVersion": "1",
+        "issue": {
+          "type": "DATE_SCOPE_UNRESOLVED",
+          "status": "UNKNOWN",
+          "symbol": "000001.SZ",
+          "apiName": "fixture_daily",
+          "dateField": "trade_date",
+          "date": null,
+          "businessKey": {
+            "ts_code": "000001.SZ",
+            "trade_date": null,
+            "event_id": "9223372036854775807",
+            "amount": "1.230000000000000000"
+          },
+          "field": "trade_date",
+          "relatedDates": {
+            "ann_date": "2024-02-28",
+            "end_date": "2023-12-31"
+          },
+          "reasonCode": "DATE_SCOPE_UNRESOLVED",
+          "message": "Unknown date; cannot assign this row to the requested interval",
+          "evidence": [
+            {
+              "source": "fixture.expected-keys",
+              "ruleVersion": "1",
+              "range": {
+                "startDate": "2024-02-01",
+                "endDate": "2024-02-29"
+              },
+              "readAt": "2026-09-17T00:00:00Z",
+              "summary": "20 controlled expected keys; 19 matched, one extra cannot offset one missing."
+            }
+          ],
+          "incomplete": false
+        }
+      }
+    },
+    {
+      "name": "emptyTaskPage",
+      "schema": "TaskPage",
+      "value": {
+        "page": 999,
+        "pageSize": 17,
+        "total": "0",
+        "items": []
+      }
+    },
+    {
+      "name": "emptyResultPage",
+      "schema": "ResultPage",
+      "value": {
+        "page": 999,
+        "pageSize": 17,
+        "total": "0",
+        "items": []
+      }
+    },
+    {
+      "name": "emptyIssuePage",
+      "schema": "IssuePage",
+      "value": {
+        "page": 999,
+        "pageSize": 17,
+        "total": "0",
+        "items": []
+      }
+    },
+    {
+      "name": "historicalTaskPage",
+      "schema": "TaskPage",
+      "value": {
+        "page": 1,
+        "pageSize": 20,
+        "total": "1",
+        "items": [
+          {
+            "checkId": "11111111-1111-4111-8111-111111111111",
+            "submissionId": "22222222-2222-4222-8222-222222222222",
+            "pluginId": "fixture",
+            "originalRequest": {
+              "submissionId": "22222222-2222-4222-8222-222222222222",
+              "pluginId": "fixture",
+              "capabilityHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "symbols": [
+                "000001.SZ"
+              ],
+              "startDate": "2024-02-01",
+              "endDate": "2024-02-29",
+              "apiNames": [
+                "fixture_daily"
+              ]
+            },
+            "scope": {
+              "pluginId": "fixture",
+              "symbols": [
+                "000001.SZ"
+              ],
+              "startDate": "2024-02-01",
+              "endDate": "2024-02-29",
+              "apiNames": [
+                "fixture_daily"
+              ],
+              "acceptedAt": "2026-09-17T00:00:00Z"
+            },
+            "capabilityHash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+            "status": "RUNNING",
+            "plannedUnits": 1,
+            "createdAt": "2026-09-17T00:00:00Z",
+            "updatedAt": "2026-09-17T00:00:00Z",
+            "startedAt": "2026-09-17T00:00:00Z",
+            "finishedAt": null,
+            "errorCode": null,
+            "errorMessage": null
+          }
+        ]
+      }
+    }
+  ]
+}

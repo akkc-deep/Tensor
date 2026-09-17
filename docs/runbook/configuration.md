@@ -46,6 +46,48 @@ Tushare 客户端还使用下列固定属性；同一客户端上的旧同步入
 | `tensor.plugins.tushare-pro.max-response-bytes` | `67108864` | 1～67108864 字节。 |
 | `tensor.plugins.tushare-pro.min-request-interval` | `1500ms` | 非负且必须可转换为纳秒。 |
 
+## 本地数据完整性检查
+
+页面入口为 `/integrity`（创建与历史）和 `/integrity/checks/:checkId`（保存的报告）。选择数据源、股票、日期及接口，确认口径后开始；未下载过的合法股票也可以检查。报告中的“计算已完成”只表示执行结束，数据结论仍可为 FAIL 或 UNKNOWN。再次检查复制原范围，重新确认当前规则并创建新报告，旧报告保持不变。
+
+| 方法与路径 | 用途 |
+| --- | --- |
+| `GET /api/v1/data-sources/{pluginId}/integrity-capabilities` | 本地能力、日期轴、规则版本与限额。 |
+| `POST /api/v1/integrity-checks` | 首次202；相同submissionId与请求重放200，返回原checkId。 |
+| `GET /api/v1/integrity-checks` | 历史；支持pluginId/status/submissionId筛选。 |
+| `GET /api/v1/integrity-checks/{checkId}` | 原范围、执行进度与结论。 |
+| `GET /api/v1/integrity-checks/{checkId}/results` | 各股票与接口结果。 |
+| `GET /api/v1/integrity-checks/{checkId}/issues` | 完整业务键、问题主日期与依据；日期筛选排除日期未知项。 |
+
+列表默认page=1/pageSize=20，pageSize最大100。计数用十进制字符串，无法计算用null；覆盖率为六位十进制字符串，不提供跨接口总百分比。完整请求与响应见[公开合同](../contracts/openapi-v1.yaml)。
+
+`tensor.integrity` 由应用启动时绑定。以下值必须全部为正，`workers` 必须等于 1，非法值阻止启动；没有自动回退或裁剪范围。
+
+| 属性（前缀 `tensor.integrity.`） | 默认值 | 含义 |
+| --- | ---: | --- |
+| `max-symbols` | 100 | 插件规范化并去重后的股票数。未下载过的合法股票仍保留。 |
+| `max-range-days` | 36600 | 起止日期闭区间自然日数。 |
+| `max-units` | 4000 | 股票级/缺描述接口按股票计划；NON_STOCK 每接口一条。 |
+| `queue-capacity` | 20 | 已预留或已排队任务数；消费者取出后释放名额。 |
+| `workers` | 1 | 首版固定单执行线程。 |
+| `scan-batch-size` | 500 | 单批读取行数。 |
+| `max-scanned-rows-per-unit` | 500000 | 单元累计扫描及生成预期键预算。 |
+| `max-issues-per-unit` | 20000 | 单元问题预算。 |
+| `unit-timeout-seconds` | 120 | 单元执行时间预算，单位秒。 |
+| `task-timeout-seconds` | 1800 | 从任务运行开始计算的时间预算，单位秒。 |
+
+受理计数等于上限允许，超过时返回 `INTEGRITY_LIMIT_EXCEEDED`；队列满为可重试的 `INTEGRITY_QUEUE_FULL`，不留下新任务。写入任务与完整计划的事务失败会释放预留名额；提交成功后才发布到独立检查队列。
+
+同一 `submissionId` 与原请求重放在当前插件能力、日期和队列检查之前返回原任务，不重复入队；不同原请求为 `SUBMISSION_CONFLICT`。首次提交核验全插件 `capabilityHash`，规则或接口定义改变为 `INTEGRITY_DEFINITION_CHANGED`。本地能力不要求上游 Token，不筛除本地无记录股票，不联网。Tushare 的 `endDate` 不得晚于受理时刻对应的上海日期。
+
+应用使用独立的单个 `tensor-integrity-worker`。以上扫描、问题和时间预算均用于运行；排队时间不计入任务预算，计数等于上限允许，时间达到 deadline 即停止。每单元在独立的只读一致快照中执行，报告和问题在读取结束后原子保存；进度只统计已提交的 COMPLETED/ERROR 单元。数据 FAIL 与任务运行完成分别展示，不提供跨接口总覆盖率。
+
+启动时先将遗留 QUEUED/RUNNING（含提交后未入队）置为 INTERRUPTED，剩余单元为 NOT_RUN，再开放首次受理。停止时关闭首次受理、等待在途提交和执行退出、处理剩余队列；已提交报告保留。启动/关闭期间相同原请求仍可幂等重放。不会自动重算旧快照，需重新发起检查。取消是规则/扫描边界的协作检查，不强制终止不遵守上下文合同的第三方代码。HTTP与页面均使用已保存的报告；报告长期保留，没有自动清理或删除入口。
+
+验收专用 fixture 只在 acceptance profile 且 `tensor.plugins.fixture.enabled=true` 时注册。`tensor.plugins.fixture.integrity-version` 仅接受 `2`（默认）或 `3`；版本3在相同合成集合上增加一条验收 FIELD 规则，以验证新旧报告各自保存依据。其他版本阻止启动，生产JAR不包含fixture。可靠窗口只用于验收，不能当作Tushare生产基线。
+
+受控真实浏览器回归通过 `python3 scripts/verify-integrity-fixture.py --acceptance-jar /绝对路径/到/本次acceptance.jar` 运行。启动器创建并清理本次专用MySQL容器与五个独立schema，串行执行完整性及既有打包套件；需要Java21、Node24.15.0、MySQL客户端、Docker与空闲的本机8080端口。真实与stub结果分别记录于[T13验收](../verification/DATA-INTEGRITY-T13.md)。
+
 ## 已核验的 Tushare 日期区间
 
 2026-09-13 首批核验的下列四项，均要求一只股票及起止日期，版本为 `tushare-range-v2`，按闭区间 `trade_date` 规划原生RANGE。部署后以实际包的能力接口和下载页为准；该源码验收不表示已发布到外部环境。
@@ -118,6 +160,6 @@ smoke 只检查指定敏感键/头、JDBC 标记及调用者提供的两个非�
 
 ## 数据库权限与版本维护
 
-首次运行创建 `utf8mb4` / `utf8mb4_0900_as_cs` 的 `tensor` schema，并仅向匹配实际 JDBC 客户端来源的应用账号授予 `tensor.*` 上 CREATE、SELECT、INSERT、UPDATE、ALTER、INDEX、REFERENCES；管理员通过 `SHOW GRANTS` 检查。当前生产支持 40 个 Tushare 数据集；自动迁移为 V1～V5、V7、V8，共七次、51 张业务表。49 张证券来源/历史表中有 9 张已下线接口遗留表；V8 另建 `tensor_download_task` 和 `tensor_download_batch`，保存任务身份、状态、计划叶子、计数和固定错误。生产 schema 共 1044 个物理列、51 个主索引和 48 个非主索引；证券业务列与任务字段分别解释。Flyway history 另计，不启用 fixture 或测试 V6；验收/测试库存为八次迁移、52 张业务表、1051 个物理列、52 个主索引和 48 个非主索引。ALTER、INDEX 用于 V7，REFERENCES 用于 V8 批次外键；不授予 DROP、DELETE 或全局权限。已有库须先停止所有写入者并验证备份；新包迁移、schema 校验和 health 通过前保持停写。旧 V7 包不兼容 V8 任务 schema 的当前行为，失败或回退按[升级说明](first-run.md#v8-任务基础设施升级)处理，不自动 repair 或只回退 JAR。
+首次运行创建 `utf8mb4` / `utf8mb4_0900_as_cs` 的 `tensor` schema，并仅向匹配实际 JDBC 客户端来源的应用账号授予 `tensor.*` 上 CREATE、SELECT、INSERT、UPDATE、ALTER、INDEX、REFERENCES；管理员通过 `SHOW GRANTS` 检查。当前生产支持 40 个 Tushare 数据集；自动迁移为 V1～V5、V7、V8、V9，共八次、54 张业务表。49 张证券来源/历史表中有 9 张已下线接口遗留表；V8 另建 `tensor_download_task` 和 `tensor_download_batch`，保存任务身份、状态、计划叶子、计数和固定错误。V9 新增 `tensor_integrity_check_task`、`tensor_integrity_check_result`、`tensor_integrity_check_issue`，保存固定检查范围、历史报告和问题明细，不改证券表。报告长期保留，不自动清理；完整性任务受理、后台执行、启动中断、HTTP与页面均已装配。生产 schema 共 1103 个物理列、54 个主索引和 56 个非主索引；证券业务列与任务字段分别解释。Flyway history 另计，不启用 fixture 或测试 V6；验收/测试库存为九次迁移、55 张业务表、1110 个物理列、55 个主索引和 56 个非主索引。ALTER、INDEX 用于 V7，REFERENCES 用于 V8 批次外键及 V9 报告归属外键；不授予 DROP、DELETE 或全局权限。已有库须先停止所有写入者并验证备份；新包迁移、schema 校验和 health 通过前保持停写。旧 V7 包不兼容 V8 任务 schema 的当前行为，失败或回退按[升级说明](first-run.md#v8-任务基础设施升级)处理，不自动 repair 或只回退 JAR。
 
 发布前使用管理员或备份账号，将交互密码的 `mysqldump --single-transaction --no-tablespaces --set-gtid-purged=OFF` 备份写入新建的权限受限唯一目录，避免覆盖，并在独立环境验证恢复。完整示例见 [备份与回退](first-run.md#7-备份与回退)。Flyway 只前向，不运行 clean、不删 history、不执行逆向/破坏性 DDL。上一应用版本必须兼容当前 schema 才能回退；删除/缩窄字段先兼容再清理，误写恢复依赖已验证备份。

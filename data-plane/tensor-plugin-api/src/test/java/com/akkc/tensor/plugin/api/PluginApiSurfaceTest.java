@@ -105,11 +105,13 @@ class PluginApiSurfaceTest {
                 "INTERNAL_ERROR", "TASK_NOT_FOUND", "SUBMISSION_CONFLICT", "TASK_STATE_CONFLICT",
                 "TASK_DEFINITION_CHANGED", "BATCH_DOWNLOAD_UNAVAILABLE", "TASK_QUEUE_FULL",
                 "BATCH_COMPLETENESS_UNCONFIRMED", "SOURCE_RANGE_MISMATCH", "TASK_LIMIT_EXCEEDED",
-                "EXECUTION_INTERRUPTED");
+                "EXECUTION_INTERRUPTED", "INTEGRITY_UNAVAILABLE", "INTEGRITY_DEFINITION_CHANGED",
+                "INTEGRITY_QUEUE_FULL", "INTEGRITY_LIMIT_EXCEEDED", "INTEGRITY_CHECK_NOT_FOUND");
         assertThat(ErrorCode.values()).extracting(ErrorCode::retryable).containsExactly(
                 false, false, false, false, false, false, true, true,
                 true, true, true, false, false, true, true, false,
-                false, false, false, false, false, true, false, false, false, false);
+                false, false, false, false, false, true, false, false, false, false,
+                false, false, true, false, false);
 
         assertThat(ErrorCode.class.getDeclaredConstructors()).hasSize(1);
         assertThat(ErrorCode.class.getDeclaredMethod("retryable").getReturnType())

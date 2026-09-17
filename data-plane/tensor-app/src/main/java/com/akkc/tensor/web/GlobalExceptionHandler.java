@@ -158,12 +158,13 @@ public final class GlobalExceptionHandler {
 
     private static HttpStatus status(ErrorCode code) {
         return switch (code) {
-            case PARAM_REQUIRED, PARAM_INVALID -> HttpStatus.BAD_REQUEST;
+            case PARAM_REQUIRED, PARAM_INVALID, INTEGRITY_LIMIT_EXCEEDED -> HttpStatus.BAD_REQUEST;
             case PLUGIN_DISABLED, DATASET_MISCONFIGURED, SUBMISSION_CONFLICT,
                     TASK_STATE_CONFLICT, TASK_DEFINITION_CHANGED, BATCH_DOWNLOAD_UNAVAILABLE,
+                    INTEGRITY_UNAVAILABLE, INTEGRITY_DEFINITION_CHANGED,
                     BATCH_COMPLETENESS_UNCONFIRMED, TASK_LIMIT_EXCEEDED, EXECUTION_INTERRUPTED -> HttpStatus.CONFLICT;
-            case TASK_NOT_FOUND -> HttpStatus.NOT_FOUND;
-            case TASK_QUEUE_FULL -> HttpStatus.TOO_MANY_REQUESTS;
+            case TASK_NOT_FOUND, INTEGRITY_CHECK_NOT_FOUND -> HttpStatus.NOT_FOUND;
+            case TASK_QUEUE_FULL, INTEGRITY_QUEUE_FULL -> HttpStatus.TOO_MANY_REQUESTS;
             case ADAPTER_FIELD_MISSING, ADAPTER_TYPE_INVALID ->
                     HttpStatus.UNPROCESSABLE_ENTITY;
             case PERSISTENCE_FAILED, QUERY_FAILED, INTERNAL_ERROR ->

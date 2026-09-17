@@ -1,0 +1,47 @@
+{
+  "artifact": "data-plane/tensor-app/target/tensor-app-1.0-SNAPSHOT.jar",
+  "sha256": "3cfc8371815068a56252284c64dd73fa294ebe6984160e42cde70f14a758135d",
+  "bytes": 31761457,
+  "migrations": [
+    "BOOT-INF/classes/db/migration/V7__version_dividend_business_key.sql",
+    "BOOT-INF/classes/db/migration/V8__create_download_task_tables.sql",
+    "BOOT-INF/classes/db/migration/V3__create_connect_and_slb_tables.sql",
+    "BOOT-INF/classes/db/migration/V9__create_integrity_check_tables.sql",
+    "BOOT-INF/classes/db/migration/V1__create_basic_and_organization_tables.sql",
+    "BOOT-INF/classes/db/migration/V5__create_corporate_and_governance_tables.sql",
+    "BOOT-INF/classes/db/migration/V4__create_financial_tables.sql",
+    "BOOT-INF/classes/db/migration/V2__create_market_and_trading_tables.sql"
+  ],
+  "fixtureEntries": [],
+  "totals": {
+    "tests": 1466,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "frontend": {
+    "tests": 738,
+    "files": 50
+  },
+  "staticAssets": {
+    "BOOT-INF/classes/static/studio-live.html": "42428ced3766fee7ac4b8ae87a40812405356a1c0c3cf2637b4ad0814a1ff912",
+    "BOOT-INF/classes/static/index.html": "a82eb8110fc14c00e2c88fa63b23d150ee698221a7fbd356746ab955e86a7853",
+    "BOOT-INF/classes/static/tensor-demo.svg": "0b669c46a84a1b48ce509f42fc7a1fa683c88a46b58618d543a0209fef5f0c23",
+    "BOOT-INF/classes/static/ui-demos.html": "8b517391439b39590741616526028052c2ee02e50e239d79fdccf4d0d248e52a",
+    "BOOT-INF/classes/static/assets/app-B4gxzH6n.css": "c0e86e0bf9648a6b384460855984cfc970a0e01d35a4d3f9c1d872162ac9d5be",
+    "BOOT-INF/classes/static/assets/DownloadTaskView-CDkMTqS1.js": "2faf2b41405d980b6a6e1a407a04b862d0a17a33fa170532ba3d6d6016825e8d",
+    "BOOT-INF/classes/static/assets/IntegrityCheckView-C10U1htf.css": "b139a90a6346e0133b31b2d6d6afeca4d2d3828af46ba11dbc65b1aa19f7559f",
+    "BOOT-INF/classes/static/assets/demos-P4SxeyeY.js": "491975e5543d0d3c65560a59f692ac26251bea1f83d2ff66d223156cffcf2587",
+    "BOOT-INF/classes/static/assets/SettingsView-B8REgL-I.js": "dc488608c691ef93953a8b3932f97f4feb5b1f0507c6b2f8ab2dd17141b4c32c",
+    "BOOT-INF/classes/static/assets/studioLive-D7acSlAz.js": "506f14a2c14ae270d6fb0c2043330150159f262afe29e207685da0fe37f12296",
+    "BOOT-INF/classes/static/assets/app-C8GTGJ2f.js": "603fb98eeee2224950372a2b0ad6ca2ce9266a8027314bf778a7919b2e46ad03",
+    "BOOT-INF/classes/static/assets/demo-LRW5XQNr.css": "a42309e747401603367dd1aca74ff6fb72ed400f96f92b96ecee645a273d0d7a",
+    "BOOT-INF/classes/static/assets/DownloadTaskView-DW13eSvS.css": "899056557212d52b1a6c45e9a92c3017b1b25f824ec9fcaedb585d14b90ac670",
+    "BOOT-INF/classes/static/assets/studioLive-Bb-vx5tI.css": "abe4103192a37faa4c56301f17afbad2358e4502c9a96ff9c975d8e6ea52c09c",
+    "BOOT-INF/classes/static/assets/IntegrityCheckView-YMDdOmW9.js": "afe7344e1bb47d3335311540e6e67413674de0d898e3f66c6335e843d06b1d39",
+    "BOOT-INF/classes/static/assets/dist-CLxxdkDn.js": "cd95391ba7b1d2fddd929508ff46df1dd9892a4dc1267fd032ec84fd5aefb0a0",
+    "BOOT-INF/classes/static/assets/useDownloadTaskList-C-EGHFSN.js": "feff59a251a479173377f80feb46b9f34928219458237c114163068752ecbd30",
+    "BOOT-INF/classes/static/assets/downloadTaskDtos-C-kZvBg0.js": "ce416f7516ceeca561fe9c68717b4a9deb54bfc408892523b0dea5987adbc86c",
+    "BOOT-INF/classes/static/favicon.svg": "61bc9a161de58248288e6905425d7180f0624c2865007b97d763fdac12043a66"
+  }
+}

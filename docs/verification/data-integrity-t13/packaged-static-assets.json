@@ -1,0 +1,122 @@
+{
+  "jarSha256": "7b4963f4719c56a7e6e2bdbd28de3971969bd2ca3ab06aa537ed080c08e72f60",
+  "fileCount": 19,
+  "allIdentical": true,
+  "files": [
+    {
+      "jarPath": "BOOT-INF/classes/static/assets/DownloadTaskView-BiBSqXz8.js",
+      "distPath": "control-plane/dist/assets/DownloadTaskView-BiBSqXz8.js",
+      "sha256": "5eb3c3d2d04b9fcb3260ef7b3ed260ed9cecffd052ee4de9660ab16dd6d96aa8",
+      "equal": true
+    },
+    {
+      "jarPath": "BOOT-INF/classes/static/assets/DownloadTaskView-CHXCUuaP.css",
+      "distPath": "control-plane/dist/assets/DownloadTaskView-CHXCUuaP.css",
+      "sha256": "2bebf31326b4b074c5491315d8f5987596d741e0c7fbb6bd23d60cdcee411f4f",
+      "equal": true
+    },
+    {
+      "jarPath": "BOOT-INF/classes/static/assets/IntegrityCheckView-Bfjyi-Tb.js",
+      "distPath": "control-plane/dist/assets/IntegrityCheckView-Bfjyi-Tb.js",
+      "sha256": "45da62ef86184a9382137f6d94dbc82ee3a591d236d40f1558262c68cb750751",
+      "equal": true
+    },
+    {
+      "jarPath": "BOOT-INF/classes/static/assets/IntegrityCheckView-C10U1htf.css",
+      "distPath": "control-plane/dist/assets/IntegrityCheckView-C10U1htf.css",
+      "sha256": "b139a90a6346e0133b31b2d6d6afeca4d2d3828af46ba11dbc65b1aa19f7559f",
+      "equal": true
+    },
+    {
+      "jarPath": "BOOT-INF/classes/static/assets/SettingsView-D5B4i7XM.js",
+      "distPath": "control-plane/dist/assets/SettingsView-D5B4i7XM.js",
+      "sha256": "63ffddba88c33e9852e0b9a4367c0e56c50c2fddf3cec7cd7ad71f0ef52a0714",
+      "equal": true
+    },
+    {
+      "jarPath": "BOOT-INF/classes/static/assets/app-7JR5lMQU.js",
+      "distPath": "control-plane/dist/assets/app-7JR5lMQU.js",
+      "sha256": "39b3764872c2842281ed8cfef5acba83613a8a116150211bb5d834cd9d020e45",
+      "equal": true
+    },
+    {
+      "jarPath": "BOOT-INF/classes/static/assets/app-Bb8_HtVx.css",
+      "distPath": "control-plane/dist/assets/app-Bb8_HtVx.css",
+      "sha256": "dd242daf7068d22f67c9e490e1190ab6269502f2b24a8b81ff4cafa2a01b467d",
+      "equal": true
+    },
+    {
+      "jarPath": "BOOT-INF/classes/static/assets/demo-eUN_aQiQ.css",
+      "distPath": "control-plane/dist/assets/demo-eUN_aQiQ.css",
+      "sha256": "c07edf41064efec4b03d6cf961eb2667f84619647ceb8c7d0715c31a51453f1e",
+      "equal": true
+    },
+    {
+      "jarPath": "BOOT-INF/classes/static/assets/demos-BrMU24vE.js",
+      "distPath": "control-plane/dist/assets/demos-BrMU24vE.js",
+      "sha256": "d296f7ee46ebc7b6904ba804db9786e88a5885aac83d238e73cc00de4f78a7c9",
+      "equal": true
+    },
+    {
+      "jarPath": "BOOT-INF/classes/static/assets/dist-CLxxdkDn.js",
+      "distPath": "control-plane/dist/assets/dist-CLxxdkDn.js",
+      "sha256": "cd95391ba7b1d2fddd929508ff46df1dd9892a4dc1267fd032ec84fd5aefb0a0",
+      "equal": true
+    },
+    {
+      "jarPath": "BOOT-INF/classes/static/assets/downloadTaskDtos-C-kZvBg0.js",
+      "distPath": "control-plane/dist/assets/downloadTaskDtos-C-kZvBg0.js",
+      "sha256": "ce416f7516ceeca561fe9c68717b4a9deb54bfc408892523b0dea5987adbc86c",
+      "equal": true
+    },
+    {
+      "jarPath": "BOOT-INF/classes/static/assets/studioLive-Bb-vx5tI.css",
+      "distPath": "control-plane/dist/assets/studioLive-Bb-vx5tI.css",
+      "sha256": "abe4103192a37faa4c56301f17afbad2358e4502c9a96ff9c975d8e6ea52c09c",
+      "equal": true
+    },
+    {
+      "jarPath": "BOOT-INF/classes/static/assets/studioLive-BvykyGEj.js",
+      "distPath": "control-plane/dist/assets/studioLive-BvykyGEj.js",
+      "sha256": "e61a4584a4875a46a01e02accd6926f7c2fdd3d35e79a75c4c56d4dc9bf8235d",
+      "equal": true
+    },
+    {
+      "jarPath": "BOOT-INF/classes/static/assets/useDownloadTaskList-C-EGHFSN.js",
+      "distPath": "control-plane/dist/assets/useDownloadTaskList-C-EGHFSN.js",
+      "sha256": "feff59a251a479173377f80feb46b9f34928219458237c114163068752ecbd30",
+      "equal": true
+    },
+    {
+      "jarPath": "BOOT-INF/classes/static/favicon.svg",
+      "distPath": "control-plane/dist/favicon.svg",
+      "sha256": "61bc9a161de58248288e6905425d7180f0624c2865007b97d763fdac12043a66",
+      "equal": true
+    },
+    {
+      "jarPath": "BOOT-INF/classes/static/index.html",
+      "distPath": "control-plane/dist/index.html",
+      "sha256": "6affe6283df9e8cf531206c146acea0d83b4d5de3c768187273a261315deed13",
+      "equal": true
+    },
+    {
+      "jarPath": "BOOT-INF/classes/static/studio-live.html",
+      "distPath": "control-plane/dist/studio-live.html",
+      "sha256": "0d6da59568a7015c9648dbba4aea7c77741166d284e60a3e52dcac6ac4a4991a",
+      "equal": true
+    },
+    {
+      "jarPath": "BOOT-INF/classes/static/tensor-demo.svg",
+      "distPath": "control-plane/dist/tensor-demo.svg",
+      "sha256": "0b669c46a84a1b48ce509f42fc7a1fa683c88a46b58618d543a0209fef5f0c23",
+      "equal": true
+    },
+    {
+      "jarPath": "BOOT-INF/classes/static/ui-demos.html",
+      "distPath": "control-plane/dist/ui-demos.html",
+      "sha256": "bffd3b8399030be54a4afb8f9e0dd8f7b40a781c4463b47ad69d081a4eddc393",
+      "equal": true
+    }
+  ],
+  "finding": "Legacy browser suites expected H1 数据下载; current packaged Studio H1 is 下载工作台. Assets are current."
+}

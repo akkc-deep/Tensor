@@ -1,6 +1,7 @@
 package com.akkc.tensor.plugin.tushare;
 
 import com.akkc.tensor.plugin.api.BatchDownloadSupport;
+import com.akkc.tensor.plugin.api.IntegrityCheckSupport;
 import com.akkc.tensor.plugin.api.dataset.DatasetDefinition;
 import com.akkc.tensor.plugin.api.descriptor.ApiDescriptor;
 import com.akkc.tensor.plugin.api.descriptor.PluginDescriptor;
@@ -14,9 +15,18 @@ import com.akkc.tensor.plugin.api.error.ErrorCode;
 import com.akkc.tensor.plugin.api.error.TensorException;
 import com.akkc.tensor.plugin.api.model.ApiName;
 import com.akkc.tensor.plugin.api.model.PluginId;
+import com.akkc.tensor.plugin.api.integrity.IntegrityDescriptor;
+import com.akkc.tensor.plugin.api.integrity.IntegrityRule;
+import com.akkc.tensor.plugin.api.integrity.IntegrityReadRequest;
+import com.akkc.tensor.plugin.api.integrity.IntegrityScope;
+import com.akkc.tensor.plugin.api.integrity.IntegrityDateRange;
 import com.akkc.tensor.plugin.tushare.batch.TushareBatchPolicies;
 import com.akkc.tensor.plugin.tushare.client.TushareProClient;
 import com.akkc.tensor.plugin.tushare.config.TushareProperties;
+import com.akkc.tensor.plugin.tushare.integrity.TushareIntegrityPolicies;
+import java.util.LinkedHashMap;
+import java.time.Instant;
+import java.time.ZoneId;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -24,7 +34,7 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-public final class TushareProPlugin implements BatchDownloadSupport {
+public final class TushareProPlugin implements BatchDownloadSupport, IntegrityCheckSupport {
     private static final String DISPLAY_NAME = "Tushare Pro";
     private static final String DESCRIPTION = "Tushare Pro 证券数据源";
 
@@ -32,6 +42,7 @@ public final class TushareProPlugin implements BatchDownloadSupport {
     private final TushareProClient client;
     private final PluginDescriptor descriptor;
     private final TushareBatchPolicies batches;
+    private final TushareIntegrityPolicies integrity;
     private final Map<ApiName, DatasetDefinition> definitionsByApi;
 
     public TushareProPlugin(
@@ -47,6 +58,10 @@ public final class TushareProPlugin implements BatchDownloadSupport {
         definitionsByApi = definitions.stream().collect(Collectors.toUnmodifiableMap(
                 definition -> definition.datasetKey().apiName(), Function.identity()));
         batches = new TushareBatchPolicies(client, definitions);
+        var batchDescriptors = new LinkedHashMap<ApiName, BatchDownloadDescriptor>();
+        definitions.forEach(definition -> batches.batchDescriptor(definition.datasetKey().apiName())
+                .ifPresent(batch -> batchDescriptors.put(definition.datasetKey().apiName(), batch)));
+        integrity = new TushareIntegrityPolicies(definitions, batchDescriptors);
         PluginReadiness readiness = properties.readiness();
         descriptor = new PluginDescriptor(
                 PluginId.of(TushareConstants.PLUGIN_ID),
@@ -73,6 +88,33 @@ public final class TushareProPlugin implements BatchDownloadSupport {
     @Override
     public PluginReadiness readiness() {
         return properties.readiness();
+    }
+
+    @Override
+    public String normalizeIntegritySymbol(String symbol) {
+        return integrity.normalizeSymbol(symbol);
+    }
+
+    @Override
+    public void validateIntegrityRange(IntegrityDateRange range, Instant acceptedAt) {
+        IntegrityCheckSupport.super.validateIntegrityRange(range, acceptedAt);
+        if (range.endDate().isAfter(acceptedAt.atZone(ZoneId.of("Asia/Shanghai")).toLocalDate()))
+            throw new IllegalArgumentException("Integrity end date exceeds acceptance date");
+    }
+
+    @Override
+    public Optional<IntegrityDescriptor> integrityDescriptor(ApiName apiName) {
+        return integrity.descriptor(apiName);
+    }
+
+    @Override
+    public List<IntegrityRule> integrityRules(ApiName apiName) {
+        return integrity.rules(apiName);
+    }
+
+    @Override
+    public List<IntegrityReadRequest> integrityReferenceReads(IntegrityScope scope) {
+        return integrity.referenceReads(scope);
     }
 
     @Override

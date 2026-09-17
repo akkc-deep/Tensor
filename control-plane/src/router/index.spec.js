@@ -8,6 +8,8 @@ describe('app router', () => {
 
     expect(router.resolve({ name: 'downloads' }).path).toBe('/downloads')
     expect(router.resolve({ name: 'datasets' }).path).toBe('/datasets')
+    expect(router.resolve({ name: 'integrity' }).path).toBe('/integrity')
+    expect(router.resolve({ name: 'integrity-check', params: { checkId: '33333333-3333-4333-8333-333333333333' } }).path).toBe('/integrity/checks/33333333-3333-4333-8333-333333333333')
     expect(router.resolve({ name: 'settings' }).path).toBe('/settings')
   })
 

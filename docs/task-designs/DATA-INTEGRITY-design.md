@@ -1,6 +1,6 @@
 # 数据完整性检验设计
 
-日期：2026-09-16。设计版本：v1。依据用户已确认的方案及关于问题日期、规则扩展、前端页面和指定检查范围的补充讨论编写。本次交付为设计文档，功能实现另行执行。
+日期：2026-09-16。设计版本：v1。依据用户已确认的方案及关于问题日期、规则扩展、前端页面和指定检查范围的补充讨论编写。本地检查、后台任务、HTTP和前端已按T01–T12实现；T13负责真实闭环和最终回归，实际验收状态见[T13记录](../verification/DATA-INTEGRITY-T13.md)。
 
 ## 做什么
 
@@ -277,7 +277,7 @@ API：
 | docs/contracts/openapi-v1.yaml、error-codes.md，docs/runbook/configuration.md、data-integrity-rules.md | 实施时同步请求/响应、错误、配置及已实现规则范围；不把规则规范全文标成自动实现。 |
 | 对应模块的 src/test、control-plane/src 与 e2e/integrity-checks.spec.js | 插件兼容、规则、持久化和完整用户流程测试。 |
 
-当前 PluginRegistry 只注册 downloadAvailable 的实例。因此必须独立判断本地检查能力：启用但未配置上游 Token 的插件，仍应可以检查已有本地数据，不能直接复用下载入口的可用性门禁。
+PluginRegistry 已增加独立本地检查能力入口：启用但未配置上游 Token 的插件仍可检查本地数据；下载入口继续按 downloadAvailable 过滤。
 
 ### 11. 实施顺序
 
@@ -288,7 +288,7 @@ API：
 
 ## 如何测试
 
-以下命令用于后续实现验证，本次设计编写不宣称这些实现测试已存在或已通过。Java 21、Node 24 与 Docker/MySQL 环境沿用项目约定；用受控 fixture 执行，不需要 Tushare Token。
+以下为实现验收命令；本次执行结果和未完成门禁逐项记录于[T13验收记录](../verification/DATA-INTEGRITY-T13.md)，设计预期不代替实测结果。Java 21、Node 24 与 Docker/MySQL 环境沿用项目约定；用受控 fixture 执行，不需要 Tushare Token。
 
 ```sh
 mvn -f data-plane/pom.xml -Dtest='*Integrity*Test,*Integrity*IT' -Dsurefire.failIfNoSpecifiedTests=false test
@@ -353,10 +353,10 @@ sh scripts/verify-contracts.sh
 
 ## 依赖什么信息
 
-- **已确认要求：** 按数据源插件设计；指定股票和时间范围；支持多股票、接口默认全部且可单选/多选；提供前端页面、具体问题日期、历史结果和后续规则扩展；第一版采用讨论方案中的本地检查。当前只交付设计。
+- **已确认要求：** 按数据源插件设计；指定股票和时间范围；支持多股票、接口默认全部且可单选/多选；提供前端页面、具体问题日期、历史结果和后续规则扩展；第一版采用讨论方案中的本地检查。实现与验证状态以任务看板及各项验收记录为准。
 - **关键数据缺口：** 当前 stock_basic 只有 list_date，没有 list_status、delist_date；suspend_d 的 RESPONSE_ONLY 也不能证明事件全集完整。现有本地资料不足以保证任意历史股票窗口都能算出可靠百分比。第一版应诚实显示 UNKNOWN；若产品要求这些窗口必须可算，需要单独确定可信生命周期、停牌、历史服务边界与发布时间证据的取得和保存方式。
 - **参考合同：** DatasetDefinition 决定表、列、类型、nullable 和业务键；[manifest](../data-template/manifest.json)固定当前 40 个接口；完整性规则文档决定状态、集合计算及结论强度；BatchDownloadSupport 只提供采集策略证据，不能代替上述判断。
-- **现有实现边界：** PluginRegistry.find 按下载可用性过滤，须增加独立本地能力查找；DatasetQueryService 的页面查询日期能力有限，须使用专门的 IntegrityReadRepository；当前表采用 upsert，没有历史时点查询能力。以上均已纳入修改范围。
+- **现有实现边界：** PluginRegistry.find 按下载可用性过滤，findIntegrity 提供独立本地能力查找；DatasetQueryService 的页面查询日期能力有限，须使用专门的 IntegrityReadRepository；当前表采用 upsert，没有历史时点查询能力。以上均已纳入修改范围。
 - **工程风险及处理：** 本地只读快照可能较长，采用单工作线程、单元 120 秒和任务 30 分钟上限；问题量可能很大，采用单元上限、完整性标记和分页；持久报告增长通过运维观察，首版不自动删除用户报告。
 - **基线证据的边界：** 可靠生命周期、停牌全集、历史服务范围和发布时间目前缺失，首版按已定义的 UNKNOWN 结果交付，不以此阻塞任务/页面/通用规则实现，也不将 fixture 的可靠基线说成真实 Tushare 数据。后续补足资料需要另行设计来源和保存方式。
 - **协作边界：** 工作区已有 Studio 前端和下载任务改动；实施时以当前实际代码为基础接入，保留其他改动。设计只维护本文这一份，不创建并行冲突方案或擅自变更现有任务板。

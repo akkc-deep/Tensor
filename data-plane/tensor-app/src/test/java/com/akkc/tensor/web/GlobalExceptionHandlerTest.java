@@ -419,12 +419,14 @@ class GlobalExceptionHandlerTest {
 
     private static int expectedStatus(ErrorCode code) {
         return switch (code) {
-            case TASK_NOT_FOUND -> 404;
+            case TASK_NOT_FOUND, INTEGRITY_CHECK_NOT_FOUND -> 404;
             case SUBMISSION_CONFLICT -> 409;
             case TASK_STATE_CONFLICT -> 409;
             case TASK_DEFINITION_CHANGED -> 409;
             case BATCH_DOWNLOAD_UNAVAILABLE -> 409;
-            case TASK_QUEUE_FULL -> 429;
+            case TASK_QUEUE_FULL, INTEGRITY_QUEUE_FULL -> 429;
+            case INTEGRITY_UNAVAILABLE, INTEGRITY_DEFINITION_CHANGED -> 409;
+            case INTEGRITY_LIMIT_EXCEEDED -> 400;
             case BATCH_COMPLETENESS_UNCONFIRMED -> 409;
             case SOURCE_RANGE_MISMATCH -> 502;
             case TASK_LIMIT_EXCEEDED -> 409;
@@ -467,6 +469,11 @@ class GlobalExceptionHandlerTest {
             case TASK_DEFINITION_CHANGED -> "Download task definition has changed";
             case BATCH_DOWNLOAD_UNAVAILABLE -> "Batch download is unavailable";
             case TASK_QUEUE_FULL -> "Download task queue is full";
+            case INTEGRITY_UNAVAILABLE -> "Local integrity check is unavailable";
+            case INTEGRITY_DEFINITION_CHANGED -> "Integrity check definition has changed";
+            case INTEGRITY_QUEUE_FULL -> "Integrity check queue is full";
+            case INTEGRITY_LIMIT_EXCEEDED -> "Integrity check limit exceeded";
+            case INTEGRITY_CHECK_NOT_FOUND -> "Integrity check was not found";
             case BATCH_COMPLETENESS_UNCONFIRMED -> "Batch completeness is unconfirmed";
             case SOURCE_RANGE_MISMATCH -> "Source data is outside the requested range";
             case TASK_LIMIT_EXCEEDED -> "Download task limit exceeded";

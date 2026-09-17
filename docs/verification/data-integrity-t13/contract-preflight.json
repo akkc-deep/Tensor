@@ -1,0 +1,31 @@
+{
+  "scope": "helper preflight and source contract mapping only; final main gate not run",
+  "manifestCount": 40,
+  "syntheticRejections": 11,
+  "expectedSchemaTests": 47,
+  "schemaMethods": {
+    "productionSchemasMatchDatasetDefinitions": 40,
+    "migratesAndValidatesRepeatablyOnMySql846": 1,
+    "fixtureSchemaMatchesContract": 1,
+    "keepsV6InTestOutputOnly": 1,
+    "taskTablesHaveExactColumnsDefaultsIndexesAndConstraints": 1,
+    "upgradesV7WithoutChangingChecksumsOrExistingSecurities": 1,
+    "productionMigrationInventoryCreates54TablesWithoutFixture": 1,
+    "mysqlRejectsTaskAndBatchConstraintViolations": 1
+  },
+  "schemaTotals": {
+    "productionTables": 54,
+    "testTables": 55,
+    "productionMigrations": 8,
+    "testMigrations": 9,
+    "testColumns": 1110,
+    "testPrimaryIndexes": 55,
+    "testNonPrimaryIndexes": 56
+  },
+  "finalGateAttempt": {
+    "exitCode": 1,
+    "diagnostic": "M14-T04 failed: branch",
+    "branch": "feat/data-integrity",
+    "result": "not passed; clean committed main required"
+  }
+}
